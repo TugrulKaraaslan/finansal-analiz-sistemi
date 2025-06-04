@@ -107,17 +107,12 @@ def calistir_tum_sistemi(tarama_tarihi_str: str,
 
     # Adım 4: Filtre Uygulama
     fn_logger.info("[Adım 4/6] Filtre Uygulama (filter_engine) Başlatılıyor...")
-    fn_logger.info("[Adım 4/6] Filtre Uygulama (filter_engine) Başlatılıyor...")
     try:
         tarama_tarihi_dt = pd.to_datetime(tarama_tarihi_str, format='%d.%m.%Y')
     except ValueError:
-        fn_logger.critical(f"Tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Sistem durduruluyor.")
-        return None
-    except ValueError:
-        fn_logger.critical(f"Tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Sistem durduruluyor.")
-        return None
-    except ValueError:
-        fn_logger.critical(f"Tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Sistem durduruluyor.")
+        fn_logger.critical(
+            f"Tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Sistem durduruluyor."
+        )
         return None
 
     filtrelenmis_hisseler_dict, atlanmis_filtreler = filter_engine.uygula_filtreler(
