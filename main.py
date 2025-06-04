@@ -129,21 +129,21 @@ def calistir_tum_sistemi(tarama_tarihi_str: str,
     # Adım 5: Backtest Çalıştırma
     fn_logger.info("[Adım 5/6] Basit Backtest Çalıştırma (backtest_core) Başlatılıyor...")
     # df_data_indikatorlu None veya boş olabilir, backtest_core bunu handle etmeli
-backtest_sonuclari = backtest_core.calistir_basit_backtest(
-    filtrelenmis_hisseler=filtrelenmis_hisseler_dict,  # Boş olabilir
-    df_tum_veri=df_data_indikatorlu,  # None veya boş olabilir
-    satis_tarihi_str=satis_tarihi_str,
-    tarama_tarihi_str=tarama_tarihi_str,
-    atlanmis_filtre_loglari=atlanmis_filtreler,  # Boş olabilir
-    logger_param=fn_logger,
-)
-# Tuple dönerse unpack et
-if isinstance(backtest_sonuclari, tuple):
-    backtest_sonuclari, istisnalar = backtest_sonuclari
-else:
-    istisnalar = []
-    if not backtest_sonuclari: # Eğer backtest_core boş dict döndürürse (örn: kritik hata)
-        fn_logger.warning("Backtest çalıştırma sonucu boş. Rapor bu duruma göre oluşturulacak.")
+    backtest_sonuclari = backtest_core.calistir_basit_backtest(
+        filtrelenmis_hisseler=filtrelenmis_hisseler_dict,  # Boş olabilir
+        df_tum_veri=df_data_indikatorlu,  # None veya boş olabilir
+        satis_tarihi_str=satis_tarihi_str,
+        tarama_tarihi_str=tarama_tarihi_str,
+        atlanmis_filtre_loglari=atlanmis_filtreler,  # Boş olabilir
+        logger_param=fn_logger,
+    )
+    # Tuple dönerse unpack et
+    if isinstance(backtest_sonuclari, tuple):
+        backtest_sonuclari, istisnalar = backtest_sonuclari
+    else:
+        istisnalar = []
+        if not backtest_sonuclari:  # Eğer backtest_core boş dict döndürürse (örn: kritik hata)
+            fn_logger.warning("Backtest çalıştırma sonucu boş. Rapor bu duruma göre oluşturulacak.")
     fn_logger.info("[Adım 5/6] Basit Backtest Çalıştırma Tamamlandı.")
     fn_logger.info("-" * 80)
 
@@ -161,9 +161,9 @@ else:
                     'notlar': v.get('notlar', [])
                 } for k, v in backtest_sonuclari.items()
             ],
-    cikti_klasoru=os.path.join(config.CIKTI_KLASORU, "raporlar"),
-    logger=fn_logger
-    )
+            cikti_klasoru=os.path.join(config.CIKTI_KLASORU, "raporlar"),
+            logger=fn_logger
+        )
     else:
         fn_logger.error("Backtest sonuçları None geldiği için CSV raporu oluşturulamayacak.")
 
