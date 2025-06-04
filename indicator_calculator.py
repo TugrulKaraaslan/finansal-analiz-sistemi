@@ -346,8 +346,6 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         else: df_final_group[kesisim_asagi.name] = np.nan
         
     return df_final_group
-    # Güvenlik kontrolü: İndikatörler df'de var mı?
-    assert all([k in df.columns for k in df.columns if k.startswith(('RSI', 'MACD', 'EMA', 'BOLL'))]), 'Bazı indikatör sütunları eksik!'
 
 
 def hesapla_teknik_indikatorler_ve_kesisimler(df_islenmis_veri: pd.DataFrame, logger_param=None) -> pd.DataFrame | None:
