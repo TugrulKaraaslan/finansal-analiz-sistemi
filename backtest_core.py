@@ -77,6 +77,7 @@ def calistir_basit_backtest(filtrelenmis_hisseler: dict,
     alim_fiyat_sutunu = config.ALIM_ZAMANI # örn: 'open'
     satis_fiyat_sutunu = config.SATIS_ZAMANI # örn: 'open' veya 'close'
     komisyon_orani = config.KOMISYON_ORANI
+    strateji_adi = getattr(config, "UYGULANAN_STRATEJI", "basit_backtest")
 
     genel_sonuclar_dict = {}
     istisnalar = []
@@ -126,7 +127,16 @@ def calistir_basit_backtest(filtrelenmis_hisseler: dict,
             df_hisse_ozel = df_tum_veri[df_tum_veri['hisse_kodu'] == hisse_adi].copy()
             if df_hisse_ozel.empty:
                 # fn_logger.warning(f"'{hisse_adi}' için ana veride kayıt bulunamadı.")
-                bireysel_performanslar.append({'hisse_kodu': hisse_adi, 'alis_fiyati': np.nan, 'satis_fiyati': np.nan, 'getiri_yuzde': np.nan, 'not': 'Veri Yok'})
+                bireysel_performanslar.append({
+                    'hisse_kodu': hisse_adi,
+                    'alis_fiyati': np.nan,
+                    'satis_fiyati': np.nan,
+                    'getiri_yuzde': np.nan,
+                    'not': 'Veri Yok',
+                    'alis_tarihi': tarama_tarihi.strftime('%d.%m.%Y'),
+                    'satis_tarihi': satis_tarihi.strftime('%d.%m.%Y'),
+                    'uygulanan_strateji': strateji_adi
+                })
                 continue
 
             alis_fiyati = satis_fiyati = getiri_yuzde = np.nan
@@ -166,7 +176,10 @@ def calistir_basit_backtest(filtrelenmis_hisseler: dict,
                 'alis_fiyati': round(alis_fiyati,2) if pd.notna(alis_fiyati) else np.nan,
                 'satis_fiyati': round(satis_fiyati,2) if pd.notna(satis_fiyati) else np.nan,
                 'getiri_yuzde': round(getiri_yuzde, 2) if pd.notna(getiri_yuzde) else np.nan,
-                'not': hisse_notu
+                'not': hisse_notu,
+                'alis_tarihi': tarama_tarihi.strftime('%d.%m.%Y'),
+                'satis_tarihi': satis_tarihi.strftime('%d.%m.%Y'),
+                'uygulanan_strateji': strateji_adi
             })
 
         df_performans = pd.DataFrame(bireysel_performanslar)
