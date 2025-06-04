@@ -1,0 +1,38 @@
+import os, sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import numpy as np
+import pandas as pd
+
+from utils import crosses_above, crosses_below
+
+
+def test_crosses_above_simple_numeric():
+    s1 = pd.Series([1, 2, 3, 4])
+    s2 = pd.Series([4, 3, 2, 1])
+    result = crosses_above(s1, s2)
+    expected = pd.Series([False, False, True, False])
+    pd.testing.assert_series_equal(result, expected)
+
+
+def test_crosses_below_simple_numeric():
+    s1 = pd.Series([4, 3, 2, 1])
+    s2 = pd.Series([1, 2, 3, 4])
+    result = crosses_below(s1, s2)
+    expected = pd.Series([False, False, True, False])
+    pd.testing.assert_series_equal(result, expected)
+
+
+def test_crosses_above_with_nan_returns_false():
+    s1 = pd.Series([1, 2, np.nan, 4])
+    s2 = pd.Series([4, 3, 2, 1])
+    result = crosses_above(s1, s2)
+    expected = pd.Series([False, False, False, False])
+    pd.testing.assert_series_equal(result, expected)
+
+
+def test_crosses_below_with_nan_returns_false():
+    s1 = pd.Series([4, 3, np.nan, 1])
+    s2 = pd.Series([1, 2, 3, 4])
+    result = crosses_below(s1, s2)
+    expected = pd.Series([False, False, False, False])
+    pd.testing.assert_series_equal(result, expected)
