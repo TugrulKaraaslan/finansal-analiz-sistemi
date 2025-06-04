@@ -7,7 +7,7 @@ import re
 def dogrula_filtre_dataframe(df_filtre: pd.DataFrame, zorunlu_kolonlar=None, logger=None) -> dict:
     """
     Filtre DataFrame'inde flag/query eksikliği veya bozukluğu kontrol eder.
-    Uygunsuz filtreleri {'filter_code': 'açıklama'} şeklinde döner.
+    Uygunsuz filtreleri {'filter_code': 'açıklama'} şeklinde döndürür.
     """
     sorunlu = {}
     zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]
