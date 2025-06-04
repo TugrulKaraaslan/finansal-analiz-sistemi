@@ -12,19 +12,30 @@ def olustur_ozet_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
         if not isinstance(sonuc, dict):
             fn_logger.warning(f"Beklenmeyen sonuç tipi: {type(sonuc)} → {sonuc}")
             continue
+
         secilen_hisseler = sonuc.get("hisseler", [])
         if not secilen_hisseler:
-            fn_logger.warning(f"Filtre '{sonuc.get('filtre_kodu', '?')}' sonucu: Hiç hisse seçilmedi. Boş rapor satırı yazılacak.")
-        getiriler = [h.get("getiri", 0) for h in secilen_hisseler if isinstance(h, dict) and h.get("getiri") is not None]
+            fn_logger.warning(
+                f"Filtre '{sonuc.get('filtre_kodu', '?')}' sonucu: Hiç hisse seçilmedi. Boş rapor satırı yazılacak."
+            )
+
+        getiriler = [
+            h.get("getiri_yuzde", 0)
+            for h in secilen_hisseler
+            if isinstance(h, dict) and h.get("getiri_yuzde") is not None
+        ]
         ortalama_getiri = round(sum(getiriler) / len(getiriler), 2) if getiriler else 0
-        ozet_kayitlar.append({
-            "filtre_kodu": sonuc.get("filtre_kodu", ""),
-            "toplam_hisse": len(secilen_hisseler),
-            "ortalama_getiri": ortalama_getiri,
-            "not": sonuc.get("not", ""),
-            "tarama_tarihi": sonuc.get("tarama_tarihi", ""),
-            "satis_tarihi": sonuc.get("satis_tarihi", "")
-        })
+
+        ozet_kayitlar.append(
+            {
+                "filtre_kodu": sonuc.get("filtre_kodu", ""),
+                "toplam_hisse": len(secilen_hisseler),
+                "ortalama_getiri": ortalama_getiri,
+                "notlar": ";".join(sonuc.get("notlar", [])),
+                "tarama_tarihi": sonuc.get("tarama_tarihi", ""),
+                "satis_tarihi": sonuc.get("satis_tarihi", ""),
+            }
+        )
 
     df = pd.DataFrame(ozet_kayitlar)
     dosya_adi = os.path.join(cikti_klasoru, f"ozet_rapor_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
@@ -42,7 +53,7 @@ def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger
             fn_logger.warning(f"Geçersiz filtre sonucu tipi: {type(sonuc)}")
             continue
         filtre_kodu = sonuc.get("filtre_kodu", "")
-        notlar = sonuc.get("not", "")
+        notlar = ";".join(sonuc.get("notlar", []))
         tarama_ortalama = sonuc.get("tarama_ortalama", "")
         tarama_tarihi = sonuc.get("tarama_tarihi", "")
         satis_tarihi = sonuc.get("satis_tarihi", "")
@@ -58,7 +69,7 @@ def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger
                 "satis_tarihi": hisse.get("satis_tarihi", ""),
                 "alis_fiyati": hisse.get("alis_fiyati", ""),
                 "satis_fiyati": hisse.get("satis_fiyati", ""),
-                "getiri_yuzde": hisse.get("getiri", ""),
+                "getiri_yuzde": hisse.get("getiri_yuzde", ""),
                 "uygulanan_strateji": hisse.get("uygulanan_strateji", ""),
                 "tarama_tarihi": tarama_tarihi,
                 "satis_tarihi_global": satis_tarihi,
