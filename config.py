@@ -214,3 +214,6 @@ SERIES_VALUE_CROSSOVERS = [
 ALIM_ZAMANI = "open"
 SATIS_ZAMANI = "open"
 KOMISYON_ORANI = 0.001
+
+# Varsayılan backtest strateji adı. Değiştirilebilir.
+UYGULANAN_STRATEJI = "basit_backtest"

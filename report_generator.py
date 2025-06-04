@@ -36,8 +36,9 @@ def olustur_ozet_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
     return dosya_adi
 
 def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
-    """Her sonucun 'hisseler' listesinde 'getiri_yuzde' ve
-    ana sözlükte 'notlar' anahtarlarını bekler."""
+    """Her sonucun 'hisseler' listesinde 'alis_tarihi', 'satis_tarihi',
+    'uygulanan_strateji' ve 'getiri_yuzde' alanları ile ana sözlükte 'notlar'
+    anahtarlarını bekler."""
     os.makedirs(cikti_klasoru, exist_ok=True)
     detayli_kayitlar = []
 
