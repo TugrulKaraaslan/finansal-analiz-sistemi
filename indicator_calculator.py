@@ -1,4 +1,3 @@
-from config import TA_STRATEGY as ta_strategy
 # indicator_calculator.py
 # -*- coding: utf-8 -*-
 # Proje: Finansal Analiz ve Backtest Sistemi Geliştirme

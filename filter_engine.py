@@ -6,8 +6,7 @@
 # Tarih: 18 Mayıs 2025 (Loglama ve hata yönetimi iyileştirmeleri)
 
 import pandas as pd
-import numpy as np
-import config
+
 
 try:
     from logger_setup import get_logger
