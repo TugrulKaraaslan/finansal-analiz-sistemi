@@ -21,7 +21,7 @@ def olustur_ozet_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
         ortalama_getiri = round(sum(getiriler) / len(getiriler), 2) if getiriler else 0
         ozet_kayitlar.append({
             "filtre_kodu": sonuc.get("filtre_kodu", ""),
-            "toplam_hisse": len(secilen_hisseler),
+            "bulunan_hisse_sayisi": len(secilen_hisseler),
             "ortalama_getiri": ortalama_getiri,
             "notlar": sonuc.get("notlar", ""),
             "tarama_tarihi": sonuc.get("tarama_tarihi", ""),
@@ -65,7 +65,7 @@ def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger
                 "getiri_yuzde": hisse.get("getiri_yuzde", ""),
                 "uygulanan_strateji": hisse.get("uygulanan_strateji", ""),
                 "tarama_tarihi": tarama_tarihi,
-                "satis_tarihi_global": satis_tarihi,
+                "satis_tarihi_genel": satis_tarihi,
                 "notlar": notlar,
                 "tarama_ortalama": tarama_ortalama
             })
