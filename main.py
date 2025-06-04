@@ -150,18 +150,28 @@ def calistir_tum_sistemi(tarama_tarihi_str: str,
     # Adım 6: Rapor Oluşturma
     fn_logger.info("[Adım 6/6] Özet Rapor Oluşturma (report_generator) Başlatılıyor...")
     if backtest_sonuclari is not None:
+        sonuclar_listesi = [
+            {
+                'filtre_kodu': k,
+                'ortalama_getiri': v['ortalama_getiri'],
+                'tarama_tarihi': tarama_tarihi_str,
+                'satis_tarihi': satis_tarihi_str,
+                'hisseler': v['hisse_performanslari'].to_dict('records'),
+                'notlar': v.get('notlar', [])
+            } for k, v in backtest_sonuclari.items()
+        ]
+
+        cikti_klasoru = os.path.join(config.CIKTI_KLASORU, "raporlar")
+
         report_generator.olustur_ozet_rapor(
-            sonuclar_listesi=[
-                {
-                    'filtre_kodu': k,
-                    'ortalama_getiri': v['ortalama_getiri'],
-                    'tarama_tarihi': tarama_tarihi_str,
-                    'satis_tarihi': satis_tarihi_str,
-                    'hisseler': v['hisse_performanslari'].to_dict('records'),
-                    'notlar': v.get('notlar', [])
-                } for k, v in backtest_sonuclari.items()
-            ],
-            cikti_klasoru=os.path.join(config.CIKTI_KLASORU, "raporlar"),
+            sonuclar_listesi=sonuclar_listesi,
+            cikti_klasoru=cikti_klasoru,
+            logger=fn_logger
+        )
+
+        report_generator.olustur_hisse_bazli_rapor(
+            sonuclar_listesi=sonuclar_listesi,
+            cikti_klasoru=cikti_klasoru,
             logger=fn_logger
         )
     else:
