@@ -107,17 +107,12 @@ def calistir_tum_sistemi(tarama_tarihi_str: str,
 
     # Adım 4: Filtre Uygulama
     fn_logger.info("[Adım 4/6] Filtre Uygulama (filter_engine) Başlatılıyor...")
-    fn_logger.info("[Adım 4/6] Filtre Uygulama (filter_engine) Başlatılıyor...")
     try:
         tarama_tarihi_dt = pd.to_datetime(tarama_tarihi_str, format='%d.%m.%Y')
     except ValueError:
-        fn_logger.critical(f"Tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Sistem durduruluyor.")
-        return None
-    except ValueError:
-        fn_logger.critical(f"Tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Sistem durduruluyor.")
-        return None
-    except ValueError:
-        fn_logger.critical(f"Tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Sistem durduruluyor.")
+        fn_logger.critical(
+            f"Tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Sistem durduruluyor."
+        )
         return None
 
     filtrelenmis_hisseler_dict, atlanmis_filtreler = filter_engine.uygula_filtreler(
@@ -134,18 +129,13 @@ def calistir_tum_sistemi(tarama_tarihi_str: str,
     # Adım 5: Backtest Çalıştırma
     fn_logger.info("[Adım 5/6] Basit Backtest Çalıştırma (backtest_core) Başlatılıyor...")
     # df_data_indikatorlu None veya boş olabilir, backtest_core bunu handle etmeli
-    backtest_sonuclari = backtest_core.calistir_basit_backtest(
-    # Tuple dönerse unpack et
-    if isinstance(backtest_sonuclari, tuple):
-        backtest_sonuclari, istisnalar = backtest_sonuclari
-    else:
-        istisnalar = []
-    filtrelenmis_hisseler=filtrelenmis_hisseler_dict, # Boş olabilir
-    df_tum_veri=df_data_indikatorlu, # None veya boş olabilir
-    satis_tarihi_str=satis_tarihi_str,
-    tarama_tarihi_str=tarama_tarihi_str,
-    atlanmis_filtre_loglari=atlanmis_filtreler, # Boş olabilir
-    logger_param=fn_logger
+    backtest_sonuclari, istisnalar = backtest_core.calistir_basit_backtest(
+        filtrelenmis_hisseler=filtrelenmis_hisseler_dict,  # Boş olabilir
+        df_tum_veri=df_data_indikatorlu,  # None veya boş olabilir
+        satis_tarihi_str=satis_tarihi_str,
+        tarama_tarihi_str=tarama_tarihi_str,
+        atlanmis_filtre_loglari=atlanmis_filtreler,  # Boş olabilir
+        logger_param=fn_logger,
     )
     if not backtest_sonuclari: # Eğer backtest_core boş dict döndürürse (örn: kritik hata)
         fn_logger.warning("Backtest çalıştırma sonucu boş. Rapor bu duruma göre oluşturulacak.")
