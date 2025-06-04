@@ -6,7 +6,6 @@
 # Tarih: 18 Mayıs 2025 (Yorumlar eklendi, NaN yönetimi teyit edildi)
 
 import pandas as pd
-import numpy as np
 import logging
 
 # Bu modül kendi logger'ını kullanır, logger_setup.py'den get_logger ile çağrılmazsa.
