@@ -1,4 +1,3 @@
-istisnalar = []
 # backtest_core.py
 # -*- coding: utf-8 -*-
 # Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
@@ -80,6 +79,7 @@ def calistir_basit_backtest(filtrelenmis_hisseler: dict,
     komisyon_orani = config.KOMISYON_ORANI
 
     genel_sonuclar_dict = {}
+    istisnalar = []
 
     # Eğer bazı filtreler atlanmışsa, rapor için bunları başlangıçta ekle
     if atlanmis_filtre_loglari:
