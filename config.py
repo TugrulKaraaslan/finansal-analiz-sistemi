@@ -7,6 +7,14 @@
 
 import os
 import logging
+import numpy as np
+
+# pandas_ta bazı ortamlarda numpy.NaN sabitini kullanarak yükleniyor.
+# NumPy 2.x sürümlerinde bu sabit olmadığı için import hatası
+# yaşanmaması için eksikse tanımlama yapıyoruz.
+if not hasattr(np, "NaN"):
+    np.NaN = np.nan
+
 import pandas_ta as ta
 import sys
 

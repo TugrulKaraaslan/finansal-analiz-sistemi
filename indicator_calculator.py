@@ -6,8 +6,15 @@
 # Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index düzeltildi, filtre uyumu artırıldı v2)
 
 import pandas as pd
-import pandas_ta as ta
 import numpy as np
+
+# numpy>=2.0 paketlerinde `NaN` sabiti kaldırıldı. pandas_ta halen bu adı
+# kullandığından import sırasında hata oluşabiliyor. Eğer `np.NaN` mevcut
+# değilse `np.nan` değerini aynı isimle tanımlayarak uyumluluk sağlanır.
+if not hasattr(np, "NaN"):
+    np.NaN = np.nan
+
+import pandas_ta as ta
 import config
 import utils
 
