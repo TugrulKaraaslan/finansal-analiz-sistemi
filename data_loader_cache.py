@@ -3,6 +3,18 @@ import pandas as pd
 import os
 
 class DataLoaderCache:
+    """Basit dosya okuma önbelleği.
+
+    Bu sınıf, CSV ve Excel dosyalarının diskten her okunuşunda tekrar
+    yüklenmesini önlemek için basit bir bellek içi önbellek tutar. ``load_csv``
+    ve ``load_excel`` metodları aynı dosya yolu için daha önce yüklenmiş bir
+    nesne varsa bunu döndürür, aksi halde dosyayı okuyup önbelleğe ekler.
+
+    Args:
+        logger (logging.Logger, optional): İşlemler hakkında bilgi vermek için
+            kullanılacak logger nesnesi.
+    """
+
     def __init__(self, logger=None):
         self.loaded_data = {}
         self.logger = logger

@@ -1,4 +1,5 @@
 import os, sys
+import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import numpy as np
 import pandas as pd
@@ -36,3 +37,12 @@ def test_crosses_below_with_nan_returns_false():
     result = crosses_below(s1, s2)
     expected = pd.Series([False, False, False, False])
     pd.testing.assert_series_equal(result, expected)
+
+
+@pytest.mark.parametrize("func", [crosses_above, crosses_below])
+def test_cross_functions_equal_series_return_false(func):
+    s = pd.Series([1, 1, 1, 1])
+    result = func(s, s)
+    expected = pd.Series([False, False, False, False], dtype=bool)
+    pd.testing.assert_series_equal(result, expected)
+    assert result.dtype == bool
