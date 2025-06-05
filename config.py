@@ -185,6 +185,7 @@ SERIES_SERIES_CROSSOVERS = [
     ('psar', 'close', 'psar_keser_close_yukari', 'psar_keser_close_asagi'),
     ('close', 'supertrend_7_3', 'close_keser_supertrend_yukari', 'close_keser_supertrend_asagi'),
     ('hma_9', 'close', 'hma_9_keser_close_yukari', 'hma_9_keser_close_asagi'),
+    ('hma_9', 'sma_20', 'hma_9_keser_sma_20_yukari', 'hma_9_keser_sma_20_asagi'),
     ('vwma_20', 'close', 'vwma_20_keser_close_yukari', 'vwma_20_keser_close_asagi'),
     ('rsi_7', 'rsi_14', 'rsi_7_keser_rsi_14_yukari', 'rsi_7_keser_rsi_14_asagi'),
     ('close', 'dcm_20_20', 'close_keser_dcm_20_20_yukari', 'close_keser_dcm_20_20_asagi'),
