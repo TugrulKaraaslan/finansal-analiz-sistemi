@@ -20,3 +20,4 @@ Projede bulunan birim testlerini çalıştırmak için:
 ```bash
 pytest -q
 ```
+

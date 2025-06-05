@@ -140,11 +140,6 @@ def calistir_basit_backtest(filtrelenmis_hisseler: dict,
                 continue
 
             alis_fiyati = satis_fiyati = getiri_yuzde = np.nan
-            istisnalar.append({
-                "filtre_kodu": filtre_kodu,
-                "hisse_kodu": hisse_adi,
-                "neden": "Alış veya satış fiyatı eksik"
-            })
             hisse_notu = ""
 
             try:
@@ -170,6 +165,13 @@ def calistir_basit_backtest(filtrelenmis_hisseler: dict,
             except Exception as e_hisse_backtest:
                 hisse_notu = f"Backtest sırasında hata: {e_hisse_backtest}"
                 fn_logger.error(f"{hisse_adi} için backtest hatası: {e_hisse_backtest}", exc_info=False)
+
+            if pd.isna(alis_fiyati) or pd.isna(satis_fiyati):
+                istisnalar.append({
+                    "filtre_kodu": filtre_kodu,
+                    "hisse_kodu": hisse_adi,
+                    "neden": "Alış veya satış fiyatı eksik"
+                })
 
             bireysel_performanslar.append({
                 'hisse_kodu': hisse_adi,
