@@ -158,6 +158,20 @@ def _calculate_volume_price(group_df: pd.DataFrame, col_name_prefix_vol: str = '
         logger.error(f"{hisse_str}: Hacim*Fiyat ({sutun_adi}) hesaplanırken hata: {e}", exc_info=False)
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
 
+def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
+    hisse_str = group_df['hisse_kodu'].iloc[0] if not group_df.empty and 'hisse_kodu' in group_df.columns else 'Bilinmeyen Hisse'
+    sutun_adi = "classicpivots_1h_p"
+    try:
+        gerekli = ['high', 'low', 'close']
+        if any(col not in group_df.columns for col in gerekli):
+            logger.debug(f"{hisse_str}: {sutun_adi} için gerekli sütunlar eksik.")
+            return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
+        pivot = (group_df['high'] + group_df['low'] + group_df['close']) / 3
+        return pivot.round(2).rename(sutun_adi)
+    except Exception as e:
+        logger.error(f"{hisse_str}: {sutun_adi} hesaplanırken hata: {e}", exc_info=False)
+        return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
+
 def _calculate_change_from_open(group_df: pd.DataFrame, col_name_open: str = 'open', col_name_close: str = 'close') -> pd.Series:
     hisse_str = group_df['hisse_kodu'].iloc[0] if not group_df.empty and 'hisse_kodu' in group_df.columns else 'Bilinmeyen Hisse'
     sutun_adi = next((item['name'] for item in config.OZEL_SUTUN_PARAMS if item['function'] == '_calculate_change_from_open'), 'change_from_open_percent_default')
@@ -357,6 +371,8 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         else: df_final_group[kesisim_yukari.name] = np.nan
         if len(kesisim_asagi) == len(df_final_group): df_final_group[kesisim_asagi.name] = kesisim_asagi.values
         else: df_final_group[kesisim_asagi.name] = np.nan
+    if "bbm_20_2" in df_final_group.columns and "BBM_20_2" not in df_final_group.columns:
+        df_final_group["BBM_20_2"] = df_final_group["bbm_20_2"]
         
     return df_final_group
 
