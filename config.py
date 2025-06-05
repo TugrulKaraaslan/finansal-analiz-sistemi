@@ -114,8 +114,10 @@ INDIKATOR_AD_ESLESTIRME = {
     'psaraf_0.02_0.2': 'psar_af', 'psarr_0.02_0.2': 'psar_reversal',
     'supertd_7_3.0': 'supertrend_direction_7_3', 
     'supert_7_3.0': 'supertrend_7_3',
-    'supertl_7_3.0': 'supertrend_7_3_long', # Filtreyle uyumlu hale getirildi
-    'superts_7_3.0': 'supertrend_7_3_short', # Filtreyle uyumlu hale getirildi
+    # pandas-ta kolonu 'supertrend_long_7_3' olarak üretildiğinden
+    # eşleştirme hedefi de bu isimle yapılmalı
+    'supertl_7_3.0': 'supertrend_long_7_3',
+    'superts_7_3.0': 'supertrend_short_7_3',
     'vwap_d': 'vwap',
     'dmp_14': 'positivedirectionalindicator_14',
     'dmn_14': 'negativedirectionalindicator_14',
