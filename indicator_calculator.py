@@ -308,6 +308,12 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         else:
             local_logger.warning(f"{hisse_kodu}: pandas-ta sütunu '{col}' kopyalanırken boyut uyuşmazlığı. Atlanıyor.")
 
+    # Bazı durumlarda pandas-ta stratejisinden beklenen 'ema_8' kolonu üretilmeyebilir.
+    # Filtre sorgularının hatasız çalışabilmesi için bu sütun eksikse manuel olarak hesapla.
+    if 'ema_8' not in df_final_group.columns and 'close' in df_final_group.columns:
+        df_final_group['ema_8'] = df_final_group['close'].ewm(span=8, adjust=False).mean()
+        local_logger.debug(f"{hisse_kodu}: 'ema_8' sütunu manuel olarak hesaplandı.")
+
 
     # Özel Sütunlar (df_final_group üzerinde, zaten RangeIndex'li)
     for sutun_conf in ozel_sutun_conf:
