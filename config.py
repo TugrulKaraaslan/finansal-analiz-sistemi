@@ -218,8 +218,8 @@ SERIES_VALUE_CROSSOVERS = [
     ('ppo_line', 0.0, '0p0')
 ]
 
-ALIM_ZAMANI = "open"
-SATIS_ZAMANI = "open"
+ALIM_ZAMANI = "close"
+SATIS_ZAMANI = "close"
 KOMISYON_ORANI = 0.001
 
 # Varsayılan backtest strateji adı. Değiştirilebilir.
