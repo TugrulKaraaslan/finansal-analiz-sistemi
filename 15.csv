@@ -162,7 +162,7 @@ T475;(relative_volume > 1.0) and (change_1w_percent < 15.0) and rsi_14_keser_55p
 T476;(relative_volume > 1.0) and (change_1w_percent < 15.0) and rsi_14_keser_50p0_yukari and ichimoku_conversionline_keser_ichimoku_baseline_yukari
 T477;(relative_volume > 1.3) and (change_1w_percent < 15.0) and (rsi_14 < 70.0) and (ichimoku_conversionline > ichimoku_baseline) and (positivedirectionalindicator_14 > negativedirectionalindicator_14) and stoch_k_keser_stoch_d_yukari and (macd_line > macd_signal) and (psar < close) and (hma_9 < close) and stochrsi_k_keser_stochrsi_d_yukari
 T478;(relative_volume > 1.3) and (change_1w_percent < 15.0) and (rsi_14 < 70.0) and (ichimoku_conversionline > ichimoku_baseline) and (positivedirectionalindicator_14 > negativedirectionalindicator_14) and (stoch_k > stoch_d) and (macd_line > macd_signal) and (psar < close) and (hma_9 < close) and (stochrsi_k > stochrsi_d)
-T500;(change_1w_percent < 15.0) and (close > df['BBM_20_2.0']) and (adx_14 > 20.0)
+T500;(change_1w_percent < 15.0) and (close > bbm_20_2) and (adx_14 > 20.0)
 T501;(relative_volume > 1.5) and (change_1w_percent < 15.0) and (adx_14 > 20.0) and positivedirectionalindicator_14_keser_negativedirectionalindicator_14_yukari
 T502;(relative_volume > 2.0) and (change_1w_percent < 15.0) and mfi_14_keser_50p0_yukari
 T503;(relative_volume > 2.0) and (change_1w_percent < 15.0) and close_keser_bbm_20_2_yukari

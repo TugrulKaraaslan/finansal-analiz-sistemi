@@ -6,6 +6,20 @@
 # Tarih: 18 Mayıs 2025 (Loglama ve hata yönetimi iyileştirmeleri)
 
 import pandas as pd
+import re
+import keyword
+
+
+def _sanitize_query(query: str) -> str:
+    sanitized = re.sub(r"df\s*\[\s*['\"]([^'\"]+)['\"]\s*\]", r"\1", str(query))
+    sanitized = sanitized.replace("df.", "")
+    return sanitized
+
+
+def _extract_query_columns(query: str) -> set:
+    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
+    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False"}
+    return tokens - reserved
 
 
 try:
@@ -70,12 +84,22 @@ def uygula_filtreler(df_ana_veri: pd.DataFrame,
 
     for index, row in df_filtre_kurallari.iterrows():
         filtre_kodu = row.get('FilterCode', f"FiltreIndex_{index}")
-        python_sorgusu = row.get('PythonQuery')
+        python_sorgusu_raw = row.get('PythonQuery')
 
-        if pd.isna(python_sorgusu) or not str(python_sorgusu).strip():
+        if pd.isna(python_sorgusu_raw) or not str(python_sorgusu_raw).strip():
             fn_logger.warning(f"Filtre '{filtre_kodu}': Python sorgusu boş veya NaN, atlanıyor.")
             atlanmis_filtreler_log_dict[filtre_kodu] = "Python sorgusu boş veya NaN."
-            filtrelenmis_hisseler_dict[filtre_kodu] = [] # Boş liste ata
+            filtrelenmis_hisseler_dict[filtre_kodu] = []
+            continue
+
+        python_sorgusu = _sanitize_query(str(python_sorgusu_raw))
+        kullanilan_sutunlar = _extract_query_columns(python_sorgusu)
+        eksik_sutunlar = [s for s in kullanilan_sutunlar if s not in df_tarama_gunu.columns]
+        if eksik_sutunlar:
+            hata_mesaji = f"Eksik sütunlar: {', '.join(eksik_sutunlar)}"
+            fn_logger.error(f"Filtre '{filtre_kodu}' sorgusunda {hata_mesaji}.")
+            atlanmis_filtreler_log_dict[filtre_kodu] = hata_mesaji
+            filtrelenmis_hisseler_dict[filtre_kodu] = []
             continue
 
         try:
