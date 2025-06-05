@@ -122,6 +122,7 @@ INDIKATOR_AD_ESLESTIRME = {
     'aroonu_14': 'aroonu_14',
     'aroond_14': 'aroond_14',
     'aroonosc_14': 'AROONOSC_14', # Filtrede büyük harf arandığı için düzeltildi
+    'mom_10': 'momentum_10',
     # Ichimoku: pandas-ta'nın ürettiği (TA_STRATEGY'deki col_names) -> Filtrelerde aranan/beklenen adlar
     'its_9': 'ichimoku_conversionline',
     'iks_26': 'ichimoku_baseline',
@@ -191,6 +192,10 @@ SERIES_SERIES_CROSSOVERS = [
     ('sma_5', 'close', 'sma_5_keser_close_yukari', 'sma_5_keser_close_asagi'),
     ('sma_10', 'close', 'sma_10_keser_close_yukari', 'sma_10_keser_close_asagi'),
     ('sma_20', 'close', 'sma_20_keser_close_yukari', 'sma_20_keser_close_asagi'),
+    ('stoch_d', 'stoch_k', 'stoch_d_keser_stoch_k_yukari', 'stoch_d_keser_stoch_k_asagi'),
+    ('ema_30', 'close', 'ema_30_keser_close_yukari', 'ema_30_keser_close_asagi'),
+    ('close', 'ichimoku_conversionline', 'close_keser_ichimoku_conversionline_yukari', 'close_keser_ichimoku_conversionline_asagi'),
+    ('ichimoku_conversionline', 'close', 'ichimoku_conversionline_keser_close_yukari', 'ichimoku_conversionline_keser_close_asagi'),
 ]
 
 SERIES_VALUE_CROSSOVERS = [
