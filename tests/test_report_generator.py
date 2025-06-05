@@ -25,7 +25,7 @@ def test_detayli_rapor_contains_new_fields(tmp_path):
         "satis_tarihi": "10.03.2025",
         "notlar": ""
     }]
-    path = report_generator.olustur_hisse_bazli_rapor(sonuclar, tmp_path)
-    df = pd.read_csv(path)
-    assert {"alis_tarihi", "satis_tarihi", "uygulanan_strateji"}.issubset(df.columns)
+    path = report_generator.olustur_excel_raporu(sonuclar, tmp_path)
+    df = pd.read_excel(path, sheet_name="Hisse_Detay")
+    assert {"Alış Tarihi", "Satış Tarihi", "Uygulanan Strateji"}.issubset(df.columns)
 

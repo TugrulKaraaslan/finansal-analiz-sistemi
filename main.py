@@ -163,13 +163,7 @@ def calistir_tum_sistemi(tarama_tarihi_str: str,
 
         cikti_klasoru = os.path.join(config.CIKTI_KLASORU, "raporlar")
 
-        report_generator.olustur_ozet_rapor(
-            sonuclar_listesi=sonuclar_listesi,
-            cikti_klasoru=cikti_klasoru,
-            logger=fn_logger
-        )
-
-        report_generator.olustur_hisse_bazli_rapor(
+        report_generator.olustur_excel_raporu(
             sonuclar_listesi=sonuclar_listesi,
             cikti_klasoru=cikti_klasoru,
             logger=fn_logger
