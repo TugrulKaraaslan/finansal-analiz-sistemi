@@ -6,6 +6,7 @@ import types
 
 sys.modules.setdefault('pandas_ta', types.SimpleNamespace(Strategy=lambda **kw: None))
 import backtest_core
+import config
 
 
 def test_bireysel_performanslar_contains_new_keys():
@@ -26,4 +27,4 @@ def test_bireysel_performanslar_contains_new_keys():
     row = perf_df.iloc[0]
     assert row["alis_tarihi"] == "07.03.2025"
     assert row["satis_tarihi"] == "10.03.2025"
-    assert row["uygulanan_strateji"]
+    assert row["uygulanan_strateji"] == config.UYGULANAN_STRATEJI
