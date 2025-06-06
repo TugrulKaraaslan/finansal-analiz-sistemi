@@ -102,21 +102,30 @@ def calistir_basit_backtest(filtrelenmis_hisseler: dict,
     for filtre_kodu, hisse_kodlari_listesi in filtrelenmis_hisseler.items():
         fn_logger.debug(f"--- Filtre: '{filtre_kodu}' için backtest başlıyor ---")
 
-        # Eğer bu filtre kodu atlanmış filtrelerde zaten varsa, notlarını oradan al
-        current_filtre_notlari = genel_sonuclar_dict.get(filtre_kodu, {}).get('notlar', [])
-
-        if not hisse_kodlari_listesi: # Eğer bu filtre için hisse listesi boşsa
-            if not any("Bu filtreye uyan hisse yok." in note for note in current_filtre_notlari): # Eğer not zaten eklenmemişse
-                 current_filtre_notlari.append("Bu filtreye uyan hisse yok.")
-
-            # genel_sonuclar_dict'te bu filtre için bir giriş oluştur veya güncelle
+        # Not listesini mevcut sözlükten referans olarak al; yoksa giriş oluştur
+        if filtre_kodu not in genel_sonuclar_dict:
             genel_sonuclar_dict[filtre_kodu] = {
                 'hisse_sayisi': 0,
                 'islem_yapilan_sayisi': 0,
                 'ortalama_getiri': np.nan,
                 'hisse_performanslari': pd.DataFrame(columns=['hisse_kodu', 'alis_fiyati', 'satis_fiyati', 'getiri_yuzde', 'not']),
-                'notlar': list(set(current_filtre_notlari)) # Tekrarları önle
+                'notlar': []
             }
+
+        current_filtre_notlari = genel_sonuclar_dict[filtre_kodu]['notlar']
+
+        if not hisse_kodlari_listesi: # Eğer bu filtre için hisse listesi boşsa
+            if not any("Bu filtreye uyan hisse yok." in note for note in current_filtre_notlari):
+                current_filtre_notlari.append("Bu filtreye uyan hisse yok.")
+
+            # genel_sonuclar_dict'te bu filtre için bir giriş oluştur veya güncelle
+            genel_sonuclar_dict[filtre_kodu].update({
+                'hisse_sayisi': 0,
+                'islem_yapilan_sayisi': 0,
+                'ortalama_getiri': np.nan,
+                'hisse_performanslari': pd.DataFrame(columns=['hisse_kodu', 'alis_fiyati', 'satis_fiyati', 'getiri_yuzde', 'not'])
+            })
+            genel_sonuclar_dict[filtre_kodu]['notlar'] = list(set(current_filtre_notlari))
             continue # Sonraki filtreye geç
 
         bireysel_performanslar = []
@@ -203,13 +212,13 @@ def calistir_basit_backtest(filtrelenmis_hisseler: dict,
                  current_filtre_notlari.append("Tüm işlemler başarılı veya ek not yok.")
             # Eğer hisse_sayisi_filtreye_uyan == 0 ise zaten en başta "Bu filtreye uyan hisse yok" notu eklenmişti.
 
-        genel_sonuclar_dict[filtre_kodu] = {
+        genel_sonuclar_dict[filtre_kodu].update({
             'hisse_sayisi': hisse_sayisi_filtreye_uyan,
             'islem_yapilan_sayisi': len(gecerli_getiriler),
             'ortalama_getiri': round(ortalama_getiri, 2) if pd.notna(ortalama_getiri) else np.nan,
-            'hisse_performanslari': df_performans,
-            'notlar': list(set(current_filtre_notlari)) # Tekrarları engelle
-        }
+            'hisse_performanslari': df_performans
+        })
+        genel_sonuclar_dict[filtre_kodu]['notlar'] = list(set(current_filtre_notlari))
 
     fn_logger.info("Tüm filtreler için basit backtest tamamlandı.")
     return genel_sonuclar_dict, istisnalar

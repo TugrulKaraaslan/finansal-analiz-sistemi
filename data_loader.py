@@ -166,7 +166,7 @@ def yukle_hisse_verileri(hisse_dosya_pattern_cfg=None,
     csv_dosyalari = [f for f in csv_dosyalari if os.path.abspath(f) != filtre_dosya_tam_yolu_abs and not os.path.basename(f).startswith('~$')]
 
     if not excel_dosyalari and not csv_dosyalari:
-        fn_logger.critical(f"Belirtilen patternde ({hisse_dosya_pattern} ve Excel varyasyonları) kaynak veri dosyası bulunamadı ({veri_klasoru}). Sistem devam edemez.")
+        fn_logger.critical(f"Belirtilen pattern'de ({hisse_dosya_pattern} ve Excel varyasyonları) kaynak veri dosyası bulunamadı ({veri_klasoru}). Sistem devam edemez.")
         return None
 
     tum_hisse_datalari = []
