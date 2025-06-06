@@ -261,14 +261,14 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
     
     # pandas-ta için DatetimeIndex'e çevir
     group_df_dt_indexed = group_df_input.copy()
-    datetime_index_set_successfully = False
     if 'tarih' in group_df_dt_indexed.columns:
         if not pd.api.types.is_datetime64_any_dtype(group_df_dt_indexed['tarih']):
             group_df_dt_indexed['tarih'] = pd.to_datetime(group_df_dt_indexed['tarih'], errors='coerce')
         if not group_df_dt_indexed['tarih'].isnull().all():
             try:
-                group_df_dt_indexed = group_df_dt_indexed.set_index(pd.DatetimeIndex(group_df_dt_indexed['tarih']), drop=True)
-                datetime_index_set_successfully = True
+                group_df_dt_indexed = group_df_dt_indexed.set_index(
+                    pd.DatetimeIndex(group_df_dt_indexed['tarih']), drop=True
+                )
                 if not group_df_dt_indexed.index.is_monotonic_increasing: group_df_dt_indexed = group_df_dt_indexed.sort_index()
             except Exception as e_set_index:
                 local_logger.error(f"{hisse_kodu}: 'tarih' DatetimeIndex olarak ayarlanamadı: {e_set_index}. Orijinal RangeIndex ile devam ediliyor.")
