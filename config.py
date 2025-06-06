@@ -187,6 +187,7 @@ SERIES_SERIES_CROSSOVERS = [
     ('close', 'sma_21', 'close_keser_sma_21_yukari', 'close_keser_sma_21_asagi'),
     ('close', 'ema_21', 'close_keser_ema_21_yukari', 'close_keser_ema_21_asagi'),
     ('close', 'bbm_20_2', 'close_keser_bbm_20_2_yukari', 'close_keser_bbm_20_2_asagi'),
+    ('close', 'classicpivots_1h_p', 'close_keser_classicpivots_1h_p_yukari', 'close_keser_classicpivots_1h_p_asagi'),
     ('close', 'ema_5', 'close_keser_ema_5_yukari', 'close_keser_ema_5_asagi'),
     ('close', 'ema_10', 'close_keser_ema_10_yukari', 'close_keser_ema_10_asagi'),
     ('ema_50', 'close', 'ema_50_keser_close_yukari', 'ema_50_keser_close_asagi'),
