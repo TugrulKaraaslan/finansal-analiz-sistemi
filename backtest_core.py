@@ -7,6 +7,8 @@
 
 import pandas as pd
 import numpy as np
+from pathlib import Path
+from datetime import datetime
 import config
 
 try:
@@ -219,7 +221,9 @@ def calistir_basit_backtest(
 
             REQUIRED = {"open", "high", "low", "close", "volume"}
             if not REQUIRED.issubset(df_hisse_ozel.columns):
-                fn_logger.warning(f"{hisse_adi}: eksik OHLCV – atlandı")
+                fn_logger.warning(
+                    f"{hisse_adi}: zorunlu OHLCV kolonları eksik – hisse atlandı"
+                )
                 continue
 
             alis_fiyati = satis_fiyati = getiri_yuzde = np.nan
@@ -322,4 +326,26 @@ def calistir_basit_backtest(
         genel_sonuclar_dict[filtre_kodu]["notlar"] = list(set(current_filtre_notlari))
 
     fn_logger.info("Tüm filtreler için basit backtest tamamlandı.")
-    return genel_sonuclar_dict, istisnalar
+
+    rapor_kayitlar = [
+        {
+            "filtre_kodu": k,
+            "hisse_sayisi": v.get("hisse_sayisi", 0),
+            "islem_yapilan_sayisi": v.get("islem_yapilan_sayisi", 0),
+            "ortalama_getiri": v.get("ortalama_getiri"),
+        }
+        for k, v in genel_sonuclar_dict.items()
+    ]
+
+    rapor_df = pd.DataFrame(rapor_kayitlar).sort_values("filtre_kodu")
+
+    if rapor_df.empty:
+        fn_logger.warning("Rapor DataFrame'i bos.")
+        return rapor_df, None
+
+    rapor_dosyasi = Path("raporlar") / f"rapor_{datetime.now():%Y%m%d_%H%M%S}.xlsx"
+    rapor_dosyasi.parent.mkdir(exist_ok=True)
+
+    rapor_df.to_excel(rapor_dosyasi, index=False)
+
+    return rapor_df, rapor_dosyasi

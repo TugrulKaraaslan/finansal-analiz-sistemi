@@ -23,18 +23,21 @@ def test_bireysel_performanslar_contains_new_keys():
         "volume": [1000, 1100],
     })
     filtrelenmis = {"F1": ["AAA"]}
-    results, _ = backtest_core.calistir_basit_backtest(
+    rapor_df, _ = backtest_core.calistir_basit_backtest(
         filtrelenmis,
         df,
         satis_tarihi_str="10.03.2025",
         tarama_tarihi_str="07.03.2025"
     )
-    perf_df = results["F1"]["hisse_performanslari"]
-    assert {"alis_tarihi", "satis_tarihi", "uygulanan_strateji"}.issubset(perf_df.columns)
-    row = perf_df.iloc[0]
-    assert row["alis_tarihi"] == "07.03.2025"
-    assert row["satis_tarihi"] == "10.03.2025"
-    assert row["uygulanan_strateji"] == config.UYGULANAN_STRATEJI
+    assert set(rapor_df.columns) == {
+        "filtre_kodu",
+        "hisse_sayisi",
+        "islem_yapilan_sayisi",
+        "ortalama_getiri",
+    }
+    row = rapor_df.iloc[0]
+    assert row["filtre_kodu"] == "F1"
+    assert row["hisse_sayisi"] == 1
 
 
 def test_missing_close_column_skips_stock():
@@ -50,13 +53,12 @@ def test_missing_close_column_skips_stock():
         "volume": [1000, 1100],
     })
     filtrelenmis = {"F1": ["AAA"]}
-    results, _ = backtest_core.calistir_basit_backtest(
+    rapor_df, _ = backtest_core.calistir_basit_backtest(
         filtrelenmis,
         df,
         satis_tarihi_str="10.03.2025",
         tarama_tarihi_str="07.03.2025",
     )
-    perf_df = results["F1"]["hisse_performanslari"]
-    assert perf_df.empty
-    assert results["F1"]["islem_yapilan_sayisi"] == 0
-    assert pd.isna(results["F1"]["ortalama_getiri"])
+    row = rapor_df.iloc[0]
+    assert row["islem_yapilan_sayisi"] == 0
+    assert pd.isna(row["ortalama_getiri"])
