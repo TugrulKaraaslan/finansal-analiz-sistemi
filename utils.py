@@ -27,15 +27,22 @@ except ImportError:
         )
 
 
-def crosses_above(a: pd.Series, b: pd.Series) -> pd.Series:
-    """Return True where ``a`` crosses ``b`` upwards."""
+def _align(a: pd.Series, b: pd.Series):
     x, y = a.align(b, join="inner")
+    return x, y
+
+
+def crosses_above(a: pd.Series, b: pd.Series) -> pd.Series:
+    if a is None or b is None:
+        return pd.Series(False, index=[])
+    x, y = _align(a, b)
     return (x.shift(1) < y.shift(1)) & (x >= y)
 
 
-def crosses_below(a: pd.Series, b: pd.Series) -> pd.Series:
-    """Return True where ``a`` crosses ``b`` downwards."""
-    x, y = a.align(b, join="inner")
+def crosses_below(a, b):
+    if a is None or b is None:
+        return pd.Series(False, index=[])
+    x, y = _align(a, b)
     return (x.shift(1) > y.shift(1)) & (x <= y)
 
 
