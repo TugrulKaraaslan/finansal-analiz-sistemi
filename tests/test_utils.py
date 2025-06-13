@@ -65,10 +65,11 @@ def test_crosses_below_misaligned_index_length_matches_intersection():
 
 
 @pytest.mark.parametrize("func", [crosses_above, crosses_below])
-def test_cross_functions_with_none_raises(func):
+def test_cross_functions_with_none_returns_empty_false_series(func):
     s = pd.Series([1, 2, 3])
-    with pytest.raises(AttributeError):
-        func(None, s)
+    result = func(None, s)
+    expected = pd.Series(False, index=[])
+    pd.testing.assert_series_equal(result, expected)
 
 
 def test_cross_functions_all_nan_do_not_fail():
