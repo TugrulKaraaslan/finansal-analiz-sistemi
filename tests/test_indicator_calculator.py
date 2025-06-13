@@ -6,6 +6,7 @@ sys.modules.pop("pandas_ta", None)
 import pandas as pd
 import numpy as np
 import pytest
+import warnings
 
 import indicator_calculator as ic
 import config
@@ -22,7 +23,13 @@ def test_classicpivots_crossover_column_exists():
         "volume": np.arange(30)
     }
     df = pd.DataFrame(data)
-    result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    try:
+        with pytest.warns(None) as rec:
+            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    except TypeError:
+        with warnings.catch_warnings(record=True) as rec:
+            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    assert not any("fragmented" in str(w.message) for w in rec)
     assert "classicpivots_1h_p" in result.columns
     assert "close_keser_classicpivots_1h_p_yukari" in result.columns
 
@@ -38,7 +45,13 @@ def test_fallback_indicators_created_when_missing():
         "volume": np.arange(50)
     }
     df = pd.DataFrame(data)
-    result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    try:
+        with pytest.warns(None) as rec:
+            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    except TypeError:
+        with warnings.catch_warnings(record=True) as rec:
+            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    assert not any("fragmented" in str(w.message) for w in rec)
     # pandas_ta normalde sma_200/ema_200 üretmez; fallback mekanizmasi NaN da olsa kolon eklemeli
     assert "sma_200" in result.columns
     assert "ema_200" in result.columns
@@ -57,7 +70,13 @@ def test_ma_columns_exist_for_various_lengths(bars):
         "volume": np.arange(bars),
     }
     df = pd.DataFrame(data)
-    result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    try:
+        with pytest.warns(None) as rec:
+            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    except TypeError:
+        with warnings.catch_warnings(record=True) as rec:
+            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    assert not any("fragmented" in str(w.message) for w in rec)
     for n in config.GEREKLI_MA_PERIYOTLAR:
         assert f"sma_{n}" in result.columns
         assert f"ema_{n}" in result.columns

@@ -6,7 +6,9 @@
 # Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index düzeltildi, filtre uyumu artırıldı v2)
 
 import pandas as pd
+import pandas.errors
 import numpy as np
+import warnings
 
 # numpy>=2.0 paketlerinde `NaN` sabiti kaldırıldı. pandas_ta halen bu adı
 # kullandığından import sırasında hata oluşabiliyor. Eğer `np.NaN` mevcut
@@ -17,6 +19,8 @@ if not hasattr(np, "NaN"):
 import pandas_ta as ta
 import config
 import utils
+
+warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 
 try:
     from logger_setup import get_logger
@@ -338,6 +342,11 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         filtered_indicators = [i for i in base_list if any(c in wanted for c in i.get('col_names', []))]
         strategy_obj = ta.Strategy(name=getattr(ta_strategy, 'name', 'filtered'), description=getattr(ta_strategy, 'description', ''), ta=filtered_indicators)
         group_df_dt_indexed.ta.strategy(strategy_obj, timed=False, append=True, min_periods=1)
+        psar = group_df_dt_indexed.ta.psar()
+        psar.columns = ['psar_long', 'psar_short', 'psar_af', 'psar_trend']
+        psar['psar'] = psar['psar_long'].fillna(psar['psar_short'])
+        psar = psar[['psar_trend', 'psar']]
+        group_df_dt_indexed = pd.concat([group_df_dt_indexed, psar], axis=1)
     except Exception as e_ta:
         local_logger.error(f"{hisse_kodu}: pandas-ta stratejisi hatası: {e_ta}", exc_info=True)
         # Hata durumunda, o ana kadar eklenen sütunlarla RangeIndex'li orijinal df'i birleştirmeye çalış
@@ -376,12 +385,15 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
     # group_df_sorted_range_indexed en başta oluşturulmuştu.
     
     # pandas-ta'nın eklediği yeni sütunları alalım (OHLCV hariç)
-    new_ta_cols = [col for col in group_df_dt_indexed.columns if col not in group_df_input.columns and col not in required_ohlcv]
-    for col in new_ta_cols:
+    new_ta_cols_list = [col for col in group_df_dt_indexed.columns if col not in group_df_input.columns and col not in required_ohlcv]
+    new_cols = {}
+    for col in new_ta_cols_list:
         if len(group_df_dt_indexed[col].values) == len(df_final_group):
-             df_final_group[col] = group_df_dt_indexed[col].values
+            new_cols[col] = group_df_dt_indexed[col].values
         else:
             local_logger.warning(f"{hisse_kodu}: pandas-ta sütunu '{col}' kopyalanırken boyut uyuşmazlığı. Atlanıyor.")
+    if new_cols:
+        df_final_group = pd.concat([df_final_group, pd.DataFrame(new_cols, index=df_final_group.index)], axis=1)
 
     # Bazı durumlarda pandas-ta stratejisinden beklenen indikatörler veri
     # yetersizliği nedeniyle oluşmayabilir. Filtrelerin sorunsuz çalışması için
@@ -401,6 +413,7 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         local_logger.debug(f"{hisse_kodu}: 'momentum_10' sütunu manuel olarak hesaplandı.")
 
     # Özel Sütunlar (df_final_group üzerinde, zaten RangeIndex'li)
+    new_cols = {}
     for sutun_conf in ozel_sutun_conf:
         yeni_sutun_adi = sutun_conf['name']
         fonksiyon_adi_str = sutun_conf['function']
@@ -408,19 +421,23 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         try:
             fonksiyon = globals().get(fonksiyon_adi_str)
             if fonksiyon:
-                result_series = fonksiyon(df_final_group.copy(), **parametreler) # Fonksiyona kopya ver
+                result_series = fonksiyon(df_final_group.copy(), **parametreler)  # Fonksiyona kopya ver
                 if result_series is not None and len(result_series) == len(df_final_group):
-                    df_final_group[yeni_sutun_adi] = result_series.values # .values ile atama
-                # ... (NaN ve boyut kontrolü) ...
-            else: # ... (hata logu) ...
-                 df_final_group[yeni_sutun_adi] = np.nan
-                 local_logger.error(f"{hisse_kodu}: Özel sütun için '{fonksiyon_adi_str}' fonksiyonu bulunamadı.")
-        except Exception as e_ozel: # ... (hata logu) ...
-             df_final_group[yeni_sutun_adi] = np.nan
-             local_logger.error(f"{hisse_kodu}: Özel sütun '{yeni_sutun_adi}' hesaplanırken hata: {e_ozel}", exc_info=False)
+                    new_cols[yeni_sutun_adi] = result_series.values
+                else:
+                    new_cols[yeni_sutun_adi] = np.full(len(df_final_group), np.nan)
+            else:
+                new_cols[yeni_sutun_adi] = np.full(len(df_final_group), np.nan)
+                local_logger.error(f"{hisse_kodu}: Özel sütun için '{fonksiyon_adi_str}' fonksiyonu bulunamadı.")
+        except Exception as e_ozel:
+            new_cols[yeni_sutun_adi] = np.full(len(df_final_group), np.nan)
+            local_logger.error(f"{hisse_kodu}: Özel sütun '{yeni_sutun_adi}' hesaplanırken hata: {e_ozel}", exc_info=False)
+    if new_cols:
+        df_final_group = pd.concat([df_final_group, pd.DataFrame(new_cols, index=df_final_group.index)], axis=1)
 
 
     # Kesişimler (df_final_group üzerinde)
+    new_cols = {}
     for s1_c, s2_c, c_above, c_below in series_series_config:
         result = _calculate_series_series_crossover(
             df_final_group.copy(), s1_c, s2_c, c_above, c_below, local_logger
@@ -429,15 +446,18 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
             continue
         kesisim_yukari, kesisim_asagi = result
         if len(kesisim_yukari) == len(df_final_group):
-            df_final_group[c_above] = kesisim_yukari.values
+            new_cols[c_above] = kesisim_yukari.values
         else:
-            df_final_group[c_above] = np.nan
+            new_cols[c_above] = np.full(len(df_final_group), np.nan)
         if len(kesisim_asagi) == len(df_final_group):
-            df_final_group[c_below] = kesisim_asagi.values
+            new_cols[c_below] = kesisim_asagi.values
         else:
-            df_final_group[c_below] = np.nan
+            new_cols[c_below] = np.full(len(df_final_group), np.nan)
+    if new_cols:
+        df_final_group = pd.concat([df_final_group, pd.DataFrame(new_cols, index=df_final_group.index)], axis=1)
 
 
+    new_cols = {}
     for s_c, val, suff in series_value_config:
         result = _calculate_series_value_crossover(
             df_final_group.copy(), s_c, val, suff, local_logger
@@ -446,13 +466,15 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
             continue
         kesisim_yukari, kesisim_asagi = result
         if len(kesisim_yukari) == len(df_final_group):
-            df_final_group[kesisim_yukari.name] = kesisim_yukari.values
+            new_cols[kesisim_yukari.name] = kesisim_yukari.values
         else:
-            df_final_group[kesisim_yukari.name] = np.nan
+            new_cols[kesisim_yukari.name] = np.full(len(df_final_group), np.nan)
         if len(kesisim_asagi) == len(df_final_group):
-            df_final_group[kesisim_asagi.name] = kesisim_asagi.values
+            new_cols[kesisim_asagi.name] = kesisim_asagi.values
         else:
-            df_final_group[kesisim_asagi.name] = np.nan
+            new_cols[kesisim_asagi.name] = np.full(len(df_final_group), np.nan)
+    if new_cols:
+        df_final_group = pd.concat([df_final_group, pd.DataFrame(new_cols, index=df_final_group.index)], axis=1)
     if "bbm_20_2" in df_final_group.columns and "BBM_20_2" not in df_final_group.columns:
         df_final_group["BBM_20_2"] = df_final_group["bbm_20_2"]
         
