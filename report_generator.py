@@ -140,3 +140,25 @@ def olustur_excel_raporu(sonuclar_listesi: list, cikti_klasoru: str, logger=None
     if logger:
         logger.info(f"Excel raporu oluşturuldu: {dosya_adi}")
     return dosya_adi
+
+
+def kaydet_uc_sekmeli_excel(
+    fname: str,
+    ozet_df: pd.DataFrame,
+    detay_df: pd.DataFrame,
+    istatistik_df: pd.DataFrame,
+):
+    """Üç DataFrame'i tek seferde aynı Excel dosyasına kaydet."""
+
+    os.makedirs(os.path.dirname(fname) or ".", exist_ok=True)
+
+    with pd.ExcelWriter(
+        fname,
+        engine="xlsxwriter",
+        mode="w",
+    ) as w:
+        ozet_df.to_excel(w, sheet_name="Özet", index=False)
+        detay_df.to_excel(w, sheet_name="Detay", index=False)
+        istatistik_df.to_excel(w, sheet_name="İstatistik", index=False)
+
+    return fname
