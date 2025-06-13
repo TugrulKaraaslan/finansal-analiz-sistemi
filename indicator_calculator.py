@@ -215,19 +215,29 @@ def _calculate_percentage_from_all_time_high(group_df: pd.DataFrame, price_col: 
         logger.error(f"{hisse_str}: ATH'den yüzde ({sutun_adi}) hesaplanırken hata: {e}", exc_info=False)
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
 
-def _calculate_series_series_crossover(group_df: pd.DataFrame, s1_col: str, s2_col: str, col_name_above: str, col_name_below: str, logger_param=None) -> tuple[pd.Series, pd.Series]:
+def _calculate_series_series_crossover(
+    group_df: pd.DataFrame,
+    s1_col: str,
+    s2_col: str,
+    col_name_above: str,
+    col_name_below: str,
+    logger_param=None,
+) -> tuple[pd.Series, pd.Series] | None:
     local_logger = logger_param or logger
-    hisse_str = group_df['hisse_kodu'].iloc[0] if not group_df.empty and 'hisse_kodu' in group_df.columns else 'Bilinmeyen Hisse'
+
+    if s1_col not in group_df.columns or s2_col not in group_df.columns:
+        local_logger.debug(
+            f"Skipped crossover {s1_col} vs {s2_col} – missing col"
+        )
+        return
+
+    hisse_str = (
+        group_df["hisse_kodu"].iloc[0]
+        if not group_df.empty and "hisse_kodu" in group_df.columns
+        else "Bilinmeyen Hisse"
+    )
     empty_above = pd.Series(False, index=group_df.index, name=col_name_above, dtype=bool)
     empty_below = pd.Series(False, index=group_df.index, name=col_name_below, dtype=bool)
-
-    missing_cols = []
-    if s1_col not in group_df.columns: missing_cols.append(s1_col)
-    if s2_col not in group_df.columns: missing_cols.append(s2_col)
-
-    if missing_cols:
-        local_logger.debug(f"{hisse_str}: Kesişim ({s1_col} vs {s2_col}) için eksik sütun(lar): {', '.join(missing_cols)}")
-        return empty_above, empty_below
     try:
         s1 = pd.to_numeric(group_df[s1_col], errors='coerce')
         s2 = pd.to_numeric(group_df[s2_col], errors='coerce')
@@ -241,17 +251,30 @@ def _calculate_series_series_crossover(group_df: pd.DataFrame, s1_col: str, s2_c
         local_logger.error(f"{hisse_str}: _calculate_series_series_crossover ({s1_col} vs {s2_col}) hatası: {e}", exc_info=False)
         return empty_above, empty_below
 
-def _calculate_series_value_crossover(group_df: pd.DataFrame, s_col: str, value: float, suffix: str, logger_param=None) -> tuple[pd.Series, pd.Series]:
+def _calculate_series_value_crossover(
+    group_df: pd.DataFrame,
+    s_col: str,
+    value: float,
+    suffix: str,
+    logger_param=None,
+) -> tuple[pd.Series, pd.Series] | None:
     local_logger = logger_param or logger
-    hisse_str = group_df['hisse_kodu'].iloc[0] if not group_df.empty and 'hisse_kodu' in group_df.columns else 'Bilinmeyen Hisse'
+
+    if s_col not in group_df.columns:
+        local_logger.debug(
+            f"Skipped crossover {s_col} vs {value} – missing col"
+        )
+        return
+
+    hisse_str = (
+        group_df["hisse_kodu"].iloc[0]
+        if not group_df.empty and "hisse_kodu" in group_df.columns
+        else "Bilinmeyen Hisse"
+    )
     col_name_above = f"{s_col}_keser_{str(suffix).replace('.', 'p')}_yukari"
     col_name_below = f"{s_col}_keser_{str(suffix).replace('.', 'p')}_asagi"
     empty_above = pd.Series(False, index=group_df.index, name=col_name_above, dtype=bool)
     empty_below = pd.Series(False, index=group_df.index, name=col_name_below, dtype=bool)
-
-    if s_col not in group_df.columns:
-        local_logger.debug(f"{hisse_str}: Kesişim ({s_col} vs {value}) için eksik sütun: {s_col}")
-        return empty_above, empty_below
     value_series = pd.Series(value, index=group_df.index, name=f"sabit_deger_{str(suffix).replace('.', 'p')}")
     try:
         s1 = pd.to_numeric(group_df[s_col], errors='coerce')
@@ -399,19 +422,37 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
 
     # Kesişimler (df_final_group üzerinde)
     for s1_c, s2_c, c_above, c_below in series_series_config:
-        kesisim_yukari, kesisim_asagi = _calculate_series_series_crossover(df_final_group.copy(), s1_c, s2_c, c_above, c_below, local_logger)
-        if len(kesisim_yukari) == len(df_final_group): df_final_group[c_above] = kesisim_yukari.values
-        else: df_final_group[c_above] = np.nan
-        if len(kesisim_asagi) == len(df_final_group): df_final_group[c_below] = kesisim_asagi.values
-        else: df_final_group[c_below] = np.nan
+        result = _calculate_series_series_crossover(
+            df_final_group.copy(), s1_c, s2_c, c_above, c_below, local_logger
+        )
+        if result is None:
+            continue
+        kesisim_yukari, kesisim_asagi = result
+        if len(kesisim_yukari) == len(df_final_group):
+            df_final_group[c_above] = kesisim_yukari.values
+        else:
+            df_final_group[c_above] = np.nan
+        if len(kesisim_asagi) == len(df_final_group):
+            df_final_group[c_below] = kesisim_asagi.values
+        else:
+            df_final_group[c_below] = np.nan
 
 
     for s_c, val, suff in series_value_config:
-        kesisim_yukari, kesisim_asagi = _calculate_series_value_crossover(df_final_group.copy(), s_c, val, suff, local_logger)
-        if len(kesisim_yukari) == len(df_final_group): df_final_group[kesisim_yukari.name] = kesisim_yukari.values
-        else: df_final_group[kesisim_yukari.name] = np.nan
-        if len(kesisim_asagi) == len(df_final_group): df_final_group[kesisim_asagi.name] = kesisim_asagi.values
-        else: df_final_group[kesisim_asagi.name] = np.nan
+        result = _calculate_series_value_crossover(
+            df_final_group.copy(), s_c, val, suff, local_logger
+        )
+        if result is None:
+            continue
+        kesisim_yukari, kesisim_asagi = result
+        if len(kesisim_yukari) == len(df_final_group):
+            df_final_group[kesisim_yukari.name] = kesisim_yukari.values
+        else:
+            df_final_group[kesisim_yukari.name] = np.nan
+        if len(kesisim_asagi) == len(df_final_group):
+            df_final_group[kesisim_asagi.name] = kesisim_asagi.values
+        else:
+            df_final_group[kesisim_asagi.name] = np.nan
     if "bbm_20_2" in df_final_group.columns and "BBM_20_2" not in df_final_group.columns:
         df_final_group["BBM_20_2"] = df_final_group["bbm_20_2"]
         
