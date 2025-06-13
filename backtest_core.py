@@ -217,6 +217,11 @@ def calistir_basit_backtest(
                 )
                 continue
 
+            REQUIRED = {"open", "high", "low", "close", "volume"}
+            if not REQUIRED.issubset(df_hisse_ozel.columns):
+                fn_logger.warning(f"{hisse_adi}: eksik OHLCV – atlandı")
+                continue
+
             alis_fiyati = satis_fiyati = getiri_yuzde = np.nan
             hisse_notu = ""
 
