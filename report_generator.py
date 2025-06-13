@@ -2,10 +2,6 @@ import pandas as pd
 import os
 from logger_setup import get_logger
 from datetime import datetime
-from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
-from openpyxl.formatting.rule import CellIsRule
-from openpyxl.styles import PatternFill
 fn_logger = get_logger(__name__)
 
 def olustur_ozet_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
@@ -97,105 +93,50 @@ def olustur_hatali_filtre_raporu(hatalar_listesi: list, cikti_klasoru: str, logg
     return dosya_adi
 
 
-def _apply_return_formatting(ws, column_letter: str, max_row: int) -> None:
-    """Apply conditional formatting on return percentage columns."""
-    positive_fill = PatternFill(start_color="90EE90", end_color="90EE90", fill_type="solid")
-    negative_fill = PatternFill(start_color="FF7F7F", end_color="FF7F7F", fill_type="solid")
-    zero_fill = PatternFill(start_color="FFFF99", end_color="FFFF99", fill_type="solid")
-
-    cell_range = f"{column_letter}2:{column_letter}{max_row}"
-    ws.conditional_formatting.add(cell_range, CellIsRule(operator='greaterThan', formula=['0'], fill=positive_fill))
-    ws.conditional_formatting.add(cell_range, CellIsRule(operator='lessThan', formula=['0'], fill=negative_fill))
-    ws.conditional_formatting.add(cell_range, CellIsRule(operator='equal', formula=['0'], fill=zero_fill))
-
 
 def olustur_excel_raporu(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
-    """Create an Excel report with summary, detail and general sheets."""
+    """Oluşturulan raporu tek sayfalık Excel dosyasına kaydet."""
     os.makedirs(cikti_klasoru, exist_ok=True)
 
-    summary_records = []
-    detail_records = []
-
+    kayitlar = []
     for sonuc in sorted(sonuclar_listesi, key=lambda x: x.get("filtre_kodu", "")):
         hisseler = sonuc.get("hisseler", []) or []
-        notlar = sonuc.get("notlar", [])
-        if isinstance(notlar, list):
-            note_text = "; ".join(notlar)
-        else:
-            note_text = str(notlar)
-        if not hisseler:
-            note_text = note_text or "Bu filtreye uygun hisse yok"
+        getiriler = [
+            h.get("getiri_yuzde")
+            for h in hisseler
+            if isinstance(h, dict) and h.get("getiri_yuzde") is not None
+        ]
+        avg_ret = (sum(getiriler) / len(getiriler) / 100) if getiriler else float("nan")
+        kayitlar.append(
+            {
+                "filtre_kodu": sonuc.get("filtre_kodu", ""),
+                "bulunan_hisse_sayisi": len(hisseler),
+                "ortalama_getiri": avg_ret,
+                "notlar": sonuc.get("notlar", ""),
+                "tarama_tarihi": sonuc.get("tarama_tarihi", ""),
+                "satis_tarihi": sonuc.get("satis_tarihi", ""),
+            }
+        )
 
-        getiriler = [h.get("getiri_yuzde") for h in hisseler if isinstance(h, dict) and h.get("getiri_yuzde") is not None]
-        avg_ret = round(sum(getiriler) / len(getiriler), 2) if getiriler else 0
-        max_ret = round(max(getiriler), 2) if getiriler else 0
-        min_ret = round(min(getiriler), 2) if getiriler else 0
+    rapor_df = pd.DataFrame(kayitlar).sort_values("filtre_kodu")
+    rapor_df["ortalama_getiri"] = rapor_df["ortalama_getiri"].fillna("—")
 
-        summary_records.append({
-            "Filtre Kodu": sonuc.get("filtre_kodu", ""),
-            "Bulunan Hisse": len(hisseler),
-            "İşlemli": "EVET" if hisseler else "HAYIR",
-            "Ortalama Getiri (%)": avg_ret,
-            "En Yüksek Getiri (%)": max_ret,
-            "En Düşük Getiri (%)": min_ret,
-            "Notlar": note_text,
-            "Tarama Tarihi": sonuc.get("tarama_tarihi", ""),
-            "Satış Tarihi": sonuc.get("satis_tarihi", ""),
-        })
+    dosya_adi = os.path.join(
+        cikti_klasoru, f"rapor_{datetime.now():%Y%m%d_%H%M%S}.xlsx"
+    )
 
-        for hisse in sorted(hisseler, key=lambda h: h.get("hisse_kodu", "")):
-            detail_records.append({
-                "Filtre Kodu": sonuc.get("filtre_kodu", ""),
-                "Hisse Kodu": hisse.get("hisse_kodu", ""),
-                "Alış Tarihi": hisse.get("alis_tarihi", ""),
-                "Satış Tarihi": hisse.get("satis_tarihi", ""),
-                "Alış Fiyatı": hisse.get("alis_fiyati", ""),
-                "Satış Fiyatı": hisse.get("satis_fiyati", ""),
-                "Getiri (%)": hisse.get("getiri_yuzde", ""),
-                "Uygulanan Strateji": hisse.get("uygulanan_strateji", ""),
-                "Genel Tarama Tarihi": sonuc.get("tarama_tarihi", ""),
-                "Genel Satış Tarihi": sonuc.get("satis_tarihi", ""),
-            })
+    (
+        rapor_df.style
+        .format({"ortalama_getiri": "{:.2%}"})
+        .hide(axis="index")
+        .to_excel(
+            dosya_adi,
+            engine="xlsxwriter",
+            sheet_name="Rapor",
+            index=False,
+        )
+    )
 
-    df_summary = pd.DataFrame(summary_records).sort_values("Filtre Kodu")
-    df_detail = pd.DataFrame(detail_records).sort_values(["Filtre Kodu", "Hisse Kodu"])
-
-    total_filters = len(df_summary)
-    transaction_filters = (df_summary["Bulunan Hisse"] > 0).sum()
-    fail_ratio = round(((df_summary["Bulunan Hisse"] == 0).sum() / total_filters) * 100, 2) if total_filters else 0
-    success_ratio = round(((df_summary["Ortalama Getiri (%)"] > 0).sum() / total_filters) * 100, 2) if total_filters else 0
-    mean_return = round(df_summary["Ortalama Getiri (%)"].mean(), 2) if total_filters else 0
-
-    df_general = pd.DataFrame([
-        {
-            "Toplam Filtre": total_filters,
-            "İşlemli Filtre Sayısı": transaction_filters,
-            "Başarısız Filtre Oranı (%)": fail_ratio,
-            "Genel Başarı Oranı (%)": success_ratio,
-            "Genel Ortalama Getiri (%)": mean_return,
-        }
-    ])
-
-    dosya_adi = os.path.join(cikti_klasoru, f"rapor_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx")
-    with pd.ExcelWriter(dosya_adi, engine="openpyxl") as writer:
-        df_summary.to_excel(writer, sheet_name="Filtre_Ozet", index=False)
-        df_detail.to_excel(writer, sheet_name="Hisse_Detay", index=False)
-        df_general.to_excel(writer, sheet_name="Genel_Performans", index=False)
-
-    wb = load_workbook(dosya_adi)
-
-    ws_summary = wb["Filtre_Ozet"]
-    ret_cols_sum = ["Ortalama Getiri (%)", "En Yüksek Getiri (%)", "En Düşük Getiri (%)"]
-    for col in ret_cols_sum:
-        idx = df_summary.columns.get_loc(col) + 1
-        _apply_return_formatting(ws_summary, get_column_letter(idx), ws_summary.max_row)
-
-    ws_detail = wb["Hisse_Detay"]
-    if not df_detail.empty:
-        idx = df_detail.columns.get_loc("Getiri (%)") + 1
-        _apply_return_formatting(ws_detail, get_column_letter(idx), ws_detail.max_row)
-
-    wb.save(dosya_adi)
     if logger:
         logger.info(f"Excel raporu oluşturuldu: {dosya_adi}")
     return dosya_adi

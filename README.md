@@ -33,7 +33,13 @@ pytest -q
    !pip install -r requirements.txt pytest
    ```
 3. Run the unit tests:
-   ```python
-   !pytest -q
-   ```
+    ```python
+    !pytest -q
+    ```
+
+## Rapor oluşturma (hızlı yöntem)
+
+```bash
+pip install xlsxwriter
+```
 
