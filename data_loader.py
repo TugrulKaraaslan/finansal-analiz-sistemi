@@ -9,6 +9,7 @@ import pandas as pd
 import os
 import glob
 import config
+from functools import lru_cache, partial
 
 from data_loader_cache import DataLoaderCache
 
@@ -23,6 +24,15 @@ except ImportError:
 _cache_loader = DataLoaderCache(logger=logger)
 
 
+_read_excel = partial(pd.read_excel, engine="openpyxl")
+
+
+@lru_cache(maxsize=None)
+def _read_excel_cached(path: str) -> pd.DataFrame:
+    """Read Excel files with LRU caching."""
+    return _read_excel(path)
+
+
 def check_and_create_dirs(*dir_paths):
     for dir_path in dir_paths:
         if dir_path and not os.path.exists(dir_path):
@@ -31,6 +41,28 @@ def check_and_create_dirs(*dir_paths):
                 logger.info(f"Dizin oluşturuldu: {dir_path}")
             except Exception as e:
                 logger.error(f"Dizin oluşturulamadı: {dir_path}. Hata: {e}", exc_info=True)
+
+def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
+    """Load an Excel file and cache the result, writing Parquet if needed."""
+    log = logger_param or logger
+    try:
+        df = _read_excel_cached(path)
+    except Exception as e:
+        log.error(f"Excel dosyası ({path}) okunamadı: {e}", exc_info=False)
+        return None
+
+    df.columns = df.columns.str.strip().str.lower()
+    if len(df) < 252:
+        log.debug(f"{path} kısa veri – atlandı")
+        return None
+
+    parquet_p = path.replace(".xlsx", ".parquet")
+    if not os.path.exists(parquet_p):
+        try:
+            df.to_parquet(parquet_p)
+        except Exception as e:
+            log.warning(f"Parquet kaydedilemedi: {parquet_p}: {e}", exc_info=False)
+    return df
 
 def _standardize_date_column(df: pd.DataFrame, file_path_for_log:str = "", logger_param=None) -> pd.DataFrame:
     log = logger_param or logger
