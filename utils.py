@@ -109,3 +109,30 @@ def crosses_below(s1: pd.Series, s2: pd.Series) -> pd.Series:
 
 # safe_pct_change gibi diğer yardımcı fonksiyonlar buraya eklenebilir.
 # Şimdilik sadece kesişimler var.
+
+def extract_columns_from_filters(df_filters: pd.DataFrame | None,
+                                 series_series: list | None,
+                                 series_value: list | None) -> set:
+    """Filtre sorgularında ve crossover tanımlarında geçen kolon adlarını döndürür."""
+    try:
+        from filter_engine import _sanitize_query, _extract_query_columns
+    except Exception:
+        # filter_engine import edilemezse boş set döndür
+        return set()
+
+    wanted = set()
+    if df_filters is not None and not df_filters.empty and 'PythonQuery' in df_filters.columns:
+        for q in df_filters['PythonQuery'].dropna().astype(str):
+            sanitized = _sanitize_query(q)
+            wanted |= _extract_query_columns(sanitized)
+
+    for entry in series_series or []:
+        if len(entry) >= 2:
+            wanted.add(entry[0])
+            wanted.add(entry[1])
+
+    for entry in series_value or []:
+        if len(entry) >= 1:
+            wanted.add(entry[0])
+
+    return wanted

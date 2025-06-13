@@ -158,6 +158,22 @@ def _calculate_volume_price(group_df: pd.DataFrame, col_name_prefix_vol: str = '
         logger.error(f"{hisse_str}: Hacim*Fiyat ({sutun_adi}) hesaplanırken hata: {e}", exc_info=False)
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
 
+
+def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
+    """Eksikse basit veya üssel hareketli ortalama kolonu ekler."""
+    local_logger = logger_param or logger
+    col = f"{kind}_{n}"
+    if col in df.columns or "close" not in df.columns:
+        return
+    try:
+        if kind == "sma":
+            df[col] = df["close"].rolling(window=n, min_periods=1).mean()
+        else:
+            df[col] = df["close"].ewm(span=n, adjust=False, min_periods=1).mean()
+        local_logger.debug(f"'{col}' sütunu safe_ma ile eklendi.")
+    except Exception as e:
+        local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)
+
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
     hisse_str = group_df['hisse_kodu'].iloc[0] if not group_df.empty and 'hisse_kodu' in group_df.columns else 'Bilinmeyen Hisse'
     sutun_adi = "classicpivots_1h_p"
@@ -282,8 +298,23 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         local_logger.error(f"{hisse_kodu}: Temel OHLCV sütunları eksik: {missing_ohlcv}.")
         return group_df_input[['hisse_kodu', 'tarih'] + [c for c in required_ohlcv if c in group_df_input.columns]].drop_duplicates()
 
+    if ta_strategy is None:
+        ta_strategy = ta.Strategy(name="empty", ta=[])
+
     try:
-        group_df_dt_indexed.ta.strategy(ta_strategy, timed=False, append=True)
+        try:
+            filtre_df = pd.read_csv(config.FILTRE_DOSYA_YOLU, sep=';', engine='python')
+        except Exception:
+            filtre_df = pd.DataFrame()
+        wanted = utils.extract_columns_from_filters(
+            filtre_df,
+            series_series_config,
+            series_value_config,
+        )
+        base_list = getattr(ta_strategy, 'ta', []) or []
+        filtered_indicators = [i for i in base_list if any(c in wanted for c in i.get('col_names', []))]
+        strategy_obj = ta.Strategy(name=getattr(ta_strategy, 'name', 'filtered'), description=getattr(ta_strategy, 'description', ''), ta=filtered_indicators)
+        group_df_dt_indexed.ta.strategy(strategy_obj, timed=False, append=True, min_periods=1)
     except Exception as e_ta:
         local_logger.error(f"{hisse_kodu}: pandas-ta stratejisi hatası: {e_ta}", exc_info=True)
         # Hata durumunda, o ana kadar eklenen sütunlarla RangeIndex'li orijinal df'i birleştirmeye çalış
@@ -338,17 +369,9 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         df_final_group['ema_8'] = df_final_group['close'].ewm(span=8, adjust=False).mean()
         local_logger.debug(f"{hisse_kodu}: 'ema_8' sütunu manuel olarak hesaplandı.")
 
-    ma_fallbacks = {
-        'sma_50': 50, 'sma_100': 100, 'sma_200': 200,
-        'ema_5': 5, 'ema_50': 50, 'ema_100': 100, 'ema_200': 200,
-    }
-    for col, period in ma_fallbacks.items():
-        if col not in df_final_group.columns and 'close' in df_final_group.columns:
-            if col.startswith('sma'):
-                df_final_group[col] = df_final_group['close'].rolling(window=period, min_periods=period).mean()
-            else:
-                df_final_group[col] = df_final_group['close'].ewm(span=period, adjust=False).mean()
-            local_logger.debug(f"{hisse_kodu}: '{col}' sütunu manuel olarak hesaplandı.")
+    for period in config.GEREKLI_MA_PERIYOTLAR:
+        safe_ma(df_final_group, period, 'sma', local_logger)
+        safe_ma(df_final_group, period, 'ema', local_logger)
 
     if 'momentum_10' not in df_final_group.columns and 'close' in df_final_group.columns:
         df_final_group['momentum_10'] = df_final_group['close'].diff(periods=10)
