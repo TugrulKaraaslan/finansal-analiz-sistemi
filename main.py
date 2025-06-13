@@ -129,7 +129,7 @@ def calistir_tum_sistemi(tarama_tarihi_str: str,
     # Adım 5: Backtest Çalıştırma
     fn_logger.info("[Adım 5/6] Basit Backtest Çalıştırma (backtest_core) Başlatılıyor...")
     # df_data_indikatorlu None veya boş olabilir, backtest_core bunu handle etmeli
-    backtest_sonuclari = backtest_core.calistir_basit_backtest(
+    rapor_df, rapor_dosyasi = backtest_core.calistir_basit_backtest(
         filtrelenmis_hisseler=filtrelenmis_hisseler_dict,  # Boş olabilir
         df_tum_veri=df_data_indikatorlu,  # None veya boş olabilir
         satis_tarihi_str=satis_tarihi_str,
@@ -137,39 +137,18 @@ def calistir_tum_sistemi(tarama_tarihi_str: str,
         atlanmis_filtre_loglari=atlanmis_filtreler,  # Boş olabilir
         logger_param=fn_logger,
     )
-    # Tuple dönerse unpack et
-    if isinstance(backtest_sonuclari, tuple):
-        backtest_sonuclari, istisnalar = backtest_sonuclari
-    else:
-        istisnalar = []
-        if not backtest_sonuclari:  # Eğer backtest_core boş dict döndürürse (örn: kritik hata)
-            fn_logger.warning("Backtest çalıştırma sonucu boş. Rapor bu duruma göre oluşturulacak.")
+    if rapor_df is None or rapor_df.empty:
+        fn_logger.warning("Backtest çalıştırma sonucu boş. Rapor oluşturulamadı.")
+        return None
     fn_logger.info("[Adım 5/6] Basit Backtest Çalıştırma Tamamlandı.")
     fn_logger.info("-" * 80)
 
     # Adım 6: Rapor Oluşturma
     fn_logger.info("[Adım 6/6] Özet Rapor Oluşturma (report_generator) Başlatılıyor...")
-    if backtest_sonuclari is not None:
-        sonuclar_listesi = [
-            {
-                'filtre_kodu': k,
-                'ortalama_getiri': v['ortalama_getiri'],
-                'tarama_tarihi': tarama_tarihi_str,
-                'satis_tarihi': satis_tarihi_str,
-                'hisseler': v['hisse_performanslari'].to_dict('records'),
-                'notlar': v.get('notlar', [])
-            } for k, v in backtest_sonuclari.items()
-        ]
-
-        cikti_klasoru = os.path.join(config.CIKTI_KLASORU, "raporlar")
-
-        report_generator.olustur_excel_raporu(
-            sonuclar_listesi=sonuclar_listesi,
-            cikti_klasoru=cikti_klasoru,
-            logger=fn_logger
-        )
+    if rapor_dosyasi:
+        fn_logger.info(f"Excel raporu oluşturuldu: {rapor_dosyasi}")
     else:
-        fn_logger.error("Backtest sonuçları None geldiği için CSV raporu oluşturulamayacak.")
+        fn_logger.error("Rapor oluşturulurken hata meydana geldi.")
 
     # Bu satırlar artık `else`'in içinde değil — if-else sonrası kapanış logları
     fn_logger.info("[Adım 6/6] Özet Rapor Oluşturma Tamamlandı.")
@@ -177,7 +156,7 @@ def calistir_tum_sistemi(tarama_tarihi_str: str,
     fn_logger.info("TÜM SİSTEM ÇALIŞMASI TAMAMLANDI.")
     fn_logger.info("=" * 80)
 
-    return backtest_sonuclari
+    return rapor_df
 
 
 
