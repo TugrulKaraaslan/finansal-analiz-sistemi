@@ -27,52 +27,16 @@ except ImportError:
         )
 
 
-def crosses_above(s1: pd.Series | None, s2: pd.Series | None) -> pd.Series:
-    """s1 serisinin s2 serisini yukarı doğru kesip kesmediğini kontrol eder."""
-    common_index = None
-    if s1 is not None:
-        common_index = s1.index
-    elif s2 is not None:
-        common_index = s2.index
-
-    if s1 is None or s2 is None:
-        return pd.Series(False, index=common_index, dtype=bool)
-
-    try:
-        nan_mask = s1.isna() | s2.isna()
-        out = (s1.shift(1) < s2.shift(1)) & (s1 >= s2)
-        out[nan_mask] = False
-        out = out.astype(bool)
-        if not out.index.equals(s1.index):
-            out = out.reindex(s1.index, fill_value=False)
-        return out
-    except Exception as e:
-        logger.error(f"crosses_above fonksiyonunda kritik hata: {e}", exc_info=False)
-        return pd.Series(False, index=common_index, dtype=bool)
+def crosses_above(a: pd.Series, b: pd.Series) -> pd.Series:
+    """Return True where ``a`` crosses ``b`` upwards."""
+    x, y = a.align(b, join="inner")
+    return (x.shift(1) < y.shift(1)) & (x >= y)
 
 
-def crosses_below(s1: pd.Series | None, s2: pd.Series | None) -> pd.Series:
-    """s1 serisinin s2'yi aşağı doğru kesip kesmediğini kontrol eder."""
-    common_index = None
-    if s1 is not None:
-        common_index = s1.index
-    elif s2 is not None:
-        common_index = s2.index
-
-    if s1 is None or s2 is None:
-        return pd.Series(False, index=common_index, dtype=bool)
-
-    try:
-        nan_mask = s1.isna() | s2.isna()
-        out = (s1.shift(1) > s2.shift(1)) & (s1 <= s2)
-        out[nan_mask] = False
-        out = out.astype(bool)
-        if not out.index.equals(s1.index):
-            out = out.reindex(s1.index, fill_value=False)
-        return out
-    except Exception as e:
-        logger.error(f"crosses_below fonksiyonunda kritik hata: {e}", exc_info=False)
-        return pd.Series(False, index=common_index, dtype=bool)
+def crosses_below(a: pd.Series, b: pd.Series) -> pd.Series:
+    """Return True where ``a`` crosses ``b`` downwards."""
+    x, y = a.align(b, join="inner")
+    return (x.shift(1) > y.shift(1)) & (x <= y)
 
 
 # safe_pct_change gibi diğer yardımcı fonksiyonlar buraya eklenebilir.
