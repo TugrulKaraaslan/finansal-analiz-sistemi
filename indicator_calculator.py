@@ -178,6 +178,14 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
     except Exception as e:
         local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)
 
+
+def safe_get(df: pd.DataFrame, col: str) -> pd.Series | None:
+    """DataFrame'den güvenli sütun erişimi yapar."""
+    if col not in df.columns:
+        logger.debug(f"{col} eksik – crossover atlandı")
+        return None
+    return df[col]
+
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
     hisse_str = group_df['hisse_kodu'].iloc[0] if not group_df.empty and 'hisse_kodu' in group_df.columns else 'Bilinmeyen Hisse'
     sutun_adi = "classicpivots_1h_p"
@@ -229,10 +237,9 @@ def _calculate_series_series_crossover(
 ) -> tuple[pd.Series, pd.Series] | None:
     local_logger = logger_param or logger
 
-    if s1_col not in group_df.columns or s2_col not in group_df.columns:
-        local_logger.debug(
-            f"Skipped crossover {s1_col} vs {s2_col} – missing col"
-        )
+    s1 = safe_get(group_df, s1_col)
+    s2 = safe_get(group_df, s2_col)
+    if s1 is None or s2 is None:
         return
 
     hisse_str = (
@@ -243,8 +250,8 @@ def _calculate_series_series_crossover(
     empty_above = pd.Series(False, index=group_df.index, name=col_name_above, dtype=bool)
     empty_below = pd.Series(False, index=group_df.index, name=col_name_below, dtype=bool)
     try:
-        s1 = pd.to_numeric(group_df[s1_col], errors='coerce')
-        s2 = pd.to_numeric(group_df[s2_col], errors='coerce')
+        s1 = pd.to_numeric(s1, errors='coerce')
+        s2 = pd.to_numeric(s2, errors='coerce')
         if s1.isnull().all() or s2.isnull().all():
             local_logger.debug(f"{hisse_str}: Kesişim ({s1_col} vs {s2_col}) için serilerden biri tamamen NaN.")
             return empty_above, empty_below
@@ -342,16 +349,13 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         filtered_indicators = [i for i in base_list if any(c in wanted for c in i.get('col_names', []))]
         strategy_obj = ta.Strategy(name=getattr(ta_strategy, 'name', 'filtered'), description=getattr(ta_strategy, 'description', ''), ta=filtered_indicators)
         group_df_dt_indexed.ta.strategy(strategy_obj, timed=False, append=True, min_periods=1)
-        psar = group_df_dt_indexed.ta.psar()
-        psar.columns = ['psar_long', 'psar_short', 'psar_af', 'psar_trend']
-        psar['psar'] = psar['psar_long'].fillna(psar['psar_short'])
-        psar = psar[['psar_trend', 'psar']]
-        group_df_dt_indexed = pd.concat([group_df_dt_indexed, psar], axis=1)
+        psar_df = group_df_dt_indexed.ta.psar()[["PSARl_0", "PSARs_0"]]
+        psar_df.columns = ["psar_long", "psar_short"]
+        group_df_dt_indexed = pd.concat([group_df_dt_indexed, psar_df], axis=1)
     except Exception as e_ta:
         local_logger.error(f"{hisse_kodu}: pandas-ta stratejisi hatası: {e_ta}", exc_info=True)
-        # Hata durumunda, o ana kadar eklenen sütunlarla RangeIndex'li orijinal df'i birleştirmeye çalış
-        # Bu kısım karmaşıklaşabilir, en iyisi temel df'i döndürmek.
-        return group_df_input[['hisse_kodu', 'tarih'] + [c for c in required_ohlcv if c in group_df_input.columns]].drop_duplicates()
+        # Hata durumunda, pandas-ta indikatörleri eklenemez ama devam edilir.
+        group_df_dt_indexed = group_df_dt_indexed.copy()
 
     # Ad eşleştirmeyi DatetimeIndex'li DataFrame üzerinde yap
     if ad_eslestirme:
@@ -399,9 +403,9 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
     # yetersizliği nedeniyle oluşmayabilir. Filtrelerin sorunsuz çalışması için
     # eksik olan temel bazı indikatörleri manuel olarak üretelim.
 
-    # EMA 8 için özel kontrol
+    manual_cols = {}
     if 'ema_8' not in df_final_group.columns and 'close' in df_final_group.columns:
-        df_final_group['ema_8'] = df_final_group['close'].ewm(span=8, adjust=False).mean()
+        manual_cols['ema_8'] = df_final_group['close'].ewm(span=8, adjust=False).mean()
         local_logger.debug(f"{hisse_kodu}: 'ema_8' sütunu manuel olarak hesaplandı.")
 
     for period in config.GEREKLI_MA_PERIYOTLAR:
@@ -409,8 +413,11 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         safe_ma(df_final_group, period, 'ema', local_logger)
 
     if 'momentum_10' not in df_final_group.columns and 'close' in df_final_group.columns:
-        df_final_group['momentum_10'] = df_final_group['close'].diff(periods=10)
+        manual_cols['momentum_10'] = df_final_group['close'].diff(periods=10)
         local_logger.debug(f"{hisse_kodu}: 'momentum_10' sütunu manuel olarak hesaplandı.")
+
+    if manual_cols:
+        df_final_group = pd.concat([df_final_group, pd.DataFrame(manual_cols, index=df_final_group.index)], axis=1)
 
     # Özel Sütunlar (df_final_group üzerinde, zaten RangeIndex'li)
     new_cols = {}
@@ -475,8 +482,11 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
             new_cols[kesisim_asagi.name] = np.full(len(df_final_group), np.nan)
     if new_cols:
         df_final_group = pd.concat([df_final_group, pd.DataFrame(new_cols, index=df_final_group.index)], axis=1)
+    manual_last = {}
     if "bbm_20_2" in df_final_group.columns and "BBM_20_2" not in df_final_group.columns:
-        df_final_group["BBM_20_2"] = df_final_group["bbm_20_2"]
+        manual_last["BBM_20_2"] = df_final_group["bbm_20_2"]
+    if manual_last:
+        df_final_group = pd.concat([df_final_group, pd.DataFrame(manual_last, index=df_final_group.index)], axis=1)
         
     return df_final_group
 
