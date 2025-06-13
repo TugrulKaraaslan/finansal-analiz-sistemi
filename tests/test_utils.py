@@ -64,3 +64,20 @@ def test_crosses_below_misaligned_index_returns_false():
     result = crosses_below(s1, s2)
     expected = pd.Series([False, False, False, False], index=s1.index)
     pd.testing.assert_series_equal(result, expected)
+
+
+@pytest.mark.parametrize("func", [crosses_above, crosses_below])
+def test_cross_functions_with_none_returns_false(func):
+    s = pd.Series([1, 2, 3])
+    result = func(None, s)
+    expected = pd.Series([False, False, False], index=s.index, dtype=bool)
+    pd.testing.assert_series_equal(result, expected)
+
+
+def test_cross_functions_all_nan_do_not_fail():
+    s_nan = pd.Series([np.nan, np.nan, np.nan])
+    expected = pd.Series([False, False, False], index=s_nan.index, dtype=bool)
+    result_above = crosses_above(s_nan, s_nan)
+    result_below = crosses_below(s_nan, s_nan)
+    pd.testing.assert_series_equal(result_above, expected)
+    pd.testing.assert_series_equal(result_below, expected)
