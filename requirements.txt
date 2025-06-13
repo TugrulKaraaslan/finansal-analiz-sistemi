@@ -3,3 +3,5 @@ numpy
 pandas_ta
 holidays
 openpyxl
+jinja2
+xlsxwriter
