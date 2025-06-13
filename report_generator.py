@@ -1,7 +1,9 @@
-import pandas as pd
 import os
-from logger_setup import get_logger
+from pathlib import Path
 from datetime import datetime
+
+import pandas as pd
+from logger_setup import get_logger
 fn_logger = get_logger(__name__)
 
 def olustur_ozet_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
@@ -162,3 +164,28 @@ def kaydet_uc_sekmeli_excel(
         istatistik_df.to_excel(w, sheet_name="İstatistik", index=False)
 
     return fname
+
+
+def kaydet_raporlar(
+    ozet_df: pd.DataFrame,
+    detay_df: pd.DataFrame,
+    istat_df: pd.DataFrame,
+    filepath: Path,
+):
+    """Append summary, detail and statistics sheets to an existing Excel file."""
+
+    filepath = Path(filepath)
+
+    with pd.ExcelWriter(
+        filepath,
+        engine="openpyxl",
+        mode="a",
+        if_sheet_exists="replace",
+    ) as w:
+        ozet_df.to_excel(w, sheet_name="Özet", index=False)
+        detay_df.to_excel(w, sheet_name="Detay", index=False)
+        istat_df.to_excel(w, sheet_name="İstatistik", index=False)
+
+    fn_logger.info(f"Rapor kaydedildi → {filepath}")
+
+    return filepath

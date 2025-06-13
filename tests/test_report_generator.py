@@ -46,3 +46,20 @@ def test_uc_sekmeli_excel_yaz(tmp_path):
     assert len(wb.sheetnames) == 3
     wb.close()
 
+
+def test_kaydet_raporlar_appends(tmp_path):
+    base = pd.DataFrame({"x": [1]})
+    fname = tmp_path / "report.xlsx"
+    base.to_excel(fname, index=False)
+
+    df1 = pd.DataFrame({"a": [1]})
+    df2 = pd.DataFrame({"b": [2]})
+    df3 = pd.DataFrame({"c": [3]})
+
+    report_generator.kaydet_raporlar(df1, df2, df3, fname)
+
+    wb = openpyxl.load_workbook(fname)
+    names = wb.sheetnames
+    assert {"Sheet1", "Özet", "Detay", "İstatistik"}.issubset(names)
+    wb.close()
+
