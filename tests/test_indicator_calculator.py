@@ -23,3 +23,21 @@ def test_classicpivots_crossover_column_exists():
     result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
     assert "classicpivots_1h_p" in result.columns
     assert "close_keser_classicpivots_1h_p_yukari" in result.columns
+
+
+def test_fallback_indicators_created_when_missing():
+    data = {
+        "hisse_kodu": ["AAA"] * 50,
+        "tarih": pd.date_range("2024-01-01", periods=50, freq="D"),
+        "open": np.linspace(1, 50, 50),
+        "high": np.linspace(1, 50, 50) + 1,
+        "low": np.linspace(1, 50, 50) - 1,
+        "close": np.linspace(1, 50, 50),
+        "volume": np.arange(50)
+    }
+    df = pd.DataFrame(data)
+    result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    # pandas_ta normalde sma_200/ema_200 üretmez; fallback mekanizmasi NaN da olsa kolon eklemeli
+    assert "sma_200" in result.columns
+    assert "ema_200" in result.columns
+    assert "momentum_10" in result.columns

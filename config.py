@@ -241,7 +241,7 @@ SERIES_VALUE_CROSSOVERS = [
     ('stochrsi_d', 20.0, '20p0'), ('stochrsi_d', 80.0, '80p0'),
     ('cmf_20', 0.0, '0p0'), ('cmf_20', 0.2, '0p2'), ('cmf_20', -0.2, 'eksi0p2'),
     ('cci_20', 100.0, '100p0'), ('cci_20', -100.0, 'eksi100p0'), ('cci_20', 0.0, '0p0'),
-    ('mom_10', 0.0, '0p0'), ('mom_10', 1.0, '1p0'),
+    ('momentum_10', 0.0, '0p0'), ('momentum_10', 1.0, '1p0'),
     ('mfi_14', 20.0, '20p0'), ('mfi_14', 80.0, '80p0'), ('mfi_14', 50.0, '50p0'),
     ('AROONOSC_14', 0.0, '0p0'), # Büyük harfle eşleşecek
     ('ppo_line', 0.0, '0p0')

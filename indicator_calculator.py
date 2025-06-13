@@ -329,12 +329,30 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         else:
             local_logger.warning(f"{hisse_kodu}: pandas-ta sütunu '{col}' kopyalanırken boyut uyuşmazlığı. Atlanıyor.")
 
-    # Bazı durumlarda pandas-ta stratejisinden beklenen 'ema_8' kolonu üretilmeyebilir.
-    # Filtre sorgularının hatasız çalışabilmesi için bu sütun eksikse manuel olarak hesapla.
+    # Bazı durumlarda pandas-ta stratejisinden beklenen indikatörler veri
+    # yetersizliği nedeniyle oluşmayabilir. Filtrelerin sorunsuz çalışması için
+    # eksik olan temel bazı indikatörleri manuel olarak üretelim.
+
+    # EMA 8 için özel kontrol
     if 'ema_8' not in df_final_group.columns and 'close' in df_final_group.columns:
         df_final_group['ema_8'] = df_final_group['close'].ewm(span=8, adjust=False).mean()
         local_logger.debug(f"{hisse_kodu}: 'ema_8' sütunu manuel olarak hesaplandı.")
 
+    ma_fallbacks = {
+        'sma_50': 50, 'sma_100': 100, 'sma_200': 200,
+        'ema_5': 5, 'ema_50': 50, 'ema_100': 100, 'ema_200': 200,
+    }
+    for col, period in ma_fallbacks.items():
+        if col not in df_final_group.columns and 'close' in df_final_group.columns:
+            if col.startswith('sma'):
+                df_final_group[col] = df_final_group['close'].rolling(window=period, min_periods=period).mean()
+            else:
+                df_final_group[col] = df_final_group['close'].ewm(span=period, adjust=False).mean()
+            local_logger.debug(f"{hisse_kodu}: '{col}' sütunu manuel olarak hesaplandı.")
+
+    if 'momentum_10' not in df_final_group.columns and 'close' in df_final_group.columns:
+        df_final_group['momentum_10'] = df_final_group['close'].diff(periods=10)
+        local_logger.debug(f"{hisse_kodu}: 'momentum_10' sütunu manuel olarak hesaplandı.")
 
     # Özel Sütunlar (df_final_group üzerinde, zaten RangeIndex'li)
     for sutun_conf in ozel_sutun_conf:
