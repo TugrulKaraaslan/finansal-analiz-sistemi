@@ -13,12 +13,18 @@ import logging
 # Eğer bu dosya tek başına test edilirse diye temel bir logger ayarı.
 try:
     from logger_setup import get_logger
+
     logger = get_logger(__name__)
 except ImportError:
     logger = logging.getLogger(__name__)
     if not logger.handlers:
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        logger.warning("logger_setup.py bulunamadı, utils.py kendi temel logger'ını kullanıyor.")
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        )
+        logger.warning(
+            "logger_setup.py bulunamadı, utils.py kendi temel logger'ını kullanıyor."
+        )
 
 
 def crosses_above(s1: pd.Series | None, s2: pd.Series | None) -> pd.Series:
@@ -41,9 +47,7 @@ def crosses_above(s1: pd.Series | None, s2: pd.Series | None) -> pd.Series:
             out = out.reindex(s1.index, fill_value=False)
         return out
     except Exception as e:
-        logger.error(
-            f"crosses_above fonksiyonunda kritik hata: {e}", exc_info=False
-        )
+        logger.error(f"crosses_above fonksiyonunda kritik hata: {e}", exc_info=False)
         return pd.Series(False, index=common_index, dtype=bool)
 
 
@@ -67,29 +71,34 @@ def crosses_below(s1: pd.Series | None, s2: pd.Series | None) -> pd.Series:
             out = out.reindex(s1.index, fill_value=False)
         return out
     except Exception as e:
-        logger.error(
-            f"crosses_below fonksiyonunda kritik hata: {e}", exc_info=False
-        )
+        logger.error(f"crosses_below fonksiyonunda kritik hata: {e}", exc_info=False)
         return pd.Series(False, index=common_index, dtype=bool)
+
 
 # safe_pct_change gibi diğer yardımcı fonksiyonlar buraya eklenebilir.
 # Şimdilik sadece kesişimler var.
 
-def extract_columns_from_filters(df_filters: pd.DataFrame | None,
-                                 series_series: list | None,
-                                 series_value: list | None) -> set:
+
+def extract_columns_from_filters(
+    df_filters: pd.DataFrame | None,
+    series_series: list | None,
+    series_value: list | None,
+) -> set:
     """Filtre sorgularında ve crossover tanımlarında geçen kolon adlarını döndürür."""
     try:
-        from filter_engine import _sanitize_query, _extract_query_columns
+        from filter_engine import _extract_query_columns
     except Exception:
         # filter_engine import edilemezse boş set döndür
         return set()
 
     wanted = set()
-    if df_filters is not None and not df_filters.empty and 'PythonQuery' in df_filters.columns:
-        for q in df_filters['PythonQuery'].dropna().astype(str):
-            sanitized = _sanitize_query(q)
-            wanted |= _extract_query_columns(sanitized)
+    if (
+        df_filters is not None
+        and not df_filters.empty
+        and "PythonQuery" in df_filters.columns
+    ):
+        for q in df_filters["PythonQuery"].dropna().astype(str):
+            wanted |= _extract_query_columns(q)
 
     for entry in series_series or []:
         if len(entry) >= 2:
