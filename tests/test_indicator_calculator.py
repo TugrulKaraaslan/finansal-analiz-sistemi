@@ -61,3 +61,20 @@ def test_ma_columns_exist_for_various_lengths(bars):
     for n in config.GEREKLI_MA_PERIYOTLAR:
         assert f"sma_{n}" in result.columns
         assert f"ema_{n}" in result.columns
+
+
+def test_crossover_skips_when_column_missing():
+    data = {
+        "hisse_kodu": ["AAA"] * 5,
+        "tarih": pd.date_range("2024-01-01", periods=5, freq="D"),
+        "ema_20": np.arange(5, 10),
+    }
+    df = pd.DataFrame(data)
+    result = ic._calculate_series_series_crossover(
+        df,
+        "ema_10",
+        "ema_20",
+        "ema_10_keser_ema_20_yukari",
+        "ema_10_keser_ema_20_asagi",
+    )
+    assert result is None
