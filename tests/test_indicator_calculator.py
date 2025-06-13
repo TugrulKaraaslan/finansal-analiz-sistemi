@@ -5,8 +5,10 @@ sys.modules.pop("pandas_ta", None)
 
 import pandas as pd
 import numpy as np
+import pytest
 
 import indicator_calculator as ic
+import config
 
 
 def test_classicpivots_crossover_column_exists():
@@ -41,3 +43,21 @@ def test_fallback_indicators_created_when_missing():
     assert "sma_200" in result.columns
     assert "ema_200" in result.columns
     assert "momentum_10" in result.columns
+
+
+@pytest.mark.parametrize("bars", [30, 60, 252])
+def test_ma_columns_exist_for_various_lengths(bars):
+    data = {
+        "hisse_kodu": ["AAA"] * bars,
+        "tarih": pd.date_range("2024-01-01", periods=bars, freq="D"),
+        "open": np.linspace(1, bars, bars),
+        "high": np.linspace(1, bars, bars) + 1,
+        "low": np.linspace(1, bars, bars) - 1,
+        "close": np.linspace(1, bars, bars),
+        "volume": np.arange(bars),
+    }
+    df = pd.DataFrame(data)
+    result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    for n in config.GEREKLI_MA_PERIYOTLAR:
+        assert f"sma_{n}" in result.columns
+        assert f"ema_{n}" in result.columns

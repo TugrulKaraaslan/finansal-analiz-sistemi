@@ -44,6 +44,9 @@ LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 IS_COLAB = 'google.colab' in sys.modules
 
+# Hızlı erişim için gereken hareketli ortalama periyotları
+GEREKLI_MA_PERIYOTLAR = [5, 10, 20, 30, 50, 100, 200]
+
 OHLCV_MAP = {
     'Tarih': 'tarih', 'Açılış': 'open', 'Yüksek': 'high', 'Düşük': 'low',
     'Kapanış': 'close', 'Miktar': 'volume', 'Hacim': 'volume_tl',
@@ -134,7 +137,6 @@ INDIKATOR_AD_ESLESTIRME = {
     'aroonu_14': 'aroonu_14',
     'aroond_14': 'aroond_14',
     'aroonosc_14': 'AROONOSC_14', # Filtrede büyük harf arandığı için düzeltildi
-    'mom_10': 'momentum_10',
     # Ichimoku: pandas-ta'nın ürettiği (TA_STRATEGY'deki col_names) -> Filtrelerde aranan/beklenen adlar
     'its_9': 'ichimoku_conversionline',
     'iks_26': 'ichimoku_baseline',
