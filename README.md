@@ -1,4 +1,5 @@
 # finansal-analiz-sistemi
+[![CI](https://github.com/<your-username>/finansal-analiz-sistemi/actions/workflows/ci.yml/badge.svg)](https://github.com/<your-username>/finansal-analiz-sistemi/actions/workflows/ci.yml)
 ChatGPT ile geliştirilen backtest otomasyon projesi
 
 ## Geliştirme Ortamı Kurulumu
@@ -41,5 +42,12 @@ pytest -q
 
 ```bash
 pip install xlsxwriter
+```
+
+## Docker ile çalıştırma
+
+```bash
+docker build -t finansal_analiz .
+docker run --rm finansal_analiz
 ```
 

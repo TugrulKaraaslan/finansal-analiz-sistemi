@@ -3,3 +3,7 @@ numpy
 pandas_ta
 holidays
 openpyxl
+jinja2
+xlsxwriter
+pytest>=7.4.0
+setuptools>=68.0.0
