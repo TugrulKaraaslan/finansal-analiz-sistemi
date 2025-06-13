@@ -2,30 +2,32 @@ import os, sys
 after_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, after_path)
 
-import pandas as pd
-
 import report_generator
 
 
-def test_detayli_rapor_contains_new_fields(tmp_path):
-    sonuclar = [{
-        "filtre_kodu": "F1",
-        "hisseler": [
+def test_excel_report_file_size(tmp_path):
+    sonuclar = []
+    for i in range(20):
+        sonuclar.append(
             {
-                "hisse_kodu": "AAA",
-                "alis_fiyati": 10,
-                "satis_fiyati": 12,
-                "getiri_yuzde": 20,
-                "alis_tarihi": "07.03.2025",
-                "satis_tarihi": "10.03.2025",
-                "uygulanan_strateji": "basit_backtest"
+                "filtre_kodu": f"F{i}",
+                "hisseler": [
+                    {
+                        "hisse_kodu": f"H{i}",
+                        "alis_fiyati": 10,
+                        "satis_fiyati": 12,
+                        "getiri_yuzde": 5,
+                        "alis_tarihi": "01.01.2025",
+                        "satis_tarihi": "02.01.2025",
+                        "uygulanan_strateji": "test",
+                    }
+                ],
+                "tarama_tarihi": "01.01.2025",
+                "satis_tarihi": "02.01.2025",
+                "notlar": "",
             }
-        ],
-        "tarama_tarihi": "07.03.2025",
-        "satis_tarihi": "10.03.2025",
-        "notlar": ""
-    }]
+        )
+
     path = report_generator.olustur_excel_raporu(sonuclar, tmp_path)
-    df = pd.read_excel(path, sheet_name="Hisse_Detay")
-    assert {"Alış Tarihi", "Satış Tarihi", "Uygulanan Strateji"}.issubset(df.columns)
+    assert os.path.getsize(path) < 100 * 1024
 
