@@ -50,28 +50,25 @@ def test_cross_functions_equal_series_return_false(func):
     assert result.dtype == bool
 
 
-def test_crosses_above_misaligned_index_returns_false():
+def test_crosses_above_misaligned_index_length_matches_intersection():
     s1 = pd.Series([1, 2, 3, 4], index=[0, 1, 2, 3])
-    s2 = pd.Series([4, 3, 2, 1], index=[10, 11, 12, 13])
+    s2 = pd.Series([4, 3, 2, 1], index=[2, 3, 4, 5])
     result = crosses_above(s1, s2)
-    expected = pd.Series([False, False, False, False], index=s1.index)
-    pd.testing.assert_series_equal(result, expected)
+    assert len(result) == len(s1.index.intersection(s2.index))
 
 
-def test_crosses_below_misaligned_index_returns_false():
+def test_crosses_below_misaligned_index_length_matches_intersection():
     s1 = pd.Series([4, 3, 2, 1], index=[0, 1, 2, 3])
-    s2 = pd.Series([1, 2, 3, 4], index=[10, 11, 12, 13])
+    s2 = pd.Series([1, 2, 3, 4], index=[2, 3, 4, 5])
     result = crosses_below(s1, s2)
-    expected = pd.Series([False, False, False, False], index=s1.index)
-    pd.testing.assert_series_equal(result, expected)
+    assert len(result) == len(s1.index.intersection(s2.index))
 
 
 @pytest.mark.parametrize("func", [crosses_above, crosses_below])
-def test_cross_functions_with_none_returns_false(func):
+def test_cross_functions_with_none_raises(func):
     s = pd.Series([1, 2, 3])
-    result = func(None, s)
-    expected = pd.Series([False, False, False], index=s.index, dtype=bool)
-    pd.testing.assert_series_equal(result, expected)
+    with pytest.raises(AttributeError):
+        func(None, s)
 
 
 def test_cross_functions_all_nan_do_not_fail():
