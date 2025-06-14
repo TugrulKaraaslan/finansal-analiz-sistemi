@@ -1,9 +1,12 @@
-pandas
-numpy
+pandas==1.5.3
 pandas-ta==0.3.14b0
-holidays
-openpyxl
-jinja2
-xlsxwriter
-pytest>=7.4.0
-setuptools>=68.0.0
+pytest>=7.4,<8.0
+
+# (İLERİDE GitHub erişimi açılırsa, üstteki üç satırı sil
+#  ve bunun yerine şunu kullan:)
+# ---------------------------------------------------------
+# pandas>=2.0,<3.0
+# pandas-ta @ git+https://github.com/twopirllc/pandas-ta.git@development
+# pytest>=8.0
+# ---------------------------------------------------------
+# NOT: yorum satırları (#) dâhil, blok olduğu gibi bırakılabilir.
