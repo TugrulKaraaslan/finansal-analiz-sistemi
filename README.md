@@ -45,3 +45,6 @@ docker build -t finansal_analiz .
 docker run --rm finansal_analiz
 ```
 
+
+## Otomatik Sağlık Raporu
+Backtest tamamlandığında son log dosyası ve üretilen rapor kullanılarak ek bir "sağlık" raporu oluşturulur. Bu Excel dosyası `sağlık_raporu_<tarih>.xlsx` adıyla çalışma dizinine kaydedilir.

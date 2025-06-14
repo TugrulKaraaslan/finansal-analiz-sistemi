@@ -1,4 +1,5 @@
 import os, sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 # Ensure real pandas_ta is used in this test
 sys.modules.pop("pandas_ta", None)
@@ -20,7 +21,7 @@ def test_classicpivots_crossover_column_exists():
         "high": np.linspace(1, 30, 30) + 1,
         "low": np.linspace(1, 30, 30) - 1,
         "close": np.linspace(1, 30, 30),
-        "volume": np.arange(30)
+        "volume": np.arange(30),
     }
     df = pd.DataFrame(data)
     with warnings.catch_warnings(record=True) as rec:
@@ -40,7 +41,7 @@ def test_fallback_indicators_created_when_missing():
         "high": np.linspace(1, 50, 50) + 1,
         "low": np.linspace(1, 50, 50) - 1,
         "close": np.linspace(1, 50, 50),
-        "volume": np.arange(50)
+        "volume": np.arange(50),
     }
     df = pd.DataFrame(data)
     with warnings.catch_warnings(record=True) as rec:
@@ -95,10 +96,12 @@ def test_crossover_skips_when_column_missing():
 
 def test_psar_no_error():
     """_calculate_combined_psar çalışırken istisna fırlatmamalı."""
-    df = pd.DataFrame({
-        "hisse_kodu": ["TEST"] * 3,
-        "psar_long":  [np.nan, 11.0, 12.0],
-        "psar_short": [10.0,   np.nan, np.nan],
-    })
+    df = pd.DataFrame(
+        {
+            "hisse_kodu": ["TEST"] * 3,
+            "psar_long": [np.nan, 11.0, 12.0],
+            "psar_short": [10.0, np.nan, np.nan],
+        }
+    )
     result = ic._calculate_combined_psar(df)
     assert len(result) == len(df)

@@ -1,4 +1,5 @@
 import os, sys
+
 after_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, after_path)
 
@@ -33,7 +34,11 @@ def test_excel_report_file_size(tmp_path):
     # convert results to simple summary records expected by the new API
     kayitlar = []
     for s in sonuclar:
-        getiriler = [h["getiri_yuzde"] for h in s["hisseler"] if h.get("getiri_yuzde") is not None]
+        getiriler = [
+            h["getiri_yuzde"]
+            for h in s["hisseler"]
+            if h.get("getiri_yuzde") is not None
+        ]
         ort = sum(getiriler) / len(getiriler)
         kayitlar.append(
             {
@@ -79,4 +84,3 @@ def test_kaydet_raporlar_appends(tmp_path):
     names = wb.sheetnames
     assert {"Sheet1", "Özet", "Detay", "İstatistik"}.issubset(names)
     wb.close()
-
