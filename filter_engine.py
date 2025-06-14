@@ -81,6 +81,21 @@ def uygula_filtreler(
 
         # Sadece tarama gününe ait veriyi al ve üzerinde çalışmak için kopyala
         df_tarama_gunu = df_ana_veri[df_ana_veri["tarih"] == tarama_tarihi].copy()
+        if df_tarama_gunu.empty:
+            prev = df_ana_veri[df_ana_veri["tarih"] < tarama_tarihi]["tarih"].max()
+            if pd.notna(prev):
+                fn_logger.info(
+                    f"{tarama_tarihi.strftime('%d.%m.%Y')} yok → {prev.strftime('%d.%m.%Y')} kullanıldı"
+                )
+                df_tarama_gunu = df_ana_veri[df_ana_veri["tarih"] == prev].copy()
+                tarama_tarihi = prev
+            else:
+                fn_logger.warning(
+                    f"Belirtilen tarama tarihi ({tarama_tarihi.strftime('%d.%m.%Y')}) ve öncesi için veri yok."
+                )
+                return {}, {
+                    "TUM_FILTRELER_ATLADI": f'Tarama tarihinde ({tarama_tarihi.strftime("%d.%m.%Y")}) ve önceki günlerde veri yok.'
+                }
     except Exception as e_tarih_hazirlik:
         fn_logger.error(
             f"Filtreleme için tarama günü verisi hazırlanırken hata: {e_tarih_hazirlik}",
