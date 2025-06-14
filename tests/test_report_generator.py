@@ -30,7 +30,24 @@ def test_excel_report_file_size(tmp_path):
             }
         )
 
-    path = report_generator.olustur_excel_raporu(sonuclar, tmp_path)
+    # convert results to simple summary records expected by the new API
+    kayitlar = []
+    for s in sonuclar:
+        getiriler = [h["getiri_yuzde"] for h in s["hisseler"] if h.get("getiri_yuzde") is not None]
+        ort = sum(getiriler) / len(getiriler)
+        kayitlar.append(
+            {
+                "filtre_kodu": s["filtre_kodu"],
+                "bulunan_hisse_sayisi": len(s["hisseler"]),
+                "ortalama_getiri": ort,
+                "notlar": s["notlar"],
+                "tarama_tarihi": s["tarama_tarihi"],
+                "satis_tarihi": s["satis_tarihi"],
+            }
+        )
+
+    fname = tmp_path / "rapor.xlsx"
+    path = report_generator.olustur_excel_raporu(kayitlar, fname)
     assert os.path.getsize(path) < 100 * 1024
 
 

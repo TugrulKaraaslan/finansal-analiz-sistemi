@@ -96,52 +96,15 @@ def olustur_hatali_filtre_raporu(hatalar_listesi: list, cikti_klasoru: str, logg
 
 
 
-def olustur_excel_raporu(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
-    """Oluşturulan raporu tek sayfalık Excel dosyasına kaydet."""
-    os.makedirs(cikti_klasoru, exist_ok=True)
-
-    kayitlar = []
-    for sonuc in sorted(sonuclar_listesi, key=lambda x: x.get("filtre_kodu", "")):
-        hisseler = sonuc.get("hisseler", []) or []
-        getiriler = [
-            h.get("getiri_yuzde")
-            for h in hisseler
-            if isinstance(h, dict) and h.get("getiri_yuzde") is not None
-        ]
-        avg_ret = (sum(getiriler) / len(getiriler) / 100) if getiriler else float("nan")
-        kayitlar.append(
-            {
-                "filtre_kodu": sonuc.get("filtre_kodu", ""),
-                "bulunan_hisse_sayisi": len(hisseler),
-                "ortalama_getiri": avg_ret,
-                "notlar": sonuc.get("notlar", ""),
-                "tarama_tarihi": sonuc.get("tarama_tarihi", ""),
-                "satis_tarihi": sonuc.get("satis_tarihi", ""),
-            }
-        )
+def olustur_excel_raporu(kayitlar: list[dict], fname: str | Path, logger=None):
+    """Given summary records, save them into a single-sheet Excel file."""
+    if not kayitlar:
+        if logger:
+            logger.warning("Hiç kayıt yok – Excel raporu atlandı.")
+        return None
 
     rapor_df = pd.DataFrame(kayitlar).sort_values("filtre_kodu")
-    rapor_df["ortalama_getiri"] = rapor_df["ortalama_getiri"].fillna("—")
-
-    dosya_adi = os.path.join(
-        cikti_klasoru, f"rapor_{datetime.now():%Y%m%d_%H%M%S}.xlsx"
-    )
-
-    (
-        rapor_df.style
-        .format({"ortalama_getiri": "{:.2%}"})
-        .hide(axis="index")
-        .to_excel(
-            dosya_adi,
-            engine="xlsxwriter",
-            sheet_name="Rapor",
-            index=False,
-        )
-    )
-
-    if logger:
-        logger.info(f"Excel raporu oluşturuldu: {dosya_adi}")
-    return dosya_adi
+    return kaydet_uc_sekmeli_excel(fname, rapor_df, pd.DataFrame(), pd.DataFrame())
 
 
 def kaydet_uc_sekmeli_excel(
