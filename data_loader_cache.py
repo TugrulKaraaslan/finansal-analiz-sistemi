@@ -2,6 +2,7 @@
 import pandas as pd
 import os
 
+
 class DataLoaderCache:
     """Basit dosya okuma önbelleği.
 

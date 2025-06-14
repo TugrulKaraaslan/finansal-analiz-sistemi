@@ -19,6 +19,24 @@ jobs:
           pip install --timeout 60 --retries 3 -r requirements.txt
 
       - run: pytest -q
+      - name: Run simple backtest
+        run: |
+          python - <<'PY'
+          import pandas as pd, report_generator, os
+          os.makedirs('cikti/raporlar', exist_ok=True)
+          df = pd.DataFrame({'filtre_kodu':['F1'], 'bulunan_hisse_sayisi':[1], 'ortalama_getiri':[1.0], 'notlar':[''], 'tarama_tarihi':['01.01.2025'], 'satis_tarihi':['02.01.2025']})
+          report_generator.kaydet_uc_sekmeli_excel('cikti/raporlar/rapor_ci.xlsx', df, df, df)
+          PY
+      - name: Generate health report
+        run: |
+          python - <<'PY'
+          import log_to_health, os, glob
+          os.makedirs('cikti/raporlar', exist_ok=True)
+          log_files = glob.glob('*.log') or ['ci.log']
+          if log_files == ['ci.log']:
+              open('ci.log','w').write('ci log')
+          log_to_health.generate(log_files[-1], ['cikti/raporlar/rapor_ci.xlsx'])
+          PY
 
   docker:
     needs: test

@@ -140,9 +140,13 @@ def uygula_filtreler(
         eksik_sutunlar = [
             s for s in kullanilan_sutunlar if s not in df_tarama_gunu.columns
         ]
-        if {"psar_long", "psar_short"} <= set(df_tarama_gunu.columns) and "psar" in eksik_sutunlar:
+        if {"psar_long", "psar_short"} <= set(
+            df_tarama_gunu.columns
+        ) and "psar" in eksik_sutunlar:
             # psar_long/short varsa birleşik psar hesaplanmamış; uyar, devam et
-            df_tarama_gunu["psar"] = df_tarama_gunu["psar_long"].fillna(df_tarama_gunu["psar_short"])
+            df_tarama_gunu["psar"] = df_tarama_gunu["psar_long"].fillna(
+                df_tarama_gunu["psar_short"]
+            )
             eksik_sutunlar = [
                 s for s in kullanilan_sutunlar if s not in df_tarama_gunu.columns
             ]
