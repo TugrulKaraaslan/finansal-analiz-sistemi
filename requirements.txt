@@ -1,6 +1,7 @@
-pandas>=2.2
-numpy>=2.0,<3.0
-packaging<25,>=23.2
+pandas==2.2.2
+numpy==2.0.2
+packaging==24.2
+jedi>=0.19.1
 pandas-ta==0.3.14b0    # pandas-ta, NumPy 1 ile uyumlu
 holidays               # tarih/tatil kontrolü için
 openpyxl>=3.1
