@@ -17,6 +17,7 @@ if not hasattr(np, "NaN"):
     np.NaN = np.nan
 
 import pandas_ta as ta
+from pandas_ta import psar as ta_psar
 import config
 import utils
 
@@ -186,6 +187,20 @@ def safe_get(df: pd.DataFrame, col: str) -> pd.Series | None:
         return None
     return df[col]
 
+def _ekle_psar(df: pd.DataFrame) -> None:
+    """PSAR kolonlarını hesaplar ve ekler."""
+    gerekli = ["high", "low", "close"]
+    if any(c not in df.columns for c in gerekli):
+        logger.debug("PSAR hesaplamak için gerekli sütunlar eksik")
+        return
+    try:
+        psar_up, psar_dn = ta_psar(high=df["high"], low=df["low"], close=df["close"])
+        df["psar_long"] = psar_up
+        df["psar_short"] = psar_dn
+        df["psar"] = np.where(df["psar_long"].notna(), df["psar_long"], df["psar_short"])
+    except Exception as e:
+        logger.error(f"PSAR hesaplanırken hata: {e}")
+
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
     hisse_str = group_df['hisse_kodu'].iloc[0] if not group_df.empty and 'hisse_kodu' in group_df.columns else 'Bilinmeyen Hisse'
     sutun_adi = "classicpivots_1h_p"
@@ -237,9 +252,13 @@ def _calculate_series_series_crossover(
 ) -> tuple[pd.Series, pd.Series] | None:
     local_logger = logger_param or logger
 
-    s1 = safe_get(group_df, s1_col)
-    s2 = safe_get(group_df, s2_col)
-    if s1 is None or s2 is None:
+    if s1_col not in group_df or s2_col not in group_df:
+        local_logger.debug(f"Crossover atlandı – {s1_col} / {s2_col} yok")
+        return
+
+    s1, s2 = group_df[s1_col].align(group_df[s2_col], join="inner")
+    if s1.empty or not isinstance(s1, pd.Series) or not isinstance(s2, pd.Series):
+        local_logger.debug(f"Crossover atlandı – {s1_col} / {s2_col} tip uygun değil")
         return
 
     hisse_str = (
@@ -247,19 +266,24 @@ def _calculate_series_series_crossover(
         if not group_df.empty and "hisse_kodu" in group_df.columns
         else "Bilinmeyen Hisse"
     )
-    empty_above = pd.Series(False, index=group_df.index, name=col_name_above, dtype=bool)
-    empty_below = pd.Series(False, index=group_df.index, name=col_name_below, dtype=bool)
+    empty_above = pd.Series(False, index=s1.index, name=col_name_above, dtype=bool)
+    empty_below = pd.Series(False, index=s1.index, name=col_name_below, dtype=bool)
     try:
-        s1 = pd.to_numeric(s1, errors='coerce')
-        s2 = pd.to_numeric(s2, errors='coerce')
+        s1 = pd.to_numeric(s1, errors="coerce")
+        s2 = pd.to_numeric(s2, errors="coerce")
         if s1.isnull().all() or s2.isnull().all():
-            local_logger.debug(f"{hisse_str}: Kesişim ({s1_col} vs {s2_col}) için serilerden biri tamamen NaN.")
+            local_logger.debug(
+                f"{hisse_str}: Kesişim ({s1_col} vs {s2_col}) için serilerden biri tamamen NaN."
+            )
             return empty_above, empty_below
         kesisim_yukari = utils.crosses_above(s1, s2).rename(col_name_above)
         kesisim_asagi = utils.crosses_below(s1, s2).rename(col_name_below)
         return kesisim_yukari, kesisim_asagi
     except Exception as e:
-        local_logger.error(f"{hisse_str}: _calculate_series_series_crossover ({s1_col} vs {s2_col}) hatası: {e}", exc_info=False)
+        local_logger.error(
+            f"{hisse_str}: _calculate_series_series_crossover ({s1_col} vs {s2_col}) hatası: {e}",
+            exc_info=False,
+        )
         return empty_above, empty_below
 
 def _calculate_series_value_crossover(
@@ -349,9 +373,10 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         filtered_indicators = [i for i in base_list if any(c in wanted for c in i.get('col_names', []))]
         strategy_obj = ta.Strategy(name=getattr(ta_strategy, 'name', 'filtered'), description=getattr(ta_strategy, 'description', ''), ta=filtered_indicators)
         group_df_dt_indexed.ta.strategy(strategy_obj, timed=False, append=True, min_periods=1)
-        psar_df = group_df_dt_indexed.ta.psar()[["PSARl_0", "PSARs_0"]]
-        psar_df.columns = ["psar_long", "psar_short"]
-        group_df_dt_indexed = pd.concat([group_df_dt_indexed, psar_df], axis=1)
+        if "psar_long" not in group_df_dt_indexed.columns or "psar_short" not in group_df_dt_indexed.columns:
+            psar_df = group_df_dt_indexed.ta.psar()[["PSARl_0", "PSARs_0"]]
+            psar_df.columns = ["psar_long", "psar_short"]
+            group_df_dt_indexed = pd.concat([group_df_dt_indexed, psar_df], axis=1)
     except Exception as e_ta:
         local_logger.error(f"{hisse_kodu}: pandas-ta stratejisi hatası: {e_ta}", exc_info=True)
         # Hata durumunda, pandas-ta indikatörleri eklenemez ama devam edilir.
@@ -504,6 +529,8 @@ def hesapla_teknik_indikatorler_ve_kesisimler(df_islenmis_veri: pd.DataFrame, lo
     if eksik_sutunlar:
         ana_logger.critical(f"İndikatör hesaplama ana fonksiyonuna gelen DataFrame'de temel sütunlar eksik: {eksik_sutunlar}.")
         return None
+
+    _ekle_psar(df_islenmis_veri)
 
     ta_strategy_params = config.TA_STRATEGY
     series_series_crossovers = config.SERIES_SERIES_CROSSOVERS
