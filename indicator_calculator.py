@@ -91,6 +91,11 @@ def _calculate_combined_psar(group_df: pd.DataFrame) -> pd.Series:
     hisse_str = group_df['hisse_kodu'].iloc[0] if not group_df.empty and 'hisse_kodu' in group_df.columns else 'Bilinmeyen Hisse'
     sutun_adi = "psar"
     try:
+        if 'psar' in group_df.columns:
+            psar_col = group_df['psar']
+            if isinstance(psar_col, pd.DataFrame):
+                psar_col = psar_col.iloc[:, 0]
+            return psar_col.rename(sutun_adi)
         if 'psar_long' in group_df.columns and 'psar_short' in group_df.columns:
             combined_psar = group_df['psar_long'].fillna(group_df['psar_short'])
             return combined_psar.rename(sutun_adi)
@@ -385,6 +390,8 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
                 psar_df = pd.concat([psar_long, psar_short], axis=1)
                 psar_df.columns = ["psar_long", "psar_short"]
             group_df_dt_indexed = pd.concat([group_df_dt_indexed, psar_df], axis=1)
+            if "psar" not in group_df_dt_indexed.columns and {"psar_long", "psar_short"} <= set(group_df_dt_indexed.columns):
+                group_df_dt_indexed["psar"] = group_df_dt_indexed["psar_long"].fillna(group_df_dt_indexed["psar_short"])
     except Exception as e_ta:
         local_logger.error(f"{hisse_kodu}: pandas-ta stratejisi hatası: {e_ta}", exc_info=True)
         # Hata durumunda, pandas-ta indikatörleri eklenemez ama devam edilir.
@@ -474,6 +481,7 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
             new_cols[yeni_sutun_adi] = np.full(len(df_final_group), np.nan)
             local_logger.error(f"{hisse_kodu}: Özel sütun '{yeni_sutun_adi}' hesaplanırken hata: {e_ozel}", exc_info=False)
     if new_cols:
+        df_final_group = df_final_group.drop(columns=[c for c in new_cols if c in df_final_group.columns], errors='ignore')
         df_final_group = pd.concat([df_final_group, pd.DataFrame(new_cols, index=df_final_group.index)], axis=1)
 
 
