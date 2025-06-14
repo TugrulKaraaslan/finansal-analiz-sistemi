@@ -51,7 +51,7 @@ try:
     logger.info("Tüm ana modüller başarıyla import edildi.")
 except ImportError as e_import_main:
     logger.critical(f"Temel modüllerden biri import edilemedi: {e_import_main}. Sistem durduruluyor.", exc_info=True)
-    sys.exit(1) # Kritik hata, devam etme
+    raise ImportError(e_import_main)
 
 def calistir_tum_sistemi(tarama_tarihi_str: str,
     satis_tarihi_str: str,
