@@ -1,7 +1,16 @@
-pandas==1.5.3          # Numpy 1.x ile uyumlu
-numpy<2.0              # ABI çakışmasını engeller
-pandas-ta==0.3.14b0    # Pandas 1.5 ve Numpy 1.x ile wheel’ı var
-holidays               # tarih/tatil kontrolü
-openpyxl>3.1
+pandas==1.5.3          # NumPy 1.x ile uyumlu
+numpy<2.0              # NumPy 1.x kullan
+pandas-ta==0.3.14b0    # pandas-ta, NumPy 1 ile uyumlu
+holidays               # tarih/tatil kontrolü için
+openpyxl>=3.1
 xlsxwriter>=3.1
 pytest>=7.4.0
+
+# (İLERİDE GitHub erişimi açılırsa, üstteki üç satırı sil
+#  ve bunun yerine şunu kullan:)
+# -------------------------------------------------------
+# pandas>=2.0,<3.0
+# pandas-ta @ git+https://github.com/twopirllc/pandas-ta.git@development
+# pytest>=8.0
+# -------------------------------------------------------
+# NOT: yorum satırları (#) dâhil, blok olduğu gibi bırakılabilir.
