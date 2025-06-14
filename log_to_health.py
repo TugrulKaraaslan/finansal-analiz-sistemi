@@ -9,7 +9,7 @@ from openpyxl import Workbook
 from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
-from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl.utils.dataframe import dataframe_to_rows as _to_rows
 
 GREEN_FILL = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
 RED_FILL = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
@@ -97,17 +97,31 @@ def generate(log_path: str | os.PathLike, excel_paths: list[str | os.PathLike]) 
     )
     df_det = df_det.reindex(columns=det_cols, fill_value="")
 
+    # ----- GETİRİ SÜTUNLARINI SAYIYA ZORLA -----
+    float_cols = [
+        "Ortalama Getiri (%)",
+        "En Yüksek Getiri (%)",
+        "En Düşük Getiri (%)",
+        "Genel Ortalama Getiri (%)",
+    ]
+    for col in float_cols:
+        if col in df_sum.columns:
+            df_sum[col] = pd.to_numeric(df_sum[col], errors="coerce")
+    # -------------------------------------------
+
     if len(df_sum):
         perf = {
             "Toplam Filtre": len(df_sum),
-            "İşlemli Filtre Sayısı": (df_sum["İşlemli"] == "EVET").sum(),
+            "İşlemli Filtre Sayısı": int((df_sum["İşlemli"] == "EVET").sum()),
             "Başarısız Filtre Oranı (%)": round(
                 100 * (df_sum["İşlemli"] == "HAYIR").sum() / len(df_sum), 1
             ),
             "Genel Başarı Oranı (%)": round(
                 100 * (df_sum["İşlemli"] == "EVET").sum() / len(df_sum), 1
             ),
-            "Genel Ortalama Getiri (%)": round(df_sum["Ortalama Getiri (%)"].mean(), 2),
+            "Genel Ortalama Getiri (%)": round(
+                df_sum["Ortalama Getiri (%)"].dropna().astype(float).mean(), 2
+            ),
         }
     else:
         perf = {
@@ -123,7 +137,7 @@ def generate(log_path: str | os.PathLike, excel_paths: list[str | os.PathLike]) 
 
     ws1 = wb.active
     ws1.title = "Filtre_Ozet"
-    for r in dataframe_to_rows(df_sum, index=False, header=True):
+    for r in _to_rows(df_sum, index=False, header=True):
         ws1.append(r)
     _format_header(ws1)
     _auto_width(ws1)
@@ -132,7 +146,7 @@ def generate(log_path: str | os.PathLike, excel_paths: list[str | os.PathLike]) 
             _apply_return_colors(ws1, df_sum.columns.get_loc(col) + 1)
 
     ws2 = wb.create_sheet("Hisse_Detay")
-    for r in dataframe_to_rows(df_det, index=False, header=True):
+    for r in _to_rows(df_det, index=False, header=True):
         ws2.append(r)
     _format_header(ws2)
     _auto_width(ws2)
@@ -140,7 +154,7 @@ def generate(log_path: str | os.PathLike, excel_paths: list[str | os.PathLike]) 
         _apply_return_colors(ws2, df_det.columns.get_loc("Getiri (%)") + 1)
 
     ws3 = wb.create_sheet("Genel_Performans")
-    for r in dataframe_to_rows(df_perf, index=False, header=True):
+    for r in _to_rows(df_perf, index=False, header=True):
         ws3.append(r)
     for cell in ws3[1]:
         cell.font = Font(bold=True)
