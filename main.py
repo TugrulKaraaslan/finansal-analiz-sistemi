@@ -8,8 +8,20 @@
 import pandas as pd
 import sys
 import os
-import logging # logger_setup'tan önce temel logging için
-import config # Önce config'i import et, logger_setup ondan sonra gelsin
+import logging  # logger_setup'tan önce temel logging için
+from pathlib import Path
+import config  # Önce config'i import et, logger_setup ondan sonra gelsin
+
+
+def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
+    """Rapor için örnek özet, detay ve istatistik DataFrame'leri üretir."""
+    if rapor_df is None or rapor_df.empty:
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+    ozet_df = rapor_df.copy()
+    detay_df = rapor_df.copy()
+    istatistik_df = rapor_df.describe().reset_index()
+    return ozet_df, detay_df, istatistik_df
 
 # Logger'ı mümkün olan en erken aşamada yapılandır
 try:
@@ -145,10 +157,18 @@ def calistir_tum_sistemi(tarama_tarihi_str: str,
 
     # Adım 6: Rapor Oluşturma
     fn_logger.info("[Adım 6/6] Özet Rapor Oluşturma (report_generator) Başlatılıyor...")
-    if rapor_dosyasi:
-        fn_logger.info(f"Excel raporu oluşturuldu: {rapor_dosyasi}")
+
+    now = pd.Timestamp.now()
+    if rapor_df.empty:
+        fn_logger.info("[Adım 6] Rapor adımı atlandı (boş sonuç).")
     else:
-        fn_logger.error("Rapor oluşturulurken hata meydana geldi.")
+        from report_generator import kaydet_uc_sekmeli_excel
+
+        ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
+        out_path = Path("cikti/raporlar") / f"rapor_{now:%Y%m%d_%H%M%S}.xlsx"
+        out_path.parent.mkdir(exist_ok=True)
+        kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
+        fn_logger.info(f"Excel raporu oluşturuldu: {out_path}")
 
     # Bu satırlar artık `else`'in içinde değil — if-else sonrası kapanış logları
     fn_logger.info("[Adım 6/6] Özet Rapor Oluşturma Tamamlandı.")
