@@ -1,4 +1,4 @@
-pandas==1.5.3
+pandas==1.5.3          # NumPy 1.x ile uyumlu
 numpy<2.0              # NumPy 1.x kullan
 pandas-ta==0.3.14b0    # pandas-ta, NumPy 1 ile uyumlu
 holidays               # tarih/tatil kontrolü için
@@ -8,9 +8,9 @@ pytest>=7.4.0
 
 # (İLERİDE GitHub erişimi açılırsa, üstteki üç satırı sil
 #  ve bunun yerine şunu kullan:)
-# ---------------------------------------------------------
+# -------------------------------------------------------
 # pandas>=2.0,<3.0
 # pandas-ta @ git+https://github.com/twopirllc/pandas-ta.git@development
 # pytest>=8.0
-# ---------------------------------------------------------
+# -------------------------------------------------------
 # NOT: yorum satırları (#) dâhil, blok olduğu gibi bırakılabilir.
