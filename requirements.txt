@@ -1,9 +1,10 @@
 pandas==1.5.3
-pandas-ta==0.3.14b0
-pytest>=7.4,<8.0
+numpy<2.0              # NumPy 1.x kullan
+pandas-ta==0.3.14b0    # pandas-ta, NumPy 1 ile uyumlu
+holidays               # tarih/tatil kontrolü için
 openpyxl>=3.1
 xlsxwriter>=3.1
-
+pytest>=7.4.0
 
 # (İLERİDE GitHub erişimi açılırsa, üstteki üç satırı sil
 #  ve bunun yerine şunu kullan:)
