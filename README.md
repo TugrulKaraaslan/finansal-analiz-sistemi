@@ -24,10 +24,18 @@ pytest -q
 
 ## Google Colab Hızlı Başlangıç
 
+> **Not:** Google Colab ortamı `pandas` 2.x ile gelir. Bu proje ise
+> `pandas==1.5.3` kullanır. Paketleri doğru sürümlerle yeniden kurmak için
+> `--force-reinstall` ve `--no-cache-dir` bayraklarını kullanmanız önerilir.
+
+1. Depoyu klonlayın ve klasöre geçin.
+2. Gereken paketleri yeniden kurun.
+3. Testleri ve örnek çalıştırmayı yapın.
+
 ```bash
 !git clone https://github.com/<KULLANICI>/finansal-analiz-sistemi.git
 %cd finansal-analiz-sistemi
-!pip install -q -r requirements.txt
+!pip install --force-reinstall --no-cache-dir -r requirements.txt
 !pytest -q
 !python main.py
 ```
