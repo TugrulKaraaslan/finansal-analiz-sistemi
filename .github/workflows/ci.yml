@@ -12,9 +12,13 @@ jobs:
           python-version: "3.12"
 
       # Bütün bağımlılıkları (pytest dâhil) kur
-      - run: |
+      - name: Install deps with PAT
+        env:
+          GIT_TERMINAL_PROMPT: 0
+          PANDAS_TA_TOKEN: ${{ secrets.PANDAS_TA_TOKEN }}
+        run: |
+          git config --global url."https://${PANDAS_TA_TOKEN}@github.com/".insteadOf "https://github.com/"
           python -m pip install --upgrade pip
-          pip install --timeout 60 --retries 3 --upgrade setuptools
           pip install --timeout 60 --retries 3 -r requirements.txt
 
       - run: pytest -q
