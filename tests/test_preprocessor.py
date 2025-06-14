@@ -1,0 +1,44 @@
+import os
+import sys
+import pandas as pd
+
+# Ensure modules are importable
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import preprocessor
+import config
+
+
+def test_temizle_sayisal_deger_thousand_comma():
+    cases = {
+        "1.234,56": 1234.56,
+        "12.345,67": 12345.67,
+        "1.234.567,89": 1234567.89,
+    }
+    for text, expected in cases.items():
+        result = preprocessor._temizle_sayisal_deger(text)
+        assert result == expected
+
+
+def test_on_isle_hisse_verileri_invalid_dates_dropped_and_numeric():
+    data = {
+        "hisse_kodu": ["AAA", "AAA", "AAA"],
+        "tarih": ["01.03.2025", "31.02.2025", "02.03.2025"],
+        "open": ["1.000,50", "1.000,50", "1.000,50"],
+        "high": ["1.100,75", "1.100,75", "1.100,75"],
+        "low": ["900,25", "900,25", "900,25"],
+        "close": ["1.050,00", "1.050,00", "1.050,00"],
+        "volume": ["1.000", "1.000", "1.000"],
+    }
+    df = pd.DataFrame(data)
+
+    original_flag = config.TR_HOLIDAYS_REMOVE
+    config.TR_HOLIDAYS_REMOVE = False
+    try:
+        result = preprocessor.on_isle_hisse_verileri(df)
+    finally:
+        config.TR_HOLIDAYS_REMOVE = original_flag
+
+    assert len(result) == 2
+    for col in ["open", "high", "low", "close", "volume"]:
+        assert result[col].dtype == float
