@@ -1,6 +1,6 @@
 pandas
 numpy
-pandas_ta
+pandas-ta==0.3.14b0
 holidays
 openpyxl
 jinja2
