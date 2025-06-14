@@ -374,8 +374,16 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
         strategy_obj = ta.Strategy(name=getattr(ta_strategy, 'name', 'filtered'), description=getattr(ta_strategy, 'description', ''), ta=filtered_indicators)
         group_df_dt_indexed.ta.strategy(strategy_obj, timed=False, append=True, min_periods=1)
         if "psar_long" not in group_df_dt_indexed.columns or "psar_short" not in group_df_dt_indexed.columns:
-            psar_df = group_df_dt_indexed.ta.psar()[["PSARl_0", "PSARs_0"]]
-            psar_df.columns = ["psar_long", "psar_short"]
+            psar_raw = group_df_dt_indexed.ta.psar()
+            # pandas-ta < 0.4 → tuple döner | pandas-ta >= 0.4 → DataFrame döner
+            if isinstance(psar_raw, pd.DataFrame):
+                # İlk iki kolonu uzun & kısa psar olarak al
+                psar_df = psar_raw.iloc[:, :2].copy()
+                psar_df.columns = ["psar_long", "psar_short"]
+            else:
+                psar_long, psar_short = psar_raw
+                psar_df = pd.concat([psar_long, psar_short], axis=1)
+                psar_df.columns = ["psar_long", "psar_short"]
             group_df_dt_indexed = pd.concat([group_df_dt_indexed, psar_df], axis=1)
     except Exception as e_ta:
         local_logger.error(f"{hisse_kodu}: pandas-ta stratejisi hatası: {e_ta}", exc_info=True)
