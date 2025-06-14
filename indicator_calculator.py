@@ -415,14 +415,15 @@ def _calculate_group_indicators_and_crossovers(hisse_kodu: str,
     
     # pandas-ta'nın eklediği yeni sütunları alalım (OHLCV hariç)
     new_ta_cols_list = [col for col in group_df_dt_indexed.columns if col not in group_df_input.columns and col not in required_ohlcv]
-    new_cols = {}
-    for col in new_ta_cols_list:
-        if len(group_df_dt_indexed[col].values) == len(df_final_group):
-            new_cols[col] = group_df_dt_indexed[col].values
-        else:
-            local_logger.warning(f"{hisse_kodu}: pandas-ta sütunu '{col}' kopyalanırken boyut uyuşmazlığı. Atlanıyor.")
-    if new_cols:
-        df_final_group = pd.concat([df_final_group, pd.DataFrame(new_cols, index=df_final_group.index)], axis=1)
+    valid_cols = {
+        c: group_df_dt_indexed[c].values
+        for c in new_ta_cols_list
+        if len(group_df_dt_indexed[c]) == len(df_final_group)
+    }
+    if valid_cols:
+        df_final_group = df_final_group.join(
+            pd.DataFrame(valid_cols, index=df_final_group.index), how="left"
+        )
 
     # Bazı durumlarda pandas-ta stratejisinden beklenen indikatörler veri
     # yetersizliği nedeniyle oluşmayabilir. Filtrelerin sorunsuz çalışması için
