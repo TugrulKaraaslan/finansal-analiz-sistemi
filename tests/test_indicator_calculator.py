@@ -23,12 +23,10 @@ def test_classicpivots_crossover_column_exists():
         "volume": np.arange(30)
     }
     df = pd.DataFrame(data)
-    try:
-        with pytest.warns(None) as rec:
-            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
-    except TypeError:
-        with warnings.catch_warnings(record=True) as rec:
-            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    with warnings.catch_warnings(record=True) as rec:
+        warnings.simplefilter("error")
+        result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+        assert not rec
     assert not any("fragmented" in str(w.message) for w in rec)
     assert "classicpivots_1h_p" in result.columns
     assert "close_keser_classicpivots_1h_p_yukari" in result.columns
@@ -45,12 +43,10 @@ def test_fallback_indicators_created_when_missing():
         "volume": np.arange(50)
     }
     df = pd.DataFrame(data)
-    try:
-        with pytest.warns(None) as rec:
-            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
-    except TypeError:
-        with warnings.catch_warnings(record=True) as rec:
-            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    with warnings.catch_warnings(record=True) as rec:
+        warnings.simplefilter("error")
+        result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+        assert not rec
     assert not any("fragmented" in str(w.message) for w in rec)
     # pandas_ta normalde sma_200/ema_200 üretmez; fallback mekanizmasi NaN da olsa kolon eklemeli
     assert "sma_200" in result.columns
@@ -70,12 +66,10 @@ def test_ma_columns_exist_for_various_lengths(bars):
         "volume": np.arange(bars),
     }
     df = pd.DataFrame(data)
-    try:
-        with pytest.warns(None) as rec:
-            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
-    except TypeError:
-        with warnings.catch_warnings(record=True) as rec:
-            result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    with warnings.catch_warnings(record=True) as rec:
+        warnings.simplefilter("error")
+        result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+        assert not rec
     assert not any("fragmented" in str(w.message) for w in rec)
     for n in config.GEREKLI_MA_PERIYOTLAR:
         assert f"sma_{n}" in result.columns
