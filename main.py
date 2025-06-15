@@ -10,6 +10,7 @@ import sys
 import os
 import logging  # logger_setup'tan önce temel logging için
 from pathlib import Path
+import argparse
 import config  # Önce config'i import et, logger_setup ondan sonra gelsin
 
 
@@ -22,6 +23,24 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
     detay_df = rapor_df.copy()
     istatistik_df = rapor_df.describe().reset_index()
     return ozet_df, detay_df, istatistik_df
+
+
+def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
+    """Sonuçları basit bir Streamlit arayüzünde gösterir."""
+    import streamlit as st
+
+    st.sidebar.title("Menü")
+    sayfa = st.sidebar.radio("Sayfa", ("Özet", "Detay", "Grafik"))
+
+    if sayfa == "Özet":
+        st.dataframe(ozet_df)
+    elif sayfa == "Detay":
+        st.dataframe(detay_df)
+    else:
+        if "ort_getiri_%" in ozet_df:
+            st.bar_chart(ozet_df.set_index("filtre_kodu")["ort_getiri_%"])
+        else:
+            st.write("Grafik için veri yok")
 
 
 # Logger'ı mümkün olan en erken aşamada yapılandır
@@ -229,56 +248,49 @@ def calistir_tum_sistemi(
     fn_logger.info("TÜM SİSTEM ÇALIŞMASI TAMAMLANDI.")
     fn_logger.info("=" * 80)
 
-    return rapor_df
+    return rapor_df, detay_df
 
 
 if __name__ == "__main__":
     logger.info("=" * 80)
     logger.info(
-        f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT BAŞLATILIYOR ======="
+        f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT BAŞLATIYOR ======="
     )
-    try:
-        logger.info(f"Çalışma Zamanı: {pd.Timestamp.now(tz=config.TIMEZONE)}")
-        logger.info(
-            f"Python Sürümü: {sys.version.split()[0]}, Pandas Sürümü: {pd.__version__}"
-        )
-        logger.info(f"config.py Yolu: {os.path.abspath(config.__file__)}")
-    except Exception as e_startup_info:
-        logger.warning(f"Başlangıç bilgileri loglanırken hata: {e_startup_info}")
-    logger.info("=" * 80)
 
-    tarama_t = config.TARAMA_TARIHI_DEFAULT
-    satis_t = config.SATIS_TARIHI_DEFAULT
+    parser = argparse.ArgumentParser(description="Finansal analiz ve backtest")
+    parser.add_argument("--tarama", default=config.TARAMA_TARIHI_DEFAULT, help="dd.mm.yyyy formatında tarama tarihi")
+    parser.add_argument("--satis", default=config.SATIS_TARIHI_DEFAULT, help="dd.mm.yyyy formatında satış tarihi")
+    parser.add_argument("--gui", action="store_true", help="Basit Streamlit arayüzü")
+    args = parser.parse_args()
 
-    logger.info("Varsayılan Parametrelerle Çalıştırılıyor:")
+    tarama_t = args.tarama
+    satis_t = args.satis
+
     logger.info(f"  Tarama Tarihi    : {tarama_t}")
     logger.info(f"  Satış Tarihi     : {satis_t}")
     logger.info("=" * 80 + "\n")
 
     try:
-        # Ana sistemi çalıştır ve logger'ı main.py'nin kendi logger'ı olarak ilet
-        sistem_sonuclari = calistir_tum_sistemi(
+        rapor_df, detay_df = calistir_tum_sistemi(
             tarama_tarihi_str=tarama_t,
             satis_tarihi_str=satis_t,
-            force_excel_reload_param=False,  # İlk çalıştırmada False, gerekirse True yapılır
+            force_excel_reload_param=False,
             logger_param=logger,
         )
 
-        if sistem_sonuclari is not None:
-            logger.info("İŞLEM SONUÇLARI ALINDI.")
-            if not sistem_sonuclari or all(
-                not v.get("hisse_performanslari", pd.DataFrame()).shape[0]
-                for v in sistem_sonuclari.values()
-            ):
-                logger.info(
-                    "Backtest sonuçları üretilemedi veya hiçbir filtre/hisse için işlem yapılamadı."
-                )
-            else:
-                logger.info("Backtest başarıyla tamamlandı ve sonuçlar üretildi.")
-        else:
-            logger.error(
-                "Ana sistem çalıştırması KRİTİK bir hata nedeniyle None sonuç döndürdü. Detaylı hatalar için logları kontrol edin."
-            )
+        sonuc_dict = {
+            "summary": rapor_df,
+            "detail": detay_df,
+            "tarama_tarihi": tarama_t,
+            "satis_tarihi": satis_t,
+        }
+        out_path = Path("cikti/raporlar") / f"full_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        rapor_path = report_generator.generate_full_report(sonuc_dict, out_path)
+        print(f"Rapor oluşturuldu → {rapor_path}")
+
+        if args.gui:
+            _run_gui(rapor_df, detay_df)
 
     except Exception as e_main_run:
         logger.critical(
@@ -289,4 +301,4 @@ if __name__ == "__main__":
         logger.info(
             f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT TAMAMLANDI ======="
         )
-        logging.shutdown()  # Tüm logger handler'larını kapat
+        logging.shutdown()
