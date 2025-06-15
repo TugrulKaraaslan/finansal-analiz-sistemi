@@ -115,14 +115,14 @@ def calistir_tum_sistemi(
         fn_logger.critical(
             "Filtre kuralları yüklenemedi veya boş. Sistem durduruluyor."
         )
-        return None
+        return pd.DataFrame(), pd.DataFrame()
 
     df_ana_veri_ham = data_loader.yukle_hisse_verileri(
         force_excel_reload=force_excel_reload_param, logger_param=fn_logger
     )
     if df_ana_veri_ham is None or df_ana_veri_ham.empty:
         fn_logger.critical("Hisse verileri yüklenemedi veya boş. Sistem durduruluyor.")
-        return None
+        return pd.DataFrame(), pd.DataFrame()
     fn_logger.info(
         f"[Adım 1/6] Veri Girişi Tamamlandı. {len(df_ana_veri_ham)} ham kayıt, {len(df_filtre_kurallari)} filtre kuralı."
     )
@@ -137,7 +137,7 @@ def calistir_tum_sistemi(
         fn_logger.critical(
             "Veri ön işleme adımında kritik hata veya boş sonuç. Sistem durduruluyor."
         )
-        return None
+        return pd.DataFrame(), pd.DataFrame()
 
     # Ön işleme sonrası temel OHLCV sütunlarının varlığını kontrol et
     temel_ohlcv_kontrol = ["open", "high", "low", "close", "volume"]
@@ -148,7 +148,7 @@ def calistir_tum_sistemi(
         fn_logger.critical(
             f"Ön işleme sonrası temel OHLCV sütunları hala eksik: {eksik_on_isleme_sonrasi}. Sistem durduruluyor."
         )
-        return None
+        return pd.DataFrame(), pd.DataFrame()
     fn_logger.info(
         f"[Adım 2/6] Veri Ön İşleme Tamamlandı. {len(df_islenmis_veri)} işlenmiş kayıt."
     )
@@ -189,7 +189,7 @@ def calistir_tum_sistemi(
         fn_logger.critical(
             f"Tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Sistem durduruluyor."
         )
-        return None
+        return pd.DataFrame(), pd.DataFrame()
 
     filtrelenmis_hisseler_dict, atlanmis_filtreler = filter_engine.uygula_filtreler(
         df_data_indikatorlu,
@@ -223,7 +223,7 @@ def calistir_tum_sistemi(
     )
     if rapor_df is None or rapor_df.empty:
         fn_logger.warning("Backtest çalıştırma sonucu boş. Rapor oluşturulamadı.")
-        return None
+        return pd.DataFrame(), pd.DataFrame()
     fn_logger.info("[Adım 5/6] Basit Backtest Çalıştırma Tamamlandı.")
     fn_logger.info("-" * 80)
 
@@ -278,16 +278,19 @@ if __name__ == "__main__":
             logger_param=logger,
         )
 
-        sonuc_dict = {
-            "summary": rapor_df,
-            "detail": detay_df,
-            "tarama_tarihi": tarama_t,
-            "satis_tarihi": satis_t,
-        }
-        out_path = Path("cikti/raporlar") / f"full_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        rapor_path = report_generator.generate_full_report(sonuc_dict, out_path)
-        print(f"Rapor oluşturuldu → {rapor_path}")
+        if not rapor_df.empty:
+            sonuc_dict = {
+                "summary": rapor_df,
+                "detail": detay_df,
+                "tarama_tarihi": tarama_t,
+                "satis_tarihi": satis_t,
+            }
+            out_path = Path("cikti/raporlar") / f"full_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            rapor_path = report_generator.generate_full_report(sonuc_dict, out_path)
+            print(f"Rapor oluşturuldu → {rapor_path}")
+        else:
+            logger.info("Rapor verisi boş, Excel oluşturulmadı.")
 
         if args.gui:
             _run_gui(rapor_df, detay_df)
