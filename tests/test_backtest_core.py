@@ -25,42 +25,30 @@ def test_bireysel_performanslar_contains_new_keys():
             "volume": [1000, 1100],
         }
     )
-    filtrelenmis = {"F1": ["AAA"]}
-    rapor_df, _ = backtest_core.calistir_basit_backtest(
-        filtrelenmis, df, satis_tarihi_str="10.03.2025", tarama_tarihi_str="07.03.2025"
+    filtre_sonuc = {"F1": {"hisseler": ["AAA"], "sebep": "OK", "hisse_sayisi": 1}}
+    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
+        filtre_sonuc, df, satis_tarihi_str="10.03.2025", tarama_tarihi_str="07.03.2025"
     )
-    assert set(rapor_df.columns) == {
-        "filtre_kodu",
-        "hisse_sayisi",
-        "islem_yapilan_sayisi",
-        "ortalama_getiri",
-    }
-    row = rapor_df.iloc[0]
-    assert row["filtre_kodu"] == "F1"
-    assert row["hisse_sayisi"] == 1
+    assert set(rapor_df.columns) == {"filtre_kodu", "ort_getiri_%", "sebep_kodu"}
+    assert {"filtre_kodu", "hisse_kodu", "getiri_yuzde", "basari"}.issubset(detay_df.columns)
+    assert detay_df.iloc[0]["basari"] == "BAŞARILI"
 
 
-def test_missing_close_column_skips_stock():
+def test_missing_buy_price_sets_data_gap():
     df = pd.DataFrame(
         {
-            "hisse_kodu": ["AAA", "AAA"],
-            "tarih": [
-                pd.to_datetime("07.03.2025", dayfirst=True),
-                pd.to_datetime("10.03.2025", dayfirst=True),
-            ],
-            "open": [10, 12],
-            "high": [11, 13],
-            "low": [9, 11],
-            "volume": [1000, 1100],
+            "hisse_kodu": ["AAA"],
+            "tarih": [pd.to_datetime("10.03.2025", dayfirst=True)],
+            "close": [12.5],
         }
     )
-    filtrelenmis = {"F1": ["AAA"]}
-    rapor_df, _ = backtest_core.calistir_basit_backtest(
-        filtrelenmis,
+    filtre_sonuc = {"F1": {"hisseler": ["AAA"], "sebep": "OK", "hisse_sayisi": 1}}
+    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
+        filtre_sonuc,
         df,
         satis_tarihi_str="10.03.2025",
         tarama_tarihi_str="07.03.2025",
     )
     row = rapor_df.iloc[0]
-    assert row["islem_yapilan_sayisi"] == 0
-    assert pd.isna(row["ortalama_getiri"])
+    assert row["sebep_kodu"] == "DATA_GAP"
+    assert pd.isna(row["ort_getiri_%"])
