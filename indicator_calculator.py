@@ -340,12 +340,17 @@ def _ekle_psar(df: pd.DataFrame) -> None:
         logger.debug("PSAR hesaplamak için gerekli sütunlar eksik")
         return
     try:
-        psar_up, psar_dn = ta_psar(high=df["high"], low=df["low"], close=df["close"])
-        df["psar_long"] = psar_up
-        df["psar_short"] = psar_dn
-        df["psar"] = np.where(
-            df["psar_long"].notna(), df["psar_long"], df["psar_short"]
-        )
+        psar_raw = ta_psar(high=df["high"], low=df["low"], close=df["close"])
+        if isinstance(psar_raw, pd.DataFrame):
+            psar_df = psar_raw.iloc[:, :2].copy()
+            psar_df.columns = ["psar_long", "psar_short"]
+        else:
+            psar_long, psar_short = psar_raw
+            psar_df = pd.concat([psar_long, psar_short], axis=1)
+            psar_df.columns = ["psar_long", "psar_short"]
+        df["psar_long"] = psar_df["psar_long"]
+        df["psar_short"] = psar_df["psar_short"]
+        df["psar"] = df["psar_long"].fillna(df["psar_short"])
     except Exception as e:
         logger.error(f"PSAR hesaplanırken hata: {e}")
 
@@ -617,24 +622,21 @@ def _calculate_group_indicators_and_crossovers(
             "psar_long" not in group_df_dt_indexed.columns
             or "psar_short" not in group_df_dt_indexed.columns
         ):
-            psar_raw = group_df_dt_indexed.ta.psar()
-            # pandas-ta < 0.4 → tuple döner | pandas-ta >= 0.4 → DataFrame döner
-            if isinstance(psar_raw, pd.DataFrame):
-                # İlk iki kolonu uzun & kısa psar olarak al
-                psar_df = psar_raw.iloc[:, :2].copy()
-                psar_df.columns = ["psar_long", "psar_short"]
-            else:
-                psar_long, psar_short = psar_raw
-                psar_df = pd.concat([psar_long, psar_short], axis=1)
-                psar_df.columns = ["psar_long", "psar_short"]
-            group_df_dt_indexed = pd.concat([group_df_dt_indexed, psar_df], axis=1)
-            if "psar" not in group_df_dt_indexed.columns and {
-                "psar_long",
-                "psar_short",
-            } <= set(group_df_dt_indexed.columns):
+            try:
+                psar_raw = group_df_dt_indexed.ta.psar()
+                if isinstance(psar_raw, pd.DataFrame):
+                    psar_df = psar_raw.iloc[:, :2].copy()
+                    psar_df.columns = ["psar_long", "psar_short"]
+                else:
+                    psar_long, psar_short = psar_raw
+                    psar_df = pd.concat([psar_long, psar_short], axis=1)
+                    psar_df.columns = ["psar_long", "psar_short"]
+                group_df_dt_indexed = pd.concat([group_df_dt_indexed, psar_df], axis=1)
                 group_df_dt_indexed["psar"] = group_df_dt_indexed["psar_long"].fillna(
                     group_df_dt_indexed["psar_short"]
                 )
+            except Exception as e_psar:
+                local_logger.error(f"{hisse_kodu}: PSAR hesaplanırken hata: {e_psar}")
     except Exception as e_ta:
         local_logger.error(
             f"{hisse_kodu}: pandas-ta stratejisi hatası: {e_ta}", exc_info=True
