@@ -8,10 +8,10 @@
 import pandas as pd
 import sys
 import os
-import logging  # logger_setup'tan önce temel logging için
+import logging
 from pathlib import Path
 import argparse
-import config  # Önce config'i import et, logger_setup ondan sonra gelsin
+import config
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
@@ -43,33 +43,83 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
             st.write("Grafik için veri yok")
 
 
-# Logger'ı mümkün olan en erken aşamada yapılandır
-try:
-    from logger_setup import get_logger
+from utils.logging_setup import setup_logger, get_logger
 
-    # main.py'nin kendi adıyla bir logger oluştur
-    logger = get_logger(os.path.splitext(os.path.basename(__file__))[0])
-except ImportError as e_log_setup:
-    # logger_setup.py bulunamazsa, çok temel bir fallback
-    logging.basicConfig(
-        level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+log_counter = setup_logger()
+logger = get_logger(__name__)
+
+
+def veri_yukle():
+    """Load filter rules and raw price data."""
+    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
+    if df_filters is None or df_filters.empty:
+        logger.critical("Filtre kuralları yüklenemedi veya boş.")
+        sys.exit(1)
+
+    df_raw = data_loader.yukle_hisse_verileri(logger_param=logger)
+    if df_raw is None or df_raw.empty:
+        logger.critical("Hisse verileri yüklenemedi veya boş.")
+        sys.exit(1)
+    return df_filters, df_raw
+
+
+def on_isle(df: pd.DataFrame) -> pd.DataFrame:
+    """Preprocess raw stock data."""
+    processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
+    if processed is None or processed.empty:
+        logger.critical("Veri ön işleme başarısız.")
+        sys.exit(1)
+    return processed
+
+
+def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculate indicators and crossovers."""
+    result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
+        df, logger_param=logger
     )
-    logger = logging.getLogger("main_fallback_logger")
-    logger.critical(
-        f"KRİTİK HATA: logger_setup.py import edilemedi: {e_log_setup}. Temel logging kullanılıyor.",
-        exc_info=True,
+    if result is None:
+        logger.critical("İndikatör hesaplanamadı.")
+        sys.exit(1)
+    return result
+
+
+def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
+    """Apply filter rules to indicator data."""
+    return filter_engine.uygula_filtreler(
+        df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
     )
-    # Bu durumda config.LOG_DOSYA_YOLU kullanılamaz, loglar sadece konsola gider.
-except Exception as e_logger_init:
-    logging.basicConfig(
-        level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+
+
+def backtest_yap(
+    df: pd.DataFrame,
+    filtre_sonuclari: dict,
+    tarama_tarihi: str,
+    satis_tarihi: str,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Run simple backtest on filtered results."""
+    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
+        filtre_sonuc_dict=filtre_sonuclari,
+        df_tum_veri=df,
+        satis_tarihi_str=satis_tarihi,
+        tarama_tarihi_str=tarama_tarihi,
+        logger_param=logger,
     )
-    logger = logging.getLogger("main_fallback_logger_init_error")
-    logger.critical(
-        f"KRİTİK HATA: Logger başlatılırken hata: {e_logger_init}. Temel logging kullanılıyor.",
-        exc_info=True,
-    )
-    # Bu durumda da config.LOG_DOSYA_YOLU kullanılamaz.
+    if rapor_df is None:
+        logger.critical("Backtest sonuç üretmedi.")
+        sys.exit(1)
+    return rapor_df, detay_df
+
+
+def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
+    """Save Excel report if data available."""
+    if rapor_df.empty:
+        logger.info("Rapor verisi boş.")
+        return
+    ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
+    out_path = Path("cikti/raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
+    out_path.parent.mkdir(exist_ok=True)
+    report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
+    logger.info(f"Excel raporu oluşturuldu: {out_path}")
 
 # Ana modülleri import et
 try:
@@ -89,167 +139,26 @@ except ImportError as e_import_main:
     raise ImportError(e_import_main)
 
 
+
 def calistir_tum_sistemi(
     tarama_tarihi_str: str,
     satis_tarihi_str: str,
     force_excel_reload_param: bool = False,
     logger_param=None,
 ):
-    """
-    Finansal analiz ve backtest sisteminin tüm adımlarını çalıştırır.
-    """
-    # Eğer dışarıdan bir logger verilmediyse, bu fonksiyon kendi adıyla bir alt logger oluşturur.
-    # Ancak genellikle main_logger (yukarıda tanımlanan) buraya logger_param olarak verilir.
-    fn_logger = logger_param or get_logger(f"{__name__}.calistir_tum_sistemi")
-
-    fn_logger.info("*" * 30 + " TÜM BACKTEST SİSTEMİ ÇALIŞTIRILIYOR " + "*" * 30)
-    fn_logger.info(f"  Tarama Tarihi            : {tarama_tarihi_str}")
-    fn_logger.info(f"  Satış Tarihi             : {satis_tarihi_str}")
-    fn_logger.info(f"  Excel/CSV'den Zorla Yükle: {force_excel_reload_param}")
-    fn_logger.info("-" * 80)
-
-    # Adım 1: Veri Girişi (Filtreler ve Ham Hisse Verisi)
-    fn_logger.info("[Adım 1/6] Veri Girişi (data_loader) Başlatılıyor...")
-    df_filtre_kurallari = data_loader.yukle_filtre_dosyasi(logger_param=fn_logger)
-    if df_filtre_kurallari is None or df_filtre_kurallari.empty:
-        fn_logger.critical(
-            "Filtre kuralları yüklenemedi veya boş. Sistem durduruluyor."
-        )
-        return pd.DataFrame(), pd.DataFrame()
-
-    df_ana_veri_ham = data_loader.yukle_hisse_verileri(
-        force_excel_reload=force_excel_reload_param, logger_param=fn_logger
+    """Run all analysis steps sequentially."""
+    global df_filtre_kurallari
+    logger.info("*" * 30 + " TÜM BACKTEST SİSTEMİ ÇALIŞTIRILIYOR " + "*" * 30)
+    df_filtre_kurallari, df_raw = veri_yukle()
+    df_processed = on_isle(df_raw)
+    df_indicator = indikator_hesapla(df_processed)
+    tarama_dt = pd.to_datetime(tarama_tarihi_str, format="%d.%m.%Y")
+    filtre_sonuclar, atlanmis = filtre_uygula(df_indicator, tarama_dt)
+    rapor_df, detay_df = backtest_yap(
+        df_indicator, filtre_sonuclar, tarama_tarihi_str, satis_tarihi_str
     )
-    if df_ana_veri_ham is None or df_ana_veri_ham.empty:
-        fn_logger.critical("Hisse verileri yüklenemedi veya boş. Sistem durduruluyor.")
-        return pd.DataFrame(), pd.DataFrame()
-    fn_logger.info(
-        f"[Adım 1/6] Veri Girişi Tamamlandı. {len(df_ana_veri_ham)} ham kayıt, {len(df_filtre_kurallari)} filtre kuralı."
-    )
-    fn_logger.info("-" * 80)
-
-    # Adım 2: Veri Ön İşleme
-    fn_logger.info("[Adım 2/6] Veri Ön İşleme (preprocessor) Başlatılıyor...")
-    df_islenmis_veri = preprocessor.on_isle_hisse_verileri(
-        df_ana_veri_ham, logger_param=fn_logger
-    )
-    if df_islenmis_veri is None or df_islenmis_veri.empty:
-        fn_logger.critical(
-            "Veri ön işleme adımında kritik hata veya boş sonuç. Sistem durduruluyor."
-        )
-        return pd.DataFrame(), pd.DataFrame()
-
-    # Ön işleme sonrası temel OHLCV sütunlarının varlığını kontrol et
-    temel_ohlcv_kontrol = ["open", "high", "low", "close", "volume"]
-    eksik_on_isleme_sonrasi = [
-        s for s in temel_ohlcv_kontrol if s not in df_islenmis_veri.columns
-    ]
-    if eksik_on_isleme_sonrasi:
-        fn_logger.critical(
-            f"Ön işleme sonrası temel OHLCV sütunları hala eksik: {eksik_on_isleme_sonrasi}. Sistem durduruluyor."
-        )
-        return pd.DataFrame(), pd.DataFrame()
-    fn_logger.info(
-        f"[Adım 2/6] Veri Ön İşleme Tamamlandı. {len(df_islenmis_veri)} işlenmiş kayıt."
-    )
-    fn_logger.info("-" * 80)
-
-    # Adım 3: İndikatör ve Kesişim Hesaplama
-    fn_logger.info(
-        "[Adım 3/6] İndikatör ve Kesişim Hesaplama (indicator_calculator) Başlatılıyor..."
-    )
-    df_data_indikatorlu = (
-        indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
-            df_islenmis_veri, logger_param=fn_logger
-        )
-    )
-    if df_data_indikatorlu is None or df_data_indikatorlu.empty:
-        fn_logger.error(
-            "İndikatör hesaplama adımında kritik hata veya boş sonuç. Filtreleme ve backtest yapılamayacak."
-        )
-        # Burada sistemi tamamen durdurmak yerine, raporlamada bu durumu belirtecek şekilde devam edebiliriz.
-        # Ancak filtrelenmis_hisseler_dict boş olacağı için backtest de boş olacaktır.
-        # Şimdilik, eğer indikatörlü veri yoksa, boş bir dict ile devam edelim ki raporlama en azından hata loglarını yazabilsin.
-        filtrelenmis_hisseler_dict = {}
-        atlanmis_filtreler = {
-            "TUM_FILTRELER_INDİKATORSUZ_VERI": "İndikatörlü veri üretilemediği için tüm filtreler atlandı."
-        }
-    else:
-        fn_logger.info("[Adım 3/6] Teknik İndikatör ve Kesişim Hesaplama Tamamlandı.")
-        fn_logger.debug(
-            f"Indicator calculator sonrası df_data_indikatorlu sütun sayısı: {len(df_data_indikatorlu.columns)}"
-        )
-        fn_logger.info("-" * 80)
-
-    # Adım 4: Filtre Uygulama
-    fn_logger.info("[Adım 4/6] Filtre Uygulama (filter_engine) Başlatılıyor...")
-    try:
-        tarama_tarihi_dt = pd.to_datetime(tarama_tarihi_str, format="%d.%m.%Y")
-    except ValueError:
-        fn_logger.critical(
-            f"Tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Sistem durduruluyor."
-        )
-        return pd.DataFrame(), pd.DataFrame()
-
-    filtrelenmis_hisseler_dict, atlanmis_filtreler = filter_engine.uygula_filtreler(
-        df_data_indikatorlu,
-        df_filtre_kurallari,
-        tarama_tarihi_dt,
-        logger_param=fn_logger,
-    )
-    if not filtrelenmis_hisseler_dict and not atlanmis_filtreler:
-        fn_logger.warning(
-            "Filtreleme sonucu hem filtrelenmiş hisse üretmedi hem de atlanmış filtre bilgisi boş."
-        )
-    elif not filtrelenmis_hisseler_dict:
-        fn_logger.info("Filtreleme sonucu hiçbir hisse bulunamadı.")
-    fn_logger.info(
-        f"[Adım 4/6] Filtre Uygulama Tamamlandı. {len(filtrelenmis_hisseler_dict)} filtre sonucu üretildi."
-    )
-
-    fn_logger.info("-" * 80)
-
-    # Adım 5: Backtest Çalıştırma
-    fn_logger.info(
-        "[Adım 5/6] Basit Backtest Çalıştırma (backtest_core) Başlatılıyor..."
-    )
-    # df_data_indikatorlu None veya boş olabilir, backtest_core bunu handle etmeli
-    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
-        filtre_sonuc_dict=filtrelenmis_hisseler_dict,
-        df_tum_veri=df_data_indikatorlu,
-        satis_tarihi_str=satis_tarihi_str,
-        tarama_tarihi_str=tarama_tarihi_str,
-        logger_param=fn_logger,
-    )
-    if rapor_df is None or rapor_df.empty:
-        fn_logger.warning("Backtest çalıştırma sonucu boş. Rapor oluşturulamadı.")
-        return pd.DataFrame(), pd.DataFrame()
-    fn_logger.info("[Adım 5/6] Basit Backtest Çalıştırma Tamamlandı.")
-    fn_logger.info("-" * 80)
-
-    # Adım 6: Rapor Oluşturma
-    fn_logger.info("[Adım 6/6] Özet Rapor Oluşturma (report_generator) Başlatılıyor...")
-
-    now = pd.Timestamp.now()
-    if rapor_df.empty:
-        fn_logger.info("[Adım 6] Rapor adımı atlandı (boş sonuç).")
-    else:
-        from report_generator import kaydet_uc_sekmeli_excel
-
-        ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
-        out_path = Path("cikti/raporlar") / f"rapor_{now:%Y%m%d_%H%M%S}.xlsx"
-        out_path.parent.mkdir(exist_ok=True)
-        kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
-        fn_logger.info(f"Excel raporu oluşturuldu: {out_path}")
-
-    # Bu satırlar artık `else`'in içinde değil — if-else sonrası kapanış logları
-    fn_logger.info("[Adım 6/6] Özet Rapor Oluşturma Tamamlandı.")
-    fn_logger.info("=" * 80)
-    fn_logger.info("TÜM SİSTEM ÇALIŞMASI TAMAMLANDI.")
-    fn_logger.info("=" * 80)
-
-    return rapor_df, detay_df
-
+    raporla(rapor_df, detay_df)
+    return rapor_df, detay_df, atlanmis
 
 if __name__ == "__main__":
     logger.info("=" * 80)
@@ -270,8 +179,9 @@ if __name__ == "__main__":
     logger.info(f"  Satış Tarihi     : {satis_t}")
     logger.info("=" * 80 + "\n")
 
+    atlanmis = {}
     try:
-        rapor_df, detay_df = calistir_tum_sistemi(
+        rapor_df, detay_df, atlanmis = calistir_tum_sistemi(
             tarama_tarihi_str=tarama_t,
             satis_tarihi_str=satis_t,
             force_excel_reload_param=False,
@@ -304,4 +214,9 @@ if __name__ == "__main__":
         logger.info(
             f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT TAMAMLANDI ======="
         )
+        summary_line = (
+            f"LOG_SUMMARY | errors={log_counter.errors} | warnings={log_counter.warnings} | "
+            f"atlanan_filtre={','.join(atlanmis.keys()) if atlanmis else ''}"
+        )
+        logger.info(summary_line)
         logging.shutdown()

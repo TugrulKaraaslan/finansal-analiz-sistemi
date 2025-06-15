@@ -11,21 +11,11 @@ from pathlib import Path
 from datetime import datetime
 import config
 
-try:
-    from logger_setup import get_logger
+from utils.logging_setup import setup_logger, get_logger
+import logging
 
-    logger = get_logger(__name__)
-except ImportError:
-    import logging
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
-    logger = logging.getLogger(__name__)
-    logger.warning(
-        "logger_setup.py bulunamadı, backtest_core.py standart logging kullanıyor."
-    )
+setup_logger()
+logger = get_logger(__name__)
 
 
 def _get_fiyat(
@@ -35,7 +25,9 @@ def _get_fiyat(
     logger_param=None,
 ) -> float:
     """Belirli bir hisse için, verilen tarihteki ve zamandaki (sütun adı) fiyatı alır."""
-    log = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    log = logger_param
     hisse_kodu_log = (
         df_hisse_veri["hisse_kodu"].iloc[0]
         if not df_hisse_veri.empty and "hisse_kodu" in df_hisse_veri.columns
@@ -87,7 +79,9 @@ def calistir_basit_backtest(
     logger_param=None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Filtre sonuçlarını kullanarak basit backtest çalıştırır."""
-    fn_logger = logger_param or get_logger(f"{__name__}.calistir_basit_backtest")
+    if logger_param is None:
+        logger_param = logger
+    fn_logger = logger_param
     fn_logger.info(
         f"Basit backtest çalıştırılıyor. Tarama: {tarama_tarihi_str}, Satış: {satis_tarihi_str}"
     )

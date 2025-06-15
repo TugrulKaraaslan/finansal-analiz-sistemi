@@ -23,21 +23,11 @@ import utils
 
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 
-try:
-    from logger_setup import get_logger
+from utils.logging_setup import setup_logger, get_logger
+import logging
 
-    logger = get_logger(__name__)
-except ImportError:
-    import logging
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
-    logger = logging.getLogger(__name__)
-    logger.warning(
-        "logger_setup.py bulunamadı, indicator_calculator.py standart logging kullanıyor."
-    )
+setup_logger()
+logger = get_logger(__name__)
 
 # --- Yeni Özel İndikatör Fonksiyonları (Filtrelerle Uyum İçin) ---
 
@@ -311,7 +301,9 @@ def _calculate_volume_price(
 
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
     """Eksikse basit veya üssel hareketli ortalama kolonu ekler."""
-    local_logger = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    local_logger = logger_param
     col = f"{kind}_{n}"
     if col in df.columns or "close" not in df.columns:
         return
@@ -458,7 +450,9 @@ def _calculate_series_series_crossover(
     col_name_below: str,
     logger_param=None,
 ) -> tuple[pd.Series, pd.Series] | None:
-    local_logger = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    local_logger = logger_param
 
     if s1_col not in group_df or s2_col not in group_df:
         local_logger.debug(f"Crossover atlandı – {s1_col} / {s2_col} yok")
@@ -502,7 +496,9 @@ def _calculate_series_value_crossover(
     suffix: str,
     logger_param=None,
 ) -> tuple[pd.Series, pd.Series] | None:
-    local_logger = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    local_logger = logger_param
 
     if s_col not in group_df.columns:
         local_logger.debug(f"Skipped crossover {s_col} vs {value} – missing col")
@@ -543,16 +539,18 @@ def _calculate_series_value_crossover(
 
 
 def _calculate_group_indicators_and_crossovers(
-    hisse_kodu: str,
-    group_df_input: pd.DataFrame,  # Bu her zaman RangeIndex ve 'tarih' sütunlu gelmeli
-    ta_strategy: ta.Strategy,
-    series_series_config: list,
-    series_value_config: list,
-    ozel_sutun_conf: list,
-    ad_eslestirme: dict,
-    logger_param=None,
+    _grp_df: pd.DataFrame, wanted_cols=None
 ) -> pd.DataFrame:
-    local_logger = logger_param or logger
+    local_logger = logger
+    hisse_kodu = (
+        _grp_df["hisse_kodu"].iloc[0] if not _grp_df.empty and "hisse_kodu" in _grp_df.columns else "Bilinmeyen Hisse"
+    )
+    ta_strategy = config.TA_STRATEGY
+    series_series_config = config.SERIES_SERIES_CROSSOVERS
+    series_value_config = config.SERIES_VALUE_CROSSOVERS
+    ozel_sutun_conf = config.OZEL_SUTUN_PARAMS
+    ad_eslestirme = config.INDIKATOR_AD_ESLESTIRME
+    group_df_input = _grp_df
 
     # pandas-ta için DatetimeIndex'e çevir
     group_df_dt_indexed = group_df_input.copy()
@@ -597,19 +595,13 @@ def _calculate_group_indicators_and_crossovers(
         ta_strategy = ta.Strategy(name="empty", ta=[])
 
     try:
-        try:
-            filtre_df = pd.read_csv(config.FILTRE_DOSYA_YOLU, sep=";", engine="python")
-        except Exception:
-            filtre_df = pd.DataFrame()
-        wanted = utils.extract_columns_from_filters(
-            filtre_df,
-            series_series_config,
-            series_value_config,
-        )
         base_list = getattr(ta_strategy, "ta", []) or []
-        filtered_indicators = [
-            i for i in base_list if any(c in wanted for c in i.get("col_names", []))
-        ]
+        if wanted_cols is not None:
+            filtered_indicators = [
+                i for i in base_list if any(c in wanted_cols for c in i.get("col_names", []))
+            ]
+        else:
+            filtered_indicators = base_list
         strategy_obj = ta.Strategy(
             name=getattr(ta_strategy, "name", "filtered"),
             description=getattr(ta_strategy, "description", ""),
@@ -825,7 +817,9 @@ def _calculate_group_indicators_and_crossovers(
 def hesapla_teknik_indikatorler_ve_kesisimler(
     df_islenmis_veri: pd.DataFrame, logger_param=None
 ) -> pd.DataFrame | None:
-    ana_logger = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    ana_logger = logger_param
     ana_logger.info(
         "Teknik indikatörler ve kesişim sinyalleri hesaplanmaya başlanıyor..."
     )
@@ -853,6 +847,16 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
     series_value_crossovers = config.SERIES_VALUE_CROSSOVERS
     ozel_sutun_params = config.OZEL_SUTUN_PARAMS
     indikator_ad_eslestirme = config.INDIKATOR_AD_ESLESTIRME
+
+    try:
+        filtre_df = pd.read_csv(config.FILTRE_DOSYA_YOLU, sep=";", engine="python")
+    except Exception:
+        filtre_df = pd.DataFrame()
+    wanted_cols = utils.extract_columns_from_filters(
+        filtre_df,
+        series_series_crossovers,
+        series_value_crossovers,
+    )
 
     results_list = []
     grouped = df_islenmis_veri.groupby("hisse_kodu", group_keys=False)
@@ -883,14 +887,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             )
 
         calculated_group = _calculate_group_indicators_and_crossovers(
-            hisse_kodu,
-            group_df_for_calc,  # RangeIndex'li df gönderiliyor
-            ta_strategy_params,
-            series_series_crossovers,
-            series_value_crossovers,
-            ozel_sutun_params,
-            indikator_ad_eslestirme,
-            ana_logger,
+            group_df_for_calc, wanted_cols
         )
         if calculated_group is not None and not calculated_group.empty:
             results_list.append(

@@ -13,18 +13,11 @@ from functools import lru_cache, partial
 
 from data_loader_cache import DataLoaderCache
 
-try:
-    from logger_setup import get_logger
+from utils.logging_setup import setup_logger, get_logger
+import logging
 
-    logger = get_logger(__name__)
-except ImportError:
-    import logging
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
-    logger = logging.getLogger(__name__)
+setup_logger()
+logger = get_logger(__name__)
 
 _cache_loader = DataLoaderCache(logger=logger)
 
@@ -52,7 +45,9 @@ def check_and_create_dirs(*dir_paths):
 
 def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
     """Load an Excel file and cache the result, writing Parquet if needed."""
-    log = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    log = logger_param
     try:
         df = _read_excel_cached(path)
     except Exception as e:
@@ -76,7 +71,9 @@ def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
 def _standardize_date_column(
     df: pd.DataFrame, file_path_for_log: str = "", logger_param=None
 ) -> pd.DataFrame:
-    log = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    log = logger_param
     olasi_tarih_sutunlari = [
         "Tarih",
         "tarih",
@@ -113,7 +110,9 @@ def _standardize_date_column(
 def _standardize_ohlcv_columns(
     df: pd.DataFrame, file_path_for_log: str = "", logger_param=None
 ) -> pd.DataFrame:
-    log = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    log = logger_param
     file_name_short = os.path.basename(
         file_path_for_log
     )  # Loglarda kısa dosya adı için
@@ -195,7 +194,9 @@ def _standardize_ohlcv_columns(
 def yukle_filtre_dosyasi(
     filtre_dosya_yolu_cfg=None, logger_param=None
 ) -> pd.DataFrame | None:
-    fn_logger = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    fn_logger = logger_param
     filtre_dosya_yolu = filtre_dosya_yolu_cfg or config.FILTRE_DOSYA_YOLU
     fn_logger.info(f"Filtre dosyası yükleniyor: {filtre_dosya_yolu}")
 
@@ -252,7 +253,9 @@ def yukle_hisse_verileri(
     force_excel_reload=False,
     logger_param=None,
 ) -> pd.DataFrame | None:
-    fn_logger = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    fn_logger = logger_param
     parquet_dosya_yolu = parquet_ana_dosya_yolu_cfg or config.PARQUET_ANA_DOSYA_YOLU
     hisse_dosya_pattern = hisse_dosya_pattern_cfg or config.HISSE_DOSYA_PATTERN
     veri_klasoru = config.VERI_KLASORU
