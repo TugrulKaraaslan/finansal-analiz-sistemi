@@ -84,3 +84,38 @@ def test_kaydet_raporlar_appends(tmp_path):
     names = wb.sheetnames
     assert {"Sheet1", "Özet", "Detay", "İstatistik"}.issubset(names)
     wb.close()
+
+def test_generate_full_report(tmp_path):
+    summary = pd.DataFrame({
+        "filtre_kodu": ["F1"],
+        "ort_getiri_%": [1.0],
+        "sebep_kodu": ["OK"],
+    })
+    detail = pd.DataFrame({
+        "filtre_kodu": ["F1"],
+        "hisse_kodu": ["AAA"],
+        "getiri_yuzde": [1.0],
+        "basari": ["BAŞARILI"],
+    })
+    sonuc = {
+        "summary": summary,
+        "detail": detail,
+        "tarama_tarihi": "01.01.2025",
+        "satis_tarihi": "02.01.2025",
+    }
+    out = tmp_path / "full.xlsx"
+    report_generator.generate_full_report(sonuc, out)
+
+    wb = openpyxl.load_workbook(out)
+    assert wb.sheetnames[:4] == ["Özet", "Detay", "İstatistik", "Grafikler"]
+    header = [c.value for c in wb["Özet"][1]]
+    assert "sebep_kodu" in header
+    wb.close()
+
+    img = tmp_path / "summary.png"
+    assert img.exists()
+
+    import zipfile
+    with zipfile.ZipFile(out) as zf:
+        images = [n for n in zf.namelist() if n.startswith("xl/media/")]
+        assert images
