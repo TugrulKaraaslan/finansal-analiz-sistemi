@@ -195,12 +195,11 @@ def calistir_tum_sistemi(
         "[Adım 5/6] Basit Backtest Çalıştırma (backtest_core) Başlatılıyor..."
     )
     # df_data_indikatorlu None veya boş olabilir, backtest_core bunu handle etmeli
-    rapor_df, rapor_dosyasi = backtest_core.calistir_basit_backtest(
-        filtrelenmis_hisseler=filtrelenmis_hisseler_dict,  # Boş olabilir
-        df_tum_veri=df_data_indikatorlu,  # None veya boş olabilir
+    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
+        filtre_sonuc_dict=filtrelenmis_hisseler_dict,
+        df_tum_veri=df_data_indikatorlu,
         satis_tarihi_str=satis_tarihi_str,
         tarama_tarihi_str=tarama_tarihi_str,
-        atlanmis_filtre_loglari=atlanmis_filtreler,  # Boş olabilir
         logger_param=fn_logger,
     )
     if rapor_df is None or rapor_df.empty:
