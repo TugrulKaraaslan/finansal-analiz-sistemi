@@ -148,6 +148,21 @@ def uygula_filtreler(
             continue
 
         python_sorgusu = str(python_sorgusu_raw)
+        sorgu_strip = python_sorgusu.strip()
+        if re.search(r"\b(?:and|or)\s*$", sorgu_strip) or sorgu_strip.endswith(
+            (">", "<", "=", "(", "&", "|")
+        ):
+            hata_mesaji = (
+                f"Sorgu olası eksik ifade ile bitiyor, atlandı: '{python_sorgusu}'"
+            )
+            fn_logger.error(f"Filtre '{filtre_kodu}': {hata_mesaji}")
+            atlanmis_filtreler_log_dict[filtre_kodu] = hata_mesaji
+            filtre_sonuclar[filtre_kodu] = {
+                "hisseler": [],
+                "sebep": "QUERY_ERROR",
+                "hisse_sayisi": 0,
+            }
+            continue
         kullanilan_sutunlar = _extract_query_columns(python_sorgusu)
         eksik_sutunlar = [
             s for s in kullanilan_sutunlar if s not in df_tarama_gunu.columns
@@ -220,7 +235,11 @@ def uygula_filtreler(
                 "hisse_sayisi": 0,
             }
         except SyntaxError as e_syntax:
-            hata_mesaji = f"Syntax (yazım) hatası. Sorgu: '{python_sorgusu}'"
+            hata_mesaji = (
+                "Syntax (yazım) hatası. Sorgu: "
+                f"'{python_sorgusu}'. Muhtemelen eksik karşılaştırma operatörü veya parantez."
+                " Filtre dosyanızı gözden geçirin."
+            )
             fn_logger.error(
                 f"Filtre '{filtre_kodu}' sorgusunda SYNTAX HATASI: {e_syntax}. {hata_mesaji}",
                 exc_info=False,
