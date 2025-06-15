@@ -4,6 +4,13 @@
 import pandas as pd
 import re
 
+SEBEP_KODLARI = {
+    "OK": "Filtre çalıştı ve hisse bulundu.",
+    "NO_STOCK": "Sorgu sonucunda hisse bulunamadı.",
+    "MISSING_COL": "Sorguda eksik sütun veya değişken.",
+    "QUERY_ERROR": "Sorgu çalıştırılırken hata oluştu.",
+}
+
 
 def dogrula_filtre_dataframe(
     df_filtre: pd.DataFrame, zorunlu_kolonlar=None, logger=None
@@ -38,6 +45,11 @@ def dogrula_filtre_dataframe(
             logger.warning(f"Filtre doğrulama uyarısı ({kod}): {mesaj}")
 
     return sorunlu
+
+
+def kod_icin_aciklama(kod: str) -> str:
+    """SEBEP_KODLARI icindeki aciklamayi dondurur."""
+    return SEBEP_KODLARI.get(kod, "")
 
 
 # ENTEGRASYON (data_loader.py içinde):
