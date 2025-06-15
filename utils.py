@@ -7,24 +7,10 @@
 
 import pandas as pd
 import logging
+from logging_setup import setup_logger
 
-# Bu modül kendi logger'ını kullanır, logger_setup.py'den get_logger ile çağrılmazsa.
-# Ancak genellikle diğer modüller tarafından import edildiği için, çağıran modülün logger'ı geçerli olur.
-# Eğer bu dosya tek başına test edilirse diye temel bir logger ayarı.
-try:
-    from logger_setup import get_logger
-
-    logger = get_logger(__name__)
-except ImportError:
-    logger = logging.getLogger(__name__)
-    if not logger.handlers:
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        )
-        logger.warning(
-            "logger_setup.py bulunamadı, utils.py kendi temel logger'ını kullanıyor."
-        )
+setup_logger()
+logger = logging.getLogger(__name__)
 
 
 def _align(a: pd.Series, b: pd.Series):

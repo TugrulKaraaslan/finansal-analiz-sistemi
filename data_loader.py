@@ -13,18 +13,11 @@ from functools import lru_cache, partial
 
 from data_loader_cache import DataLoaderCache
 
-try:
-    from logger_setup import get_logger
+from logging_setup import setup_logger
+import logging
 
-    logger = get_logger(__name__)
-except ImportError:
-    import logging
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
-    logger = logging.getLogger(__name__)
+setup_logger()
+logger = logging.getLogger(__name__)
 
 _cache_loader = DataLoaderCache(logger=logger)
 

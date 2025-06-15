@@ -42,7 +42,7 @@ LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 IS_COLAB = "google.colab" in sys.modules
 
 # Hızlı erişim için gereken hareketli ortalama periyotları
-GEREKLI_MA_PERIYOTLAR = [5, 10, 20, 30, 50, 100, 200]
+GEREKLI_MA_PERIYOTLAR = [5, 10, 20, 50, 100, 200]
 
 OHLCV_MAP = {
     "Tarih": "tarih",
@@ -324,17 +324,22 @@ OZEL_SUTUN_PARAMS = [
 ]
 
 SERIES_SERIES_CROSSOVERS = [
-    ("sma_5", "sma_10", "sma_5_keser_sma_10_yukari", "sma_5_keser_sma_10_asagi"),
-    ("sma_10", "sma_20", "sma_10_keser_sma_20_yukari", "sma_10_keser_sma_20_asagi"),
-    ("sma_20", "sma_50", "sma_20_keser_sma_50_yukari", "sma_20_keser_sma_50_asagi"),
-    ("sma_10", "sma_50", "sma_10_keser_sma_50_yukari", "sma_10_keser_sma_50_asagi"),
-    ("sma_50", "sma_100", "sma_50_keser_sma_100_yukari", "sma_50_keser_sma_100_asagi"),
-    ("sma_50", "sma_200", "sma_50_keser_sma_200_yukari", "sma_50_keser_sma_200_asagi"),
-    ("ema_5", "ema_10", "ema_5_keser_ema_10_yukari", "ema_5_keser_ema_10_asagi"),
-    ("ema_10", "ema_20", "ema_10_keser_ema_20_yukari", "ema_10_keser_ema_20_asagi"),
-    ("ema_20", "ema_50", "ema_20_keser_ema_50_yukari", "ema_20_keser_ema_50_asagi"),
-    ("ema_50", "ema_100", "ema_50_keser_ema_100_yukari", "ema_50_keser_ema_100_asagi"),
-    ("ema_50", "ema_200", "ema_50_keser_ema_200_yukari", "ema_50_keser_ema_200_asagi"),
+    (
+        f"sma_{a}",
+        f"sma_{b}",
+        f"sma_{a}_keser_sma_{b}_yukari",
+        f"sma_{a}_keser_sma_{b}_asagi",
+    )
+    for a, b in zip(GEREKLI_MA_PERIYOTLAR[:-1], GEREKLI_MA_PERIYOTLAR[1:])
+] + [
+    (
+        f"ema_{a}",
+        f"ema_{b}",
+        f"ema_{a}_keser_ema_{b}_yukari",
+        f"ema_{a}_keser_ema_{b}_asagi",
+    )
+    for a, b in zip(GEREKLI_MA_PERIYOTLAR[:-1], GEREKLI_MA_PERIYOTLAR[1:])
+] + [
     ("sma_5", "sma_20", "sma_5_keser_sma_20_yukari", "sma_5_keser_sma_20_asagi"),
     ("close", "sma_20", "close_keser_sma_20_yukari", "close_keser_sma_20_asagi"),
     ("close", "sma_50", "close_keser_sma_50_yukari", "close_keser_sma_50_asagi"),

@@ -4,9 +4,11 @@ from datetime import datetime
 
 import pandas as pd
 import report_utils
-from logger_setup import get_logger
+from logging_setup import setup_logger
+import logging
 
-fn_logger = get_logger(__name__)
+setup_logger()
+fn_logger = logging.getLogger(__name__)
 
 
 def olustur_ozet_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
