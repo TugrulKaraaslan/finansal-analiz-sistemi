@@ -185,6 +185,13 @@ def generate_full_report(sonuc_dict: dict, out_xlsx: str | Path) -> Path:
     tarama_tarihi = sonuc_dict.get("tarama_tarihi", "")
     satis_tarihi = sonuc_dict.get("satis_tarihi", "")
 
+    if summary_df is None or getattr(summary_df, "empty", False):
+        out_xlsx = Path(out_xlsx)
+        out_xlsx.parent.mkdir(parents=True, exist_ok=True)
+        with pd.ExcelWriter(out_xlsx, engine="xlsxwriter") as w:
+            pd.DataFrame({"Uyari": ["Filtre bulunamadi"]}).to_excel(w, sheet_name="Uyari", index=False)
+        return out_xlsx
+
     ozet_df = report_utils.build_ozet_df(
         summary_df, detail_df, tarama_tarihi, satis_tarihi
     )
