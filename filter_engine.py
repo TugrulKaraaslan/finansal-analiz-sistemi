@@ -167,6 +167,16 @@ def uygula_filtreler(
         eksik_sutunlar = [
             s for s in kullanilan_sutunlar if s not in df_tarama_gunu.columns
         ]
+        if (
+            "volume_tl" in eksik_sutunlar
+            and {"volume", "close"} <= set(df_tarama_gunu.columns)
+        ):
+            df_tarama_gunu["volume_tl"] = (
+                df_tarama_gunu["volume"] * df_tarama_gunu["close"]
+            )
+            eksik_sutunlar = [
+                s for s in kullanilan_sutunlar if s not in df_tarama_gunu.columns
+            ]
         if {"psar_long", "psar_short"} <= set(
             df_tarama_gunu.columns
         ) and "psar" in eksik_sutunlar:

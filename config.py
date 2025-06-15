@@ -117,7 +117,7 @@ TA_STRATEGY = ta.Strategy(
         {"kind": "cci", "length": 20, "col_names": ("cci_20",)},
         {"kind": "cmo", "length": 14, "col_names": ("cmo_14",)},
         {"kind": "roc", "length": 12, "col_names": ("roc_12",)},
-        {"kind": "mom", "length": 10, "col_names": ("mom_10",)},
+        {"kind": "mom", "length": 10, "col_names": ("momentum_10",)},
         {
             "kind": "ppo",
             "fast": 12,
@@ -219,6 +219,7 @@ INDIKATOR_AD_ESLESTIRME = {
     "supertl_7_3.0": "supertrend_long_7_3",
     "superts_7_3.0": "supertrend_short_7_3",
     "vwap_d": "vwap",
+    "mom_10": "momentum_10",
     "dmp_14": "positivedirectionalindicator_14",
     "dmn_14": "negativedirectionalindicator_14",
     "aroonu_14": "aroonu_14",
