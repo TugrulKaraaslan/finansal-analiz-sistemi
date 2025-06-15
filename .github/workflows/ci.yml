@@ -17,6 +17,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --timeout 60 --retries 3 --upgrade setuptools
           pip install --timeout 60 --retries 3 -r requirements.txt
+          pip install --timeout 60 --retries 3 --upgrade kaleido
 
       - run: pytest -q
       - name: Run simple backtest

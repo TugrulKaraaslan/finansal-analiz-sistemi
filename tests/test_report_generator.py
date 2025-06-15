@@ -111,3 +111,11 @@ def test_generate_full_report(tmp_path):
     header = [c.value for c in wb["Özet"][1]]
     assert "sebep_kodu" in header
     wb.close()
+
+    img = tmp_path / "summary.png"
+    assert img.exists()
+
+    import zipfile
+    with zipfile.ZipFile(out) as zf:
+        images = [n for n in zf.namelist() if n.startswith("xl/media/")]
+        assert images

@@ -185,7 +185,9 @@ def generate_full_report(sonuc_dict: dict, out_xlsx: str | Path) -> Path:
     tarama_tarihi = sonuc_dict.get("tarama_tarihi", "")
     satis_tarihi = sonuc_dict.get("satis_tarihi", "")
 
-    ozet_df = report_utils.build_ozet_df(summary_df, detail_df, tarama_tarihi, satis_tarihi)
+    ozet_df = report_utils.build_ozet_df(
+        summary_df, detail_df, tarama_tarihi, satis_tarihi
+    )
     detay_df = report_utils.build_detay_df(summary_df, detail_df)
     stats_df = report_utils.build_stats_df(ozet_df)
 
@@ -214,6 +216,9 @@ def generate_full_report(sonuc_dict: dict, out_xlsx: str | Path) -> Path:
 
         ws_stats = w.sheets["İstatistik"]
         ws_stats.set_row(0, None, fmt_bold)
+        ws_stats.autofilter(0, 0, len(stats_df), len(report_utils.DEFAULT_STATS_COLS) - 1)
+
+        ws_chart.set_row(0, None, fmt_bold)
 
     return out_xlsx
 
