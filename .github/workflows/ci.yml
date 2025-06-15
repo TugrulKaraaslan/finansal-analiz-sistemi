@@ -18,6 +18,7 @@ jobs:
           pip install --timeout 60 --retries 3 --upgrade setuptools
           pip install --timeout 60 --retries 3 -r requirements.txt
           pip install --timeout 60 --retries 3 --upgrade kaleido
+          pip install --timeout 60 --retries 3 matplotlib xlsxwriter streamlit
 
       - run: pytest -q
       - name: Run simple backtest
@@ -38,6 +39,12 @@ jobs:
               open('ci.log','w').write('ci log')
           log_to_health.generate(log_files[-1], ['cikti/raporlar/rapor_ci.xlsx'])
           PY
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: 'cikti/raporlar/rapor_*.xlsx'
 
   docker:
     needs: test
