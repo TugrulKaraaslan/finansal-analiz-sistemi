@@ -49,6 +49,17 @@ docker build -t finansal_analiz .
 docker run --rm finansal_analiz
 ```
 
+## Komut Satırı Kullanımı
+
+Temel script `main.py` aşağıdaki parametreleri kabul eder:
+
+```bash
+python main.py --tarama 01.01.2025 --satis 05.01.2025 [--gui]
+```
+
+* `--tarama` ve `--satis` tarihleri `dd.mm.yyyy` formatındadır.
+* `--gui` verildiğinde sonuçlar basit bir Streamlit arayüzünde görüntülenir.
+
 
 ## Otomatik Sağlık Raporu
 Backtest tamamlandığında son log dosyası ve üretilen rapor kullanılarak ek bir "sağlık" raporu oluşturulur. Bu Excel dosyası `sağlık_raporu_<tarih>.xlsx` adıyla çalışma dizinine kaydedilir.
