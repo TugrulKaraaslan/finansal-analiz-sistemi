@@ -6,6 +6,7 @@ pandas-ta==0.3.14b0    # pandas-ta, NumPy 1 ile uyumlu
 holidays               # tarih/tatil kontrolü için
 openpyxl>=3.1
 xlsxwriter>=3.1
+plotly>=5.20
 pytest>=7.4.0
 
 # (İLERİDE GitHub erişimi açılırsa, üstteki üç satırı sil
