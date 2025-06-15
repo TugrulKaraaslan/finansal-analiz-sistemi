@@ -43,10 +43,10 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
             st.write("Grafik için veri yok")
 
 
-from logging_setup import setup_logger
+from utils.logging_setup import setup_logger, get_logger
 
 log_counter = setup_logger()
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def veri_yukle():

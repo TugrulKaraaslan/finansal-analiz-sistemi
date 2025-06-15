@@ -64,3 +64,8 @@ def setup_logger(level: int = logging.INFO) -> CounterFilter:
 
     logging.basicConfig(level=level, handlers=[console_handler, file_handler])
     return _counter_filter
+
+
+def get_logger(name: str) -> logging.Logger:
+    """Return a module-level logger."""
+    return logging.getLogger(name)

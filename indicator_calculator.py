@@ -23,11 +23,11 @@ import utils
 
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 
-from logging_setup import setup_logger
+from utils.logging_setup import setup_logger, get_logger
 import logging
 
 setup_logger()
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # --- Yeni Özel İndikatör Fonksiyonları (Filtrelerle Uyum İçin) ---
 
@@ -301,7 +301,9 @@ def _calculate_volume_price(
 
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
     """Eksikse basit veya üssel hareketli ortalama kolonu ekler."""
-    local_logger = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    local_logger = logger_param
     col = f"{kind}_{n}"
     if col in df.columns or "close" not in df.columns:
         return
@@ -448,7 +450,9 @@ def _calculate_series_series_crossover(
     col_name_below: str,
     logger_param=None,
 ) -> tuple[pd.Series, pd.Series] | None:
-    local_logger = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    local_logger = logger_param
 
     if s1_col not in group_df or s2_col not in group_df:
         local_logger.debug(f"Crossover atlandı – {s1_col} / {s2_col} yok")
@@ -492,7 +496,9 @@ def _calculate_series_value_crossover(
     suffix: str,
     logger_param=None,
 ) -> tuple[pd.Series, pd.Series] | None:
-    local_logger = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    local_logger = logger_param
 
     if s_col not in group_df.columns:
         local_logger.debug(f"Skipped crossover {s_col} vs {value} – missing col")
@@ -811,7 +817,9 @@ def _calculate_group_indicators_and_crossovers(
 def hesapla_teknik_indikatorler_ve_kesisimler(
     df_islenmis_veri: pd.DataFrame, logger_param=None
 ) -> pd.DataFrame | None:
-    ana_logger = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    ana_logger = logger_param
     ana_logger.info(
         "Teknik indikatörler ve kesişim sinyalleri hesaplanmaya başlanıyor..."
     )

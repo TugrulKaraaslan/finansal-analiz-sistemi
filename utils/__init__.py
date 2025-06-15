@@ -7,10 +7,10 @@
 
 import pandas as pd
 import logging
-from logging_setup import setup_logger
+from utils.logging_setup import setup_logger, get_logger
 
 setup_logger()
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def _align(a: pd.Series, b: pd.Series):

@@ -18,11 +18,11 @@ def _extract_query_columns(query: str) -> set:
     return tokens - reserved
 
 
-from logging_setup import setup_logger
+from utils.logging_setup import setup_logger, get_logger
 import logging
 
 setup_logger()
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def uygula_filtreler(
@@ -51,7 +51,9 @@ def uygula_filtreler(
             }
             - atlanmis_filtreler_log_dict: {filtre_kodu: hata_mesajı}
     """
-    fn_logger = logger_param or get_logger(f"{__name__}.uygula_filtreler")
+    if logger_param is None:
+        logger_param = logger
+    fn_logger = logger_param
     fn_logger.info(
         f"Filtreleme işlemi başlatılıyor. Tarama Tarihi: {tarama_tarihi.strftime('%d.%m.%Y')}"
     )

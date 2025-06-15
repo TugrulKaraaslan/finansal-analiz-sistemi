@@ -4,16 +4,18 @@ from datetime import datetime
 
 import pandas as pd
 import report_utils
-from logging_setup import setup_logger
+from utils.logging_setup import setup_logger, get_logger
 import logging
 
 setup_logger()
-fn_logger = logging.getLogger(__name__)
+fn_logger = get_logger(__name__)
 
 
 def olustur_ozet_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
     """Sonuç listesinde beklenen anahtarlar: 'hisseler', 'notlar' ve
     her hisse için 'getiri_yuzde'."""
+    if logger is None:
+        logger = fn_logger
     os.makedirs(cikti_klasoru, exist_ok=True)
     ozet_kayitlar = []
 
@@ -48,8 +50,7 @@ def olustur_ozet_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
         cikti_klasoru, f"ozet_rapor_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
     )
     df.to_csv(dosya_adi, index=False, encoding="utf-8-sig")
-    if logger:
-        logger.info(f"Özet rapor oluşturuldu: {dosya_adi}")
+    logger.info(f"Özet rapor oluşturuldu: {dosya_adi}")
     return dosya_adi
 
 
@@ -57,6 +58,8 @@ def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger
     """Her sonucun 'hisseler' listesinde 'alis_tarihi', 'satis_tarihi',
     'uygulanan_strateji' ve 'getiri_yuzde' alanları ile ana sözlükte 'notlar'
     anahtarlarını bekler."""
+    if logger is None:
+        logger = fn_logger
     os.makedirs(cikti_klasoru, exist_ok=True)
     detayli_kayitlar = []
 
@@ -98,8 +101,7 @@ def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger
         f"hisse_bazli_rapor_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
     )
     df.to_csv(dosya_adi, index=False, encoding="utf-8-sig")
-    if logger:
-        logger.info(f"Hisse bazlı detaylı rapor oluşturuldu: {dosya_adi}")
+    logger.info(f"Hisse bazlı detaylı rapor oluşturuldu: {dosya_adi}")
     return dosya_adi
 
 
@@ -110,6 +112,8 @@ def olustur_hatali_filtre_raporu(
     içerdiği varsayılır."""
     if not hatalar_listesi:
         return None
+    if logger is None:
+        logger = fn_logger
     os.makedirs(cikti_klasoru, exist_ok=True)
     df = pd.DataFrame(hatalar_listesi)
     dosya_adi = os.path.join(
@@ -117,16 +121,16 @@ def olustur_hatali_filtre_raporu(
         f"hatali_filtre_raporu_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
     )
     df.to_csv(dosya_adi, index=False, encoding="utf-8-sig")
-    if logger:
-        logger.info(f"Hatalı filtre raporu oluşturuldu: {dosya_adi}")
+    logger.info(f"Hatalı filtre raporu oluşturuldu: {dosya_adi}")
     return dosya_adi
 
 
 def olustur_excel_raporu(kayitlar: list[dict], fname: str | Path, logger=None):
     """Given summary records, save them into a single-sheet Excel file."""
+    if logger is None:
+        logger = fn_logger
     if not kayitlar:
-        if logger:
-            logger.warning("Hiç kayıt yok – Excel raporu atlandı.")
+        logger.warning("Hiç kayıt yok – Excel raporu atlandı.")
         return None
 
     rapor_df = pd.DataFrame(kayitlar).sort_values("filtre_kodu")

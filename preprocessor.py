@@ -10,11 +10,11 @@ import numpy as np
 import config
 import re
 
-from logging_setup import setup_logger
+from utils.logging_setup import setup_logger, get_logger
 import logging
 
 setup_logger()
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 try:
     import holidays
@@ -74,7 +74,9 @@ def on_isle_hisse_verileri(
     - Veriyi sıralar.
     - İsteğe bağlı olarak BIST tatil günlerini çıkarır.
     """
-    fn_logger = logger_param or logger
+    if logger_param is None:
+        logger_param = logger
+    fn_logger = logger_param
     fn_logger.info("Veri ön işleme adımı başlatılıyor...")
 
     if df_ham is None or df_ham.empty:
