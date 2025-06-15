@@ -9,6 +9,8 @@ import pandas as pd
 import re
 import keyword
 
+from filtre_dogrulama import SEBEP_KODLARI
+
 
 def _extract_query_columns(query: str) -> set:
     tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
@@ -50,7 +52,13 @@ def uygula_filtreler(
 
     Returns:
         tuple[dict, dict]:
-            - filtrelenmis_hisseler_dict: {filtre_kodu: [hisse_listesi]}
+            - filtre_sonuclar: {
+                filtre_kodu: {
+                    "hisseler": list[str],
+                    "sebep": str,
+                    "hisse_sayisi": int,
+                }
+            }
             - atlanmis_filtreler_log_dict: {filtre_kodu: hata_mesajı}
     """
     fn_logger = logger_param or get_logger(f"{__name__}.uygula_filtreler")
@@ -120,7 +128,7 @@ def uygula_filtreler(
         f"Tarama günü DataFrame sütunları (ilk 10): {df_tarama_gunu.columns.tolist()[:10]}"
     )
 
-    filtrelenmis_hisseler_dict = {}
+    filtre_sonuclar = {}
     atlanmis_filtreler_log_dict = {}
 
     for index, row in df_filtre_kurallari.iterrows():
@@ -132,7 +140,11 @@ def uygula_filtreler(
                 f"Filtre '{filtre_kodu}': Python sorgusu boş veya NaN, atlanıyor."
             )
             atlanmis_filtreler_log_dict[filtre_kodu] = "Python sorgusu boş veya NaN."
-            filtrelenmis_hisseler_dict[filtre_kodu] = []
+            filtre_sonuclar[filtre_kodu] = {
+                "hisseler": [],
+                "sebep": "NO_STOCK",
+                "hisse_sayisi": 0,
+            }
             continue
 
         python_sorgusu = str(python_sorgusu_raw)
@@ -154,7 +166,11 @@ def uygula_filtreler(
             hata_mesaji = f"Eksik sütunlar: {', '.join(eksik_sutunlar)}"
             fn_logger.error(f"Filtre '{filtre_kodu}' sorgusunda {hata_mesaji}.")
             atlanmis_filtreler_log_dict[filtre_kodu] = hata_mesaji
-            filtrelenmis_hisseler_dict[filtre_kodu] = []
+            filtre_sonuclar[filtre_kodu] = {
+                "hisseler": [],
+                "sebep": "MISSING_COL",
+                "hisse_sayisi": 0,
+            }
             continue
 
         try:
@@ -170,13 +186,20 @@ def uygula_filtreler(
 
             if not filtrelenmis_df.empty:
                 hisse_kodlari_listesi = filtrelenmis_df["hisse_kodu"].unique().tolist()
-                filtrelenmis_hisseler_dict[filtre_kodu] = hisse_kodlari_listesi
+                sebep_kodu = "OK"
                 fn_logger.info(
                     f"Filtre '{filtre_kodu}': {len(hisse_kodlari_listesi)} hisse bulundu. (Örnek: {hisse_kodlari_listesi[:3]})"
                 )
             else:
-                filtrelenmis_hisseler_dict[filtre_kodu] = []  # Boş liste ata
+                hisse_kodlari_listesi = []
+                sebep_kodu = "NO_STOCK"
                 fn_logger.debug(f"Filtre '{filtre_kodu}': Uygun hisse bulunamadı.")
+
+            filtre_sonuclar[filtre_kodu] = {
+                "hisseler": hisse_kodlari_listesi,
+                "sebep": sebep_kodu,
+                "hisse_sayisi": len(hisse_kodlari_listesi),
+            }
 
         except pd.errors.UndefinedVariableError as e_undef_var:
             # Hata mesajından hangi değişkenin/sütunun tanımsız olduğunu ayıkla
@@ -191,7 +214,11 @@ def uygula_filtreler(
                 exc_info=False,
             )
             atlanmis_filtreler_log_dict[filtre_kodu] = hata_mesaji
-            filtrelenmis_hisseler_dict[filtre_kodu] = []
+            filtre_sonuclar[filtre_kodu] = {
+                "hisseler": [],
+                "sebep": "MISSING_COL",
+                "hisse_sayisi": 0,
+            }
         except SyntaxError as e_syntax:
             hata_mesaji = f"Syntax (yazım) hatası. Sorgu: '{python_sorgusu}'"
             fn_logger.error(
@@ -199,7 +226,11 @@ def uygula_filtreler(
                 exc_info=False,
             )
             atlanmis_filtreler_log_dict[filtre_kodu] = hata_mesaji
-            filtrelenmis_hisseler_dict[filtre_kodu] = []
+            filtre_sonuclar[filtre_kodu] = {
+                "hisseler": [],
+                "sebep": "QUERY_ERROR",
+                "hisse_sayisi": 0,
+            }
         except Exception as e_query:  # Diğer olası query hataları
             hata_mesaji = (
                 f"Sorgu uygulanırken beklenmedik hata. Sorgu: '{python_sorgusu}'"
@@ -209,10 +240,14 @@ def uygula_filtreler(
                 exc_info=True,
             )
             atlanmis_filtreler_log_dict[filtre_kodu] = f"{hata_mesaji} Detay: {e_query}"
-            filtrelenmis_hisseler_dict[filtre_kodu] = []
+            filtre_sonuclar[filtre_kodu] = {
+                "hisseler": [],
+                "sebep": "QUERY_ERROR",
+                "hisse_sayisi": 0,
+            }
 
     fn_logger.info(
-        f"Tüm filtreler uygulandı. {len(filtrelenmis_hisseler_dict)} filtre için sonuç listesi üretildi."
+        f"Tüm filtreler uygulandı. {len(filtre_sonuclar)} filtre için sonuç listesi üretildi."
     )
     if atlanmis_filtreler_log_dict:
         fn_logger.warning(
@@ -221,4 +256,4 @@ def uygula_filtreler(
         for fk, err_msg in atlanmis_filtreler_log_dict.items():
             fn_logger.debug(f"  Atlanan/Hatalı Filtre '{fk}': {err_msg}")
 
-    return filtrelenmis_hisseler_dict, atlanmis_filtreler_log_dict
+    return filtre_sonuclar, atlanmis_filtreler_log_dict
