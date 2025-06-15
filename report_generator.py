@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime
 
 import pandas as pd
+import report_utils
 from logger_setup import get_logger
 
 fn_logger = get_logger(__name__)
@@ -176,6 +177,45 @@ def kaydet_raporlar(
 
     return filepath
 
+
+def generate_full_report(sonuc_dict: dict, out_xlsx: str | Path) -> Path:
+    """Build dataframes from results and write a four-sheet Excel report."""
+    summary_df = sonuc_dict.get("summary")
+    detail_df = sonuc_dict.get("detail")
+    tarama_tarihi = sonuc_dict.get("tarama_tarihi", "")
+    satis_tarihi = sonuc_dict.get("satis_tarihi", "")
+
+    ozet_df = report_utils.build_ozet_df(summary_df, detail_df, tarama_tarihi, satis_tarihi)
+    detay_df = report_utils.build_detay_df(summary_df, detail_df)
+    stats_df = report_utils.build_stats_df(ozet_df)
+
+    fig = report_utils.plot_summary_stats(ozet_df, detail_df)
+    img_path = Path(out_xlsx).with_name("summary.png")
+    fig.write_image(str(img_path))
+
+    out_xlsx = Path(out_xlsx)
+    out_xlsx.parent.mkdir(parents=True, exist_ok=True)
+
+    with pd.ExcelWriter(out_xlsx, engine="xlsxwriter") as w:
+        ozet_df.to_excel(w, sheet_name="Özet", index=False)
+        detay_df.to_excel(w, sheet_name="Detay", index=False)
+        stats_df.to_excel(w, sheet_name="İstatistik", index=False)
+        ws_chart = w.book.add_worksheet("Grafikler")
+        ws_chart.insert_image("A1", str(img_path))
+
+        fmt_bold = w.book.add_format({"bold": True})
+        ws_sum = w.sheets["Özet"]
+        ws_sum.set_row(0, None, fmt_bold)
+        ws_sum.autofilter(0, 0, len(ozet_df), len(report_utils.DEFAULT_OZET_COLS) - 1)
+
+        ws_det = w.sheets["Detay"]
+        ws_det.set_row(0, None, fmt_bold)
+        ws_det.autofilter(0, 0, len(detay_df), len(report_utils.DEFAULT_DETAY_COLS) - 1)
+
+        ws_stats = w.sheets["İstatistik"]
+        ws_stats.set_row(0, None, fmt_bold)
+
+    return out_xlsx
 
 if __name__ == "__main__":
     from pathlib import Path
