@@ -16,6 +16,14 @@ import utils
 import report_utils
 
 
+def _parse_date(dt_str: str) -> pd.Timestamp:
+    """Parse date from 'DD.MM.YYYY' or ISO 'YYYY-MM-DD'."""
+    try:
+        return pd.to_datetime(dt_str, format="%Y-%m-%d", dayfirst=False)
+    except ValueError:
+        return pd.to_datetime(dt_str, format="%d.%m.%Y", dayfirst=True)
+
+
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
     """Rapor için örnek özet, detay ve istatistik DataFrame'leri üretir."""
     if rapor_df is None or rapor_df.empty:
@@ -182,10 +190,14 @@ def calistir_tum_sistemi(
     df_filtre_kurallari, df_raw = veri_yukle(force_excel_reload_param)
     df_processed = on_isle(df_raw)
     df_indicator = indikator_hesapla(df_processed)
-    tarama_dt = pd.to_datetime(tarama_tarihi_str, format="%d.%m.%Y")
+    tarama_dt = _parse_date(tarama_tarihi_str)
+    satis_dt = _parse_date(satis_tarihi_str)
     filtre_sonuclar, atlanmis = filtre_uygula(df_indicator, tarama_dt)
     rapor_df, detay_df = backtest_yap(
-        df_indicator, filtre_sonuclar, tarama_tarihi_str, satis_tarihi_str
+        df_indicator,
+        filtre_sonuclar,
+        tarama_tarihi_str,
+        satis_tarihi_str,
     )
     raporla(rapor_df, detay_df)
     return rapor_df, detay_df, atlanmis
