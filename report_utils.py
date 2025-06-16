@@ -1,6 +1,5 @@
 # report_utils.py
 import pandas as pd
-from pathlib import Path
 from openpyxl.chart import BarChart, Reference
 from openpyxl.utils import get_column_letter
 import report_stats
@@ -38,13 +37,31 @@ DEFAULT_STATS_COLS = [
 ]
 
 
-def build_ozet_df(summary_df: pd.DataFrame, detail_df: pd.DataFrame, tarama_tarihi: str = "", satis_tarihi: str = "") -> pd.DataFrame:
-    df = report_stats.build_ozet_df(summary_df, detail_df, tarama_tarihi, satis_tarihi)
+def build_ozet_df(
+    summary_df: pd.DataFrame,
+    detail_df: pd.DataFrame,
+    tarama_tarihi: str = "",
+    satis_tarihi: str = "",
+) -> pd.DataFrame:
+    df = report_stats.build_ozet_df(
+        summary_df,
+        detail_df,
+        tarama_tarihi,
+        satis_tarihi,
+    )
     return df.reindex(columns=DEFAULT_OZET_COLS)
 
 
-def build_detay_df(summary_df: pd.DataFrame, detail_df: pd.DataFrame, strateji: str | None = None) -> pd.DataFrame:
-    df = report_stats.build_detay_df(summary_df, detail_df, strateji)
+def build_detay_df(
+    summary_df: pd.DataFrame,
+    detail_df: pd.DataFrame,
+    strateji: str | None = None,
+) -> pd.DataFrame:
+    df = report_stats.build_detay_df(
+        summary_df,
+        detail_df,
+        strateji,
+    )
     return df.reindex(columns=DEFAULT_DETAY_COLS)
 
 
@@ -53,8 +70,16 @@ def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
     return df.reindex(columns=DEFAULT_STATS_COLS)
 
 
-def plot_summary_stats(ozet_df: pd.DataFrame, detail_df: pd.DataFrame, std_threshold: float = 5.0):
-    return report_stats.plot_summary_stats(ozet_df, detail_df, std_threshold)
+def plot_summary_stats(
+    ozet_df: pd.DataFrame,
+    detail_df: pd.DataFrame,
+    std_threshold: float = 5.0,
+):
+    return report_stats.plot_summary_stats(
+        ozet_df,
+        detail_df,
+        std_threshold,
+    )
 
 
 def add_bar_chart(ws, data_idx: int, label_idx: int, title: str) -> BarChart:
@@ -64,9 +89,9 @@ def add_bar_chart(ws, data_idx: int, label_idx: int, title: str) -> BarChart:
     ----------
     ws : openpyxl.Worksheet
         Target worksheet containing data.
-    data_col : int
+    data_idx : int
         Column index (1-based) of numeric data.
-    label_col : int
+    label_idx : int
         Column index (1-based) for category labels.
     title : str
         Title of the chart.
