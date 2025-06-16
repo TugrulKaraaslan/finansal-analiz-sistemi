@@ -6,7 +6,6 @@
 # Tarih: 18 Mayıs 2025 (Yorumlar eklendi, NaN yönetimi teyit edildi)
 
 import pandas as pd
-import logging
 from utils.logging_setup import setup_logger, get_logger
 from functools import lru_cache
 from io import StringIO
@@ -27,7 +26,7 @@ def crosses_above(a: pd.Series, b: pd.Series) -> pd.Series:
     return (x.shift(1) < y.shift(1)) & (x >= y)
 
 
-def crosses_below(a, b):
+def crosses_below(a: pd.Series, b: pd.Series) -> pd.Series:
     if a is None or b is None:
         return pd.Series(False, index=[])
     x, y = _align(a, b)
