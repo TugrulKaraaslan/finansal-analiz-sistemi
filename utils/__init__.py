@@ -8,6 +8,8 @@
 import pandas as pd
 import logging
 from utils.logging_setup import setup_logger, get_logger
+from functools import lru_cache
+from io import StringIO
 
 setup_logger()
 logger = get_logger(__name__)
@@ -67,3 +69,31 @@ def extract_columns_from_filters(
             wanted.add(entry[0])
 
     return wanted
+
+
+@lru_cache(maxsize=1)
+def extract_columns_from_filters_cached(
+    df_filters_csv: str,
+    series_series: list | None,
+    series_value: list | None,
+) -> set:
+    """Cacheable wrapper for ``extract_columns_from_filters``.
+
+    Parameters
+    ----------
+    df_filters_csv : str
+        CSV representation of the filters DataFrame.
+    series_series : list | None
+        Definitions for series/series crossovers.
+    series_value : list | None
+        Definitions for series/value crossovers.
+    """
+
+    df_filters = None
+    if df_filters_csv:
+        try:
+            df_filters = pd.read_csv(StringIO(df_filters_csv))
+        except Exception:
+            df_filters = None
+
+    return extract_columns_from_filters(df_filters, series_series, series_value)
