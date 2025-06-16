@@ -14,14 +14,12 @@ import argparse
 import config
 import utils
 import report_utils
+from utils.date_utils import parse_date
 
 
 def _parse_date(dt_str: str) -> pd.Timestamp:
     """Parse date from 'DD.MM.YYYY' or ISO 'YYYY-MM-DD'."""
-    try:
-        return pd.to_datetime(dt_str, format="%Y-%m-%d", dayfirst=False)
-    except ValueError:
-        return pd.to_datetime(dt_str, format="%d.%m.%Y", dayfirst=True)
+    return parse_date(dt_str)
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
@@ -190,8 +188,8 @@ def calistir_tum_sistemi(
     df_filtre_kurallari, df_raw = veri_yukle(force_excel_reload_param)
     df_processed = on_isle(df_raw)
     df_indicator = indikator_hesapla(df_processed)
-    tarama_dt = _parse_date(tarama_tarihi_str)
-    satis_dt = _parse_date(satis_tarihi_str)
+    tarama_dt = parse_date(tarama_tarihi_str)
+    satis_dt = parse_date(satis_tarihi_str)
     filtre_sonuclar, atlanmis = filtre_uygula(df_indicator, tarama_dt)
     rapor_df, detay_df = backtest_yap(
         df_indicator,
@@ -267,6 +265,11 @@ if __name__ == "__main__":
             f"Ana çalıştırma (`if __name__ == '__main__':`) bloğunda BEKLENMEDİK KRİTİK HATA: {e_main_run}",
             exc_info=True,
         )
+        # yine de boş rapor yaz
+        empty = pd.DataFrame()
+        from report_generator import generate_full_report
+        generate_full_report(empty, empty, log_counter.error_list, out_path="cikti/rapor_empty.xlsx")
+        sys.exit(1)
     finally:
         logger.info(
             f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT TAMAMLANDI ======="
@@ -276,4 +279,8 @@ if __name__ == "__main__":
             f"atlanan_filtre={','.join(atlanmis.keys()) if atlanmis else ''}"
         )
         logger.info(summary_line)
+        if log_counter.errors > 0 and 'rapor_path' in locals():
+            from report_generator import add_error_sheet
+            with pd.ExcelWriter(rapor_path, mode="a", if_sheet_exists="replace", engine="openpyxl") as wr:
+                add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
