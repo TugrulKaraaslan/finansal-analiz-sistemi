@@ -12,6 +12,8 @@ import logging
 from pathlib import Path
 import argparse
 import config
+import utils
+import report_utils
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
@@ -74,8 +76,16 @@ def on_isle(df: pd.DataFrame) -> pd.DataFrame:
 
 def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate indicators and crossovers."""
+    wanted_cols = utils.extract_columns_from_filters_cached(
+        df_filtre_kurallari.to_csv(index=False),
+        tuple(config.SERIES_SERIES_CROSSOVERS),
+        tuple(config.SERIES_VALUE_CROSSOVERS),
+    )
     result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
-        df, logger_param=logger
+        df,
+        wanted_cols=wanted_cols,
+        df_filters=df_filtre_kurallari,
+        logger_param=logger,
     )
     if result is None:
         logger.critical("İndikatör hesaplanamadı.")
@@ -199,13 +209,16 @@ if __name__ == "__main__":
             out_path.parent.mkdir(parents=True, exist_ok=True)
             rapor_path = report_generator.generate_full_report(sonuc_dict, out_path)
             print(f"Rapor oluşturuldu → {rapor_path}")
+            df_ozet = report_utils.build_ozet_df(
+                rapor_df, detay_df, tarama_t, satis_t
+            )
             with pd.ExcelWriter(
                 out_path,
                 mode="a",
                 if_sheet_exists="replace",
                 engine="openpyxl",
             ) as wr:
-                report_generator.olustur_hatali_filtre_raporu(atlanmis, wr)
+                report_generator.olustur_hatali_filtre_raporu(atlanmis, wr, df_ozet)
         else:
             logger.info("Rapor verisi boş, Excel oluşturulmadı.")
 

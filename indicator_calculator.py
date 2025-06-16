@@ -830,7 +830,10 @@ def _calculate_group_indicators_and_crossovers(
 
 
 def hesapla_teknik_indikatorler_ve_kesisimler(
-    df_islenmis_veri: pd.DataFrame, logger_param=None
+    df_islenmis_veri: pd.DataFrame,
+    wanted_cols=None,
+    df_filters: pd.DataFrame | None = None,
+    logger_param=None,
 ) -> pd.DataFrame | None:
     if logger_param is None:
         logger_param = logger
@@ -863,15 +866,22 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
     ozel_sutun_params = config.OZEL_SUTUN_PARAMS
     indikator_ad_eslestirme = config.INDIKATOR_AD_ESLESTIRME
 
-    try:
-        filtre_df = pd.read_csv(config.FILTRE_DOSYA_YOLU, sep=";", engine="python")
-    except Exception:
-        filtre_df = pd.DataFrame()
-    wanted_cols = utils.extract_columns_from_filters_cached(
-        filtre_df.to_csv(index=False),
-        tuple(series_series_crossovers),
-        tuple(series_value_crossovers),
-    )
+    filtre_df = df_filters
+    if filtre_df is None:
+        try:
+            filtre_df = pd.read_csv(
+                config.FILTRE_DOSYA_YOLU, sep=";", engine="python"
+            )
+        except Exception:
+            filtre_df = pd.DataFrame()
+
+    if wanted_cols is None:
+        csv_str = filtre_df.to_csv(index=False) if not filtre_df.empty else ""
+        wanted_cols = utils.extract_columns_from_filters_cached(
+            csv_str,
+            tuple(series_series_crossovers),
+            tuple(series_value_crossovers),
+        )
 
     results_list = []
     grouped = df_islenmis_veri.groupby("hisse_kodu", group_keys=False)

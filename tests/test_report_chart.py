@@ -9,7 +9,7 @@ def test_add_bar_chart():
     ws.append(["filtre", "val"])
     for i in range(1, 6):
         ws.append([f"F{i}", i])
-    report_utils.add_bar_chart(ws, data_col=2, label_col=1, title="demo")
+    report_utils.add_bar_chart(ws, data_idx=2, label_idx=1, title="demo")
     assert len(ws._charts) > 0
     wb.close()
 

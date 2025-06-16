@@ -106,20 +106,45 @@ def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger
     return dosya_adi
 
 
-def olustur_hatali_filtre_raporu(atlanmis_dict: dict, writer) -> pd.DataFrame | None:
+def olustur_hatali_filtre_raporu(
+    atlanmis_dict: dict, writer, df_ozet: pd.DataFrame | None = None
+) -> pd.DataFrame | None:
     """Write skipped filter information into an Excel sheet named 'Hatalar'."""
 
-    if not atlanmis_dict:
+    if not atlanmis_dict and (df_ozet is None or df_ozet.empty):
         return None
 
-    df = pd.DataFrame(
-        [(k, v) for k, v in atlanmis_dict.items()],
-        columns=["filtre_kodu", "hata_mesaji"],
-    )
+    records = []
+    for k, v in atlanmis_dict.items():
+        if isinstance(v, dict):
+            records.append(
+                {
+                    "filtre_kodu": k,
+                    "hata_tipi": v.get("tip", "MISSING_COL"),
+                    "eksik_ad": ", ".join(v.get("eksik", [])),
+                    "detay": v.get("mesaj", ""),
+                    "cozum_onerisi": v.get("cozum", ""),
+                }
+            )
+        else:
+            records.append(
+                {
+                    "filtre_kodu": k,
+                    "hata_tipi": "GENERIC",
+                    "eksik_ad": "",
+                    "detay": str(v),
+                    "cozum_onerisi": "",
+                }
+            )
+    df_hatalar = pd.DataFrame(records)
 
-    df.to_excel(writer, sheet_name="Hatalar", index=False)
+    if df_ozet is not None and not df_ozet.empty:
+        df_hatalar_extra = df_ozet[df_ozet["sebep_kodu"].isin(["NO_STOCK", "DATA_GAP"])]
+        df_hatalar = pd.concat([df_hatalar, df_hatalar_extra], ignore_index=True)
+
+    df_hatalar.to_excel(writer, sheet_name="Hatalar", index=False)
     fn_logger.info("Hatalı filtre raporu Excel'e yazıldı.")
-    return df
+    return df_hatalar
 
 
 def olustur_excel_raporu(kayitlar: list[dict], fname: str | Path, logger=None):
@@ -240,7 +265,7 @@ def generate_full_report(sonuc_dict: dict, out_xlsx: str | Path) -> Path:
 
     wb = openpyxl.load_workbook(out_xlsx)
     ws_sum = wb["Özet"]
-    report_utils.add_bar_chart(ws_sum, data_col=3, label_col=1, title="En İyi 10 Ortalama Getiri")
+    report_utils.add_bar_chart(ws_sum, data_idx=3, label_idx=1, title="En İyi 10 Ortalama Getiri")
     wb.save(out_xlsx)
 
     return out_xlsx
