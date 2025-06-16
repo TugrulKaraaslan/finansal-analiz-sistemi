@@ -107,15 +107,8 @@ def test_generate_full_report(tmp_path):
     report_generator.generate_full_report(sonuc, out)
 
     wb = openpyxl.load_workbook(out)
-    assert wb.sheetnames[:4] == ["Özet", "Detay", "İstatistik", "Grafikler"]
+    assert wb.sheetnames[:3] == ["Özet", "Detay", "İstatistik"]
     header = [c.value for c in wb["Özet"][1]]
     assert "sebep_kodu" in header
+    assert len(wb["Özet"]._charts) > 0
     wb.close()
-
-    img = tmp_path / "summary.png"
-    assert img.exists()
-
-    import zipfile
-    with zipfile.ZipFile(out) as zf:
-        images = [n for n in zf.namelist() if n.startswith("xl/media/")]
-        assert images

@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime
 
 import pandas as pd
+import openpyxl
 import report_utils
 from utils.logging_setup import setup_logger, get_logger
 import logging
@@ -190,8 +191,17 @@ def generate_full_report(sonuc_dict: dict, out_xlsx: str | Path) -> Path:
     if summary_df is None or getattr(summary_df, "empty", False):
         out_xlsx = Path(out_xlsx)
         out_xlsx.parent.mkdir(parents=True, exist_ok=True)
-        with pd.ExcelWriter(out_xlsx, engine="xlsxwriter") as w:
-            pd.DataFrame({"Uyari": ["Filtre bulunamadi"]}).to_excel(w, sheet_name="Uyari", index=False)
+        with pd.ExcelWriter(
+            out_xlsx,
+            engine="openpyxl",
+            engine_kwargs={"write_only": True},
+            mode="w",
+        ) as w:
+            wb = w.book
+            ws = wb.create_sheet("Uyari")
+            ws.append(["Uyari"])
+            ws.append(["Filtre bulunamadi"])
+            w.sheets["Uyari"] = ws
         return out_xlsx
 
     ozet_df = report_utils.build_ozet_df(
@@ -200,34 +210,38 @@ def generate_full_report(sonuc_dict: dict, out_xlsx: str | Path) -> Path:
     detay_df = report_utils.build_detay_df(summary_df, detail_df)
     stats_df = report_utils.build_stats_df(ozet_df)
 
-    fig = report_utils.plot_summary_stats(ozet_df, detail_df)
-    img_path = Path(out_xlsx).with_name("summary.png")
-    fig.write_image(str(img_path))
-
     out_xlsx = Path(out_xlsx)
     out_xlsx.parent.mkdir(parents=True, exist_ok=True)
 
-    with pd.ExcelWriter(out_xlsx, engine="xlsxwriter") as w:
-        ozet_df.to_excel(w, sheet_name="Özet", index=False)
-        detay_df.to_excel(w, sheet_name="Detay", index=False)
-        stats_df.to_excel(w, sheet_name="İstatistik", index=False)
-        ws_chart = w.book.add_worksheet("Grafikler")
-        ws_chart.insert_image("A1", str(img_path))
+    from openpyxl.utils.dataframe import dataframe_to_rows
 
-        fmt_bold = w.book.add_format({"bold": True})
-        ws_sum = w.sheets["Özet"]
-        ws_sum.set_row(0, None, fmt_bold)
-        ws_sum.autofilter(0, 0, len(ozet_df), len(report_utils.DEFAULT_OZET_COLS) - 1)
+    with pd.ExcelWriter(
+        out_xlsx,
+        engine="openpyxl",
+        engine_kwargs={"write_only": True},
+        mode="w",
+    ) as w:
+        wb = w.book
 
-        ws_det = w.sheets["Detay"]
-        ws_det.set_row(0, None, fmt_bold)
-        ws_det.autofilter(0, 0, len(detay_df), len(report_utils.DEFAULT_DETAY_COLS) - 1)
+        ws_ozet = wb.create_sheet("Özet")
+        for r in dataframe_to_rows(ozet_df, index=False, header=True):
+            ws_ozet.append(r)
+        w.sheets["Özet"] = ws_ozet
 
-        ws_stats = w.sheets["İstatistik"]
-        ws_stats.set_row(0, None, fmt_bold)
-        ws_stats.autofilter(0, 0, len(stats_df), len(report_utils.DEFAULT_STATS_COLS) - 1)
+        ws_detay = wb.create_sheet("Detay")
+        for r in dataframe_to_rows(detay_df, index=False, header=True):
+            ws_detay.append(r)
+        w.sheets["Detay"] = ws_detay
 
-        ws_chart.set_row(0, None, fmt_bold)
+        ws_stats = wb.create_sheet("İstatistik")
+        for r in dataframe_to_rows(stats_df, index=False, header=True):
+            ws_stats.append(r)
+        w.sheets["İstatistik"] = ws_stats
+
+    wb = openpyxl.load_workbook(out_xlsx)
+    ws_sum = wb["Özet"]
+    report_utils.add_bar_chart(ws_sum, data_col=3, label_col=1, title="En İyi 10 Ortalama Getiri")
+    wb.save(out_xlsx)
 
     return out_xlsx
 

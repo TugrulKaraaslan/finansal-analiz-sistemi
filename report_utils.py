@@ -1,6 +1,8 @@
 # report_utils.py
 import pandas as pd
 from pathlib import Path
+from openpyxl.chart import BarChart, Reference
+from openpyxl.utils import get_column_letter
 import report_stats
 
 # Default column orders for generated reports
@@ -53,3 +55,33 @@ def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
 
 def plot_summary_stats(ozet_df: pd.DataFrame, detail_df: pd.DataFrame, std_threshold: float = 5.0):
     return report_stats.plot_summary_stats(ozet_df, detail_df, std_threshold)
+
+
+def add_bar_chart(ws, data_col: int, label_col: int, title: str) -> BarChart:
+    """Add a simple bar chart to the worksheet.
+
+    Parameters
+    ----------
+    ws : openpyxl.Worksheet
+        Target worksheet containing data.
+    data_col : int
+        Column index (1-based) of numeric data.
+    label_col : int
+        Column index (1-based) for category labels.
+    title : str
+        Title of the chart.
+    """
+
+    chart = BarChart()
+    chart.title = title
+
+    max_row = min(ws.max_row, 11)
+    data = Reference(ws, min_col=data_col, min_row=2, max_row=max_row)
+    labels = Reference(ws, min_col=label_col, min_row=2, max_row=max_row)
+    chart.add_data(data, titles_from_data=False)
+    chart.set_categories(labels)
+
+    anchor_col = get_column_letter(ws.max_column + 2)
+    ws.add_chart(chart, f"{anchor_col}2")
+
+    return chart
