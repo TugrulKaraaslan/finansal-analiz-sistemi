@@ -20,16 +20,9 @@ def test_generate_full_report_creates_files(tmp_path):
         "getiri_yuzde": [1.0],
         "basari": ["BAŞARILI"],
     })
-    sonuc = {
-        "summary": summary,
-        "detail": detail,
-        "tarama_tarihi": "01.01.2025",
-        "satis_tarihi": "02.01.2025",
-    }
     out = tmp_path / "full.xlsx"
-    path = report_generator.generate_full_report(sonuc, out)
+    path = report_generator.generate_full_report(summary, detail, [], out)
 
     wb = openpyxl.load_workbook(path)
-    assert wb.sheetnames[:3] == ["Özet", "Detay", "İstatistik"]
-    assert len(wb["Özet"]._charts) > 0
+    assert wb.sheetnames[:2] == ["Sonuclar", "Detaylar"]
     wb.close()

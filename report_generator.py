@@ -12,6 +12,14 @@ setup_logger()
 fn_logger = get_logger(__name__)
 
 
+def add_error_sheet(writer, error_list):
+    import pandas as pd
+    if error_list:
+        pd.DataFrame(error_list, columns=["timestamp", "level", "message"]).to_excel(
+            writer, sheet_name="Hatalar", index=False
+        )
+
+
 def olustur_ozet_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
     """Sonuç listesinde beklenen anahtarlar: 'hisseler', 'notlar' ve
     her hisse için 'getiri_yuzde'."""
@@ -206,69 +214,19 @@ def kaydet_raporlar(
     return filepath
 
 
-def generate_full_report(sonuc_dict: dict, out_xlsx: str | Path) -> Path:
-    """Build dataframes from results and write a four-sheet Excel report."""
-    summary_df = sonuc_dict.get("summary")
-    detail_df = sonuc_dict.get("detail")
-    tarama_tarihi = sonuc_dict.get("tarama_tarihi", "")
-    satis_tarihi = sonuc_dict.get("satis_tarihi", "")
+def generate_full_report(summary_df: pd.DataFrame, detail_df: pd.DataFrame, error_list: list, out_path: str | Path) -> Path:
+    """Write summary, detail and optional error sheets to Excel."""
 
-    if summary_df is None or getattr(summary_df, "empty", False):
-        out_xlsx = Path(out_xlsx)
-        out_xlsx.parent.mkdir(parents=True, exist_ok=True)
-        with pd.ExcelWriter(
-            out_xlsx,
-            engine="openpyxl",
-            engine_kwargs={"write_only": True},
-            mode="w",
-        ) as w:
-            wb = w.book
-            ws = wb.create_sheet("Uyari")
-            ws.append(["Uyari"])
-            ws.append(["Filtre bulunamadi"])
-            w.sheets["Uyari"] = ws
-        return out_xlsx
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    ozet_df = report_utils.build_ozet_df(
-        summary_df, detail_df, tarama_tarihi, satis_tarihi
-    )
-    detay_df = report_utils.build_detay_df(summary_df, detail_df)
-    stats_df = report_utils.build_stats_df(ozet_df)
+    with pd.ExcelWriter(out_path, engine="xlsxwriter") as writer:
+        summary_df.to_excel(writer, sheet_name="Sonuclar", index=False)
+        detail_df.to_excel(writer, sheet_name="Detaylar", index=False)
+        add_error_sheet(writer, error_list)
 
-    out_xlsx = Path(out_xlsx)
-    out_xlsx.parent.mkdir(parents=True, exist_ok=True)
-
-    from openpyxl.utils.dataframe import dataframe_to_rows
-
-    with pd.ExcelWriter(
-        out_xlsx,
-        engine="openpyxl",
-        engine_kwargs={"write_only": True},
-        mode="w",
-    ) as w:
-        wb = w.book
-
-        ws_ozet = wb.create_sheet("Özet")
-        for r in dataframe_to_rows(ozet_df, index=False, header=True):
-            ws_ozet.append(r)
-        w.sheets["Özet"] = ws_ozet
-
-        ws_detay = wb.create_sheet("Detay")
-        for r in dataframe_to_rows(detay_df, index=False, header=True):
-            ws_detay.append(r)
-        w.sheets["Detay"] = ws_detay
-
-        ws_stats = wb.create_sheet("İstatistik")
-        for r in dataframe_to_rows(stats_df, index=False, header=True):
-            ws_stats.append(r)
-        w.sheets["İstatistik"] = ws_stats
-
-    wb = openpyxl.load_workbook(out_xlsx)
-    ws_sum = wb["Özet"]
-    report_utils.add_bar_chart(ws_sum, data_idx=3, label_idx=1, title="En İyi 10 Ortalama Getiri")
-    wb.save(out_xlsx)
-
-    return out_xlsx
+    fn_logger.info(f"Rapor kaydedildi → {out_path}")
+    return out_path
 
 if __name__ == "__main__":
     from pathlib import Path

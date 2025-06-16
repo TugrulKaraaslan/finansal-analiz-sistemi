@@ -26,10 +26,14 @@ class CounterFilter(logging.Filter):
         super().__init__("counter")
         self.errors = 0
         self.warnings = 0
+        self.error_list: list[tuple[str, str, str]] = []
 
     def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
         if record.levelno == logging.ERROR:
             self.errors += 1
+            self.error_list.append(
+                (datetime.now().isoformat(timespec="seconds"), "ERROR", record.getMessage())
+            )
         elif record.levelno == logging.WARNING:
             self.warnings += 1
         return True
