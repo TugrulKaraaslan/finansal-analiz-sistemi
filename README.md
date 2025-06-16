@@ -55,9 +55,11 @@ Temel script `main.py` aşağıdaki parametreleri kabul eder:
 
 ```bash
 python main.py --tarama 01.01.2025 --satis 05.01.2025 [--gui]
+python main.py --tarama 2025-03-07 --satis 2025-03-10
 ```
+(GG.AA.YYYY biçimi de desteklenir)
 
-* `--tarama` ve `--satis` tarihleri `dd.mm.yyyy` formatındadır.
+* `--tarama` ve `--satis` tarihleri `yyyy-mm-dd` formatındadır.
 * `--gui` verildiğinde sonuçlar basit bir Streamlit arayüzünde görüntülenir.
 
 
