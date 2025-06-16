@@ -8,8 +8,7 @@
 import pandas as pd
 import re
 import keyword
-
-from filtre_dogrulama import SEBEP_KODLARI
+from utils.logging_setup import setup_logger, get_logger
 
 
 def _extract_query_columns(query: str) -> set:
@@ -17,9 +16,6 @@ def _extract_query_columns(query: str) -> set:
     reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
     return tokens - reserved
 
-
-from utils.logging_setup import setup_logger, get_logger
-import logging
 
 setup_logger()
 logger = get_logger(__name__)
