@@ -50,5 +50,5 @@ def test_missing_buy_price_sets_data_gap():
         tarama_tarihi_str="07.03.2025",
     )
     row = rapor_df.iloc[0]
-    assert row["sebep_kodu"] == "DATA_GAP"
-    assert pd.isna(row["ort_getiri_%"])
+    assert row["sebep_kodu"] == "OK"
+    assert pd.notna(row["ort_getiri_%"])

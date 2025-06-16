@@ -43,8 +43,23 @@ def _get_fiyat(
 
         veri_satiri = df_hisse_veri[df_hisse_veri["tarih"] == tarih]
         if veri_satiri.empty:
-            # log.debug(f"{hisse_kodu_log} için {tarih.strftime('%d.%m.%Y')} tarihinde veri bulunamadı ({zaman_sutun_adi} için).")
-            return np.nan
+            sonraki = df_hisse_veri[df_hisse_veri["tarih"] > tarih]
+            if not sonraki.empty:
+                tarih2 = sonraki["tarih"].min()
+            else:
+                onceki = df_hisse_veri[df_hisse_veri["tarih"] < tarih]
+                tarih2 = onceki["tarih"].max() if not onceki.empty else None
+
+            if tarih2 is not None:
+                log.info(
+                    f"{hisse_kodu_log} için {tarih.strftime('%d.%m.%Y')} tarihli fiyat bulunamadı. {tarih2.strftime('%d.%m.%Y')} tarihine kaydırıldı."
+                )
+                veri_satiri = df_hisse_veri[df_hisse_veri["tarih"] == tarih2]
+            else:
+                log.warning(
+                    f"{hisse_kodu_log} için {tarih.strftime('%d.%m.%Y')} ve civarındaki fiyat verisi bulunamadı."
+                )
+                return np.nan
 
         if zaman_sutun_adi in veri_satiri.columns:
             fiyat = veri_satiri[zaman_sutun_adi].iloc[0]
