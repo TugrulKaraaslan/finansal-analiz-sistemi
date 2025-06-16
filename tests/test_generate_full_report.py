@@ -30,7 +30,6 @@ def test_generate_full_report_creates_files(tmp_path):
     path = report_generator.generate_full_report(sonuc, out)
 
     wb = openpyxl.load_workbook(path)
-    assert wb.sheetnames[:4] == ["Özet", "Detay", "İstatistik", "Grafikler"]
+    assert wb.sheetnames[:3] == ["Özet", "Detay", "İstatistik"]
+    assert len(wb["Özet"]._charts) > 0
     wb.close()
-
-    assert (tmp_path / "summary.png").exists()
