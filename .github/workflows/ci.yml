@@ -11,14 +11,12 @@ jobs:
         with:
           python-version: "3.11"
 
-      # Bütün bağımlılıkları (pytest dâhil) kur
+      # Proje paketlenmedi; setup.py yok → requirements.txt kullan.
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --timeout 60 --retries 3 --upgrade setuptools
-          pip install --timeout 60 --retries 3 -r requirements.txt
-          pip install --timeout 60 --retries 3 --upgrade kaleido
-          pip install --timeout 60 --retries 3 matplotlib xlsxwriter streamlit
+          pip install --timeout 60 -r requirements.txt
+          pip install --timeout 60 matplotlib xlsxwriter streamlit
 
       - run: pytest -q
       - name: Run simple backtest
@@ -44,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: reports
-          path: 'cikti/raporlar/rapor_*.xlsx'
+          path: '*.xlsx'
 
   docker:
     needs: test
