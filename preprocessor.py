@@ -11,7 +11,6 @@ import config
 import re
 
 from utils.logging_setup import setup_logger, get_logger
-import logging
 
 setup_logger()
 logger = get_logger(__name__)
