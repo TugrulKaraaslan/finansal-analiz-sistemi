@@ -29,6 +29,8 @@ def _format_header(ws):
 
 
 def _apply_return_colors(ws, column_index):
+    if ws.max_row < 2:
+        return
     letter = get_column_letter(column_index)
     rng = f"{letter}2:{letter}{ws.max_row}"
     ws.conditional_formatting.add(
