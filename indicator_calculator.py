@@ -539,11 +539,15 @@ def _calculate_series_value_crossover(
 
 
 def _calculate_group_indicators_and_crossovers(
-    _grp_df: pd.DataFrame, wanted_cols=None
+    _grp_df: pd.DataFrame,
+    wanted_cols=None,
+    df_filters: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     local_logger = logger
     hisse_kodu = (
-        _grp_df["hisse_kodu"].iloc[0] if not _grp_df.empty and "hisse_kodu" in _grp_df.columns else "Bilinmeyen Hisse"
+        _grp_df["hisse_kodu"].iloc[0]
+        if not _grp_df.empty and "hisse_kodu" in _grp_df.columns
+        else "Bilinmeyen Hisse"
     )
     ta_strategy = config.TA_STRATEGY
     series_series_config = config.SERIES_SERIES_CROSSOVERS
@@ -551,6 +555,15 @@ def _calculate_group_indicators_and_crossovers(
     ozel_sutun_conf = config.OZEL_SUTUN_PARAMS
     ad_eslestirme = config.INDIKATOR_AD_ESLESTIRME
     group_df_input = _grp_df
+
+    if wanted_cols is not None:
+        extended = set(wanted_cols)
+        wanted_lower = {w.lower() for w in wanted_cols}
+        for raw, mapped in ad_eslestirme.items():
+            if mapped.lower() in wanted_lower:
+                extended.add(raw)
+                extended.add(str(raw).upper())
+        wanted_cols = extended
 
     # pandas-ta için DatetimeIndex'e çevir
     group_df_dt_indexed = group_df_input.copy()
@@ -598,7 +611,9 @@ def _calculate_group_indicators_and_crossovers(
         base_list = getattr(ta_strategy, "ta", []) or []
         if wanted_cols is not None:
             filtered_indicators = [
-                i for i in base_list if any(c in wanted_cols for c in i.get("col_names", []))
+                i
+                for i in base_list
+                if any(c in wanted_cols for c in i.get("col_names", []))
             ]
         else:
             filtered_indicators = base_list
@@ -852,10 +867,10 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
         filtre_df = pd.read_csv(config.FILTRE_DOSYA_YOLU, sep=";", engine="python")
     except Exception:
         filtre_df = pd.DataFrame()
-    wanted_cols = utils.extract_columns_from_filters(
-        filtre_df,
-        series_series_crossovers,
-        series_value_crossovers,
+    wanted_cols = utils.extract_columns_from_filters_cached(
+        filtre_df.to_csv(index=False),
+        tuple(series_series_crossovers),
+        tuple(series_value_crossovers),
     )
 
     results_list = []
@@ -887,7 +902,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             )
 
         calculated_group = _calculate_group_indicators_and_crossovers(
-            group_df_for_calc, wanted_cols
+            group_df_for_calc, wanted_cols, filtre_df
         )
         if calculated_group is not None and not calculated_group.empty:
             results_list.append(
