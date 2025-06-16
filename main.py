@@ -51,14 +51,23 @@ log_counter = setup_logger()
 logger = get_logger(__name__)
 
 
-def veri_yukle():
-    """Load filter rules and raw price data."""
+def veri_yukle(force_excel_reload: bool = False):
+    """Load filter rules and raw price data.
+
+    Parameters
+    ----------
+    force_excel_reload : bool, optional
+        Parquet dosyası bulunsa bile hisse verisini Excel/CSV'den yeniden
+        yükle.
+    """
     df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
     if df_filters is None or df_filters.empty:
         logger.critical("Filtre kuralları yüklenemedi veya boş.")
         sys.exit(1)
 
-    df_raw = data_loader.yukle_hisse_verileri(logger_param=logger)
+    df_raw = data_loader.yukle_hisse_verileri(
+        force_excel_reload=force_excel_reload, logger_param=logger
+    )
     if df_raw is None or df_raw.empty:
         logger.critical("Hisse verileri yüklenemedi veya boş.")
         sys.exit(1)
@@ -156,10 +165,21 @@ def calistir_tum_sistemi(
     force_excel_reload_param: bool = False,
     logger_param=None,
 ):
-    """Run all analysis steps sequentially."""
+    """Run all analysis steps sequentially.
+
+    Parameters
+    ----------
+    tarama_tarihi_str : str
+        Filtrelerin uygulanacağı tarama tarihi (``dd.mm.yyyy``).
+    satis_tarihi_str : str
+        Geri test satış tarihi (``dd.mm.yyyy``).
+    force_excel_reload_param : bool, optional
+        Parquet dosyası mevcut olsa bile veri setini Excel/CSV kaynaklarından
+        yeniden yükle.
+    """
     global df_filtre_kurallari
     logger.info("*" * 30 + " TÜM BACKTEST SİSTEMİ ÇALIŞTIRILIYOR " + "*" * 30)
-    df_filtre_kurallari, df_raw = veri_yukle()
+    df_filtre_kurallari, df_raw = veri_yukle(force_excel_reload_param)
     df_processed = on_isle(df_raw)
     df_indicator = indikator_hesapla(df_processed)
     tarama_dt = pd.to_datetime(tarama_tarihi_str, format="%d.%m.%Y")
@@ -180,6 +200,11 @@ if __name__ == "__main__":
     parser.add_argument("--tarama", default=config.TARAMA_TARIHI_DEFAULT, help="dd.mm.yyyy formatında tarama tarihi")
     parser.add_argument("--satis", default=config.SATIS_TARIHI_DEFAULT, help="dd.mm.yyyy formatında satış tarihi")
     parser.add_argument("--gui", action="store_true", help="Basit Streamlit arayüzü")
+    parser.add_argument(
+        "--force-excel-reload",
+        action="store_true",
+        help="Parquet yerine Excel/CSV dosyalarını yeniden yükle",
+    )
     args = parser.parse_args()
 
     tarama_t = args.tarama
@@ -194,7 +219,7 @@ if __name__ == "__main__":
         rapor_df, detay_df, atlanmis = calistir_tum_sistemi(
             tarama_tarihi_str=tarama_t,
             satis_tarihi_str=satis_t,
-            force_excel_reload_param=False,
+            force_excel_reload_param=args.force_excel_reload,
             logger_param=logger,
         )
 
