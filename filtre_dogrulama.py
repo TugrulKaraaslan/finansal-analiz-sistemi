@@ -26,9 +26,17 @@ def dogrula_filtre_dataframe(
     sorunlu = {}
     zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]
 
+    eksik_kolonlar = [c for c in zorunlu_kolonlar if c not in df_filtre.columns]
+    if eksik_kolonlar:
+        raise KeyError(
+            "Eksik zorunlu kolonlar: " + ", ".join(eksik_kolonlar)
+        )
+
     for idx, row in df_filtre.iterrows():
-        kod = row.get("flag") or f"satir_{idx}"
-        query = str(row.get("query", "")).strip()
+        kod_degeri = row.get("flag")
+        kod = f"satir_{idx}" if pd.isna(kod_degeri) else str(kod_degeri)
+        query_degeri = row.get("query", "")
+        query = "" if pd.isna(query_degeri) else str(query_degeri).strip()
 
         if not kod or kod.strip() == "":
             sorunlu[kod] = "Boş veya eksik flag (kod) değeri."
