@@ -7,12 +7,9 @@
 
 import pandas as pd
 import numpy as np
-from pathlib import Path
-from datetime import datetime
 import config
 
 from utils.logging_setup import setup_logger, get_logger
-import logging
 
 setup_logger()
 logger = get_logger(__name__)
@@ -105,7 +102,7 @@ def calistir_basit_backtest(
         fn_logger.error(
             "Backtest için ana veri (df_tum_veri) boş veya None. İşlem durduruluyor."
         )
-        return {}  # Boş dict döndür
+        return pd.DataFrame(), pd.DataFrame()
 
     try:
         satis_tarihi = pd.to_datetime(satis_tarihi_str, format="%d.%m.%Y")
@@ -114,7 +111,7 @@ def calistir_basit_backtest(
         fn_logger.critical(
             f"Satış tarihi '{satis_tarihi_str}' veya tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Backtest durduruluyor."
         )
-        return {}
+        return pd.DataFrame(), pd.DataFrame()
 
     # config'den alım/satım zamanı ve komisyonu al
     alim_fiyat_sutunu = config.ALIM_ZAMANI  # örn: 'open'
