@@ -105,24 +105,20 @@ def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger
     return dosya_adi
 
 
-def olustur_hatali_filtre_raporu(
-    hatalar_listesi: list, cikti_klasoru: str, logger=None
-):
-    """'hatalar_listesi' elemanlarının 'filtre_kodu' ve 'notlar' anahtarları
-    içerdiği varsayılır."""
-    if not hatalar_listesi:
+def olustur_hatali_filtre_raporu(atlanmis_dict: dict, writer) -> pd.DataFrame | None:
+    """Write skipped filter information into an Excel sheet named 'Hatalar'."""
+
+    if not atlanmis_dict:
         return None
-    if logger is None:
-        logger = fn_logger
-    os.makedirs(cikti_klasoru, exist_ok=True)
-    df = pd.DataFrame(hatalar_listesi)
-    dosya_adi = os.path.join(
-        cikti_klasoru,
-        f"hatali_filtre_raporu_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+
+    df = pd.DataFrame(
+        [(k, v) for k, v in atlanmis_dict.items()],
+        columns=["filtre_kodu", "hata_mesaji"],
     )
-    df.to_csv(dosya_adi, index=False, encoding="utf-8-sig")
-    logger.info(f"Hatalı filtre raporu oluşturuldu: {dosya_adi}")
-    return dosya_adi
+
+    df.to_excel(writer, sheet_name="Hatalar", index=False)
+    fn_logger.info("Hatalı filtre raporu Excel'e yazıldı.")
+    return df
 
 
 def olustur_excel_raporu(kayitlar: list[dict], fname: str | Path, logger=None):

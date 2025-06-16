@@ -199,6 +199,13 @@ if __name__ == "__main__":
             out_path.parent.mkdir(parents=True, exist_ok=True)
             rapor_path = report_generator.generate_full_report(sonuc_dict, out_path)
             print(f"Rapor oluşturuldu → {rapor_path}")
+            with pd.ExcelWriter(
+                out_path,
+                mode="a",
+                if_sheet_exists="replace",
+                engine="openpyxl",
+            ) as wr:
+                report_generator.olustur_hatali_filtre_raporu(atlanmis, wr)
         else:
             logger.info("Rapor verisi boş, Excel oluşturulmadı.")
 
