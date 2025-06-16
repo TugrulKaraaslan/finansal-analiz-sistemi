@@ -1,16 +1,20 @@
-import os, sys
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-# Ensure real pandas_ta is used in this test
-sys.modules.pop("pandas_ta", None)
+import os
+import sys
+import warnings
 
 import pandas as pd
 import numpy as np
 import pytest
-import warnings
 
-import indicator_calculator as ic
-import config
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+)
+sys.modules.pop(
+    "pandas_ta", None
+)  # Ensure real pandas_ta is used in this test
+
+import indicator_calculator as ic  # noqa: E402
+import config  # noqa: E402
 
 
 def test_classicpivots_crossover_column_exists():
@@ -49,7 +53,8 @@ def test_fallback_indicators_created_when_missing():
         result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
         assert not rec
     assert not any("fragmented" in str(w.message) for w in rec)
-    # pandas_ta normalde sma_200/ema_200 üretmez; fallback mekanizmasi NaN da olsa kolon eklemeli
+    # pandas_ta normalde sma_200/ema_200 üretmez.
+    # Fallback mekanizmasi kolonlarin NaN dahi olsa eklenmesini saglar.
     assert "sma_200" in result.columns
     assert "ema_200" in result.columns
     assert "momentum_10" in result.columns
