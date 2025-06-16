@@ -21,10 +21,9 @@ from pandas_ta import psar as ta_psar
 import config
 import utils
 
-warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
-
 from utils.logging_setup import setup_logger, get_logger
-import logging
+
+warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 
 setup_logger()
 logger = get_logger(__name__)
@@ -860,11 +859,8 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
 
     _ekle_psar(df_islenmis_veri)
 
-    ta_strategy_params = config.TA_STRATEGY
     series_series_crossovers = config.SERIES_SERIES_CROSSOVERS
     series_value_crossovers = config.SERIES_VALUE_CROSSOVERS
-    ozel_sutun_params = config.OZEL_SUTUN_PARAMS
-    indikator_ad_eslestirme = config.INDIKATOR_AD_ESLESTIRME
 
     filtre_df = df_filters
     if filtre_df is None:
