@@ -341,6 +341,7 @@ SERIES_SERIES_CROSSOVERS = [
     for a, b in zip(GEREKLI_MA_PERIYOTLAR[:-1], GEREKLI_MA_PERIYOTLAR[1:])
 ] + [
     ("sma_5", "sma_20", "sma_5_keser_sma_20_yukari", "sma_5_keser_sma_20_asagi"),
+    ("sma_10", "sma_50", "sma_10_keser_sma_50_yukari", "sma_10_keser_sma_50_asagi"),
     ("close", "sma_20", "close_keser_sma_20_yukari", "close_keser_sma_20_asagi"),
     ("close", "sma_50", "close_keser_sma_50_yukari", "close_keser_sma_50_asagi"),
     ("close", "sma_100", "close_keser_sma_100_yukari", "close_keser_sma_100_asagi"),
