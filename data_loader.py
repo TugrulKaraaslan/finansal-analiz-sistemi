@@ -14,7 +14,6 @@ from functools import lru_cache, partial
 from data_loader_cache import DataLoaderCache
 
 from utils.logging_setup import setup_logger, get_logger
-import logging
 
 setup_logger()
 logger = get_logger(__name__)
