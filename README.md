@@ -63,3 +63,9 @@ python main.py --tarama 01.01.2025 --satis 05.01.2025 [--gui]
 
 ## Otomatik Sağlık Raporu
 Backtest tamamlandığında son log dosyası ve üretilen rapor kullanılarak ek bir "sağlık" raporu oluşturulur. Bu Excel dosyası `sağlık_raporu_<tarih>.xlsx` adıyla çalışma dizinine kaydedilir.
+
+## Changelog
+- Ichimoku hatası giderildi.
+- Hatalar sekmesi eklendi.
+- Satış tarihi veri yoksa tarih kaydırma.
+- Excel BarChart + boyut küçültme.
