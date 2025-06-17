@@ -17,8 +17,57 @@ def _extract_query_columns(query: str) -> set:
     return tokens - reserved
 
 
+def _extract_columns_from_query(query: str) -> set:
+    """Yeni isimlendirme için yardımcı."""
+    return _extract_query_columns(query)
+
+
 setup_logger()
 logger = get_logger(__name__)
+
+
+def _apply_single_filter(df, kod, query):
+    """Tek filtre sorgusunu çalıştır ve detaylı info döndür."""
+    info = {
+        "kod": kod,
+        "tip": "tarama",
+        "durum": None,
+        "sebep": "",
+        "eksik_sutunlar": "",
+        "nan_sutunlar": "",
+        "secim_adedi": 0,
+    }
+
+    req_cols = _extract_columns_from_query(query)
+    missing = [c for c in req_cols if c not in df.columns]
+    if missing:
+        info.update(
+            durum="CALISTIRILAMADI",
+            sebep="EXIST_FALSE",
+            eksik_sutunlar=",".join(missing),
+        )
+        return None, info
+
+    nan_cols = [c for c in req_cols if df[c].isna().mean() > 0.9]
+    if nan_cols:
+        info.update(
+            durum="DATASIZ",
+            sebep="NAN_GT90",
+            nan_sutunlar=",".join(nan_cols),
+        )
+
+    try:
+        seç = df.query(query)
+        info["secim_adedi"] = len(seç)
+        if len(seç):
+            info.update(durum="OK", sebep="HISSE_BULUNDU")
+        else:
+            if info["durum"] is None:
+                info.update(durum="BOS", sebep="SIFIR_HISSE")
+        return seç, info
+    except Exception as e:
+        info.update(durum="HATA", sebep=str(e)[:120])
+        return None, info
 
 
 def uygula_filtreler(
@@ -118,6 +167,7 @@ def uygula_filtreler(
 
     filtre_sonuclar = {}
     atlanmis_filtreler_log_dict = {}
+    kontrol_log = []
 
     for index, row in df_filtre_kurallari.iterrows():
         filtre_kodu = row.get("FilterCode", f"FiltreIndex_{index}")
@@ -151,117 +201,47 @@ def uygula_filtreler(
                 "hisse_sayisi": 0,
             }
             continue
-        kullanilan_sutunlar = _extract_query_columns(python_sorgusu)
-        eksik_sutunlar = [
-            s for s in kullanilan_sutunlar if s not in df_tarama_gunu.columns
-        ]
+        kullanilan_sutunlar = _extract_columns_from_query(python_sorgusu)
         if (
-            "volume_tl" in eksik_sutunlar
+            "volume_tl" in kullanilan_sutunlar
             and {"volume", "close"} <= set(df_tarama_gunu.columns)
         ):
-            df_tarama_gunu["volume_tl"] = (
-                df_tarama_gunu["volume"] * df_tarama_gunu["close"]
-            )
-            eksik_sutunlar = [
-                s for s in kullanilan_sutunlar if s not in df_tarama_gunu.columns
-            ]
-        if {"psar_long", "psar_short"} <= set(
-            df_tarama_gunu.columns
-        ) and "psar" in eksik_sutunlar:
-            # psar_long/short varsa birleşik psar hesaplanmamış; uyar, devam et
-            df_tarama_gunu["psar"] = df_tarama_gunu["psar_long"].fillna(
-                df_tarama_gunu["psar_short"]
-            )
-            eksik_sutunlar = [
-                s for s in kullanilan_sutunlar if s not in df_tarama_gunu.columns
-            ]
-        if eksik_sutunlar:
-            hata_mesaji = f"Eksik sütunlar: {', '.join(eksik_sutunlar)}"
-            fn_logger.error(f"Filtre '{filtre_kodu}' sorgusunda {hata_mesaji}.")
-            atlanmis_filtreler_log_dict[filtre_kodu] = hata_mesaji
+            df_tarama_gunu["volume_tl"] = df_tarama_gunu["volume"] * df_tarama_gunu["close"]
+        if {
+            "psar_long",
+            "psar_short",
+        } <= set(df_tarama_gunu.columns) and "psar" in kullanilan_sutunlar:
+            df_tarama_gunu["psar"] = df_tarama_gunu["psar_long"].fillna(df_tarama_gunu["psar_short"])
+
+        filtrelenmis_df, info = _apply_single_filter(df_tarama_gunu, filtre_kodu, python_sorgusu)
+        kontrol_log.append(info)
+
+        if info["durum"] == "CALISTIRILAMADI":
+            atlanmis_filtreler_log_dict[filtre_kodu] = f"Eksik sütunlar: {info['eksik_sutunlar']}"
             filtre_sonuclar[filtre_kodu] = {
                 "hisseler": [],
                 "sebep": "MISSING_COL",
                 "hisse_sayisi": 0,
             }
             continue
-
-        try:
-            # Sorguyu çalıştırmadan önce mevcut sütunları logla (DEBUG için)
-            fn_logger.debug(
-                f"Filtre '{filtre_kodu}' uygulanıyor. Sorgu: '{python_sorgusu}'. df_tarama_gunu sütunları: {df_tarama_gunu.columns.tolist()}"
-            )
-            filtrelenmis_df = df_tarama_gunu.query(
-                python_sorgusu,
-                engine="python",
-                local_dict=df_tarama_gunu.to_dict("series"),
-            )
-
-            if not filtrelenmis_df.empty:
-                hisse_kodlari_listesi = filtrelenmis_df["hisse_kodu"].unique().tolist()
-                sebep_kodu = "OK"
-                fn_logger.info(
-                    f"Filtre '{filtre_kodu}': {len(hisse_kodlari_listesi)} hisse bulundu. (Örnek: {hisse_kodlari_listesi[:3]})"
-                )
-            else:
-                hisse_kodlari_listesi = []
-                sebep_kodu = "NO_STOCK"
-                fn_logger.debug(f"Filtre '{filtre_kodu}': Uygun hisse bulunamadı.")
-
-            filtre_sonuclar[filtre_kodu] = {
-                "hisseler": hisse_kodlari_listesi,
-                "sebep": sebep_kodu,
-                "hisse_sayisi": len(hisse_kodlari_listesi),
-            }
-
-        except pd.errors.UndefinedVariableError as e_undef_var:
-            # Hata mesajından hangi değişkenin/sütunun tanımsız olduğunu ayıkla
-            tanimsiz_degisken = (
-                str(e_undef_var).split("'")[1]
-                if "'" in str(e_undef_var)
-                else "Bilinmeyen"
-            )
-            hata_mesaji = f"Tanımsız sütun/değişken: '{tanimsiz_degisken}'. Sorgu: '{python_sorgusu}'"
-            fn_logger.error(
-                f"Filtre '{filtre_kodu}' sorgusunda TANIMSIZ DEĞİŞKEN/SÜTUN hatası: {hata_mesaji}",
-                exc_info=False,
-            )
-            atlanmis_filtreler_log_dict[filtre_kodu] = hata_mesaji
-            filtre_sonuclar[filtre_kodu] = {
-                "hisseler": [],
-                "sebep": "MISSING_COL",
-                "hisse_sayisi": 0,
-            }
-        except SyntaxError as e_syntax:
-            hata_mesaji = (
-                "Syntax (yazım) hatası. Sorgu: "
-                f"'{python_sorgusu}'. Muhtemelen eksik karşılaştırma operatörü veya parantez."
-                " Filtre dosyanızı gözden geçirin."
-            )
-            fn_logger.error(
-                f"Filtre '{filtre_kodu}' sorgusunda SYNTAX HATASI: {e_syntax}. {hata_mesaji}",
-                exc_info=False,
-            )
-            atlanmis_filtreler_log_dict[filtre_kodu] = hata_mesaji
+        if info["durum"] == "HATA":
+            atlanmis_filtreler_log_dict[filtre_kodu] = info["sebep"]
             filtre_sonuclar[filtre_kodu] = {
                 "hisseler": [],
                 "sebep": "QUERY_ERROR",
                 "hisse_sayisi": 0,
             }
-        except Exception as e_query:  # Diğer olası query hataları
-            hata_mesaji = (
-                f"Sorgu uygulanırken beklenmedik hata. Sorgu: '{python_sorgusu}'"
-            )
-            fn_logger.error(
-                f"Filtre '{filtre_kodu}' uygulanırken BEKLENMEDİK HATA: {e_query}. {hata_mesaji}",
-                exc_info=True,
-            )
-            atlanmis_filtreler_log_dict[filtre_kodu] = f"{hata_mesaji} Detay: {e_query}"
-            filtre_sonuclar[filtre_kodu] = {
-                "hisseler": [],
-                "sebep": "QUERY_ERROR",
-                "hisse_sayisi": 0,
-            }
+            continue
+
+        hisse_kodlari_listesi = []
+        if filtrelenmis_df is not None and not filtrelenmis_df.empty:
+            hisse_kodlari_listesi = filtrelenmis_df["hisse_kodu"].unique().tolist()
+        sebep_kodu = "OK" if info["durum"] == "OK" else "NO_STOCK"
+        filtre_sonuclar[filtre_kodu] = {
+            "hisseler": hisse_kodlari_listesi,
+            "sebep": sebep_kodu,
+            "hisse_sayisi": len(hisse_kodlari_listesi),
+        }
 
     fn_logger.info(
         f"Tüm filtreler uygulandı. {len(filtre_sonuclar)} filtre için sonuç listesi üretildi."
