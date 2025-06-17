@@ -645,7 +645,11 @@ def _calculate_group_indicators_and_crossovers(
             ta=filtered_indicators,
         )
         group_df_dt_indexed.ta.strategy(
-            strategy_obj, timed=False, append=True, min_periods=1
+            strategy_obj,
+            timed=False,
+            append=True,
+            min_periods=1,
+            unique=True,
         )
         if (
             "psar_long" not in group_df_dt_indexed.columns
@@ -938,9 +942,24 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             group_df_for_calc, wanted_cols, filtre_df
         )
         if calculated_group is not None and not calculated_group.empty:
+            grouped = calculated_group
+            dup_cols = grouped.columns[grouped.columns.duplicated()]
+            if dup_cols.any():
+                ana_logger.warning(
+                    f"{hisse_kodu}: yinelenen kolonlar atıldı -> {dup_cols.tolist()}"
+                )
+                grouped = grouped.loc[:, ~grouped.columns.duplicated()]
+
+            if grouped.index.duplicated().any():
+                ana_logger.warning(
+                    f"{hisse_kodu}: yinelenen satır index'i silindi"
+                )
+                grouped = grouped[~grouped.index.duplicated()]
+
+            grouped.reset_index(drop=True, inplace=True)
             results_list.append(
-                calculated_group
-            )  # calculated_group zaten RangeIndex'li ve 'tarih' sütunlu dönmeli
+                grouped
+            )  # grouped zaten RangeIndex'li ve 'tarih' sütunlu dönmeli
         else:
             ana_logger.warning(
                 f"{hisse_kodu} için indikatör hesaplama sonucu boş veya None döndü."
