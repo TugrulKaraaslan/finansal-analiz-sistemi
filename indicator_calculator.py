@@ -18,6 +18,7 @@ if not hasattr(np, "NaN"):
 
 import pandas_ta as ta
 from pandas_ta import psar as ta_psar
+from pandas_ta import tema
 import config
 import utils
 
@@ -322,6 +323,11 @@ def safe_get(df: pd.DataFrame, col: str) -> pd.Series | None:
         logger.debug(f"{col} eksik – crossover atlandı")
         return None
     return df[col]
+
+
+def _tema20(series: pd.Series) -> pd.Series:
+    """TEMA 20 – pandas_ta."""
+    return tema(series, length=20)
 
 
 def _ekle_psar(df: pd.DataFrame) -> None:
@@ -713,6 +719,10 @@ def _calculate_group_indicators_and_crossovers(
     if "ema_8" not in df_final_group.columns and "close" in df_final_group.columns:
         manual_cols["ema_8"] = df_final_group["close"].ewm(span=8, adjust=False).mean()
         local_logger.debug(f"{hisse_kodu}: 'ema_8' sütunu manuel olarak hesaplandı.")
+
+    if "tema_20" not in df_final_group.columns and "close" in df_final_group.columns:
+        manual_cols["tema_20"] = _tema20(df_final_group["close"])
+        local_logger.debug(f"{hisse_kodu}: 'tema_20' sütunu manuel olarak hesaplandı.")
 
     for period in config.GEREKLI_MA_PERIYOTLAR:
         safe_ma(df_final_group, period, "sma", local_logger)
