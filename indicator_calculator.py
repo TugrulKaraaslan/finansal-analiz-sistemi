@@ -572,6 +572,23 @@ def _calculate_group_indicators_and_crossovers(
 
     # pandas-ta için DatetimeIndex'e çevir
     group_df_dt_indexed = group_df_input.copy()
+
+    grouped = group_df_dt_indexed.groupby(
+        "hisse_kodu" if "hisse_kodu" in group_df_dt_indexed.columns else "symbol"
+    )
+    if "close" in group_df_dt_indexed.columns:
+        group_df_dt_indexed["ema_5"] = grouped["close"].transform(
+            lambda s: s.ewm(span=5, adjust=False).mean()
+        )
+        group_df_dt_indexed["ema_20"] = grouped["close"].transform(
+            lambda s: s.ewm(span=20, adjust=False).mean()
+        )
+        group_df_dt_indexed["ema_5_keser_ema_20_yukari"] = utils.crosses_above(
+            group_df_dt_indexed["ema_5"], group_df_dt_indexed["ema_20"]
+        )
+        group_df_dt_indexed["ema_5_keser_ema_20_asagi"] = utils.crosses_below(
+            group_df_dt_indexed["ema_5"], group_df_dt_indexed["ema_20"]
+        )
     if "tarih" in group_df_dt_indexed.columns:
         if not pd.api.types.is_datetime64_any_dtype(group_df_dt_indexed["tarih"]):
             group_df_dt_indexed["tarih"] = pd.to_datetime(
