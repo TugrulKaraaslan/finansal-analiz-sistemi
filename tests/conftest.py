@@ -5,15 +5,11 @@ import pytest
 @pytest.fixture
 def sample_filtreler():
     return pd.DataFrame({
-        "kod": ["F_OK", "F_MISS"],
-        "PythonQuery": ["close > 10", "open > 5"],
+        "kod": ["T0", "T1"],
+        "PythonQuery": ["close > 0", "volume > 0"],
     })
 
 
 @pytest.fixture
 def sample_indikator_df():
-    return pd.DataFrame({
-        "hisse_kodu": ["AAA"],
-        "tarih": [pd.Timestamp("2025-01-01")],
-        "close": [12],
-    })
+    return pd.DataFrame({"close": [10, 11], "relative_volume": [1.2, 1.3]})

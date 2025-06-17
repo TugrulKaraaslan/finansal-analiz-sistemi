@@ -1,5 +1,8 @@
 import pandas as pd
-from filter_engine import _apply_single_filter
+try:
+    from .filter_engine import _apply_single_filter
+except ImportError:  # pragma: no cover - fallback when run as script
+    from filter_engine import _apply_single_filter
 
 
 def tarama_denetimi(df_filtreler: pd.DataFrame, df_indikator: pd.DataFrame) -> pd.DataFrame:
