@@ -1,0 +1,18 @@
+import os
+import sys
+import pandas as pd
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from src import kontrol_araci
+
+
+def test_tarama_denetimi_returns_expected_cols(sample_filtreler, sample_indikator_df):
+    df = kontrol_araci.tarama_denetimi(sample_filtreler, sample_indikator_df)
+    expected = {"kod", "tip", "durum", "sebep", "eksik_sutunlar", "nan_sutunlar", "secim_adedi"}
+    assert expected.issubset(df.columns)
+
+
+def test_at_least_one_error(sample_filtreler, sample_indikator_df):
+    df = kontrol_araci.tarama_denetimi(sample_filtreler, sample_indikator_df)
+    assert (df["durum"] != "OK").any(), "En az bir sorun satırı bekleniyordu"
