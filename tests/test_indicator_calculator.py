@@ -58,6 +58,7 @@ def test_fallback_indicators_created_when_missing():
     assert "sma_200" in result.columns
     assert "ema_200" in result.columns
     assert "momentum_10" in result.columns
+    assert "tema_20" in result.columns
 
 
 @pytest.mark.parametrize("bars", [30, 60, 252])

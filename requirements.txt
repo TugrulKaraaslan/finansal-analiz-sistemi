@@ -2,7 +2,7 @@ pandas==2.2.2
 numpy==2.0.2
 packaging==24.2
 jedi>=0.19.1
-pandas-ta==0.3.14b0    # pandas-ta, NumPy 2 ile uyumlu
+pandas-ta>=0.3.14b0    # pandas-ta, NumPy 2 ile uyumlu
 holidays               # tarih/tatil kontrolü için
 openpyxl>=3.1
 xlsxwriter>=3.1
