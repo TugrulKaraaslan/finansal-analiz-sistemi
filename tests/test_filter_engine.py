@@ -39,3 +39,25 @@ def test_volume_tl_generated_if_missing():
     assert result["F1"]["sebep"] == "OK"
     assert result["F1"]["hisse_sayisi"] == 1
 
+
+def test_apply_single_filter_ok():
+    df = pd.DataFrame({
+        "hisse_kodu": ["AAA"],
+        "tarih": [pd.Timestamp("2025-03-01")],
+        "close": [1],
+    })
+    secim, info = filter_engine._apply_single_filter(df, "T1", "close > 0")
+    assert info["durum"] == "OK"
+    assert info["secim_adedi"] == 1
+
+
+def test_apply_single_filter_missing_column():
+    df = pd.DataFrame({
+        "hisse_kodu": ["AAA"],
+        "tarih": [pd.Timestamp("2025-03-01")],
+        "close": [1],
+    })
+    secim, info = filter_engine._apply_single_filter(df, "T1", "olmayan_kolon < 10")
+    assert info["durum"] == "CALISTIRILAMADI"
+    assert "olmayan_kolon" in info["eksik_sutunlar"]
+
