@@ -4,6 +4,7 @@ from datetime import datetime
 
 import pandas as pd
 import openpyxl
+from openpyxl.utils import get_column_letter
 import report_utils
 from utils.logging_setup import setup_logger, get_logger
 import logging
@@ -114,45 +115,30 @@ def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger
     return dosya_adi
 
 
-def olustur_hatali_filtre_raporu(
-    atlanmis_dict: dict, writer, df_ozet: pd.DataFrame | None = None
-) -> pd.DataFrame | None:
-    """Write skipped filter information into an Excel sheet named 'Hatalar'."""
+def olustur_hatali_filtre_raporu(writer, kontrol_df: pd.DataFrame):
+    """Denetim tablosundan sadece sorunlu satırları alır,
+    'Hatalar' adlı çalışma sayfasına detaylı yazar."""
 
-    if not atlanmis_dict and (df_ozet is None or df_ozet.empty):
-        return None
+    sorunlu = kontrol_df[kontrol_df["durum"].isin(
+        ["CALISTIRILAMADI", "HATA", "DATASIZ"]
+    )]
 
-    records = []
-    for k, v in atlanmis_dict.items():
-        if isinstance(v, dict):
-            records.append(
-                {
-                    "filtre_kodu": k,
-                    "hata_tipi": v.get("tip", "MISSING_COL"),
-                    "eksik_ad": ", ".join(v.get("eksik", [])),
-                    "detay": v.get("mesaj", ""),
-                    "cozum_onerisi": v.get("cozum", ""),
-                }
-            )
+    # Sütun sırası ve geniş açıklamalar
+    cols = ["kod", "durum", "sebep",
+            "eksik_sutunlar", "nan_sutunlar", "secim_adedi"]
+    sorunlu = sorunlu[cols]
+
+    sheet_name = "Hatalar"
+    sorunlu.to_excel(writer, sheet_name=sheet_name, index=False)
+
+    # Otomatik sütun genişliği
+    ws = writer.sheets[sheet_name]
+    for idx, col in enumerate(sorunlu.columns, 1):
+        max_len = max(10, sorunlu[col].astype(str).str.len().max() + 2)
+        if hasattr(ws, "set_column"):
+            ws.set_column(idx - 1, idx - 1, max_len)
         else:
-            records.append(
-                {
-                    "filtre_kodu": k,
-                    "hata_tipi": "GENERIC",
-                    "eksik_ad": "",
-                    "detay": str(v),
-                    "cozum_onerisi": "",
-                }
-            )
-    df_hatalar = pd.DataFrame(records)
-
-    if df_ozet is not None and not df_ozet.empty:
-        df_hatalar_extra = df_ozet[df_ozet["sebep_kodu"].isin(["NO_STOCK", "DATA_GAP"])]
-        df_hatalar = pd.concat([df_hatalar, df_hatalar_extra], ignore_index=True)
-
-    df_hatalar.to_excel(writer, sheet_name="Hatalar", index=False)
-    fn_logger.info("Hatalı filtre raporu Excel'e yazıldı.")
-    return df_hatalar
+            ws.column_dimensions[get_column_letter(idx)].width = max_len
 
 
 def olustur_excel_raporu(kayitlar: list[dict], fname: str | Path, logger=None):
