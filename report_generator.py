@@ -133,12 +133,15 @@ def olustur_hatali_filtre_raporu(writer, kontrol_df: pd.DataFrame):
 
     # Otomatik sütun genişliği
     ws = writer.sheets[sheet_name]
-    for idx, col in enumerate(sorunlu.columns, 1):
-        max_len = max(10, sorunlu[col].astype(str).str.len().max() + 2)
-        if hasattr(ws, "set_column"):
-            ws.set_column(idx - 1, idx - 1, max_len)
-        else:
-            ws.column_dimensions[get_column_letter(idx)].width = max_len
+    if hasattr(ws, "set_column"):  # xlsxwriter
+        for i, col in enumerate(sorunlu.columns):
+            max_len = max(10, sorunlu[col].astype(str).str.len().max() + 2)
+            ws.set_column(i, i, max_len)
+    else:  # openpyxl
+        from openpyxl.utils import get_column_letter
+        for i, col in enumerate(sorunlu.columns, 1):
+            max_len = max(10, sorunlu[col].astype(str).str.len().max() + 2)
+            ws.column_dimensions[get_column_letter(i)].width = max_len
 
 
 def olustur_excel_raporu(kayitlar: list[dict], fname: str | Path, logger=None):

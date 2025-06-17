@@ -478,15 +478,16 @@ SERIES_SERIES_CROSSOVERS = [
     ),
 ]
 # --- crossover çıktıları da her zaman hesaplansın
-try:
-    wanted_cols
-except NameError:
-    wanted_cols = set()
-wanted_cols |= {
-    c_above for _, _, c_above, _ in SERIES_SERIES_CROSSOVERS
+wc = globals().get("wanted_cols") or globals().get("WANTED_COLS")
+if wc is None:
+    wc = set()
+    globals()["wanted_cols"] = wc
+wc |= {
+    c_above for *_, c_above, _ in SERIES_SERIES_CROSSOVERS
 } | {
-    c_below for _, _, _, c_below in SERIES_SERIES_CROSSOVERS
+    c_below for *_, _, c_below in SERIES_SERIES_CROSSOVERS
 }
+wanted_cols = wc
 
 SERIES_VALUE_CROSSOVERS = [
     ("rsi_14", 50.0, "50p0"),
