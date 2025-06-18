@@ -36,13 +36,13 @@ def test_hatalar_sheet_not_empty_and_matches(tmp_path):
     path = tmp_path / "rapor.xlsx"
     generate_full_report(df_sum, df_det, err_list, path, keep_legacy=True)
 
-    xls = pd.ExcelFile(path)
-    assert "Hatalar" in xls.sheet_names, "'Hatalar' sheet'i yok!"
+    with pd.ExcelFile(path) as xls:
+        assert "Hatalar" in xls.sheet_names, "'Hatalar' sheet'i yok!"
 
-    hatalar_df = pd.read_excel(xls, "Hatalar")
-    assert not hatalar_df.empty, "'Hatalar' sheet'i boş!"
+        hatalar_df = pd.read_excel(xls, "Hatalar")
+        assert not hatalar_df.empty, "'Hatalar' sheet'i boş!"
 
-    # Özet’te OK olmayan satır sayısı == Hatalar sheet satır sayısı
-    ozet_df = pd.read_excel(xls, "Özet")
-    n_bad = (ozet_df["sebep_kodu"] != "OK").sum()
-    assert len(hatalar_df) == n_bad, "Hatalar sayısı uyumsuz!"
+        # Özet’te OK olmayan satır sayısı == Hatalar sheet satır sayısı
+        ozet_df = pd.read_excel(xls, "Özet")
+        n_bad = (ozet_df["sebep_kodu"] != "OK").sum()
+        assert len(hatalar_df) == n_bad, "Hatalar sayısı uyumsuz!"

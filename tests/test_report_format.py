@@ -42,14 +42,14 @@ def test_legacy_columns_preserved(tmp_path):
         path,
         keep_legacy=True,
     )
-    xls = pd.ExcelFile(path)
-    assert xls.sheet_names[:2] == ["Özet", "Detay"]
-    assert list(pd.read_excel(xls, "Özet").columns) == LEGACY_SUMMARY_COLS
-    assert list(pd.read_excel(xls, "Detay").columns) == LEGACY_DETAIL_COLS
-    assert len(pd.read_excel(xls, "Özet")) >= 1
-    assert len(pd.read_excel(xls, "Detay")) >= 1
-    assert "Hatalar" in xls.sheet_names, "Hatalar sayfası eksik!"
-    assert not pd.read_excel(xls, "Hatalar").empty, "Hatalar sayfası boş!"
+    with pd.ExcelFile(path) as xls:
+        assert xls.sheet_names[:2] == ["Özet", "Detay"]
+        assert list(pd.read_excel(xls, "Özet").columns) == LEGACY_SUMMARY_COLS
+        assert list(pd.read_excel(xls, "Detay").columns) == LEGACY_DETAIL_COLS
+        assert len(pd.read_excel(xls, "Özet")) >= 1
+        assert len(pd.read_excel(xls, "Detay")) >= 1
+        assert "Hatalar" in xls.sheet_names, "Hatalar sayfası eksik!"
+        assert not pd.read_excel(xls, "Hatalar").empty, "Hatalar sayfası boş!"
 
 
 def test_error_sheet_not_empty(tmp_path):

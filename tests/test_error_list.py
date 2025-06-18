@@ -17,5 +17,6 @@ def test_error_list_writes_sheet(tmp_path):
         path,
         keep_legacy=True,
     )
-    assert "Hatalar" in pd.ExcelFile(path).sheet_names
+    with pd.ExcelFile(path) as xls:
+        assert "Hatalar" in xls.sheet_names
 

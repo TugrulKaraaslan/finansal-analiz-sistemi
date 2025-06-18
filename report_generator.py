@@ -5,10 +5,17 @@ from pathlib import Path
 from datetime import datetime
 from typing import Iterable
 
-import pandas as pd
 from openpyxl.utils import get_column_letter
 import xlsxwriter
 from utils.logging_setup import get_logger, setup_logger
+
+import warnings, pandas as pd
+warnings.filterwarnings(
+    "ignore",
+    message="Downcasting object dtype arrays on .fillna",
+    category=FutureWarning,
+    module="report_generator",
+)
 
 setup_logger()
 fn_logger = get_logger(__name__)
