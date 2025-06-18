@@ -239,8 +239,11 @@ def _write_stats_sheet(wr: pd.ExcelWriter, df: pd.DataFrame) -> None:
 
 
 def _write_error_sheet(wr: pd.ExcelWriter, error_list: Iterable) -> None:
-    err_df = pd.DataFrame(error_list)
-    err_df.to_excel(wr, "Hatalar", index=False)
+    if not error_list:
+        return  # liste boşsa sheet oluşturma
+    pd.DataFrame(error_list).to_excel(
+        wr, sheet_name="Hatalar", index=False
+    )
 
 
 def generate_full_report(

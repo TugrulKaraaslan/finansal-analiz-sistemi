@@ -177,6 +177,19 @@ def uygula_filtreler(
     atlanmis_filtreler_log_dict = {}
     kontrol_log = []
 
+    def kaydet_hata(kod, error_type, msg, eksik=None):
+        hack = {
+            "filtre_kodu": kod,
+            "hata_tipi": error_type,
+            "eksik_ad": eksik or "",
+            "detay": msg,
+            "cozum_onerisi": (
+                f"{eksik} indikatörünü hesaplama listesine ekleyin." if eksik
+                else "Query ifadesini pandas.query() sözdizimine göre düzeltin."
+            ),
+        }
+        atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(hack)
+
     for index, row in df_filtre_kurallari.iterrows():
         filtre_kodu = row.get("FilterCode", f"FiltreIndex_{index}")
         python_sorgusu_raw = row.get("PythonQuery")
@@ -192,14 +205,7 @@ def uygula_filtreler(
                 "sebep": "GENERIC",
                 "hisse_sayisi": 0,
             }
-            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
-                {
-                    "filtre_kodu": filtre_kodu,
-                    "hata_tipi": "GENERIC",
-                    "detay": msg,
-                    "cozum_onerisi": "",
-                }
-            )
+            kaydet_hata(filtre_kodu, "GENERIC", msg)
             continue
 
         python_sorgusu = str(python_sorgusu_raw)
@@ -217,14 +223,7 @@ def uygula_filtreler(
                 "sebep": "QUERY_ERROR",
                 "hisse_sayisi": 0,
             }
-            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
-                {
-                    "filtre_kodu": filtre_kodu,
-                    "hata_tipi": "QUERY_ERROR",
-                    "detay": hata_mesaji,
-                    "cozum_onerisi": "",
-                }
-            )
+            kaydet_hata(filtre_kodu, "QUERY_ERROR", hata_mesaji)
             continue
         kullanilan_sutunlar = _extract_columns_from_query(python_sorgusu)
         if (
@@ -249,13 +248,11 @@ def uygula_filtreler(
                 "sebep": "QUERY_ERROR",
                 "hisse_sayisi": 0,
             }
-            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
-                {
-                    "filtre_kodu": filtre_kodu,
-                    "hata_tipi": "QUERY_ERROR",
-                    "detay": msg,
-                    "cozum_onerisi": "",
-                }
+            kaydet_hata(
+                filtre_kodu,
+                "QUERY_ERROR",
+                msg,
+                eksik=info.get("eksik_sutunlar"),
             )
             continue
         if info["durum"] == "HATA":
@@ -266,14 +263,7 @@ def uygula_filtreler(
                 "sebep": "QUERY_ERROR",
                 "hisse_sayisi": 0,
             }
-            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
-                {
-                    "filtre_kodu": filtre_kodu,
-                    "hata_tipi": "QUERY_ERROR",
-                    "detay": msg,
-                    "cozum_onerisi": "",
-                }
-            )
+            kaydet_hata(filtre_kodu, "QUERY_ERROR", msg)
             continue
 
         hisse_kodlari_listesi = []
@@ -291,14 +281,7 @@ def uygula_filtreler(
             "hisse_sayisi": len(hisse_kodlari_listesi),
         }
         if sebep_kodu in {"QUERY_ERROR", "GENERIC"}:
-            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
-                {
-                    "filtre_kodu": filtre_kodu,
-                    "hata_tipi": sebep_kodu,
-                    "detay": info.get("sebep", ""),
-                    "cozum_onerisi": "",
-                }
-            )
+            kaydet_hata(filtre_kodu, sebep_kodu, info.get("sebep", ""))
 
     fn_logger.info(
         f"Tüm filtreler uygulandı. {len(filtre_sonuclar)} filtre için sonuç listesi üretildi."

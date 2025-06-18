@@ -50,3 +50,22 @@ def test_legacy_columns_preserved(tmp_path):
     assert len(pd.read_excel(xls, "Detay")) >= 1
     assert "Hatalar" in xls.sheet_names, "Hatalar sayfası eksik!"
     assert not pd.read_excel(xls, "Hatalar").empty, "Hatalar sayfası boş!"
+
+
+def test_error_sheet_not_empty(tmp_path):
+    # sahte QUERY_ERROR satırı ekle
+    errs = [{
+        "filtre_kodu": "T999",
+        "hata_tipi": "QUERY_ERROR",
+        "detay": "demo",
+        "cozum_onerisi": "fix",
+    }]
+    path = tmp_path / "r.xlsx"
+    generate_full_report(
+        pd.DataFrame(columns=LEGACY_SUMMARY_COLS),
+        pd.DataFrame(columns=LEGACY_DETAIL_COLS),
+        errs,
+        path,
+        keep_legacy=True,
+    )
+    assert not pd.read_excel(path, "Hatalar").empty
