@@ -1,4 +1,10 @@
-import pandas as pd
+import os, sys, pandas as pd
+
+# → Proje kökünü PYTHONPATH’e ekle (CI runner’da absolute path gerekir)
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 from report_generator import (
     generate_full_report,
     LEGACY_SUMMARY_COLS,

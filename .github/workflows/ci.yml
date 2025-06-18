@@ -18,7 +18,10 @@ jobs:
           pip install --timeout 60 -r requirements.txt
           pip install --timeout 60 matplotlib xlsxwriter streamlit
 
-      - run: pytest -q
+      - name: Run tests
+        run: |
+          pytest -q
+          pytest -q tests/test_report_format.py
       - name: Run simple backtest
         run: |
           python - <<'PY'
