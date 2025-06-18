@@ -233,16 +233,22 @@ if __name__ == "__main__":
             logger_param=logger,
         )
 
+        summary_df = rapor_df.copy()
+        detail_df = detay_df.copy()
+        error_list = (
+            atlanmis.get("hatalar", []) if isinstance(atlanmis, dict) else atlanmis
+        )
+
         if not rapor_df.empty:
-            sonuc_dict = {
-                "summary": rapor_df,
-                "detail": detay_df,
-                "tarama_tarihi": tarama_t,
-                "satis_tarihi": satis_t,
-            }
             out_path = Path("cikti/raporlar") / f"full_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
             out_path.parent.mkdir(parents=True, exist_ok=True)
-            rapor_path = report_generator.generate_full_report(sonuc_dict, out_path)
+            rapor_path = report_generator.generate_full_report(
+                summary_df,
+                detail_df,
+                error_list,
+                out_path,
+                keep_legacy=True,
+            )
             print(f"Rapor oluşturuldu → {rapor_path}")
             df_ozet = report_utils.build_ozet_df(
                 rapor_df, detay_df, tarama_t, satis_t
@@ -284,3 +290,7 @@ if __name__ == "__main__":
             with pd.ExcelWriter(rapor_path, mode="a", if_sheet_exists="replace", engine="openpyxl") as wr:
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
+        import glob, os, time
+        for fp in glob.glob("raporlar/*.log"):
+            if time.time() - os.path.getmtime(fp) > 7 * 24 * 3600:
+                os.remove(fp)
