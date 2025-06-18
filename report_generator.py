@@ -231,7 +231,11 @@ def _write_stats_sheet(wr: pd.ExcelWriter, df: pd.DataFrame) -> None:
         "işlemsiz": int((df["islemli"] == 0).sum()),
         "genel_ortalama_%": df["ort_getiri_%"].mean(),
     }
-    pd.DataFrame([stats]).to_excel(wr, "İstatistik", index=False)
+    pd.DataFrame([stats]).to_excel(
+        excel_writer=wr,
+        sheet_name="İstatistik",
+        index=False,
+    )
 
 
 def _write_error_sheet(wr: pd.ExcelWriter, err: Iterable) -> None:
@@ -252,8 +256,16 @@ def generate_full_report(
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(out_path, engine="xlsxwriter") as wr:
-        summary_df.to_excel(wr, "Özet", index=False)
-        detail_df.to_excel(wr, "Detay", index=False)
+        summary_df.to_excel(
+            excel_writer=wr,
+            sheet_name="Özet",
+            index=False,
+        )
+        detail_df.to_excel(
+            excel_writer=wr,
+            sheet_name="Detay",
+            index=False,
+        )
         _write_stats_sheet(wr, summary_df)
         if error_list:
             _write_error_sheet(wr, error_list)
