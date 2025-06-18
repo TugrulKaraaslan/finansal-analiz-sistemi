@@ -9,6 +9,14 @@ import pandas as pd
 import re
 import keyword
 from pandas.errors import UndefinedVariableError as QueryError
+
+
+class MissingColumnError(Exception):
+    """Raised when a required column is absent."""
+
+    def __init__(self, missing: str):
+        super().__init__(missing)
+        self.missing = missing
 from utils.logging_setup import setup_logger, get_logger
 
 
@@ -77,6 +85,38 @@ def _apply_single_filter(df, kod, query):
     except Exception as e:
         info.update(durum="HATA", sebep=str(e)[:120])
         return None, info
+
+
+def run_single_filter(kod: str, query: str) -> dict:
+    """Küçük bir DataFrame üzerinde tek filtreyi çalıştır."""
+    df = pd.DataFrame({"close": [1]})
+    atlanmis: dict = {}
+    try:
+        df.query(query)
+    except QueryError as qe:
+        msg = str(qe)
+        logger.warning(f"QUERY_ERROR: {kod} – {msg}")
+        atlanmis.setdefault("hatalar", []).append(
+            {
+                "filtre_kodu": kod,
+                "hata_tipi": "QUERY_ERROR",
+                "detay": msg,
+                "cozum_onerisi": "Query sözdizimini pandas.query() formatına göre düzeltin.",
+            }
+        )
+    except MissingColumnError as me:
+        msg = str(me)
+        logger.warning(f"GENERIC: {kod} – {msg}")
+        atlanmis.setdefault("hatalar", []).append(
+            {
+                "filtre_kodu": kod,
+                "hata_tipi": "GENERIC",
+                "eksik_ad": me.missing,
+                "detay": msg,
+                "cozum_onerisi": f"{me.missing} indikatörünü hesaplama listesine ekleyin.",
+            }
+        )
+    return atlanmis
 
 
 def uygula_filtreler(
@@ -243,26 +283,29 @@ def uygula_filtreler(
                 df_tarama_gunu, filtre_kodu, python_sorgusu
             )
         except QueryError as qe:
+            msg = str(qe)
+            fn_logger.warning(f"QUERY_ERROR: {filtre_kodu} – {msg}")
             atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
                 {
                     "filtre_kodu": filtre_kodu,
                     "hata_tipi": "QUERY_ERROR",
-                    "detay": str(qe),
-                    "cozum_onerisi": "Pandas query ifadesini kontrol et",
+                    "detay": msg,
+                    "cozum_onerisi": "Query sözdizimini pandas.query() formatına göre düzeltin.",
                 }
             )
-            fn_logger.warning(f"QUERY_ERROR {filtre_kodu}: {qe}")
             continue
-        except Exception as ge:
+        except MissingColumnError as me:
+            msg = str(me)
+            fn_logger.warning(f"GENERIC: {filtre_kodu} – {msg}")
             atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
                 {
                     "filtre_kodu": filtre_kodu,
                     "hata_tipi": "GENERIC",
-                    "detay": str(ge),
-                    "cozum_onerisi": "Eksik sütun ya da isim hatası",
+                    "eksik_ad": me.missing,
+                    "detay": msg,
+                    "cozum_onerisi": f"{me.missing} indikatörünü hesaplama listesine ekleyin.",
                 }
             )
-            fn_logger.warning(f"GENERIC {filtre_kodu}: {ge}")
             continue
 
         kontrol_log.append(info)
