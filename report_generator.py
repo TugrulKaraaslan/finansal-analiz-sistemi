@@ -404,6 +404,32 @@ def generate_full_report(
             sheet_name="Özet",
             index=False,
         )
+        # Koşullu biçimlendirme: Özet sayfası satırlarının renklendirilmesi
+        ws_ozet = wr.sheets["Özet"]
+        last_row = len(summary_df) + 1
+        last_col = len(summary_df.columns)
+        data_range = f"A2:{chr(64+last_col)}{last_row}"
+
+        fmt_nostock = wr.book.add_format({"bg_color": "#FFF2CC"})
+        fmt_error = wr.book.add_format({"bg_color": "#F8CBAD"})
+
+        ws_ozet.conditional_format(
+            data_range,
+            {
+                "type": "formula",
+                "criteria": '=INDIRECT("G"&ROW())="NO_STOCK"',
+                "format": fmt_nostock,
+            },
+        )
+
+        ws_ozet.conditional_format(
+            data_range,
+            {
+                "type": "formula",
+                "criteria": '=OR(INDIRECT("G"&ROW())="QUERY_ERROR",INDIRECT("G"&ROW())="GENERIC")',
+                "format": fmt_error,
+            },
+        )
         detail_df.to_excel(
             excel_writer=wr,
             sheet_name="Detay",
