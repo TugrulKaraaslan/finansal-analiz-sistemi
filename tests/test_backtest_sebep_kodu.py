@@ -25,8 +25,8 @@ def test_sebep_kodu_passthrough_ok():
 
 
 def test_error_code_preserved():
-    filtre = {"F1": {"hisseler": [], "sebep": "MISSING_COL", "hisse_sayisi": 0}}
+    filtre = {"F1": {"hisseler": [], "sebep": "QUERY_ERROR", "hisse_sayisi": 0}}
     rapor_df, _ = backtest_core.calistir_basit_backtest(
         filtre, _df(), "10.03.2025", "07.03.2025"
     )
-    assert rapor_df.iloc[0]["sebep_kodu"] == "MISSING_COL"
+    assert rapor_df.iloc[0]["sebep_kodu"] == "QUERY_ERROR"

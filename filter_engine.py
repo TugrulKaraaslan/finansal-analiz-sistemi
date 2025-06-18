@@ -185,12 +185,21 @@ def uygula_filtreler(
             fn_logger.warning(
                 f"Filtre '{filtre_kodu}': Python sorgusu boş veya NaN, atlanıyor."
             )
-            atlanmis_filtreler_log_dict[filtre_kodu] = "Python sorgusu boş veya NaN."
+            msg = "Python sorgusu boş veya NaN."
+            atlanmis_filtreler_log_dict[filtre_kodu] = msg
             filtre_sonuclar[filtre_kodu] = {
                 "hisseler": [],
-                "sebep": "NO_STOCK",
+                "sebep": "GENERIC",
                 "hisse_sayisi": 0,
             }
+            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
+                {
+                    "filtre_kodu": filtre_kodu,
+                    "hata_tipi": "GENERIC",
+                    "detay": msg,
+                    "cozum_onerisi": "",
+                }
+            )
             continue
 
         python_sorgusu = str(python_sorgusu_raw)
@@ -208,6 +217,14 @@ def uygula_filtreler(
                 "sebep": "QUERY_ERROR",
                 "hisse_sayisi": 0,
             }
+            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
+                {
+                    "filtre_kodu": filtre_kodu,
+                    "hata_tipi": "QUERY_ERROR",
+                    "detay": hata_mesaji,
+                    "cozum_onerisi": "",
+                }
+            )
             continue
         kullanilan_sutunlar = _extract_columns_from_query(python_sorgusu)
         if (
@@ -225,31 +242,63 @@ def uygula_filtreler(
         kontrol_log.append(info)
 
         if info["durum"] == "CALISTIRILAMADI":
-            atlanmis_filtreler_log_dict[filtre_kodu] = f"Eksik sütunlar: {info['eksik_sutunlar']}"
-            filtre_sonuclar[filtre_kodu] = {
-                "hisseler": [],
-                "sebep": "MISSING_COL",
-                "hisse_sayisi": 0,
-            }
-            continue
-        if info["durum"] == "HATA":
-            atlanmis_filtreler_log_dict[filtre_kodu] = info["sebep"]
+            msg = f"Eksik sütunlar: {info['eksik_sutunlar']}"
+            atlanmis_filtreler_log_dict[filtre_kodu] = msg
             filtre_sonuclar[filtre_kodu] = {
                 "hisseler": [],
                 "sebep": "QUERY_ERROR",
                 "hisse_sayisi": 0,
             }
+            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
+                {
+                    "filtre_kodu": filtre_kodu,
+                    "hata_tipi": "QUERY_ERROR",
+                    "detay": msg,
+                    "cozum_onerisi": "",
+                }
+            )
+            continue
+        if info["durum"] == "HATA":
+            msg = info["sebep"]
+            atlanmis_filtreler_log_dict[filtre_kodu] = msg
+            filtre_sonuclar[filtre_kodu] = {
+                "hisseler": [],
+                "sebep": "QUERY_ERROR",
+                "hisse_sayisi": 0,
+            }
+            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
+                {
+                    "filtre_kodu": filtre_kodu,
+                    "hata_tipi": "QUERY_ERROR",
+                    "detay": msg,
+                    "cozum_onerisi": "",
+                }
+            )
             continue
 
         hisse_kodlari_listesi = []
         if filtrelenmis_df is not None and not filtrelenmis_df.empty:
             hisse_kodlari_listesi = filtrelenmis_df["hisse_kodu"].unique().tolist()
-        sebep_kodu = "OK" if info["durum"] == "OK" else "NO_STOCK"
+        if info["durum"] == "OK":
+            sebep_kodu = "OK"
+        elif info["durum"] == "DATASIZ":
+            sebep_kodu = "GENERIC"
+        else:
+            sebep_kodu = "NO_STOCK"
         filtre_sonuclar[filtre_kodu] = {
             "hisseler": hisse_kodlari_listesi,
             "sebep": sebep_kodu,
             "hisse_sayisi": len(hisse_kodlari_listesi),
         }
+        if sebep_kodu in {"QUERY_ERROR", "GENERIC"}:
+            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
+                {
+                    "filtre_kodu": filtre_kodu,
+                    "hata_tipi": sebep_kodu,
+                    "detay": info.get("sebep", ""),
+                    "cozum_onerisi": "",
+                }
+            )
 
     fn_logger.info(
         f"Tüm filtreler uygulandı. {len(filtre_sonuclar)} filtre için sonuç listesi üretildi."

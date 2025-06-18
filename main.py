@@ -235,9 +235,7 @@ if __name__ == "__main__":
 
         summary_df = rapor_df.copy()
         detail_df = detay_df.copy()
-        error_list = (
-            atlanmis.get("hatalar", []) if isinstance(atlanmis, dict) else atlanmis
-        )
+        error_list = atlanmis.get("hatalar", [])
 
         if not rapor_df.empty:
             out_path = Path("cikti/raporlar") / f"full_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"

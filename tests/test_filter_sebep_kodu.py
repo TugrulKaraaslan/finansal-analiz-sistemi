@@ -30,7 +30,7 @@ def test_ok_code():
 
 def test_missing_column_returns_missing_col():
     code = _apply("missing > 0")
-    assert code == "MISSING_COL"
+    assert code == "QUERY_ERROR"
 
 
 def test_syntax_error_returns_query_error():
