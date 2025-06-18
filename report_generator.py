@@ -367,6 +367,35 @@ def generate_full_report(
     if keep_legacy:
         summary_df = summary_df.reindex(columns=LEGACY_SUMMARY_COLS)
         detail_df = detail_df.reindex(columns=LEGACY_DETAIL_COLS)
+
+    # ----- ➤ sebep_aciklama'ları doldur (Hatalar sheet'inden) -----
+    if error_list:
+        err_df = pd.DataFrame(error_list)
+        if not err_df.empty and "detay" in err_df.columns:
+            err_map = err_df[["filtre_kodu", "detay"]].dropna()
+            # Özet
+            summary_df = summary_df.merge(
+                err_map.rename(columns={"detay": "sebep_aciklama_fill"}),
+                on="filtre_kodu",
+                how="left",
+            )
+            summary_df["sebep_aciklama"] = (
+                summary_df["sebep_aciklama"].replace("", pd.NA)
+                .fillna(summary_df["sebep_aciklama_fill"])
+            )
+            summary_df.drop(columns="sebep_aciklama_fill", inplace=True)
+            # Detay (sadece sütun varsa)
+            if "sebep_aciklama" in detail_df.columns:
+                detail_df = detail_df.merge(
+                    err_map.rename(columns={"detay": "sebep_aciklama_fill"}),
+                    on="filtre_kodu",
+                    how="left",
+                )
+                detail_df["sebep_aciklama"] = (
+                    detail_df["sebep_aciklama"].replace("", pd.NA)
+                    .fillna(detail_df["sebep_aciklama_fill"])
+                )
+                detail_df.drop(columns="sebep_aciklama_fill", inplace=True)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(out_path, engine="xlsxwriter") as wr:
