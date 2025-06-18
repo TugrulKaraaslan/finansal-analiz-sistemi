@@ -259,7 +259,7 @@ if __name__ == "__main__":
                 if_sheet_exists="replace",
                 engine="openpyxl",
             ) as wr:
-                report_generator.olustur_hatali_filtre_raporu(atlanmis, wr, df_ozet)
+                report_generator.olustur_hatali_filtre_raporu(wr, atlanmis)
         else:
             logger.info("Rapor verisi boş, Excel oluşturulmadı.")
 
@@ -267,14 +267,8 @@ if __name__ == "__main__":
             _run_gui(rapor_df, detay_df)
 
     except Exception as e_main_run:
-        logger.critical(
-            f"Ana çalıştırma (`if __name__ == '__main__':`) bloğunda BEKLENMEDİK KRİTİK HATA: {e_main_run}",
-            exc_info=True,
-        )
-        # yine de boş rapor yaz
-        empty = pd.DataFrame()
-        from report_generator import generate_full_report
-        generate_full_report(empty, empty, log_counter.error_list, out_path="cikti/rapor_empty.xlsx")
+        import traceback, sys
+        traceback.print_exc()
         sys.exit(1)
     finally:
         logger.info(

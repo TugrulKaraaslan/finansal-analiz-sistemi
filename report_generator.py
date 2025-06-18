@@ -239,7 +239,10 @@ def _write_stats_sheet(wr: pd.ExcelWriter, df: pd.DataFrame) -> None:
 
 
 def _write_error_sheet(wr: pd.ExcelWriter, err: Iterable) -> None:
-    pd.DataFrame(err).to_excel(wr, "Hatalar", index=False)
+    df = pd.DataFrame(err)
+    if df.empty:
+        df = pd.DataFrame({"bilgi": ["Hata yok"]})
+    df.to_excel(wr, "Hatalar", index=False)
 
 
 def generate_full_report(
@@ -267,8 +270,7 @@ def generate_full_report(
             index=False,
         )
         _write_stats_sheet(wr, summary_df)
-        if error_list:
-            _write_error_sheet(wr, error_list)
+        _write_error_sheet(wr, error_list)
     fn_logger.info("Rapor kaydedildi → %s", out_path)
     return str(out_path)
 

@@ -25,3 +25,5 @@ def test_legacy_columns_preserved(tmp_path):
     assert xls.sheet_names[:2] == ["Özet", "Detay"]
     assert list(pd.read_excel(xls, "Özet").columns)  == LEGACY_SUMMARY_COLS
     assert list(pd.read_excel(xls, "Detay").columns) == LEGACY_DETAIL_COLS
+    assert "Hatalar" in xls.sheet_names, "Hatalar sayfası eksik!"
+    assert not pd.read_excel(xls, "Hatalar").empty, "Hatalar sayfası boş!"

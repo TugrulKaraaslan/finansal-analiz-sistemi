@@ -856,6 +856,7 @@ def _calculate_group_indicators_and_crossovers(
             axis=1,
         )
 
+    df_final_group = df_final_group.loc[:, ~df_final_group.columns.duplicated()]
     return df_final_group
 
 
