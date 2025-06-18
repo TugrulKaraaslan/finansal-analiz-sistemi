@@ -10,6 +10,7 @@ import xlsxwriter
 from utils.logging_setup import get_logger, setup_logger
 
 import warnings, pandas as pd
+import report_stats
 warnings.filterwarnings(
     "ignore",
     message="Downcasting object dtype arrays on .fillna",
@@ -372,8 +373,8 @@ def generate_full_report(
     quick: bool = False,
 ) -> str:
     if keep_legacy:
-        summary_df = summary_df.reindex(columns=LEGACY_SUMMARY_COLS)
-        detail_df = detail_df.reindex(columns=LEGACY_DETAIL_COLS)
+        summary_df = report_stats.build_ozet_df(summary_df, detail_df)
+        detail_df = report_stats.build_detay_df(summary_df, detail_df)
 
     # NaN temizliği: sadece filtre kodu olmayan satırlar atılır
     summary_df = summary_df.dropna(subset=["filtre_kodu"])
@@ -390,9 +391,8 @@ def generate_full_report(
                 on="filtre_kodu",
                 how="left",
             )
-            summary_df["sebep_aciklama"] = (
-                summary_df["sebep_aciklama"].replace("", pd.NA)
-                .fillna(summary_df["sebep_aciklama_fill"])
+            summary_df["sebep_aciklama"] = summary_df["sebep_aciklama_fill"].combine_first(
+                summary_df["sebep_aciklama"]
             )
             summary_df.drop(columns="sebep_aciklama_fill", inplace=True)
             # Detay (sadece sütun varsa)
@@ -402,16 +402,15 @@ def generate_full_report(
                     on="filtre_kodu",
                     how="left",
                 )
-                detail_df["sebep_aciklama"] = (
-                    detail_df["sebep_aciklama"].replace("", pd.NA)
-                    .fillna(detail_df["sebep_aciklama_fill"])
+                detail_df["sebep_aciklama"] = detail_df["sebep_aciklama_fill"].combine_first(
+                    detail_df.get("sebep_aciklama")
                 )
                 detail_df.drop(columns="sebep_aciklama_fill", inplace=True)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(out_path, engine="xlsxwriter") as wr:
         summary_df.to_excel(
-            excel_writer=wr,
+            wr,
             sheet_name="Özet",
             index=False,
         )
@@ -442,7 +441,7 @@ def generate_full_report(
             },
         )
         detail_df.to_excel(
-            excel_writer=wr,
+            wr,
             sheet_name="Detay",
             index=False,
         )
