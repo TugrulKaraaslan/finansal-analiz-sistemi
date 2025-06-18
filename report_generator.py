@@ -1,81 +1,112 @@
+from __future__ import annotations
+
 import os
 from pathlib import Path
 from datetime import datetime
+from typing import Iterable
 
 import pandas as pd
-import openpyxl
 from openpyxl.utils import get_column_letter
-import report_utils
-from utils.logging_setup import setup_logger, get_logger
-import logging
+from utils.logging_setup import get_logger, setup_logger
 
 setup_logger()
 fn_logger = get_logger(__name__)
 
+LEGACY_SUMMARY_COLS = [
+    "filtre_kodu",
+    "hisse_sayisi",
+    "ort_getiri_%",
+    "en_yuksek_%",
+    "en_dusuk_%",
+    "islemli",
+    "sebep_kodu",
+    "sebep_aciklama",
+    "tarama_tarihi",
+    "satis_tarihi",
+]
 
-def add_error_sheet(writer, error_list):
-    import pandas as pd
+LEGACY_DETAIL_COLS = [
+    "filtre_kodu",
+    "hisse_kodu",
+    "getiri_%",
+    "basari",
+    "strateji",
+    "sebep_kodu",
+]
+
+
+def add_error_sheet(writer, error_list: Iterable[tuple]):
     if error_list:
-        pd.DataFrame(error_list, columns=["timestamp", "level", "message"]).to_excel(
-            writer, sheet_name="Hatalar", index=False
-        )
+        pd.DataFrame(
+            error_list,
+            columns=["timestamp", "level", "message"],
+        ).to_excel(writer, sheet_name="Hatalar", index=False)
 
 
-def olustur_ozet_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
-    """Sonuç listesinde beklenen anahtarlar: 'hisseler', 'notlar' ve
-    her hisse için 'getiri_yuzde'."""
+def olustur_ozet_rapor(
+    sonuclar_listesi: list,
+    cikti_klasoru: str,
+    logger=None,
+) -> str | None:
     if logger is None:
         logger = fn_logger
     os.makedirs(cikti_klasoru, exist_ok=True)
-    ozet_kayitlar = []
-
+    kayitlar = []
     for sonuc in sonuclar_listesi:
         if not isinstance(sonuc, dict):
-            fn_logger.warning(f"Beklenmeyen sonuç tipi: {type(sonuc)} → {sonuc}")
+            logger.warning(
+                "Beklenmeyen sonuç tipi: %s → %s",
+                type(sonuc),
+                sonuc,
+            )
             continue
-        secilen_hisseler = sonuc.get("hisseler", [])
-        if not secilen_hisseler:
-            fn_logger.warning(
-                f"Filtre '{sonuc.get('filtre_kodu', '?')}' sonucu: Hiç hisse seçilmedi. Boş rapor satırı yazılacak."
+        secilen = sonuc.get("hisseler", [])
+        if not secilen:
+            logger.warning(
+                "Filtre '%s' sonucu: Hiç hisse seçilmedi."
+                " Boş rapor satırı yazılacak.",
+                sonuc.get("filtre_kodu", "?"),
             )
         getiriler = [
             h.get("getiri_yuzde", 0)
-            for h in secilen_hisseler
+            for h in secilen
             if isinstance(h, dict) and h.get("getiri_yuzde") is not None
         ]
-        ortalama_getiri = round(sum(getiriler) / len(getiriler), 2) if getiriler else 0
-        ozet_kayitlar.append(
+        ort = round(sum(getiriler) / len(getiriler), 2) if getiriler else 0
+        kayitlar.append(
             {
                 "filtre_kodu": sonuc.get("filtre_kodu", ""),
-                "bulunan_hisse_sayisi": len(secilen_hisseler),
-                "ortalama_getiri": ortalama_getiri,
+                "bulunan_hisse_sayisi": len(secilen),
+                "ortalama_getiri": ort,
                 "notlar": sonuc.get("notlar", ""),
                 "tarama_tarihi": sonuc.get("tarama_tarihi", ""),
                 "satis_tarihi": sonuc.get("satis_tarihi", ""),
             }
         )
-
-    df = pd.DataFrame(ozet_kayitlar)
+    if not kayitlar:
+        return None
+    df = pd.DataFrame(kayitlar)
     dosya_adi = os.path.join(
-        cikti_klasoru, f"ozet_rapor_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        cikti_klasoru,
+        f"ozet_rapor_{datetime.now():%Y%m%d_%H%M%S}.csv",
     )
     df.to_csv(dosya_adi, index=False, encoding="utf-8-sig")
-    logger.info(f"Özet rapor oluşturuldu: {dosya_adi}")
+    logger.info("Özet rapor oluşturuldu: %s", dosya_adi)
     return dosya_adi
 
 
-def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger=None):
-    """Her sonucun 'hisseler' listesinde 'alis_tarihi', 'satis_tarihi',
-    'uygulanan_strateji' ve 'getiri_yuzde' alanları ile ana sözlükte 'notlar'
-    anahtarlarını bekler."""
+def olustur_hisse_bazli_rapor(
+    sonuclar_listesi: list,
+    cikti_klasoru: str,
+    logger=None,
+) -> str | None:
     if logger is None:
         logger = fn_logger
     os.makedirs(cikti_klasoru, exist_ok=True)
     detayli_kayitlar = []
-
     for sonuc in sonuclar_listesi:
         if not isinstance(sonuc, dict):
-            fn_logger.warning(f"Geçersiz filtre sonucu tipi: {type(sonuc)}")
+            logger.warning("Geçersiz filtre sonucu tipi: %s", type(sonuc))
             continue
         filtre_kodu = sonuc.get("filtre_kodu", "")
         notlar = sonuc.get("notlar", "")
@@ -83,7 +114,6 @@ def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger
         tarama_tarihi = sonuc.get("tarama_tarihi", "")
         satis_tarihi = sonuc.get("satis_tarihi", "")
         secilenler = sonuc.get("hisseler", [])
-
         for hisse in secilenler:
             if not isinstance(hisse, dict):
                 continue
@@ -108,74 +138,70 @@ def olustur_hisse_bazli_rapor(sonuclar_listesi: list, cikti_klasoru: str, logger
     df = pd.DataFrame(detayli_kayitlar)
     dosya_adi = os.path.join(
         cikti_klasoru,
-        f"hisse_bazli_rapor_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        f"hisse_bazli_rapor_{datetime.now():%Y%m%d_%H%M%S}.csv",
     )
     df.to_csv(dosya_adi, index=False, encoding="utf-8-sig")
-    logger.info(f"Hisse bazlı detaylı rapor oluşturuldu: {dosya_adi}")
+    logger.info("Hisse bazlı detaylı rapor oluşturuldu: %s", dosya_adi)
     return dosya_adi
 
 
-def olustur_hatali_filtre_raporu(writer, kontrol_df: pd.DataFrame):
-    """Denetim tablosundan sadece sorunlu satırları alır,
-    'Hatalar' adlı çalışma sayfasına detaylı yazar."""
-
-    sorunlu = kontrol_df[kontrol_df["durum"].isin(
-        ["CALISTIRILAMADI", "HATA", "DATASIZ"]
-    )]
-
-    # Sütun sırası ve geniş açıklamalar
-    cols = ["kod", "durum", "sebep",
-            "eksik_sutunlar", "nan_sutunlar", "secim_adedi"]
+def olustur_hatali_filtre_raporu(writer, kontrol_df: pd.DataFrame) -> None:
+    sorunlu = kontrol_df[
+        kontrol_df["durum"].isin(["CALISTIRILAMADI", "HATA", "DATASIZ"])
+    ]
+    cols = [
+        "kod",
+        "durum",
+        "sebep",
+        "eksik_sutunlar",
+        "nan_sutunlar",
+        "secim_adedi",
+    ]
     sorunlu = sorunlu[cols]
-
     sheet_name = "Hatalar"
     sorunlu.to_excel(writer, sheet_name=sheet_name, index=False)
-
-    # Otomatik sütun genişliği
     ws = writer.sheets[sheet_name]
-    if hasattr(ws, "set_column"):  # xlsxwriter
+    if hasattr(ws, "set_column"):
         for i, col in enumerate(sorunlu.columns):
             max_len = max(10, sorunlu[col].astype(str).str.len().max() + 2)
             ws.set_column(i, i, max_len)
-    else:  # openpyxl
-        from openpyxl.utils import get_column_letter
+    else:
         for i, col in enumerate(sorunlu.columns, 1):
             max_len = max(10, sorunlu[col].astype(str).str.len().max() + 2)
             ws.column_dimensions[get_column_letter(i)].width = max_len
 
 
-def olustur_excel_raporu(kayitlar: list[dict], fname: str | Path, logger=None):
-    """Given summary records, save them into a single-sheet Excel file."""
+def olustur_excel_raporu(
+    kayitlar: list[dict],
+    fname: str | Path,
+    logger=None,
+) -> str | None:
     if logger is None:
         logger = fn_logger
     if not kayitlar:
         logger.warning("Hiç kayıt yok – Excel raporu atlandı.")
         return None
-
     rapor_df = pd.DataFrame(kayitlar).sort_values("filtre_kodu")
-    return kaydet_uc_sekmeli_excel(fname, rapor_df, pd.DataFrame(), pd.DataFrame())
+    return kaydet_uc_sekmeli_excel(
+        fname,
+        rapor_df,
+        pd.DataFrame(),
+        pd.DataFrame(),
+    )
 
 
 def kaydet_uc_sekmeli_excel(
-    fname: str,
+    fname: str | Path,
     ozet_df: pd.DataFrame,
     detay_df: pd.DataFrame,
     istatistik_df: pd.DataFrame,
-):
-    """Üç DataFrame'i tek seferde aynı Excel dosyasına kaydet."""
-
-    os.makedirs(os.path.dirname(fname) or ".", exist_ok=True)
-
-    with pd.ExcelWriter(
-        fname,
-        engine="xlsxwriter",
-        mode="w",
-    ) as w:
+) -> str:
+    os.makedirs(os.path.dirname(str(fname)) or ".", exist_ok=True)
+    with pd.ExcelWriter(fname, engine="xlsxwriter", mode="w") as w:
         ozet_df.to_excel(w, sheet_name="Özet", index=False)
         detay_df.to_excel(w, sheet_name="Detay", index=False)
         istatistik_df.to_excel(w, sheet_name="İstatistik", index=False)
-
-    return fname
+    return str(fname)
 
 
 def kaydet_raporlar(
@@ -183,11 +209,8 @@ def kaydet_raporlar(
     detay_df: pd.DataFrame,
     istat_df: pd.DataFrame,
     filepath: Path,
-):
-    """Append summary, detail and statistics sheets to an existing Excel file."""
-
+) -> Path:
     filepath = Path(filepath)
-
     with pd.ExcelWriter(
         filepath,
         engine="openpyxl",
@@ -197,31 +220,56 @@ def kaydet_raporlar(
         ozet_df.to_excel(w, sheet_name="Özet", index=False)
         detay_df.to_excel(w, sheet_name="Detay", index=False)
         istat_df.to_excel(w, sheet_name="İstatistik", index=False)
-
-    fn_logger.info(f"Rapor kaydedildi → {filepath}")
-
+    fn_logger.info("Rapor kaydedildi → %s", filepath)
     return filepath
 
 
-def generate_full_report(summary_df: pd.DataFrame, detail_df: pd.DataFrame, error_list: list, out_path: str | Path) -> Path:
-    """Write summary, detail and optional error sheets to Excel."""
+def _write_stats_sheet(wr: pd.ExcelWriter, df: pd.DataFrame) -> None:
+    stats = {
+        "toplam_filtre": len(df),
+        "işlemli": int(df["islemli"].sum()),
+        "işlemsiz": int((df["islemli"] == 0).sum()),
+        "genel_ortalama_%": df["ort_getiri_%"].mean(),
+    }
+    pd.DataFrame([stats]).to_excel(wr, "İstatistik", index=False)
 
+
+def _write_error_sheet(wr: pd.ExcelWriter, err: Iterable) -> None:
+    pd.DataFrame(err).to_excel(wr, "Hatalar", index=False)
+
+
+def generate_full_report(
+    summary_df: pd.DataFrame,
+    detail_df: pd.DataFrame,
+    error_list: Iterable,
+    out_path: str | Path,
+    *,
+    keep_legacy: bool = True,
+) -> str:
+    if keep_legacy:
+        summary_df = summary_df.reindex(columns=LEGACY_SUMMARY_COLS)
+        detail_df = detail_df.reindex(columns=LEGACY_DETAIL_COLS)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    with pd.ExcelWriter(out_path, engine="xlsxwriter") as wr:
+        summary_df.to_excel(wr, "Özet", index=False)
+        detail_df.to_excel(wr, "Detay", index=False)
+        _write_stats_sheet(wr, summary_df)
+        if error_list:
+            _write_error_sheet(wr, error_list)
+    fn_logger.info("Rapor kaydedildi → %s", out_path)
+    return str(out_path)
 
-    with pd.ExcelWriter(out_path, engine="xlsxwriter") as writer:
-        summary_df.to_excel(writer, sheet_name="Sonuclar", index=False)
-        detail_df.to_excel(writer, sheet_name="Detaylar", index=False)
-        add_error_sheet(writer, error_list)
 
-    fn_logger.info(f"Rapor kaydedildi → {out_path}")
-    return out_path
-
-if __name__ == "__main__":
-    from pathlib import Path
-    import log_to_health
-
-    log_files = sorted(Path(".").glob("*.log"))
-    excel_files = sorted(Path("cikti/raporlar").glob("rapor_*.xlsx"))
-    if log_files and excel_files:
-        log_to_health.generate(str(log_files[-1]), [str(excel_files[-1])])
+__all__ = [
+    "add_error_sheet",
+    "olustur_ozet_rapor",
+    "olustur_hisse_bazli_rapor",
+    "olustur_hatali_filtre_raporu",
+    "olustur_excel_raporu",
+    "kaydet_uc_sekmeli_excel",
+    "kaydet_raporlar",
+    "generate_full_report",
+    "_write_stats_sheet",
+    "_write_error_sheet",
+]

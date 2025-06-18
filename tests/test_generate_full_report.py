@@ -24,5 +24,5 @@ def test_generate_full_report_creates_files(tmp_path):
     path = report_generator.generate_full_report(summary, detail, [], out)
 
     wb = openpyxl.load_workbook(path)
-    assert wb.sheetnames[:2] == ["Sonuclar", "Detaylar"]
+    assert wb.sheetnames[:2] == ["Özet", "Detay"]
     wb.close()
