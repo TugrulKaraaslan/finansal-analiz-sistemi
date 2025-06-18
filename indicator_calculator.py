@@ -989,6 +989,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             by=["hisse_kodu", "tarih"], inplace=True, na_position="first"
         )
         df_sonuc.reset_index(drop=True, inplace=True)
+        df_sonuc = df_sonuc.loc[:, ~df_sonuc.columns.duplicated()]
 
         ana_logger.info(
             f"Tüm {current_processed_count_main} hisse için indikatör ve kesişim hesaplamaları tamamlandı. Son DataFrame boyutu: {df_sonuc.shape}"
