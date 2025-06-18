@@ -325,6 +325,45 @@ def safe_get(df: pd.DataFrame, col: str) -> pd.Series | None:
     return df[col]
 
 
+def calculate_indicators(df: pd.DataFrame, indicators: list[str] | None = None) -> pd.DataFrame:
+    """Calculate simple indicators like EMA/SMA for given list.
+
+    Duplicate column names are skipped with a warning.
+    """
+    if indicators is None:
+        return df
+
+    out = df.copy()
+    for ind in indicators:
+        new_name = ind
+        if new_name in out.columns:
+            logger.warning(f"Duplicate skip: {new_name}")
+            continue
+
+        try:
+            if new_name.startswith("ema_"):
+                span = int(new_name.split("_", 1)[1])
+                if "close" in out.columns:
+                    out[new_name] = out["close"].ewm(span=span, adjust=False).mean()
+                else:
+                    out[new_name] = np.nan
+            elif new_name.startswith("sma_"):
+                span = int(new_name.split("_", 1)[1])
+                if "close" in out.columns:
+                    out[new_name] = out["close"].rolling(window=span, min_periods=1).mean()
+                else:
+                    out[new_name] = np.nan
+            else:
+                logger.warning(f"Indicator not implemented: {new_name}")
+                out[new_name] = np.nan
+        except Exception as e:
+            logger.error(f"{new_name} hesaplanirken hata: {e}")
+            out[new_name] = np.nan
+
+    out = out.loc[:, ~out.columns.duplicated()]
+    return out
+
+
 def _tema20(series: pd.Series) -> pd.Series:
     """TEMA 20 – pandas_ta."""
     return tema(series, length=20)
