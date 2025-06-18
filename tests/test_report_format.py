@@ -14,16 +14,39 @@ from report_generator import (
 
 def test_legacy_columns_preserved(tmp_path):
     path = tmp_path / "rapor.xlsx"
+    summary = pd.DataFrame({
+        "filtre_kodu": ["F1"],
+        "hisse_sayisi": [1],
+        "ort_getiri_%": [1.0],
+        "en_yuksek_%": [1.5],
+        "en_dusuk_%": [-0.5],
+        "islemli": [1],
+        "sebep_kodu": ["OK"],
+        "sebep_aciklama": [""],
+        "tarama_tarihi": ["01.01.2025"],
+        "satis_tarihi": ["02.01.2025"],
+    })
+    detail = pd.DataFrame({
+        "filtre_kodu": ["F1"],
+        "hisse_kodu": ["AAA"],
+        "getiri_%": [1.0],
+        "basari": ["BAŞARILI"],
+        "strateji": ["S1"],
+        "sebep_kodu": ["OK"],
+    })
+    errors = [{"filtre_kodu": "F2", "hata_tipi": "GENERIC", "detay": "x", "cozum_onerisi": ""}]
     generate_full_report(
-        pd.DataFrame(columns=LEGACY_SUMMARY_COLS),
-        pd.DataFrame(columns=LEGACY_DETAIL_COLS),
-        [],
+        summary,
+        detail,
+        errors,
         path,
         keep_legacy=True,
     )
     xls = pd.ExcelFile(path)
     assert xls.sheet_names[:2] == ["Özet", "Detay"]
-    assert list(pd.read_excel(xls, "Özet").columns)  == LEGACY_SUMMARY_COLS
+    assert list(pd.read_excel(xls, "Özet").columns) == LEGACY_SUMMARY_COLS
     assert list(pd.read_excel(xls, "Detay").columns) == LEGACY_DETAIL_COLS
+    assert len(pd.read_excel(xls, "Özet")) >= 1
+    assert len(pd.read_excel(xls, "Detay")) >= 1
     assert "Hatalar" in xls.sheet_names, "Hatalar sayfası eksik!"
     assert not pd.read_excel(xls, "Hatalar").empty, "Hatalar sayfası boş!"
