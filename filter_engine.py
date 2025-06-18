@@ -5,8 +5,8 @@
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (Loglama ve hata yönetimi iyileştirmeleri)
 
-import pandas as pd
 import re
+import pandas as pd
 import keyword
 from pandas.errors import UndefinedVariableError as QueryError
 
@@ -33,6 +33,27 @@ def _extract_columns_from_query(query: str) -> set:
 
 setup_logger()
 logger = get_logger(__name__)
+
+_missing_re = re.compile(r"Eksik sütunlar?:\s*(?P<col>[A-Za-z0-9_]+)")
+_undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)'")
+
+
+def _build_solution(err_type: str, msg: str) -> str:
+    if err_type == "GENERIC":
+        m1 = _missing_re.search(msg)
+        if m1:
+            col = m1.group("col")
+            return f'"{col}" indikatörünü hesaplama listesine ekleyin.'
+        m2 = _undefined_re.search(msg)
+        if m2:
+            col = m2.group("col")
+            return f'Sorguda geçen "{col}" sütununu veri setine ekleyin veya sorgudan çıkarın.'
+        return "Eksik veriyi veya sorgu değişkenini düzeltin."
+    if err_type == "QUERY_ERROR":
+        return "Query ifadesini pandas.query() sözdizimine göre düzeltin."
+    if err_type == "NO_STOCK":
+        return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
+    return ""
 
 
 def _apply_single_filter(df, kod, query):
@@ -95,27 +116,27 @@ def run_single_filter(kod: str, query: str) -> dict:
         df.query(query)
     except QueryError as qe:
         msg = str(qe)
-        logger.warning(f"QUERY_ERROR: {kod} – {msg}")
         atlanmis.setdefault("hatalar", []).append(
             {
                 "filtre_kodu": kod,
                 "hata_tipi": "QUERY_ERROR",
                 "detay": msg,
-                "cozum_onerisi": "Query sözdizimini pandas.query() formatına göre düzeltin.",
+                "cozum_onerisi": _build_solution("QUERY_ERROR", msg),
             }
         )
+        logger.warning(f"QUERY_ERROR: {kod} – {msg}")
     except MissingColumnError as me:
         msg = str(me)
-        logger.warning(f"GENERIC: {kod} – {msg}")
         atlanmis.setdefault("hatalar", []).append(
             {
                 "filtre_kodu": kod,
                 "hata_tipi": "GENERIC",
                 "eksik_ad": me.missing,
                 "detay": msg,
-                "cozum_onerisi": f"{me.missing} indikatörünü hesaplama listesine ekleyin.",
+                "cozum_onerisi": _build_solution("GENERIC", msg),
             }
         )
+        logger.warning(f"GENERIC: {kod} – {msg}")
     return atlanmis
 
 
@@ -224,10 +245,7 @@ def uygula_filtreler(
             "hata_tipi": error_type,
             "eksik_ad": eksik or "",
             "detay": msg,
-            "cozum_onerisi": (
-                f"{eksik} indikatörünü hesaplama listesine ekleyin." if eksik
-                else "Query ifadesini pandas.query() sözdizimine göre düzeltin."
-            ),
+            "cozum_onerisi": _build_solution(error_type, msg if msg else ""),
         }
         atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(hack)
 
@@ -284,28 +302,28 @@ def uygula_filtreler(
             )
         except QueryError as qe:
             msg = str(qe)
-            fn_logger.warning(f"QUERY_ERROR: {filtre_kodu} – {msg}")
             atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
                 {
                     "filtre_kodu": filtre_kodu,
                     "hata_tipi": "QUERY_ERROR",
                     "detay": msg,
-                    "cozum_onerisi": "Query sözdizimini pandas.query() formatına göre düzeltin.",
+                    "cozum_onerisi": _build_solution("QUERY_ERROR", msg),
                 }
             )
+            fn_logger.warning(f"QUERY_ERROR: {filtre_kodu} – {msg}")
             continue
         except MissingColumnError as me:
             msg = str(me)
-            fn_logger.warning(f"GENERIC: {filtre_kodu} – {msg}")
             atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
                 {
                     "filtre_kodu": filtre_kodu,
                     "hata_tipi": "GENERIC",
                     "eksik_ad": me.missing,
                     "detay": msg,
-                    "cozum_onerisi": f"{me.missing} indikatörünü hesaplama listesine ekleyin.",
+                    "cozum_onerisi": _build_solution("GENERIC", msg),
                 }
             )
+            fn_logger.warning(f"GENERIC: {filtre_kodu} – {msg}")
             continue
 
         kontrol_log.append(info)
