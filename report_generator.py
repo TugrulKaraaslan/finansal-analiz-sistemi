@@ -246,12 +246,48 @@ def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     pd.DataFrame(stats).to_excel(wr, sheet_name="İstatistik", index=False)
 
 
-def _write_error_sheet(wr: pd.ExcelWriter, error_list: Iterable) -> None:
-    if not error_list:
+def _write_error_sheet(
+    wr: pd.ExcelWriter,
+    error_list: Iterable,
+    summary_df: pd.DataFrame | None = None,
+) -> None:
+    """Write errors to ``Hatalar`` sheet.
+
+    Parameters
+    ----------
+    wr : pd.ExcelWriter
+        Writer object to write the sheet into.
+    error_list : Iterable
+        Explicit error entries generated during processing.
+    summary_df : pd.DataFrame, optional
+        Summary table used to ensure every non-``OK`` record is represented.
+    """
+
+    df_err = pd.DataFrame(error_list)
+
+    if summary_df is not None and not summary_df.empty:
+        non_ok = summary_df[summary_df["sebep_kodu"] != "OK"]
+        if not non_ok.empty:
+            base_records = []
+            existing = set(df_err.get("filtre_kodu", []))
+            for _, row in non_ok.iterrows():
+                if row["filtre_kodu"] in existing:
+                    continue
+                base_records.append(
+                    {
+                        "filtre_kodu": row["filtre_kodu"],
+                        "hata_tipi": row["sebep_kodu"],
+                        "detay": row.get("sebep_aciklama", ""),
+                        "cozum_onerisi": "",
+                    }
+                )
+            if base_records:
+                df_err = pd.concat([df_err, pd.DataFrame(base_records)], ignore_index=True)
+
+    if df_err.empty:
         return  # liste boşsa sheet oluşturma
-    pd.DataFrame(error_list).to_excel(
-        wr, sheet_name="Hatalar", index=False
-    )
+
+    df_err.to_excel(wr, sheet_name="Hatalar", index=False)
 
 
 def generate_full_report(
@@ -279,7 +315,7 @@ def generate_full_report(
             index=False,
         )
         _write_stats_sheet(wr, summary_df)
-        _write_error_sheet(wr, error_list)
+        _write_error_sheet(wr, error_list, summary_df)
     fn_logger.info("Rapor kaydedildi → %s", out_path)
     return str(out_path)
 
