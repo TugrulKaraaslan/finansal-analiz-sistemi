@@ -96,3 +96,24 @@ def extract_columns_from_filters_cached(
             df_filters = None
 
     return extract_columns_from_filters(df_filters, series_series, series_value)
+
+
+def purge_old_logs(dir_path: str = "raporlar", days: int = 7) -> None:
+    """Delete ``.log`` files older than ``days`` in ``dir_path``.
+
+    Parameters
+    ----------
+    dir_path : str, optional
+        Directory containing log files. Default is ``"raporlar"``.
+    days : int, optional
+        Files older than this number of days will be removed. Default is ``7``.
+    """
+
+    import glob
+    import os
+    import time
+
+    for fp in glob.glob(f"{dir_path}/*.log"):
+        if time.time() - os.path.getmtime(fp) > days * 24 * 3600:
+            os.remove(fp)
+
