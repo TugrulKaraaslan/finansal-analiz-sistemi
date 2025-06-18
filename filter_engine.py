@@ -8,6 +8,7 @@
 import pandas as pd
 import re
 import keyword
+from pandas.errors import UndefinedVariableError as QueryError
 from utils.logging_setup import setup_logger, get_logger
 
 
@@ -237,7 +238,33 @@ def uygula_filtreler(
         } <= set(df_tarama_gunu.columns) and "psar" in kullanilan_sutunlar:
             df_tarama_gunu["psar"] = df_tarama_gunu["psar_long"].fillna(df_tarama_gunu["psar_short"])
 
-        filtrelenmis_df, info = _apply_single_filter(df_tarama_gunu, filtre_kodu, python_sorgusu)
+        try:
+            filtrelenmis_df, info = _apply_single_filter(
+                df_tarama_gunu, filtre_kodu, python_sorgusu
+            )
+        except QueryError as qe:
+            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
+                {
+                    "filtre_kodu": filtre_kodu,
+                    "hata_tipi": "QUERY_ERROR",
+                    "detay": str(qe),
+                    "cozum_onerisi": "Pandas query ifadesini kontrol et",
+                }
+            )
+            fn_logger.warning(f"QUERY_ERROR {filtre_kodu}: {qe}")
+            continue
+        except Exception as ge:
+            atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
+                {
+                    "filtre_kodu": filtre_kodu,
+                    "hata_tipi": "GENERIC",
+                    "detay": str(ge),
+                    "cozum_onerisi": "Eksik sütun ya da isim hatası",
+                }
+            )
+            fn_logger.warning(f"GENERIC {filtre_kodu}: {ge}")
+            continue
+
         kontrol_log.append(info)
 
         if info["durum"] == "CALISTIRILAMADI":
