@@ -368,6 +368,10 @@ def generate_full_report(
         summary_df = summary_df.reindex(columns=LEGACY_SUMMARY_COLS)
         detail_df = detail_df.reindex(columns=LEGACY_DETAIL_COLS)
 
+    # NaN temizliği: sadece filtre kodu olmayan satırlar atılır
+    summary_df = summary_df.dropna(subset=["filtre_kodu"])
+    detail_df = detail_df.dropna(subset=["filtre_kodu"])
+
     # ----- ➤ sebep_aciklama'ları doldur (Hatalar sheet'inden) -----
     if error_list:
         err_df = pd.DataFrame(error_list)
