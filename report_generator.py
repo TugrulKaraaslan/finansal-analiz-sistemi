@@ -224,18 +224,26 @@ def kaydet_raporlar(
     return filepath
 
 
-def _write_stats_sheet(wr: pd.ExcelWriter, df: pd.DataFrame) -> None:
-    stats = {
-        "toplam_filtre": len(df),
-        "işlemli": int(df["islemli"].sum()),
-        "işlemsiz": int((df["islemli"] == 0).sum()),
-        "genel_ortalama_%": df["ort_getiri_%"].mean(),
-    }
-    pd.DataFrame([stats]).to_excel(
-        excel_writer=wr,
-        sheet_name="İstatistik",
-        index=False,
-    )
+def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
+    """Write summary statistics to the given Excel writer."""
+    toplam = len(df_sum)
+    islemli = (df_sum["hisse_sayisi"] > 0).sum()
+    islemsiz = (df_sum["sebep_kodu"] == "NO_STOCK").sum()
+    hatali = toplam - islemli - islemsiz
+    gen_bas = round(islemli / toplam * 100, 2) if toplam else 0
+    gen_avg = round(df_sum["ort_getiri_%"].mean(skipna=True), 2)
+
+    stats = [
+        {
+            "toplam_filtre": toplam,
+            "islemli": islemli,
+            "işlemsiz": islemsiz,
+            "hatalı": hatali,
+            "genel_başarı_%": gen_bas,
+            "genel_ortalama_%": gen_avg,
+        }
+    ]
+    pd.DataFrame(stats).to_excel(wr, sheet_name="İstatistik", index=False)
 
 
 def _write_error_sheet(wr: pd.ExcelWriter, error_list: Iterable) -> None:
