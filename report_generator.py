@@ -7,6 +7,7 @@ from typing import Iterable
 
 import pandas as pd
 from openpyxl.utils import get_column_letter
+import xlsxwriter
 from utils.logging_setup import get_logger, setup_logger
 
 setup_logger()
@@ -246,6 +247,70 @@ def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     pd.DataFrame(stats).to_excel(wr, sheet_name="İstatistik", index=False)
 
 
+def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
+    """Write a lightweight health summary sheet."""
+    toplam = len(df_sum)
+    ok = int((df_sum["sebep_kodu"] == "OK").sum())
+    nostock = int((df_sum["sebep_kodu"] == "NO_STOCK").sum())
+    hatali = toplam - ok - nostock
+    gen_bas = round(ok / toplam * 100, 2) if toplam else 0
+    gen_avg = round(df_sum["ort_getiri_%"].mean(skipna=True), 2)
+
+    kpi_df = pd.DataFrame(
+        [
+            {
+                "TOPLAM FİLTRE": toplam,
+                "OK": ok,
+                "NO_STOCK": nostock,
+                "HATALI": hatali,
+                "GENEL BAŞARI %": gen_bas,
+                "GENEL ORT. %": gen_avg,
+            }
+        ]
+    )
+
+    kpi_df.to_excel(wr, sheet_name="Sağlık Özeti", index=False, startrow=1)
+
+    workbook = wr.book
+    ws = wr.sheets["Sağlık Özeti"]
+
+    fmt_grey = workbook.add_format({"bold": True, "align": "center", "bg_color": "#D9D9D9"})
+    fmt_green = workbook.add_format({"bold": True, "align": "center", "bg_color": "#92D050"})
+    fmt_orange = workbook.add_format({"bold": True, "align": "center", "bg_color": "#FFC000"})
+    fmt_red = workbook.add_format({"bold": True, "align": "center", "bg_color": "#FF0000", "font_color": "white"})
+
+    ws.write("A1", "KPI", workbook.add_format({"bold": True}))
+
+    ws.set_column("A:G", 18)
+    ws.conditional_format("B2:B2", {"type": "no_blanks", "format": fmt_grey})
+    ws.conditional_format("C2:C2", {"type": "no_blanks", "format": fmt_green})
+    ws.conditional_format("D2:D2", {"type": "no_blanks", "format": fmt_orange})
+    ws.conditional_format("E2:E2", {"type": "no_blanks", "format": fmt_red})
+    ws.conditional_format("F2:G2", {"type": "no_blanks", "format": fmt_green})
+
+    top5 = df_sum.sort_values("ort_getiri_%", ascending=False).head(5)
+    worst5 = df_sum.sort_values("ort_getiri_%").head(5)
+
+    chart = workbook.add_chart({"type": "column"})
+    chart.add_series(
+        {
+            "name": "En İyi 5",
+            "categories": ["Sağlık Özeti", 0, 8, len(top5) - 1, 8],
+            "values": top5["ort_getiri_%"].tolist(),
+        }
+    )
+    chart.add_series(
+        {
+            "name": "En Kötü 5",
+            "categories": ["Sağlık Özeti", 0, 9, len(worst5) - 1, 9],
+            "values": worst5["ort_getiri_%"].tolist(),
+            "invert_if_negative": True,
+        }
+    )
+    chart.set_title({"name": "En İyi / En Kötü 5 Filtre (Getiri %)"})
+    ws.insert_chart("A5", chart, {"x_scale": 1.2, "y_scale": 1.2})
+
+
 def _write_error_sheet(
     wr: pd.ExcelWriter,
     error_list: Iterable,
@@ -297,6 +362,7 @@ def generate_full_report(
     out_path: str | Path,
     *,
     keep_legacy: bool = True,
+    quick: bool = False,
 ) -> str:
     if keep_legacy:
         summary_df = summary_df.reindex(columns=LEGACY_SUMMARY_COLS)
@@ -316,6 +382,9 @@ def generate_full_report(
         )
         _write_stats_sheet(wr, summary_df)
         _write_error_sheet(wr, error_list, summary_df)
+
+        if quick:
+            _write_health_sheet(wr, summary_df)
     fn_logger.info("Rapor kaydedildi → %s", out_path)
     return str(out_path)
 
@@ -331,4 +400,5 @@ __all__ = [
     "generate_full_report",
     "_write_stats_sheet",
     "_write_error_sheet",
+    "_write_health_sheet",
 ]
