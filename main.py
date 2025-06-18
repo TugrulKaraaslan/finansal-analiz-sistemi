@@ -290,7 +290,4 @@ if __name__ == "__main__":
             with pd.ExcelWriter(rapor_path, mode="a", if_sheet_exists="replace", engine="openpyxl") as wr:
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
-        import glob, os, time
-        for fp in glob.glob("raporlar/*.log"):
-            if time.time() - os.path.getmtime(fp) > 7 * 24 * 3600:
-                os.remove(fp)
+        utils.purge_old_logs("raporlar", days=7)
