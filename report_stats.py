@@ -116,7 +116,7 @@ def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
     """Compute aggregated performance statistics."""
     toplam = len(ozet_df)
     islemli = int((ozet_df["islemli"] == "EVET").sum())
-    islemesiz = int((ozet_df["islemli"] == "HAYIR").sum())
+    islemsiz = int((ozet_df["islemli"] == "HAYIR").sum())
     hatali = int(ozet_df["sebep_kodu"].isin(["MISSING_COL", "QUERY_ERROR"]).sum())
     genel_basari = round(100 * islemli / toplam, 2) if toplam else 0.0
     genel_ortalama = round(pd.to_numeric(ozet_df["ort_getiri_%"], errors="coerce").mean(), 2) if toplam else 0.0
@@ -124,7 +124,7 @@ def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
         {
             "toplam_filtre": toplam,
             "islemli": islemli,
-            "işlemsiz": islemesiz,
+            "işlemsiz": islemsiz,
             "hatalı": hatali,
             "genel_başarı_%": genel_basari,
             "genel_ortalama_%": genel_ortalama,
