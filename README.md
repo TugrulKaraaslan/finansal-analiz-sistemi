@@ -14,6 +14,11 @@ ChatGPT ile geliştirilen backtest otomasyon projesi
    ```bash
    pip install -r requirements.txt
    ```
+4. `pre-commit` kurulumunu yapın ve git kancalarını etkinleştirin:
+   ```bash
+   pip install pre-commit
+   pre-commit install
+   ```
 
 ## Testlerin Çalıştırılması
 
