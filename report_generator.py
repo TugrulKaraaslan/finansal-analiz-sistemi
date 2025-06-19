@@ -6,7 +6,6 @@ from datetime import datetime
 from typing import Iterable
 
 from openpyxl.utils import get_column_letter
-import xlsxwriter
 from logging_config import get_logger
 
 import pandas as pd

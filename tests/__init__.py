@@ -1,7 +1,4 @@
 import warnings
-import pandas as pd
-import contextlib
-import io
 import pytest
 
 # pytest sırasında açık dosya uyarısını bastır

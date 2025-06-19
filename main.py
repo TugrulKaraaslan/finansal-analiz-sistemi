@@ -13,9 +13,9 @@ import os
 import logging
 from pathlib import Path
 import argparse
+import traceback
 import config
 import utils
-import report_utils
 from utils.date_utils import parse_date
 
 
@@ -189,7 +189,7 @@ def calistir_tum_sistemi(
     df_processed = on_isle(df_raw)
     df_indicator = indikator_hesapla(df_processed)
     tarama_dt = parse_date(tarama_tarihi_str)
-    satis_dt = parse_date(satis_tarihi_str)
+    parse_date(satis_tarihi_str)
     filtre_sonuclar, atlanmis = filtre_uygula(df_indicator, tarama_dt)
     rapor_df, detay_df = backtest_yap(
         df_indicator,
@@ -246,8 +246,6 @@ if __name__ == "__main__":
         detail_df = detay_df.copy()
         error_list = atlanmis.get("hatalar", [])
         if not error_list:
-            import logging
-
             logging.warning("Uyarı: error_list boş—'Hatalar' sheet'i yazılmayacak!")
 
         if not rapor_df.empty:
@@ -269,10 +267,7 @@ if __name__ == "__main__":
         if args.gui:
             _run_gui(rapor_df, detay_df)
 
-    except Exception as e_main_run:
-        import traceback
-        import sys
-
+    except Exception:
         traceback.print_exc()
         sys.exit(1)
     finally:

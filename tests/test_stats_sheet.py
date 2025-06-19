@@ -1,4 +1,4 @@
-from report_generator import generate_full_report, LEGACY_SUMMARY_COLS
+from report_generator import generate_full_report
 import os
 import sys
 import pandas as pd

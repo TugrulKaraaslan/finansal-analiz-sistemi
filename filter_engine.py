@@ -10,7 +10,6 @@ import re
 import pandas as pd
 import keyword
 from pandas.errors import UndefinedVariableError as QueryError
-import logging
 import yaml
 import os
 

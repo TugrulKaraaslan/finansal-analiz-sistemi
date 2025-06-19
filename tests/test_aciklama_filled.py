@@ -1,6 +1,5 @@
 from report_generator import (
     generate_full_report,
-    LEGACY_SUMMARY_COLS,
     LEGACY_DETAIL_COLS,
 )
 import os

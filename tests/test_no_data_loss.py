@@ -1,6 +1,5 @@
 import pandas as pd
-import tempfile
-from report_generator import generate_full_report, LEGACY_SUMMARY_COLS
+from report_generator import generate_full_report
 
 
 def test_no_data_loss(tmp_path):

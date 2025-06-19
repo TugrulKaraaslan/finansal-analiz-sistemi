@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from utils.pandas_compat import safe_concat
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from filtre_dogrulama import SEBEP_KODLARI

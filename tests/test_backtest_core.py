@@ -1,4 +1,3 @@
-import config
 import backtest_core
 import types
 import pandas as pd

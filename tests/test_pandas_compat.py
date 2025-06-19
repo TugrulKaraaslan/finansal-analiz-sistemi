@@ -1,5 +1,4 @@
 import pandas as pd
-import pytest
 from utils.pandas_compat import safe_to_excel, safe_concat
 
 

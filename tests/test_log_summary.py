@@ -18,7 +18,7 @@ def test_log_summary_present(caplog):
         )
         logger.info(summary)
 
-    lines = [l for l in caplog.text.splitlines() if "LOG_SUMMARY" in l]
-    assert any("errors=" in l and "atlanan_filtre=" in l for l in lines)
+    lines = [line for line in caplog.text.splitlines() if "LOG_SUMMARY" in line]
+    assert any("errors=" in line and "atlanan_filtre=" in line for line in lines)
     assert log_counter.errors == 0
     assert log_counter.warnings <= 5

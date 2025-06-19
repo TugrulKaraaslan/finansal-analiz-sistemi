@@ -7,7 +7,6 @@
 
 import pandas as pd
 from logging_config import get_logger
-from utils.logging_setup import setup_logger
 from functools import lru_cache
 from io import StringIO
 
