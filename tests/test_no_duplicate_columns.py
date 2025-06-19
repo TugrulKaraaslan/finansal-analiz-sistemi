@@ -8,6 +8,7 @@ sys.modules.pop("pandas_ta", None)
 
 from indicator_calculator import calculate_indicators
 
+
 def test_duplicate_columns():
     df = pd.DataFrame({"close": [1, 2, 3, 4, 5]})
     out = calculate_indicators(df.copy(), indicators=["ema_5", "ema_5"])

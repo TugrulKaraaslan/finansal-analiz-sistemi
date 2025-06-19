@@ -14,17 +14,21 @@ def test_hatalar_sheet(tmp_path):
     with pd.ExcelWriter(fname) as w:
         pd.DataFrame({"a": [1]}).to_excel(w, sheet_name="Sheet1", index=False)
 
-    kontrol_df = pd.DataFrame([
-        {
-            "kod": "F1",
-            "durum": "HATA",
-            "sebep": "ERR",
-            "eksik_sutunlar": "x",
-            "nan_sutunlar": "",
-            "secim_adedi": 0,
-        }
-    ])
-    with pd.ExcelWriter(fname, mode="a", if_sheet_exists="replace", engine="openpyxl") as wr:
+    kontrol_df = pd.DataFrame(
+        [
+            {
+                "kod": "F1",
+                "durum": "HATA",
+                "sebep": "ERR",
+                "eksik_sutunlar": "x",
+                "nan_sutunlar": "",
+                "secim_adedi": 0,
+            }
+        ]
+    )
+    with pd.ExcelWriter(
+        fname, mode="a", if_sheet_exists="replace", engine="openpyxl"
+    ) as wr:
         report_generator.olustur_hatali_filtre_raporu(wr, kontrol_df)
 
     wb = openpyxl.load_workbook(fname)

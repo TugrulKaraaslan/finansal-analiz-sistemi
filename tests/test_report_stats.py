@@ -7,17 +7,21 @@ import report_stats
 
 
 def sample_data():
-    summary = pd.DataFrame({
-        "filtre_kodu": ["F1", "F2"],
-        "ort_getiri_%": [5.0, -3.0],
-        "sebep_kodu": ["OK", "NO_STOCK"],
-    })
-    detail = pd.DataFrame({
-        "filtre_kodu": ["F1", "F1"],
-        "hisse_kodu": ["AAA", "BBB"],
-        "getiri_yuzde": [5.0, 6.0],
-        "basari": ["BAŞARILI", "BAŞARILI"],
-    })
+    summary = pd.DataFrame(
+        {
+            "filtre_kodu": ["F1", "F2"],
+            "ort_getiri_%": [5.0, -3.0],
+            "sebep_kodu": ["OK", "NO_STOCK"],
+        }
+    )
+    detail = pd.DataFrame(
+        {
+            "filtre_kodu": ["F1", "F1"],
+            "hisse_kodu": ["AAA", "BBB"],
+            "getiri_yuzde": [5.0, 6.0],
+            "basari": ["BAŞARILI", "BAŞARILI"],
+        }
+    )
     return summary, detail
 
 

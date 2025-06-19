@@ -20,6 +20,8 @@ class MissingColumnError(Exception):
     def __init__(self, missing: str):
         super().__init__(missing)
         self.missing = missing
+
+
 from logging_config import get_logger
 
 
@@ -87,6 +89,7 @@ def safe_eval(expr, df, depth: int = 0):
             logger.warning("QUERY_ERROR %s", e)
             try:
                 from utils.failure_tracker import log_failure
+
                 log_failure("filters", expr.get("code", "unknown"), str(e))
             except Exception:
                 pass
@@ -157,6 +160,7 @@ def _apply_single_filter(df, kod, query):
         info.update(durum="HATA", sebep=str(e)[:120])
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("filters", kod, str(e))
         except Exception:
             pass
@@ -167,8 +171,9 @@ def run_filter(code, df, expr):
     """Simple wrapper for running a filter expression."""
     # Pasif filtreler listede mi?
     from config import cfg
-    if code in cfg.get('passive_filters', []):
-        logger.info('Filter %s marked passive, skipped.', code)
+
+    if code in cfg.get("passive_filters", []):
+        logger.info("Filter %s marked passive, skipped.", code)
         return pd.DataFrame()
     return safe_eval(expr, df)
 
@@ -192,6 +197,7 @@ def run_single_filter(kod: str, query: str) -> dict:
         logger.warning(f"QUERY_ERROR: {kod} – {msg}")
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("filters", kod, msg)
         except Exception:
             pass
@@ -209,6 +215,7 @@ def run_single_filter(kod: str, query: str) -> dict:
         logger.warning(f"GENERIC: {kod} – {msg}")
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("filters", kod, msg)
         except Exception:
             pass
@@ -360,16 +367,19 @@ def uygula_filtreler(
             kaydet_hata(filtre_kodu, "QUERY_ERROR", hata_mesaji)
             continue
         kullanilan_sutunlar = _extract_columns_from_query(python_sorgusu)
-        if (
-            "volume_tl" in kullanilan_sutunlar
-            and {"volume", "close"} <= set(df_tarama_gunu.columns)
+        if "volume_tl" in kullanilan_sutunlar and {"volume", "close"} <= set(
+            df_tarama_gunu.columns
         ):
-            df_tarama_gunu["volume_tl"] = df_tarama_gunu["volume"] * df_tarama_gunu["close"]
+            df_tarama_gunu["volume_tl"] = (
+                df_tarama_gunu["volume"] * df_tarama_gunu["close"]
+            )
         if {
             "psar_long",
             "psar_short",
         } <= set(df_tarama_gunu.columns) and "psar" in kullanilan_sutunlar:
-            df_tarama_gunu["psar"] = df_tarama_gunu["psar_long"].fillna(df_tarama_gunu["psar_short"])
+            df_tarama_gunu["psar"] = df_tarama_gunu["psar_long"].fillna(
+                df_tarama_gunu["psar_short"]
+            )
 
         try:
             filtrelenmis_df, info = _apply_single_filter(
@@ -388,6 +398,7 @@ def uygula_filtreler(
             fn_logger.warning(f"QUERY_ERROR: {filtre_kodu} – {msg}")
             try:
                 from utils.failure_tracker import log_failure
+
                 log_failure("filters", filtre_kodu, msg)
             except Exception:
                 pass
@@ -406,6 +417,7 @@ def uygula_filtreler(
             fn_logger.warning(f"GENERIC: {filtre_kodu} – {msg}")
             try:
                 from utils.failure_tracker import log_failure
+
                 log_failure("filters", filtre_kodu, msg)
             except Exception:
                 pass

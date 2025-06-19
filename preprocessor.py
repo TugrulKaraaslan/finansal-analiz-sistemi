@@ -101,9 +101,7 @@ def on_isle_hisse_verileri(
         )
         try:
             # Olası farklı formatları dene (genellikle pd.to_datetime bunu otomatik yapar ama garanti olsun)
-            df["tarih"] = pd.to_datetime(
-                df["tarih"], errors="coerce", dayfirst=True
-            )
+            df["tarih"] = pd.to_datetime(df["tarih"], errors="coerce", dayfirst=True)
             # errors='coerce' geçersiz tarihleri NaT (Not a Time) yapar.
             # dayfirst=True, dd.mm.yyyy formatını önceliklendirir.
             fn_logger.info(

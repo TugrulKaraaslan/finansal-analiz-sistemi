@@ -28,9 +28,7 @@ def dogrula_filtre_dataframe(
 
     eksik_kolonlar = [c for c in zorunlu_kolonlar if c not in df_filtre.columns]
     if eksik_kolonlar:
-        raise KeyError(
-            "Eksik zorunlu kolonlar: " + ", ".join(eksik_kolonlar)
-        )
+        raise KeyError("Eksik zorunlu kolonlar: " + ", ".join(eksik_kolonlar))
 
     for idx, row in df_filtre.iterrows():
         kod_degeri = row.get("flag")

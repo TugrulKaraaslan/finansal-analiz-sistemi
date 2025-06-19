@@ -30,7 +30,9 @@ def test_bireysel_performanslar_contains_new_keys():
         filtre_sonuc, df, satis_tarihi_str="10.03.2025", tarama_tarihi_str="07.03.2025"
     )
     assert set(rapor_df.columns) == {"filtre_kodu", "ort_getiri_%", "sebep_kodu"}
-    assert {"filtre_kodu", "hisse_kodu", "getiri_yuzde", "basari"}.issubset(detay_df.columns)
+    assert {"filtre_kodu", "hisse_kodu", "getiri_yuzde", "basari"}.issubset(
+        detay_df.columns
+    )
     assert detay_df.iloc[0]["basari"] == "BAŞARILI"
 
 

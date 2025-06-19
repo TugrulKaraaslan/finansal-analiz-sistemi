@@ -85,25 +85,32 @@ def test_kaydet_raporlar_appends(tmp_path):
     assert {"Sheet1", "Özet", "Detay", "İstatistik"}.issubset(names)
     wb.close()
 
+
 def test_generate_full_report(tmp_path):
-    summary = pd.DataFrame({
-        "filtre_kodu": ["F1"],
-        "ort_getiri_%": [1.0],
-        "sebep_kodu": ["OK"],
-    })
-    detail = pd.DataFrame({
-        "filtre_kodu": ["F1"],
-        "hisse_kodu": ["AAA"],
-        "getiri_yuzde": [1.0],
-        "basari": ["BAŞARILI"],
-    })
+    summary = pd.DataFrame(
+        {
+            "filtre_kodu": ["F1"],
+            "ort_getiri_%": [1.0],
+            "sebep_kodu": ["OK"],
+        }
+    )
+    detail = pd.DataFrame(
+        {
+            "filtre_kodu": ["F1"],
+            "hisse_kodu": ["AAA"],
+            "getiri_yuzde": [1.0],
+            "basari": ["BAŞARILI"],
+        }
+    )
     out = tmp_path / "full.xlsx"
-    errs = [{
-        "filtre_kodu": "F1",
-        "hata_tipi": "GENERIC",
-        "detay": "demo",
-        "cozum_onerisi": ""
-    }]
+    errs = [
+        {
+            "filtre_kodu": "F1",
+            "hata_tipi": "GENERIC",
+            "detay": "demo",
+            "cozum_onerisi": "",
+        }
+    ]
     report_generator.generate_full_report(summary, detail, errs, out)
 
     wb = openpyxl.load_workbook(out)

@@ -116,4 +116,3 @@ def purge_old_logs(dir_path: str = "raporlar", days: int = 7) -> None:
     for fp in glob.glob(f"{dir_path}/*.log"):
         if time.time() - os.path.getmtime(fp) > days * 24 * 3600:
             os.remove(fp)
-

@@ -15,4 +15,3 @@ def test_parse_date_variants():
             assert ts is pd.NaT
         else:
             assert ts.strftime("%Y-%m-%d") == expected
-

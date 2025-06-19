@@ -14,6 +14,7 @@ def parse_requirements(path):
             reqs.append(line.split()[0])
     return reqs
 
+
 setup(
     name="finansal-analiz-sistemi",
     version="0.1.0",

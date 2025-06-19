@@ -29,4 +29,3 @@ EXPECTED_COLUMNS = [
 def test_summary_columns_complete():
     df = generate_summary(dummy_results())
     assert list(df.columns)[:13] == EXPECTED_COLUMNS
-

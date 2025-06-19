@@ -20,6 +20,14 @@ jobs:
           pip install --timeout 60 matplotlib xlsxwriter streamlit
           pip install -e .
 
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint & Format
+        run: |
+          black --check .
+          flake8 --extend-ignore=E203,W503
+
       - name: Run tests
         run: |
           pytest -q

@@ -4,10 +4,12 @@ import pytest
 
 @pytest.fixture
 def sample_filtreler():
-    return pd.DataFrame({
-        "kod": ["T0", "T1"],
-        "PythonQuery": ["close > 0", "volume > 0"],
-    })
+    return pd.DataFrame(
+        {
+            "kod": ["T0", "T1"],
+            "PythonQuery": ["close > 0", "volume > 0"],
+        }
+    )
 
 
 @pytest.fixture

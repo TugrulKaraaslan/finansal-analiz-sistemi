@@ -6,7 +6,8 @@ import pandas as pd
 
 import utils
 import importlib, config as _cfg
-importlib.reload(_cfg)   # test ortamında doğru yolu garantile
+
+importlib.reload(_cfg)  # test ortamında doğru yolu garantile
 config = _cfg
 
 

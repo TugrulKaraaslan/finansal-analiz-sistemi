@@ -96,6 +96,7 @@ def _calculate_change_percent(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", effective_output_col_name, str(e))
         except Exception:
             pass
@@ -133,6 +134,7 @@ def _calculate_sma(group_df: pd.DataFrame, period: int, data_col: str) -> pd.Ser
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", sutun_adi, str(e))
         except Exception:
             pass
@@ -161,6 +163,7 @@ def _get_previous_bar_value(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", sutun_adi, str(e))
         except Exception:
             pass
@@ -249,6 +252,7 @@ def _calculate_percentage_from_period_high_low(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", sutun_adi, str(e))
         except Exception:
             pass
@@ -293,6 +297,7 @@ def _calculate_relative_volume(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", sutun_adi, str(e))
         except Exception:
             pass
@@ -336,6 +341,7 @@ def _calculate_volume_price(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", sutun_adi, str(e))
         except Exception:
             pass
@@ -361,6 +367,7 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
         local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", col, str(e))
         except Exception:
             pass
@@ -420,6 +427,7 @@ def calculate_indicators(
             logger.error(f"{alias} hesaplanirken hata: {e}")
             try:
                 from utils.failure_tracker import log_failure
+
                 log_failure("indicators", alias, str(e))
             except Exception:
                 pass
@@ -457,6 +465,7 @@ def _ekle_psar(df: pd.DataFrame) -> None:
         logger.error(f"PSAR hesaplanırken hata: {e}")
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", "psar", str(e))
         except Exception:
             pass
@@ -603,6 +612,7 @@ def _calculate_series_series_crossover(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("crossovers", f"{s1_col} vs {s2_col}", str(e))
         except Exception:
             pass
@@ -657,6 +667,7 @@ def _calculate_series_value_crossover(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("crossovers", f"{s_col} vs {value}", str(e))
         except Exception:
             pass
@@ -1031,7 +1042,11 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
         return None
 
     # NaN ön temizlik: OHLCV kolonlarındaki boşlukları 3 satıra kadar ileri taşı
-    ind_cols = [c for c in ["open", "high", "low", "close", "volume"] if c in df_islenmis_veri.columns]
+    ind_cols = [
+        c
+        for c in ["open", "high", "low", "close", "volume"]
+        if c in df_islenmis_veri.columns
+    ]
     if ind_cols:
         df_islenmis_veri[ind_cols] = df_islenmis_veri[ind_cols].ffill(limit=3)
 

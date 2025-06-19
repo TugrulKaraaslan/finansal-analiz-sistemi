@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
+
 class NoDuplicateFilter(logging.Filter):
     """Filter that removes consecutive duplicate log messages."""
 
@@ -32,7 +33,11 @@ class CounterFilter(logging.Filter):
         if record.levelno == logging.ERROR:
             self.errors += 1
             self.error_list.append(
-                (datetime.now().isoformat(timespec="seconds"), "ERROR", record.getMessage())
+                (
+                    datetime.now().isoformat(timespec="seconds"),
+                    "ERROR",
+                    record.getMessage(),
+                )
             )
         elif record.levelno == logging.WARNING:
             self.warnings += 1

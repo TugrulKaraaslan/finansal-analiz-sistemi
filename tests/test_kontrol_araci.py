@@ -8,16 +8,20 @@ import kontrol_araci
 
 
 def test_tarama_denetimi_collects_info():
-    df_filtreler = pd.DataFrame({
-        "kod": ["F1", "F2"],
-        "PythonQuery": ["close > 10", "open > 5"],
-    })
+    df_filtreler = pd.DataFrame(
+        {
+            "kod": ["F1", "F2"],
+            "PythonQuery": ["close > 10", "open > 5"],
+        }
+    )
 
-    df_indikator = pd.DataFrame({
-        "hisse_kodu": ["AAA"],
-        "tarih": [pd.Timestamp("2025-03-01")],
-        "close": [5],
-    })
+    df_indikator = pd.DataFrame(
+        {
+            "hisse_kodu": ["AAA"],
+            "tarih": [pd.Timestamp("2025-03-01")],
+            "close": [5],
+        }
+    )
 
     result = kontrol_araci.tarama_denetimi(df_filtreler, df_indikator)
 
