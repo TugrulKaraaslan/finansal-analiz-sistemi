@@ -21,6 +21,7 @@ from pandas_ta import psar as ta_psar
 from pandas_ta import tema
 import config
 import utils
+from utilities.naming import unique_name
 
 from utils.logging_setup import setup_logger, get_logger
 
@@ -338,7 +339,19 @@ def safe_get(df: pd.DataFrame, col: str) -> pd.Series | None:
     return df[col]
 
 
-def calculate_indicators(df: pd.DataFrame, indicators: list[str] | None = None) -> pd.DataFrame:
+def add_series(
+    df: pd.DataFrame, name: str, values, seen_names: set[str] | None = None
+) -> None:
+    """Add a column ensuring the name is unique."""
+    if seen_names is None:
+        seen_names = set(df.columns)
+    safe = unique_name(name, seen_names)
+    df[safe] = values
+
+
+def calculate_indicators(
+    df: pd.DataFrame, indicators: list[str] | None = None
+) -> pd.DataFrame:
     """Calculate simple indicators like EMA/SMA for given list.
 
     Duplicate column names are skipped with a warning.
@@ -347,31 +360,31 @@ def calculate_indicators(df: pd.DataFrame, indicators: list[str] | None = None) 
         return df
 
     out = df.copy()
+    seen_names = set(out.columns)
     for ind in indicators:
-        new_name = ind
-        if new_name in out.columns:
-            logger.warning(f"Duplicate skip: {new_name}")
-            continue
-
+        alias = ind
         try:
-            if new_name.startswith("ema_"):
-                span = int(new_name.split("_", 1)[1])
+            if alias.startswith("ema_"):
+                span = int(alias.split("_", 1)[1])
                 if "close" in out.columns:
-                    out[new_name] = out["close"].ewm(span=span, adjust=False).mean()
+                    calc_values = out["close"].ewm(span=span, adjust=False).mean()
                 else:
-                    out[new_name] = np.nan
-            elif new_name.startswith("sma_"):
-                span = int(new_name.split("_", 1)[1])
+                    calc_values = np.nan
+            elif alias.startswith("sma_"):
+                span = int(alias.split("_", 1)[1])
                 if "close" in out.columns:
-                    out[new_name] = out["close"].rolling(window=span, min_periods=1).mean()
+                    calc_values = (
+                        out["close"].rolling(window=span, min_periods=1).mean()
+                    )
                 else:
-                    out[new_name] = np.nan
+                    calc_values = np.nan
             else:
-                logger.warning(f"Indicator not implemented: {new_name}")
-                out[new_name] = np.nan
+                logger.warning(f"Indicator not implemented: {alias}")
+                calc_values = np.nan
         except Exception as e:
-            logger.error(f"{new_name} hesaplanirken hata: {e}")
-            out[new_name] = np.nan
+            logger.error(f"{alias} hesaplanirken hata: {e}")
+            calc_values = np.nan
+        add_series(out, alias, calc_values, seen_names)
 
     out = out.loc[:, ~out.columns.duplicated()]
     return out
@@ -762,6 +775,7 @@ def _calculate_group_indicators_and_crossovers(
     df_final_group = (
         group_df_input.copy()
     )  # Temel olarak orijinal df'i alalım (RangeIndex, 'tarih' sütunlu)
+    seen_names = set(df_final_group.columns)
 
     # pandas-ta ile hesaplanan sütunları (DatetimeIndex'li df'ten) RangeIndex'li df_final_group'a aktar
     # İndeksler farklı olduğu için doğrudan merge yerine, değerleri .values ile atamak daha güvenli olabilir,
@@ -811,13 +825,10 @@ def _calculate_group_indicators_and_crossovers(
         )
 
     if manual_cols:
-        df_final_group = pd.concat(
-            [df_final_group, pd.DataFrame(manual_cols, index=df_final_group.index)],
-            axis=1,
-        )
+        for alias, vals in manual_cols.items():
+            add_series(df_final_group, alias, vals, seen_names)
 
     # Özel Sütunlar (df_final_group üzerinde, zaten RangeIndex'li)
-    new_cols = {}
     for sutun_conf in ozel_sutun_conf:
         yeni_sutun_adi = sutun_conf["name"]
         fonksiyon_adi_str = sutun_conf["function"]
@@ -831,31 +842,39 @@ def _calculate_group_indicators_and_crossovers(
                 if result_series is not None and len(result_series) == len(
                     df_final_group
                 ):
-                    new_cols[yeni_sutun_adi] = result_series.values
+                    add_series(
+                        df_final_group, yeni_sutun_adi, result_series.values, seen_names
+                    )
                 else:
-                    new_cols[yeni_sutun_adi] = np.full(len(df_final_group), np.nan)
+                    add_series(
+                        df_final_group,
+                        yeni_sutun_adi,
+                        np.full(len(df_final_group), np.nan),
+                        seen_names,
+                    )
             else:
-                new_cols[yeni_sutun_adi] = np.full(len(df_final_group), np.nan)
+                add_series(
+                    df_final_group,
+                    yeni_sutun_adi,
+                    np.full(len(df_final_group), np.nan),
+                    seen_names,
+                )
                 local_logger.error(
                     f"{hisse_kodu}: Özel sütun için '{fonksiyon_adi_str}' fonksiyonu bulunamadı."
                 )
         except Exception as e_ozel:
-            new_cols[yeni_sutun_adi] = np.full(len(df_final_group), np.nan)
+            add_series(
+                df_final_group,
+                yeni_sutun_adi,
+                np.full(len(df_final_group), np.nan),
+                seen_names,
+            )
             local_logger.error(
                 f"{hisse_kodu}: Özel sütun '{yeni_sutun_adi}' hesaplanırken hata: {e_ozel}",
                 exc_info=False,
             )
-    if new_cols:
-        df_final_group = df_final_group.drop(
-            columns=[c for c in new_cols if c in df_final_group.columns],
-            errors="ignore",
-        )
-        df_final_group = pd.concat(
-            [df_final_group, pd.DataFrame(new_cols, index=df_final_group.index)], axis=1
-        )
 
     # Kesişimler (df_final_group üzerinde)
-    new_cols = {}
     for s1_c, s2_c, c_above, c_below in series_series_config:
         result = _calculate_series_series_crossover(
             df_final_group.copy(), s1_c, s2_c, c_above, c_below, local_logger
@@ -864,19 +883,24 @@ def _calculate_group_indicators_and_crossovers(
             continue
         kesisim_yukari, kesisim_asagi = result
         if len(kesisim_yukari) == len(df_final_group):
-            new_cols[c_above] = kesisim_yukari.values
+            add_series(df_final_group, c_above, kesisim_yukari.values, seen_names)
         else:
-            new_cols[c_above] = np.full(len(df_final_group), np.nan)
+            add_series(
+                df_final_group,
+                c_above,
+                np.full(len(df_final_group), np.nan),
+                seen_names,
+            )
         if len(kesisim_asagi) == len(df_final_group):
-            new_cols[c_below] = kesisim_asagi.values
+            add_series(df_final_group, c_below, kesisim_asagi.values, seen_names)
         else:
-            new_cols[c_below] = np.full(len(df_final_group), np.nan)
-    if new_cols:
-        df_final_group = pd.concat(
-            [df_final_group, pd.DataFrame(new_cols, index=df_final_group.index)], axis=1
-        )
+            add_series(
+                df_final_group,
+                c_below,
+                np.full(len(df_final_group), np.nan),
+                seen_names,
+            )
 
-    new_cols = {}
     for s_c, val, suff in series_value_config:
         result = _calculate_series_value_crossover(
             df_final_group.copy(), s_c, val, suff, local_logger
@@ -885,28 +909,38 @@ def _calculate_group_indicators_and_crossovers(
             continue
         kesisim_yukari, kesisim_asagi = result
         if len(kesisim_yukari) == len(df_final_group):
-            new_cols[kesisim_yukari.name] = kesisim_yukari.values
+            add_series(
+                df_final_group,
+                kesisim_yukari.name,
+                kesisim_yukari.values,
+                seen_names,
+            )
         else:
-            new_cols[kesisim_yukari.name] = np.full(len(df_final_group), np.nan)
+            add_series(
+                df_final_group,
+                kesisim_yukari.name,
+                np.full(len(df_final_group), np.nan),
+                seen_names,
+            )
         if len(kesisim_asagi) == len(df_final_group):
-            new_cols[kesisim_asagi.name] = kesisim_asagi.values
+            add_series(
+                df_final_group,
+                kesisim_asagi.name,
+                kesisim_asagi.values,
+                seen_names,
+            )
         else:
-            new_cols[kesisim_asagi.name] = np.full(len(df_final_group), np.nan)
-    if new_cols:
-        df_final_group = pd.concat(
-            [df_final_group, pd.DataFrame(new_cols, index=df_final_group.index)], axis=1
-        )
-    manual_last = {}
+            add_series(
+                df_final_group,
+                kesisim_asagi.name,
+                np.full(len(df_final_group), np.nan),
+                seen_names,
+            )
     if (
         "bbm_20_2" in df_final_group.columns
         and "BBM_20_2" not in df_final_group.columns
     ):
-        manual_last["BBM_20_2"] = df_final_group["bbm_20_2"]
-    if manual_last:
-        df_final_group = pd.concat(
-            [df_final_group, pd.DataFrame(manual_last, index=df_final_group.index)],
-            axis=1,
-        )
+        add_series(df_final_group, "BBM_20_2", df_final_group["bbm_20_2"], seen_names)
 
     df_final_group = df_final_group.loc[:, ~df_final_group.columns.duplicated()]
     return df_final_group
@@ -949,9 +983,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
     filtre_df = df_filters
     if filtre_df is None:
         try:
-            filtre_df = pd.read_csv(
-                config.FILTRE_DOSYA_YOLU, sep=";", engine="python"
-            )
+            filtre_df = pd.read_csv(config.FILTRE_DOSYA_YOLU, sep=";", engine="python")
         except Exception:
             filtre_df = pd.DataFrame()
 
@@ -1004,9 +1036,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
                 grouped = grouped.loc[:, ~grouped.columns.duplicated()]
 
             if grouped.index.duplicated().any():
-                ana_logger.warning(
-                    f"{hisse_kodu}: yinelenen satır index'i silindi"
-                )
+                ana_logger.warning(f"{hisse_kodu}: yinelenen satır index'i silindi")
                 grouped = grouped[~grouped.index.duplicated()]
 
             grouped.reset_index(drop=True, inplace=True)
