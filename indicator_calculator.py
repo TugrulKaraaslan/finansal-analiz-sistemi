@@ -94,6 +94,11 @@ def _calculate_change_percent(
             f"{hisse_str}: {effective_output_col_name} (periyot: {period}, sütun: {price_col}) hesaplanırken hata: {e}",
             exc_info=False,
         )
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("indicators", effective_output_col_name, str(e))
+        except Exception:
+            pass
         return pd.Series(np.nan, index=group_df.index, name=effective_output_col_name)
 
 
@@ -126,6 +131,11 @@ def _calculate_sma(group_df: pd.DataFrame, period: int, data_col: str) -> pd.Ser
         logger.error(
             f"{hisse_str}: {sutun_adi} hesaplanırken hata: {e}", exc_info=False
         )
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("indicators", sutun_adi, str(e))
+        except Exception:
+            pass
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
 
 
@@ -149,6 +159,11 @@ def _get_previous_bar_value(
         logger.error(
             f"{hisse_str}: {sutun_adi} hesaplanırken hata: {e}", exc_info=False
         )
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("indicators", sutun_adi, str(e))
+        except Exception:
+            pass
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
 
 
@@ -232,6 +247,11 @@ def _calculate_percentage_from_period_high_low(
         logger.error(
             f"{hisse_str}: {sutun_adi} hesaplanırken hata: {e}", exc_info=False
         )
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("indicators", sutun_adi, str(e))
+        except Exception:
+            pass
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
 
 
@@ -271,6 +291,11 @@ def _calculate_relative_volume(
             f"{hisse_str}: Relative Volume ({sutun_adi}, {window}) hesaplanırken hata: {e}",
             exc_info=False,
         )
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("indicators", sutun_adi, str(e))
+        except Exception:
+            pass
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
 
 
@@ -309,6 +334,11 @@ def _calculate_volume_price(
             f"{hisse_str}: Hacim*Fiyat ({sutun_adi}) hesaplanırken hata: {e}",
             exc_info=False,
         )
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("indicators", sutun_adi, str(e))
+        except Exception:
+            pass
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
 
 
@@ -329,6 +359,11 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
         local_logger.debug(f"'{col}' sütunu safe_ma ile eklendi.")
     except Exception as e:
         local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("indicators", col, str(e))
+        except Exception:
+            pass
 
 
 def safe_get(df: pd.DataFrame, col: str) -> pd.Series | None:
@@ -383,6 +418,11 @@ def calculate_indicators(
                 calc_values = np.nan
         except Exception as e:
             logger.error(f"{alias} hesaplanirken hata: {e}")
+            try:
+                from utils.failure_tracker import log_failure
+                log_failure("indicators", alias, str(e))
+            except Exception:
+                pass
             calc_values = np.nan
         add_series(out, alias, calc_values, seen_names)
 
@@ -415,6 +455,11 @@ def _ekle_psar(df: pd.DataFrame) -> None:
         df["psar"] = df["psar_long"].fillna(df["psar_short"])
     except Exception as e:
         logger.error(f"PSAR hesaplanırken hata: {e}")
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("indicators", "psar", str(e))
+        except Exception:
+            pass
 
 
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
@@ -556,6 +601,11 @@ def _calculate_series_series_crossover(
             f"{hisse_str}: _calculate_series_series_crossover ({s1_col} vs {s2_col}) hatası: {e}",
             exc_info=False,
         )
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("crossovers", f"{s1_col} vs {s2_col}", str(e))
+        except Exception:
+            pass
         return empty_above, empty_below
 
 
@@ -605,6 +655,11 @@ def _calculate_series_value_crossover(
             f"{hisse_str}: _calculate_series_value_crossover ({s_col} vs {value}) hatası: {e}",
             exc_info=False,
         )
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("crossovers", f"{s_col} vs {value}", str(e))
+        except Exception:
+            pass
         return empty_above, empty_below
 
 
