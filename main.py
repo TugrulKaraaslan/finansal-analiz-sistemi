@@ -51,10 +51,11 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
             st.write("Grafik için veri yok")
 
 
-from utils.logging_setup import setup_logger, get_logger
+from logging_config import get_logger
+from utils.logging_setup import setup_logger
 
-log_counter = setup_logger()
 logger = get_logger(__name__)
+log_counter = setup_logger()
 
 
 def veri_yukle(force_excel_reload: bool = False):

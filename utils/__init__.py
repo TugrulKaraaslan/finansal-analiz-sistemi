@@ -6,11 +6,11 @@
 # Tarih: 18 Mayıs 2025 (Yorumlar eklendi, NaN yönetimi teyit edildi)
 
 import pandas as pd
-from utils.logging_setup import setup_logger, get_logger
+from logging_config import get_logger
+from utils.logging_setup import setup_logger
 from functools import lru_cache
 from io import StringIO
 
-setup_logger()
 logger = get_logger(__name__)
 
 

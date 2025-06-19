@@ -10,9 +10,8 @@ import numpy as np
 import config
 import re
 
-from utils.logging_setup import setup_logger, get_logger
+from logging_config import get_logger
 
-setup_logger()
 logger = get_logger(__name__)
 
 try:
