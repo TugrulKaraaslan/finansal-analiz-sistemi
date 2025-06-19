@@ -6,6 +6,7 @@
 # Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index düzeltildi, filtre uyumu artırıldı v2)
 
 import pandas as pd
+from utils.pandas_compat import safe_concat
 import pandas.errors
 import numpy as np
 import warnings
@@ -1055,9 +1056,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
         return pd.DataFrame()
 
     try:
-        df_sonuc = pd.concat(
-            results_list, ignore_index=True
-        )  # ignore_index=True zaten RangeIndex oluşturur
+        df_sonuc = safe_concat(results_list, ignore_index=True)
 
         if "tarih" in df_sonuc.columns and not pd.api.types.is_datetime64_any_dtype(
             df_sonuc["tarih"]
