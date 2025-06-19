@@ -154,7 +154,16 @@ def olustur_hisse_bazli_rapor(
     return dosya_adi
 
 
-def olustur_hatali_filtre_raporu(writer, kontrol_df: pd.DataFrame) -> None:
+def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
+    if isinstance(kontrol_df, dict):
+        hatalar = kontrol_df.get("hatalar", [])
+        if hatalar:
+            pd.DataFrame(hatalar).to_excel(
+                writer, sheet_name="Hatalar", index=False
+            )
+        return
+    if not isinstance(kontrol_df, pd.DataFrame) or kontrol_df.empty:
+        return
     sorunlu = kontrol_df[
         kontrol_df["durum"].isin(["CALISTIRILAMADI", "HATA", "DATASIZ"])
     ]
