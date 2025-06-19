@@ -457,7 +457,7 @@ def _ekle_psar(df: pd.DataFrame) -> None:
             psar_df.columns = ["psar_long", "psar_short"]
         else:
             psar_long, psar_short = psar_raw
-            psar_df = pd.concat([psar_long, psar_short], axis=1)
+            psar_df = safe_concat([psar_long, psar_short], axis=1)
             psar_df.columns = ["psar_long", "psar_short"]
         df["psar_long"] = psar_df["psar_long"]
         df["psar_short"] = psar_df["psar_short"]
@@ -794,9 +794,11 @@ def _calculate_group_indicators_and_crossovers(
                     psar_df.columns = ["psar_long", "psar_short"]
                 else:
                     psar_long, psar_short = psar_raw
-                    psar_df = pd.concat([psar_long, psar_short], axis=1)
+                    psar_df = safe_concat([psar_long, psar_short], axis=1)
                     psar_df.columns = ["psar_long", "psar_short"]
-                group_df_dt_indexed = pd.concat([group_df_dt_indexed, psar_df], axis=1)
+                group_df_dt_indexed = safe_concat(
+                    [group_df_dt_indexed, psar_df], axis=1
+                )
                 group_df_dt_indexed["psar"] = group_df_dt_indexed["psar_long"].fillna(
                     group_df_dt_indexed["psar_short"]
                 )

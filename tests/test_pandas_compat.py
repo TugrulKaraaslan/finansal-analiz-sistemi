@@ -1,5 +1,5 @@
+from utils.pandas_compat import safe_concat, safe_to_excel
 import pandas as pd
-from utils.pandas_compat import safe_to_excel, safe_concat
 
 
 def test_safe_to_excel(tmp_path):
