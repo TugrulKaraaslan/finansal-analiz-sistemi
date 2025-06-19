@@ -21,8 +21,15 @@ def test_generate_full_report_creates_files(tmp_path):
         "basari": ["BAŞARILI"],
     })
     out = tmp_path / "full.xlsx"
-    path = report_generator.generate_full_report(summary, detail, [], out)
+    errs = [{
+        "filtre_kodu": "F1",
+        "hata_tipi": "GENERIC",
+        "detay": "demo",
+        "cozum_onerisi": ""
+    }]
+    path = report_generator.generate_full_report(summary, detail, errs, out)
 
     wb = openpyxl.load_workbook(path)
     assert wb.sheetnames[:2] == ["Özet", "Detay"]
+    assert "Hatalar" in wb.sheetnames
     wb.close()
