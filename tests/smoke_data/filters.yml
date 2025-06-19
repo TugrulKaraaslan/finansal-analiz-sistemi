@@ -1,0 +1,4 @@
+- code: Tsmk1
+  clause: close > open
+- code: Tsmk2
+  clause: volume > 8000
