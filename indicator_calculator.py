@@ -25,6 +25,18 @@ import utils
 from utils.logging_setup import setup_logger, get_logger
 
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
+warnings.filterwarnings(
+    "ignore",
+    message="A value is trying to be set on a copy of a DataFrame or Series",
+    category=FutureWarning,
+    module="indicator_calculator",
+)
+warnings.filterwarnings(
+    "ignore",
+    message="Series.fillna with 'method' is deprecated",
+    category=FutureWarning,
+    module="indicator_calculator",
+)
 
 setup_logger()
 logger = get_logger(__name__)
@@ -312,7 +324,7 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
             df[col] = df["close"].rolling(window=n, min_periods=1).mean()
         else:
             df[col] = df["close"].ewm(span=n, adjust=False, min_periods=1).mean()
-        df[col].fillna(method="bfill", inplace=True)
+        df[col] = df[col].bfill()
         local_logger.debug(f"'{col}' sütunu safe_ma ile eklendi.")
     except Exception as e:
         local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)

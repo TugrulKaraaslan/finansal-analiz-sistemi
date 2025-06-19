@@ -3,6 +3,20 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from filtre_dogrulama import SEBEP_KODLARI
 import config
+import warnings
+
+warnings.filterwarnings(
+    "ignore",
+    message="The behavior of array concatenation with empty entries is deprecated",
+    category=FutureWarning,
+    module="report_stats",
+)
+warnings.filterwarnings(
+    "ignore",
+    message="Downcasting object dtype arrays on .fillna",
+    category=FutureWarning,
+    module="report_stats",
+)
 
 
 def build_ozet_df(summary_df: pd.DataFrame, detail_df: pd.DataFrame,

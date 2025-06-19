@@ -25,5 +25,6 @@ def test_aciklama_filled(tmp_path):
     }]
     path = tmp_path/"rapor.xlsx"
     generate_full_report(df_sum, df_det, errs, path, keep_legacy=True)
-    ozet = pd.read_excel(path,"Özet")
+    with pd.ExcelFile(path) as xls:
+        ozet = pd.read_excel(xls, "Özet")
     assert ozet.loc[ozet["filtre_kodu"]=="T2","sebep_aciklama"].iloc[0] == "demo hata metni"
