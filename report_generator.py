@@ -423,8 +423,15 @@ def generate_full_report(
             sheet_name="Özet",
             index=False,
         )
-        # Koşullu biçimlendirme: Özet sayfası satırlarının renklendirilmesi
         ws_ozet = wr.sheets["Özet"]
+
+        # --- Hücre formatları (opsiyonel) ---
+        percent_fmt = wr.book.add_format({"num_format": "0.00%"})
+        date_fmt = wr.book.add_format({"num_format": "yyyy-mm-dd"})
+        ws_ozet.set_column("C:E", None, percent_fmt)
+        ws_ozet.set_column("I:J", None, date_fmt)
+
+        # Koşullu biçimlendirme: Özet sayfası satırlarının renklendirilmesi
         last_row = len(summary_df) + 1
         last_col = len(summary_df.columns)
         data_range = f"A2:{chr(64+last_col)}{last_row}"
