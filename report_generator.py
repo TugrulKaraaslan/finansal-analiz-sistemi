@@ -488,6 +488,11 @@ def generate_full_report(
             sheet_name="Detay",
             index=False,
         )
+
+        # Query recursion hatalarını ayrı sayfaya dök
+        from filter_engine import FAILED_FILTERS
+        if FAILED_FILTERS:
+            pd.DataFrame(FAILED_FILTERS).to_excel(wr, "query_errors", index=False)
         _write_stats_sheet(wr, summary_df)
         _write_error_sheet(wr, error_list, summary_df)
 
