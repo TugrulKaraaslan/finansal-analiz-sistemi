@@ -305,27 +305,33 @@ def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     ws.conditional_format("E2:E2", {"type": "no_blanks", "format": fmt_red})
     ws.conditional_format("F2:G2", {"type": "no_blanks", "format": fmt_green})
 
-    top5 = df_sum.sort_values("ort_getiri_%", ascending=False).head(5)
-    worst5 = df_sum.sort_values("ort_getiri_%").head(5)
+    top5 = df_sum.sort_values("ort_getiri_%", ascending=False).dropna(subset=["ort_getiri_%"]).head(5)
+    worst5 = df_sum.sort_values("ort_getiri_%").dropna(subset=["ort_getiri_%"]).head(5)
 
-    chart = workbook.add_chart({"type": "column"})
-    chart.add_series(
-        {
-            "name": "En İyi 5",
-            "categories": ["Sağlık Özeti", 0, 8, len(top5) - 1, 8],
-            "values": top5["ort_getiri_%"].tolist(),
-        }
-    )
-    chart.add_series(
-        {
-            "name": "En Kötü 5",
-            "categories": ["Sağlık Özeti", 0, 9, len(worst5) - 1, 9],
-            "values": worst5["ort_getiri_%"].tolist(),
-            "invert_if_negative": True,
-        }
-    )
-    chart.set_title({"name": "En İyi / En Kötü 5 Filtre (Getiri %)"})
-    ws.insert_chart("A5", chart, {"x_scale": 1.2, "y_scale": 1.2})
+    if not top5.empty and not worst5.empty:
+        ws.write_column(1, 8, top5["filtre_kodu"])  # I column
+        ws.write_column(1, 9, worst5["filtre_kodu"])  # J column
+        ws.write_column(1, 10, top5["ort_getiri_%"])  # K column
+        ws.write_column(1, 11, worst5["ort_getiri_%"])  # L column
+
+        chart = workbook.add_chart({"type": "column"})
+        chart.add_series(
+            {
+                "name": "En İyi 5",
+                "categories": ["Sağlık Özeti", 1, 8, 1 + len(top5) - 1, 8],
+                "values": ["Sağlık Özeti", 1, 10, 1 + len(top5) - 1, 10],
+            }
+        )
+        chart.add_series(
+            {
+                "name": "En Kötü 5",
+                "categories": ["Sağlık Özeti", 1, 9, 1 + len(worst5) - 1, 9],
+                "values": ["Sağlık Özeti", 1, 11, 1 + len(worst5) - 1, 11],
+                "invert_if_negative": True,
+            }
+        )
+        chart.set_title({"name": "En İyi / En Kötü 5 Filtre (Getiri %)"})
+        ws.insert_chart("A5", chart, {"x_scale": 1.2, "y_scale": 1.2})
 
 
 def _write_error_sheet(
@@ -379,7 +385,7 @@ def generate_full_report(
     out_path: str | Path,
     *,
     keep_legacy: bool = True,
-    quick: bool = False,
+    quick: bool = True,
 ) -> str:
     if keep_legacy:
         summary_df = report_stats.build_ozet_df(summary_df, detail_df)
