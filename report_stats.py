@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from filtre_dogrulama import SEBEP_KODLARI
@@ -24,6 +25,14 @@ warnings.filterwarnings(
     category=FutureWarning,
     module="report_stats",
 )
+
+
+# --- Helper: normalize_pct ---
+def normalize_pct(series):
+    """Temizle (% işareti), float'a çevir, 100x şişkinse ÷100."""
+    s = series.astype(str).str.replace('%', '', regex=False)
+    s = pd.to_numeric(s, errors='coerce')
+    return np.where(s.abs() > 100, s / 100.0, s).round(2)
 
 
 def build_ozet_df(
@@ -94,6 +103,11 @@ def build_ozet_df(
         },
         inplace=True,
     )
+    # --- Şişkin yüzde kolonlarını normalize et ---
+    pct_cols_idx = [i for i, c in enumerate(df.columns) if c.endswith("_%")]
+    for i in pct_cols_idx:
+        df.iloc[:, i] = normalize_pct(df.iloc[:, i])
+
     subset = df[
         [
             "filtre_kodu",
