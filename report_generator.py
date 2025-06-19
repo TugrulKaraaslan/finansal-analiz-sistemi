@@ -11,6 +11,7 @@ from utils.logging_setup import get_logger, setup_logger
 
 import pandas as pd
 import numpy as np
+from utils.pandas_compat import safe_to_excel
 import report_stats
 
 setup_logger()
@@ -445,11 +446,7 @@ def generate_full_report(
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(out_path, engine="xlsxwriter") as wr:
-        summary_df.to_excel(
-            wr,
-            sheet_name="Özet",
-            index=False,
-        )
+        safe_to_excel(summary_df, wr, sheet_name="Özet", index=False)
         ws_ozet = wr.sheets["Özet"]
 
         # --- Hücre formatları (opsiyonel) ---
@@ -483,11 +480,7 @@ def generate_full_report(
                 "format": fmt_error,
             },
         )
-        detail_df.to_excel(
-            wr,
-            sheet_name="Detay",
-            index=False,
-        )
+        safe_to_excel(detail_df, wr, sheet_name="Detay", index=False)
 
         # Query recursion hatalarını ayrı sayfaya dök
         from filter_engine import FAILED_FILTERS
