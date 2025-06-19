@@ -13,14 +13,33 @@ def build_ozet_df(summary_df: pd.DataFrame, detail_df: pd.DataFrame,
     if detail_df is None:
         detail_df = pd.DataFrame()
 
-    stats = (
-        detail_df.dropna(subset=["getiri_yuzde"])
-        .groupby("filtre_kodu")["getiri_yuzde"]
-        .agg(hisse_sayisi="count", en_yuksek="max", en_dusuk="min")
-    )
+    col = None
+    if "getiri_yuzde" in detail_df.columns:
+        col = "getiri_yuzde"
+    elif "getiri_%" in detail_df.columns:
+        col = "getiri_%"
+
+    if col is not None:
+        stats = (
+            detail_df.dropna(subset=[col])
+            .rename(columns={col: "getiri_yuzde"})
+            .groupby("filtre_kodu")["getiri_yuzde"]
+            .agg(hisse_sayisi="count", en_yuksek="max", en_dusuk="min")
+        )
+    else:
+        stats = pd.DataFrame(columns=["filtre_kodu", "hisse_sayisi", "en_yuksek", "en_dusuk", "islemli"])
     stats["islemli"] = stats["hisse_sayisi"].apply(lambda x: "EVET" if x > 0 else "HAYIR")
 
-    df = summary_df.merge(stats, on="filtre_kodu", how="left")
+    if not stats.empty:
+        summary_df = summary_df.drop(
+            columns=["hisse_sayisi", "en_yuksek_%", "en_dusuk_%", "islemli"],
+            errors="ignore",
+        )
+    df = summary_df.merge(stats, on="filtre_kodu", how="left", suffixes=("", "_y"))
+    for col in ["hisse_sayisi", "en_yuksek", "en_dusuk", "islemli"]:
+        if col+"_y" in df.columns:
+            df[col] = df[col+"_y"].combine_first(df.get(col))
+            df.drop(columns=col+"_y", inplace=True)
     df["sebep_aciklama"] = df["sebep_kodu"].map(SEBEP_KODLARI).fillna("")
     df["tarama_tarihi"] = tarama_tarihi
     df["satis_tarihi"] = satis_tarihi
@@ -50,9 +69,25 @@ def build_detay_df(summary_df: pd.DataFrame, detail_df: pd.DataFrame,
                    strateji: str | None = None) -> pd.DataFrame:
     """Add strategy and reason code info to detail dataframe."""
     strateji = strateji or getattr(config, "UYGULANAN_STRATEJI", "")
-    merged = detail_df.merge(summary_df[["filtre_kodu", "sebep_kodu"]], on="filtre_kodu", how="left")
+    if "filtre_kodu" not in detail_df.columns:
+        merged = pd.DataFrame(columns=[
+            "filtre_kodu",
+            "hisse_kodu",
+            "getiri_%",
+            "basari",
+            "strateji",
+            "sebep_kodu",
+        ])
+    else:
+        detail_df = detail_df.drop(columns=["sebep_kodu"], errors="ignore")
+        merged = detail_df.merge(
+            summary_df[["filtre_kodu", "sebep_kodu"]],
+            on="filtre_kodu",
+            how="left",
+        )
     merged["strateji"] = strateji
-    merged.rename(columns={"getiri_yuzde": "getiri_%"}, inplace=True)
+    if "getiri_yuzde" in merged.columns:
+        merged.rename(columns={"getiri_yuzde": "getiri_%"}, inplace=True)
     return merged[[
         "filtre_kodu",
         "hisse_kodu",
