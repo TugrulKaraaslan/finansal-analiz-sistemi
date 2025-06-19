@@ -10,6 +10,7 @@ import xlsxwriter
 from utils.logging_setup import get_logger, setup_logger
 
 import pandas as pd
+import numpy as np
 import report_stats
 
 setup_logger()
@@ -36,6 +37,32 @@ LEGACY_DETAIL_COLS = [
     "strateji",
     "sebep_kodu",
 ]
+
+# Columns expected in summary dataframe generated from backtest results
+EXPECTED_COLUMNS = [
+    "hisse_kodu",
+    "hisse_sayisi",
+    "getiri_%",
+    "max_dd_%",
+    "giris_tarihi",
+    "cikis_tarihi",
+    "giris_fiyati",
+    "cikis_fiyati",
+    "strateji_adi",
+    "filtre_kodu",
+    "taramada_bulundu",
+    "risk_skoru",
+    "notlar",
+]
+
+
+def generate_summary(results: list[dict]) -> pd.DataFrame:
+    """Create summary dataframe from raw result records."""
+    summary_df = pd.DataFrame(results)
+    # Kolonları tam ve sabit sırada tut
+    summary_df = summary_df.reindex(columns=EXPECTED_COLUMNS, fill_value=np.nan)
+
+    return summary_df
 
 
 def add_error_sheet(writer, error_list: Iterable[tuple]):
@@ -478,6 +505,7 @@ __all__ = [
     "olustur_excel_raporu",
     "kaydet_uc_sekmeli_excel",
     "kaydet_raporlar",
+    "generate_summary",
     "generate_full_report",
     "_write_stats_sheet",
     "_write_error_sheet",
