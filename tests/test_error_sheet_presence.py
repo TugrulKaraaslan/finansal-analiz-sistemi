@@ -1,3 +1,8 @@
+from report_generator import (
+    generate_full_report,
+    LEGACY_SUMMARY_COLS,
+    LEGACY_DETAIL_COLS,
+)
 import os
 import sys
 import pandas as pd
@@ -6,12 +11,6 @@ import pandas as pd
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
-
-from report_generator import (
-    generate_full_report,
-    LEGACY_SUMMARY_COLS,
-    LEGACY_DETAIL_COLS,
-)
 
 
 def test_hatalar_sheet_not_empty_and_matches(tmp_path):

@@ -1,8 +1,9 @@
-import os, sys
+import report_utils
+import os
+import sys
 import openpyxl
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-import report_utils
 
 
 def test_add_bar_chart():

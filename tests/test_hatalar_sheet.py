@@ -1,11 +1,10 @@
+import report_generator
 import os
 import sys
 import pandas as pd
 import openpyxl
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-import report_generator
 
 
 def test_hatalar_sheet(tmp_path):

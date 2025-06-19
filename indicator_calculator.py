@@ -3,7 +3,8 @@
 # Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
 # Modül: Teknik İndikatörler ve Kesişim Sinyalleri Hesaplama
 # Tuğrul Karaaslan & Gemini
-# Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index düzeltildi, filtre uyumu artırıldı v2)
+# Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index
+# düzeltildi, filtre uyumu artırıldı v2)
 
 import pandas as pd
 from utils.pandas_compat import safe_concat
@@ -833,10 +834,12 @@ def _calculate_group_indicators_and_crossovers(
     # Şimdi tüm hesaplamaların (özel ve kesişimler) yapılacağı RangeIndex'li DataFrame'i hazırlayalım.
     # Bu DataFrame, pandas-ta tarafından hesaplanan indikatörleri de içermeli.
     # group_df_input (RangeIndex, 'tarih' sütunlu, OHLCV)
-    # group_df_dt_indexed (DatetimeIndex, 'tarih' SÜTUNU YOK, OHLCV + pandas-ta indikatörleri)
+    # group_df_dt_indexed (DatetimeIndex, 'tarih' SÜTUNU YOK, OHLCV +
+    # pandas-ta indikatörleri)
 
     # En temiz yol: group_df_dt_indexed'in indeksini sıfırlayıp 'tarih' sütununu geri getirmek
-    # ve orijinal group_df_input ile birleştirmek (sadece yeni eklenen sütunları almak için).
+    # ve orijinal group_df_input ile birleştirmek (sadece yeni eklenen
+    # sütunları almak için).
 
     df_final_group = (
         group_df_input.copy()
@@ -1084,7 +1087,8 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
     ):  # group_df_original zaten 'tarih'e göre sıralı geliyor (preprocessor'dan)
         current_processed_count_main += 1
         # _calculate_group_indicators_and_crossovers fonksiyonuna RangeIndex'li ve 'tarih' sütunlu df gönderiyoruz.
-        # Bu fonksiyon içinde DatetimeIndex'e çevrilip, sonra tekrar RangeIndex'e ve 'tarih' sütununa sahip olarak dönüyor.
+        # Bu fonksiyon içinde DatetimeIndex'e çevrilip, sonra tekrar RangeIndex'e
+        # ve 'tarih' sütununa sahip olarak dönüyor.
         group_df_for_calc = group_df_original.reset_index(
             drop=True
         )  # Her ihtimale karşı indeksi sıfırla

@@ -3,7 +3,8 @@
 # Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
 # Modül: Yapılandırma Dosyası
 # Tuğrul Karaaslan & Gemini
-# Tarih: 19 Mayıs 2025 (Ichimoku ve Aroon ad eşleştirmeleri filtre uyumu için SON DÜZELTMELER)
+# Tarih: 19 Mayıs 2025 (Ichimoku ve Aroon ad eşleştirmeleri filtre uyumu
+# için SON DÜZELTMELER)
 
 import os
 import logging
@@ -233,7 +234,8 @@ INDIKATOR_AD_ESLESTIRME = {
     "aroonu_14": "aroonu_14",
     "aroond_14": "aroond_14",
     "aroonosc_14": "AROONOSC_14",  # Filtrede büyük harf arandığı için düzeltildi
-    # Ichimoku: pandas-ta'nın ürettiği (TA_STRATEGY'deki col_names) -> Filtrelerde aranan/beklenen adlar
+    # Ichimoku: pandas-ta'nın ürettiği (TA_STRATEGY'deki col_names) ->
+    # Filtrelerde aranan/beklenen adlar
     "its_9": "ichimoku_conversionline",
     "iks_26": "ichimoku_baseline",
     "isa_9_26_52": "ichimoku_leadingspana",  # Düzeltildi (filtredeki ad)

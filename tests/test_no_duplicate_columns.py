@@ -1,3 +1,4 @@
+from indicator_calculator import calculate_indicators
 import os
 import sys
 import pandas as pd
@@ -5,8 +6,6 @@ import numpy as np
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.modules.pop("pandas_ta", None)
-
-from indicator_calculator import calculate_indicators
 
 
 def test_duplicate_columns():

@@ -1,15 +1,15 @@
-import os, sys
-import pandas as pd
-import openpyxl
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+from utils.failure_tracker import log_failure, failures
 from report_generator import (
     generate_full_report,
     LEGACY_SUMMARY_COLS,
     LEGACY_DETAIL_COLS,
 )
-from utils.failure_tracker import log_failure, failures
+import os
+import sys
+import pandas as pd
+import openpyxl
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 def test_failed_sheets_created(tmp_path):

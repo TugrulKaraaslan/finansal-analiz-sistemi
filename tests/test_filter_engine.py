@@ -1,10 +1,9 @@
+import filter_engine
 import os
 import sys
 import pandas as pd
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-import filter_engine
 
 
 def test_no_stock_reason_for_empty_result():

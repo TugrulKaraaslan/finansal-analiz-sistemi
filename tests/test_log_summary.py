@@ -1,10 +1,9 @@
+from utils.logging_setup import setup_logger
+import logging
 import os
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-import logging
-from utils.logging_setup import setup_logger
 
 
 def test_log_summary_present(caplog):

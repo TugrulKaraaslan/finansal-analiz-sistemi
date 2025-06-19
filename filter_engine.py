@@ -5,6 +5,7 @@
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (Loglama ve hata yönetimi iyileştirmeleri)
 
+from logging_config import get_logger
 import re
 import pandas as pd
 import keyword
@@ -20,9 +21,6 @@ class MissingColumnError(Exception):
     def __init__(self, missing: str):
         super().__init__(missing)
         self.missing = missing
-
-
-from logging_config import get_logger
 
 
 def _extract_query_columns(query: str) -> set:

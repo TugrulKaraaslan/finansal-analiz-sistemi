@@ -126,7 +126,8 @@ def _standardize_ohlcv_columns(
         if raw_name_from_config in current_columns_set:
             # Ve bu ham_ad, zaten hedeflenen standart ad değilse
             # VE hedeflenen standart ad, DataFrame'de (rename_map ile oluşacaklar dahil) henüz yoksa
-            # VEYA hedeflenen standart ad zaten rename_map'te başka bir orijinal adla eşleşmişse AMA şu anki raw_name_from_config için değilse
+            # VEYA hedeflenen standart ad zaten rename_map'te başka bir orijinal adla
+            # eşleşmişse AMA şu anki raw_name_from_config için değilse
             if (
                 raw_name_from_config != standard_name_target
                 and (
@@ -140,14 +141,17 @@ def _standardize_ohlcv_columns(
                     f"'{file_name_short}': Eşleştirme bulundu: '{raw_name_from_config}' -> '{standard_name_target}' (rename_map'e eklendi)"
                 )
             elif raw_name_from_config == standard_name_target:
-                pass  # log.debug(f"'{file_name_short}': Sütun '{raw_name_from_config}' zaten standart adında.")
+                # log.debug(f"'{file_name_short}': Sütun '{raw_name_from_config}' zaten standart adında.")
+                pass
             elif (
                 standard_name_target in current_columns_set
                 or standard_name_target in df.columns
             ):
-                pass  # log.debug(f"'{file_name_short}': Hedef standart ad '{standard_name_target}' DataFrame'de zaten mevcut. '{raw_name_from_config}' için işlem yapılmadı.")
+                # log.debug(f"'{file_name_short}': Hedef standart ad '{standard_name_target}' DataFrame'de zaten mevcut. '{raw_name_from_config}' için işlem yapılmadı.")
+                pass
             elif standard_name_target in rename_map.values():
-                pass  # log.debug(f"'{file_name_short}': Hedef standart ad '{standard_name_target}' zaten başka bir sütun için rename_map'te. '{raw_name_from_config}' için işlem yapılmadı.")
+                # log.debug(f"'{file_name_short}': Hedef standart ad '{standard_name_target}' zaten başka bir sütun için rename_map'te. '{raw_name_from_config}' için işlem yapılmadı.")
+                pass
         # else:
         # log.debug(f"'{file_name_short}': Config'deki ham ad '{raw_name_from_config}' DataFrame'de bulunamadı.")
 
@@ -380,7 +384,8 @@ def yukle_hisse_verileri(
         )
         return None
 
-    # Birleştirilmiş DataFrame'in sütunlarını son bir kez logla (Parquet'e yazmadan önce)
+    # Birleştirilmiş DataFrame'in sütunlarını son bir kez logla (Parquet'e
+    # yazmadan önce)
     fn_logger.debug(
         f"Birleştirilmiş DataFrame (Parquet'e yazılmadan önce) sütunları: {df_birlesik.columns.tolist()}"
     )

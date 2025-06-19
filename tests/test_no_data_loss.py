@@ -1,4 +1,5 @@
-import pandas as pd, tempfile
+import pandas as pd
+import tempfile
 from report_generator import generate_full_report, LEGACY_SUMMARY_COLS
 
 

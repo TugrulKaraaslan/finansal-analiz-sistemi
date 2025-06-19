@@ -5,6 +5,8 @@
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (Erken hata durdurma mantığı eklendi, loglama iyileştirildi)
 
+from utils.logging_setup import setup_logger
+from logging_config import get_logger
 import pandas as pd
 import sys
 import os
@@ -50,9 +52,6 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
         else:
             st.write("Grafik için veri yok")
 
-
-from logging_config import get_logger
-from utils.logging_setup import setup_logger
 
 logger = get_logger(__name__)
 log_counter = setup_logger()
@@ -271,7 +270,8 @@ if __name__ == "__main__":
             _run_gui(rapor_df, detay_df)
 
     except Exception as e_main_run:
-        import traceback, sys
+        import traceback
+        import sys
 
         traceback.print_exc()
         sys.exit(1)

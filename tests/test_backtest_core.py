@@ -1,13 +1,14 @@
-import os, sys
+import config
+import backtest_core
+import types
+import pandas as pd
+import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import pandas as pd
-import types
 
 sys.modules.setdefault("pandas_ta", types.SimpleNamespace(Strategy=lambda **kw: None))
-import backtest_core
-import config
 
 
 def test_bireysel_performanslar_contains_new_keys():

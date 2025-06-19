@@ -1,11 +1,11 @@
-import os, sys
+import report_generator
+import openpyxl
+import pandas as pd
+import os
+import sys
 
 after_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, after_path)
-
-import pandas as pd
-import openpyxl
-import report_generator
 
 
 def test_excel_report_file_size(tmp_path):
