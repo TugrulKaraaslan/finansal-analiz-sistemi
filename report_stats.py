@@ -78,7 +78,10 @@ def build_ozet_df(
     )
     for col in ["hisse_sayisi", "en_yuksek", "en_dusuk", "islemli"]:
         if f"{col}_y" in df.columns:
-            df[col] = df[f"{col}_y"].combine_first(df[col])
+            left = df.get(f"{col}_y", pd.Series(dtype=df[col].dtype)).dropna()
+            right = df[col].dropna()
+            if not left.empty:
+                df[col] = left.combine_first(right)
             df.drop(columns=[f"{col}_y"], inplace=True)
     df["sebep_aciklama"] = df["sebep_kodu"].map(SEBEP_KODLARI).fillna("")
     df["tarama_tarihi"] = tarama_tarihi
@@ -91,24 +94,23 @@ def build_ozet_df(
         },
         inplace=True,
     )
-    return (
-        df[
-            [
-                "filtre_kodu",
-                "hisse_sayisi",
-                "ort_getiri_%",
-                "en_yuksek_%",
-                "en_dusuk_%",
-                "islemli",
-                "sebep_kodu",
-                "sebep_aciklama",
-                "tarama_tarihi",
-                "satis_tarihi",
-            ]
+    subset = df[
+        [
+            "filtre_kodu",
+            "hisse_sayisi",
+            "ort_getiri_%",
+            "en_yuksek_%",
+            "en_dusuk_%",
+            "islemli",
+            "sebep_kodu",
+            "sebep_aciklama",
+            "tarama_tarihi",
+            "satis_tarihi",
         ]
-        .fillna({"hisse_sayisi": 0})
-        .infer_objects(copy=False)
-    )
+    ]
+    with pd.option_context("future.no_silent_downcasting", True):
+        subset = subset.fillna({"hisse_sayisi": 0}).infer_objects(copy=False)
+    return subset
 
 
 def build_detay_df(
