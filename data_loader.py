@@ -1,3 +1,5 @@
+from utils.pandas_compat import safe_concat
+
 # data_loader.py
 # -*- coding: utf-8 -*-
 # Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
@@ -373,7 +375,7 @@ def yukle_hisse_verileri(
         return None
 
     try:
-        df_birlesik = pd.concat(tum_hisse_datalari, ignore_index=True)
+        df_birlesik = safe_concat(tum_hisse_datalari, ignore_index=True)
         fn_logger.info(
             f"Toplam {len(df_birlesik)} satır ve {df_birlesik['hisse_kodu'].nunique()} farklı hisse verisi birleştirildi."
         )

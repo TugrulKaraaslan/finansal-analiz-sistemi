@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from utils.pandas_compat import safe_concat
+
 import os
 from datetime import datetime
 from pathlib import Path
@@ -87,13 +89,13 @@ def generate(log_path: str | os.PathLike, excel_paths: list[str | os.PathLike]) 
     ]
 
     df_sum = (
-        pd.concat(summary_frames, ignore_index=True)
+        safe_concat(summary_frames, ignore_index=True)
         if summary_frames
         else pd.DataFrame(columns=sum_cols)
     )
     df_sum = df_sum.reindex(columns=sum_cols, fill_value="")
     df_det = (
-        pd.concat(detail_frames, ignore_index=True)
+        safe_concat(detail_frames, ignore_index=True)
         if detail_frames
         else pd.DataFrame(columns=det_cols)
     )

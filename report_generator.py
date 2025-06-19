@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from utils.pandas_compat import safe_concat, safe_to_excel
+
 import os
 from pathlib import Path
 from datetime import datetime
@@ -10,7 +12,6 @@ from logging_config import get_logger
 
 import pandas as pd
 import numpy as np
-from utils.pandas_compat import safe_to_excel
 import report_stats
 
 fn_logger = get_logger(__name__)
@@ -400,7 +401,7 @@ def _write_error_sheet(
                     }
                 )
             if base_records:
-                df_err = pd.concat(
+                df_err = safe_concat(
                     [df_err, pd.DataFrame(base_records)], ignore_index=True
                 )
 
@@ -496,12 +497,16 @@ def generate_full_report(
         from filter_engine import FAILED_FILTERS
 
         if FAILED_FILTERS:
-            pd.DataFrame(FAILED_FILTERS).to_excel(wr, "query_errors", index=False)
+            safe_to_excel(
+                pd.DataFrame(FAILED_FILTERS), wr, sheet_name="query_errors", index=False
+            )
         from utils.failure_tracker import get_failures
 
         for cat, rows in get_failures().items():
             if rows:
-                pd.DataFrame(rows).to_excel(wr, f"{cat}_failed", index=False)
+                safe_to_excel(
+                    pd.DataFrame(rows), wr, sheet_name=f"{cat}_failed", index=False
+                )
         _write_stats_sheet(wr, summary_df)
         _write_error_sheet(wr, error_list, summary_df)
 
