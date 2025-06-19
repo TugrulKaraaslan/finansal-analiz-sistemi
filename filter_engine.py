@@ -85,6 +85,11 @@ def safe_eval(expr, df, depth: int = 0):
         except QueryError as e:
             FAILED_FILTERS.append({"filtre_kodu": expr.get("code"), "hata": str(e)})
             logger.warning("QUERY_ERROR %s", e)
+            try:
+                from utils.failure_tracker import log_failure
+                log_failure("filters", expr.get("code", "unknown"), str(e))
+            except Exception:
+                pass
             raise
 
     raise QueryError("Invalid expression")
@@ -150,6 +155,11 @@ def _apply_single_filter(df, kod, query):
         return seç, info
     except Exception as e:
         info.update(durum="HATA", sebep=str(e)[:120])
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("filters", kod, str(e))
+        except Exception:
+            pass
         return None, info
 
 
@@ -180,6 +190,11 @@ def run_single_filter(kod: str, query: str) -> dict:
             }
         )
         logger.warning(f"QUERY_ERROR: {kod} – {msg}")
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("filters", kod, msg)
+        except Exception:
+            pass
     except MissingColumnError as me:
         msg = str(me)
         atlanmis.setdefault("hatalar", []).append(
@@ -192,6 +207,11 @@ def run_single_filter(kod: str, query: str) -> dict:
             }
         )
         logger.warning(f"GENERIC: {kod} – {msg}")
+        try:
+            from utils.failure_tracker import log_failure
+            log_failure("filters", kod, msg)
+        except Exception:
+            pass
     return atlanmis
 
 
@@ -366,6 +386,11 @@ def uygula_filtreler(
                 }
             )
             fn_logger.warning(f"QUERY_ERROR: {filtre_kodu} – {msg}")
+            try:
+                from utils.failure_tracker import log_failure
+                log_failure("filters", filtre_kodu, msg)
+            except Exception:
+                pass
             continue
         except MissingColumnError as me:
             msg = str(me)
@@ -379,6 +404,11 @@ def uygula_filtreler(
                 }
             )
             fn_logger.warning(f"GENERIC: {filtre_kodu} – {msg}")
+            try:
+                from utils.failure_tracker import log_failure
+                log_failure("filters", filtre_kodu, msg)
+            except Exception:
+                pass
             continue
 
         kontrol_log.append(info)
