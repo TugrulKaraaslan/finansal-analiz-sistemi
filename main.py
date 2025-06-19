@@ -253,16 +253,6 @@ if __name__ == "__main__":
                 keep_legacy=True,
             )
             print(f"Rapor oluşturuldu → {rapor_path}")
-            df_ozet = report_utils.build_ozet_df(
-                rapor_df, detay_df, tarama_t, satis_t
-            )
-            with pd.ExcelWriter(
-                out_path,
-                mode="a",
-                if_sheet_exists="replace",
-                engine="openpyxl",
-            ) as wr:
-                report_generator.olustur_hatali_filtre_raporu(wr, atlanmis)
         else:
             logger.info("Rapor verisi boş, Excel oluşturulmadı.")
 
