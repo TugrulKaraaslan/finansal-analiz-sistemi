@@ -9,6 +9,7 @@ import re
 import pandas as pd
 import keyword
 from pandas.errors import UndefinedVariableError as QueryError
+import logging
 
 
 class MissingColumnError(Exception):
@@ -37,6 +38,10 @@ logger = get_logger(__name__)
 _missing_re = re.compile(r"Eksik sütunlar?:\s*(?P<col>[A-Za-z0-9_]+)")
 _undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)'")
 
+# Recursion guard constants
+MAX_DEPTH = 5  # maks. izin verilen iç içe çağrı
+FAILED_FILTERS: list[dict] = []
+
 
 def _build_solution(err_type: str, msg: str) -> str:
     if err_type == "GENERIC":
@@ -54,6 +59,25 @@ def _build_solution(err_type: str, msg: str) -> str:
     if err_type == "NO_STOCK":
         return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
     return ""
+
+
+def safe_eval(expr, df, depth: int = 0):
+    """Evaluate filter safely with depth guard."""
+    if depth >= MAX_DEPTH:
+        raise QueryError(f"Max recursion depth ({MAX_DEPTH}) exceeded")
+
+    if isinstance(expr, str):
+        return df.query(expr)
+
+    if isinstance(expr, dict) and "sub_expr" in expr:
+        try:
+            return safe_eval(expr["sub_expr"], df, depth + 1)
+        except QueryError as e:
+            FAILED_FILTERS.append({"filtre_kodu": expr.get("code"), "hata": str(e)})
+            logger.warning("QUERY_ERROR %s", e)
+            raise
+
+    raise QueryError("Invalid expression")
 
 
 def _apply_single_filter(df, kod, query):
