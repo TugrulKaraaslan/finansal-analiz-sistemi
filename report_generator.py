@@ -9,14 +9,8 @@ from openpyxl.utils import get_column_letter
 import xlsxwriter
 from utils.logging_setup import get_logger, setup_logger
 
-import warnings, pandas as pd
+import pandas as pd
 import report_stats
-warnings.filterwarnings(
-    "ignore",
-    message="Downcasting object dtype arrays on .fillna",
-    category=FutureWarning,
-    module="report_generator",
-)
 
 setup_logger()
 fn_logger = get_logger(__name__)
