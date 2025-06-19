@@ -395,7 +395,7 @@ def generate_full_report(
                 summary_df["sebep_aciklama"]
             )
             summary_df.drop(columns="sebep_aciklama_fill", inplace=True)
-            # Detay (sadece sütun varsa)
+            # Detay DataFrame de güncellendi (sadece sütun varsa)
             if "sebep_aciklama" in detail_df.columns:
                 detail_df = detail_df.merge(
                     err_map.rename(columns={"detay": "sebep_aciklama_fill"}),
