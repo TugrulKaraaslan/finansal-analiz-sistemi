@@ -11,13 +11,14 @@ jobs:
         with:
           python-version: "3.11"
 
-      # Proje paketlenmedi; setup.py yok → requirements.txt kullan.
+      # Install project and dependencies
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install pandas-ta==0.3.14b0
           pip install --timeout 60 -r requirements.txt
           pip install --timeout 60 matplotlib xlsxwriter streamlit
+          pip install -e .
 
       - name: Run tests
         run: |
