@@ -14,6 +14,7 @@ import logging
 from pathlib import Path
 import argparse
 import traceback
+import yaml
 import config
 import utils
 from utils.date_utils import parse_date
@@ -199,6 +200,36 @@ def calistir_tum_sistemi(
     )
     raporla(rapor_df, detay_df)
     return rapor_df, detay_df, atlanmis
+
+
+def run_pipeline(price_csv: str, filter_def: str, output: str | Path) -> str:
+    """Run a minimal pipeline using provided CSV/filters and save Excel report."""
+    df = pd.read_csv(
+        price_csv,
+        comment="#",
+        header=None,
+        names=["code", "date", "open", "high", "low", "close", "volume"],
+    )
+    df = df.rename(columns={"code": "hisse_kodu", "date": "tarih"})
+    df["tarih"] = pd.to_datetime(df["tarih"])
+
+    with open(filter_def) as f:
+        filt = yaml.safe_load(f) or []
+    filt_df = pd.DataFrame(filt).rename(
+        columns={"code": "FilterCode", "clause": "PythonQuery"}
+    )
+
+    tarama_dt = df["tarih"].min()
+    satis_dt = df["tarih"].max()
+
+    filtre_sonuclar, _ = filter_engine.uygula_filtreler(df, filt_df, tarama_dt)
+    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
+        filtre_sonuclar,
+        df,
+        satis_tarihi_str=satis_dt.strftime("%d.%m.%Y"),
+        tarama_tarihi_str=tarama_dt.strftime("%d.%m.%Y"),
+    )
+    return report_generator.generate_full_report(rapor_df, detay_df, [], output)
 
 
 if __name__ == "__main__":
