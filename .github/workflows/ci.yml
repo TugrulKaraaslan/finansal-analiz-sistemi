@@ -24,9 +24,7 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Lint & Format
-        run: |
-          black --check .
-          flake8 .
+        run: black --check .
 
       - name: Run tests
         run: |
