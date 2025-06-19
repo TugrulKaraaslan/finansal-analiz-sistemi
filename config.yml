@@ -1,1 +1,5 @@
 min_stocks_per_filter: 1
+passive_filters:
+  - T31
+filter_weights:
+  T31: 0.0
