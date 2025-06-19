@@ -24,7 +24,7 @@ import config
 import utils
 from utilities.naming import unique_name
 
-from utils.logging_setup import setup_logger, get_logger
+from logging_config import get_logger
 
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 warnings.filterwarnings(
@@ -40,7 +40,6 @@ warnings.filterwarnings(
     module="indicator_calculator",
 )
 
-setup_logger()
 logger = get_logger(__name__)
 
 # --- Yeni Özel İndikatör Fonksiyonları (Filtrelerle Uyum İçin) ---

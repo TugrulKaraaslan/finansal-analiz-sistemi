@@ -20,7 +20,7 @@ class MissingColumnError(Exception):
     def __init__(self, missing: str):
         super().__init__(missing)
         self.missing = missing
-from utils.logging_setup import setup_logger, get_logger
+from logging_config import get_logger
 
 
 def _extract_query_columns(query: str) -> set:
@@ -34,7 +34,6 @@ def _extract_columns_from_query(query: str) -> set:
     return _extract_query_columns(query)
 
 
-setup_logger()
 logger = get_logger(__name__)
 
 # Konfigürasyon dosyasından minimum hisse eşiğini oku

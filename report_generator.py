@@ -7,14 +7,13 @@ from typing import Iterable
 
 from openpyxl.utils import get_column_letter
 import xlsxwriter
-from utils.logging_setup import get_logger, setup_logger
+from logging_config import get_logger
 
 import pandas as pd
 import numpy as np
 from utils.pandas_compat import safe_to_excel
 import report_stats
 
-setup_logger()
 fn_logger = get_logger(__name__)
 
 LEGACY_SUMMARY_COLS = [
