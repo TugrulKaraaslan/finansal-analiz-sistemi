@@ -1,5 +1,5 @@
 # finansal-analiz-sistemi
-[![CI](https://github.com/<your-username>/finansal-analiz-sistemi/actions/workflows/ci.yml/badge.svg)](https://github.com/<your-username>/finansal-analiz-sistemi/actions/workflows/ci.yml)
+[![CI](https://github.com/owner/finansal-analiz-sistemi/actions/workflows/ci.yml/badge.svg)](https://github.com/owner/finansal-analiz-sistemi/actions/workflows/ci.yml)
 ChatGPT ile geliştirilen backtest otomasyon projesi
 
 ## Geliştirme Ortamı Kurulumu
