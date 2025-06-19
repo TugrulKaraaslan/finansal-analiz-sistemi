@@ -154,6 +154,16 @@ def _apply_single_filter(df, kod, query):
         return None, info
 
 
+def run_filter(code, df, expr):
+    """Simple wrapper for running a filter expression."""
+    # Pasif filtreler listede mi?
+    from config import cfg
+    if code in cfg.get('passive_filters', []):
+        logger.info('Filter %s marked passive, skipped.', code)
+        return pd.DataFrame()
+    return safe_eval(expr, df)
+
+
 def run_single_filter(kod: str, query: str) -> dict:
     """Küçük bir DataFrame üzerinde tek filtreyi çalıştır."""
     df = pd.DataFrame({"close": [1]})

@@ -8,6 +8,7 @@
 import os
 import logging
 import numpy as np
+import yaml
 
 # pandas_ta bazı ortamlarda numpy.NaN sabitini kullanarak yükleniyor.
 # NumPy 2.x sürümlerinde bu sabit olmadığı için import hatası
@@ -27,6 +28,13 @@ FILTRE_DOSYA_YOLU = os.path.join(VERI_KLASORU, "15.csv")
 PARQUET_ANA_DOSYA_YOLU = os.path.join(VERI_KLASORU, "birlesik_hisse_verileri.parquet")
 LOG_DOSYA_YOLU = os.path.join(BASE_DIR, "finansal_analiz_sistemi.log")
 CSV_OZET_DOSYA_ADI = "backtest_ozet_raporu.csv"
+
+_cfg_path = os.path.join(os.path.dirname(__file__), "config.yml")
+if os.path.exists(_cfg_path):
+    with open(_cfg_path) as _f:
+        cfg = yaml.safe_load(_f) or {}
+else:
+    cfg = {}
 
 FILTRE_SUTUN_ADLARI_MAP = {"FilterCode": "FilterCode", "PythonQuery": "PythonQuery"}
 
