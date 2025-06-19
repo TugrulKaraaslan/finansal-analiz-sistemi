@@ -1,11 +1,10 @@
+import log_to_health
+import openpyxl
+import pandas as pd
 import os
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-import pandas as pd
-import openpyxl
-import log_to_health
 
 
 def test_basic_not_empty(tmp_path):

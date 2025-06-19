@@ -3,12 +3,14 @@ from report_generator import generate_full_report, LEGACY_SUMMARY_COLS
 
 
 def test_error_list_writes_sheet(tmp_path):
-    errs = [{
-        "filtre_kodu": "T1",
-        "hata_tipi": "QUERY_ERROR",
-        "detay": "demo",
-        "cozum_onerisi": "fix",
-    }]
+    errs = [
+        {
+            "filtre_kodu": "T1",
+            "hata_tipi": "QUERY_ERROR",
+            "detay": "demo",
+            "cozum_onerisi": "fix",
+        }
+    ]
     path = tmp_path / "err.xlsx"
     generate_full_report(
         pd.DataFrame(columns=LEGACY_SUMMARY_COLS),
@@ -19,4 +21,3 @@ def test_error_list_writes_sheet(tmp_path):
     )
     with pd.ExcelFile(path) as xls:
         assert "Hatalar" in xls.sheet_names
-

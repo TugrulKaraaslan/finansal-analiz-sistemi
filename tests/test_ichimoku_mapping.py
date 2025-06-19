@@ -1,12 +1,14 @@
-import os, sys
+import config as _cfg
+import importlib
+import utils
+import pandas as pd
+import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import pandas as pd
 
-import utils
-import importlib, config as _cfg
-importlib.reload(_cfg)   # test ortamında doğru yolu garantile
+importlib.reload(_cfg)  # test ortamında doğru yolu garantile
 config = _cfg
 
 

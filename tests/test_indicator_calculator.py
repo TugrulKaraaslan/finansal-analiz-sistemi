@@ -6,12 +6,8 @@ import pandas as pd
 import numpy as np
 import pytest
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-)
-sys.modules.pop(
-    "pandas_ta", None
-)  # Ensure real pandas_ta is used in this test
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.modules.pop("pandas_ta", None)  # Ensure real pandas_ta is used in this test
 
 import indicator_calculator as ic  # noqa: E402
 import config  # noqa: E402

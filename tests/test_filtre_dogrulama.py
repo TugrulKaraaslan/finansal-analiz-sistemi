@@ -1,12 +1,10 @@
+from filtre_dogrulama import dogrula_filtre_dataframe
+import pytest
+import pandas as pd
 import os
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-import pandas as pd
-import pytest
-
-from filtre_dogrulama import dogrula_filtre_dataframe
 
 
 def test_invalid_filter_code_characters():

@@ -3,7 +3,8 @@
 # Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
 # Modül: Teknik İndikatörler ve Kesişim Sinyalleri Hesaplama
 # Tuğrul Karaaslan & Gemini
-# Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index düzeltildi, filtre uyumu artırıldı v2)
+# Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index
+# düzeltildi, filtre uyumu artırıldı v2)
 
 import pandas as pd
 from utils.pandas_compat import safe_concat
@@ -96,6 +97,7 @@ def _calculate_change_percent(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", effective_output_col_name, str(e))
         except Exception:
             pass
@@ -133,6 +135,7 @@ def _calculate_sma(group_df: pd.DataFrame, period: int, data_col: str) -> pd.Ser
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", sutun_adi, str(e))
         except Exception:
             pass
@@ -161,6 +164,7 @@ def _get_previous_bar_value(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", sutun_adi, str(e))
         except Exception:
             pass
@@ -249,6 +253,7 @@ def _calculate_percentage_from_period_high_low(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", sutun_adi, str(e))
         except Exception:
             pass
@@ -293,6 +298,7 @@ def _calculate_relative_volume(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", sutun_adi, str(e))
         except Exception:
             pass
@@ -336,6 +342,7 @@ def _calculate_volume_price(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", sutun_adi, str(e))
         except Exception:
             pass
@@ -361,6 +368,7 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
         local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", col, str(e))
         except Exception:
             pass
@@ -420,6 +428,7 @@ def calculate_indicators(
             logger.error(f"{alias} hesaplanirken hata: {e}")
             try:
                 from utils.failure_tracker import log_failure
+
                 log_failure("indicators", alias, str(e))
             except Exception:
                 pass
@@ -457,6 +466,7 @@ def _ekle_psar(df: pd.DataFrame) -> None:
         logger.error(f"PSAR hesaplanırken hata: {e}")
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("indicators", "psar", str(e))
         except Exception:
             pass
@@ -603,6 +613,7 @@ def _calculate_series_series_crossover(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("crossovers", f"{s1_col} vs {s2_col}", str(e))
         except Exception:
             pass
@@ -657,6 +668,7 @@ def _calculate_series_value_crossover(
         )
         try:
             from utils.failure_tracker import log_failure
+
             log_failure("crossovers", f"{s_col} vs {value}", str(e))
         except Exception:
             pass
@@ -822,10 +834,12 @@ def _calculate_group_indicators_and_crossovers(
     # Şimdi tüm hesaplamaların (özel ve kesişimler) yapılacağı RangeIndex'li DataFrame'i hazırlayalım.
     # Bu DataFrame, pandas-ta tarafından hesaplanan indikatörleri de içermeli.
     # group_df_input (RangeIndex, 'tarih' sütunlu, OHLCV)
-    # group_df_dt_indexed (DatetimeIndex, 'tarih' SÜTUNU YOK, OHLCV + pandas-ta indikatörleri)
+    # group_df_dt_indexed (DatetimeIndex, 'tarih' SÜTUNU YOK, OHLCV +
+    # pandas-ta indikatörleri)
 
     # En temiz yol: group_df_dt_indexed'in indeksini sıfırlayıp 'tarih' sütununu geri getirmek
-    # ve orijinal group_df_input ile birleştirmek (sadece yeni eklenen sütunları almak için).
+    # ve orijinal group_df_input ile birleştirmek (sadece yeni eklenen
+    # sütunları almak için).
 
     df_final_group = (
         group_df_input.copy()
@@ -1031,7 +1045,11 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
         return None
 
     # NaN ön temizlik: OHLCV kolonlarındaki boşlukları 3 satıra kadar ileri taşı
-    ind_cols = [c for c in ["open", "high", "low", "close", "volume"] if c in df_islenmis_veri.columns]
+    ind_cols = [
+        c
+        for c in ["open", "high", "low", "close", "volume"]
+        if c in df_islenmis_veri.columns
+    ]
     if ind_cols:
         df_islenmis_veri[ind_cols] = df_islenmis_veri[ind_cols].ffill(limit=3)
 
@@ -1069,7 +1087,8 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
     ):  # group_df_original zaten 'tarih'e göre sıralı geliyor (preprocessor'dan)
         current_processed_count_main += 1
         # _calculate_group_indicators_and_crossovers fonksiyonuna RangeIndex'li ve 'tarih' sütunlu df gönderiyoruz.
-        # Bu fonksiyon içinde DatetimeIndex'e çevrilip, sonra tekrar RangeIndex'e ve 'tarih' sütununa sahip olarak dönüyor.
+        # Bu fonksiyon içinde DatetimeIndex'e çevrilip, sonra tekrar RangeIndex'e
+        # ve 'tarih' sütununa sahip olarak dönüyor.
         group_df_for_calc = group_df_original.reset_index(
             drop=True
         )  # Her ihtimale karşı indeksi sıfırla

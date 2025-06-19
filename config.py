@@ -3,7 +3,8 @@
 # Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
 # Modül: Yapılandırma Dosyası
 # Tuğrul Karaaslan & Gemini
-# Tarih: 19 Mayıs 2025 (Ichimoku ve Aroon ad eşleştirmeleri filtre uyumu için SON DÜZELTMELER)
+# Tarih: 19 Mayıs 2025 (Ichimoku ve Aroon ad eşleştirmeleri filtre uyumu
+# için SON DÜZELTMELER)
 
 import os
 import logging
@@ -233,7 +234,8 @@ INDIKATOR_AD_ESLESTIRME = {
     "aroonu_14": "aroonu_14",
     "aroond_14": "aroond_14",
     "aroonosc_14": "AROONOSC_14",  # Filtrede büyük harf arandığı için düzeltildi
-    # Ichimoku: pandas-ta'nın ürettiği (TA_STRATEGY'deki col_names) -> Filtrelerde aranan/beklenen adlar
+    # Ichimoku: pandas-ta'nın ürettiği (TA_STRATEGY'deki col_names) ->
+    # Filtrelerde aranan/beklenen adlar
     "its_9": "ichimoku_conversionline",
     "iks_26": "ichimoku_baseline",
     "isa_9_26_52": "ichimoku_leadingspana",  # Düzeltildi (filtredeki ad)
@@ -331,168 +333,180 @@ OZEL_SUTUN_PARAMS = [
     },
 ]
 
-SERIES_SERIES_CROSSOVERS = [
-    (
-        f"sma_{a}",
-        f"sma_{b}",
-        f"sma_{a}_keser_sma_{b}_yukari",
-        f"sma_{a}_keser_sma_{b}_asagi",
-    )
-    for a, b in zip(GEREKLI_MA_PERIYOTLAR[:-1], GEREKLI_MA_PERIYOTLAR[1:])
-] + [
-    (
-        f"ema_{a}",
-        f"ema_{b}",
-        f"ema_{a}_keser_ema_{b}_yukari",
-        f"ema_{a}_keser_ema_{b}_asagi",
-    )
-    for a, b in zip(GEREKLI_MA_PERIYOTLAR[:-1], GEREKLI_MA_PERIYOTLAR[1:])
-] + [
-    ("sma_5", "sma_20", "sma_5_keser_sma_20_yukari", "sma_5_keser_sma_20_asagi"),
-    ("sma_10", "sma_50", "sma_10_keser_sma_50_yukari", "sma_10_keser_sma_50_asagi"),
-    ("close", "sma_20", "close_keser_sma_20_yukari", "close_keser_sma_20_asagi"),
-    ("close", "sma_50", "close_keser_sma_50_yukari", "close_keser_sma_50_asagi"),
-    ("close", "sma_100", "close_keser_sma_100_yukari", "close_keser_sma_100_asagi"),
-    ("close", "sma_200", "close_keser_sma_200_yukari", "close_keser_sma_200_asagi"),
-    (
-        "macd_line",
-        "macd_signal",
-        "macd_line_keser_macd_signal_yukari",
-        "macd_line_keser_macd_signal_asagi",
-    ),
-    (
-        "ichimoku_conversionline",
-        "ichimoku_baseline",
-        "ichimoku_conversionline_keser_ichimoku_baseline_yukari",
-        "ichimoku_conversionline_keser_ichimoku_baseline_asagi",
-    ),
-    (
-        "close",
-        "ichimoku_baseline",
-        "close_keser_ichimoku_baseline_yukari",
-        "close_keser_ichimoku_baseline_asagi",
-    ),
-    ("sma_30", "close", "sma_30_keser_close_asagi", "sma_30_keser_close_yukari"),
-    ("sma_5", "close", "sma_5_keser_close_asagi", "sma_5_keser_close_yukari"),
-    ("close", "bbu_20_2", "close_keser_bbu_20_2_yukari", "close_keser_bbu_20_2_asagi"),
-    ("close", "sma_21", "close_keser_sma_21_yukari", "close_keser_sma_21_asagi"),
-    ("close", "ema_21", "close_keser_ema_21_yukari", "close_keser_ema_21_asagi"),
-    ("close", "bbm_20_2", "close_keser_bbm_20_2_yukari", "close_keser_bbm_20_2_asagi"),
-    (
-        "close",
-        "classicpivots_1h_p",
-        "close_keser_classicpivots_1h_p_yukari",
-        "close_keser_classicpivots_1h_p_asagi",
-    ),
-    ("close", "ema_5", "close_keser_ema_5_yukari", "close_keser_ema_5_asagi"),
-    ("close", "ema_10", "close_keser_ema_10_yukari", "close_keser_ema_10_asagi"),
-    ("ema_50", "close", "ema_50_keser_close_yukari", "ema_50_keser_close_asagi"),
-    ("sma_50", "close", "sma_50_keser_close_yukari", "sma_50_keser_close_asagi"),
-    ("sma_100", "close", "sma_100_keser_close_yukari", "sma_100_keser_close_asagi"),
-    ("sma_200", "close", "sma_200_keser_close_yukari", "sma_200_keser_close_asagi"),
-    (
-        "positivedirectionalindicator_14",
-        "negativedirectionalindicator_14",
-        "positivedirectionalindicator_14_keser_negativedirectionalindicator_14_yukari",
-        "positivedirectionalindicator_14_keser_negativedirectionalindicator_14_asagi",
-    ),
-    (
-        "stoch_k",
-        "stoch_d",
-        "stoch_k_keser_stoch_d_yukari",
-        "stoch_k_keser_stoch_d_asagi",
-    ),
-    (
-        "stochrsi_d",
-        "stochrsi_k",
-        "stochrsi_d_keser_stochrsi_k_yukari",
-        "stochrsi_d_keser_stochrsi_k_asagi",
-    ),
-    (
-        "stochrsi_k",
-        "stochrsi_d",
-        "stochrsi_k_keser_stochrsi_d_yukari",
-        "stochrsi_k_keser_stochrsi_d_asagi",
-    ),
-    (
-        "ichimoku_leadingspana",
-        "ichimoku_leadingspanb",
-        "senkou_a_keser_senkou_b_yukari",
-        "senkou_a_keser_senkou_b_asagi",
-    ),
-    ("close", "psar", "close_keser_psar_yukari", "close_keser_psar_asagi"),
-    ("psar", "close", "psar_keser_close_yukari", "psar_keser_close_asagi"),
-    (
-        "close",
-        "supertrend_7_3",
-        "close_keser_supertrend_yukari",
-        "close_keser_supertrend_asagi",
-    ),
-    ("hma_9", "close", "hma_9_keser_close_yukari", "hma_9_keser_close_asagi"),
-    ("hma_9", "sma_20", "hma_9_keser_sma_20_yukari", "hma_9_keser_sma_20_asagi"),
-    ("vwma_20", "close", "vwma_20_keser_close_yukari", "vwma_20_keser_close_asagi"),
-    ("rsi_7", "rsi_14", "rsi_7_keser_rsi_14_yukari", "rsi_7_keser_rsi_14_asagi"),
-    (
-        "close",
-        "dcm_20_20",
-        "close_keser_dcm_20_20_yukari",
-        "close_keser_dcm_20_20_asagi",
-    ),
-    (
-        "macd_signal",
-        "macd_line",
-        "macd_signal_keser_macd_line_yukari",
-        "macd_signal_keser_macd_line_asagi",
-    ),
-    ("ema_5", "ema_20", "ema_5_keser_ema_20_yukari", "ema_5_keser_ema_20_asagi"),
-    ("ema_5", "ema_50", "ema_5_keser_ema_50_yukari", "ema_5_keser_ema_50_asagi"),
-    ("ema_5", "close", "ema_5_keser_close_yukari", "ema_5_keser_close_asagi"),
-    ("ema_10", "close", "ema_10_keser_close_yukari", "ema_10_keser_close_asagi"),
-    ("ema_20", "close", "ema_20_keser_close_yukari", "ema_20_keser_close_asagi"),
-    ("ema_100", "close", "ema_100_keser_close_yukari", "ema_100_keser_close_asagi"),
-    ("ema_200", "close", "ema_200_keser_close_yukari", "ema_200_keser_close_asagi"),
-    ("close", "ema_100", "close_keser_ema_100_yukari", "close_keser_ema_100_asagi"),
-    ("close", "ema_200", "close_keser_ema_200_yukari", "close_keser_ema_200_asagi"),
-    ("close", "ema_8", "close_keser_ema_8_yukari", "close_keser_ema_8_asagi"),
-    ("close", "ema_13", "close_keser_ema_13_yukari", "close_keser_ema_13_asagi"),
-    ("close", "hma_9", "close_keser_hma_9_yukari", "close_keser_hma_9_asagi"),
-    ("sma_5", "close", "sma_5_keser_close_yukari", "sma_5_keser_close_asagi"),
-    ("sma_10", "close", "sma_10_keser_close_yukari", "sma_10_keser_close_asagi"),
-    ("sma_20", "close", "sma_20_keser_close_yukari", "sma_20_keser_close_asagi"),
-    (
-        "stoch_d",
-        "stoch_k",
-        "stoch_d_keser_stoch_k_yukari",
-        "stoch_d_keser_stoch_k_asagi",
-    ),
-    ("ema_30", "close", "ema_30_keser_close_yukari", "ema_30_keser_close_asagi"),
-    (
-        "close",
-        "ichimoku_conversionline",
-        "close_keser_ichimoku_conversionline_yukari",
-        "close_keser_ichimoku_conversionline_asagi",
-    ),
-    (
-        "ichimoku_conversionline",
-        "close",
-        "ichimoku_conversionline_keser_close_yukari",
-        "ichimoku_conversionline_keser_close_asagi",
-    ),
-    (
-        "psar",
-        "close",
-        "psar_keser_close_yukari",
-        "psar_keser_close_asagi",
-    ),
-]
+SERIES_SERIES_CROSSOVERS = (
+    [
+        (
+            f"sma_{a}",
+            f"sma_{b}",
+            f"sma_{a}_keser_sma_{b}_yukari",
+            f"sma_{a}_keser_sma_{b}_asagi",
+        )
+        for a, b in zip(GEREKLI_MA_PERIYOTLAR[:-1], GEREKLI_MA_PERIYOTLAR[1:])
+    ]
+    + [
+        (
+            f"ema_{a}",
+            f"ema_{b}",
+            f"ema_{a}_keser_ema_{b}_yukari",
+            f"ema_{a}_keser_ema_{b}_asagi",
+        )
+        for a, b in zip(GEREKLI_MA_PERIYOTLAR[:-1], GEREKLI_MA_PERIYOTLAR[1:])
+    ]
+    + [
+        ("sma_5", "sma_20", "sma_5_keser_sma_20_yukari", "sma_5_keser_sma_20_asagi"),
+        ("sma_10", "sma_50", "sma_10_keser_sma_50_yukari", "sma_10_keser_sma_50_asagi"),
+        ("close", "sma_20", "close_keser_sma_20_yukari", "close_keser_sma_20_asagi"),
+        ("close", "sma_50", "close_keser_sma_50_yukari", "close_keser_sma_50_asagi"),
+        ("close", "sma_100", "close_keser_sma_100_yukari", "close_keser_sma_100_asagi"),
+        ("close", "sma_200", "close_keser_sma_200_yukari", "close_keser_sma_200_asagi"),
+        (
+            "macd_line",
+            "macd_signal",
+            "macd_line_keser_macd_signal_yukari",
+            "macd_line_keser_macd_signal_asagi",
+        ),
+        (
+            "ichimoku_conversionline",
+            "ichimoku_baseline",
+            "ichimoku_conversionline_keser_ichimoku_baseline_yukari",
+            "ichimoku_conversionline_keser_ichimoku_baseline_asagi",
+        ),
+        (
+            "close",
+            "ichimoku_baseline",
+            "close_keser_ichimoku_baseline_yukari",
+            "close_keser_ichimoku_baseline_asagi",
+        ),
+        ("sma_30", "close", "sma_30_keser_close_asagi", "sma_30_keser_close_yukari"),
+        ("sma_5", "close", "sma_5_keser_close_asagi", "sma_5_keser_close_yukari"),
+        (
+            "close",
+            "bbu_20_2",
+            "close_keser_bbu_20_2_yukari",
+            "close_keser_bbu_20_2_asagi",
+        ),
+        ("close", "sma_21", "close_keser_sma_21_yukari", "close_keser_sma_21_asagi"),
+        ("close", "ema_21", "close_keser_ema_21_yukari", "close_keser_ema_21_asagi"),
+        (
+            "close",
+            "bbm_20_2",
+            "close_keser_bbm_20_2_yukari",
+            "close_keser_bbm_20_2_asagi",
+        ),
+        (
+            "close",
+            "classicpivots_1h_p",
+            "close_keser_classicpivots_1h_p_yukari",
+            "close_keser_classicpivots_1h_p_asagi",
+        ),
+        ("close", "ema_5", "close_keser_ema_5_yukari", "close_keser_ema_5_asagi"),
+        ("close", "ema_10", "close_keser_ema_10_yukari", "close_keser_ema_10_asagi"),
+        ("ema_50", "close", "ema_50_keser_close_yukari", "ema_50_keser_close_asagi"),
+        ("sma_50", "close", "sma_50_keser_close_yukari", "sma_50_keser_close_asagi"),
+        ("sma_100", "close", "sma_100_keser_close_yukari", "sma_100_keser_close_asagi"),
+        ("sma_200", "close", "sma_200_keser_close_yukari", "sma_200_keser_close_asagi"),
+        (
+            "positivedirectionalindicator_14",
+            "negativedirectionalindicator_14",
+            "positivedirectionalindicator_14_keser_negativedirectionalindicator_14_yukari",
+            "positivedirectionalindicator_14_keser_negativedirectionalindicator_14_asagi",
+        ),
+        (
+            "stoch_k",
+            "stoch_d",
+            "stoch_k_keser_stoch_d_yukari",
+            "stoch_k_keser_stoch_d_asagi",
+        ),
+        (
+            "stochrsi_d",
+            "stochrsi_k",
+            "stochrsi_d_keser_stochrsi_k_yukari",
+            "stochrsi_d_keser_stochrsi_k_asagi",
+        ),
+        (
+            "stochrsi_k",
+            "stochrsi_d",
+            "stochrsi_k_keser_stochrsi_d_yukari",
+            "stochrsi_k_keser_stochrsi_d_asagi",
+        ),
+        (
+            "ichimoku_leadingspana",
+            "ichimoku_leadingspanb",
+            "senkou_a_keser_senkou_b_yukari",
+            "senkou_a_keser_senkou_b_asagi",
+        ),
+        ("close", "psar", "close_keser_psar_yukari", "close_keser_psar_asagi"),
+        ("psar", "close", "psar_keser_close_yukari", "psar_keser_close_asagi"),
+        (
+            "close",
+            "supertrend_7_3",
+            "close_keser_supertrend_yukari",
+            "close_keser_supertrend_asagi",
+        ),
+        ("hma_9", "close", "hma_9_keser_close_yukari", "hma_9_keser_close_asagi"),
+        ("hma_9", "sma_20", "hma_9_keser_sma_20_yukari", "hma_9_keser_sma_20_asagi"),
+        ("vwma_20", "close", "vwma_20_keser_close_yukari", "vwma_20_keser_close_asagi"),
+        ("rsi_7", "rsi_14", "rsi_7_keser_rsi_14_yukari", "rsi_7_keser_rsi_14_asagi"),
+        (
+            "close",
+            "dcm_20_20",
+            "close_keser_dcm_20_20_yukari",
+            "close_keser_dcm_20_20_asagi",
+        ),
+        (
+            "macd_signal",
+            "macd_line",
+            "macd_signal_keser_macd_line_yukari",
+            "macd_signal_keser_macd_line_asagi",
+        ),
+        ("ema_5", "ema_20", "ema_5_keser_ema_20_yukari", "ema_5_keser_ema_20_asagi"),
+        ("ema_5", "ema_50", "ema_5_keser_ema_50_yukari", "ema_5_keser_ema_50_asagi"),
+        ("ema_5", "close", "ema_5_keser_close_yukari", "ema_5_keser_close_asagi"),
+        ("ema_10", "close", "ema_10_keser_close_yukari", "ema_10_keser_close_asagi"),
+        ("ema_20", "close", "ema_20_keser_close_yukari", "ema_20_keser_close_asagi"),
+        ("ema_100", "close", "ema_100_keser_close_yukari", "ema_100_keser_close_asagi"),
+        ("ema_200", "close", "ema_200_keser_close_yukari", "ema_200_keser_close_asagi"),
+        ("close", "ema_100", "close_keser_ema_100_yukari", "close_keser_ema_100_asagi"),
+        ("close", "ema_200", "close_keser_ema_200_yukari", "close_keser_ema_200_asagi"),
+        ("close", "ema_8", "close_keser_ema_8_yukari", "close_keser_ema_8_asagi"),
+        ("close", "ema_13", "close_keser_ema_13_yukari", "close_keser_ema_13_asagi"),
+        ("close", "hma_9", "close_keser_hma_9_yukari", "close_keser_hma_9_asagi"),
+        ("sma_5", "close", "sma_5_keser_close_yukari", "sma_5_keser_close_asagi"),
+        ("sma_10", "close", "sma_10_keser_close_yukari", "sma_10_keser_close_asagi"),
+        ("sma_20", "close", "sma_20_keser_close_yukari", "sma_20_keser_close_asagi"),
+        (
+            "stoch_d",
+            "stoch_k",
+            "stoch_d_keser_stoch_k_yukari",
+            "stoch_d_keser_stoch_k_asagi",
+        ),
+        ("ema_30", "close", "ema_30_keser_close_yukari", "ema_30_keser_close_asagi"),
+        (
+            "close",
+            "ichimoku_conversionline",
+            "close_keser_ichimoku_conversionline_yukari",
+            "close_keser_ichimoku_conversionline_asagi",
+        ),
+        (
+            "ichimoku_conversionline",
+            "close",
+            "ichimoku_conversionline_keser_close_yukari",
+            "ichimoku_conversionline_keser_close_asagi",
+        ),
+        (
+            "psar",
+            "close",
+            "psar_keser_close_yukari",
+            "psar_keser_close_asagi",
+        ),
+    ]
+)
 # --- crossover çıktıları da her zaman hesaplansın
 wc = globals().get("wanted_cols") or globals().get("WANTED_COLS")
 if wc is None:
     wc = set()
     globals()["wanted_cols"] = wc
-wc |= {
-    c_above for *_, c_above, _ in SERIES_SERIES_CROSSOVERS
-} | {
+wc |= {c_above for *_, c_above, _ in SERIES_SERIES_CROSSOVERS} | {
     c_below for *_, _, c_below in SERIES_SERIES_CROSSOVERS
 }
 wanted_cols = wc

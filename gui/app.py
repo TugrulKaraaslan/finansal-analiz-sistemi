@@ -12,5 +12,11 @@ if uploaded:
             st.dataframe(pd.read_excel(xls, "Özet"))
         with tab2:
             hatalar = pd.read_excel(xls, "Hatalar")
-            st.dataframe(hatalar.style.apply(
-                lambda s: ["background-color:#faa" if v!="OK" else "" for v in s["durum"]], axis=1))
+            st.dataframe(
+                hatalar.style.apply(
+                    lambda s: [
+                        "background-color:#faa" if v != "OK" else "" for v in s["durum"]
+                    ],
+                    axis=1,
+                )
+            )

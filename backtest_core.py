@@ -116,7 +116,7 @@ def calistir_basit_backtest(
     alim_fiyat_sutunu = config.ALIM_ZAMANI  # örn: 'open'
     satis_fiyat_sutunu = config.SATIS_ZAMANI  # örn: 'open' veya 'close'
     komisyon_orani = config.KOMISYON_ORANI
-    strateji_adi = getattr(config, "UYGULANAN_STRATEJI", "basit_backtest")
+    getattr(config, "UYGULANAN_STRATEJI", "basit_backtest")
 
     summary_records = []
     detail_records = []

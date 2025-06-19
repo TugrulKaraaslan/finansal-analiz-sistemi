@@ -1,19 +1,23 @@
+import backtest_core
 import os
 import sys
 import pandas as pd
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import backtest_core
-
 
 def _df():
-    return pd.DataFrame({
-        "hisse_kodu": ["AAA", "AAA"],
-        "tarih": [pd.to_datetime("07.03.2025", dayfirst=True), pd.to_datetime("10.03.2025", dayfirst=True)],
-        "open": [10, 12],
-        "close": [11, 13],
-    })
+    return pd.DataFrame(
+        {
+            "hisse_kodu": ["AAA", "AAA"],
+            "tarih": [
+                pd.to_datetime("07.03.2025", dayfirst=True),
+                pd.to_datetime("10.03.2025", dayfirst=True),
+            ],
+            "open": [10, 12],
+            "close": [11, 13],
+        }
+    )
 
 
 def test_sebep_kodu_passthrough_ok():

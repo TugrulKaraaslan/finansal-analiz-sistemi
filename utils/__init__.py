@@ -7,7 +7,6 @@
 
 import pandas as pd
 from logging_config import get_logger
-from utils.logging_setup import setup_logger
 from functools import lru_cache
 from io import StringIO
 
@@ -116,4 +115,3 @@ def purge_old_logs(dir_path: str = "raporlar", days: int = 7) -> None:
     for fp in glob.glob(f"{dir_path}/*.log"):
         if time.time() - os.path.getmtime(fp) > days * 24 * 3600:
             os.remove(fp)
-

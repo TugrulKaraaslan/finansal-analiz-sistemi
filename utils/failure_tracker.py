@@ -1,6 +1,8 @@
 from collections import defaultdict
 
-failures = defaultdict(list)  # {'indicators': [...], 'filters': [...], 'crossovers': []}
+failures = defaultdict(
+    list
+)  # {'indicators': [...], 'filters': [...], 'crossovers': []}
 
 
 def log_failure(category: str, item: str, reason: str):

@@ -35,7 +35,7 @@ def get_logger(name: str) -> logging.Logger:
 
     if not root.handlers:
         setup_logging()
-    
+
     logger = logging.getLogger(name)
 
     if not logger.handlers:
@@ -44,4 +44,3 @@ def get_logger(name: str) -> logging.Logger:
         logger.propagate = True
 
     return logger
-

@@ -6,7 +6,6 @@ from datetime import datetime
 from typing import Iterable
 
 from openpyxl.utils import get_column_letter
-import xlsxwriter
 from logging_config import get_logger
 
 import pandas as pd
@@ -179,9 +178,7 @@ def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
     if isinstance(kontrol_df, dict):
         hatalar = kontrol_df.get("hatalar", [])
         if hatalar:
-            pd.DataFrame(hatalar).to_excel(
-                writer, sheet_name="Hatalar", index=False
-            )
+            pd.DataFrame(hatalar).to_excel(writer, sheet_name="Hatalar", index=False)
         return
     if not isinstance(kontrol_df, pd.DataFrame) or kontrol_df.empty:
         return
@@ -312,10 +309,18 @@ def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     workbook = wr.book
     ws = wr.sheets["Sağlık Özeti"]
 
-    fmt_grey = workbook.add_format({"bold": True, "align": "center", "bg_color": "#D9D9D9"})
-    fmt_green = workbook.add_format({"bold": True, "align": "center", "bg_color": "#92D050"})
-    fmt_orange = workbook.add_format({"bold": True, "align": "center", "bg_color": "#FFC000"})
-    fmt_red = workbook.add_format({"bold": True, "align": "center", "bg_color": "#FF0000", "font_color": "white"})
+    fmt_grey = workbook.add_format(
+        {"bold": True, "align": "center", "bg_color": "#D9D9D9"}
+    )
+    fmt_green = workbook.add_format(
+        {"bold": True, "align": "center", "bg_color": "#92D050"}
+    )
+    fmt_orange = workbook.add_format(
+        {"bold": True, "align": "center", "bg_color": "#FFC000"}
+    )
+    fmt_red = workbook.add_format(
+        {"bold": True, "align": "center", "bg_color": "#FF0000", "font_color": "white"}
+    )
 
     ws.write("A1", "KPI", workbook.add_format({"bold": True}))
 
@@ -326,7 +331,11 @@ def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     ws.conditional_format("E2:E2", {"type": "no_blanks", "format": fmt_red})
     ws.conditional_format("F2:G2", {"type": "no_blanks", "format": fmt_green})
 
-    top5 = df_sum.sort_values("ort_getiri_%", ascending=False).dropna(subset=["ort_getiri_%"]).head(5)
+    top5 = (
+        df_sum.sort_values("ort_getiri_%", ascending=False)
+        .dropna(subset=["ort_getiri_%"])
+        .head(5)
+    )
     worst5 = df_sum.sort_values("ort_getiri_%").dropna(subset=["ort_getiri_%"]).head(5)
 
     if not top5.empty and not worst5.empty:
@@ -391,7 +400,9 @@ def _write_error_sheet(
                     }
                 )
             if base_records:
-                df_err = pd.concat([df_err, pd.DataFrame(base_records)], ignore_index=True)
+                df_err = pd.concat(
+                    [df_err, pd.DataFrame(base_records)], ignore_index=True
+                )
 
     if df_err.empty:
         return  # liste boşsa sheet oluşturma
@@ -427,9 +438,9 @@ def generate_full_report(
                 on="filtre_kodu",
                 how="left",
             )
-            summary_df["sebep_aciklama"] = summary_df["sebep_aciklama_fill"].combine_first(
-                summary_df["sebep_aciklama"]
-            )
+            summary_df["sebep_aciklama"] = summary_df[
+                "sebep_aciklama_fill"
+            ].combine_first(summary_df["sebep_aciklama"])
             summary_df.drop(columns="sebep_aciklama_fill", inplace=True)
             # Detay DataFrame de güncellendi (sadece sütun varsa)
             if "sebep_aciklama" in detail_df.columns:
@@ -438,9 +449,9 @@ def generate_full_report(
                     on="filtre_kodu",
                     how="left",
                 )
-                detail_df["sebep_aciklama"] = detail_df["sebep_aciklama_fill"].combine_first(
-                    detail_df.get("sebep_aciklama")
-                )
+                detail_df["sebep_aciklama"] = detail_df[
+                    "sebep_aciklama_fill"
+                ].combine_first(detail_df.get("sebep_aciklama"))
                 detail_df.drop(columns="sebep_aciklama_fill", inplace=True)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -483,9 +494,11 @@ def generate_full_report(
 
         # Query recursion hatalarını ayrı sayfaya dök
         from filter_engine import FAILED_FILTERS
+
         if FAILED_FILTERS:
             pd.DataFrame(FAILED_FILTERS).to_excel(wr, "query_errors", index=False)
         from utils.failure_tracker import get_failures
+
         for cat, rows in get_failures().items():
             if rows:
                 pd.DataFrame(rows).to_excel(wr, f"{cat}_failed", index=False)

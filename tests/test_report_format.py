@@ -1,40 +1,47 @@
-import os, sys, pandas as pd
+from report_generator import (
+    generate_full_report,
+    LEGACY_SUMMARY_COLS,
+    LEGACY_DETAIL_COLS,
+)
+import os
+import sys
+import pandas as pd
 
 # → Proje kökünü PYTHONPATH’e ekle (CI runner’da absolute path gerekir)
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-from report_generator import (
-    generate_full_report,
-    LEGACY_SUMMARY_COLS,
-    LEGACY_DETAIL_COLS,
-)
-
 
 def test_legacy_columns_preserved(tmp_path):
     path = tmp_path / "rapor.xlsx"
-    summary = pd.DataFrame({
-        "filtre_kodu": ["F1"],
-        "hisse_sayisi": [1],
-        "ort_getiri_%": [1.0],
-        "en_yuksek_%": [1.5],
-        "en_dusuk_%": [-0.5],
-        "islemli": [1],
-        "sebep_kodu": ["OK"],
-        "sebep_aciklama": [""],
-        "tarama_tarihi": ["01.01.2025"],
-        "satis_tarihi": ["02.01.2025"],
-    })
-    detail = pd.DataFrame({
-        "filtre_kodu": ["F1"],
-        "hisse_kodu": ["AAA"],
-        "getiri_%": [1.0],
-        "basari": ["BAŞARILI"],
-        "strateji": ["S1"],
-        "sebep_kodu": ["OK"],
-    })
-    errors = [{"filtre_kodu": "F2", "hata_tipi": "GENERIC", "detay": "x", "cozum_onerisi": ""}]
+    summary = pd.DataFrame(
+        {
+            "filtre_kodu": ["F1"],
+            "hisse_sayisi": [1],
+            "ort_getiri_%": [1.0],
+            "en_yuksek_%": [1.5],
+            "en_dusuk_%": [-0.5],
+            "islemli": [1],
+            "sebep_kodu": ["OK"],
+            "sebep_aciklama": [""],
+            "tarama_tarihi": ["01.01.2025"],
+            "satis_tarihi": ["02.01.2025"],
+        }
+    )
+    detail = pd.DataFrame(
+        {
+            "filtre_kodu": ["F1"],
+            "hisse_kodu": ["AAA"],
+            "getiri_%": [1.0],
+            "basari": ["BAŞARILI"],
+            "strateji": ["S1"],
+            "sebep_kodu": ["OK"],
+        }
+    )
+    errors = [
+        {"filtre_kodu": "F2", "hata_tipi": "GENERIC", "detay": "x", "cozum_onerisi": ""}
+    ]
     generate_full_report(
         summary,
         detail,
@@ -54,12 +61,14 @@ def test_legacy_columns_preserved(tmp_path):
 
 def test_error_sheet_not_empty(tmp_path):
     # sahte QUERY_ERROR satırı ekle
-    errs = [{
-        "filtre_kodu": "T999",
-        "hata_tipi": "QUERY_ERROR",
-        "detay": "demo",
-        "cozum_onerisi": "fix",
-    }]
+    errs = [
+        {
+            "filtre_kodu": "T999",
+            "hata_tipi": "QUERY_ERROR",
+            "detay": "demo",
+            "cozum_onerisi": "fix",
+        }
+    ]
     path = tmp_path / "r.xlsx"
     generate_full_report(
         pd.DataFrame(columns=LEGACY_SUMMARY_COLS),

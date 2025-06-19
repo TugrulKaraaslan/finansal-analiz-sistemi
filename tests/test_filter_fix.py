@@ -1,23 +1,24 @@
+import filter_engine
 import os
 import sys
 import pandas as pd
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import filter_engine
-
 
 def test_t17_t500_ok():
-    df = pd.DataFrame({
-        "hisse_kodu": ["AAA"],
-        "tarih": [pd.Timestamp("2025-03-07")],
-        "relative_volume": [1.4],
-        "change_1w_percent": [10.0],
-        "sma_10_keser_sma_50_yukari": [True],
-        "close": [15.0],
-        "bbm_20_2": [10.0],
-        "adx_14": [25.0],
-    })
+    df = pd.DataFrame(
+        {
+            "hisse_kodu": ["AAA"],
+            "tarih": [pd.Timestamp("2025-03-07")],
+            "relative_volume": [1.4],
+            "change_1w_percent": [10.0],
+            "sma_10_keser_sma_50_yukari": [True],
+            "close": [15.0],
+            "bbm_20_2": [10.0],
+            "adx_14": [25.0],
+        }
+    )
 
     filters = pd.DataFrame(
         {

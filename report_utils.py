@@ -100,7 +100,7 @@ def add_bar_chart(ws, data_idx: int, label_idx: int, title: str) -> BarChart:
     chart = BarChart()
     chart.title = title
 
-    max_row = min(11, ws.max_row)   # satır 2-11 = ilk 10 kayıt
+    max_row = min(11, ws.max_row)  # satır 2-11 = ilk 10 kayıt
     vals = Reference(ws, min_col=data_idx, min_row=2, max_row=max_row)
     labels = Reference(ws, min_col=label_idx, min_row=2, max_row=max_row)
     chart.add_data(vals, titles_from_data=False)

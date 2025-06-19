@@ -1,12 +1,11 @@
+import config
+import preprocessor
 import os
 import sys
 import pandas as pd
 
 # Ensure modules are importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-import preprocessor
-import config
 
 
 def test_temizle_sayisal_deger_thousand_comma():

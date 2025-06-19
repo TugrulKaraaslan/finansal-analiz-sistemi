@@ -5,15 +5,17 @@
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (Erken hata durdurma mantığı eklendi, loglama iyileştirildi)
 
+from utils.logging_setup import setup_logger
+from logging_config import get_logger
 import pandas as pd
 import sys
 import os
 import logging
 from pathlib import Path
 import argparse
+import traceback
 import config
 import utils
-import report_utils
 from utils.date_utils import parse_date
 
 
@@ -50,9 +52,6 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
         else:
             st.write("Grafik için veri yok")
 
-
-from logging_config import get_logger
-from utils.logging_setup import setup_logger
 
 logger = get_logger(__name__)
 log_counter = setup_logger()
@@ -147,6 +146,7 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
     logger.info(f"Excel raporu oluşturuldu: {out_path}")
 
+
 # Ana modülleri import et
 try:
     import data_loader
@@ -163,7 +163,6 @@ except ImportError as e_import_main:
         exc_info=True,
     )
     raise ImportError(e_import_main)
-
 
 
 def calistir_tum_sistemi(
@@ -190,7 +189,7 @@ def calistir_tum_sistemi(
     df_processed = on_isle(df_raw)
     df_indicator = indikator_hesapla(df_processed)
     tarama_dt = parse_date(tarama_tarihi_str)
-    satis_dt = parse_date(satis_tarihi_str)
+    parse_date(satis_tarihi_str)
     filtre_sonuclar, atlanmis = filtre_uygula(df_indicator, tarama_dt)
     rapor_df, detay_df = backtest_yap(
         df_indicator,
@@ -201,6 +200,7 @@ def calistir_tum_sistemi(
     raporla(rapor_df, detay_df)
     return rapor_df, detay_df, atlanmis
 
+
 if __name__ == "__main__":
     logger.info("=" * 80)
     logger.info(
@@ -208,8 +208,16 @@ if __name__ == "__main__":
     )
 
     parser = argparse.ArgumentParser(description="Finansal analiz ve backtest")
-    parser.add_argument("--tarama", default=config.TARAMA_TARIHI_DEFAULT, help="dd.mm.yyyy formatında tarama tarihi")
-    parser.add_argument("--satis", default=config.SATIS_TARIHI_DEFAULT, help="dd.mm.yyyy formatında satış tarihi")
+    parser.add_argument(
+        "--tarama",
+        default=config.TARAMA_TARIHI_DEFAULT,
+        help="dd.mm.yyyy formatında tarama tarihi",
+    )
+    parser.add_argument(
+        "--satis",
+        default=config.SATIS_TARIHI_DEFAULT,
+        help="dd.mm.yyyy formatında satış tarihi",
+    )
     parser.add_argument("--gui", action="store_true", help="Basit Streamlit arayüzü")
     parser.add_argument(
         "--force-excel-reload",
@@ -238,13 +246,12 @@ if __name__ == "__main__":
         detail_df = detay_df.copy()
         error_list = atlanmis.get("hatalar", [])
         if not error_list:
-            import logging
-            logging.warning(
-                "Uyarı: error_list boş—'Hatalar' sheet'i yazılmayacak!"
-            )
+            logging.warning("Uyarı: error_list boş—'Hatalar' sheet'i yazılmayacak!")
 
         if not rapor_df.empty:
-            out_path = Path("cikti/raporlar") / f"full_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
+            out_path = (
+                Path("cikti/raporlar") / f"full_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
+            )
             out_path.parent.mkdir(parents=True, exist_ok=True)
             rapor_path = report_generator.generate_full_report(
                 summary_df,
@@ -260,8 +267,7 @@ if __name__ == "__main__":
         if args.gui:
             _run_gui(rapor_df, detay_df)
 
-    except Exception as e_main_run:
-        import traceback, sys
+    except Exception:
         traceback.print_exc()
         sys.exit(1)
     finally:
@@ -273,9 +279,12 @@ if __name__ == "__main__":
             f"atlanan_filtre={','.join(atlanmis.keys()) if atlanmis else ''}"
         )
         logger.info(summary_line)
-        if log_counter.errors > 0 and 'rapor_path' in locals():
+        if log_counter.errors > 0 and "rapor_path" in locals():
             from report_generator import add_error_sheet
-            with pd.ExcelWriter(rapor_path, mode="a", if_sheet_exists="replace", engine="openpyxl") as wr:
+
+            with pd.ExcelWriter(
+                rapor_path, mode="a", if_sheet_exists="replace", engine="openpyxl"
+            ) as wr:
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
         utils.purge_old_logs("raporlar", days=7)

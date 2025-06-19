@@ -1,7 +1,9 @@
 import pandas as pd
 
 
-def fill_missing_business_day(df: pd.DataFrame, date_col: str = "tarih") -> pd.DataFrame:
+def fill_missing_business_day(
+    df: pd.DataFrame, date_col: str = "tarih"
+) -> pd.DataFrame:
     """Shift rows with NaT in ``date_col`` to the previous business day.
 
     Parameters

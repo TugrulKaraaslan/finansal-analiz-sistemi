@@ -1,13 +1,13 @@
-import os, sys
+import backtest_core
+import types
+import pandas as pd
+import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import pandas as pd
-import types
 
 sys.modules.setdefault("pandas_ta", types.SimpleNamespace(Strategy=lambda **kw: None))
-import backtest_core
-import config
 
 
 def test_bireysel_performanslar_contains_new_keys():
@@ -30,7 +30,9 @@ def test_bireysel_performanslar_contains_new_keys():
         filtre_sonuc, df, satis_tarihi_str="10.03.2025", tarama_tarihi_str="07.03.2025"
     )
     assert set(rapor_df.columns) == {"filtre_kodu", "ort_getiri_%", "sebep_kodu"}
-    assert {"filtre_kodu", "hisse_kodu", "getiri_yuzde", "basari"}.issubset(detay_df.columns)
+    assert {"filtre_kodu", "hisse_kodu", "getiri_yuzde", "basari"}.issubset(
+        detay_df.columns
+    )
     assert detay_df.iloc[0]["basari"] == "BAŞARILI"
 
 

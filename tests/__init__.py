@@ -1,4 +1,5 @@
-import warnings, pandas as pd, contextlib, io, pytest
+import warnings
+import pytest
 
 # pytest sırasında açık dosya uyarısını bastır
 warnings.filterwarnings(

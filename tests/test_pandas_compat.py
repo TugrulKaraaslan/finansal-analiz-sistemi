@@ -1,4 +1,4 @@
-import pandas as pd, pytest
+import pandas as pd
 from utils.pandas_compat import safe_to_excel, safe_concat
 
 

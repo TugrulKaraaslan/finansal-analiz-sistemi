@@ -50,7 +50,8 @@ def _temizle_sayisal_deger(deger):
         try:
             return float(temizlenmis_deger_standart)
         except ValueError:
-            # Eğer yukarıdaki başarısız olursa, orijinal temizlenmiş değeri (belki zaten standart 1.234,56 değil de 1234.56 formatındadır) dene
+            # Eğer yukarıdaki başarısız olursa, orijinal temizlenmiş değeri (belki
+            # zaten standart 1.234,56 değil de 1234.56 formatındadır) dene
             try:
                 return float(
                     temizlenmis_deger
@@ -100,10 +101,9 @@ def on_isle_hisse_verileri(
             "'tarih' sütunu henüz datetime formatında değil, dönüştürülüyor (preprocessor)..."
         )
         try:
-            # Olası farklı formatları dene (genellikle pd.to_datetime bunu otomatik yapar ama garanti olsun)
-            df["tarih"] = pd.to_datetime(
-                df["tarih"], errors="coerce", dayfirst=True
-            )
+            # Olası farklı formatları dene (genellikle pd.to_datetime bunu otomatik
+            # yapar ama garanti olsun)
+            df["tarih"] = pd.to_datetime(df["tarih"], errors="coerce", dayfirst=True)
             # errors='coerce' geçersiz tarihleri NaT (Not a Time) yapar.
             # dayfirst=True, dd.mm.yyyy formatını önceliklendirir.
             fn_logger.info(
@@ -136,7 +136,8 @@ def on_isle_hisse_verileri(
         return None
 
     # 2. OHLCV ve Volume Sütunlarını Sayısal Tipe Dönüştürme
-    # data_loader bu sütunları 'open', 'high', 'low', 'close', 'volume' olarak standartlaştırdı.
+    # data_loader bu sütunları 'open', 'high', 'low', 'close', 'volume' olarak
+    # standartlaştırdı.
     sayisal_hedef_sutunlar = ["open", "high", "low", "close", "volume"]
     if (
         "adj_close" in df.columns and "adj_close" not in sayisal_hedef_sutunlar
@@ -149,7 +150,8 @@ def on_isle_hisse_verileri(
 
     for col in sayisal_hedef_sutunlar:
         if col in df.columns:
-            # Eğer sütun object (string) tipindeyse veya kategorikse, sayısal yapmaya çalış
+            # Eğer sütun object (string) tipindeyse veya kategorikse, sayısal yapmaya
+            # çalış
             if df[col].dtype == "object" or pd.api.types.is_categorical_dtype(df[col]):
                 nan_before = df[col].isnull().sum()
                 original_type = df[col].dtype
@@ -172,9 +174,9 @@ def on_isle_hisse_verileri(
                 )  # Hataları NaT/NaN yapar
             # Eğer zaten sayısal bir tipse ve float değilse, float'a çevir
             elif df[col].dtype != float:
-                df[col] = df[col].astype(
-                    float, errors="ignore"
-                )  # errors='ignore' sorunlu dönüşümlerde orijinal değeri korur (nadiren olmalı)
+                # errors='ignore' sorunlu dönüşümlerde orijinal değeri korur (nadiren
+                # olmalı)
+                df[col] = df[col].astype(float, errors="ignore")
         else:
             # Bu uyarı data_loader'da daha detaylı verildi, burada tekrar etmeye gerek yok.
             # Sadece ana OHLCV için bir son kontrol yapılabilir.
@@ -249,7 +251,8 @@ def on_isle_hisse_verileri(
                 len(unique_years) > 0 and pd.notna(unique_years).all()
             ):  # Geçerli yıllar varsa
                 tr_holidays = holidays.Turkey(years=unique_years)
-                # Tarihleri karşılaştırmadan önce normalize et (sadece tarih kısmı, saat bilgisi olmadan)
+                # Tarihleri karşılaştırmadan önce normalize et (sadece tarih kısmı, saat
+                # bilgisi olmadan)
                 original_len = len(df)
                 df = df[~df["tarih"].dt.normalize().isin(tr_holidays)]
                 rows_dropped_for_holidays = original_len - len(df)

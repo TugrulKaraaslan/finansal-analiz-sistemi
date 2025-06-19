@@ -1,11 +1,14 @@
 import pandas as pd
+
 try:
     from .filter_engine import _apply_single_filter
 except ImportError:  # pragma: no cover - fallback when run as script
     from filter_engine import _apply_single_filter
 
 
-def tarama_denetimi(df_filtreler: pd.DataFrame, df_indikator: pd.DataFrame) -> pd.DataFrame:
+def tarama_denetimi(
+    df_filtreler: pd.DataFrame, df_indikator: pd.DataFrame
+) -> pd.DataFrame:
     """Her filtre satırını çalıştırıp _apply_single_filter'in info sözlüğünü
     toplar.
 
