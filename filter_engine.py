@@ -10,6 +10,8 @@ import pandas as pd
 import keyword
 from pandas.errors import UndefinedVariableError as QueryError
 import logging
+import yaml
+import os
 
 
 class MissingColumnError(Exception):
@@ -34,6 +36,15 @@ def _extract_columns_from_query(query: str) -> set:
 
 setup_logger()
 logger = get_logger(__name__)
+
+# Konfigürasyon dosyasından minimum hisse eşiğini oku
+_cfg_path = os.path.join(os.path.dirname(__file__), "config.yml")
+if os.path.exists(_cfg_path):
+    with open(_cfg_path) as f:
+        _cfg = yaml.safe_load(f) or {}
+else:
+    _cfg = {}
+MIN_STOCKS_PER_FILTER = _cfg.get("min_stocks_per_filter", 1)
 
 _missing_re = re.compile(r"Eksik sütunlar?:\s*(?P<col>[A-Za-z0-9_]+)")
 _undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)'")
@@ -120,6 +131,17 @@ def _apply_single_filter(df, kod, query):
 
     try:
         seç = df.query(query)
+        # --- 0 hisse skip mekaniği ---
+        if len(seç) < MIN_STOCKS_PER_FILTER:
+            logger.info(
+                "Filter %s skipped (len=%s < %s)",
+                kod,
+                len(seç),
+                MIN_STOCKS_PER_FILTER,
+            )
+            info.update(durum="BOS", sebep="SIFIR_HISSE")
+            return pd.DataFrame(), info
+
         info["secim_adedi"] = len(seç)
         if len(seç):
             info.update(durum="OK", sebep="HISSE_BULUNDU")

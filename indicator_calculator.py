@@ -976,6 +976,11 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
         )
         return None
 
+    # NaN ön temizlik: OHLCV kolonlarındaki boşlukları 3 satıra kadar ileri taşı
+    ind_cols = [c for c in ["open", "high", "low", "close", "volume"] if c in df_islenmis_veri.columns]
+    if ind_cols:
+        df_islenmis_veri[ind_cols] = df_islenmis_veri[ind_cols].ffill(limit=3)
+
     _ekle_psar(df_islenmis_veri)
 
     series_series_crossovers = config.SERIES_SERIES_CROSSOVERS
