@@ -305,13 +305,14 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
         logger_param = logger
     local_logger = logger_param
     col = f"{kind}_{n}"
-    if col in df.columns or "close" not in df.columns:
+    if col in df.columns and df[col].notna().all() or "close" not in df.columns:
         return
     try:
         if kind == "sma":
             df[col] = df["close"].rolling(window=n, min_periods=1).mean()
         else:
             df[col] = df["close"].ewm(span=n, adjust=False, min_periods=1).mean()
+        df[col].fillna(method="bfill", inplace=True)
         local_logger.debug(f"'{col}' sütunu safe_ma ile eklendi.")
     except Exception as e:
         local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)
