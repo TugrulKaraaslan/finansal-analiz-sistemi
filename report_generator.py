@@ -526,6 +526,13 @@ def generate_full_report(
 
         if quick:
             _write_health_sheet(wr, summary_df)
+
+    # Trace
+    logger.debug(
+        "[TRACE] writer closed → exists=%s size=%s",
+        out_path.exists(),
+        out_path.stat().st_size if out_path.exists() else 0,
+    )
     # run-spesifik log handler
     run_log = out_path.with_suffix(".log")
     fh = logging.FileHandler(run_log, encoding="utf-8")
