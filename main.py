@@ -171,6 +171,7 @@ def calistir_tum_sistemi(
     satis_tarihi_str: str,
     force_excel_reload_param: bool = False,
     logger_param=None,
+    output_path: str | Path | None = None,
 ):
     """Run all analysis steps sequentially.
 
@@ -198,7 +199,16 @@ def calistir_tum_sistemi(
         tarama_tarihi_str,
         satis_tarihi_str,
     )
-    raporla(rapor_df, detay_df)
+
+    if output_path:
+        from report_generator import generate_full_report
+
+        output_path = Path(output_path)
+        generate_full_report(rapor_df.copy(), detay_df.copy(), [], output_path)
+        if logger_param:
+            logger_param.info("Saved report to %s", output_path)
+    else:
+        raporla(rapor_df, detay_df)
     return rapor_df, detay_df, atlanmis
 
 
@@ -279,6 +289,7 @@ if __name__ == "__main__":
             satis_tarihi_str=satis_t,
             force_excel_reload_param=args.force_excel_reload,
             logger_param=logger,
+            output_path=args.output,
         )
 
         summary_df = rapor_df.copy()
