@@ -1,6 +1,7 @@
 import log_to_health
 import openpyxl
 import pandas as pd
+from utils.pandas_safe import safe_to_excel
 import os
 import sys
 
@@ -44,9 +45,9 @@ def test_basic_not_empty(tmp_path):
 
     excel_path = tmp_path / "source.xlsx"
     with pd.ExcelWriter(excel_path) as w:
-        summary.to_excel(w, sheet_name="Özet", index=False)
-        detail.to_excel(w, sheet_name="Detay", index=False)
-        istat.to_excel(w, sheet_name="İstatistik", index=False)
+        safe_to_excel(summary, w, sheet_name="Özet", index=False)
+        safe_to_excel(detail, w, sheet_name="Detay", index=False)
+        safe_to_excel(istat, w, sheet_name="İstatistik", index=False)
 
     out_path = log_to_health.generate(str(log_file), [str(excel_path)])
 

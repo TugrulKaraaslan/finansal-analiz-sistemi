@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from utils.pandas_compat import safe_concat, safe_to_excel
+from utils.pandas_safe import safe_concat, safe_to_excel
 
 import os
 import logging
@@ -71,10 +71,12 @@ def generate_summary(results: list[dict]) -> pd.DataFrame:
 
 def add_error_sheet(writer, error_list: Iterable[tuple]):
     if error_list:
-        pd.DataFrame(
-            error_list,
-            columns=["timestamp", "level", "message"],
-        ).to_excel(writer, sheet_name="Hatalar", index=False)
+        safe_to_excel(
+            pd.DataFrame(error_list, columns=["timestamp", "level", "message"]),
+            writer,
+            sheet_name="Hatalar",
+            index=False,
+        )
 
 
 def olustur_ozet_rapor(
@@ -183,7 +185,12 @@ def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
     if isinstance(kontrol_df, dict):
         hatalar = kontrol_df.get("hatalar", [])
         if hatalar:
-            pd.DataFrame(hatalar).to_excel(writer, sheet_name="Hatalar", index=False)
+            safe_to_excel(
+                pd.DataFrame(hatalar),
+                writer,
+                sheet_name="Hatalar",
+                index=False,
+            )
         return
     if not isinstance(kontrol_df, pd.DataFrame) or kontrol_df.empty:
         return
@@ -200,7 +207,7 @@ def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
     ]
     sorunlu = sorunlu[cols]
     sheet_name = "Hatalar"
-    sorunlu.to_excel(writer, sheet_name=sheet_name, index=False)
+    safe_to_excel(sorunlu, writer, sheet_name=sheet_name, index=False)
     ws = writer.sheets[sheet_name]
     if hasattr(ws, "set_column"):
         for i, col in enumerate(sorunlu.columns):
@@ -240,9 +247,9 @@ def kaydet_uc_sekmeli_excel(
     fname = Path(fname)
     fname.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(fname, engine="xlsxwriter", mode="w") as w:
-        ozet_df.to_excel(w, sheet_name="Özet", index=False)
-        detay_df.to_excel(w, sheet_name="Detay", index=False)
-        istatistik_df.to_excel(w, sheet_name="İstatistik", index=False)
+        safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
+        safe_to_excel(detay_df, w, sheet_name="Detay", index=False)
+        safe_to_excel(istatistik_df, w, sheet_name="İstatistik", index=False)
     # run-spesifik log handler
     run_log = fname.with_suffix(".log")
     fh = logging.FileHandler(run_log, encoding="utf-8")
@@ -271,9 +278,9 @@ def kaydet_raporlar(
         mode="a",
         if_sheet_exists="replace",
     ) as w:
-        ozet_df.to_excel(w, sheet_name="Özet", index=False)
-        detay_df.to_excel(w, sheet_name="Detay", index=False)
-        istat_df.to_excel(w, sheet_name="İstatistik", index=False)
+        safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
+        safe_to_excel(detay_df, w, sheet_name="Detay", index=False)
+        safe_to_excel(istat_df, w, sheet_name="İstatistik", index=False)
     logger.info("Rapor kaydedildi → %s", filepath)
     return filepath
 
@@ -297,7 +304,7 @@ def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
             "genel_ortalama_%": gen_avg,
         }
     ]
-    pd.DataFrame(stats).to_excel(wr, sheet_name="İstatistik", index=False)
+    safe_to_excel(pd.DataFrame(stats), wr, sheet_name="İstatistik", index=False)
 
 
 def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
@@ -322,7 +329,7 @@ def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
         ]
     )
 
-    kpi_df.to_excel(wr, sheet_name="Sağlık Özeti", index=False, startrow=1)
+    safe_to_excel(kpi_df, wr, sheet_name="Sağlık Özeti", index=False, startrow=1)
 
     workbook = wr.book
     ws = wr.sheets["Sağlık Özeti"]
@@ -425,7 +432,7 @@ def _write_error_sheet(
     if df_err.empty:
         return  # liste boşsa sheet oluşturma
 
-    df_err.to_excel(wr, sheet_name="Hatalar", index=False)
+    safe_to_excel(df_err, wr, sheet_name="Hatalar", index=False)
 
 
 def generate_full_report(

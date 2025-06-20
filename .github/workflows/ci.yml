@@ -21,7 +21,7 @@ jobs:
           pip install -e .
 
       - name: Install dev dependencies
-        run: pip install -r requirements-dev.txt
+        run: pip install -r requirements-dev.txt && pip install "pandas==${{ matrix.pandas-version }}"
 
       - name: Lint & Tests via pre-commit
         run: |
