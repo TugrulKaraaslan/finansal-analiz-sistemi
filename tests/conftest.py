@@ -1,6 +1,12 @@
 import pandas as pd
 import pytest
 
+try:
+    pd.set_option("future.no_silent_downcasting", True)
+except (AttributeError, KeyError, pd.errors.OptionError):
+    # Pandas <2.2'de bu seçenek yok; sessizce atla.
+    pass
+
 
 @pytest.fixture
 def sample_filtreler():
