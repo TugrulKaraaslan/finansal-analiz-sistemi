@@ -515,7 +515,7 @@ def generate_full_report(
         if quick:
             _write_health_sheet(wr, summary_df)
     logger.info("Rapor kaydedildi → %s", out_path)
-    return str(out_path)
+    return out_path
 
 
 __all__ = [

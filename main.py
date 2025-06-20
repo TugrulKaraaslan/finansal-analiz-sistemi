@@ -257,25 +257,13 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--output",
-        default=None,
-        help=(
-            "Excel output .xlsx path (varsayılan: "
-            "raporlar/rapor_<tarama>_<satis>.xlsx)"
-        ),
+        required=True,
+        help="Excel .xlsx son dosya yolu",
     )
     args = parser.parse_args()
 
-    if args.output is None:
-        out_dir = Path.cwd() / "raporlar"
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_name = (
-            f"rapor_{args.tarama.replace('.', '')}_"
-            f"{args.satis.replace('.', '')}.xlsx"
-        )
-        out_file = out_dir / out_name
-    else:
-        out_file = Path(args.output)
-        out_file.parent.mkdir(parents=True, exist_ok=True)
+    out_file = Path(args.output)
+    out_file.parent.mkdir(parents=True, exist_ok=True)
 
     tarama_t = args.tarama
     satis_t = args.satis
