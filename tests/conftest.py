@@ -1,11 +1,9 @@
 import pandas as pd
 import pytest
 
-try:
-    pd.set_option("future.no_silent_downcasting", True)
-except (AttributeError, KeyError, pd.errors.OptionError):
-    # Pandas <2.2'de bu seçenek yok; sessizce atla.
-    pass
+from utils.pandas_option_safe import ensure_option
+
+ensure_option("future.no_silent_downcasting", True)
 
 
 @pytest.fixture
