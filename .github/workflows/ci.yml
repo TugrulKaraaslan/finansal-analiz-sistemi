@@ -6,7 +6,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pandas_version: ["1.5.*", "2.*"]
+        include:
+          - pandas_version: "1.5.*"
+            numpy_version: "1.26.*"
+          - pandas_version: "2.*"
+            numpy_version: "2.*"
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +28,9 @@ jobs:
           pip install -e .
 
       - name: Install dev dependencies
-        run: pip install -r requirements-dev.txt && pip install pandas==${{ matrix.pandas_version }}
+        run: pip install -r requirements-dev.txt && \
+            pip install pandas==${{ matrix.pandas_version }} \
+                        numpy==${{ matrix.numpy_version }}
 
       - name: Lint & Tests via pre-commit
         run: |
