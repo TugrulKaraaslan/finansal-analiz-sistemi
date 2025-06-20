@@ -14,7 +14,7 @@ import pandas as pd
 import numpy as np
 import report_stats
 
-fn_logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 LEGACY_SUMMARY_COLS = [
     "filtre_kodu",
@@ -79,7 +79,7 @@ def olustur_ozet_rapor(
     logger=None,
 ) -> str | None:
     if logger is None:
-        logger = fn_logger
+        logger = logger
     os.makedirs(cikti_klasoru, exist_ok=True)
     kayitlar = []
     for sonuc in sonuclar_listesi:
@@ -131,7 +131,7 @@ def olustur_hisse_bazli_rapor(
     logger=None,
 ) -> str | None:
     if logger is None:
-        logger = fn_logger
+        logger = logger
     os.makedirs(cikti_klasoru, exist_ok=True)
     detayli_kayitlar = []
     for sonuc in sonuclar_listesi:
@@ -211,12 +211,12 @@ def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
 def olustur_excel_raporu(
     kayitlar: list[dict],
     fname: str | Path,
-    logger=None,
-) -> str | None:
-    if logger is None:
-        logger = fn_logger
+    logger_param=None,
+) -> Path | None:
+    if logger_param is None:
+        logger_param = logger
     if not kayitlar:
-        logger.warning("Hiç kayıt yok – Excel raporu atlandı.")
+        logger_param.warning("Hiç kayıt yok – Excel raporu atlandı.")
         return None
     rapor_df = pd.DataFrame(kayitlar).sort_values("filtre_kodu")
     return kaydet_uc_sekmeli_excel(
@@ -232,13 +232,15 @@ def kaydet_uc_sekmeli_excel(
     ozet_df: pd.DataFrame,
     detay_df: pd.DataFrame,
     istatistik_df: pd.DataFrame,
-) -> str:
-    os.makedirs(os.path.dirname(str(fname)) or ".", exist_ok=True)
+) -> Path:
+    fname = Path(fname)
+    fname.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(fname, engine="xlsxwriter", mode="w") as w:
         ozet_df.to_excel(w, sheet_name="Özet", index=False)
         detay_df.to_excel(w, sheet_name="Detay", index=False)
         istatistik_df.to_excel(w, sheet_name="İstatistik", index=False)
-    return str(fname)
+    logger.info("Saved report to %s", fname)
+    return fname
 
 
 def kaydet_raporlar(
@@ -257,7 +259,7 @@ def kaydet_raporlar(
         ozet_df.to_excel(w, sheet_name="Özet", index=False)
         detay_df.to_excel(w, sheet_name="Detay", index=False)
         istat_df.to_excel(w, sheet_name="İstatistik", index=False)
-    fn_logger.info("Rapor kaydedildi → %s", filepath)
+    logger.info("Rapor kaydedildi → %s", filepath)
     return filepath
 
 
@@ -512,7 +514,7 @@ def generate_full_report(
 
         if quick:
             _write_health_sheet(wr, summary_df)
-    fn_logger.info("Rapor kaydedildi → %s", out_path)
+    logger.info("Rapor kaydedildi → %s", out_path)
     return str(out_path)
 
 
