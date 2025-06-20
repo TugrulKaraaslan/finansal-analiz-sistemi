@@ -35,6 +35,13 @@ def normalize_pct(series):
     return np.where(s.abs() > 100, s / 100.0, s).round(2)
 
 
+def _normalize_pct(s: pd.Series) -> pd.Series:
+    """Scale whole-number percentages to fractional form if needed."""
+    mask = s.abs() > 1.5
+    s.loc[mask] = s.loc[mask] / 100
+    return s
+
+
 def build_ozet_df(
     summary_df: pd.DataFrame,
     detail_df: pd.DataFrame,
@@ -155,6 +162,8 @@ def build_detay_df(
     merged["strateji"] = strateji
     if "getiri_yuzde" in merged.columns:
         merged.rename(columns={"getiri_yuzde": "getiri_%"}, inplace=True)
+    if "getiri_%" in merged.columns:
+        merged["getiri_%"] = _normalize_pct(merged["getiri_%"]).round(2)
     return merged[
         [
             "filtre_kodu",
