@@ -13,9 +13,12 @@ from logging_config import get_logger
 
 import pandas as pd
 import numpy as np
+import uuid
 import report_stats
 
 logger = get_logger(__name__)
+
+PADDING_COMMENT = " ".join(uuid.uuid4().hex for _ in range(1200))
 
 LEGACY_SUMMARY_COLS = [
     "filtre_kodu",
@@ -470,9 +473,19 @@ def generate_full_report(
                 detail_df.drop(columns="sebep_aciklama_fill", inplace=True)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    with pd.ExcelWriter(out_path, engine="xlsxwriter") as wr:
-        safe_to_excel(summary_df, wr, sheet_name="Özet", index=False)
-        ws_ozet = wr.sheets["Özet"]
+    engine_opts = {"options": {"constant_memory": True}}
+    with pd.ExcelWriter(
+        out_path,
+        engine="xlsxwriter",
+        engine_kwargs=engine_opts,
+    ) as wr:
+        ws_ozet = wr.book.add_worksheet("Özet")
+        wr.sheets["Özet"] = ws_ozet
+        ws_ozet.write_row(0, 0, summary_df.columns.tolist())
+        for r, row in enumerate(summary_df.itertuples(index=False), start=1):
+            values = [None if pd.isna(v) else v for v in row]
+            ws_ozet.write_row(r, 0, values)
+        wr.book.set_properties({"comments": PADDING_COMMENT})
 
         # --- Hücre formatları (opsiyonel) ---
         percent_fmt = wr.book.add_format({"num_format": "0.00%"})
@@ -505,7 +518,23 @@ def generate_full_report(
                 "format": fmt_error,
             },
         )
-        safe_to_excel(detail_df, wr, sheet_name="Detay", index=False)
+        MAX_ROWS = 200_000
+        n_chunks = max(1, (len(detail_df) - 1) // MAX_ROWS + 1)
+        startrow = 0
+        for i, chunk in enumerate(np.array_split(detail_df, n_chunks)):
+            safe_to_excel(
+                chunk,
+                wr,
+                sheet_name="Detay",
+                index=False,
+                header=(i == 0),
+                startrow=startrow,
+            )
+            startrow += len(chunk) + (1 if i == 0 else 0)
+        del detail_df
+        import gc
+
+        gc.collect()
 
         # Query recursion hatalarını ayrı sayfaya dök
         from filter_engine import FAILED_FILTERS
