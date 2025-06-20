@@ -255,7 +255,27 @@ if __name__ == "__main__":
         action="store_true",
         help="Parquet yerine Excel/CSV dosyalarını yeniden yükle",
     )
+    parser.add_argument(
+        "--output",
+        default=None,
+        help=(
+            "Excel output .xlsx path (varsayılan: "
+            "raporlar/rapor_<tarama>_<satis>.xlsx)"
+        ),
+    )
     args = parser.parse_args()
+
+    if args.output is None:
+        out_dir = Path.cwd() / "raporlar"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_name = (
+            f"rapor_{args.tarama.replace('.', '')}_"
+            f"{args.satis.replace('.', '')}.xlsx"
+        )
+        out_file = out_dir / out_name
+    else:
+        out_file = Path(args.output)
+        out_file.parent.mkdir(parents=True, exist_ok=True)
 
     tarama_t = args.tarama
     satis_t = args.satis
@@ -279,21 +299,14 @@ if __name__ == "__main__":
         if not error_list:
             logging.warning("Uyarı: error_list boş—'Hatalar' sheet'i yazılmayacak!")
 
-        if not rapor_df.empty:
-            out_path = (
-                Path("cikti/raporlar") / f"full_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
-            )
-            out_path.parent.mkdir(parents=True, exist_ok=True)
-            rapor_path = report_generator.generate_full_report(
-                summary_df,
-                detail_df,
-                error_list,
-                out_path,
-                keep_legacy=True,
-            )
-            print(f"Rapor oluşturuldu → {rapor_path}")
-        else:
-            logger.info("Rapor verisi boş, Excel oluşturulmadı.")
+        rapor_path = report_generator.generate_full_report(
+            summary_df,
+            detail_df,
+            error_list,
+            out_file,
+            keep_legacy=True,
+        )
+        print(f"Rapor oluşturuldu → {rapor_path}")
 
         if args.gui:
             _run_gui(rapor_df, detay_df)
