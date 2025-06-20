@@ -1,10 +1,15 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 24.4.2
-    hooks: [{id: black}]
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
+    rev: 23.12.1
+    hooks:
+      - id: black
+        args: ["--check"]
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.1.0
     hooks:
       - id: flake8
-        additional_dependencies: ["flake8-bugbear"]
-        args: [--extend-ignore=E203,W503]
+  - repo: https://github.com/pytest-dev/pytest
+    rev: 7.4.4
+    hooks:
+      - id: pytest
+        additional_dependencies: ["pytest-cov"]
