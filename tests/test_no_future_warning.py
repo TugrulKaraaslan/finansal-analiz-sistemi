@@ -1,6 +1,6 @@
 import pandas as pd
 import warnings
-from utils.pandas_safe import safe_concat, safe_to_excel
+from utils.compat import safe_concat, safe_to_excel
 
 
 def test_no_future_warning(tmp_path):

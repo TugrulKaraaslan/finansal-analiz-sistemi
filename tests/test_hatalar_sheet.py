@@ -3,7 +3,7 @@ import os
 import sys
 import pandas as pd
 import openpyxl
-from utils.pandas_safe import safe_to_excel
+from utils.compat import safe_to_excel
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

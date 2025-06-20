@@ -1,5 +1,5 @@
 import pandas as pd
-from utils.pandas_safe import safe_infer_objects
+from utils.compat import safe_infer_objects
 
 
 def test_safe_infer_objects_copy_flag():

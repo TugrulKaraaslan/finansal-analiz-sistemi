@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from utils.pandas_safe import safe_concat, safe_to_excel
+from utils.compat import safe_concat, safe_to_excel
 
 import os
 import logging

@@ -2,6 +2,13 @@
 [![CI](https://github.com/owner/finansal-analiz-sistemi/actions/workflows/ci.yml/badge.svg)](https://github.com/owner/finansal-analiz-sistemi/actions/workflows/ci.yml)
 ChatGPT ile geliştirilen backtest otomasyon projesi
 
+## Destek Matrisi
+
+| Tier | Pandas | NumPy |
+|------|--------|-------|
+| 🟢 LTS | 2.2.2 | 2.0.2 |
+| 🟡 Legacy | 1.5.3 | 1.26.4 |
+
 ## Geliştirme Ortamı Kurulumu
 
 1. Python 3.11+ yüklü olduğundan emin olun.

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from utils.pandas_compat import safe_concat
+from utils.compat import safe_concat
 
 import os
 from datetime import datetime

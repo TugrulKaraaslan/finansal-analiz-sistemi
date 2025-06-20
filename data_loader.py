@@ -1,4 +1,4 @@
-from utils.pandas_compat import safe_concat
+from utils.compat import safe_concat
 
 # data_loader.py
 # -*- coding: utf-8 -*-

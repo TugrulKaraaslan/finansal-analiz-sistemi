@@ -4,13 +4,16 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.tier == 'legacy' }}
     strategy:
       matrix:
         include:
-          - pandas_version: "1.5.*"
-            numpy_version: "1.26.*"
-          - pandas_version: "2.*"
-            numpy_version: "2.*"
+          - pandas_version: "2.2.2"
+            numpy_version: "2.0.2"
+            tier: lts
+          - pandas_version: "1.5.3"
+            numpy_version: "1.26.4"
+            tier: legacy
     steps:
       - uses: actions/checkout@v4
 
@@ -64,7 +67,7 @@ jobs:
       - name: Upload reports
         uses: actions/upload-artifact@v4
         with:
-          name: reports
+          name: "reports-${{ matrix.pandas_version }}"
           path: '*.xlsx'
 
   docker:

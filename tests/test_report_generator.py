@@ -1,7 +1,7 @@
 import report_generator
 import openpyxl
 import pandas as pd
-from utils.pandas_safe import safe_to_excel
+from utils.compat import safe_to_excel
 import os
 import sys
 
