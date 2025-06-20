@@ -1,5 +1,5 @@
 import pandas as pd
-from contextlib import contextmanager, nullcontext
+from contextlib import contextmanager
 
 
 def ensure_option(name: str, value) -> None:

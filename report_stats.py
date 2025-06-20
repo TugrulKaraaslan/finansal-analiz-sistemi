@@ -130,8 +130,10 @@ def build_ozet_df(
             "satis_tarihi",
         ]
     ]
+    from utils.pandas_safe import safe_infer_objects
+
     with option_context("future.no_silent_downcasting", True):
-        subset = subset.fillna({"hisse_sayisi": 0}).infer_objects(copy=False)
+        subset = safe_infer_objects(subset.fillna({"hisse_sayisi": 0}), copy=False)
     return subset
 
 
