@@ -3,6 +3,7 @@ from __future__ import annotations
 from utils.pandas_compat import safe_concat, safe_to_excel
 
 import os
+import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Iterable
@@ -239,7 +240,18 @@ def kaydet_uc_sekmeli_excel(
         ozet_df.to_excel(w, sheet_name="Özet", index=False)
         detay_df.to_excel(w, sheet_name="Detay", index=False)
         istatistik_df.to_excel(w, sheet_name="İstatistik", index=False)
+    # run-spesifik log handler
+    run_log = fname.with_suffix(".log")
+    fh = logging.FileHandler(run_log, encoding="utf-8")
+    fh.setFormatter(
+        logging.Formatter(
+            "%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S"
+        )
+    )
+    logging.getLogger().addHandler(fh)
+
     logger.info("Saved report to %s", fname)
+    logger.info("Per-run log file: %s", run_log)
     return fname
 
 
@@ -514,7 +526,18 @@ def generate_full_report(
 
         if quick:
             _write_health_sheet(wr, summary_df)
+    # run-spesifik log handler
+    run_log = out_path.with_suffix(".log")
+    fh = logging.FileHandler(run_log, encoding="utf-8")
+    fh.setFormatter(
+        logging.Formatter(
+            "%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S"
+        )
+    )
+    logging.getLogger().addHandler(fh)
+
     logger.info("Rapor kaydedildi → %s", out_path)
+    logger.info("Per-run log file: %s", run_log)
     return out_path
 
 
