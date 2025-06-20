@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pandas_version: ["1.5.*", "3.*"]
+        pandas_version: ["1.5.*", "2.*"]
     steps:
       - uses: actions/checkout@v4
 
