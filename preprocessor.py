@@ -188,6 +188,32 @@ def on_isle_hisse_verileri(
         "OHLCV ve volume sütunları sayısal tipe dönüştürüldü/kontrol edildi."
     )
 
+    # Otomatik türetilen kolonlar
+    if {
+        "volume",
+        "close",
+    } <= set(df.columns) and "volume_tl" not in df.columns:
+        df["volume_tl"] = df["volume"] * df["close"]
+        fn_logger.debug("'volume_tl' sütunu otomatik eklendi.")
+    if {
+        "psar_long",
+        "psar_short",
+    } <= set(df.columns) and "psar" not in df.columns:
+        df["psar"] = df["psar_long"].fillna(df["psar_short"])
+        fn_logger.debug("'psar' sütunu otomatik eklendi.")
+    if {
+        "volume",
+        "close",
+    } <= set(df.columns) and "volume_price" not in df.columns:
+        df["volume_price"] = df["volume"] * df["close"]
+        fn_logger.debug("'volume_price' sütunu otomatik eklendi.")
+    if {
+        "open",
+        "close",
+    } <= set(df.columns) and "change_from_open_percent" not in df.columns:
+        df["change_from_open_percent"] = (df["close"] - df["open"]) / df["open"] * 100
+        fn_logger.debug("'change_from_open_percent' sütunu otomatik eklendi.")
+
     # 3. Kritik OHLC Sütunlarında NaN Varsa Satırları Çıkar
     kritik_ohlc_sutunlar = [
         "open",

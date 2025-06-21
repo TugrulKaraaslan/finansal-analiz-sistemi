@@ -84,3 +84,4 @@ Backtest tamamlandığında son log dosyası ve üretilen rapor kullanılarak ek
 - Satış tarihi veri yoksa tarih kaydırma.
 - Excel BarChart + boyut küçültme.
 - CI: 'pip install .[dev]' → 'pip install -r requirements.txt' olarak düzeltildi.
+- Filtre derinliği `max_filter_depth` ayarıyla yönetilir (varsayılan 7).

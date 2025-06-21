@@ -1,14 +1,23 @@
 from collections import defaultdict
-
-failures = defaultdict(
-    list
-)  # {'indicators': [...], 'filters': [...], 'crossovers': []}
+from dataclasses import dataclass, asdict
 
 
-def log_failure(category: str, item: str, reason: str):
+@dataclass
+class FailedFilter:
+    item: str
+    reason: str
+    hint: str = ""
+
+
+failures = defaultdict(list)  # {'indicators': [...], 'filters': [...], ...}
+
+
+def log_failure(category: str, item: str, reason: str, hint: str = "") -> None:
     """Log a failure under given category."""
-    failures[category].append({"item": item, "reason": reason})
+    failures[category].append(FailedFilter(item, reason, hint))
 
 
-def get_failures():
+def get_failures(as_dict: bool = False):
+    if as_dict:
+        return {c: [asdict(r) for r in rows] for c, rows in failures.items()}
     return failures
