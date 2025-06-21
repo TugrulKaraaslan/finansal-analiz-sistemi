@@ -1,0 +1,20 @@
+import pytest
+import pandas as pd
+import settings
+import filter_engine as fe
+
+
+def _nested(depth: int):
+    expr = "x>0"
+    for i in range(depth, 0, -1):
+        expr = {"code": f"F{i}", "sub_expr": expr}
+    return expr
+
+
+def test_max_depth_guard(monkeypatch):
+    df = pd.DataFrame({"x": [1]})
+    monkeypatch.setattr(settings, "MAX_FILTER_DEPTH", 5)
+    with pytest.raises(fe.QueryError):
+        fe.safe_eval(_nested(6), df)
+    monkeypatch.setattr(settings, "MAX_FILTER_DEPTH", 7)
+    fe.safe_eval(_nested(6), df)
