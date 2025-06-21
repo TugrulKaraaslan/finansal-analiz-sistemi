@@ -1,4 +1,4 @@
-# main.py
+# run.py
 # -*- coding: utf-8 -*-
 # Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
 # Ana Çalıştırma Script'i
@@ -156,7 +156,7 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
 
 # Ana modülleri import et
 try:
-    import data_loader
+    from finansal_analiz_sistemi import data_loader
     import preprocessor
     import indicator_calculator
     import filter_engine

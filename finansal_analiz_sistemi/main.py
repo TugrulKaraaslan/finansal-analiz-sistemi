@@ -1,6 +1,6 @@
 import runpy
 
 if __name__ == "__main__":
-    runpy.run_module("main", run_name="__main__")
+    runpy.run_module("run", run_name="__main__")
 else:
-    from main import *
+    from run import *  # noqa: F401,F403

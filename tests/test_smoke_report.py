@@ -1,6 +1,6 @@
 import openpyxl, tempfile
 from pathlib import Path
-from main import run_pipeline
+from run import run_pipeline
 
 
 def test_smoke_report(tmp_path):

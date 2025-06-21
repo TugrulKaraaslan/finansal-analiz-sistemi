@@ -67,7 +67,7 @@ pytest -q -m "not slow" --cov .
 %cd finansal-analiz-sistemi
 !pip install -r requirements.txt
 !pytest -q
-!python main.py
+!python -m finansal_analiz_sistemi
 ```
 
 ## Rapor oluşturma (hızlı yöntem)
@@ -88,11 +88,11 @@ docker run --rm finansal_analiz
 
 ## Komut Satırı Kullanımı
 
-Temel script `main.py` aşağıdaki parametreleri kabul eder:
+Komut satırından çalıştırmak için `python -m finansal_analiz_sistemi` komutu kullanılır. Aşağıdaki parametreleri kabul eder:
 
 ```bash
-python main.py --tarama 01.01.2025 --satis 05.01.2025 [--gui]
-python main.py --tarama 2025-03-07 --satis 2025-03-10
+python -m finansal_analiz_sistemi --tarama 01.01.2025 --satis 05.01.2025 [--gui]
+python -m finansal_analiz_sistemi --tarama 2025-03-07 --satis 2025-03-10
 ```
 (GG.AA.YYYY biçimi de desteklenir)
 

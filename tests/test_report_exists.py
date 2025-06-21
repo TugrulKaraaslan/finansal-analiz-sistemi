@@ -1,7 +1,7 @@
 from pathlib import Path
 import pandas as pd
 from finansal_analiz_sistemi.main import calistir_tum_sistemi
-import main as main_mod
+import run as main_mod
 
 
 def test_report_file_created(tmp_path, monkeypatch):

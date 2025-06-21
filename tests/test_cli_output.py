@@ -1,5 +1,5 @@
 from pathlib import Path
-from main import run_pipeline
+from run import run_pipeline
 
 
 def test_cli_creates_report(tmp_path):
