@@ -31,12 +31,14 @@ jobs:
           pip install --upgrade pip
           pip install pandas-ta==0.3.14b0
           pip install --timeout 60 -r requirements.txt
+          pip install pytest-cov
           pip install --timeout 60 matplotlib xlsxwriter streamlit
           pip install -e .
 
       - name: Install dev dependencies
         run: |
           pip install -r requirements-dev.txt
+          pip install pytest-cov
           pip install "pandas==${{ matrix.pandas_version }}" \
                       "numpy==${{ matrix.numpy_version }}"
 
