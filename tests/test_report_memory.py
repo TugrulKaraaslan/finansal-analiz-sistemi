@@ -1,5 +1,6 @@
 import pytest
 import report_generator
+import pandas as pd
 import psutil
 import time
 
@@ -9,17 +10,19 @@ def test_generate_full_report_memory(tmp_path, big_df):
     base = psutil.Process().memory_info().rss
     out = tmp_path / "rep.xlsx"
     t0 = time.time()
-    df1 = big_df.head(100_000).assign(
-        **{
-            "filtre_kodu": "F1",
-            "sebep_kodu": "OK",
-            "ort_getiri_%": 0.5,
-            "getiri_%": 0.5,
-            "basari": "OK",
+    # minimal meta row expected by generate_full_report
+    summary = pd.DataFrame(
+        {
+            "filtre_kodu": ["F1"],
+            "tarih": [pd.Timestamp.now()],
+            "sebep_kodu": ["OK"],
+            "ort_getiri_%": [0.0],
+            "getiri_%": [0.0],
+            "basari": ["OK"],
         }
     )
-    summary = df1.head(1)
-    report_generator.generate_full_report(summary, df1, [], out)
+
+    report_generator.generate_full_report(summary, big_df.head(100_000), [], out)
     dt = time.time() - t0
     peak = psutil.Process().memory_info().rss
     assert dt < 90
