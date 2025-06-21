@@ -52,6 +52,11 @@ _undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)'")
 FAILED_FILTERS: list[dict] = []
 
 
+def clear_failed() -> None:
+    """Clear global FAILED_FILTERS list."""
+    FAILED_FILTERS.clear()
+
+
 class CircularError(QueryError):
     """Raised when a circular filter reference is detected."""
 
