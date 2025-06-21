@@ -1,11 +1,13 @@
+import pytest
 import os
 from pathlib import Path
 
 import pandas as pd
-import psutil
 import main
 import filter_engine as fe
 import utils.failure_tracker as ft
+
+psutil = pytest.importorskip("psutil")
 
 
 def test_memory_clean(tmp_path, monkeypatch):

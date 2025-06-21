@@ -8,6 +8,7 @@
 ## [0.9.2] – 2025-06-22
 ### Fixed
 - Reduced peak RAM by ~35 % and cleared global leak points (#MEM-07)
+- Added psutil to dev dependencies and made memory test optional if missing (#CI-psutil)
 
 ## [0.9.1] – 2025-06-21
 ### Fixed
