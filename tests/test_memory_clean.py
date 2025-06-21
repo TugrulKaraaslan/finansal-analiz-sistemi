@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 import pandas as pd
-import main
+import run as main
 import filter_engine as fe
 import utils.failure_tracker as ft
 
