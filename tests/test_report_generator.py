@@ -1,6 +1,7 @@
 import report_generator
 import openpyxl
 import pandas as pd
+from utils.compat import safe_to_excel
 import os
 import sys
 
@@ -72,7 +73,8 @@ def test_uc_sekmeli_excel_yaz(tmp_path):
 def test_kaydet_raporlar_appends(tmp_path):
     base = pd.DataFrame({"x": [1]})
     fname = tmp_path / "report.xlsx"
-    base.to_excel(fname, index=False)
+    with pd.ExcelWriter(fname) as wr:
+        safe_to_excel(base, wr, sheet_name="Sheet1", index=False)
 
     df1 = pd.DataFrame({"a": [1]})
     df2 = pd.DataFrame({"b": [2]})

@@ -1,6 +1,10 @@
 import pandas as pd
 import pytest
 
+from utils.pandas_option_safe import ensure_option
+
+ensure_option("future.no_silent_downcasting", True)
+
 
 @pytest.fixture
 def sample_filtreler():

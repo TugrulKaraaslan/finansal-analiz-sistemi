@@ -7,7 +7,7 @@
 # düzeltildi, filtre uyumu artırıldı v2)
 
 import pandas as pd
-from utils.pandas_compat import safe_concat
+from utils.compat import safe_concat
 import pandas.errors
 import numpy as np
 import warnings

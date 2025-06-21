@@ -3,6 +3,7 @@ import os
 import sys
 import pandas as pd
 import openpyxl
+from utils.compat import safe_to_excel
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -11,7 +12,7 @@ def test_hatalar_sheet(tmp_path):
     fname = tmp_path / "test.xlsx"
     # create base workbook
     with pd.ExcelWriter(fname) as w:
-        pd.DataFrame({"a": [1]}).to_excel(w, sheet_name="Sheet1", index=False)
+        safe_to_excel(pd.DataFrame({"a": [1]}), w, sheet_name="Sheet1", index=False)
 
     kontrol_df = pd.DataFrame(
         [

@@ -5,6 +5,7 @@ from plotly.subplots import make_subplots
 from filtre_dogrulama import SEBEP_KODLARI
 import config
 import warnings
+from utils.pandas_option_safe import option_context
 
 WARN_MSG = "".join(
     [
@@ -129,8 +130,10 @@ def build_ozet_df(
             "satis_tarihi",
         ]
     ]
-    with pd.option_context("future.no_silent_downcasting", True):
-        subset = subset.fillna({"hisse_sayisi": 0}).infer_objects(copy=False)
+    from utils.compat import safe_infer_objects
+
+    with option_context("future.no_silent_downcasting", True):
+        subset = safe_infer_objects(subset.fillna({"hisse_sayisi": 0}), copy=False)
     return subset
 
 

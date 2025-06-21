@@ -1,4 +1,4 @@
-from utils.pandas_compat import safe_concat, safe_to_excel
+from utils.compat import safe_concat, safe_to_excel
 import pandas as pd
 
 
