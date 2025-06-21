@@ -499,9 +499,7 @@ def generate_full_report(
         wr.book.set_properties({"comments": PADDING_COMMENT})
 
         # --- Hücre formatları (opsiyonel) ---
-        percent_fmt = wr.book.add_format({"num_format": "0.00%"})
         date_fmt = wr.book.add_format({"num_format": "yyyy-mm-dd"})
-        ws_ozet.set_column("C:E", None, percent_fmt)
         ws_ozet.set_column("I:J", None, date_fmt)
 
         # Koşullu biçimlendirme: Özet sayfası satırlarının renklendirilmesi

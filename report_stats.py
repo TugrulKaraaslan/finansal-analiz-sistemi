@@ -37,10 +37,10 @@ def normalize_pct(series):
 
 
 def _normalize_pct(s: pd.Series) -> pd.Series:
-    """Scale whole-number percentages to fractional form if needed."""
+    """Convert whole-number percentages to fractional scale (÷100 once)."""
     mask = s.abs() > 1.5
     s.loc[mask] = s.loc[mask] / 100
-    return s
+    return s.round(2)
 
 
 def build_ozet_df(
