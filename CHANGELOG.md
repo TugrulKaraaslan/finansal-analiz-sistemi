@@ -7,8 +7,8 @@
 - Failure tracker entries now capture `reason` and `hint`.
 - 2025-06-22  Added Excel / Parquet support to filter loader (LOADER-02)
 - 2025-06-22  Added Rich color logs for Colab (LOG-03)
-- TEST-04-B: helper & loader tests.
 - TEST-04-C: memory & rich-logging tests; CI updates.
+- TEST-04-B: helper & loader tests.
 
 ## [0.9.2] – 2025-06-22
 ### Fixed

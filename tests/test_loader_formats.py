@@ -1,6 +1,8 @@
 import pandas as pd
 from finansal_analiz_sistemi.data_loader import yukle_filtre_dosyasi
 
+# regression test for new loader formats
+
 
 def test_excel_and_parquet(tmp_path):
     df = pd.DataFrame({"filtre_kodu": ["F1"], "notlar": [""]})
