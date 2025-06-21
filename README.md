@@ -73,6 +73,7 @@ python main.py --tarama 2025-03-07 --satis 2025-03-10
 
 * `--tarama` ve `--satis` tarihleri `yyyy-mm-dd` formatındadır.
 * `--gui` verildiğinde sonuçlar basit bir Streamlit arayüzünde görüntülenir.
+* Filtre dosyaları CSV (`;` ayracıyla), Excel (.xlsx/.xls - ilk sayfa) veya Parquet (.parquet) formatında olabilir.
 
 
 ## Otomatik Sağlık Raporu

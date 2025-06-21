@@ -11,6 +11,7 @@ import pandas as pd
 import os
 import glob
 import config
+from pathlib import Path
 from functools import lru_cache, partial
 
 from data_loader_cache import DataLoaderCache
@@ -195,60 +196,28 @@ def _standardize_ohlcv_columns(
     return df
 
 
-def yukle_filtre_dosyasi(
-    filtre_dosya_yolu_cfg=None, logger_param=None
-) -> pd.DataFrame | None:
+def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.DataFrame:
+    """Load filter definitions.
+
+    Accepts CSV (`;` separated), Excel (.xlsx/.xls, first sheet) and Parquet
+    files.
+    """
+
     if logger_param is None:
         logger_param = logger
-    fn_logger = logger_param
-    filtre_dosya_yolu = filtre_dosya_yolu_cfg or config.FILTRE_DOSYA_YOLU
-    fn_logger.info(f"Filtre dosyası yükleniyor: {filtre_dosya_yolu}")
+    log = logger_param
+    path = Path(filtre_dosya_yolu_cfg or config.FILTRE_DOSYA_YOLU)
+    log.info(f"Filtre dosyası yükleniyor: {path}")
 
-    if not os.path.exists(filtre_dosya_yolu):
-        fn_logger.critical(
-            f"FİLTRE DOSYASI BULUNAMADI: {filtre_dosya_yolu}. Sistem devam edemez."
-        )
-        return None
-    try:
-        df_filtreler = _cache_loader.load_csv(
-            filtre_dosya_yolu,
-            delimiter=";",
-            engine="python",
-            encoding="utf-8-sig",
-            skipinitialspace=True,
-        )
-        fn_logger.info(
-            f"Filtre dosyası '{filtre_dosya_yolu}' başarıyla yüklendi. {len(df_filtreler)} filtre bulundu."
-        )
-    except Exception as e:
-        fn_logger.critical(
-            f"Filtre dosyası ({filtre_dosya_yolu}) okunurken KRİTİK HATA: {e}. Sistem devam edemez.",
-            exc_info=True,
-        )
-        return None
-
-    if hasattr(config, "FILTRE_SUTUN_ADLARI_MAP"):
-        df_filtreler.rename(
-            columns=config.FILTRE_SUTUN_ADLARI_MAP, inplace=True, errors="ignore"
-        )
-
-    if (
-        "FilterCode" not in df_filtreler.columns
-        or "PythonQuery" not in df_filtreler.columns
-    ):
-        fn_logger.critical(
-            f"Filtre dosyası ({filtre_dosya_yolu}) standart 'FilterCode' veya 'PythonQuery' sütunlarını içermiyor. Sistem devam edemez."
-        )
-        return None
-
-    df_filtreler.dropna(subset=["PythonQuery"], inplace=True)
-    df_filtreler = df_filtreler[
-        df_filtreler["PythonQuery"].astype(str).str.strip() != ""
-    ]
-    fn_logger.debug(
-        f"Yüklenen ve boş olmayan sorgulara sahip filtre sayısı: {len(df_filtreler)}"
-    )
-    return df_filtreler
+    suf = path.suffix.lower()
+    if suf in {".xlsx", ".xls"}:
+        df = pd.read_excel(path, sheet_name=0, engine="openpyxl", keep_default_na=False)
+    elif suf == ".parquet":
+        df = pd.read_parquet(path)
+    else:
+        df = pd.read_csv(path, sep=";")
+    log.info(f"Filtre dosyası '{path}' başarıyla yüklendi. {len(df)} filtre bulundu.")
+    return df
 
 
 def yukle_hisse_verileri(
