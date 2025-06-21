@@ -97,12 +97,15 @@ def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
         tuple(config.SERIES_SERIES_CROSSOVERS),
         tuple(config.SERIES_VALUE_CROSSOVERS),
     )
-    result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
-        df,
-        wanted_cols=wanted_cols,
-        df_filters=df_filtre_kurallari,
-        logger_param=logger,
-    )
+    from utils.memory_profile import mem_profile
+
+    with mem_profile():
+        result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
+            df,
+            wanted_cols=wanted_cols,
+            df_filters=df_filtre_kurallari,
+            logger_param=logger,
+        )
     if result is None:
         logger.critical("İndikatör hesaplanamadı.")
         sys.exit(1)
@@ -144,7 +147,10 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
     out_path = Path("cikti/raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
     out_path.parent.mkdir(exist_ok=True)
-    report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
+    from utils.memory_profile import mem_profile
+
+    with mem_profile():
+        report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
     logger.info(f"Excel raporu oluşturuldu: {out_path}")
 
 
@@ -185,6 +191,13 @@ def calistir_tum_sistemi(
         Parquet dosyası mevcut olsa bile veri setini Excel/CSV kaynaklarından
         yeniden yükle.
     """
+    import gc
+    import filter_engine
+    import utils.failure_tracker as ft
+
+    filter_engine.clear_failed()
+    ft.clear_failures()
+
     global df_filtre_kurallari
     logger.info("*" * 30 + " TÜM BACKTEST SİSTEMİ ÇALIŞTIRILIYOR " + "*" * 30)
     df_filtre_kurallari, df_raw = veri_yukle(force_excel_reload_param)
@@ -202,13 +215,16 @@ def calistir_tum_sistemi(
 
     if output_path:
         from report_generator import generate_full_report
+        from utils.memory_profile import mem_profile
 
         output_path = Path(output_path)
-        generate_full_report(rapor_df.copy(), detay_df.copy(), [], output_path)
+        with mem_profile():
+            generate_full_report(rapor_df.copy(), detay_df.copy(), [], output_path)
         if logger_param:
             logger_param.info("Saved report to %s", output_path)
     else:
         raporla(rapor_df, detay_df)
+    gc.collect()
     return rapor_df, detay_df, atlanmis
 
 

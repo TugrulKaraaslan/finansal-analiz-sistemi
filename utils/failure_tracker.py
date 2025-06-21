@@ -12,6 +12,11 @@ class FailedFilter:
 failures = defaultdict(list)  # {'indicators': [...], 'filters': [...], ...}
 
 
+def clear_failures() -> None:
+    """Reset global failures dict."""
+    failures.clear()
+
+
 def log_failure(category: str, item: str, reason: str, hint: str = "") -> None:
     """Log a failure under given category."""
     failures[category].append(FailedFilter(item, reason, hint))
