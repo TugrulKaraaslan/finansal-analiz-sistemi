@@ -10,6 +10,20 @@
 - TEST-04-C: memory & rich-logging tests; CI updates.
 - TEST-04-B: helper & loader tests.
 
+## [0.9.3] – 2025-06-22
+### Added
+• MAX_FILTER_DEPTH now user-configurable (default raised 5→ 7).
+• Excel / Parquet filter-loader formats; helper columns auto-generated (`volume_tl`, `psar`).
+• Rich color logs on Colab when `LOG_SIMPLE` unset.
+• Memory-leak regression tests; nightly slow-test job.
+
+### Fixed
+• Percentage metrics display correct scale (12.8 % not 1280 %).
+• generate_full_report produces stable output under 2 GB RAM.
+
+### Changed
+• generate_full_report API returns detailed error sheet + summary.
+
 ## [0.9.2] – 2025-06-22
 ### Fixed
 - Reduced peak RAM by ~35 % and cleared global leak points (#MEM-07)

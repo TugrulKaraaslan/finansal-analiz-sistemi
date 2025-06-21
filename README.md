@@ -3,6 +3,27 @@
 [![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg)](https://github.com/owner/finansal-analiz-sistemi/actions/workflows/ci.yml)
 ChatGPT ile geliştirilen backtest otomasyon projesi
 
+## Installation
+```bash
+pip install finansal-analiz-sistemi[pyarrow]   # enables Parquet & fast tests
+```
+
+## Configuration
+
+| Key                   | Default | Description                                    |
+| --------------------- | ------- | ---------------------------------------------- |
+| `max_filter_depth`    | `7`     | Recursion guard for nested filter expressions. |
+| `output_format`       | `xlsx`  | Report output (`csv`/`xlsx`).                  |
+| `log_simple` env flag | `1`     | Set to `0` for Rich color logs (Colab).        |
+
+Sample **config.yml** snippet:
+
+```yaml
+max_filter_depth: 9
+output_format: csv      # override default
+```
+
+
 ## Destek Matrisi
 
 | Tier | Pandas | NumPy |
@@ -32,7 +53,7 @@ ChatGPT ile geliştirilen backtest otomasyon projesi
 
 Projede bulunan birim testlerini çalıştırmak için:
 ```bash
-pytest -q -m "not slow"
+pytest -q -m "not slow" --cov .
 ```
 
 ## Google Colab Hızlı Başlangıç
@@ -78,6 +99,12 @@ python main.py --tarama 2025-03-07 --satis 2025-03-10
 * `--tarama` ve `--satis` tarihleri `yyyy-mm-dd` formatındadır.
 * `--gui` verildiğinde sonuçlar basit bir Streamlit arayüzünde görüntülenir.
 * Filtre dosyaları CSV (`;` ayracıyla), Excel (.xlsx/.xls - ilk sayfa) veya Parquet (.parquet) formatında olabilir.
+
+## Usage
+```python
+from finansal_analiz_sistemi.data_loader import yukle_filtre_dosyasi
+df = yukle_filtre_dosyasi("filters.xlsx")
+```
 
 
 ## Otomatik Sağlık Raporu
