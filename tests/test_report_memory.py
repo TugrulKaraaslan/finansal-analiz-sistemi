@@ -16,6 +16,9 @@ def test_generate_full_report_memory(tmp_path, big_df):
             "filtre_kodu": ["F1"],
             "tarih": [pd.Timestamp.now()],
             "sebep_kodu": ["OK"],
+            "ort_getiri_%": [0.0],
+            "getiri_%": [0.0],
+            "basari": ["OK"],
         }
     )
 
