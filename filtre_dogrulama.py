@@ -39,9 +39,9 @@ def dogrula_filtre_dataframe(
         if not kod or kod.strip() == "":
             sorunlu[kod] = "Boş veya eksik flag (kod) değeri."
         elif not re.match(r"^[A-Z0-9_\-]+$", kod):
-            sorunlu[
-                kod
-            ] = "Geçersiz karakterler içeren flag. Sadece A-Z, 0-9, _ ve - izinli."
+            sorunlu[kod] = (
+                "Geçersiz karakterler içeren flag. Sadece A-Z, 0-9, _ ve - izinli."
+            )
 
         if "query" not in row or not query:
             sorunlu[kod] = sorunlu.get(kod, "") + " Query sütunu boş veya eksik."
