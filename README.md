@@ -1,5 +1,6 @@
 # finansal-analiz-sistemi
 [![CI](https://github.com/owner/finansal-analiz-sistemi/actions/workflows/ci.yml/badge.svg)](https://github.com/owner/finansal-analiz-sistemi/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg)](https://github.com/owner/finansal-analiz-sistemi/actions/workflows/ci.yml)
 ChatGPT ile geliştirilen backtest otomasyon projesi
 
 ## Destek Matrisi
@@ -31,7 +32,7 @@ ChatGPT ile geliştirilen backtest otomasyon projesi
 
 Projede bulunan birim testlerini çalıştırmak için:
 ```bash
-pytest -q
+pytest -q -m "not slow"
 ```
 
 ## Google Colab Hızlı Başlangıç

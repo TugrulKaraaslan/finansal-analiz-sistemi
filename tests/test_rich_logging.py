@@ -34,3 +34,12 @@ def test_rich_disabled(monkeypatch):
     importlib.reload(logging_config)
     out = _capture("warn")
     assert "\x1b[" not in out
+
+
+def test_rich_handler_added(monkeypatch):
+    monkeypatch.delenv("LOG_SIMPLE", raising=False)
+    monkeypatch.setattr("finansal_analiz_sistemi.config.IS_COLAB", True)
+    logging.getLogger().handlers.clear()
+    importlib.reload(logging_config)
+    log = logging_config.get_logger("t")
+    assert any(h.__class__.__name__ == "RichHandler" for h in log.handlers)
