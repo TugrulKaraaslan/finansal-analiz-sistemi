@@ -407,6 +407,10 @@ def _write_error_sheet(
     """
 
     df_err = pd.DataFrame(error_list)
+    if "reason" not in df_err.columns:
+        df_err["reason"] = ""
+    if "hint" not in df_err.columns:
+        df_err["hint"] = ""
 
     if summary_df is not None and not summary_df.empty:
         non_ok = summary_df[summary_df["sebep_kodu"] != "OK"]
@@ -551,11 +555,16 @@ def generate_full_report(
                 pd.DataFrame(FAILED_FILTERS), wr, sheet_name="query_errors", index=False
             )
         from utils.failure_tracker import get_failures
+        from dataclasses import asdict, is_dataclass
 
         for cat, rows in get_failures().items():
             if rows:
+                converted = [asdict(r) if is_dataclass(r) else r for r in rows]
                 safe_to_excel(
-                    pd.DataFrame(rows), wr, sheet_name=f"{cat}_failed", index=False
+                    pd.DataFrame(converted),
+                    wr,
+                    sheet_name=f"{cat}_failed",
+                    index=False,
                 )
         _write_stats_sheet(wr, summary_df)
         _write_error_sheet(wr, error_list, summary_df)

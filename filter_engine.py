@@ -12,6 +12,7 @@ import keyword
 from pandas.errors import UndefinedVariableError as QueryError
 import yaml
 import os
+import settings
 
 
 class MissingColumnError(Exception):
@@ -47,9 +48,12 @@ MIN_STOCKS_PER_FILTER = _cfg.get("min_stocks_per_filter", 1)
 _missing_re = re.compile(r"Eksik sütunlar?:\s*(?P<col>[A-Za-z0-9_]+)")
 _undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)'")
 
-# Recursion guard constants
-MAX_DEPTH = 5  # maks. izin verilen iç içe çağrı
+# Recursion guard
 FAILED_FILTERS: list[dict] = []
+
+
+class CircularError(QueryError):
+    """Raised when a circular filter reference is detected."""
 
 
 def _build_solution(err_type: str, msg: str) -> str:
@@ -70,17 +74,24 @@ def _build_solution(err_type: str, msg: str) -> str:
     return ""
 
 
-def safe_eval(expr, df, depth: int = 0):
-    """Evaluate filter safely with depth guard."""
-    if depth >= MAX_DEPTH:
-        raise QueryError(f"Max recursion depth ({MAX_DEPTH}) exceeded")
+def safe_eval(expr, df, depth: int = 0, visited=None):
+    """Evaluate filter safely with depth and circular guards."""
+    if visited is None:
+        visited = set()
+    if depth > settings.MAX_FILTER_DEPTH:
+        raise QueryError(f"Max recursion depth ({settings.MAX_FILTER_DEPTH}) exceeded")
 
     if isinstance(expr, str):
         return df.query(expr)
 
     if isinstance(expr, dict) and "sub_expr" in expr:
+        current = expr.get("code")
+        if current is not None:
+            if current in visited:
+                raise CircularError(f"Circular reference: {current}")
+            visited.add(current)
         try:
-            return safe_eval(expr["sub_expr"], df, depth + 1)
+            return safe_eval(expr["sub_expr"], df, depth + 1, visited)
         except QueryError as e:
             FAILED_FILTERS.append({"filtre_kodu": expr.get("code"), "hata": str(e)})
             logger.warning("QUERY_ERROR %s", e)
