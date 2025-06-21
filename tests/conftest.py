@@ -25,19 +25,15 @@ def sample_indikator_df():
 @pytest.fixture
 def big_df():
     """Large DataFrame fixture around 100 MB in memory."""
-    n = 70_000
-    df = pd.DataFrame(
+    n = 90_000
+    return pd.DataFrame(
         {
             "hisse_kodu": ["AAA"] * n,
-            "tarih": pd.date_range("1900-01-01", periods=n, freq="B"),
+            "tarih": pd.date_range("1900-01-01", periods=n, freq="D"),
             "close": np.random.rand(n) * 100,
             "open": np.random.rand(n) * 100,
             "high": np.random.rand(n) * 100,
             "low": np.random.rand(n) * 100,
             "volume": np.random.randint(1_000_000, 10_000_000, n),
-            "psar_long": np.nan,
-            "psar_short": np.nan,
         }
     )
-    df["volume_tl"] = df["volume"] * df["close"]
-    return df
