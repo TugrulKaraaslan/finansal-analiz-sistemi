@@ -61,6 +61,9 @@ docker build -t finansal_analiz .
 docker run --rm finansal_analiz
 ```
 
+### LOG_SIMPLE=1 düz log için
+`LOG_SIMPLE=1` değeri ayarlandığında konsol çıktısı renkli olmayıp basit biçimde görünür.
+
 ## Komut Satırı Kullanımı
 
 Temel script `main.py` aşağıdaki parametreleri kabul eder:
