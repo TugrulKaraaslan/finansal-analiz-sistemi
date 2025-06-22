@@ -28,29 +28,9 @@ jobs:
           python-version: "${{ matrix.python_version }}"
           cache: pip
 
-      - name: Pre-install build toolchain & compatibility pins
+      - name: Install project dependencies
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y build-essential wget tar
-          pip install --upgrade pip
-          pip install --prefer-binary \
-            "pyarrow<15" \
-            "pandas-ta==0.3.14b0" "setuptools<69" "cython<3" wheel
-
-      - name: Build TA-Lib C library
-        run: |
-          wget -q \
-            http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
-          tar -xf ta-lib-0.4.0-src.tar.gz
-          cd ta-lib
-          ./configure --prefix=/usr
-          make -j$(nproc)
-          sudo make install
-
-      - name: Install project dependencies (binary-first)
-        run: |
-          pip install --no-binary=ta-lib ta-lib==0.4.28
-          PIP_ONLY_BINARY=":all:" pip install -r requirements.txt
+          pip install -r requirements.txt
 
       - name: Install dev dependencies
         run: |

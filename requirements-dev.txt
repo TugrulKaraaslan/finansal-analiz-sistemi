@@ -5,4 +5,4 @@ psutil
 setuptools==68.2.2
 cython==0.29.37
 pyarrow==14.0.2
-ta-lib==0.4.28
+pandas-ta==0.3.14b0
