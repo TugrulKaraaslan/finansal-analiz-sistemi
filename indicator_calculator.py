@@ -24,8 +24,18 @@ from pandas_ta import tema
 import config
 import utils
 from utilities.naming import unique_name
-
 from logging_config import get_logger
+
+
+def _sma(series: pd.Series, length: int) -> pd.Series:
+    """Wrapper for pandas_ta.sma to mimic TA-Lib SMA."""
+    return ta.sma(series, length=length)
+
+
+def _rsi(series: pd.Series, length: int) -> pd.Series:
+    """Wrapper for pandas_ta.rsi to mimic TA-Lib RSI."""
+    return ta.rsi(series, length=length)
+
 
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 warnings.filterwarnings(

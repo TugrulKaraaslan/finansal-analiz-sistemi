@@ -15,25 +15,22 @@ jobs:
           - pandas_version: "2.2.2"
             numpy_version: "2.0.2"
             tier: lts
+            python_version: "3.12"
           - pandas_version: "1.5.3"
             numpy_version: "1.26.4"
             tier: legacy
+            python_version: "3.12"
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "${{ matrix.python_version }}"
+          cache: pip
 
-      # Install project and dependencies
-      - name: Install dependencies
+      - name: Install project dependencies
         run: |
-          pip install --upgrade pip
-          pip install pandas-ta==0.3.14b0
-          pip install --timeout 60 -r requirements.txt
-          pip install pytest-cov
-          pip install --timeout 60 matplotlib xlsxwriter streamlit
-          pip install -e .
+          pip install -r requirements.txt
 
       - name: Install dev dependencies
         run: |
@@ -61,8 +58,20 @@ jobs:
           python - <<'PY'
           import pandas as pd, report_generator, os
           os.makedirs('cikti/raporlar', exist_ok=True)
-          df = pd.DataFrame({'filtre_kodu':['F1'], 'bulunan_hisse_sayisi':[1], 'ortalama_getiri':[1.0], 'notlar':[''], 'tarama_tarihi':['01.01.2025'], 'satis_tarihi':['02.01.2025']})
-          report_generator.kaydet_uc_sekmeli_excel('cikti/raporlar/rapor_ci.xlsx', df, df, df)
+          df = pd.DataFrame({
+              'filtre_kodu': ['F1'],
+              'bulunan_hisse_sayisi': [1],
+              'ortalama_getiri': [1.0],
+              'notlar': [''],
+              'tarama_tarihi': ['01.01.2025'],
+              'satis_tarihi': ['02.01.2025'],
+          })
+          report_generator.kaydet_uc_sekmeli_excel(
+              'cikti/raporlar/rapor_ci.xlsx',
+              df,
+              df,
+              df,
+          )
           PY
       - name: Generate health report
         run: |
@@ -72,7 +81,10 @@ jobs:
           log_files = glob.glob('*.log') or ['ci.log']
           if log_files == ['ci.log']:
               open('ci.log','w').write('ci log')
-          log_to_health.generate(log_files[-1], ['cikti/raporlar/rapor_ci.xlsx'])
+          log_to_health.generate(
+              log_files[-1],
+              ['cikti/raporlar/rapor_ci.xlsx'],
+          )
           PY
 
       - name: Upload reports
