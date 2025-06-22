@@ -49,6 +49,15 @@ output_format: csv      # override default
    pre-commit install
    ```
 
+## Sürüm Pinleme
+
+Projede kullanılan paketlerin sürüm kilitlemesi için [pip-tools](https://pypi.org/project/pip-tools/) kullanılabilir. Aşağıdaki komut akışı `requirements.txt` dosyasını güncelleyerek kararlı bir ortam sağlar:
+
+```bash
+scripts/lock_requirements.sh
+```
+
+
 ## Testlerin Çalıştırılması
 
 Projede bulunan birim testlerini çalıştırmak için:
