@@ -3,5 +3,4 @@ line-length = 88
 
 [tool.flake8]
 max-line-length = 88
-extend-ignore   = ["E203", "W503"]
-per-file-ignores = ["finansal_analiz_sistemi/data_loader.py:E501", "indicator_calculator.py:E501"]
+extend-ignore   = ["E203", "W503", "E501"]
