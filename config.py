@@ -10,6 +10,7 @@ import os
 import logging
 import numpy as np
 import yaml
+from dotenv import load_dotenv
 
 # pandas_ta bazı ortamlarda numpy.NaN sabitini kullanarak yükleniyor.
 # NumPy 2.x sürümlerinde bu sabit olmadığı için import hatası
@@ -20,6 +21,8 @@ if not hasattr(np, "NaN"):
 import pandas_ta as ta
 import sys
 
+load_dotenv()
+
 # Temel Dizinler
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CIKTI_KLASORU = os.path.join(BASE_DIR, "cikti")
@@ -29,6 +32,7 @@ FILTRE_DOSYA_YOLU = os.path.join(VERI_KLASORU, "15.csv")
 PARQUET_ANA_DOSYA_YOLU = os.path.join(VERI_KLASORU, "birlesik_hisse_verileri.parquet")
 LOG_DOSYA_YOLU = os.path.join(BASE_DIR, "finansal_analiz_sistemi.log")
 CSV_OZET_DOSYA_ADI = "backtest_ozet_raporu.csv"
+API_KEY = os.getenv("API_KEY")
 
 _cfg_path = os.path.join(os.path.dirname(__file__), "config.yml")
 if os.path.exists(_cfg_path):
