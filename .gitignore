@@ -3,4 +3,5 @@ __pycache__/
 *.log
 raporlar/
 cikti/
+.env
 
