@@ -5,3 +5,7 @@ raporlar/
 cikti/
 .env
 
+
+# Çıktılar
+raporlar/
+log/
