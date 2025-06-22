@@ -5,6 +5,7 @@ import pytest
 from utils.pandas_option_safe import ensure_option
 
 ensure_option("future.no_silent_downcasting", True)
+pd.options.mode.chained_assignment = "raise"
 
 
 @pytest.fixture
