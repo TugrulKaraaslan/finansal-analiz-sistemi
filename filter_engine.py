@@ -45,11 +45,15 @@ else:
     _cfg = {}
 MIN_STOCKS_PER_FILTER = _cfg.get("min_stocks_per_filter", 1)
 
+# Regular expressions for error parsing
 _missing_re = re.compile(r"Eksik sütunlar?:\s*(?P<col>[A-Za-z0-9_]+)")
 _undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)'")
 
 # Recursion guard
 FAILED_FILTERS: list[dict] = []
+
+# Maximum depth for nested filter evaluation
+MAX_DEPTH = 50
 
 
 def clear_failed() -> None:
@@ -77,6 +81,21 @@ def _build_solution(err_type: str, msg: str) -> str:
     if err_type == "NO_STOCK":
         return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
     return ""
+
+
+def evaluate_filter(expr, df, depth: int = 0):
+    """Evaluate filter expression with recursion guard."""
+    if depth > MAX_DEPTH:
+        logger.error("Recursion limit exceeded for %s", expr)
+        raise RecursionError("Filtre döngüsel olabilir")
+
+    if isinstance(expr, str):
+        return df.query(expr)
+
+    if isinstance(expr, dict) and "sub_expr" in expr:
+        return evaluate_filter(expr["sub_expr"], df, depth + 1)
+
+    raise QueryError("Invalid expression")
 
 
 def safe_eval(expr, df, depth: int = 0, visited=None):
