@@ -81,4 +81,4 @@ xlsxwriter==3.2.5
 setuptools==68.2.2
 cython==0.29.37
 pyarrow==14.0.2
-ta-lib==0.4.26
+ta-lib==0.4.28
