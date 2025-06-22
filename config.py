@@ -20,6 +20,7 @@ if not hasattr(np, "NaN"):
 
 import pandas_ta as ta
 import sys
+
 load_dotenv()
 
 # Temel Dizinler
