@@ -2,6 +2,6 @@
 max-line-length = 250
 extend-ignore = E203,W503
 per-file-ignores =
-    finansal_analiz_sistemi/main.py:F401,F403
+    finansal_analiz_sistemi/main.py:F401
     tests/test_report_exists.py:F401
     tests/test_smoke_report.py:F401,E401
