@@ -37,6 +37,8 @@ def load_data(path: str) -> pd.DataFrame:
     """Read a CSV file using an in-memory cache."""
     df = pd.read_csv(path)
     return df
+
+
 # İkinci çağrıda dosya diske erişilmez, cache'den gelir.
 
 
