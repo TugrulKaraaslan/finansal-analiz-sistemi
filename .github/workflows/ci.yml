@@ -31,14 +31,15 @@ jobs:
       - name: Pre-install build toolchain & compatibility pins
         run: |
           sudo apt-get update -qq
-          sudo apt-get -y install build-essential python3-dev
+          sudo apt-get -y install build-essential python3-dev libta-lib0-dev
           pip install --upgrade pip
           pip install --prefer-binary \
-            "pyarrow<15" "ta-lib-binary>=0.4.25" \
+            "pyarrow<15" \
             "pandas-ta==0.3.14b0" "setuptools<69" "cython<3" wheel
 
       - name: Install project dependencies (binary-first)
         run: |
+          pip install --no-binary=ta-lib ta-lib==0.4.26
           PIP_ONLY_BINARY=":all:" pip install -r requirements.txt
 
       - name: Install dev dependencies
