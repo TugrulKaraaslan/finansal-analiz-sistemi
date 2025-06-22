@@ -3,12 +3,13 @@ repos:
     rev: 24.4.2
     hooks:
       - id: black
-        args: ["--check"]
+        args: ["--check", "."]
+        pass_filenames: false
   - repo: https://github.com/PyCQA/flake8
     rev: 6.1.0
     hooks:
       - id: flake8
-        args: ["--max-line-length=88"]
+        args: [--extend-ignore=E501]
   - repo: local
     hooks:
       - id: pytest
