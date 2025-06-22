@@ -11,16 +11,12 @@ def test_generate_full_report_memory(tmp_path, big_df):
     out = tmp_path / "rep.xlsx"
     t0 = time.time()
     # minimal meta row expected by generate_full_report
-    summary = pd.DataFrame(
-        {
-            "filtre_kodu": ["F1"],
-            "tarih": [pd.Timestamp.now()],
-            "sebep_kodu": ["OK"],
-            "ort_getiri_%": [0.0],
-            "getiri_%": [0.0],
-            "basari": ["OK"],
-        }
-    )
+    summary = pd.DataFrame([{c: pd.NA for c in report_generator.LEGACY_SUMMARY_COLS}])
+    summary.loc[0, ["filtre_kodu", "tarih", "sebep_kodu"]] = [
+        "F1",
+        pd.Timestamp.now(),
+        "OK",
+    ]
 
     report_generator.generate_full_report(summary, big_df.head(100_000), [], out)
     dt = time.time() - t0
