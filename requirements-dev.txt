@@ -4,3 +4,5 @@ xlsxwriter>=3.2
 psutil
 setuptools==68.2.2
 cython==0.29.37
+pyarrow==14.0.2
+ta-lib-binary==0.4.27
