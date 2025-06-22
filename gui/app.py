@@ -11,7 +11,9 @@ if uploaded:
         with tab1:
             df_ozet = pd.read_excel(xls, "Özet")
             if df_ozet.empty:
-                warn = "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
+                warn = (
+                    "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
+                )
                 st.warning(warn)
                 print(warn)
             else:
@@ -24,7 +26,8 @@ if uploaded:
                 st.dataframe(
                     hatalar.style.apply(
                         lambda s: [
-                            "background-color:#faa" if v != "OK" else "" for v in s["durum"]
+                            "background-color:#faa" if v != "OK" else ""
+                            for v in s["durum"]
                         ],
                         axis=1,
                     )
