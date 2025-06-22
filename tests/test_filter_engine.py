@@ -2,6 +2,7 @@ import filter_engine
 import os
 import sys
 import pandas as pd
+import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -61,3 +62,16 @@ def test_apply_single_filter_missing_column():
     secim, info = filter_engine._apply_single_filter(df, "T1", "olmayan_kolon < 10")
     assert info["durum"] == "CALISTIRILAMADI"
     assert "olmayan_kolon" in info["eksik_sutunlar"]
+
+
+def test_recursive_filter_detection():
+    df = pd.DataFrame({"x": [1]})
+    f1: dict = {"code": "F1"}
+    f2: dict = {"code": "F2"}
+    f3: dict = {"code": "F3"}
+    f1["sub_expr"] = f2
+    f2["sub_expr"] = f3
+    f3["sub_expr"] = f1
+
+    with pytest.raises(RecursionError):
+        filter_engine.evaluate_filter(f1, df)
