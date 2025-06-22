@@ -9,14 +9,26 @@ if uploaded:
         xls = pd.ExcelFile(uploaded)
         tab1, tab2 = st.tabs(["Özet", "Hatalar"])
         with tab1:
-            st.dataframe(pd.read_excel(xls, "Özet"))
+            df_ozet = pd.read_excel(xls, "Özet")
+            if df_ozet.empty:
+                warn = (
+                    "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
+                )
+                st.warning(warn)
+                print(warn)
+            else:
+                st.dataframe(df_ozet)
         with tab2:
             hatalar = pd.read_excel(xls, "Hatalar")
-            st.dataframe(
-                hatalar.style.apply(
-                    lambda s: [
-                        "background-color:#faa" if v != "OK" else "" for v in s["durum"]
-                    ],
-                    axis=1,
+            if hatalar.empty:
+                st.write("Hata verisi bulunamadı")
+            else:
+                st.dataframe(
+                    hatalar.style.apply(
+                        lambda s: [
+                            "background-color:#faa" if v != "OK" else ""
+                            for v in s["durum"]
+                        ],
+                        axis=1,
+                    )
                 )
-            )

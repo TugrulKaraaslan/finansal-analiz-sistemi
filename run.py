@@ -43,6 +43,18 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     st.sidebar.title("Menü")
     sayfa = st.sidebar.radio("Sayfa", ("Özet", "Detay", "Grafik"))
 
+    df_to_show = (
+        ozet_df if sayfa == "Özet" else detay_df if sayfa == "Detay" else ozet_df
+    )
+
+    if df_to_show.empty:
+        msg = "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
+        st.warning(msg)
+        print(msg)
+        if "logger" in globals():
+            logger.warning(msg)
+        return
+
     if sayfa == "Özet":
         st.dataframe(ozet_df)
     elif sayfa == "Detay":
@@ -307,6 +319,13 @@ if __name__ == "__main__":
             logger_param=logger,
             output_path=args.output,
         )
+
+        if rapor_df.empty:
+            empty_msg = (
+                "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
+            )
+            logger.warning(empty_msg)
+            print(empty_msg)
 
         summary_df = rapor_df.copy()
         detail_df = detay_df.copy()
