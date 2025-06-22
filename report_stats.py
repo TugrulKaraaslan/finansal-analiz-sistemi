@@ -38,6 +38,7 @@ def normalize_pct(series):
 
 def _normalize_pct(s: pd.Series) -> pd.Series:
     """Convert whole-number percentages to fractional scale (÷100 once)."""
+    s = s.copy()
     mask = s.abs() > 1.5
     s.loc[mask] = s.loc[mask] / 100
     return s.round(2)
