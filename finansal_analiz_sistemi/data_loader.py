@@ -32,6 +32,14 @@ def _read_excel_cached(path: str) -> pd.DataFrame:
     return _read_excel(path)
 
 
+@lru_cache(maxsize=None)
+def load_data(path: str) -> pd.DataFrame:
+    """Read a CSV file using an in-memory cache."""
+    df = pd.read_csv(path)
+    return df
+# İkinci çağrıda dosya diske erişilmez, cache'den gelir.
+
+
 def check_and_create_dirs(*dir_paths):
     for dir_path in dir_paths:
         if dir_path and not os.path.exists(dir_path):
