@@ -18,3 +18,11 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: git-add-all
+        name: Auto-stage modified files
+        entry: git add -u
+        language: system
+        pass_filenames: false
