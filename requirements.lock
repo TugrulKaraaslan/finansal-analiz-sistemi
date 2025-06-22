@@ -73,6 +73,8 @@ pluggy==1.6.0
     #   pytest
 psutil==7.0.0
     # via -r requirements.txt
+pyarrow==20.0.0
+    # via -r requirements.txt
 pygments==2.19.2
     # via
     #   -r requirements.txt

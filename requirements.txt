@@ -79,3 +79,4 @@ xlsxwriter==3.2.5
     # via -r requirements.in
 rich<14,>=12.4.4
 psutil>=5.9.8
+pyarrow>=15.0.2         # Parquet engine for pandas

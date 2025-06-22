@@ -1,3 +1,13 @@
+import glob
+import os
+from functools import lru_cache, partial
+from pathlib import Path
+
+import pandas as pd
+
+import config
+from data_loader_cache import DataLoaderCache
+from logging_config import get_logger
 from utils.compat import safe_concat
 
 # data_loader.py
@@ -7,21 +17,9 @@ from utils.compat import safe_concat
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (OHLCV_MAP kullanımı ve loglama detaylandırıldı)
 
-import pandas as pd
-import os
-import glob
-import config
-from pathlib import Path
-from functools import lru_cache, partial
-
-from data_loader_cache import DataLoaderCache
-
-from logging_config import get_logger
-
 logger = get_logger(__name__)
 
 _cache_loader = DataLoaderCache(logger=logger)
-
 
 _read_excel = partial(pd.read_excel, engine="openpyxl")
 
