@@ -449,6 +449,10 @@ def generate_full_report(
     quick: bool = True,
 ) -> str:
     if keep_legacy:
+        from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
+
+        summary_df = normalize_filtre_kodu(summary_df)
+        detail_df = normalize_filtre_kodu(detail_df)
         summary_df = report_stats.build_ozet_df(summary_df, detail_df)
         detail_df = report_stats.build_detay_df(summary_df, detail_df)
 

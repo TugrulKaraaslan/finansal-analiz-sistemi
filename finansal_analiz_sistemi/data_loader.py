@@ -223,16 +223,10 @@ def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.Da
     elif suf == ".parquet":
         df = pd.read_parquet(path)
     else:
-        df = pd.read_csv(path, sep=";")
+        from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
 
-        # Bazı eski CSV’lerde sütun adı İngilizce ‘FilterCode’.
-        # Raporlama katmanı ise Türkçe ‘filtre_kodu’ bekliyor.
-        df = df.rename(
-            columns={
-                "FilterCode": "filtre_kodu",
-                "filtercode": "filtre_kodu",
-            }
-        )
+        df = pd.read_csv(path, sep=";")
+        df = normalize_filtre_kodu(df)
 
         # Hâlâ eksikse, erken ve anlaşılır hata ver.
         if "filtre_kodu" not in df.columns:
