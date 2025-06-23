@@ -452,8 +452,17 @@ def generate_full_report(
     if keep_legacy:
         from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
 
-        summary_df = normalize_filtre_kodu(summary_df)
-        detail_df = normalize_filtre_kodu(detail_df)
+        if not summary_df.empty and (
+            "filtre_kodu" in summary_df.columns
+            or any(c.lower() == "filtercode" for c in summary_df.columns)
+        ):
+            summary_df = normalize_filtre_kodu(summary_df)
+
+        if not detail_df.empty and (
+            "filtre_kodu" in detail_df.columns
+            or any(c.lower() == "filtercode" for c in detail_df.columns)
+        ):
+            detail_df = normalize_filtre_kodu(detail_df)
         summary_df = report_stats.build_ozet_df(summary_df, detail_df)
         detail_df = report_stats.build_detay_df(summary_df, detail_df)
 
@@ -534,7 +543,17 @@ def generate_full_report(
         )
         MAX_ROWS = 200_000
         n_chunks = max(1, (len(detail_df) - 1) // MAX_ROWS + 1)
-        normalized_detail = normalize_filtre_kodu(detail_df)
+        normalized_detail = (
+            normalize_filtre_kodu(detail_df)
+            if (
+                not detail_df.empty
+                and (
+                    "filtre_kodu" in detail_df.columns
+                    or any(c.lower() == "filtercode" for c in detail_df.columns)
+                )
+            )
+            else detail_df
+        )
         startrow = 0
         for i, chunk in enumerate(np.array_split(normalized_detail, n_chunks)):
             safe_to_excel(
