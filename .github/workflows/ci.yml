@@ -1,21 +1,89 @@
 name: CI
 on:
   push:
-    branches: [main]
   pull_request:
+  schedule:
+    - cron: '0 3 * * *'
+
 jobs:
-  tests:
+  test:
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.tier == 'legacy' }}
+    strategy:
+      matrix:
+        include:
+          - pandas_version: "2.2.2"
+            numpy_version: "2.0.2"
+            tier: lts
+          - pandas_version: "1.5.3"
+            numpy_version: "1.26.4"
+            tier: legacy
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Install project and dependencies
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pandas-ta==0.3.14b0
+          pip install --timeout 60 -r requirements.txt
+          pip install pytest-cov
+          pip install --timeout 60 matplotlib xlsxwriter streamlit
+          pip install -e .
+
+      - name: Install dev dependencies
+        run: |
+          pip install -r requirements-dev.txt
+          pip install pytest-cov
+          pip install "pandas==${{ matrix.pandas_version }}" \
+                      "numpy==${{ matrix.numpy_version }}"
+
+      - name: Lint & Tests via pre-commit
+        run: |
+          pip install pre-commit
+          pre-commit run --all-files
+
+      - name: Run tests
+        run: |
+          pytest -q -m "not slow" --cov . --cov-report=xml
+          pytest -q tests/test_report_format.py
+
+      - name: Run nightly tests
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          pytest -q --cov . --cov-report=xml
+      - name: Run simple backtest
+        run: |
+          python - <<'PY'
+          import pandas as pd, report_generator, os
+          os.makedirs('cikti/raporlar', exist_ok=True)
+          df = pd.DataFrame({'filtre_kodu':['F1'], 'bulunan_hisse_sayisi':[1], 'ortalama_getiri':[1.0], 'notlar':[''], 'tarama_tarihi':['01.01.2025'], 'satis_tarihi':['02.01.2025']})
+          report_generator.kaydet_uc_sekmeli_excel('cikti/raporlar/rapor_ci.xlsx', df, df, df)
+          PY
+      - name: Generate health report
+        run: |
+          python - <<'PY'
+          import log_to_health, os, glob
+          os.makedirs('cikti/raporlar', exist_ok=True)
+          log_files = glob.glob('*.log') or ['ci.log']
+          if log_files == ['ci.log']:
+              open('ci.log','w').write('ci log')
+          log_to_health.generate(log_files[-1], ['cikti/raporlar/rapor_ci.xlsx'])
+          PY
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: "reports-${{ matrix.pandas_version }}"
+          path: '*.xlsx'
+
+  docker:
+    needs: test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        lfs: true
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-    - name: Install deps
-      run: |
-        pip install -q pip-tools
-        pip install -q -r requirements.txt
-    - name: Run tests
-      run: pytest -q
+      - uses: actions/checkout@v4
+      - run: docker build -t finansal_analiz:latest .
