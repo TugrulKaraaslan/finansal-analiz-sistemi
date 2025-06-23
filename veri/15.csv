@@ -1,4 +1,4 @@
-FilterCode;PythonQuery
+filtre_kodu;PythonQuery
 T2;(relative_volume > 1.0) and (change_1w_percent < 15.0) and (rsi_14 > 50) and (rsi_14 < 65) and (adx_14 > 30) and (adx_14 < 60) and (stochrsi_k < 20.0) and stochrsi_d_keser_stochrsi_k_asagi
 T3;(relative_volume > 1.5) and (rsi_14 > 50.0) and (momentum_10 > 1.0) and (sma_5 < close) and (sma_10 < close) and (sma_200 < close)
 T5;(relative_volume > 1.3) and (rsi_14 > 55.0) and (ema_5 < close) and (ema_20 < ema_5) and (ema_50 < ema_20) and (cci_20 > 100.0) and (vwma_20 < close) and (ichimoku_conversionline < ichimoku_baseline)
