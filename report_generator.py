@@ -242,7 +242,10 @@ def kaydet_uc_sekmeli_excel(
     ozet_df: pd.DataFrame,
     detay_df: pd.DataFrame,
     istatistik_df: pd.DataFrame,
+    logger_param=None,
 ) -> Path:
+    if logger_param is None:
+        logger_param = logger
     fname = Path(fname)
     fname.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(fname, engine="xlsxwriter", mode="w") as w:
@@ -259,8 +262,8 @@ def kaydet_uc_sekmeli_excel(
     )
     logging.getLogger().addHandler(fh)
 
-    logger.info("Saved report to %s", fname)
-    logger.info("Per-run log file: %s", run_log)
+    logger_param.info("Saved report to %s", fname)
+    logger_param.info("Per-run log file: %s", run_log)
     return fname
 
 
@@ -269,7 +272,10 @@ def kaydet_raporlar(
     detay_df: pd.DataFrame,
     istat_df: pd.DataFrame,
     filepath: Path,
+    logger_param=None,
 ) -> Path:
+    if logger_param is None:
+        logger_param = logger
     filepath = Path(filepath)
     with pd.ExcelWriter(
         filepath,
@@ -280,7 +286,7 @@ def kaydet_raporlar(
         safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
         safe_to_excel(detay_df, w, sheet_name="Detay", index=False)
         safe_to_excel(istat_df, w, sheet_name="İstatistik", index=False)
-    logger.info("Rapor kaydedildi → %s", filepath)
+    logger_param.info("Rapor kaydedildi → %s", filepath)
     return filepath
 
 
@@ -446,10 +452,12 @@ def generate_full_report(
     *,
     keep_legacy: bool = True,
     quick: bool = True,
+    logger_param=None,
 ) -> str:
+    if logger_param is None:
+        logger_param = logger
     if keep_legacy:
-        from finansal_analiz_sistemi.utils.normalize import \
-            normalize_filtre_kodu
+        from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
 
         if not summary_df.empty and (
             "filtre_kodu" in summary_df.columns
@@ -596,7 +604,7 @@ def generate_full_report(
             _write_health_sheet(wr, summary_df)
 
     # Trace
-    logger.debug(
+    logger_param.debug(
         "[TRACE] writer closed → exists=%s size=%s",
         out_path.exists(),
         out_path.stat().st_size if out_path.exists() else 0,
@@ -611,8 +619,8 @@ def generate_full_report(
     )
     logging.getLogger().addHandler(fh)
 
-    logger.info("Rapor kaydedildi → %s", out_path)
-    logger.info("Per-run log file: %s", run_log)
+    logger_param.info("Rapor kaydedildi → %s", out_path)
+    logger_param.info("Per-run log file: %s", run_log)
     return out_path
 
 
