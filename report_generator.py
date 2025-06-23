@@ -81,15 +81,15 @@ def add_error_sheet(writer, error_list: Iterable[tuple]):
 def olustur_ozet_rapor(
     sonuclar_listesi: list,
     cikti_klasoru: str,
-    logger=None,
+    logger_param=None,
 ) -> str | None:
-    if logger is None:
-        logger = logger
+    if logger_param is None:
+        logger_param = logger
     os.makedirs(cikti_klasoru, exist_ok=True)
     kayitlar = []
     for sonuc in sonuclar_listesi:
         if not isinstance(sonuc, dict):
-            logger.warning(
+            logger_param.warning(
                 "Beklenmeyen sonuç tipi: %s → %s",
                 type(sonuc),
                 sonuc,
@@ -97,7 +97,7 @@ def olustur_ozet_rapor(
             continue
         secilen = sonuc.get("hisseler", [])
         if not secilen:
-            logger.warning(
+            logger_param.warning(
                 "Filtre '%s' sonucu: Hiç hisse seçilmedi."
                 " Boş rapor satırı yazılacak.",
                 sonuc.get("filtre_kodu", "?"),
@@ -126,22 +126,22 @@ def olustur_ozet_rapor(
         f"ozet_rapor_{datetime.now():%Y%m%d_%H%M%S}.csv",
     )
     df.to_csv(dosya_adi, index=False, encoding="utf-8-sig")
-    logger.info("Özet rapor oluşturuldu: %s", dosya_adi)
+    logger_param.info("Özet rapor oluşturuldu: %s", dosya_adi)
     return dosya_adi
 
 
 def olustur_hisse_bazli_rapor(
     sonuclar_listesi: list,
     cikti_klasoru: str,
-    logger=None,
+    logger_param=None,
 ) -> str | None:
-    if logger is None:
-        logger = logger
+    if logger_param is None:
+        logger_param = logger
     os.makedirs(cikti_klasoru, exist_ok=True)
     detayli_kayitlar = []
     for sonuc in sonuclar_listesi:
         if not isinstance(sonuc, dict):
-            logger.warning("Geçersiz filtre sonucu tipi: %s", type(sonuc))
+            logger_param.warning("Geçersiz filtre sonucu tipi: %s", type(sonuc))
             continue
         filtre_kodu = sonuc.get("filtre_kodu", "")
         notlar = sonuc.get("notlar", "")
@@ -176,7 +176,7 @@ def olustur_hisse_bazli_rapor(
         f"hisse_bazli_rapor_{datetime.now():%Y%m%d_%H%M%S}.csv",
     )
     df.to_csv(dosya_adi, index=False, encoding="utf-8-sig")
-    logger.info("Hisse bazlı detaylı rapor oluşturuldu: %s", dosya_adi)
+    logger_param.info("Hisse bazlı detaylı rapor oluşturuldu: %s", dosya_adi)
     return dosya_adi
 
 
