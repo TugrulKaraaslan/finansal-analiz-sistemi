@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def normalize_filtre_kodu(df: pd.DataFrame) -> pd.DataFrame:
     """
     DataFrame içinde 'FilterCode' / 'filtercode' gibi varyasyonları

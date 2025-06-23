@@ -1,21 +1,19 @@
 from __future__ import annotations
 
-from utils.compat import safe_concat, safe_to_excel
-from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
-
-import os
 import logging
-from pathlib import Path
+import os
+import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import Iterable
 
-from openpyxl.utils import get_column_letter
-from logging_config import get_logger
-
-import pandas as pd
 import numpy as np
-import uuid
+import pandas as pd
+from openpyxl.utils import get_column_letter
+
 import report_stats
+from logging_config import get_logger
+from utils.compat import safe_concat, safe_to_excel
 
 logger = get_logger(__name__)
 
@@ -450,7 +448,8 @@ def generate_full_report(
     quick: bool = True,
 ) -> str:
     if keep_legacy:
-        from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
+        from finansal_analiz_sistemi.utils.normalize import \
+            normalize_filtre_kodu
 
         if not summary_df.empty and (
             "filtre_kodu" in summary_df.columns
@@ -577,8 +576,9 @@ def generate_full_report(
             safe_to_excel(
                 pd.DataFrame(FAILED_FILTERS), wr, sheet_name="query_errors", index=False
             )
-        from utils.failure_tracker import get_failures
         from dataclasses import asdict, is_dataclass
+
+        from utils.failure_tracker import get_failures
 
         for cat, rows in get_failures().items():
             if rows:
