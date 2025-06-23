@@ -534,8 +534,9 @@ def generate_full_report(
         )
         MAX_ROWS = 200_000
         n_chunks = max(1, (len(detail_df) - 1) // MAX_ROWS + 1)
+        normalized_detail = normalize_filtre_kodu(detail_df)
         startrow = 0
-        for i, chunk in enumerate(np.array_split(detail_df, n_chunks)):
+        for i, chunk in enumerate(np.array_split(normalized_detail, n_chunks)):
             safe_to_excel(
                 chunk,
                 wr,
