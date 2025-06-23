@@ -69,7 +69,8 @@ pytest -q -m "not slow" --cov .
 
 1. Depoyu klonlayın ve klasöre geçin.
 2. Gereken paketleri kurun.
-3. Testleri ve örnek çalıştırmayı yapın.
+3. Git LFS kurulumu gerekmez; CSV verileri bu depoda yer alır.
+4. Testleri ve örnek çalıştırmayı yapın.
 
 ```bash
 !git clone https://github.com/<KULLANICI>/finansal-analiz-sistemi.git
