@@ -5,10 +5,12 @@
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (Yorumlar eklendi, NaN yönetimi teyit edildi)
 
-import pandas as pd
-from logging_config import get_logger
 from functools import lru_cache
 from io import StringIO
+
+import pandas as pd
+
+from logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -97,13 +99,13 @@ def extract_columns_from_filters_cached(
     return extract_columns_from_filters(df_filters, series_series, series_value)
 
 
-def purge_old_logs(dir_path: str = "raporlar", days: int = 7) -> None:
+def purge_old_logs(dir_path: str = "loglar", days: int = 7) -> None:
     """Delete ``.log`` files older than ``days`` in ``dir_path``.
 
     Parameters
     ----------
     dir_path : str, optional
-        Directory containing log files. Default is ``"raporlar"``.
+        Directory containing log files. Default is ``"loglar"``.
     days : int, optional
         Files older than this number of days will be removed. Default is ``7``.
     """

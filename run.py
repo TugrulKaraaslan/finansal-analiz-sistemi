@@ -5,19 +5,21 @@
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (Erken hata durdurma mantığı eklendi, loglama iyileştirildi)
 
-from utils.logging_setup import setup_logger
-from logging_config import get_logger
-import pandas as pd
-import sys
-import os
-import logging
-from pathlib import Path
 import argparse
+import logging
+import os
+import sys
 import traceback
+from pathlib import Path
+
+import pandas as pd
 import yaml
+
 import config
 import utils
+from logging_config import get_logger
 from utils.date_utils import parse_date
+from utils.logging_setup import setup_logger
 
 
 def _parse_date(dt_str: str) -> pd.Timestamp:
@@ -157,7 +159,7 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
         logger.info("Rapor verisi boş.")
         return
     ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
-    out_path = Path("cikti/raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
+    out_path = Path("raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
     out_path.parent.mkdir(exist_ok=True)
     from utils.memory_profile import mem_profile
 
@@ -168,12 +170,12 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
 
 # Ana modülleri import et
 try:
-    from finansal_analiz_sistemi import data_loader
-    import preprocessor
-    import indicator_calculator
-    import filter_engine
     import backtest_core
+    import filter_engine
+    import indicator_calculator
+    import preprocessor
     import report_generator
+    from finansal_analiz_sistemi import data_loader
 
     logger.info("Tüm ana modüller başarıyla import edildi.")
 except ImportError as e_import_main:
@@ -204,6 +206,7 @@ def calistir_tum_sistemi(
         yeniden yükle.
     """
     import gc
+
     import filter_engine
     import utils.failure_tracker as ft
 
@@ -365,4 +368,4 @@ if __name__ == "__main__":
             ) as wr:
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
-        utils.purge_old_logs("raporlar", days=7)
+        utils.purge_old_logs("loglar", days=7)

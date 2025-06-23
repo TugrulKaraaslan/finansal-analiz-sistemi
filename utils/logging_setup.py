@@ -1,6 +1,6 @@
 import logging
-import sys
 import os
+import sys
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
@@ -53,7 +53,7 @@ def setup_logger(level: int = logging.INFO) -> CounterFilter:
     if root.handlers:
         return _counter_filter
 
-    log_dir = os.path.join("cikti", "logs")
+    log_dir = os.path.join("loglar")
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f"app_{datetime.now():%Y%m%d_%H%M%S}.log")
 
