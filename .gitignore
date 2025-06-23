@@ -1,12 +1,7 @@
-__pycache__/
+pycache/
 .pytest_cache/
+.env
 *.log
+loglar/
 raporlar/
 cikti/
-.env
-
-
-# Çıktılar
-raporlar/
-log/
-loglar/
