@@ -8,6 +8,7 @@
 
 import pandas as pd
 from utils.compat import safe_concat
+from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
 import pandas.errors
 import numpy as np
 import warnings
@@ -1063,7 +1064,9 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
     filtre_df = df_filters
     if filtre_df is None:
         try:
-            filtre_df = pd.read_csv(config.FILTRE_DOSYA_YOLU, sep=";", engine="python")
+            filtre_df = normalize_filtre_kodu(
+                pd.read_csv(config.FILTRE_DOSYA_YOLU, sep=";", engine="python")
+            )
         except Exception:
             filtre_df = pd.DataFrame()
 
