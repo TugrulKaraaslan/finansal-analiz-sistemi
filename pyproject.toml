@@ -4,3 +4,10 @@ line-length = 88
 [tool.flake8]
 max-line-length = 88
 extend-ignore   = ["E203", "W503", "E501"]
+
+[project]
+name = "finansal-analiz-sistemi"
+version = "0.1.0"
+
+[project.scripts]
+finansal-analiz = "finansal_analiz_sistemi.main:main"
