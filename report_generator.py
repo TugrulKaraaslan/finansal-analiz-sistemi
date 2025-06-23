@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from utils.compat import safe_concat, safe_to_excel
+from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
 
 import os
 import logging
