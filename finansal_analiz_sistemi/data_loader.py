@@ -224,6 +224,21 @@ def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.Da
         df = pd.read_parquet(path)
     else:
         df = pd.read_csv(path, sep=";")
+
+        # Bazı eski CSV’lerde sütun adı İngilizce ‘FilterCode’.
+        # Raporlama katmanı ise Türkçe ‘filtre_kodu’ bekliyor.
+        df = df.rename(
+            columns={
+                "FilterCode": "filtre_kodu",
+                "filtercode": "filtre_kodu",
+            }
+        )
+
+        # Hâlâ eksikse, erken ve anlaşılır hata ver.
+        if "filtre_kodu" not in df.columns:
+            raise ValueError(
+                f"{path.name}: 'filtre_kodu' sütunu bulunamadı; CSV başlıklarını kontrol et."
+            )
     log.info(f"Filtre dosyası '{path}' başarıyla yüklendi. {len(df)} filtre bulundu.")
     return df
 
