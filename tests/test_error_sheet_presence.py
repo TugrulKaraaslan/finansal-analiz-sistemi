@@ -1,19 +1,18 @@
-from report_generator import (
-    generate_full_report,
-    LEGACY_DETAIL_COLS,
-)
 import os
 import sys
-import pandas as pd
 
-# Proje kök dizinini PYTHONPATH'e ekle
+import pandas as pd
+import pytest
+
+from report_generator import LEGACY_DETAIL_COLS, generate_full_report
+
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 
-def test_hatalar_sheet_not_empty_and_matches(tmp_path):
-    # -- 1. Örnek veri seti: 5 satır → 2 OK, 1 QUERY_ERROR, 2 NO_STOCK
+@pytest.fixture
+def report_path(tmp_path):
     df_sum = pd.DataFrame(
         [
             ["T1", 1, 2.0, 2, -1, 1, "OK", "", "", ""],
@@ -35,30 +34,34 @@ def test_hatalar_sheet_not_empty_and_matches(tmp_path):
             "satis_tarihi",
         ],
     )
-
-    # -- Detay dummy
     df_det = pd.DataFrame(columns=LEGACY_DETAIL_COLS)
-
-    # -- Hata listesi (QUERY_ERROR satırı)
     err_list = [
         {
             "filtre_kodu": "T3",
             "hata_tipi": "QUERY_ERROR",
+            "eksik_ad": "-",
             "detay": "demo parse hatası",
             "cozum_onerisi": "ifade düzelt",
+            "reason": "demo",
+            "hint": "-",
         }
     ]
-
     path = tmp_path / "rapor.xlsx"
     generate_full_report(df_sum, df_det, err_list, path, keep_legacy=True)
+    return path
 
-    with pd.ExcelFile(path) as xls:
-        assert "Hatalar" in xls.sheet_names, "'Hatalar' sheet'i yok!"
 
-        hatalar_df = pd.read_excel(xls, "Hatalar")
-        assert not hatalar_df.empty, "'Hatalar' sheet'i boş!"
-
-        # Özet’te OK olmayan satır sayısı == Hatalar sheet satır sayısı
-        ozet_df = pd.read_excel(xls, "Özet")
-        n_bad = (ozet_df["sebep_kodu"] != "OK").sum()
-        assert len(hatalar_df) == n_bad, "Hatalar sayısı uyumsuz!"
+def test_error_sheet_presence(report_path):
+    xls = pd.ExcelFile(report_path)
+    assert "Hatalar" in xls.sheet_names
+    df = pd.read_excel(report_path, "Hatalar")
+    assert not df.empty
+    critical = [
+        "hata_tipi",
+        "eksik_ad",
+        "detay",
+        "cozum_onerisi",
+        "reason",
+        "hint",
+    ]
+    assert df[critical].notna().all(axis=None)

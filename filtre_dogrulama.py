@@ -1,8 +1,11 @@
 # filtre_dogrulama.py
 # Bu modül CSV filtre dosyasındaki flag/query hatalarını tespit eder
 
-import pandas as pd
 import re
+
+import pandas as pd
+
+from validators import ValidationError
 
 SEBEP_KODLARI = {
     "OK": "Filtre çalıştı ve hisse bulundu.",
@@ -56,6 +59,74 @@ def dogrula_filtre_dataframe(
 def kod_icin_aciklama(kod: str) -> str:
     """SEBEP_KODLARI icindeki aciklamayi dondurur."""
     return SEBEP_KODLARI.get(kod, "")
+
+
+def validate(
+    df_filtre: pd.DataFrame, zorunlu_kolonlar=None, logger=None
+) -> list[ValidationError]:
+    """Return list of ValidationError for filter dataframe."""
+    zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]
+    errors: list[ValidationError] = []
+
+    eksik = [c for c in zorunlu_kolonlar if c not in df_filtre.columns]
+    if eksik:
+        errors.append(
+            ValidationError(
+                hata_tipi="MISSING_COL",
+                eksik_ad=",".join(eksik),
+                detay=f"Eksik zorunlu kolonlar: {', '.join(eksik)}",
+                cozum_onerisi="CSV başlıklarını kontrol edin",
+                reason="missing_column",
+                hint="flag ve query sütunları gereklidir",
+            )
+        )
+        return errors
+
+    for idx, row in df_filtre.iterrows():
+        kod_degeri = row.get("flag")
+        kod = f"satir_{idx}" if pd.isna(kod_degeri) else str(kod_degeri).strip()
+        query_degeri = row.get("query", "")
+        query = "" if pd.isna(query_degeri) else str(query_degeri).strip()
+
+        if not kod:
+            errors.append(
+                ValidationError(
+                    hata_tipi="MISSING_FLAG",
+                    eksik_ad="flag",
+                    detay=f"Boş veya eksik flag (kod) değeri: satır {idx}",
+                    cozum_onerisi="flag kolonunu doldurun",
+                    reason="missing_flag",
+                    hint="Her filtre için bir kod girilmeli",
+                )
+            )
+        elif not re.match(r"^[A-Z0-9_\-]+$", kod):
+            errors.append(
+                ValidationError(
+                    hata_tipi="INVALID_FLAG",
+                    eksik_ad=kod,
+                    detay="Geçersiz karakterler içeren flag",
+                    cozum_onerisi="Sadece A-Z, 0-9, _ ve - kullanın",
+                    reason="invalid_flag",
+                    hint="Kodlar A-Z0-9_- ile sınırlıdır",
+                )
+            )
+
+        if not query:
+            errors.append(
+                ValidationError(
+                    hata_tipi="MISSING_QUERY",
+                    eksik_ad=kod,
+                    detay="Query sütunu boş veya eksik",
+                    cozum_onerisi="PythonQuery alanını doldurun",
+                    reason="missing_query",
+                    hint="Sorgu satırı boş bırakılmamalı",
+                )
+            )
+
+    if logger:
+        for err in errors:
+            logger.warning(f"Filtre doğrulama uyarısı ({err.eksik_ad}): {err.detay}")
+    return errors
 
 
 # ENTEGRASYON (data_loader.py içinde):
