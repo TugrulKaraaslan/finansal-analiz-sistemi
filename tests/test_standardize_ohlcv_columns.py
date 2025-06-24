@@ -1,7 +1,8 @@
 import pandas as pd
 import pytest
 
-from finansal_analiz_sistemi.data_loader import data_loader_standardize_ohlcv_columns
+from finansal_analiz_sistemi.data_loader import _standardize_ohlcv_columns
+
 
 @pytest.mark.parametrize(
     "raw_columns, expected_columns",
@@ -18,11 +19,11 @@ from finansal_analiz_sistemi.data_loader import data_loader_standardize_ohlcv_co
         ),
         (
             {
-                "Open": [1],
-                "High": [2],
-                "Low": [0],
-                "Close": [1],
-                "Volume": [10],
+                "OPEN": [1],
+                "HIGH": [2],
+                "LOW": [0],
+                "CLOSE": [1],
+                "VOLUME": [10],
             },
             {"open", "high", "low", "close", "volume"},
         ),
@@ -30,5 +31,5 @@ from finansal_analiz_sistemi.data_loader import data_loader_standardize_ohlcv_co
 )
 def test_standardize_ohlcv_columns(raw_columns, expected_columns):
     df = pd.DataFrame(raw_columns)
-    standardized_df = data_loader_standardize_ohlcv_columns(df, "dummy")
+    standardized_df = _standardize_ohlcv_columns(df, "dummy")
     assert expected_columns.issubset(set(standardized_df.columns))

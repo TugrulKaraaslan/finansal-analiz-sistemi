@@ -1,10 +1,12 @@
+from pathlib import Path
+
 import pandas as pd
 import pytest
-from pathlib import Path
 
 from finansal_analiz_sistemi import data_loader
 
 CSV_CONTENT = "col\n1\n2\n3"
+
 
 @pytest.mark.parametrize("content,expected_rows", [(CSV_CONTENT, 3), ("col\n42", 1)])
 def test_load_data_param(tmp_path: Path, content: str, expected_rows: int):
@@ -21,6 +23,7 @@ def test_load_data_empty(tmp_path: Path):
     with pytest.raises(Exception):
         data_loader.load_data(str(p))
 
+
 @pytest.mark.parametrize("colname", ["Date", "Tarih", "tarih", "TARİH", "Unnamed: 0"])
 def test_standardize_date_column(colname):
     df = pd.DataFrame({colname: ["2025-03-07"]})
@@ -36,13 +39,15 @@ def test_standardize_date_column_no_match():
 
 
 def test_standardize_ohlcv_columns():
-    df = pd.DataFrame({
-        "Açılış": [1],
-        "Yüksek": [2],
-        "Düşük": [0],
-        "Kapanış": [1],
-        "Miktar": [10],
-    })
+    df = pd.DataFrame(
+        {
+            "Açılış": [1],
+            "Yüksek": [2],
+            "Düşük": [0],
+            "Kapanış": [1],
+            "Miktar": [10],
+        }
+    )
     out = data_loader._standardize_ohlcv_columns(df, "dummy")
     assert set(["open", "high", "low", "close", "volume"]).issubset(out.columns)
 
@@ -61,6 +66,7 @@ def test_load_excel_katalogu_short(tmp_path: Path):
 
 
 def test_load_excel_katalogu_long(tmp_path: Path):
+    pytest.importorskip("pyarrow")
     df = pd.DataFrame({"a": range(252)})
     p = tmp_path / "s2.xlsx"
     df.to_excel(p, index=False)
