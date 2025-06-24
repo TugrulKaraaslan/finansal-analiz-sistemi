@@ -1,9 +1,11 @@
-from utils import crosses_above, crosses_below
-import pandas as pd
-import numpy as np
 import os
 import sys
+
+import numpy as np
+import pandas as pd
 import pytest
+
+from utils import crosses_above, crosses_below
 
 # Adjust path so that utils module is importable when running tests directly
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))

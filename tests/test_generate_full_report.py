@@ -1,8 +1,10 @@
-import report_generator
 import os
 import sys
-import pandas as pd
+
 import openpyxl
+import pandas as pd
+
+import report_generator
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

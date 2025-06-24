@@ -1,8 +1,10 @@
-from src.preprocessor import fill_missing_business_day
-import backtest_core
 import os
 import sys
+
 import pandas as pd
+
+import backtest_core
+from src.preprocessor import fill_missing_business_day
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

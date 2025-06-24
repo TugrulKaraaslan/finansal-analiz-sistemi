@@ -1,8 +1,10 @@
-import pytest
-import report_generator
+import time
+
 import pandas as pd
 import psutil
-import time
+import pytest
+
+import report_generator
 
 
 @pytest.mark.slow

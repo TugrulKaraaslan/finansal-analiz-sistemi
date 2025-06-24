@@ -1,7 +1,9 @@
-from indicator_calculator import calculate_indicators
 import os
 import sys
+
 import pandas as pd
+
+from indicator_calculator import calculate_indicators
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.modules.pop("pandas_ta", None)
