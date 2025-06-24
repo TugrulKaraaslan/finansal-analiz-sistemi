@@ -3,6 +3,7 @@ import pytest
 
 from finansal_analiz_sistemi.data_loader import data_loader_standardize_ohlcv_columns
 
+
 @pytest.mark.parametrize(
     "raw_columns, expected_columns",
     [

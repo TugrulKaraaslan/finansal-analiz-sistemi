@@ -10,10 +10,14 @@ except Exception:
 DF = pd.DataFrame(
     {
         "hisse_kodu": ["AAA", "AAA"],
-        "tarih": [pd.to_datetime("09.03.2025", dayfirst=True), pd.to_datetime("11.03.2025", dayfirst=True)],
+        "tarih": [
+            pd.to_datetime("09.03.2025", dayfirst=True),
+            pd.to_datetime("11.03.2025", dayfirst=True),
+        ],
         "close": [10.0, 11.0],
     }
 )
+
 
 @pytest.mark.parametrize(
     "tarih,col,expected",
