@@ -1,10 +1,12 @@
-import pandas as pd
+import warnings
+
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from filtre_dogrulama import SEBEP_KODLARI
+
 import config
-import warnings
+from filtre_dogrulama import SEBEP_KODLARI
 from utils.pandas_option_safe import option_context
 
 WARN_MSG = "".join(
@@ -38,7 +40,7 @@ def normalize_pct(series):
 
 def _normalize_pct(s: pd.Series) -> pd.Series:
     """Convert whole-number percentages to fractional scale (÷100 once)."""
-    s = s.copy()
+    s = pd.to_numeric(s, errors="coerce").copy()
     mask = s.abs() > 1.5
     s.loc[mask] = s.loc[mask] / 100
     return s.round(2)

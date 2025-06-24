@@ -426,11 +426,20 @@ def _write_error_sheet(
         Summary table used to ensure every non-``OK`` record is represented.
     """
 
-    df_err = pd.DataFrame(error_list)
-    if "reason" not in df_err.columns:
-        df_err["reason"] = ""
-    if "hint" not in df_err.columns:
-        df_err["hint"] = ""
+    from dataclasses import asdict, is_dataclass
+
+    df_err = pd.DataFrame([asdict(e) if is_dataclass(e) else e for e in error_list])
+    for col in [
+        "filtre_kodu",
+        "hata_tipi",
+        "eksik_ad",
+        "detay",
+        "cozum_onerisi",
+        "reason",
+        "hint",
+    ]:
+        if col not in df_err.columns:
+            df_err[col] = "-"
 
     if summary_df is not None and not summary_df.empty:
         non_ok = summary_df[summary_df["sebep_kodu"] != "OK"]
@@ -444,8 +453,11 @@ def _write_error_sheet(
                     {
                         "filtre_kodu": row["filtre_kodu"],
                         "hata_tipi": row["sebep_kodu"],
-                        "detay": row.get("sebep_aciklama", ""),
-                        "cozum_onerisi": "",
+                        "detay": row.get("sebep_aciklama", "-") or "-",
+                        "cozum_onerisi": "-",
+                        "eksik_ad": "-",
+                        "reason": "-",
+                        "hint": "-",
                     }
                 )
             if base_records:
@@ -494,7 +506,20 @@ def generate_full_report(
 
     # ----- ➤ sebep_aciklama'ları doldur (Hatalar sheet'inden) -----
     if error_list:
-        err_df = pd.DataFrame(error_list)
+        from dataclasses import asdict, is_dataclass
+
+        err_df = pd.DataFrame([asdict(e) if is_dataclass(e) else e for e in error_list])
+        for col in [
+            "filtre_kodu",
+            "hata_tipi",
+            "eksik_ad",
+            "detay",
+            "cozum_onerisi",
+            "reason",
+            "hint",
+        ]:
+            if col not in err_df.columns:
+                err_df[col] = "-"
         if not err_df.empty and "detay" in err_df.columns:
             err_map = err_df[["filtre_kodu", "detay"]].dropna()
             # Özet
@@ -520,11 +545,9 @@ def generate_full_report(
                 detail_df.drop(columns="sebep_aciklama_fill", inplace=True)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    engine_opts = {"options": {"constant_memory": True}}
     with pd.ExcelWriter(
         out_path,
         engine="xlsxwriter",
-        engine_kwargs=engine_opts,
     ) as wr:
         ws_ozet = wr.book.add_worksheet("Özet")
         wr.sheets["Özet"] = ws_ozet
