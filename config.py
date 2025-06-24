@@ -6,8 +6,9 @@
 # Tarih: 19 Mayıs 2025 (Ichimoku ve Aroon ad eşleştirmeleri filtre uyumu
 # için SON DÜZELTMELER)
 
-import os
 import logging
+import os
+
 import numpy as np
 import yaml
 from dotenv import load_dotenv
@@ -18,7 +19,12 @@ from dotenv import load_dotenv
 if not hasattr(np, "NaN"):
     np.NaN = np.nan
 
-import pandas_ta as ta
+try:
+    import pandas_ta as ta
+except ImportError as exc:
+    raise RuntimeError(
+        "pandas-ta eksik — `poetry add pandas-ta@^0.3.14b0` ile kurun"
+    ) from exc
 import sys
 
 load_dotenv()

@@ -1,6 +1,16 @@
 [tool.black]
 line-length = 88
 
+[tool.poetry]
+name = "finansal-analiz-sistemi"
+version = "0.1.0"
+description = "Backtest otomasyon projesi"
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas-ta = "0.3.14b0"
+
 [tool.flake8]
 max-line-length = 88
 extend-ignore = ["E203", "W503", "E501"]
