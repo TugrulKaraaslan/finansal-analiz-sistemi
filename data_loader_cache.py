@@ -2,6 +2,9 @@
 import os
 
 import pandas as pd
+from cachetools import TTLCache
+
+CACHE: TTLCache = TTLCache(maxsize=256, ttl=4 * 60 * 60)  # 4 saat LRU+TTL
 
 
 class DataLoaderCache:
@@ -56,3 +59,21 @@ class DataLoaderCache:
             if self.logger:
                 self.logger.error(f"CSV yükleme hatası: {filepath}: {e}")
             raise
+
+
+def _read_parquet(ticker: str, start: str, end: str) -> pd.DataFrame:
+    dates = pd.date_range(start, end, freq="D")
+    return pd.DataFrame({"hisse_kodu": ticker, "tarih": dates})
+
+
+def get_df(ticker: str, start, end):
+    key = f"{ticker}_{start}_{end}"
+    if key in CACHE:
+        return CACHE[key]
+    df = _read_parquet(ticker, start, end)
+    CACHE[key] = df
+    return df
+
+
+def clear_cache() -> None:
+    CACHE.clear()
