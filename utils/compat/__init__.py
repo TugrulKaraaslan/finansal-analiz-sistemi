@@ -1,5 +1,6 @@
-import pandas as pd
 from typing import List
+
+import pandas as pd
 from packaging import version as _v
 
 __all__ = ["safe_concat", "safe_to_excel", "safe_infer_objects"]

@@ -1,6 +1,7 @@
 # data_loader_cache.py
-import pandas as pd
 import os
+
+import pandas as pd
 
 
 class DataLoaderCache:

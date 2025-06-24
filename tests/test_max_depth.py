@@ -1,7 +1,8 @@
-import pytest
 import pandas as pd
-import settings
+import pytest
+
 import filter_engine as fe
+import settings
 
 
 def _nested(depth: int):

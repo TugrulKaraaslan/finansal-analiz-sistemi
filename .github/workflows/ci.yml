@@ -15,5 +15,6 @@ jobs:
       run: |
         pip install -q pip-tools
         pip install -q -r requirements.txt
-    - name: Run tests
-      run: pytest -q
+      - uses: pre-commit/action@v3.0.1
+      - name: Run tests
+        run: pytest -q

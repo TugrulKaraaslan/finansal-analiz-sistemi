@@ -1,13 +1,15 @@
-from utils.failure_tracker import log_failure, failures
-from report_generator import (
-    generate_full_report,
-    LEGACY_SUMMARY_COLS,
-    LEGACY_DETAIL_COLS,
-)
 import os
 import sys
-import pandas as pd
+
 import openpyxl
+import pandas as pd
+
+from report_generator import (
+    LEGACY_DETAIL_COLS,
+    LEGACY_SUMMARY_COLS,
+    generate_full_report,
+)
+from utils.failure_tracker import failures, log_failure
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

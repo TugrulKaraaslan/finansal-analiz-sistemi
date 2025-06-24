@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from utils.compat import safe_concat
-
 import os
 from datetime import datetime
 from pathlib import Path
@@ -12,6 +10,8 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.utils.dataframe import dataframe_to_rows as _to_rows
+
+from utils.compat import safe_concat
 
 GREEN_FILL = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
 RED_FILL = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")

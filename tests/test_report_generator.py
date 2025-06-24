@@ -1,9 +1,11 @@
-import report_generator
-import openpyxl
-import pandas as pd
-from utils.compat import safe_to_excel
 import os
 import sys
+
+import openpyxl
+import pandas as pd
+
+import report_generator
+from utils.compat import safe_to_excel
 
 after_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, after_path)

@@ -5,11 +5,12 @@
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (Sütun adı standardizasyonu sonrası, loglama iyileştirmeleri)
 
-import pandas as pd
-import numpy as np
-import config
 import re
 
+import numpy as np
+import pandas as pd
+
+import config
 from logging_config import get_logger
 
 logger = get_logger(__name__)

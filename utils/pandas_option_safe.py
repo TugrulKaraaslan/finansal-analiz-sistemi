@@ -1,5 +1,6 @@
-import pandas as pd
 from contextlib import contextmanager
+
+import pandas as pd
 
 
 def ensure_option(name: str, value) -> None:

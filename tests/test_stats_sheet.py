@@ -1,7 +1,9 @@
-from report_generator import generate_full_report
 import os
 import sys
+
 import pandas as pd
+
+from report_generator import generate_full_report
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

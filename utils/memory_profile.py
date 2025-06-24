@@ -1,6 +1,7 @@
-import psutil
 import os
 import time
+
+import psutil
 
 
 class mem_profile:

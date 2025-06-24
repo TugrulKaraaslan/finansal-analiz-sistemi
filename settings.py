@@ -1,4 +1,5 @@
 import os
+
 import yaml
 
 _cfg_path = os.path.join(os.path.dirname(__file__), "settings.yaml")

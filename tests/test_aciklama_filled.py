@@ -1,10 +1,9 @@
-from report_generator import (
-    generate_full_report,
-    LEGACY_DETAIL_COLS,
-)
 import os
 import sys
+
 import pandas as pd
+
+from report_generator import LEGACY_DETAIL_COLS, generate_full_report
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:

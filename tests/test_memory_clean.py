@@ -1,10 +1,11 @@
-import pytest
 import os
 from pathlib import Path
 
 import pandas as pd
-import run as main
+import pytest
+
 import filter_engine as fe
+import run as main
 import utils.failure_tracker as ft
 
 psutil = pytest.importorskip("psutil")

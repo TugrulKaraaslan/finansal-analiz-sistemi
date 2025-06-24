@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
-from filter_engine import safe_eval, QueryError
+
+from filter_engine import QueryError, safe_eval
 
 
 def test_safe_eval_recursion_guard():
