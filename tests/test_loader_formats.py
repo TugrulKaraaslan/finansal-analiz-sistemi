@@ -1,6 +1,9 @@
 import pandas as pd
+import pytest
 
 from finansal_analiz_sistemi.data_loader import yukle_filtre_dosyasi
+
+pytest.importorskip("pyarrow")
 
 # regression test for new loader formats
 

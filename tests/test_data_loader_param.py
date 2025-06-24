@@ -66,6 +66,7 @@ def test_load_excel_katalogu_short(tmp_path: Path):
 
 
 def test_load_excel_katalogu_long(tmp_path: Path):
+    pytest.importorskip("pyarrow")
     df = pd.DataFrame({"a": range(252)})
     p = tmp_path / "s2.xlsx"
     df.to_excel(p, index=False)
