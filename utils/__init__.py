@@ -7,6 +7,7 @@
 
 from functools import lru_cache
 from io import StringIO
+from pathlib import Path
 
 import pandas as pd
 
@@ -99,17 +100,12 @@ def extract_columns_from_filters_cached(
     return extract_columns_from_filters(df_filters, series_series, series_value)
 
 
-def purge_old_logs(dir_path: str = "loglar", days: int = 7):
-    """Delete .log files older than days in the loglar/ directory.
-    Returns the number of deleted files."""
+def purge_old_logs(dir_path: str = "loglar", days: int = 7, dry_run: bool = False):
+    """Delete ``*.log`` files older than ``days`` in ``dir_path``.
 
-    import glob
-    import os
-    import time
+    Parameters match the legacy helper for backward compatibility.
+    """
 
-    deleted = 0
-    for fp in glob.glob(f"{dir_path}/*.log"):
-        if time.time() - os.path.getmtime(fp) > days * 24 * 3600:
-            os.remove(fp)
-            deleted += 1
-    return deleted
+    from .purge_old_logs import purge_old_logs as _impl
+
+    return _impl(log_dir=Path(dir_path), keep_days=days, dry_run=dry_run)
