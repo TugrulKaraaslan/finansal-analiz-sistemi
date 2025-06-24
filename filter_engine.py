@@ -122,9 +122,11 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
             FAILED_FILTERS.append({"filtre_kodu": expr.get("code"), "hata": str(e)})
             logger.warning("QUERY_ERROR %s", e)
             try:
+                from utils.error_map import get_reason_hint
                 from utils.failure_tracker import log_failure
 
-                log_failure("filters", expr.get("code", "unknown"), str(e))
+                reason, hint = get_reason_hint(e)
+                log_failure("filters", expr.get("code", "unknown"), reason, hint)
             except Exception:
                 pass
             raise
@@ -193,9 +195,11 @@ def _apply_single_filter(df, kod, query):
     except Exception as e:
         info.update(durum="HATA", sebep=str(e)[:120])
         try:
+            from utils.error_map import get_reason_hint
             from utils.failure_tracker import log_failure
 
-            log_failure("filters", kod, str(e))
+            reason, hint = get_reason_hint(e)
+            log_failure("filters", kod, reason, hint)
         except Exception:
             pass
         return None, info
@@ -230,9 +234,11 @@ def run_single_filter(kod: str, query: str) -> dict:
         )
         logger.warning(f"QUERY_ERROR: {kod} – {msg}")
         try:
+            from utils.error_map import get_reason_hint
             from utils.failure_tracker import log_failure
 
-            log_failure("filters", kod, msg)
+            reason, hint = get_reason_hint(qe)
+            log_failure("filters", kod, reason, hint)
         except Exception:
             pass
     except MissingColumnError as me:
@@ -248,9 +254,11 @@ def run_single_filter(kod: str, query: str) -> dict:
         )
         logger.warning(f"GENERIC: {kod} – {msg}")
         try:
+            from utils.error_map import get_reason_hint
             from utils.failure_tracker import log_failure
 
-            log_failure("filters", kod, msg)
+            reason, hint = get_reason_hint(me)
+            log_failure("filters", kod, reason, hint)
         except Exception:
             pass
     return atlanmis
@@ -431,9 +439,11 @@ def uygula_filtreler(
             )
             fn_logger.warning(f"QUERY_ERROR: {filtre_kodu} – {msg}")
             try:
+                from utils.error_map import get_reason_hint
                 from utils.failure_tracker import log_failure
 
-                log_failure("filters", filtre_kodu, msg)
+                reason, hint = get_reason_hint(qe)
+                log_failure("filters", filtre_kodu, reason, hint)
             except Exception:
                 pass
             continue
@@ -450,9 +460,11 @@ def uygula_filtreler(
             )
             fn_logger.warning(f"GENERIC: {filtre_kodu} – {msg}")
             try:
+                from utils.error_map import get_reason_hint
                 from utils.failure_tracker import log_failure
 
-                log_failure("filters", filtre_kodu, msg)
+                reason, hint = get_reason_hint(me)
+                log_failure("filters", filtre_kodu, reason, hint)
             except Exception:
                 pass
             continue
