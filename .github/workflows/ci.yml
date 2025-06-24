@@ -17,12 +17,8 @@ jobs:
         run: |
           pip install -q pip-tools
           pip install -q -r requirements.txt
-          pip install -q flake8==7.0.0 isort==5.13.2 black==24.4.2 mypy pytest-cov
-      - name: Lint (flake8 / isort / black)
-        run: |
-          flake8 src tests || exit 1
-          isort --check src tests || exit 1
-          black --check src tests || exit 1
+          pip install -q pre-commit mypy pytest-cov
+      - uses: pre-commit/action@v3.0.1
       - name: Type-check (mypy – toleranslı)
         run: mypy src tests || true
       - name: Run unit tests + coverage
