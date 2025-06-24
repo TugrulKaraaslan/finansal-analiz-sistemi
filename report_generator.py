@@ -290,6 +290,21 @@ def kaydet_raporlar(
     return filepath
 
 
+def _build_detay_df(
+    detay_list: list[pd.DataFrame], trades: pd.DataFrame
+) -> pd.DataFrame:
+    """Combine partial detail frames and merge with trade results."""
+    detay_df = pd.concat(detay_list, ignore_index=True)
+    if trades is not None and not trades.empty:
+        detay_df = detay_df.merge(
+            trades,
+            on=["filtre_kodu", "hisse_kodu"],
+            how="left",
+            validate="one_to_one",
+        )
+    return detay_df
+
+
 def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     """Write summary statistics to the given Excel writer."""
     toplam = len(df_sum)
@@ -632,6 +647,7 @@ __all__ = [
     "olustur_excel_raporu",
     "kaydet_uc_sekmeli_excel",
     "kaydet_raporlar",
+    "_build_detay_df",
     "generate_summary",
     "generate_full_report",
     "_write_stats_sheet",
