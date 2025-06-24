@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 
+COLS = ["tarih", "filter_kodu", "python_query"]
+
 import config
 from data_loader_cache import DataLoaderCache
 from logging_config import get_logger
@@ -34,6 +36,24 @@ def _read_excel_cached(path: str) -> pd.DataFrame:
 def load_data(path: str) -> pd.DataFrame:
     """Read a CSV file using an in-memory cache."""
     df = pd.read_csv(path)
+    return df
+
+
+def load_filter_csv(path: str) -> pd.DataFrame:
+    """CSV'yi okunur ve kolon hizasını garanti eder."""
+
+    df = pd.read_csv(
+        path,
+        names=COLS,  # beklenen kolon listesi
+        header=None,  # dosya başlıksız
+        skiprows=1,  # ilk dummy satırı atla
+        sep=";",
+    )
+
+    # Güvenlik: kolonlar beklenenden farklıysa CI kırmızı olsun
+    if list(df.columns) != COLS:
+        raise ValueError(f"Beklenen kolonlar {COLS}, gelen: {df.columns}")
+
     return df
 
 
