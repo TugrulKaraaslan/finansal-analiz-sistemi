@@ -1,5 +1,6 @@
 import pandas as pd
-from filter_engine import safe_eval, FAILED_FILTERS
+
+from filter_engine import FAILED_FILTERS, safe_eval
 from utils.failure_tracker import failures
 
 

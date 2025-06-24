@@ -1,8 +1,10 @@
-import filter_engine
 import os
 import sys
+
 import pandas as pd
 import pytest
+
+import filter_engine
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

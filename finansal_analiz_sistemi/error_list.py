@@ -1,4 +1,5 @@
 import pandas as pd
+
 from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
 
 

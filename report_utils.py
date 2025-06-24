@@ -2,6 +2,7 @@
 import pandas as pd
 from openpyxl.chart import BarChart, Reference
 from openpyxl.utils import get_column_letter
+
 import report_stats
 
 # Default column orders for generated reports

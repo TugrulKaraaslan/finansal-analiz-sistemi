@@ -1,5 +1,6 @@
-import re
 import logging
+import re
+
 from filter_engine import run_single_filter
 
 

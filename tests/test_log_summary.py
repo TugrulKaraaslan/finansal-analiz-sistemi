@@ -1,7 +1,8 @@
-from utils.logging_setup import setup_logger
 import logging
 import os
 import sys
+
+from utils.logging_setup import setup_logger
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

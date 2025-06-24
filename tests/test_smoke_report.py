@@ -1,5 +1,8 @@
-import openpyxl, tempfile
+import tempfile
 from pathlib import Path
+
+import openpyxl
+
 from run import run_pipeline
 
 

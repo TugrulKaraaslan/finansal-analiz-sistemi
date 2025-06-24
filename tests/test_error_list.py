@@ -1,5 +1,6 @@
 import pandas as pd
-from report_generator import generate_full_report, LEGACY_SUMMARY_COLS
+
+from report_generator import LEGACY_SUMMARY_COLS, generate_full_report
 
 
 def test_error_list_writes_sheet(tmp_path):
