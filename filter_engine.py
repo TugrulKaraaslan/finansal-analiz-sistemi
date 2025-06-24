@@ -5,14 +5,16 @@
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (Loglama ve hata yönetimi iyileştirmeleri)
 
-from logging_config import get_logger
-import re
-import pandas as pd
 import keyword
-from pandas.errors import UndefinedVariableError as QueryError
-import yaml
 import os
+import re
+
+import pandas as pd
+import yaml
+from pandas.errors import UndefinedVariableError as QueryError
+
 import settings
+from logging_config import get_logger
 
 
 class MissingColumnError(Exception):
@@ -364,7 +366,7 @@ def uygula_filtreler(
         atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(hack)
 
     for index, row in df_filtre_kurallari.iterrows():
-        filtre_kodu = row.get("FilterCode", f"FiltreIndex_{index}")
+        filtre_kodu = row.get("FilterCode")
         python_sorgusu_raw = row.get("PythonQuery")
 
         if pd.isna(python_sorgusu_raw) or not str(python_sorgusu_raw).strip():
