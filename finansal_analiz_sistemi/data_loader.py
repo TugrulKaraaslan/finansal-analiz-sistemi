@@ -1,16 +1,19 @@
 import glob
+
+# Stdlib / 3rd-party importlar en üstte olmalı
 import os
 from functools import lru_cache, partial
 from pathlib import Path
 
 import pandas as pd
 
-COLS = ["tarih", "filter_kodu", "python_query"]
-
 import config
 from data_loader_cache import DataLoaderCache
 from logging_config import get_logger
 from utils.compat import safe_concat
+
+# Sabitler
+COLS = ["tarih", "filter_kodu", "python_query"]
 
 # data_loader.py
 # -*- coding: utf-8 -*-
