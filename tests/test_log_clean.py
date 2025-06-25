@@ -1,5 +1,8 @@
-import os, time, pytest
+import os
+import time
 from pathlib import Path
+
+import pytest
 
 from utils.log_cleaner import purge_old_logs
 
