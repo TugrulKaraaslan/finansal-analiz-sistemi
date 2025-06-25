@@ -22,9 +22,7 @@ if not hasattr(np, "NaN"):
 try:
     import pandas_ta as ta
 except ImportError as exc:
-    raise RuntimeError(
-        "pandas_ta eksik — `pip install pandas-ta`"
-    ) from exc
+    raise RuntimeError("pandas_ta eksik — `pip install pandas-ta`") from exc
 import sys
 
 load_dotenv()
