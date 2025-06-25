@@ -23,7 +23,7 @@ try:
     import pandas_ta as ta
 except ImportError as exc:
     raise RuntimeError(
-        "pandas-ta eksik — `poetry add pandas-ta@^0.3.14b0` ile kurun"
+        "pandas_ta eksik — `pip install pandas-ta`"
     ) from exc
 import sys
 
