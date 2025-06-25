@@ -1,12 +1,13 @@
 import pandas as pd
 import streamlit as st
+from src.utils.excel_reader import open_excel_cached
 
 st.title("Rapor Görüntüleyici")
 
 uploaded = st.file_uploader("Rapor Excel’i (.xlsx) seç", type="xlsx")
 if uploaded:
     with st.spinner("Yükleniyor..."):
-        xls = pd.ExcelFile(uploaded)
+        xls = open_excel_cached(uploaded)
         tab1, tab2 = st.tabs(["Özet", "Hatalar"])
         with tab1:
             df_ozet = pd.read_excel(xls, "Özet")

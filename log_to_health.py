@@ -10,6 +10,7 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.utils.dataframe import dataframe_to_rows as _to_rows
+from src.utils.excel_reader import open_excel_cached
 
 from utils.compat import safe_concat
 
@@ -56,7 +57,7 @@ def generate(log_path: str | os.PathLike, excel_paths: list[str | os.PathLike]) 
         if not os.path.exists(p):
             continue
         try:
-            xl = pd.ExcelFile(p)
+            xl = open_excel_cached(p)
         except Exception:
             continue
         if "Özet" in xl.sheet_names:
