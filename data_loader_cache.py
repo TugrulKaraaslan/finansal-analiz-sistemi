@@ -4,6 +4,8 @@ import os
 import pandas as pd
 from cachetools import TTLCache
 
+from src.utils.excel_reader import open_excel_cached
+
 CACHE: TTLCache = TTLCache(maxsize=256, ttl=4 * 60 * 60)  # 4 saat LRU+TTL
 
 
@@ -32,7 +34,7 @@ class DataLoaderCache:
             return self.loaded_data[key]
 
         try:
-            xls = pd.ExcelFile(filepath, **kwargs)
+            xls = open_excel_cached(filepath, **kwargs)
             self.loaded_data[key] = xls
             if self.logger:
                 self.logger.info(f"ExcelFile yüklendi: {filepath}")
