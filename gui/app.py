@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+
 from src.utils.excel_reader import open_excel_cached
 
 st.title("Rapor Görüntüleyici")

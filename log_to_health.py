@@ -10,8 +10,8 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.utils.dataframe import dataframe_to_rows as _to_rows
-from src.utils.excel_reader import open_excel_cached
 
+from src.utils.excel_reader import open_excel_cached
 from utils.compat import safe_concat
 
 GREEN_FILL = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")

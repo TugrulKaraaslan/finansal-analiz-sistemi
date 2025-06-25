@@ -2,8 +2,9 @@
 import os
 
 import pandas as pd
-from src.utils.excel_reader import open_excel_cached
 from cachetools import TTLCache
+
+from src.utils.excel_reader import open_excel_cached
 
 CACHE: TTLCache = TTLCache(maxsize=256, ttl=4 * 60 * 60)  # 4 saat LRU+TTL
 
