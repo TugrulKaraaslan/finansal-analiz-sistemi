@@ -17,6 +17,7 @@ jobs:
         run: |
           pip install -q pip-tools
           pip install -q -r requirements.txt
+          python -m pip install -e .
           pip install -q pre-commit mypy pytest-cov
       - uses: pre-commit/action@v3.0.1
       - name: Type-check (mypy – toleranslı)
