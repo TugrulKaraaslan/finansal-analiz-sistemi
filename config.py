@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-from pathlib import Path
-
 import yaml
 
 CACHE_PATH: Path = Path("veri/birlesik_hisse_verileri.parquet")
