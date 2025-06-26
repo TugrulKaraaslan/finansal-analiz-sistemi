@@ -25,7 +25,6 @@ DTYPES_MAP = {
     "close": "float32",
     "volume": "int32",
     # common indicators
-    "rsi_14": "float32",
     "macd": "float32",
     "ema_10": "float32",
     "ema_20": "float32",

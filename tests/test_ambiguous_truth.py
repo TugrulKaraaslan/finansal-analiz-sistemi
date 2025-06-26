@@ -1,10 +1,12 @@
 import pandas as pd
 
-import filter_engine
-
-
-def test_no_ambiguous_truth():
     df = pd.DataFrame(
+        {
+            "hisse_kodu": ["AAA", "BBB"],
+            "tarih": [pd.Timestamp("2025-01-01"), pd.Timestamp("2025-01-01")],
+            "close": [1, 2],
+        }
+    )
         {
             "hisse_kodu": ["AAA", "BBB"],
             "tarih": [pd.Timestamp("2025-01-01"), pd.Timestamp("2025-01-01")],
