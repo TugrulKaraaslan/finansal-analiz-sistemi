@@ -7,8 +7,8 @@ from pathlib import Path
 
 import click
 
-from finansal.parquet_cache import ParquetCacheManager
 import config  # noqa: WPS433  # local import pattern is intentional
+from finansal.parquet_cache import ParquetCacheManager
 
 logging.basicConfig(
     level=logging.INFO,
