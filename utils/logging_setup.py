@@ -4,20 +4,7 @@ import sys
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
-
-class NoDuplicateFilter(logging.Filter):
-    """Filter that removes consecutive duplicate log messages."""
-
-    def __init__(self):
-        super().__init__("no-dup")
-        self.last = None
-
-    def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
-        current = (record.levelno, record.getMessage())
-        if current == self.last:
-            return False
-        self.last = current
-        return True
+from finansal_analiz_sistemi.log_tools import DuplicateFilter
 
 
 class CounterFilter(logging.Filter):
@@ -68,10 +55,11 @@ def setup_logger(level: int = logging.INFO) -> CounterFilter:
 
     for handler in (file_handler, console_handler):
         handler.setFormatter(formatter)
-        handler.addFilter(NoDuplicateFilter())
+        handler.addFilter(DuplicateFilter())
         handler.addFilter(_counter_filter)
 
     logging.basicConfig(level=level, handlers=[console_handler, file_handler])
+    root.propagate = False
     return _counter_filter
 
 
