@@ -5,6 +5,8 @@ import logging
 import pathlib
 from importlib import import_module
 
+from finansal_analiz_sistemi.log_tools import setup_logging as _setup_logging
+
 _log_dir = pathlib.Path("log")
 _log_dir.mkdir(exist_ok=True)
 logging.basicConfig(
@@ -15,5 +17,7 @@ logging.basicConfig(
 
 config = import_module("config")
 logging_config = import_module("finansal_analiz_sistemi.logging_config")
+
+_setup_logging()
 
 __all__ = ["config", "logging_config"]
