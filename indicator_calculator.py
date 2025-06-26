@@ -32,6 +32,7 @@ import config
 import utils
 from config import CHUNK_SIZE
 from finansal.utils import lazy_chunk, safe_set
+from finansal_analiz_sistemi.log_tools import PCT_STEP
 from logging_config import get_logger
 from utilities.naming import unique_name
 
@@ -1152,14 +1153,16 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             drop=True
         )  # Her ihtimale karşı indeksi sıfırla
 
+        step = max(1, int(total_stocks * PCT_STEP / 100))
+        msg = f"({current_processed_count_main}/{total_stocks}) {hisse_kodu} için indikatör hesaplama..."
         if (
-            current_processed_count_main % 50 == 0
+            current_processed_count_main % step == 0
             or current_processed_count_main == 1
             or current_processed_count_main == total_stocks
         ):
-            ana_logger.info(
-                f"({current_processed_count_main}/{total_stocks}) {hisse_kodu} için indikatör hesaplama..."
-            )
+            ana_logger.info(msg)
+        else:
+            ana_logger.debug(msg)
 
         calculated_group = _calculate_group_indicators_and_crossovers(
             group_df_for_calc, wanted_cols, filtre_df
