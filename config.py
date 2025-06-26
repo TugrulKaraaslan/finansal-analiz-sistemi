@@ -1,7 +1,6 @@
 """Global yapi landirma sabitleri."""
 
-# Flag to indicate the application is running in Google Colab
-IS_COLAB: bool = False
+from pathlib import Path
 
 CACHE_PATH: Path = Path("veri/birlesik_hisse_verileri.parquet")
 DEFAULT_CSV_PATH: Path = Path("data/raw/all_prices.csv")
@@ -23,6 +22,7 @@ DTYPES_MAP = {
     "close": "float32",
     "volume": "int32",
     # common indicators
+    "rsi_14": "float32",
     "macd": "float32",
     "ema_10": "float32",
     "ema_20": "float32",
