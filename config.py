@@ -1,7 +1,8 @@
 """Global yapi landirma sabitleri."""
 
-from pathlib import Path
 import os
+from pathlib import Path
+
 import yaml
 
 CACHE_PATH: Path = Path("veri/birlesik_hisse_verileri.parquet")
@@ -50,4 +51,3 @@ if os.path.exists(_cfg_path):
         cfg = yaml.safe_load(f) or {}
 else:
     cfg = {}
-
