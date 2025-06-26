@@ -10,6 +10,7 @@ authors = []
 [tool.poetry.dependencies]
 python = "^3.11"
 pandas-ta = "0.3.14b0"
+cachetools = "6.1.0"
 
 [tool.flake8]
 max-line-length = 88

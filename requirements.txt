@@ -1,5 +1,6 @@
-pandas >= 2.2
-pyarrow >= 16
-portalocker >= 2.8
+cachetools>=6.1.0
 click >= 8.1
+pandas >= 2.2
+portalocker >= 2.8
 psutil>=5.9
+pyarrow >= 16
