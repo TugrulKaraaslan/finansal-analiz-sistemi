@@ -14,7 +14,7 @@ def purge_old_logs(
     """
     cutoff = datetime.now() - timedelta(days=keep_days)
     deleted = 0
-    for f in log_dir.glob("*.log"):
+    for f in log_dir.glob("*.log*"):
         if datetime.fromtimestamp(f.stat().st_mtime) < cutoff:
             if dry_run:
                 print(f"[DRY-RUN] Would delete {f}")

@@ -379,4 +379,4 @@ if __name__ == "__main__":
             ) as wr:
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
-        utils.purge_old_logs("loglar", days=7)
+        utils.purge_old_logs("loglar", days=30)
