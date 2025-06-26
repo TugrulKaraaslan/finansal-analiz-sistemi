@@ -14,6 +14,22 @@ DTYPES = {
     "volume": "int32",
 }
 
+# final dataframe dtypes
+DTYPES_MAP = {
+    "open": "float32",
+    "high": "float32",
+    "low": "float32",
+    "close": "float32",
+    "volume": "int32",
+    # common indicators
+    "rsi_14": "float32",
+    "macd": "float32",
+    "ema_10": "float32",
+    "ema_20": "float32",
+    "sma_20": "float32",
+    "adx_14": "float32",
+}
+
 # chunk size for indicator calculation
 CHUNK_SIZE: int = 1
 

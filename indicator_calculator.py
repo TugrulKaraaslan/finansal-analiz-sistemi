@@ -31,7 +31,7 @@ from pandas_ta import tema
 import config
 import utils
 from config import CHUNK_SIZE
-from finansal.utils import lazy_chunk
+from finansal.utils import lazy_chunk, safe_set
 from logging_config import get_logger
 from utilities.naming import unique_name
 
@@ -367,9 +367,17 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
         return
     try:
         if kind == "sma":
-            df[col] = df["close"].rolling(window=n, min_periods=1).mean()
+            safe_set(
+                df,
+                col,
+                df["close"].rolling(window=n, min_periods=1).mean().values,
+            )
         else:
-            df[col] = df["close"].ewm(span=n, adjust=False, min_periods=1).mean()
+            safe_set(
+                df,
+                col,
+                df["close"].ewm(span=n, adjust=False, min_periods=1).mean().values,
+            )
         df[col] = df[col].bfill()
         local_logger.debug(f"'{col}' sütunu safe_ma ile eklendi.")
     except Exception as e:
@@ -397,7 +405,7 @@ def add_series(
     if seen_names is None:
         seen_names = set(df.columns)
     safe = unique_name(name, seen_names)
-    df[safe] = values
+    safe_set(df, safe, values)
 
 
 def calculate_indicators(
@@ -459,7 +467,10 @@ def calculate_chunked(df: pd.DataFrame, active_inds: list[str]) -> None:
         for kod, group in kods:
             mini = group.sort_values("date").copy()
             mini = apply_indicators(mini, active_inds)
-            mini.to_parquet(pq_path, partition_cols=["ticker"], append=True)
+            try:
+                mini.to_parquet(pq_path, partition_cols=["ticker"], append=True)
+            except TypeError:
+                mini.to_parquet(pq_path, partition_cols=["ticker"])
             del mini
         gc.collect()
 
@@ -484,9 +495,9 @@ def _ekle_psar(df: pd.DataFrame) -> None:
             psar_long, psar_short = psar_raw
             psar_df = safe_concat([psar_long, psar_short], axis=1)
             psar_df.columns = ["psar_long", "psar_short"]
-        df["psar_long"] = psar_df["psar_long"]
-        df["psar_short"] = psar_df["psar_short"]
-        df["psar"] = df["psar_long"].fillna(df["psar_short"])
+        safe_set(df, "psar_long", psar_df["psar_long"].values)
+        safe_set(df, "psar_short", psar_df["psar_short"].values)
+        safe_set(df, "psar", df["psar_long"].fillna(df["psar_short"]).values)
     except Exception as e:
         logger.error(f"PSAR hesaplanırken hata: {e}")
         try:
@@ -734,17 +745,33 @@ def _calculate_group_indicators_and_crossovers(
         "hisse_kodu" if "hisse_kodu" in group_df_dt_indexed.columns else "symbol"
     )
     if "close" in group_df_dt_indexed.columns:
-        group_df_dt_indexed["ema_5"] = grouped["close"].transform(
-            lambda s: s.ewm(span=5, adjust=False).mean()
+        safe_set(
+            group_df_dt_indexed,
+            "ema_5",
+            grouped["close"]
+            .transform(lambda s: s.ewm(span=5, adjust=False).mean())
+            .values,
         )
-        group_df_dt_indexed["ema_20"] = grouped["close"].transform(
-            lambda s: s.ewm(span=20, adjust=False).mean()
+        safe_set(
+            group_df_dt_indexed,
+            "ema_20",
+            grouped["close"]
+            .transform(lambda s: s.ewm(span=20, adjust=False).mean())
+            .values,
         )
-        group_df_dt_indexed["ema_5_keser_ema_20_yukari"] = utils.crosses_above(
-            group_df_dt_indexed["ema_5"], group_df_dt_indexed["ema_20"]
+        safe_set(
+            group_df_dt_indexed,
+            "ema_5_keser_ema_20_yukari",
+            utils.crosses_above(
+                group_df_dt_indexed["ema_5"], group_df_dt_indexed["ema_20"]
+            ).values,
         )
-        group_df_dt_indexed["ema_5_keser_ema_20_asagi"] = utils.crosses_below(
-            group_df_dt_indexed["ema_5"], group_df_dt_indexed["ema_20"]
+        safe_set(
+            group_df_dt_indexed,
+            "ema_5_keser_ema_20_asagi",
+            utils.crosses_below(
+                group_df_dt_indexed["ema_5"], group_df_dt_indexed["ema_20"]
+            ).values,
         )
     if "tarih" in group_df_dt_indexed.columns:
         if not pd.api.types.is_datetime64_any_dtype(group_df_dt_indexed["tarih"]):
@@ -824,8 +851,12 @@ def _calculate_group_indicators_and_crossovers(
                 group_df_dt_indexed = safe_concat(
                     [group_df_dt_indexed, psar_df], axis=1
                 )
-                group_df_dt_indexed["psar"] = group_df_dt_indexed["psar_long"].fillna(
-                    group_df_dt_indexed["psar_short"]
+                safe_set(
+                    group_df_dt_indexed,
+                    "psar",
+                    group_df_dt_indexed["psar_long"]
+                    .fillna(group_df_dt_indexed["psar_short"])
+                    .values,
                 )
             except Exception as e_psar:
                 local_logger.error(f"{hisse_kodu}: PSAR hesaplanırken hata: {e_psar}")
@@ -890,9 +921,8 @@ def _calculate_group_indicators_and_crossovers(
         if len(group_df_dt_indexed[c]) == len(df_final_group)
     }
     if valid_cols:
-        df_final_group = df_final_group.join(
-            pd.DataFrame(valid_cols, index=df_final_group.index), how="left"
-        )
+        for c, vals in valid_cols.items():
+            safe_set(df_final_group, c, vals)
 
     # Bazı durumlarda pandas-ta stratejisinden beklenen indikatörler veri
     # yetersizliği nedeniyle oluşmayabilir. Filtrelerin sorunsuz çalışması için
