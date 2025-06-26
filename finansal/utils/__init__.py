@@ -1,9 +1,11 @@
-"""Utility helpers for the finansal package."""
+"""Utility helpers for the ``finansal`` package."""
 
 from __future__ import annotations
 
 from collections.abc import Iterable
 from typing import Generator, Sequence, TypeVar
+
+from .dtypes import safe_set
 
 T = TypeVar("T")
 
@@ -18,3 +20,6 @@ def lazy_chunk(seq: Iterable[T], size: int) -> Generator[Sequence[T], None, None
             chunk = []
     if chunk:
         yield chunk
+
+
+__all__ = ["lazy_chunk", "safe_set"]
