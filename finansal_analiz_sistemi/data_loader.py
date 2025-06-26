@@ -264,7 +264,8 @@ def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.Da
             )
 
     if "filtre_kodu" in df.columns:
-        df = df[df["filtre_kodu"].astype(str).str.strip() != ""]
+        col = df["filtre_kodu"]
+        df = df[col.notna() & col.astype(str).str.strip().ne("")]
     for col in ("min", "max"):
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")

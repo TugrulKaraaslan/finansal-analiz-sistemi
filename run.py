@@ -365,9 +365,10 @@ if __name__ == "__main__":
         logger.info(
             f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT TAMAMLANDI ======="
         )
+        summary_keys = [str(k) for k in atlanmis.keys() if k]
         summary_line = (
             f"LOG_SUMMARY | errors={log_counter.errors} | warnings={log_counter.warnings} | "
-            f"atlanan_filtre={','.join(atlanmis.keys()) if atlanmis else ''}"
+            f"atlanan_filtre={','.join(summary_keys)}"
         )
         logger.info(summary_line)
         if log_counter.errors > 0 and "rapor_path" in locals():
