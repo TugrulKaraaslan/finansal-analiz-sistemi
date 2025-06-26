@@ -248,7 +248,13 @@ def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.Da
     else:
         from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
 
-        df = pd.read_csv(path, sep=";")
+        df = pd.read_csv(
+            path,
+            sep=";",
+            dtype="string",
+            keep_default_na=False,
+            na_filter=False,
+        )
         df = normalize_filtre_kodu(df)
 
         # Hâlâ eksikse, erken ve anlaşılır hata ver.
@@ -256,6 +262,12 @@ def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.Da
             raise ValueError(
                 f"{path.name}: 'filtre_kodu' sütunu bulunamadı; CSV başlıklarını kontrol et."
             )
+
+    if "filtre_kodu" in df.columns:
+        df = df[df["filtre_kodu"].astype(str).str.strip() != ""]
+    for col in ("min", "max"):
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
     log.info(f"Filtre dosyası '{path}' başarıyla yüklendi. {len(df)} filtre bulundu.")
     return df
 

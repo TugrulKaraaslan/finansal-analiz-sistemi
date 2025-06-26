@@ -176,7 +176,7 @@ def _apply_single_filter(df, kod, query):
         seç = df.query(query)
         # --- 0 hisse skip mekaniği ---
         if len(seç) < MIN_STOCKS_PER_FILTER:
-            logger.info(
+            logger.debug(
                 "Filter %s skipped (len=%s < %s)",
                 kod,
                 len(seç),
