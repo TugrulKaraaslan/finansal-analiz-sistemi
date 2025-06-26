@@ -282,12 +282,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Finansal analiz ve backtest")
     parser.add_argument(
         "--tarama",
-        default=config.TARAMA_TARIHI_DEFAULT,
+        default=getattr(config, "TARAMA_TARIHI_DEFAULT", "2020-01-01"),
         help="dd.mm.yyyy formatında tarama tarihi",
     )
     parser.add_argument(
         "--satis",
-        default=config.SATIS_TARIHI_DEFAULT,
+        default=getattr(config, "SATIS_TARIHI_DEFAULT", "2020-12-31"),
         help="dd.mm.yyyy formatında satış tarihi",
     )
     parser.add_argument("--gui", action="store_true", help="Basit Streamlit arayüzü")
