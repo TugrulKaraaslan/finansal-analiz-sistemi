@@ -25,7 +25,11 @@ import gc
 from pathlib import Path
 
 import pandas_ta as ta
-from pandas_ta import psar as ta_psar
+
+try:  # pragma: no cover - optional indicator
+    from pandas_ta import psar as ta_psar
+except Exception:  # pragma: no cover - missing indicator
+    ta_psar = None  # type: ignore[misc]
 from pandas_ta import tema
 
 import config
@@ -486,6 +490,9 @@ def _ekle_psar(df: pd.DataFrame) -> None:
     gerekli = ["high", "low", "close"]
     if any(c not in df.columns for c in gerekli):
         logger.debug("PSAR hesaplamak için gerekli sütunlar eksik")
+        return
+    if ta_psar is None:
+        logger.debug("pandas_ta.psar bulunamadı, PSAR hesaplanamadı")
         return
     try:
         psar_raw = ta_psar(high=df["high"], low=df["low"], close=df["close"])

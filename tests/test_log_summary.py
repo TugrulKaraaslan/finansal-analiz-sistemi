@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 
-from utils.logging_setup import setup_logger
+from finansal_analiz_sistemi.log_tools import setup_logger
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

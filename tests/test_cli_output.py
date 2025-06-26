@@ -1,6 +1,12 @@
 from pathlib import Path
 
-from run import run_pipeline
+import pytest
+
+ta = pytest.importorskip("pandas_ta")
+if not hasattr(ta, "psar"):
+    pytest.skip("psar not available")
+
+from run import run_pipeline  # noqa: E402
 
 
 def test_cli_creates_report(tmp_path):

@@ -17,9 +17,9 @@ import yaml
 
 import config
 import utils
+from finansal_analiz_sistemi.log_tools import setup_logger
 from logging_config import get_logger
 from utils.date_utils import parse_date
-from utils.logging_setup import setup_logger
 
 
 def _parse_date(dt_str: str) -> pd.Timestamp:
