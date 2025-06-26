@@ -20,7 +20,7 @@ def _want_rich() -> bool:
         return False
     if not _HAVE_RICH:
         return False
-    return config.IS_COLAB or sys.stderr is None or True  # force True
+    return config.IS_COLAB or sys.stderr is None
 
 
 def setup_logging() -> logging.Logger:

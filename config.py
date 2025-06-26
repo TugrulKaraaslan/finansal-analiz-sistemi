@@ -1,5 +1,8 @@
 """Global yapi landirma sabitleri."""
 
+# flag to signal rich logging usage
+IS_COLAB: bool = False
+
 CACHE_PATH: Path = Path("veri/birlesik_hisse_verileri.parquet")
 DEFAULT_CSV_PATH: Path = Path("data/raw/all_prices.csv")
 
