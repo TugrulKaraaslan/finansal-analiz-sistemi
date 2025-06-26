@@ -1,6 +1,6 @@
 """Global yapi landirma sabitleri."""
 
-# flag to signal rich logging usage
+# Flag to indicate the application is running in Google Colab
 IS_COLAB: bool = False
 
 CACHE_PATH: Path = Path("veri/birlesik_hisse_verileri.parquet")
