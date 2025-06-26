@@ -60,10 +60,19 @@ EXPECTED_COLUMNS = [
 
 
 def generate_summary(results: list[dict]) -> pd.DataFrame:
-    """Create summary dataframe from raw result records."""
+    """Create summary dataframe from raw result records.
+
+    Parameters
+    ----------
+    results : list[dict]
+        Raw backtest results.
+    """
     summary_df = pd.DataFrame(results)
     # Kolonları tam ve sabit sırada tut
     summary_df = summary_df.reindex(columns=EXPECTED_COLUMNS, fill_value=np.nan)
+
+    if summary_df.empty:
+        logger.warning("generate_summary: sonuç listesi boş")
 
     return summary_df
 
@@ -262,7 +271,10 @@ def kaydet_uc_sekmeli_excel(
     )
     logging.getLogger().addHandler(fh)
 
-    logger_param.info("Saved report to %s", fname)
+    log_fn = logger_param.info
+    if ozet_df.empty and detay_df.empty and istatistik_df.empty:
+        log_fn = logger_param.warning
+    log_fn("Saved report to %s", fname)
     logger_param.info("Per-run log file: %s", run_log)
     return fname
 
@@ -286,7 +298,10 @@ def kaydet_raporlar(
         safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
         safe_to_excel(detay_df, w, sheet_name="Detay", index=False)
         safe_to_excel(istat_df, w, sheet_name="İstatistik", index=False)
-    logger_param.info("Rapor kaydedildi → %s", filepath)
+    log_fn = logger_param.info
+    if ozet_df.empty and detay_df.empty and istat_df.empty:
+        log_fn = logger_param.warning
+    log_fn("Rapor kaydedildi → %s", filepath)
     return filepath
 
 
@@ -610,6 +625,7 @@ def generate_full_report(
                 startrow=startrow,
             )
             startrow += len(chunk) + (1 if i == 0 else 0)
+        detail_empty = detail_df.empty
         del detail_df
         import gc
 
@@ -657,7 +673,10 @@ def generate_full_report(
     )
     logging.getLogger().addHandler(fh)
 
-    logger_param.info("Rapor kaydedildi → %s", out_path)
+    log_fn = logger_param.info
+    if summary_df.empty and detail_empty:
+        log_fn = logger_param.warning
+    log_fn("Rapor kaydedildi → %s", out_path)
     logger_param.info("Per-run log file: %s", run_log)
     return out_path
 
