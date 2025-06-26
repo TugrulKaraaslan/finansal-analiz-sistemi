@@ -21,12 +21,17 @@ from utils.compat import safe_concat
 if not hasattr(np, "NaN"):
     np.NaN = np.nan
 
+import gc
+from pathlib import Path
+
 import pandas_ta as ta
 from pandas_ta import psar as ta_psar
 from pandas_ta import tema
 
 import config
 import utils
+from config import CHUNK_SIZE
+from finansal.utils import lazy_chunk
 from logging_config import get_logger
 from utilities.naming import unique_name
 
@@ -440,6 +445,23 @@ def calculate_indicators(
 
     out = out.loc[:, ~out.columns.duplicated()]
     return out
+
+
+def apply_indicators(df: pd.DataFrame, indicators: list[str]) -> pd.DataFrame:
+    """Small wrapper to apply ``calculate_indicators``."""
+    return calculate_indicators(df, indicators)
+
+
+def calculate_chunked(df: pd.DataFrame, active_inds: list[str]) -> None:
+    """Process DataFrame per ticker and append to Parquet."""
+    pq_path = Path("veri/gosterge.parquet")
+    for kods in lazy_chunk(df.groupby("ticker", sort=False), CHUNK_SIZE):
+        for kod, group in kods:
+            mini = group.sort_values("date").copy()
+            mini = apply_indicators(mini, active_inds)
+            mini.to_parquet(pq_path, partition_cols=["ticker"], append=True)
+            del mini
+        gc.collect()
 
 
 def _tema20(series: pd.Series) -> pd.Series:

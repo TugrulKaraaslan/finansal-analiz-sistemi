@@ -301,6 +301,8 @@ if __name__ == "__main__":
         required=True,
         help="Excel .xlsx son dosya yolu",
     )
+    parser.add_argument("--ind-set", choices=["core", "full"], default="core")
+    parser.add_argument("--chunk-size", type=int, default=config.CHUNK_SIZE)
     args = parser.parse_args()
 
     out_file = Path(args.output)
@@ -308,6 +310,14 @@ if __name__ == "__main__":
 
     tarama_t = args.tarama
     satis_t = args.satis
+
+    full_inds = (
+        config.CORE_INDICATORS
+        + [f"ema_{n}" for n in (50, 100, 200)]
+        + [f"sma_{n}" for n in (50, 100, 200)]
+    )
+    active_inds = config.CORE_INDICATORS if args.ind_set == "core" else full_inds
+    logger.info("Aktif gosterge listesi: %s", ", ".join(active_inds))
 
     logger.info(f"  Tarama Tarihi    : {tarama_t}")
     logger.info(f"  Satış Tarihi     : {satis_t}")
