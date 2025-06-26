@@ -21,17 +21,17 @@ from utils.compat import safe_concat
 if not hasattr(np, "NaN"):
     np.NaN = np.nan
 
-import pandas_ta as ta
-from pandas_ta import psar as ta_psar
-from pandas_ta import tema
 import gc
 from pathlib import Path
 
-from config import CHUNK_SIZE
-from finansal.utils import lazy_chunk
+import pandas_ta as ta
+from pandas_ta import psar as ta_psar
+from pandas_ta import tema
 
 import config
 import utils
+from config import CHUNK_SIZE
+from finansal.utils import lazy_chunk
 from logging_config import get_logger
 from utilities.naming import unique_name
 

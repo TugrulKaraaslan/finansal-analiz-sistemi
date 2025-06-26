@@ -1,8 +1,8 @@
-import psutil
 import subprocess
 from pathlib import Path
 
 import pandas as pd
+import psutil
 
 
 def test_memory_usage(tmp_path: Path):
