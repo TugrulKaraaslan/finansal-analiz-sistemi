@@ -35,7 +35,7 @@ def test_utils_setup_logger_adds_duplicate_filter_and_disables_propagation():
 
     lines = [line for line in stream.getvalue().splitlines() if "dup" in line]
     assert len(lines) == 2
-
+    logging.shutdown()
     root.handlers.clear()
     root.filters.clear()
     root.propagate = old_propagate
