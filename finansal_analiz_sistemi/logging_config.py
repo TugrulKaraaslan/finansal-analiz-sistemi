@@ -2,15 +2,8 @@ import logging
 import os
 import sys
 
-try:
-    from rich.console import Console
-    from rich.logging import RichHandler
-
-    _HAVE_RICH = True
-except ImportError:  # pragma: no cover - rich is optional
-    Console = None  # type: ignore
-    RichHandler = None  # type: ignore
-    _HAVE_RICH = False
+from rich.console import Console
+from rich.logging import RichHandler
 
 from finansal_analiz_sistemi import config
 
@@ -18,9 +11,7 @@ from finansal_analiz_sistemi import config
 def _want_rich() -> bool:
     if os.getenv("LOG_SIMPLE"):
         return False
-    if not _HAVE_RICH:
-        return False
-    return config.IS_COLAB or sys.stderr is None
+    return config.IS_COLAB or sys.stderr is None or True  # force True
 
 
 def setup_logging() -> logging.Logger:
