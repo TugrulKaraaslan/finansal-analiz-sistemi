@@ -1,0 +1,42 @@
+"""Komut satiri arayuzu."""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+
+import click
+
+from finansal.parquet_cache import ParquetCacheManager
+import config  # noqa: WPS433  # local import pattern is intentional
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+
+
+@click.command(help="Parquet cache yoneticisi")
+@click.option(
+    "--csv", "csv_path", type=click.Path(exists=True), default=config.DEFAULT_CSV_PATH
+)
+@click.option("--cache-path", type=click.Path(), default=config.CACHE_PATH)
+@click.option(
+    "--refresh-cache",
+    is_flag=True,
+    default=False,
+    help="Cache’i CSV’den yeniden olustur",
+)
+def main(csv_path: str, cache_path: str, refresh_cache: bool) -> None:  # noqa: D401
+    manager = ParquetCacheManager(Path(cache_path))
+
+    if refresh_cache or not Path(cache_path).exists():
+        df = manager.refresh(Path(csv_path))
+    else:
+        df = manager.load()
+
+    click.echo(f"Veri satir sayisi: {len(df):,}")
+
+
+if __name__ == "__main__":  # pragma: no cover
+    main()
