@@ -1,4 +1,5 @@
 """Logging configuration with optional rich handling."""
+
 from __future__ import annotations
 
 import logging
