@@ -1,3 +1,5 @@
+from pathlib import Path
+import os
 """Global yapi landirma sabitleri."""
 
 from pathlib import Path
