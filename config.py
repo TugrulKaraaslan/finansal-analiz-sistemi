@@ -1,6 +1,7 @@
 """Global yapi landirma sabitleri."""
 
-import os
+from pathlib import Path
+
 from pathlib import Path
 
 import yaml
