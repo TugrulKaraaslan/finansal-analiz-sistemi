@@ -1,12 +1,15 @@
-"""Global yapi landirma sabitleri."""
+"""Global yapılandırma sabitleri."""
 
 from pathlib import Path
+
+# Flag to indicate the application is running in Google Colab
+IS_COLAB: bool = False
 
 CACHE_PATH: Path = Path("veri/birlesik_hisse_verileri.parquet")
 DEFAULT_CSV_PATH: Path = Path("data/raw/all_prices.csv")
 
 # dtype downcast mappings for CSV reading
-DTYPES = {
+DTYPES: dict[str, str] = {
     "open": "float32",
     "high": "float32",
     "low": "float32",
@@ -15,7 +18,7 @@ DTYPES = {
 }
 
 # final dataframe dtypes
-DTYPES_MAP = {
+DTYPES_MAP: dict[str, str] = {
     "open": "float32",
     "high": "float32",
     "low": "float32",
@@ -32,11 +35,3 @@ DTYPES_MAP = {
 
 # chunk size for indicator calculation
 CHUNK_SIZE: int = 1
-
-# minimal indicator subset used by memory test
-CORE_INDICATORS = [
-    "ema_10",
-    "ema_20",
-    "rsi_14",
-    "macd",
-]
