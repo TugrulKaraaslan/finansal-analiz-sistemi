@@ -42,14 +42,14 @@ def setup_logger(level: int = logging.INFO) -> CounterFilter:
 
     log_dir = os.path.join("loglar")
     os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, f"app_{datetime.now():%Y%m%d_%H%M%S}.log")
+    log_file = os.path.join(log_dir, "rapor.log")
 
     formatter = logging.Formatter(
         "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
     )
 
     file_handler = RotatingFileHandler(
-        log_file, maxBytes=1_000_000, backupCount=3, encoding="utf-8"
+        log_file, maxBytes=2_000_000, backupCount=20, encoding="utf-8"
     )
     console_handler = logging.StreamHandler(sys.stdout)
 
