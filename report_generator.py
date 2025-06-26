@@ -12,9 +12,9 @@ import pandas as pd
 from openpyxl.utils import get_column_letter
 
 import report_stats
+from finansal_analiz_sistemi.report_utils import save_df_safe
 from logging_config import get_logger
 from utils.compat import safe_concat, safe_to_excel
-from finansal_analiz_sistemi.report_utils import save_df_safe
 
 logger = get_logger(__name__)
 

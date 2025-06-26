@@ -2,9 +2,9 @@
 import pandas as pd
 from openpyxl.chart import BarChart, Reference
 from openpyxl.utils import get_column_letter
-from finansal_analiz_sistemi.report_utils import save_df_safe
 
 import report_stats
+from finansal_analiz_sistemi.report_utils import save_df_safe
 
 # Default column orders for generated reports
 DEFAULT_OZET_COLS = [

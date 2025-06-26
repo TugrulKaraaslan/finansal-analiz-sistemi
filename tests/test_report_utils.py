@@ -58,4 +58,3 @@ def test_save_df_safe_writes(tmp_path):
     df = pd.DataFrame({"a": [1]})
     report_utils.save_df_safe(df, path, "Test")
     assert path.exists() and path.stat().st_size > 0
-
