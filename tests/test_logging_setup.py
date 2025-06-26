@@ -3,7 +3,7 @@ import logging
 import time
 
 from finansal_analiz_sistemi.log_tools import DuplicateFilter
-from utils.logging_setup import setup_logger, CounterFilter
+from utils.logging_setup import CounterFilter, setup_logger
 
 
 def test_utils_setup_logger_adds_duplicate_filter_and_disables_propagation():
@@ -21,9 +21,7 @@ def test_utils_setup_logger_adds_duplicate_filter_and_disables_propagation():
 
     assert isinstance(counter, CounterFilter)
     assert root.propagate is False
-    assert any(
-        isinstance(f, DuplicateFilter) for h in root.handlers for f in h.filters
-    )
+    assert any(isinstance(f, DuplicateFilter) for h in root.handlers for f in h.filters)
 
     stream = io.StringIO()
     handler = logging.StreamHandler(stream)
