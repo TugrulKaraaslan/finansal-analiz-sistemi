@@ -12,6 +12,7 @@ import pandas as pd
 from openpyxl.utils import get_column_letter
 
 import report_stats
+from finansal_analiz_sistemi.report_utils import save_df_safe
 from logging_config import get_logger
 from utils.compat import safe_concat, safe_to_excel
 
@@ -262,7 +263,7 @@ def kaydet_uc_sekmeli_excel(
     )
     logging.getLogger().addHandler(fh)
 
-    logger_param.info("Saved report to %s", fname)
+    logger_param.info("Saved report to %s (%d rows)", fname, len(ozet_df))
     logger_param.info("Per-run log file: %s", run_log)
     return fname
 
@@ -504,6 +505,11 @@ def generate_full_report(
     summary_df = summary_df.dropna(subset=["filtre_kodu"])
     detail_df = detail_df.dropna(subset=["filtre_kodu"])
 
+    if summary_df.empty:
+        save_df_safe(pd.DataFrame(), out_path, "EMPTY_REPORT", allow_empty=True)
+        logger_param.error("Summary dataframe empty")
+        raise ValueError("summary dataframe empty")
+
     # ----- ➤ sebep_aciklama'ları doldur (Hatalar sheet'inden) -----
     if error_list:
         from dataclasses import asdict, is_dataclass
@@ -657,7 +663,7 @@ def generate_full_report(
     )
     logging.getLogger().addHandler(fh)
 
-    logger_param.info("Rapor kaydedildi → %s", out_path)
+    logger_param.info("Rapor kaydedildi → %s (rows=%d)", out_path, len(summary_df))
     logger_param.info("Per-run log file: %s", run_log)
     return out_path
 

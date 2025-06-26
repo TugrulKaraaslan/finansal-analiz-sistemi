@@ -2,6 +2,7 @@ import os
 import sys
 
 import pandas as pd
+import pytest
 
 import report_utils
 
@@ -44,3 +45,16 @@ def test_build_stats_df_default_columns():
     ozet = report_utils.build_ozet_df(summary, detail)
     stats = report_utils.build_stats_df(ozet)
     assert list(stats.columns) == report_utils.DEFAULT_STATS_COLS
+
+
+def test_save_df_safe_raises(tmp_path):
+    path = tmp_path / "r.xlsx"
+    with pytest.raises(ValueError):
+        report_utils.save_df_safe(pd.DataFrame(), path, "Test")
+
+
+def test_save_df_safe_writes(tmp_path):
+    path = tmp_path / "r.xlsx"
+    df = pd.DataFrame({"a": [1]})
+    report_utils.save_df_safe(df, path, "Test")
+    assert path.exists() and path.stat().st_size > 0
