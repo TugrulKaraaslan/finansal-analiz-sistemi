@@ -1,7 +1,6 @@
 import argparse
 from pathlib import Path
 
-
 from finansal_analiz_sistemi.report_writer import ReportWriter
 
 
