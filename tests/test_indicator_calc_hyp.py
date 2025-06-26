@@ -1,8 +1,13 @@
 import pandas as pd
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-import indicator_calculator as ic
+ta = pytest.importorskip("pandas_ta")
+if not hasattr(ta, "psar"):
+    pytest.skip("psar not available")
+
+import indicator_calculator as ic  # noqa: E402
 
 
 @given(st.lists(st.floats(-1e6, 1e6), min_size=10, max_size=200))

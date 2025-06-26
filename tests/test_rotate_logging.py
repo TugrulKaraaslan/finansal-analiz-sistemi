@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-from utils import logging_setup
+from finansal_analiz_sistemi import log_tools as logging_setup
 
 
 def test_log_rotation(tmp_path, monkeypatch):

@@ -2,10 +2,14 @@ import importlib
 import logging
 import os
 
-from rich.console import Console
-from rich.logging import RichHandler
+import pytest
 
-from finansal_analiz_sistemi import logging_config
+pytest.importorskip("rich")
+
+from rich.console import Console  # noqa: E402
+from rich.logging import RichHandler  # noqa: E402
+
+from finansal_analiz_sistemi import logging_config  # noqa: E402
 
 
 def _capture(msg: str) -> str:

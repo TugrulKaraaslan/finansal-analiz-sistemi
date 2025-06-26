@@ -2,8 +2,11 @@ import io
 import logging
 import time
 
-from finansal_analiz_sistemi.log_tools import DuplicateFilter
-from utils.logging_setup import CounterFilter, setup_logger
+from finansal_analiz_sistemi.log_tools import (
+    CounterFilter,
+    DuplicateFilter,
+    setup_logger,
+)
 
 
 def test_utils_setup_logger_adds_duplicate_filter_and_disables_propagation():

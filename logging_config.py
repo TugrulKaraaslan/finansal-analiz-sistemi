@@ -1,6 +1,6 @@
-"""Compatibility wrapper for logging setup functions."""
+"""Compatibility wrapper that re-exports logging helpers."""
 
-from utils.logging_setup import get_logger
-from utils.logging_setup import setup_logger as setup_logging
+from finansal_analiz_sistemi.log_tools import get_logger
+from finansal_analiz_sistemi.log_tools import setup_logger as setup_logging
 
 __all__ = ["get_logger", "setup_logging"]
