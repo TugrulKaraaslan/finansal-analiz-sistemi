@@ -282,12 +282,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Finansal analiz ve backtest")
     parser.add_argument(
         "--tarama",
-        default=config.TARAMA_TARIHI_DEFAULT,
+        default=getattr(config, "TARAMA_TARIHI_DEFAULT", "2020-01-01"),
         help="dd.mm.yyyy formatında tarama tarihi",
     )
     parser.add_argument(
         "--satis",
-        default=config.SATIS_TARIHI_DEFAULT,
+        default=getattr(config, "SATIS_TARIHI_DEFAULT", "2020-12-31"),
         help="dd.mm.yyyy formatında satış tarihi",
     )
     parser.add_argument("--gui", action="store_true", help="Basit Streamlit arayüzü")
@@ -365,9 +365,10 @@ if __name__ == "__main__":
         logger.info(
             f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT TAMAMLANDI ======="
         )
+        summary_keys = [str(k) for k in atlanmis.keys() if k]
         summary_line = (
             f"LOG_SUMMARY | errors={log_counter.errors} | warnings={log_counter.warnings} | "
-            f"atlanan_filtre={','.join(atlanmis.keys()) if atlanmis else ''}"
+            f"atlanan_filtre={','.join(summary_keys)}"
         )
         logger.info(summary_line)
         if log_counter.errors > 0 and "rapor_path" in locals():
