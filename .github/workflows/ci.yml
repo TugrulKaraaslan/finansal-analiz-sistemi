@@ -19,7 +19,7 @@ jobs:
       - name: Install deps
         run: |
           pip install -q pip-tools
-          pip install -q -r requirements.txt
+          pip install -q --pre -r requirements.txt
           python -m pip install -e .   # editable install, varsa setup.cfg
           pip install -q pre-commit mypy pytest-cov
       - uses: pre-commit/action@v3.0.1
