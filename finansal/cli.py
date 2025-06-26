@@ -9,6 +9,7 @@ import click
 
 import config  # noqa: WPS433  # local import pattern is intentional
 from finansal.parquet_cache import ParquetCacheManager
+from indicator_calculator import calculate_chunked
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,7 +28,15 @@ logging.basicConfig(
     default=False,
     help="Cache’i CSV’den yeniden olustur",
 )
-def main(csv_path: str, cache_path: str, refresh_cache: bool) -> None:  # noqa: D401
+@click.option("--ind-set", type=click.Choice(["core", "full"]), default="core")
+@click.option("--chunk-size", type=int, default=config.CHUNK_SIZE)
+def main(
+    csv_path: str,
+    cache_path: str,
+    refresh_cache: bool,
+    ind_set: str,
+    chunk_size: int,
+) -> None:  # noqa: D401
     manager = ParquetCacheManager(Path(cache_path))
 
     if refresh_cache or not Path(cache_path).exists():
@@ -36,6 +45,14 @@ def main(csv_path: str, cache_path: str, refresh_cache: bool) -> None:  # noqa: 
         df = manager.load()
 
     click.echo(f"Veri satir sayisi: {len(df):,}")
+
+    full_inds = (
+        config.CORE_INDICATORS
+        + [f"ema_{n}" for n in (50, 100, 200)]
+        + [f"sma_{n}" for n in (50, 100, 200)]
+    )
+    active = config.CORE_INDICATORS if ind_set == "core" else full_inds
+    calculate_chunked(df, active)  # yazim: indicator_calculator
 
 
 if __name__ == "__main__":  # pragma: no cover
