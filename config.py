@@ -1,6 +1,8 @@
 """Global yapi landirma sabitleri."""
 
 from pathlib import Path
+import os
+import yaml
 
 CACHE_PATH: Path = Path("veri/birlesik_hisse_verileri.parquet")
 DEFAULT_CSV_PATH: Path = Path("data/raw/all_prices.csv")
@@ -40,3 +42,12 @@ CORE_INDICATORS = [
     "rsi_14",
     "macd",
 ]
+
+# load optional YAML config for runtime options
+_cfg_path = os.path.join(os.path.dirname(__file__), "config.yml")
+if os.path.exists(_cfg_path):
+    with open(_cfg_path) as f:
+        cfg = yaml.safe_load(f) or {}
+else:
+    cfg = {}
+
