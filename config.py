@@ -1,6 +1,7 @@
 """Global yapılandırma sabitleri."""
 
 from pathlib import Path
+import sys
 
 # Flag to indicate the application is running in Google Colab
 IS_COLAB: bool = False
@@ -35,3 +36,33 @@ DTYPES_MAP: dict[str, str] = {
 
 # chunk size for indicator calculation
 CHUNK_SIZE: int = 1
+
+# ---------------------------------------------------------------------------
+# Optional defaults
+if "ALIM_ZAMANI" not in globals():
+    ALIM_ZAMANI = "open"
+
+if "TR_HOLIDAYS_REMOVE" not in globals():
+    TR_HOLIDAYS_REMOVE = False
+
+if "OHLCV_MAP" not in globals():
+    OHLCV_MAP = {
+        "Açılış": "open",
+        "OPEN": "open",
+        "Yüksek": "high",
+        "HIGH": "high",
+        "Düşük": "low",
+        "LOW": "low",
+        "Kapanış": "close",
+        "CLOSE": "close",
+        "Miktar": "volume",
+        "VOLUME": "volume",
+    }
+
+if "INDIKATOR_AD_ESLESTIRME" not in globals():
+    INDIKATOR_AD_ESLESTIRME: dict = {}
+
+if "SERIES_SERIES_CROSSOVERS" not in globals():
+    SERIES_SERIES_CROSSOVERS: list = []
+
+sys.modules.setdefault("cfg", sys.modules[__name__])
