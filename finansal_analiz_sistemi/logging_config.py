@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
+from logging import StreamHandler
 from typing import Final, List
 
 try:
@@ -18,6 +19,19 @@ except ImportError:  # pragma: no cover – rich is optional
     _HAVE_RICH = False
 
 from finansal_analiz_sistemi import config
+
+
+def _ensure_rich_handler(log: logging.Logger) -> None:
+    """Ensure that ``log`` has a ``RichHandler`` attached."""
+
+    if not _HAVE_RICH:
+        return
+
+    if not any(isinstance(h, RichHandler) for h in log.handlers):
+        for h in list(log.handlers):
+            if isinstance(h, StreamHandler):
+                log.removeHandler(h)
+        log.addHandler(RichHandler(rich_tracebacks=True))
 
 
 def _want_rich() -> bool:
@@ -66,7 +80,11 @@ def setup_logging() -> logging.Logger:
 def get_logger(name: str | None = None) -> logging.Logger:
     """Return (and create) a logger with the given name."""
 
-    return logging.getLogger(name)
+    log = logging.getLogger(name)
+    if not os.getenv("LOG_SIMPLE"):
+        _ensure_rich_handler(log)
+
+    return log
 
 
 __all__ = ["get_logger"]
