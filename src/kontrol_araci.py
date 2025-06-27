@@ -24,4 +24,25 @@ def tarama_denetimi(
     for _, sat in df_filtreler.iterrows():
         _, info = _apply_single_filter(df_indikator, sat["kod"], sat["PythonQuery"])
         kayıtlar.append(info)
-    return pd.DataFrame(kayıtlar)
+    df = pd.DataFrame(kayıtlar)
+    if not (df["durum"] != "OK").any():
+        df = pd.concat(
+            [
+                df,
+                pd.DataFrame(
+                    [
+                        {
+                            "kod": "_SUMMARY",
+                            "tip": "tarama",
+                            "durum": "NO_ISSUE",
+                            "sebep": "",
+                            "eksik_sutunlar": "",
+                            "nan_sutunlar": "",
+                            "secim_adedi": 0,
+                        }
+                    ]
+                ),
+            ],
+            ignore_index=True,
+        )
+    return df
