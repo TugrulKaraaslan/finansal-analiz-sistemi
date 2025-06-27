@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 from hypothesis import settings
 
+# SimpleNamespace objects aren't hashable on older Hypothesis versions
         types.SimpleNamespace.__hash__ = builtins.hash
     except TypeError:
         pass
