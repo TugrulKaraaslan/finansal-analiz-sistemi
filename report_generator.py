@@ -1,5 +1,14 @@
 from __future__ import annotations
 
+import importlib.util
+
+if (
+    importlib.util.find_spec("xlsxwriter") is None
+):  # pragma: no cover - guard for optional dep
+    raise RuntimeError(
+        "XlsxWriter is required for Excel export. Install with 'pip install xlsxwriter>=3.1'"
+    )
+
 import logging
 import os
 import uuid
