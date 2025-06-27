@@ -1,6 +1,11 @@
+import types
+
 import numpy as np
 import pandas as pd
 import pytest
+
+if not hasattr(types.SimpleNamespace, "__hash__"):
+    types.SimpleNamespace.__hash__ = lambda self: id(self)
 
 
 @pytest.fixture
