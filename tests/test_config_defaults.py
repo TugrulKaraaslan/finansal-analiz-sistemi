@@ -10,6 +10,7 @@ CONSTANTS = [
     "SERIES_SERIES_CROSSOVERS",
 ]
 
+
 def test_config_has_defaults():
     for name in CONSTANTS:
         assert hasattr(config, name)

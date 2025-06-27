@@ -1,7 +1,7 @@
 """Global yapılandırma sabitleri."""
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 # Flag to indicate the application is running in Google Colab
 IS_COLAB: bool = False
