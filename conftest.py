@@ -1,4 +1,6 @@
-import types, builtins
+import builtins
+import types
+
 if getattr(types.SimpleNamespace, "__hash__", None) is None:
     types.SimpleNamespace.__hash__ = builtins.hash
 import numpy as np
