@@ -1,4 +1,6 @@
-import types, builtins
+import builtins
+import types
+
 if getattr(types.SimpleNamespace, "__hash__", None) is None:
     try:
         types.SimpleNamespace.__hash__ = builtins.hash
@@ -6,6 +8,7 @@ if getattr(types.SimpleNamespace, "__hash__", None) is None:
         pass
 
 from hypothesis import settings
+
 settings.register_profile("ci", max_examples=100)
 settings.load_profile("ci")
 import numpy as np
