@@ -32,5 +32,9 @@ INDIKATOR_AD_ESLESTIRME.setdefault("its_9", "ichimoku_conversionline")
 # Environment flag
 IS_COLAB = globals().get("IS_COLAB", False)
 
+# Ensure the attribute exists for downstream imports
+if "IS_COLAB" not in globals():
+    IS_COLAB = False
+
 # Legacy `cfg` alias
 cfg = _sys.modules.setdefault("cfg", _sys.modules[__name__])
