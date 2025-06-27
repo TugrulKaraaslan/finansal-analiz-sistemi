@@ -1,6 +1,6 @@
 """Global yapılandırma sabitleri."""
 
-import sys
+import sys  # isort: skip
 from pathlib import Path
 
 # Flag to indicate the application is running in Google Colab
@@ -76,7 +76,6 @@ if not hasattr(sys.modules[__name__], "SERIES_VALUE_CROSSOVERS"):
 if not hasattr(sys.modules[__name__], "cfg"):
     cfg = sys.modules[__name__]
 
-import sys  # noqa: E402
 
 if not hasattr(sys.modules[__name__], "KOMISYON_ORANI"):
     KOMISYON_ORANI = 0.001
@@ -86,3 +85,9 @@ if not hasattr(sys.modules[__name__], "get"):
 
     def get(key, default=None):
         return globals().get(key, default)
+
+
+if not hasattr(sys.modules[__name__], "passive_filters"):
+    passive_filters = ["T31"]  # D2
+if not hasattr(sys.modules[__name__], "OZEL_SUTUN_PARAMS"):
+    OZEL_SUTUN_PARAMS: dict = {}  # D3

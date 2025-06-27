@@ -120,6 +120,11 @@ def calistir_basit_backtest(
     alim_fiyat_sutunu = config.ALIM_ZAMANI  # örn: 'open'
     satis_fiyat_sutunu = config.SATIS_ZAMANI  # örn: 'open' veya 'close'
     komisyon_orani = config.KOMISYON_ORANI
+    # D1 fallback – open yoksa close’u kullan
+    if alim_fiyat_sutunu not in df_tum_veri.columns:
+        alim_fiyat_sutunu = "close"
+    if satis_fiyat_sutunu not in df_tum_veri.columns:
+        satis_fiyat_sutunu = "close"
     getattr(config, "UYGULANAN_STRATEJI", "basit_backtest")
 
     summary_records = []
