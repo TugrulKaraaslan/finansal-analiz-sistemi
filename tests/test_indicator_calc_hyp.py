@@ -1,11 +1,17 @@
-import pandas as pd
 import pytest
-from hypothesis import given
-from hypothesis import strategies as st
+
+try:  # pytest < 8 does not support allow_module_level
+    pytest.importorskip("hypothesis", allow_module_level=True)
+except TypeError:  # pragma: no cover - fallback
+    pytest.importorskip("hypothesis")
+
+import pandas as pd  # noqa: E402
+from hypothesis import given  # noqa: E402
+from hypothesis import strategies as st  # noqa: E402
 
 ta = pytest.importorskip("pandas_ta")
 if not hasattr(ta, "psar"):
-    pytest.skip("psar not available")
+    pytest.skip("psar not available", allow_module_level=True)
 
 import indicator_calculator as ic  # noqa: E402
 

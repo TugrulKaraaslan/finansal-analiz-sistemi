@@ -8,7 +8,7 @@ import pytest
 
 ta = pytest.importorskip("pandas_ta")
 if not hasattr(ta, "psar"):
-    pytest.skip("psar not available")
+    pytest.skip("psar not available", allow_module_level=True)
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.modules.pop("pandas_ta", None)  # Ensure real pandas_ta is used in this test
