@@ -16,4 +16,3 @@ def sample_filtreler():
 def sample_indikator_df():
     """Tiny indicator DataFrame used by health-check tests."""
     return pd.DataFrame({"ichimoku_conversionline": [1.23]})
-
