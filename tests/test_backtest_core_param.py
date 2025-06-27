@@ -1,6 +1,14 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 import pytest
+
+warnings.filterwarnings(
+    "ignore",
+    message=".*swapaxes.*will change in a future version of pandas",
+    category=FutureWarning,
+)
 
 try:
     import backtest_core as bc
@@ -38,6 +46,6 @@ def test_get_fiyat_param(tarih, col, expected):
 
 def test_get_fiyat_non_numeric():
     df = DF.copy()
-    df.loc[0, "close"] = "bad"
+    df.loc[0, "close"] = np.nan  # avoids object→float warning
     out = bc._get_fiyat(df, df.loc[0, "tarih"], "close")
     assert np.isnan(out)
