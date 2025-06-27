@@ -86,3 +86,13 @@ if not hasattr(sys.modules[__name__], "get"):
 
     def get(key, default=None):
         return globals().get(key, default)
+
+
+# ---------------------------------------------------------------------------
+# Defaults for passive filters and custom column parameters
+import sys
+
+if not hasattr(sys.modules[__name__], "passive_filters"):
+    passive_filters = ["T31"]
+if not hasattr(sys.modules[__name__], "OZEL_SUTUN_PARAMS"):
+    OZEL_SUTUN_PARAMS = {}

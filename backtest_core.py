@@ -119,6 +119,10 @@ def calistir_basit_backtest(
     # config'den alım/satım zamanı ve komisyonu al
     alim_fiyat_sutunu = config.ALIM_ZAMANI  # örn: 'open'
     satis_fiyat_sutunu = config.SATIS_ZAMANI  # örn: 'open' veya 'close'
+    if alim_fiyat_sutunu not in df_tum_veri.columns:
+        alim_fiyat_sutunu = "close"
+    if satis_fiyat_sutunu not in df_tum_veri.columns:
+        satis_fiyat_sutunu = "close"
     komisyon_orani = config.KOMISYON_ORANI
     getattr(config, "UYGULANAN_STRATEJI", "basit_backtest")
 
