@@ -4,7 +4,7 @@ pandas >= 2.2
 portalocker >= 2.8
 psutil>=5.9
 pyarrow >= 16
-pandas_ta==0.3.14b0
+pandas_ta>=0.3.14,<0.4
 openpyxl>=3.1
 plotly>=5
 kaleido>=0.2
