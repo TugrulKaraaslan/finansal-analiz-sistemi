@@ -6,14 +6,12 @@ import pandas as pd
 import pytest
 from hypothesis import settings
 
-# SimpleNamespace objects aren't hashable prior to Hypothesis 6.101
-        types.SimpleNamespace.__hash__ = builtins.hash
-    except TypeError:
-        pass
+try:
+    if getattr(types.SimpleNamespace, "__hash__", None) is None:
+except TypeError:
+    pass
 
-from hypothesis import settings
-
-settings.register_profile("ci", max_examples=100)
+def dummy_df() -> pd.DataFrame:
 settings.load_profile("ci")
 import numpy as np
 import pandas as pd
