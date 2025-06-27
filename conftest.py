@@ -1,4 +1,7 @@
-import pandas as pd, numpy as np, pytest
+import numpy as np
+import pandas as pd
+import pytest
+
 
 @pytest.fixture
 def big_df() -> pd.DataFrame:
