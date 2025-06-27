@@ -12,7 +12,7 @@ python = "^3.11"
 pandas-ta = "0.3.14b0"
 cachetools = "6.1.0"
 xlsxwriter = "^3.1"
-hypothesis = "^6.102"
+hypothesis = ">=6.102,<7"
 
 [tool.flake8]
 max-line-length = 88
