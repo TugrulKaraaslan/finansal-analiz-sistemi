@@ -75,3 +75,14 @@ if not hasattr(sys.modules[__name__], "SERIES_VALUE_CROSSOVERS"):
 
 if not hasattr(sys.modules[__name__], "cfg"):
     cfg = sys.modules[__name__]
+
+import sys  # noqa: E402
+
+if not hasattr(sys.modules[__name__], "KOMISYON_ORANI"):
+    KOMISYON_ORANI = 0.001
+if not hasattr(sys.modules[__name__], "TA_STRATEGY"):
+    TA_STRATEGY: dict = {}
+if not hasattr(sys.modules[__name__], "get"):
+
+    def get(key, default=None):
+        return globals().get(key, default)
