@@ -1,7 +1,7 @@
 black==24.4.2
-cachetools>=6.1.0
+cachetools<6.0,>=5.3
 flake8==7.0.0
-hypothesis==6.*
-pandas-ta>=0.3.14      # teknik indikatör kütüphanesi
+hypothesis~=6.99
+pandas-ta==0.3.14b0      # teknik indikatör kütüphanesi
 psutil
 xlsxwriter>=3.2

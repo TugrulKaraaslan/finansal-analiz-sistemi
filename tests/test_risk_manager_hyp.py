@@ -1,9 +1,15 @@
 import pandas as pd
-from hypothesis import given
-from hypothesis import strategies as st
+import pytest
 
-import src.kontrol_araci as kontrol_araci
-from src.preprocessor import fill_missing_business_day
+try:  # allow older pytest versions
+    pytest.importorskip("hypothesis", allow_module_level=True)
+except TypeError:  # pragma: no cover - fallback for pytest<7.2
+    pytest.importorskip("hypothesis")
+from hypothesis import given  # noqa: E402
+from hypothesis import strategies as st  # noqa: E402
+
+import src.kontrol_araci as kontrol_araci  # noqa: E402
+from src.preprocessor import fill_missing_business_day  # noqa: E402
 
 min_dt = pd.Timestamp("1970-01-01").to_pydatetime()
 max_dt = pd.Timestamp("2262-04-11").to_pydatetime()

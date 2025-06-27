@@ -30,7 +30,6 @@ try:  # pragma: no cover - optional indicator
     from pandas_ta import psar as ta_psar
 except Exception:  # pragma: no cover - missing indicator
     ta_psar = None  # type: ignore[misc]
-from pandas_ta import tema
 
 import config
 import utils
@@ -482,7 +481,7 @@ def calculate_chunked(df: pd.DataFrame, active_inds: list[str]) -> None:
 
 def _tema20(series: pd.Series) -> pd.Series:
     """TEMA 20 – pandas_ta."""
-    return tema(series, length=20)
+    return ta.tema(series, length=20)
 
 
 def _ekle_psar(df: pd.DataFrame) -> None:
