@@ -20,6 +20,7 @@ jobs:
         run: |
           pip install -q pip-tools
           pip install -q -r requirements.txt
+          pip install -U "hypothesis>=6.102,<7"
           python -m pip install -e .   # editable install, varsa setup.cfg
           pip install -q pre-commit mypy pytest-cov
       - uses: pre-commit/action@v3.0.1
