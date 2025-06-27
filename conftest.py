@@ -1,8 +1,11 @@
 import builtins
 import types
 
-if getattr(types.SimpleNamespace, "__hash__", None) is None:
-    try:
+import numpy as np
+import pandas as pd
+import pytest
+from hypothesis import settings
+
         types.SimpleNamespace.__hash__ = builtins.hash
     except TypeError:
         pass
