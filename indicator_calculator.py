@@ -24,7 +24,22 @@ if not hasattr(np, "NaN"):
 import gc
 from pathlib import Path
 
-import pandas_ta as ta
+# try import
+try:
+    import pandas_ta as ta  # noqa: E402
+
+    def _tema20(series):  # noqa: E302
+        return ta.tema(series, length=20)
+
+except (ImportError, AttributeError):
+    from pandas import Series
+
+    def _tema20(series: Series):  # noqa: E302
+        ema1 = series.ewm(span=20, adjust=False).mean()
+        ema2 = ema1.ewm(span=20, adjust=False).mean()
+        ema3 = ema2.ewm(span=20, adjust=False).mean()
+        return 3 * (ema1 - ema2) + ema3
+
 
 try:  # pragma: no cover - optional indicator
     from pandas_ta import psar as ta_psar
@@ -477,11 +492,6 @@ def calculate_chunked(df: pd.DataFrame, active_inds: list[str]) -> None:
                 mini.to_parquet(pq_path, partition_cols=["ticker"])
             del mini
         gc.collect()
-
-
-def _tema20(series: pd.Series) -> pd.Series:
-    """TEMA 20 – pandas_ta."""
-    return ta.tema(series, length=20)
 
 
 def _ekle_psar(df: pd.DataFrame) -> None:
