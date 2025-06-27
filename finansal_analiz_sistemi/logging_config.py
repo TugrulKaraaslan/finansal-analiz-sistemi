@@ -61,3 +61,12 @@ def setup_logging() -> logging.Logger:
         root.addHandler(handler)
 
     return root
+
+
+def get_logger(name: str | None = None) -> logging.Logger:
+    """Return (and create) a logger with the given name."""
+
+    return logging.getLogger(name)
+
+
+__all__ = ["get_logger"]
