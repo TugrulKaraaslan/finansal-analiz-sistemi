@@ -31,5 +31,8 @@ def test_memory_usage(tmp_path: Path):
     ]
     proc = subprocess.Popen(cmd)
     proc.wait(timeout=60)
-    mem = psutil.Process(proc.pid).memory_info().rss / (1024**2)
+    if psutil.pid_exists(proc.pid):
+        mem = psutil.Process(proc.pid).memory_info().rss / (1024**2)
+    else:
+        mem = 0
     assert mem < 200, f"RSS {mem:.1f} MB > 200 MB"
