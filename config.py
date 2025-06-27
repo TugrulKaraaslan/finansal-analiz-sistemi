@@ -66,3 +66,14 @@ if "SERIES_SERIES_CROSSOVERS" not in globals():
     SERIES_SERIES_CROSSOVERS: list = []
 
 sys.modules.setdefault("cfg", sys.modules[__name__])
+
+import sys as _sys
+
+if not hasattr(_sys.modules[__name__], "SATIS_ZAMANI"):
+    SATIS_ZAMANI = globals().get("ALIM_ZAMANI", "close")
+
+if not hasattr(_sys.modules[__name__], "SERIES_VALUE_CROSSOVERS"):
+    SERIES_VALUE_CROSSOVERS: list = []
+
+if not hasattr(_sys.modules[__name__], "cfg"):
+    cfg = _sys.modules[__name__]
