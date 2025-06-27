@@ -8,5 +8,5 @@ pandas_ta==0.3.14b0
 openpyxl>=3.1
 plotly>=5
 kaleido>=0.2
-hypothesis>=6.104
+hypothesis>=6.102,<7
 xlsxwriter>=3.1
