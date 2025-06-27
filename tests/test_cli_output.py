@@ -4,7 +4,7 @@ import pytest
 
 ta = pytest.importorskip("pandas_ta")
 if not hasattr(ta, "psar"):
-    pytest.skip("psar not available")
+    pytest.skip("psar not available", allow_module_level=True)
 
 from run import run_pipeline  # noqa: E402
 
