@@ -14,3 +14,5 @@ xlsxwriter>=3.1
 pyyaml>=6
 pytest-timeout>=2.2
 coverage>=7.0
+responses>=0.25
+urllib3>=2.0
