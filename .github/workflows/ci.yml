@@ -33,9 +33,16 @@ jobs:
       - uses: pre-commit/action@v3.0.1
       - name: Type-check (mypy – toleranslı)
         run: mypy src tests || true
-      - name: Run unit tests + coverage
-        run: pytest -q --cov=src --cov-report=xml
+      - name: Run tests (parallel coverage)
+        run: |
+          coverage run -m pytest -q --parallel
         timeout-minutes: 10
+      - name: Combine & export coverage
+        run: |
+          coverage combine
+          coverage xml
+        env:
+          COVERAGE_PROCESS_START: .coveragerc
       - name: Upload coverage artefact
         uses: actions/upload-artifact@v4
         with:

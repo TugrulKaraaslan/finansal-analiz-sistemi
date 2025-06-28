@@ -266,7 +266,12 @@ def kaydet_uc_sekmeli_excel(
         logger_param = logger
     fname = Path(fname)
     fname.parent.mkdir(parents=True, exist_ok=True)
-    with pd.ExcelWriter(fname, engine="xlsxwriter", mode="w") as w:
+    with pd.ExcelWriter(
+        fname,
+        engine="xlsxwriter",
+        engine_kwargs={"options": {"constant_memory": True}},
+        mode="w",
+    ) as w:
         safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
         safe_to_excel(detay_df, w, sheet_name="Detay", index=False)
         safe_to_excel(istatistik_df, w, sheet_name="İstatistik", index=False)
