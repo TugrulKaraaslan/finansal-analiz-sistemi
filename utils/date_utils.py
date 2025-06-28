@@ -13,8 +13,13 @@ def parse_date(date_str: str) -> datetime:
     if pd.isna(date_str) or str(date_str).strip() == "":
         return pd.NaT
 
-    # Try explicit ISO first
+    # Try explicit ISO first (YYYY-MM-DD)
     ts = pd.to_datetime(date_str, format="%Y-%m-%d", errors="coerce")
+    if ts is not pd.NaT:
+        return ts
+
+    # Handle ISO with slashes (YYYY/MM/DD)
+    ts = pd.to_datetime(date_str, format="%Y/%m/%d", errors="coerce")
     if ts is not pd.NaT:
         return ts
 
