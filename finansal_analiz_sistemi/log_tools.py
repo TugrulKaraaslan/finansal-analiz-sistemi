@@ -90,10 +90,11 @@ def setup_logger(level: int = logging.INFO) -> CounterFilter:
     )
     console_handler = logging.StreamHandler(sys.stdout)
 
+    if _counter_filter not in root.filters:
+        root.addFilter(_counter_filter)
     for handler in (file_handler, console_handler):
         handler.setFormatter(formatter)
         handler.addFilter(DuplicateFilter())
-        handler.addFilter(_counter_filter)
 
     logging.basicConfig(level=level, handlers=[console_handler, file_handler])
     root.propagate = False
