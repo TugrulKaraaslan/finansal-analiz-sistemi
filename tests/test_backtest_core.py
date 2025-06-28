@@ -4,10 +4,11 @@ import types
 
 import pandas as pd
 
-import backtest_core
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+)  # isort: off
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+import backtest_core  # noqa: E402
 
 sys.modules.setdefault("pandas_ta", types.SimpleNamespace(Strategy=lambda **kw: None))
 
