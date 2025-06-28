@@ -23,8 +23,8 @@ class DataLoaderCache:
             kullanılacak logger nesnesi.
     """
 
-    def __init__(self, logger=None):
-        self.loaded_data = {}
+    def __init__(self, logger=None, *, ttl: int = 4 * 60 * 60, maxsize: int = 64):
+        self.loaded_data: TTLCache = TTLCache(maxsize=maxsize, ttl=ttl)
         self.logger = logger
 
     def load_excel(self, filepath: str, **kwargs) -> pd.ExcelFile:
@@ -63,6 +63,10 @@ class DataLoaderCache:
             if self.logger:
                 self.logger.error(f"CSV yükleme hatası: {filepath}: {e}")
             raise
+
+    def clear(self) -> None:
+        """Clear the internal cache."""
+        self.loaded_data.clear()
 
 
 def _read_parquet(ticker: str, start: str, end: str) -> pd.DataFrame:
