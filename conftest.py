@@ -27,3 +27,40 @@ def big_df() -> pd.DataFrame:
             "volume": np.random.randint(1, 1000, rows),
         }
     )
+
+
+"""Pytest genel ayarları ve yardımcı araçlar."""
+import logging  # noqa: E402
+import sys  # noqa: E402
+from types import ModuleType, SimpleNamespace  # noqa: E402,F401
+
+
+def _sanitize_sys_modules() -> None:
+    """Hypothesis'in `unhashable module` hatasını önle.
+
+    `sys.modules` içinde gerçek `ModuleType` olmayan (örn. `SimpleNamespace`)
+    girdileri tespit eder; aynı isimle yeni bir `ModuleType` üretip
+    orijinal öznitelikleri kopyalar. Böylece **hashable** hâle gelirler.
+    Çağrı maliyeti yok denecek kadar azdır ve production kodunu
+    etkilemez – yalnızca test oturumunda çalışır.
+    """
+
+    fixed: dict[str, ModuleType] = {}
+    for name, mod in list(sys.modules.items()):
+        if isinstance(mod, ModuleType):
+            continue  # zaten güvenli
+        safe_mod = ModuleType(name)
+        # SimpleNamespace ise dict kopyala; diğer durumlarda __dict__ yeterli
+        attrs = getattr(mod, "__dict__", {})
+        safe_mod.__dict__.update(attrs)
+        fixed[name] = safe_mod
+    if fixed:
+        logging.getLogger(__name__).debug(
+            "sys.modules temizlik: %d girdi düzeltildi", len(fixed)
+        )
+        sys.modules.update(fixed)
+
+
+# pytest hook – test tüm dosyalar toplanmadan önce çalışır
+def pytest_sessionstart(session):  # noqa: D401 – kısa açıklama yeterli
+    _sanitize_sys_modules()
