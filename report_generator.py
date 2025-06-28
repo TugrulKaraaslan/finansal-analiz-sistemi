@@ -278,13 +278,17 @@ def kaydet_uc_sekmeli_excel(
             "%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S"
         )
     )
-    logging.getLogger().addHandler(fh)
-
-    log_fn = logger_param.info
-    if ozet_df.empty and detay_df.empty and istatistik_df.empty:
-        log_fn = logger_param.warning
-    log_fn("Saved report to %s", fname)
-    logger_param.info("Per-run log file: %s", run_log)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(fh)
+    try:
+        log_fn = logger_param.info
+        if ozet_df.empty and detay_df.empty and istatistik_df.empty:
+            log_fn = logger_param.warning
+        log_fn("Saved report to %s", fname)
+        logger_param.info("Per-run log file: %s", run_log)
+    finally:
+        root_logger.removeHandler(fh)
+        fh.close()
     return fname
 
 
@@ -684,13 +688,17 @@ def generate_full_report(
             "%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S"
         )
     )
-    logging.getLogger().addHandler(fh)
-
-    log_fn = logger_param.info
-    if summary_df.empty and detail_empty:
-        log_fn = logger_param.warning
-    log_fn("Rapor kaydedildi → %s", out_path)
-    logger_param.info("Per-run log file: %s", run_log)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(fh)
+    try:
+        log_fn = logger_param.info
+        if summary_df.empty and detail_empty:
+            log_fn = logger_param.warning
+        log_fn("Rapor kaydedildi → %s", out_path)
+        logger_param.info("Per-run log file: %s", run_log)
+    finally:
+        root_logger.removeHandler(fh)
+        fh.close()
     return out_path
 
 
