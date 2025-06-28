@@ -32,5 +32,3 @@ def _as_int(value: Any, default: int) -> int:
 
 
 MAX_FILTER_DEPTH: int = _as_int(_cfg.get("max_filter_depth"), DEFAULT_MAX_FILTER_DEPTH)
-
-__all__ = ["MAX_FILTER_DEPTH"]
