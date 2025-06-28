@@ -12,6 +12,9 @@ T = TypeVar("T")
 
 def lazy_chunk(seq: Iterable[T], size: int) -> Generator[Sequence[T], None, None]:
     """Yield sequence chunks lazily without loading all into memory."""
+    if size <= 0:
+        raise ValueError("size must be positive")
+
     chunk: list[T] = []
     for item in seq:
         chunk.append(item)
