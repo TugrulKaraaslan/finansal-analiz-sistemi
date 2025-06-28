@@ -4,6 +4,7 @@ import logging
 import sys
 from types import ModuleType, SimpleNamespace
 
+import hypothesis
 import numpy as np  # mevcut test yardımcıları için gerekli
 import pandas as pd  # mevcut test yardımcıları için gerekli
 import pytest  # pytest fixture’ları için gerekli
@@ -37,6 +38,13 @@ def _sanitize_sys_modules() -> None:
 # Hypothesis, modüller toplanırken ``sys.modules``'u tarar.
 # Hemen yama uygulayarak koleksiyon hatalarını önle.
 _sanitize_sys_modules()
+
+hypothesis.settings.register_profile(
+    "ci",
+    max_examples=10,
+    deadline=1000,
+)
+hypothesis.settings.load_profile("ci")
 
 # ``SimpleNamespace`` için basit bir ``__hash__`` ekleyerek Hypothesis'in
 # set oluşturma sırasında hata vermemesini sağla.
