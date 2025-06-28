@@ -9,6 +9,10 @@ sys.path.insert(
 
 import backtest_core  # noqa: E402
 
+backtest_core = (
+    backtest_core  # importlib ile reload yapmıyorsan bu şekilde bırakabilirsin
+)
+
 
 def _df():
     return pd.DataFrame(
