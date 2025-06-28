@@ -1,16 +1,18 @@
-import types
+import logging
+import sys
+from types import ModuleType, SimpleNamespace
 
-import numpy as np
-import pandas as pd
-import pytest
+import numpy as np  # ↳ mevcut test yardımcıları için gerekli
+import pandas as pd  # ↳ mevcut test yardımcıları için gerekli
+import pytest  # ↳ pytest fixture’ları için gerekli
 
 # Hypothesis scans sys.modules during test collection.  Our tests inject
 # ``types.SimpleNamespace`` objects as stubs, but these are not hashable by
 # default, which leads to ``TypeError`` when Hypothesis tries to create a set
 # from module values.  Provide a simple ``__hash__`` implementation early so
 # that test collection succeeds regardless of import order.
-if not hasattr(types.SimpleNamespace, "__hash__"):
-    types.SimpleNamespace.__hash__ = lambda self: id(self)
+if not hasattr(SimpleNamespace, "__hash__"):
+    SimpleNamespace.__hash__ = lambda self: id(self)
 
 
 @pytest.fixture
@@ -30,9 +32,6 @@ def big_df() -> pd.DataFrame:
 
 
 """Pytest genel ayarları ve yardımcı araçlar."""
-import logging  # noqa: E402
-import sys  # noqa: E402
-from types import ModuleType, SimpleNamespace  # noqa: E402,F401
 
 
 def _sanitize_sys_modules() -> None:
