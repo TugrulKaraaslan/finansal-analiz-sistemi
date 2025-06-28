@@ -35,7 +35,7 @@ jobs:
         run: mypy src tests || true
       - name: Run tests (parallel coverage)
         run: |
-          coverage run -m pytest -q --parallel
+          coverage run -m pytest -q
         timeout-minutes: 10
       - name: Combine & export coverage
         run: |
