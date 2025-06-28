@@ -1,7 +1,21 @@
 """Minimal conftest to avoid heavy dependencies."""
 
+import glob
+import os
+import tempfile
+
 import pandas as pd
 import pytest
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _cleanup_stale_locks():
+    for fp in glob.glob(os.path.join(tempfile.gettempdir(), "*.lock")):
+        try:
+            os.remove(fp)
+        except OSError:
+            pass
+    yield
 
 
 @pytest.fixture
