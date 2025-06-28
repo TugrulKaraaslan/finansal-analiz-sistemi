@@ -1,8 +1,9 @@
 """Minimal conftest to avoid heavy dependencies."""
 
-import os
 import glob
+import os
 import tempfile
+
 import pandas as pd
 import pytest
 

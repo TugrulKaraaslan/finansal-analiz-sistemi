@@ -1,6 +1,7 @@
 import tempfile
-from uuid import uuid4
 from pathlib import Path
+from uuid import uuid4
+
 import portalocker
 
 # Unique lock file in temp directory
