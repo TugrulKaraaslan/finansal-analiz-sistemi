@@ -269,7 +269,6 @@ def kaydet_uc_sekmeli_excel(
     with pd.ExcelWriter(
         fname,
         engine="xlsxwriter",
-        engine_kwargs={"options": {"constant_memory": True}},
         mode="w",
     ) as w:
         safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
@@ -581,7 +580,6 @@ def generate_full_report(
     with pd.ExcelWriter(
         out_path,
         engine="xlsxwriter",
-        engine_kwargs={"options": {"constant_memory": True}},
     ) as wr:
         ws_ozet = wr.book.add_worksheet("Özet")
         wr.sheets["Özet"] = ws_ozet

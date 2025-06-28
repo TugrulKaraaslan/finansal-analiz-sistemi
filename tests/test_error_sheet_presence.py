@@ -52,16 +52,16 @@ def report_path(tmp_path):
 
 
 def test_error_sheet_presence(report_path):
-    xls = pd.ExcelFile(report_path)
-    assert "Hatalar" in xls.sheet_names
-    df = pd.read_excel(report_path, "Hatalar")
-    assert not df.empty
-    critical = [
-        "hata_tipi",
-        "eksik_ad",
-        "detay",
-        "cozum_onerisi",
-        "reason",
-        "hint",
-    ]
-    assert df[critical].notna().all(axis=None)
+    with pd.ExcelFile(report_path) as xls:
+        assert "Hatalar" in xls.sheet_names
+        df = pd.read_excel(report_path, "Hatalar")
+        assert not df.empty
+        critical = [
+            "hata_tipi",
+            "eksik_ad",
+            "detay",
+            "cozum_onerisi",
+            "reason",
+            "hint",
+        ]
+        assert df[critical].notna().all(axis=None)
