@@ -6,3 +6,6 @@ pycache/
 loglar/
 raporlar/
 cikti/
+venv/
+.venv/
+.coverage
