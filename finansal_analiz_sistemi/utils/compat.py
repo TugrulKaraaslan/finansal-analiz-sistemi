@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 def transpose(
     df,
     axis0: int = 0,
