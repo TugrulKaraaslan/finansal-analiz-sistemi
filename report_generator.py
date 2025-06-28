@@ -1,14 +1,6 @@
 from __future__ import annotations
 
 import importlib.util
-
-if (
-    importlib.util.find_spec("xlsxwriter") is None
-):  # pragma: no cover - guard for optional dep
-    raise RuntimeError(
-        "XlsxWriter is required for Excel export. Install with 'pip install xlsxwriter>=3.1'"
-    )
-
 import logging
 import os
 import uuid
@@ -23,6 +15,8 @@ from openpyxl.utils import get_column_letter
 import report_stats
 from logging_config import get_logger
 from utils.compat import safe_concat, safe_to_excel
+
+HAVE_XLSXWRITER = importlib.util.find_spec("xlsxwriter") is not None
 
 logger = get_logger(__name__)
 
@@ -266,7 +260,8 @@ def kaydet_uc_sekmeli_excel(
         logger_param = logger
     fname = Path(fname)
     fname.parent.mkdir(parents=True, exist_ok=True)
-    with pd.ExcelWriter(fname, engine="xlsxwriter", mode="w") as w:
+    engine = "xlsxwriter" if HAVE_XLSXWRITER else "openpyxl"
+    with pd.ExcelWriter(fname, engine=engine, mode="w") as w:
         safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
         safe_to_excel(detay_df, w, sheet_name="Detay", index=False)
         safe_to_excel(istatistik_df, w, sheet_name="İstatistik", index=False)
@@ -278,13 +273,17 @@ def kaydet_uc_sekmeli_excel(
             "%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S"
         )
     )
-    logging.getLogger().addHandler(fh)
-
-    log_fn = logger_param.info
-    if ozet_df.empty and detay_df.empty and istatistik_df.empty:
-        log_fn = logger_param.warning
-    log_fn("Saved report to %s", fname)
-    logger_param.info("Per-run log file: %s", run_log)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(fh)
+    try:
+        log_fn = logger_param.info
+        if ozet_df.empty and detay_df.empty and istatistik_df.empty:
+            log_fn = logger_param.warning
+        log_fn("Saved report to %s", fname)
+        logger_param.info("Per-run log file: %s", run_log)
+    finally:
+        root_logger.removeHandler(fh)
+        fh.close()
     return fname
 
 
@@ -575,7 +574,7 @@ def generate_full_report(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(
         out_path,
-        engine="xlsxwriter",
+        engine="xlsxwriter" if HAVE_XLSXWRITER else "openpyxl",
     ) as wr:
         ws_ozet = wr.book.add_worksheet("Özet")
         wr.sheets["Özet"] = ws_ozet
@@ -684,13 +683,17 @@ def generate_full_report(
             "%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S"
         )
     )
-    logging.getLogger().addHandler(fh)
-
-    log_fn = logger_param.info
-    if summary_df.empty and detail_empty:
-        log_fn = logger_param.warning
-    log_fn("Rapor kaydedildi → %s", out_path)
-    logger_param.info("Per-run log file: %s", run_log)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(fh)
+    try:
+        log_fn = logger_param.info
+        if summary_df.empty and detail_empty:
+            log_fn = logger_param.warning
+        log_fn("Rapor kaydedildi → %s", out_path)
+        logger_param.info("Per-run log file: %s", run_log)
+    finally:
+        root_logger.removeHandler(fh)
+        fh.close()
     return out_path
 
 
