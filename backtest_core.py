@@ -125,7 +125,8 @@ def calistir_basit_backtest(
         alim_fiyat_sutunu = "close"
     if satis_fiyat_sutunu not in df_tum_veri.columns:
         satis_fiyat_sutunu = "close"
-    getattr(config, "UYGULANAN_STRATEJI", "basit_backtest")
+    # Uygulanan strateji bilgisini konfigürasyona yaz
+    setattr(config, "UYGULANAN_STRATEJI", "basit_backtest")
 
     summary_records = []
     detail_records = []
