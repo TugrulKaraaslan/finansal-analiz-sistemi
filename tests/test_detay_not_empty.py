@@ -20,4 +20,5 @@ def test_detay_not_empty():
     ]
     detay_df = _build_detay_df(detay_list, trades)
     critical = ["hisse_kodu", "getiri_%", "basari", "strateji", "sebep_kodu"]
-    assert detay_df[critical].notna().any().all()
+    # ensure none of the critical columns contain missing values
+    assert detay_df[critical].notna().all().all()
