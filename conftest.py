@@ -30,9 +30,9 @@ def big_df() -> pd.DataFrame:
 
 
 """Pytest genel ayarları ve yardımcı araçlar."""
-from types import ModuleType, SimpleNamespace  # noqa: E402,F401
-import sys  # noqa: E402
 import logging  # noqa: E402
+import sys  # noqa: E402
+from types import ModuleType, SimpleNamespace  # noqa: E402,F401
 
 
 def _sanitize_sys_modules() -> None:
@@ -55,7 +55,9 @@ def _sanitize_sys_modules() -> None:
         safe_mod.__dict__.update(attrs)
         fixed[name] = safe_mod
     if fixed:
-        logging.getLogger(__name__).debug("sys.modules temizlik: %d girdi düzeltildi", len(fixed))
+        logging.getLogger(__name__).debug(
+            "sys.modules temizlik: %d girdi düzeltildi", len(fixed)
+        )
         sys.modules.update(fixed)
 
 
