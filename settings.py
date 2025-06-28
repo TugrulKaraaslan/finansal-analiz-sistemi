@@ -9,4 +9,4 @@ if os.path.exists(_cfg_path):
 else:
     _cfg = {}
 
-MAX_FILTER_DEPTH = _cfg.get("max_filter_depth", 5)
+MAX_FILTER_DEPTH = _cfg.get("max_filter_depth", 7)
