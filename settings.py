@@ -15,8 +15,11 @@ def _load_cfg() -> dict[str, Any]:
         os.environ.get("FAS_SETTINGS_FILE", Path(__file__).with_suffix(".yaml"))
     )
     if cfg_file.is_file():
-        with cfg_file.open() as f:
-            return yaml.safe_load(f) or {}
+        try:
+            with cfg_file.open() as f:
+                return yaml.safe_load(f) or {}
+        except yaml.YAMLError:
+            return {}
     return {}
 
 
