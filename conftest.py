@@ -8,6 +8,7 @@ import hypothesis
 import numpy as np  # mevcut test yardımcıları için gerekli
 import pandas as pd  # mevcut test yardımcıları için gerekli
 import pytest  # pytest fixture’ları için gerekli
+import responses
 
 # Ensure runtime patches (e.g., numpy.NaN) are applied early
 import sitecustomize  # noqa: F401
@@ -66,6 +67,13 @@ def big_df() -> pd.DataFrame:
             "volume": np.random.randint(1, 1000, rows),
         }
     )
+
+
+@pytest.fixture(autouse=True)
+def _mock_http():
+    with responses.RequestsMock() as rsps:
+        rsps.add_passthru("http://localhost")
+        yield
 
 
 def pytest_sessionstart(session: pytest.Session) -> None:  # noqa: D401
