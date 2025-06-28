@@ -91,3 +91,12 @@ if not hasattr(sys.modules[__name__], "passive_filters"):
     passive_filters = ["T31"]  # D2
 if not hasattr(sys.modules[__name__], "OZEL_SUTUN_PARAMS"):
     OZEL_SUTUN_PARAMS: dict = {}  # D3
+
+# ---------------------------------------------------------------------------
+# Teknik analizde zorunlu olarak üretilecek hareketli ortalamalar
+# ---------------------------------------------------------------------------
+
+from typing import List  # noqa: E402
+
+# Basit/üstel vb. MA hesaplamalarında gereken pencere uzunlukları
+GEREKLI_MA_PERIYOTLAR: List[int] = [5, 8, 20, 50, 100, 200]
