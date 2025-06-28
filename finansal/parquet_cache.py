@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
-import pandas as pd
 import portalocker
-from pandas import DataFrame
+
+if TYPE_CHECKING:  # pragma: no cover - used for type hints only
+    from pandas import DataFrame
 
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -20,6 +21,8 @@ class ParquetCacheManager:  # noqa: D101
 
     def load(self) -> DataFrame:  # noqa: D401, D403
         """Load the cached parquet. Raise FileNotFoundError if absent."""
+        import pandas as pd
+
         if not self.cache_path.exists():
             raise FileNotFoundError(self.cache_path)
         df = pd.read_parquet(self.cache_path)
