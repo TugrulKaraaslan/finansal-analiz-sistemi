@@ -1,4 +1,4 @@
-cachetools<6.0,>=5.3
+cachetools>=6.1,<7
 click >= 8.1
 pandas >= 2.2
 portalocker >= 2.8
