@@ -23,7 +23,7 @@ sys.modules.setdefault("cfg", sys.modules[__name__])
 SATIS_ZAMANI = globals().get("SATIS_ZAMANI", "close")
 
 # Empty default for value crossovers
-SERIES_VALUE_CROSSOVERS = globals().get("SERIES_VALUE_CROSSOVERS", {})
+SERIES_VALUE_CROSSOVERS = globals().get("SERIES_VALUE_CROSSOVERS", [])
 
 # Ensure Ichimoku alias exists
 INDIKATOR_AD_ESLESTIRME = globals().get("INDIKATOR_AD_ESLESTIRME", {})
