@@ -87,4 +87,4 @@ def get_logger(name: str | None = None) -> logging.Logger:
     return log
 
 
-__all__ = ["get_logger"]
+__all__ = ["get_logger", "setup_logging"]
