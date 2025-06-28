@@ -1,7 +1,7 @@
 cachetools>=6.1,<7
 click >= 8.1
 pandas >= 2.2
-portalocker >= 2.8
+portalocker>=2.8
 psutil>=5.9
 pyarrow >= 16
 pandas-ta==0.3.14b0
