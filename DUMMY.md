@@ -1,1 +1,2 @@
-Trigger pre-commit
+Trigger pre-commit hooks
+
