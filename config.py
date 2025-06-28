@@ -3,11 +3,22 @@
 import sys  # isort: skip
 from pathlib import Path
 
+import yaml
+
 # Flag to indicate the application is running in Google Colab
 IS_COLAB: bool = False
 
 CACHE_PATH: Path = Path("veri/birlesik_hisse_verileri.parquet")
 DEFAULT_CSV_PATH: Path = Path("data/raw/all_prices.csv")
+
+# Load optional configuration overrides from 'config.yml'
+_CFG_FILE = Path(__file__).with_suffix(".yml")
+if _CFG_FILE.exists():
+    with _CFG_FILE.open() as f:
+        _CFG = yaml.safe_load(f) or {}
+        globals().update(_CFG)
+else:
+    _CFG = {}
 
 # dtype downcast mappings for CSV reading
 DTYPES: dict[str, str] = {
@@ -89,6 +100,8 @@ if not hasattr(sys.modules[__name__], "get"):
 
 if not hasattr(sys.modules[__name__], "passive_filters"):
     passive_filters = ["T31"]  # D2
+if not hasattr(sys.modules[__name__], "filter_weights"):
+    filter_weights: dict = {}
 if not hasattr(sys.modules[__name__], "OZEL_SUTUN_PARAMS"):
     OZEL_SUTUN_PARAMS: dict = {}  # D3
 
