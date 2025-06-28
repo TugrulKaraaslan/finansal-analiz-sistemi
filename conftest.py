@@ -1,3 +1,17 @@
+import types
+
+# Ensure SimpleNamespace is hashable for Hypothesis set-operations
+if getattr(types.SimpleNamespace, "__hash__", None) is None:
+    try:
+        types.SimpleNamespace.__hash__ = lambda self: id(self)
+    except TypeError:
+        pass
+    if getattr(types.SimpleNamespace, "__hash__", None) is None:
+        class _HashableSimpleNamespace(types.SimpleNamespace):
+            __hash__ = lambda self: id(self)
+
+        types.SimpleNamespace = _HashableSimpleNamespace
+
 import logging
 import sys
 from types import ModuleType, SimpleNamespace
