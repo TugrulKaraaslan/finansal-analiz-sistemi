@@ -1,4 +1,4 @@
 - code: Tsmk1
-  clause: close > open
+  clause: "close > open"
 - code: Tsmk2
-  clause: volume > 8000
+  clause: "volume > 8000"
