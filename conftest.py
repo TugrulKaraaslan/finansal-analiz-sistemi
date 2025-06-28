@@ -1,48 +1,42 @@
-import logging
-import sys
-from types import ModuleType, SimpleNamespace
-
-import numpy as np  # ↳ mevcut test yardımcıları için gerekli
-import pandas as pd  # ↳ mevcut test yardımcıları için gerekli
-import pytest  # ↳ pytest fixture’ları için gerekli
-
-"""Pytest genel ayarları – Hypothesis uyumluluk yamaları."""
+"""Pytest genel ayarları ve yardımcı araçlar."""
 
 import logging
 import sys
 from types import ModuleType, SimpleNamespace
+
+import numpy as np  # mevcut test yardımcıları için gerekli
+import pandas as pd  # mevcut test yardımcıları için gerekli
+import pytest  # pytest fixture’ları için gerekli
 
 
 def _sanitize_sys_modules() -> None:
-    """`sys.modules` içindeki hash'lenemez girdileri kaldır/terfi et.
+    """Hypothesis'in ``unhashable module`` hatasını önle.
 
-    Hypothesis >=\u00a06.88, yerel sabitleri belirlerken `sys.modules.values()`
-    kümesine ihtiyaç duyar.  `SimpleNamespace` hashable değildir ve
-    `set()` dönüşümü sırasında `TypeError` fırlatır.  Bu yardımcı, test
-    oturumunun başında hatalı girdileri güvenli hâle getirir.
+    ``sys.modules`` içinde gerçek :class:`ModuleType` olmayan girdileri tespit
+    eder; aynı isimle yeni bir :class:`ModuleType` üretip orijinal
+    öznitelikleri kopyalar. Böylece **hashable** hâle gelirler.
     """
-    patched = 0
+
+    fixed: dict[str, ModuleType] = {}
     for name, mod in list(sys.modules.items()):
-        if not isinstance(mod, ModuleType):
-            safe_mod = ModuleType(name)
-            # Varsa kullanıcı tanımlı attribute’ları taşı
-            safe_mod.__dict__.update(getattr(mod, "__dict__", {}))
-            sys.modules[name] = safe_mod
-            patched += 1
-    if patched:
+        if isinstance(mod, ModuleType):
+            continue
+        safe_mod = ModuleType(name)
+        safe_mod.__dict__.update(getattr(mod, "__dict__", {}))
+        fixed[name] = safe_mod
+    if fixed:
         logging.getLogger(__name__).debug(
-            "Hypothesis fix: %s hash'lenemez sys.modules girdisi ModuleType'a dönüştürüldü.",
-            patched,
+            "sys.modules temizlik: %d girdi düzeltildi", len(fixed)
         )
+        sys.modules.update(fixed)
 
 
-# Pytest oturumunun en erken noktasında çalıştır
+# Hypothesis, modüller toplanırken ``sys.modules``'u tarar.
+# Hemen yama uygulayarak koleksiyon hatalarını önle.
 _sanitize_sys_modules()
-# Hypothesis scans sys.modules during test collection.  Our tests inject
-# ``types.SimpleNamespace`` objects as stubs, but these are not hashable by
-# default, which leads to ``TypeError`` when Hypothesis tries to create a set
-# from module values.  Provide a simple ``__hash__`` implementation early so
-# that test collection succeeds regardless of import order.
+
+# ``SimpleNamespace`` için basit bir ``__hash__`` ekleyerek Hypothesis'in
+# set oluşturma sırasında hata vermemesini sağla.
 if not hasattr(SimpleNamespace, "__hash__"):
     SimpleNamespace.__hash__ = lambda self: id(self)
 
@@ -63,35 +57,7 @@ def big_df() -> pd.DataFrame:
     )
 
 
-"""Pytest genel ayarları ve yardımcı araçlar."""
+def pytest_sessionstart(session: pytest.Session) -> None:  # noqa: D401
+    """Test oturumu başlamadan önce ``sys.modules``'u temizle."""
 
-
-def _sanitize_sys_modules() -> None:
-    """Hypothesis'in `unhashable module` hatasını önle.
-
-    `sys.modules` içinde gerçek `ModuleType` olmayan (örn. `SimpleNamespace`)
-    girdileri tespit eder; aynı isimle yeni bir `ModuleType` üretip
-    orijinal öznitelikleri kopyalar. Böylece **hashable** hâle gelirler.
-    Çağrı maliyeti yok denecek kadar azdır ve production kodunu
-    etkilemez – yalnızca test oturumunda çalışır.
-    """
-
-    fixed: dict[str, ModuleType] = {}
-    for name, mod in list(sys.modules.items()):
-        if isinstance(mod, ModuleType):
-            continue  # zaten güvenli
-        safe_mod = ModuleType(name)
-        # SimpleNamespace ise dict kopyala; diğer durumlarda __dict__ yeterli
-        attrs = getattr(mod, "__dict__", {})
-        safe_mod.__dict__.update(attrs)
-        fixed[name] = safe_mod
-    if fixed:
-        logging.getLogger(__name__).debug(
-            "sys.modules temizlik: %d girdi düzeltildi", len(fixed)
-        )
-        sys.modules.update(fixed)
-
-
-# pytest hook – test tüm dosyalar toplanmadan önce çalışır
-def pytest_sessionstart(session):  # noqa: D401 – kısa açıklama yeterli
     _sanitize_sys_modules()
