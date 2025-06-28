@@ -66,3 +66,11 @@ def test_plot_summary_stats_returns_fig():
     ozet = report_stats.build_ozet_df(summary, detail)
     fig = report_stats.plot_summary_stats(ozet, detail, std_threshold=10)
     assert len(fig.data) == 4
+
+
+def test_plot_summary_stats_with_processed_detail():
+    summary, detail = sample_data()
+    ozet = report_stats.build_ozet_df(summary, detail)
+    processed = report_stats.build_detay_df(summary, detail)
+    fig = report_stats.plot_summary_stats(ozet, processed, std_threshold=10)
+    assert len(fig.data) == 4

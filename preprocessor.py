@@ -282,7 +282,7 @@ def on_isle_hisse_verileri(
                 # bilgisi olmadan)
                 original_len = len(df)
                 normalized_dates = pd.to_datetime(df["tarih"].dt.normalize())
-                holiday_dates = pd.to_datetime(tr_holidays)
+                holiday_dates = pd.to_datetime(list(tr_holidays.keys()))
                 df = df[~normalized_dates.isin(holiday_dates)]
                 rows_dropped_for_holidays = original_len - len(df)
                 if rows_dropped_for_holidays > 0:
