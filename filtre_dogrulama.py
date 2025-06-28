@@ -35,19 +35,23 @@ def dogrula_filtre_dataframe(
 
     for idx, row in df_filtre.iterrows():
         kod_degeri = row.get("flag")
-        kod = f"satir_{idx}" if pd.isna(kod_degeri) else str(kod_degeri)
+        kod_raw = "" if pd.isna(kod_degeri) else str(kod_degeri).strip()
+        kod = kod_raw or f"satir_{idx}"
         query_degeri = row.get("query", "")
         query = "" if pd.isna(query_degeri) else str(query_degeri).strip()
 
-        if not kod or kod.strip() == "":
+        if not kod_raw:
             sorunlu[kod] = "Boş veya eksik flag (kod) değeri."
-        elif not re.match(r"^[A-Z0-9_\-]+$", kod):
+        elif not re.match(r"^[A-Z0-9_\-]+$", kod_raw):
             sorunlu[kod] = (
                 "Geçersiz karakterler içeren flag. Sadece A-Z, 0-9, _ ve - izinli."
             )
 
         if "query" not in row or not query:
-            sorunlu[kod] = sorunlu.get(kod, "") + " Query sütunu boş veya eksik."
+            prefix = sorunlu.get(kod, "")
+            if prefix:
+                prefix = prefix.rstrip(". ") + ". "
+            sorunlu[kod] = prefix + "Query sütunu boş veya eksik."
 
     if logger:
         for kod, mesaj in sorunlu.items():
@@ -84,11 +88,12 @@ def validate(
 
     for idx, row in df_filtre.iterrows():
         kod_degeri = row.get("flag")
-        kod = f"satir_{idx}" if pd.isna(kod_degeri) else str(kod_degeri).strip()
+        kod_raw = "" if pd.isna(kod_degeri) else str(kod_degeri).strip()
+        kod = kod_raw or f"satir_{idx}"
         query_degeri = row.get("query", "")
         query = "" if pd.isna(query_degeri) else str(query_degeri).strip()
 
-        if not kod:
+        if not kod_raw:
             errors.append(
                 ValidationError(
                     hata_tipi="MISSING_FLAG",
@@ -99,7 +104,7 @@ def validate(
                     hint="Her filtre için bir kod girilmeli",
                 )
             )
-        elif not re.match(r"^[A-Z0-9_\-]+$", kod):
+        elif not re.match(r"^[A-Z0-9_\-]+$", kod_raw):
             errors.append(
                 ValidationError(
                     hata_tipi="INVALID_FLAG",
