@@ -4,10 +4,10 @@ import logging
 import sys
 from types import ModuleType, SimpleNamespace
 
+import hypothesis
 import numpy as np  # mevcut test yardımcıları için gerekli
 import pandas as pd  # mevcut test yardımcıları için gerekli
 import pytest  # pytest fixture’ları için gerekli
-import hypothesis
 
 # Ensure runtime patches (e.g., numpy.NaN) are applied early
 import sitecustomize  # noqa: F401
