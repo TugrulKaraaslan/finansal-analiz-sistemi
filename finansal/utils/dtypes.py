@@ -8,8 +8,20 @@ import config
 
 
 def safe_set(df: pd.DataFrame, column: str, values) -> None:
-    """Assign series to DataFrame with dtype safety."""
-    series = pd.Series(values)
+    """Assign series to DataFrame with dtype safety.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Target DataFrame to modify.
+    column : str
+        Column name to assign.
+    values : iterable
+        Values to be set. ``values`` must be index-aligned with ``df``.
+    """
+
+    # Ensure the index matches the DataFrame to avoid misaligned assignment
+    series = pd.Series(values, index=df.index)
 
     target_dtype = config.DTYPES_MAP.get(column)
     if target_dtype is None and column in df.columns:
