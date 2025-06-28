@@ -504,7 +504,7 @@ def generate_full_report(
     keep_legacy: bool = True,
     quick: bool = True,
     logger_param=None,
-) -> str:
+) -> Path:
     if logger_param is None:
         logger_param = logger
     if keep_legacy:
