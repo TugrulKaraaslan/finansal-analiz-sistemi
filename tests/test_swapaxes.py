@@ -20,5 +20,5 @@ def test_swapaxes_axis_args():
 
 def test_swapaxes_invalid_axis():
     df = pd.DataFrame({"x": [5, 6]})
-    with pytest.raises(NotImplementedError):
-        swapaxes(df, 1, 0)
+    with pytest.raises(ValueError):
+        swapaxes(df, 2, 0)
