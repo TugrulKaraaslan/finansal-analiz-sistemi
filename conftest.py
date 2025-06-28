@@ -4,6 +4,38 @@ import numpy as np
 import pandas as pd
 import pytest
 
+"""Pytest genel ayarları – Hypothesis uyumluluk yamaları."""
+
+from types import ModuleType, SimpleNamespace
+import sys
+import logging
+
+
+def _sanitize_sys_modules() -> None:
+    """`sys.modules` içindeki hash'lenemez girdileri kaldır/terfi et.
+
+    Hypothesis >= 6.88, yerel sabitleri belirlerken `sys.modules.values()`
+    kümesine ihtiyaç duyar.  `SimpleNamespace` hashable değildir ve
+    `set()` dönüşümü sırasında `TypeError` fırlatır.  Bu yardımcı, test
+    oturumunun başında hatalı girdileri güvenli hâle getirir.
+    """
+    patched = 0
+    for name, mod in list(sys.modules.items()):
+        if not isinstance(mod, ModuleType):
+            safe_mod = ModuleType(name)
+            # Varsa kullanıcı tanımlı attribute’ları taşı
+            safe_mod.__dict__.update(getattr(mod, "__dict__", {}))
+            sys.modules[name] = safe_mod
+            patched += 1
+    if patched:
+        logging.getLogger(__name__).debug(
+            "Hypothesis fix: %s hash'lenemez sys.modules girdisi ModuleType'a dönüştürüldü.",
+            patched,
+        )
+
+
+_sanitize_sys_modules()
+
 # Hypothesis scans sys.modules during test collection.  Our tests inject
 # ``types.SimpleNamespace`` objects as stubs, but these are not hashable by
 # default, which leads to ``TypeError`` when Hypothesis tries to create a set
