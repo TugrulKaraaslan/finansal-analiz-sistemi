@@ -1,14 +1,10 @@
-# data_loader_cache.py
 import os
-
 import pandas as pd
 from cachetools import TTLCache
-
 import config
 from src.utils.excel_reader import open_excel_cached
 
 CACHE: TTLCache = TTLCache(maxsize=256, ttl=4 * 60 * 60)  # 4 saat LRU+TTL
-
 
 class DataLoaderCache:
     """Basit dosya okuma önbelleği.
@@ -48,7 +44,7 @@ class DataLoaderCache:
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
         abs_path = os.path.abspath(filepath)
         key = (abs_path, "__csv__")
-        # Use nanosecond precision to detect rapid successive writes
+        # Use nanosecond precision and file size to detect rapid file updates
         stat = os.stat(abs_path)
         stamp = (stat.st_mtime_ns, stat.st_size)
         cached = self.loaded_data.get(key)
