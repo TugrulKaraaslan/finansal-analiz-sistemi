@@ -2,12 +2,21 @@ import warnings
 
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 import config
 from filtre_dogrulama import SEBEP_KODLARI
 from utils.pandas_option_safe import option_context
+
+
+def _get_plotly():
+    """Lazily import plotly when needed."""
+    try:
+        import plotly.graph_objects as go_mod
+        from plotly.subplots import make_subplots as make_subplots_mod
+    except ModuleNotFoundError as exc:  # pragma: no cover - import error path
+        raise ModuleNotFoundError("plotly is required for plotting functions") from exc
+    return go_mod, make_subplots_mod
+
 
 WARN_MSG = "".join(
     [
@@ -224,6 +233,7 @@ def plot_summary_stats(
     ozet_df: pd.DataFrame, detail_df: pd.DataFrame, std_threshold: float = 5.0
 ):
     """Create four-bar charts summarizing performance using plotly."""
+    go, make_subplots = _get_plotly()
     counts = build_stats_df(ozet_df).iloc[0]
 
     fig = make_subplots(
