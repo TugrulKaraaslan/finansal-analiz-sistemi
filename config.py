@@ -12,7 +12,7 @@ CACHE_PATH: Path = Path("veri/birlesik_hisse_verileri.parquet")
 DEFAULT_CSV_PATH: Path = Path("data/raw/all_prices.csv")
 
 # Load optional configuration overrides from 'config.yml'
-_CFG_FILE = Path(__file__).with_suffix(".yml")
+_CFG_FILE = Path(__file__).with_name("config.yml")
 if _CFG_FILE.exists():
     with _CFG_FILE.open() as f:
         _CFG = yaml.safe_load(f) or {}
