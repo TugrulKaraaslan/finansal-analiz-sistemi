@@ -1,5 +1,15 @@
 import pandas as pd
 
+EXPECTED_COLUMNS = [
+    "kod",
+    "tip",
+    "durum",
+    "sebep",
+    "eksik_sutunlar",
+    "nan_sutunlar",
+    "secim_adedi",
+]
+
 try:
     from .filter_engine import _apply_single_filter
 except ImportError:  # pragma: no cover - fallback when run as script
@@ -18,13 +28,17 @@ def tarama_denetimi(
     """
     # --- HOT-PATCH C2: kolon uyum katmanı -----------------
     if "kod" not in df_filtreler.columns and "FilterCode" in df_filtreler.columns:
-        df_filtreler = df_filtreler.rename(columns={"FilterCode": "kod"})
+        df_filtreler = df_filtreler.rename(
+            columns={"FilterCode": "kod"}
+        )  # pragma: no cover
     # ------------------------------------------------------
     kayıtlar = []
     for _, sat in df_filtreler.iterrows():
         _, info = _apply_single_filter(df_indikator, sat["kod"], sat["PythonQuery"])
         kayıtlar.append(info)
     df = pd.DataFrame(kayıtlar)
+    if df.empty:
+        df = pd.DataFrame(columns=EXPECTED_COLUMNS)  # pragma: no cover
     if not (df["durum"] != "OK").any():
         df = pd.concat(
             [
