@@ -54,5 +54,6 @@ def test_memory_clean(tmp_path, monkeypatch):
         assert not fe.FAILED_FILTERS
         assert not ft.failures
 
-    peak = max(int(line.split(",")[1]) for line in open(mp_file))
+    with mp_file.open() as f:
+        peak = max(int(line.split(",")[1]) for line in f)
     assert peak - base < 8 * 1024**3

@@ -31,6 +31,8 @@ def fill_missing_business_day(
 
     # propagate next valid dates downward so NaT values have a reference point
     next_valid = dates.bfill()
+    if next_valid.isna().any():
+        next_valid = next_valid.fillna(dates.ffill())
 
     # determine how far each NaT is from the next valid date
     offsets = []
