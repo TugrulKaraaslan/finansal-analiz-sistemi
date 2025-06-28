@@ -576,6 +576,7 @@ def generate_full_report(
     with pd.ExcelWriter(
         out_path,
         engine="xlsxwriter",
+        engine_kwargs={"options": {"constant_memory": True}},
     ) as wr:
         ws_ozet = wr.book.add_worksheet("Özet")
         wr.sheets["Özet"] = ws_ozet
