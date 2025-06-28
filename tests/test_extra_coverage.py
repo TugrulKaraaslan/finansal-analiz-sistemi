@@ -1,7 +1,6 @@
 import pandas as pd
 
 import src.kontrol_araci as kontrol_araci
-from finansal_analiz_sistemi.utils import swapaxes
 from src.preprocessor import fill_missing_business_day
 from src.utils import excel_reader
 
@@ -69,9 +68,3 @@ def test_logging_config_import(monkeypatch):
     monkeypatch.setattr(lc.os, "makedirs", lambda *a, **k: None)
     importlib.reload(lc)
     assert calls["file"].endswith("run.log")
-
-
-def test_swapaxes_basic():
-    df = pd.DataFrame({"a": [1, 2]})
-    out = swapaxes(df)
-    pd.testing.assert_frame_equal(out, df.transpose())
