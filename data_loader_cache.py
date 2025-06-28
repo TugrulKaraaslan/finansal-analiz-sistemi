@@ -1,10 +1,13 @@
 import os
+
 import pandas as pd
 from cachetools import TTLCache
+
 import config
 from src.utils.excel_reader import open_excel_cached
 
 CACHE: TTLCache = TTLCache(maxsize=256, ttl=4 * 60 * 60)  # 4 saat LRU+TTL
+
 
 class DataLoaderCache:
     """Basit dosya okuma önbelleği.
