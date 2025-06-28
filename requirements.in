@@ -13,3 +13,8 @@ rich
 python-dotenv
 pytest
 hypothesis
+click
+psutil
+portalocker
+pyarrow
+cachetools

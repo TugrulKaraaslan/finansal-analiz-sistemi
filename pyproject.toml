@@ -11,6 +11,8 @@ authors = []
 python = "^3.11"
 pandas-ta = "0.3.14b0"
 cachetools = "6.1.0"
+numpy = "*"
+pandas = "^2.2"
 xlsxwriter = "^3.1"
 hypothesis = ">=6.102,<7"
 
