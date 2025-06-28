@@ -1,13 +1,12 @@
-from datetime import datetime
+import pandas as pd
 
 
-def parse_date(date_str: str) -> datetime:
+def parse_date(date_str: str) -> pd.Timestamp:
     """Parse TR/EU or ISO date strings safely.
 
     Returns ``pd.NaT`` for invalid inputs instead of raising ``ValueError``.
     """
 
-    import pandas as pd
     from dateutil import parser
 
     if pd.isna(date_str) or str(date_str).strip() == "":
@@ -30,6 +29,6 @@ def parse_date(date_str: str) -> datetime:
 
     # Fallback to dateutil for other variants
     try:
-        return parser.parse(str(date_str), dayfirst=True)
+        return pd.to_datetime(parser.parse(str(date_str), dayfirst=True))
     except Exception:
         return pd.NaT

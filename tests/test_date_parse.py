@@ -12,7 +12,7 @@ def test_parse_date_variants():
     }
     for raw, expected in cases.items():
         ts = parse_date(raw)
-        if expected is pd.NaT:
-            assert ts is pd.NaT
+        if pd.isna(expected):
+            assert pd.isna(ts)
         else:
             assert ts.strftime("%Y-%m-%d") == expected
