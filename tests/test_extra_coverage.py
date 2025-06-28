@@ -1,6 +1,7 @@
 import pandas as pd
 
 import src.kontrol_araci as kontrol_araci
+from finansal_analiz_sistemi.report_writer import ReportWriter
 from src.preprocessor import fill_missing_business_day
 from src.utils import excel_reader
 
@@ -68,3 +69,10 @@ def test_logging_config_import(monkeypatch):
     monkeypatch.setattr(lc.os, "makedirs", lambda *a, **k: None)
     importlib.reload(lc)
     assert calls["file"].endswith("run.log")
+
+
+def test_report_writer_accepts_str(tmp_path):
+    df = pd.DataFrame({"a": [1]})
+    nested = tmp_path / "nested" / "out.xlsx"
+    ReportWriter().write_report(df, str(nested))
+    assert nested.exists() and nested.stat().st_size > 0
