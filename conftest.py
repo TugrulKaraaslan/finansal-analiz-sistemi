@@ -8,6 +8,9 @@ import numpy as np  # mevcut test yardımcıları için gerekli
 import pandas as pd  # mevcut test yardımcıları için gerekli
 import pytest  # pytest fixture’ları için gerekli
 
+# Ensure runtime patches (e.g., numpy.NaN) are applied early
+import sitecustomize  # noqa: F401
+
 
 def _sanitize_sys_modules() -> None:
     """Hypothesis'in ``unhashable module`` hatasını önle.
