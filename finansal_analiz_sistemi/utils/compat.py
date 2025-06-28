@@ -14,6 +14,14 @@ def transpose(
     """
     if axis0 == axis1:
         return df.copy(deep=bool(copy))
-    if (axis0, axis1) not in ((0, 1), ("index", "columns")):
+
+    valid_pairs = {
+        (0, 1),
+        (1, 0),
+        ("index", "columns"),
+        ("columns", "index"),
+    }
+    if (axis0, axis1) not in valid_pairs:
         raise ValueError("only axes 0 and 1 are supported")
+
     return df.transpose(copy=False if copy is None else copy)
