@@ -6,9 +6,9 @@ import pytest
 
 """Pytest genel ayarları – Hypothesis uyumluluk yamaları."""
 
-from types import ModuleType, SimpleNamespace
-import sys
 import logging
+import sys
+from types import ModuleType, SimpleNamespace
 
 
 def _sanitize_sys_modules() -> None:
