@@ -1150,7 +1150,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
         )
 
     results_list = []
-    grouped = df_islenmis_veri.groupby("hisse_kodu", group_keys=False)
+    groupby_obj = df_islenmis_veri.groupby("hisse_kodu", group_keys=False)
 
     total_stocks = len(df_islenmis_veri["hisse_kodu"].unique())
     current_processed_count_main = 0
@@ -1159,7 +1159,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
         hisse_kodu,
         group_df_original,
     ) in (
-        grouped
+        groupby_obj
     ):  # group_df_original zaten 'tarih'e göre sıralı geliyor (preprocessor'dan)
         current_processed_count_main += 1
         # _calculate_group_indicators_and_crossovers fonksiyonuna RangeIndex'li ve 'tarih' sütunlu df gönderiyoruz.
@@ -1184,22 +1184,22 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             group_df_for_calc, wanted_cols, filtre_df
         )
         if calculated_group is not None and not calculated_group.empty:
-            grouped = calculated_group
-            dup_cols = grouped.columns[grouped.columns.duplicated()]
+            group_df = calculated_group
+            dup_cols = group_df.columns[group_df.columns.duplicated()]
             if dup_cols.any():
                 ana_logger.warning(
                     f"{hisse_kodu}: yinelenen kolonlar atıldı -> {dup_cols.tolist()}"
                 )
-                grouped = grouped.loc[:, ~grouped.columns.duplicated()]
+                group_df = group_df.loc[:, ~group_df.columns.duplicated()]
 
-            if grouped.index.duplicated().any():
+            if group_df.index.duplicated().any():
                 ana_logger.warning(f"{hisse_kodu}: yinelenen satır index'i silindi")
-                grouped = grouped[~grouped.index.duplicated()]
+                group_df = group_df[~group_df.index.duplicated()]
 
-            grouped.reset_index(drop=True, inplace=True)
+            group_df.reset_index(drop=True, inplace=True)
             results_list.append(
-                grouped
-            )  # grouped zaten RangeIndex'li ve 'tarih' sütunlu dönmeli
+                group_df
+            )  # group_df zaten RangeIndex'li ve 'tarih' sütunlu dönmeli
         else:
             ana_logger.warning(
                 f"{hisse_kodu} için indikatör hesaplama sonucu boş veya None döndü."
