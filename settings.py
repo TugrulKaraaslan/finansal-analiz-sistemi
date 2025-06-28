@@ -9,4 +9,7 @@ if os.path.exists(_cfg_path):
 else:
     _cfg = {}
 
-MAX_FILTER_DEPTH = _cfg.get("max_filter_depth", 7)
+try:
+    MAX_FILTER_DEPTH = int(_cfg.get("max_filter_depth", 7))
+except (TypeError, ValueError):
+    MAX_FILTER_DEPTH = 7
