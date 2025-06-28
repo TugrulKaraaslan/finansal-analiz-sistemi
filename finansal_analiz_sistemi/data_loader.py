@@ -35,11 +35,9 @@ def _read_excel_cached(path: str) -> pd.DataFrame:
     return _read_excel(path)
 
 
-@lru_cache(maxsize=None)
 def load_data(path: str) -> pd.DataFrame:
-    """Read a CSV file using an in-memory cache."""
-    df = pd.read_csv(path, dtype=config.DTYPES)
-    return df
+    """Read a CSV file using the shared cache."""
+    return _cache_loader.load_csv(path)
 
 
 def load_filter_csv(path: str) -> pd.DataFrame:

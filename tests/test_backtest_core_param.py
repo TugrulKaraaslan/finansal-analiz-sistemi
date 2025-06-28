@@ -49,3 +49,15 @@ def test_get_fiyat_non_numeric():
     df.loc[0, "close"] = np.nan  # avoids object→float warning
     out = bc._get_fiyat(df, df.loc[0, "tarih"], "close")
     assert np.isnan(out)
+
+
+def test_get_fiyat_string_dates():
+    df = pd.DataFrame(
+        {
+            "hisse_kodu": ["AAA", "AAA"],
+            "tarih": ["09.03.2025", "11.03.2025"],
+            "close": [10.0, 11.0],
+        }
+    )
+    out = bc._get_fiyat(df, pd.to_datetime("10.03.2025", dayfirst=True), "close")
+    assert out == 11.0

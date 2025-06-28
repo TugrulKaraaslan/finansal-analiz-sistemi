@@ -545,7 +545,11 @@ def generate_full_report(
             if col not in err_df.columns:
                 err_df[col] = "-"
         if not err_df.empty and "detay" in err_df.columns:
-            err_map = err_df[["filtre_kodu", "detay"]].dropna()
+            err_map = (
+                err_df[["filtre_kodu", "detay"]]
+                .dropna()
+                .drop_duplicates(subset=["filtre_kodu"])
+            )
             # Özet
             summary_df = summary_df.merge(
                 err_map.rename(columns={"detay": "sebep_aciklama_fill"}),
