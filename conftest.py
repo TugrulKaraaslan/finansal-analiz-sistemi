@@ -7,6 +7,7 @@ if getattr(types.SimpleNamespace, "__hash__", None) is None:
     except TypeError:
         pass
     if getattr(types.SimpleNamespace, "__hash__", None) is None:
+
         class _HashableSimpleNamespace(types.SimpleNamespace):
             __hash__ = lambda self: id(self)
 
