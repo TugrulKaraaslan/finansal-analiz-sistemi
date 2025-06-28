@@ -9,6 +9,7 @@ import re
 
 import numpy as np
 import pandas as pd
+from pandas import CategoricalDtype
 
 import config
 from logging_config import get_logger
@@ -153,7 +154,7 @@ def on_isle_hisse_verileri(
         if col in df.columns:
             # Eğer sütun object (string) tipindeyse veya kategorikse, sayısal yapmaya
             # çalış
-            if df[col].dtype == "object" or pd.api.types.is_categorical_dtype(df[col]):
+            if df[col].dtype == "object" or isinstance(df[col].dtype, CategoricalDtype):
                 nan_before = df[col].isnull().sum()
                 original_type = df[col].dtype
                 df[col] = (
