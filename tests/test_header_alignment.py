@@ -6,4 +6,4 @@ def test_header_alignment(tmp_path):
     tmp.write_text("dummy\n2025-01-01;MACD;close>vwap\n")
 
     df = load_filter_csv(tmp)
-    assert list(df.columns) == ["tarih", "filter_kodu", "python_query"]
+    assert list(df.columns) == ["tarih", "filtre_kodu", "python_query"]
