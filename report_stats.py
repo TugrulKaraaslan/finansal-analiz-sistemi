@@ -269,8 +269,16 @@ def plot_summary_stats(
     )
 
     # Bar 4 - reliability
+    col = None
+    if "getiri_yuzde" in detail_df.columns:
+        col = "getiri_yuzde"
+    elif "getiri_%" in detail_df.columns:
+        col = "getiri_%"
+    if col is None:
+        raise KeyError("detail_df must contain 'getiri_yuzde' or 'getiri_%'")
+
     rel_df = (
-        detail_df.groupby("filtre_kodu")["getiri_yuzde"]
+        detail_df.groupby("filtre_kodu")[col]
         .agg(["count", "std", "mean"])
         .rename(columns={"count": "hisse_sayisi"})
     )
