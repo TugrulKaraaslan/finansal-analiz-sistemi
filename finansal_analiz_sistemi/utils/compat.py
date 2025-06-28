@@ -2,7 +2,10 @@
 
 import pandas as pd
 
-def transpose(df: pd.DataFrame, axis0: int = 0, axis1: int = 1, copy: bool | None = None) -> pd.DataFrame:
+
+def transpose(
+    df: pd.DataFrame, axis0: int = 0, axis1: int = 1, copy: bool | None = None
+) -> pd.DataFrame:
     """Backwards compatible helper for :meth:`DataFrame.swapaxes`.
 
     Parameters mimic ``swapaxes`` but only ``axis0=0`` and ``axis1=1`` are
