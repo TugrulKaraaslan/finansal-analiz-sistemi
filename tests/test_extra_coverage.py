@@ -24,6 +24,21 @@ def test_excel_reader_cache(tmp_path):
     assert not excel_reader._excel_cache
 
 
+def test_excel_reader_cache_refresh(tmp_path):
+    path = tmp_path / "t.xlsx"
+    df1 = pd.DataFrame({"a": [1]})
+    df1.to_excel(path, index=False)
+    x1 = excel_reader.open_excel_cached(path)
+
+    df2 = pd.DataFrame({"a": [2]})
+    df2.to_excel(path, index=False)
+
+    x2 = excel_reader.open_excel_cached(path)
+    assert x1 is not x2
+    pd.testing.assert_frame_equal(excel_reader.read_excel_cached(path, "Sheet1"), df2)
+    excel_reader.clear_cache()
+
+
 def test_tarama_denetimi_summary(monkeypatch):
     df_filtreler = pd.DataFrame({"kod": ["F1"], "PythonQuery": ["close > open"]})
     df_ind = pd.DataFrame()
