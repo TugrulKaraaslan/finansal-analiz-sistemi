@@ -4,19 +4,45 @@
 #
 #    pip-compile --output-file=requirements.lock requirements.txt
 #
-cachetools==6.1.0
+attrs==25.3.0
+    # via hypothesis
+cachetools==5.5.2
     # via -r requirements.txt
+choreographer==1.0.9
+    # via kaleido
 click==8.2.1
-    # via -r requirements.txt
-numpy==2.0.2
-    # via pandas
-pandas==2.2.2
-    # via -r requirements.txt
-portalocker==3.2.0
     # via -r requirements.txt
 et-xmlfile==2.0.0
     # via openpyxl
+hypothesis==6.135.16
+    # via -r requirements.txt
+kaleido==1.0.0
+    # via -r requirements.txt
+logistro==1.1.0
+    # via
+    #   choreographer
+    #   kaleido
+narwhals==1.44.0
+    # via plotly
+numpy==2.0.2
+    # via pandas
 openpyxl==3.1.5
+    # via -r requirements.txt
+orjson==3.10.18
+    # via kaleido
+packaging==25.0
+    # via
+    #   kaleido
+    #   plotly
+pandas==2.2.2
+    # via
+    #   -r requirements.txt
+    #   pandas-ta
+pandas-ta==0.3.14b0
+    # via -r requirements.txt
+plotly==6.2.0
+    # via -r requirements.txt
+portalocker==3.2.0
     # via -r requirements.txt
 psutil==7.0.0
     # via -r requirements.txt
@@ -26,7 +52,15 @@ python-dateutil==2.9.0.post0
     # via pandas
 pytz==2025.2
     # via pandas
+pyyaml==6.0.2
+    # via -r requirements.txt
+simplejson==3.20.1
+    # via choreographer
 six==1.17.0
     # via python-dateutil
+sortedcontainers==2.4.0
+    # via hypothesis
 tzdata==2025.2
     # via pandas
+xlsxwriter==3.2.5
+    # via -r requirements.txt
