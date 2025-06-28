@@ -30,11 +30,18 @@ class ParquetCacheManager:  # noqa: D101
         return df
 
     def refresh(self, csv_path: Path) -> DataFrame:  # noqa: D401, D403
-        """Read CSV, write parquet, return DataFrame."""
+        """Read CSV (header or comment-style) and update the cache."""
         import pandas as pd  # local import to speed CLI --help
 
+        read_kwargs = {}
+        with open(csv_path, encoding="utf-8") as f:
+            first_line = f.readline().lstrip()
+        if first_line.startswith("#"):
+            names = [c.strip() for c in first_line[1:].split(",")]
+            read_kwargs = {"comment": "#", "header": None, "names": names}
+
         with portalocker.Lock(str(self.cache_path) + ".lock", timeout=30):
-            df = pd.read_csv(csv_path)
+            df = pd.read_csv(csv_path, **read_kwargs)
             df.to_parquet(self.cache_path, compression="snappy", index=False)
             logger.info("Cache refreshed from %s (%s rows)", csv_path, len(df))
         return df
