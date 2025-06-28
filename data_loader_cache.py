@@ -46,16 +46,21 @@ class DataLoaderCache:
             raise
 
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
-        key = (os.path.abspath(filepath), "__csv__")
-        if key in self.loaded_data:
-            if self.logger:
-                self.logger.debug(f"Cache hit: {key}")
-            return self.loaded_data[key]
+        abs_path = os.path.abspath(filepath)
+        key = (abs_path, "__csv__")
+        mtime = os.path.getmtime(abs_path)
+        cached = self.loaded_data.get(key)
+        if cached:
+            cached_mtime, df_cached = cached
+            if cached_mtime == mtime:
+                if self.logger:
+                    self.logger.debug(f"Cache hit: {key}")
+                return df_cached
 
         try:
             kwargs.setdefault("dtype", config.DTYPES)
-            df = pd.read_csv(filepath, **kwargs)
-            self.loaded_data[key] = df
+            df = pd.read_csv(abs_path, **kwargs)
+            self.loaded_data[key] = (mtime, df)
             if self.logger:
                 self.logger.info(f"CSV yüklendi: {filepath}")
             return df
