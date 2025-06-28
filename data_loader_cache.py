@@ -48,7 +48,8 @@ class DataLoaderCache:
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
         abs_path = os.path.abspath(filepath)
         key = (abs_path, "__csv__")
-        mtime = os.path.getmtime(abs_path)
+        # Use nanosecond precision to detect rapid file updates
+        mtime = os.stat(abs_path).st_mtime_ns
         cached = self.loaded_data.get(key)
         if cached:
             cached_mtime, df_cached = cached
