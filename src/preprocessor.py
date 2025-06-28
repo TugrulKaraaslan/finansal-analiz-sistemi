@@ -25,12 +25,29 @@ def fill_missing_business_day(
     df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
 
     dates = df[date_col]
-    next_valid = dates.bfill()
-    prev_valid = dates.ffill()
-
-    adjusted = next_valid - pd.offsets.BDay(1)
-    fallback = prev_valid - pd.offsets.BDay(1)
-
     mask = dates.isna()
-    df.loc[mask, date_col] = adjusted.where(~next_valid.isna(), fallback)[mask]
+    if not mask.any():
+        return df
+
+    # propagate next valid dates downward so NaT values have a reference point
+    next_valid = dates.bfill()
+
+    # determine how far each NaT is from the next valid date
+    offsets = []
+    counter = 0
+    for is_na in reversed(mask.to_list()):
+        if is_na:
+            counter += 1
+            offsets.append(counter)
+        else:
+            offsets.append(0)
+            counter = 0
+    offsets = list(reversed(offsets))
+
+    adjusted = next_valid.copy()
+    for idx, off in enumerate(offsets):
+        if off:
+            adjusted.iloc[idx] = adjusted.iloc[idx] - pd.offsets.BDay(off)
+
+    df.loc[mask, date_col] = adjusted[mask]
     return df
