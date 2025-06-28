@@ -2,14 +2,32 @@ import pandas as pd
 
 
 def normalize_filtre_kodu(df: pd.DataFrame) -> pd.DataFrame:
+    """'filtre_kodu' sütununu standartlaştır.
+
+    ``FilterCode`` veya ``filtercode`` gibi olası isimleri, baştaki ve sondaki
+    boşluklara aldırmadan ``filtre_kodu`` adına dönüştürür. Birden fazla eşleşen
+    sütun varsa sadece ilki tutulur. Sütun yoksa ``KeyError`` yükseltilir.
     """
-    DataFrame içinde 'FilterCode' / 'filtercode' gibi varyasyonları
-    tek standarda ('filtre_kodu') indirger.
-    Eksikse anlaşılır bir hata yükseltir.
-    """
-    if "filtre_kodu" in df.columns:
-        return df
-    aliases = [c for c in df.columns if c.lower() == "filtercode"]
-    if aliases:
-        return df.rename(columns={aliases[0]: "filtre_kodu"})
-    raise KeyError("'filtre_kodu' sütunu bulunamadı – CSV başlıklarını kontrol et")
+
+    # Harici müdahalelerden etkilenmemek için kopya üzerinde çalış
+    out = df.copy()
+
+    # Geçerli sütun isimlerini normalize et
+    normalized = {c: c.strip().lower() for c in out.columns}
+
+    # Aliases to be mapped to 'filtre_kodu'
+    alias_map = {
+        col: "filtre_kodu"
+        for col, norm in normalized.items()
+        if norm in {"filtercode", "filtre_kodu"}
+    }
+
+    out = out.rename(columns=alias_map)
+
+    if "filtre_kodu" not in out.columns:
+        raise KeyError("'filtre_kodu' sütunu bulunamadı – CSV başlıklarını kontrol et")
+
+    # Aynı isimde birden fazla sütun oluştuysa ilkini sakla
+    out = out.loc[:, ~out.columns.duplicated()]
+
+    return out
