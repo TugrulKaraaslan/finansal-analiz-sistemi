@@ -38,7 +38,9 @@ def _get_fiyat(
         # Tarih sütununun datetime olduğundan emin ol (preprocessor bunu yapmalı)
         if not pd.api.types.is_datetime64_any_dtype(df_hisse_veri["tarih"]):
             df_hisse_veri["tarih"] = pd.to_datetime(
-                df_hisse_veri["tarih"], errors="coerce"
+                df_hisse_veri["tarih"],
+                dayfirst=True,
+                errors="coerce",
             )
 
         veri_satiri = df_hisse_veri[df_hisse_veri["tarih"] == tarih]
