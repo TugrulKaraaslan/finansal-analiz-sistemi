@@ -243,7 +243,9 @@ def calistir_tum_sistemi(
     return rapor_df, detay_df, atlanmis
 
 
-def run_pipeline(price_csv: str, filter_def: str, output: str | Path) -> str:
+def run_pipeline(
+    price_csv: str | Path, filter_def: str | Path, output: str | Path
+) -> Path:
     """Run a minimal pipeline using provided CSV/filters and save Excel report."""
     df = pd.read_csv(
         price_csv,

@@ -1,10 +1,13 @@
 import importlib
 import os
 import sys
-
 import pandas as pd
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+)  # isort: off
+
+import backtest_core  # noqa: E402
 
 backtest_core = importlib.import_module("backtest_core")
 

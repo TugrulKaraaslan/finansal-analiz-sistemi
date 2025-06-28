@@ -47,3 +47,45 @@ def test_aciklama_filled(tmp_path):
         ozet.loc[ozet["filtre_kodu"] == "T2", "sebep_aciklama"].iloc[0]
         == "demo hata metni"
     )
+
+
+def test_aciklama_dedup(tmp_path):
+    df_sum = pd.DataFrame(
+        [
+            ["T1", 1, 1.0, 1, 0, 1, "OK", "", "", ""],
+            ["T2", 0, None, None, None, 0, "QUERY_ERROR", "", "", ""],
+        ],
+        columns=[
+            "filtre_kodu",
+            "hisse_sayisi",
+            "ort_getiri_%",
+            "en_yuksek_%",
+            "en_dusuk_%",
+            "islemli",
+            "sebep_kodu",
+            "sebep_aciklama",
+            "tarama_tarihi",
+            "satis_tarihi",
+        ],
+    )
+    df_det = pd.DataFrame(columns=LEGACY_DETAIL_COLS)
+    errs = [
+        {
+            "filtre_kodu": "T2",
+            "hata_tipi": "QUERY_ERROR",
+            "detay": "ilk hata",
+            "cozum_onerisi": "düzelt",
+        },
+        {
+            "filtre_kodu": "T2",
+            "hata_tipi": "QUERY_ERROR",
+            "detay": "ikinci hata",
+            "cozum_onerisi": "düzelt",
+        },
+    ]
+    path = tmp_path / "rapor2.xlsx"
+    generate_full_report(df_sum, df_det, errs, path, keep_legacy=True)
+    with pd.ExcelFile(path) as xls:
+        ozet = pd.read_excel(xls, "Özet")
+    assert len(ozet) == 2
+    assert ozet.loc[ozet["filtre_kodu"] == "T2", "sebep_aciklama"].iloc[0] == "ilk hata"

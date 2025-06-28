@@ -24,6 +24,16 @@ def test_load_data_empty(tmp_path: Path):
         data_loader.load_data(str(p))
 
 
+def test_load_data_cache_refresh(tmp_path: Path):
+    p = tmp_path / "sample.csv"
+    p.write_text("col\n1\n2")
+    df1 = data_loader.load_data(str(p))
+    assert len(df1) == 2
+    p.write_text("col\n1")
+    df2 = data_loader.load_data(str(p))
+    assert len(df2) == 1
+
+
 @pytest.mark.parametrize("colname", ["Date", "Tarih", "tarih", "TARİH", "Unnamed: 0"])
 def test_standardize_date_column(colname):
     df = pd.DataFrame({colname: ["2025-03-07"]})
