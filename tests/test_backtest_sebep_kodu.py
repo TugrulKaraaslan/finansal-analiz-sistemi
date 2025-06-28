@@ -1,3 +1,4 @@
+import importlib
 import os
 import sys
 
@@ -8,6 +9,8 @@ if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 import backtest_core  # noqa: E402
+
+backtest_core = importlib.import_module("backtest_core")
 
 
 def _df():
