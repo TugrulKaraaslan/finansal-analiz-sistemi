@@ -4,6 +4,7 @@ black==24.4.2
 flake8==7.0.0
 pre-commit
 pytest
+pytest-timeout
 pandas-stubs
 types-openpyxl
 types-psutil

@@ -16,18 +16,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Install deps
         run: |
           pip install -q pip-tools
           pip install -q -r requirements.txt
           python -m pip install -e .   # editable install, varsa setup.cfg
           pip install -q "hypothesis>=6.102,<7"
-          pip install -q pre-commit mypy pytest-cov
+          pip install -q pre-commit mypy pytest-cov pytest-timeout
       - uses: pre-commit/action@v3.0.1
       - name: Type-check (mypy – toleranslı)
         run: mypy src tests || true
       - name: Run unit tests + coverage
         run: pytest -q --cov=src --cov-report=xml
+        timeout-minutes: 10
       - name: Upload coverage artefact
         uses: actions/upload-artifact@v4
         with:
