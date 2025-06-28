@@ -1,7 +1,6 @@
+-r requirements.txt
+
 black==24.4.2
-cachetools<6.0,>=5.3
 flake8==7.0.0
-hypothesis>=6.102,<7
-pandas-ta==0.3.14b0      # teknik indikatör kütüphanesi
-psutil
-xlsxwriter>=3.2
+pre-commit
+pytest
