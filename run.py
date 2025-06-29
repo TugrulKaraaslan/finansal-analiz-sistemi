@@ -214,36 +214,80 @@ def calistir_tum_sistemi(
     import filter_engine
     import utils.failure_tracker as ft
 
+    steps_report = []
+
     filter_engine.clear_failed()
     ft.clear_failures()
 
+    rapor_df = detay_df = None
+    atlanmis: dict | None = None
+
     global df_filtre_kurallari
     logger.info("*" * 30 + " TÜM BACKTEST SİSTEMİ ÇALIŞTIRILIYOR " + "*" * 30)
-    df_filtre_kurallari, df_raw = veri_yukle(force_excel_reload_param)
-    df_processed = on_isle(df_raw)
-    df_indicator = indikator_hesapla(df_processed)
-    tarama_dt = parse_date(tarama_tarihi_str)
-    parse_date(satis_tarihi_str)
-    filtre_sonuclar, atlanmis = filtre_uygula(df_indicator, tarama_dt)
-    rapor_df, detay_df = backtest_yap(
-        df_indicator,
-        filtre_sonuclar,
-        tarama_tarihi_str,
-        satis_tarihi_str,
-    )
 
-    if output_path:
-        from report_generator import generate_full_report
-        from utils.memory_profile import mem_profile
+    try:
+        print("veri_yukle BAŞLIYOR")
+        steps_report.append("veri_yukle: BAŞLADI")
+        df_filtre_kurallari, df_raw = veri_yukle(force_excel_reload_param)
+        steps_report.append("veri_yukle: BAŞARILI")
 
-        output_path = Path(output_path)
-        with mem_profile():
-            generate_full_report(rapor_df.copy(), detay_df.copy(), [], output_path)
-        if logger_param:
-            logger_param.info("Saved report to %s", output_path)
-    else:
-        raporla(rapor_df, detay_df)
-    gc.collect()
+        print("on_isle BAŞLIYOR")
+        steps_report.append("on_isle: BAŞLADI")
+        df_processed = on_isle(df_raw)
+        steps_report.append("on_isle: BAŞARILI")
+
+        print("indikator_hesapla BAŞLIYOR")
+        steps_report.append("indikator_hesapla: BAŞLADI")
+        df_indicator = indikator_hesapla(df_processed)
+        steps_report.append("indikator_hesapla: BAŞARILI")
+
+        tarama_dt = parse_date(tarama_tarihi_str)
+        parse_date(satis_tarihi_str)
+
+        print("filtre_uygula BAŞLIYOR")
+        steps_report.append("filtre_uygula: BAŞLADI")
+        filtre_sonuclar, atlanmis = filtre_uygula(df_indicator, tarama_dt)
+        steps_report.append("filtre_uygula: BAŞARILI")
+
+        print("backtest_yap BAŞLIYOR")
+        steps_report.append("backtest_yap: BAŞLADI")
+        rapor_df, detay_df = backtest_yap(
+            df_indicator,
+            filtre_sonuclar,
+            tarama_tarihi_str,
+            satis_tarihi_str,
+        )
+        steps_report.append("backtest_yap: BAŞARILI")
+
+        if output_path:
+            from report_generator import generate_full_report
+            from utils.memory_profile import mem_profile
+
+            output_path = Path(output_path)
+            with mem_profile():
+                generate_full_report(rapor_df.copy(), detay_df.copy(), [], output_path)
+            if logger_param:
+                logger_param.info("Saved report to %s", output_path)
+        else:
+            raporla(rapor_df, detay_df)
+
+        steps_report.append("TÜM ADIMLAR TAMAMLANDI")
+        print("TÜM ADIMLAR BAŞARIYLA TAMAMLANDI")
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        steps_report.append(f"HATA: {type(e).__name__}: {str(e)}")
+        raise
+
+    finally:
+        print("\n=== ADIM RAPORU ===")
+        for adim in steps_report:
+            print(adim)
+        print("=== RAPOR SONU ===\n")
+        gc.collect()
+
     return rapor_df, detay_df, atlanmis
 
 
@@ -391,4 +435,5 @@ def main(argv: list[str] | None = None) -> None:
 
 
 if __name__ == "__main__":  # pragma: no cover - manual execution
+    print("RUN.PY CLI BAŞLATILDI")
     main()
