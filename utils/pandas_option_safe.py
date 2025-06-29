@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from contextlib import contextmanager
 
 import pandas as pd
@@ -13,7 +14,7 @@ def ensure_option(name: str, value) -> None:
 
 
 @contextmanager
-def option_context(name: str, value):
+def option_context(name: str, value) -> Iterator[None]:
     """Like ``pd.option_context`` but ignores unknown-option errors."""
     try:
         with pd.option_context(name, value):
