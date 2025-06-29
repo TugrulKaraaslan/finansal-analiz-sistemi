@@ -40,6 +40,30 @@ def load_data(path: str) -> pd.DataFrame:
     return _cache_loader.load_csv(path)
 
 
+def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
+    """Read price CSV using a best-effort delimiter guess.
+
+    The first line is inspected to choose between comma or semicolon
+    delimiters. If neither is detected, ``sep=None`` is used so pandas
+    can auto-detect the separator via the ``python`` engine.
+    """
+
+    encoding = kwargs.get("encoding", "utf-8")
+    with open(path, encoding=encoding) as f:
+        first = f.readline().lstrip("#")
+
+    delimiter: str | None
+    if first.count(";") > first.count(","):
+        delimiter = ";"
+    elif "," in first:
+        delimiter = ","
+    else:
+        delimiter = None
+
+    kwargs.setdefault("engine", "python")
+    return pd.read_csv(path, sep=delimiter, **kwargs)
+
+
 def load_filter_csv(path: str) -> pd.DataFrame:
     """CSV'yi okunur ve kolon hizasını garanti eder."""
 
