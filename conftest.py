@@ -63,7 +63,7 @@ def big_df() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "hisse_kodu": ["AAA"] * rows,
-            "tarih": pd.date_range("2024-01-01", periods=rows, freq="T"),
+            "tarih": pd.date_range("2024-01-01", periods=rows, freq="min"),
             "open": np.random.rand(rows),
             "high": np.random.rand(rows),
             "low": np.random.rand(rows),
