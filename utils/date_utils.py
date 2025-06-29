@@ -1,14 +1,15 @@
 from datetime import datetime
+from typing import Union
+
+import pandas as pd
+from dateutil import parser
 
 
-def parse_date(date_str: str) -> datetime:
+def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | type(pd.NaT):
     """Parse TR/EU or ISO date strings safely.
 
     Returns ``pd.NaT`` for invalid inputs instead of raising ``ValueError``.
     """
-
-    import pandas as pd
-    from dateutil import parser
 
     if pd.isna(date_str) or str(date_str).strip() == "":
         return pd.NaT
