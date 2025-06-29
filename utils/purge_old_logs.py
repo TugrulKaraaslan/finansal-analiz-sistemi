@@ -8,19 +8,20 @@ from pathlib import Path
 def purge_old_logs(
     *, log_dir: Path = Path("loglar"), keep_days: int = 7, dry_run: bool = False
 ) -> int:
-    """Purge ``*.log`` files older than ``keep_days`` days in ``log_dir``.
+    """Purge ``*.log`` and ``*.lock`` files older than ``keep_days`` days.
 
     Returns the number of matching files (even in dry-run mode).
     """
     cutoff = datetime.now() - timedelta(days=keep_days)
     count = 0
-    for f in log_dir.glob("*.log*"):
-        if datetime.fromtimestamp(f.stat().st_mtime) < cutoff:
-            if dry_run:
-                print(f"[DRY-RUN] Would delete {f}")
-            else:
-                f.unlink()
-            count += 1
+    for pattern in ("*.log*", "*.lock"):
+        for f in log_dir.glob(pattern):
+            if datetime.fromtimestamp(f.stat().st_mtime) < cutoff:
+                if dry_run:
+                    print(f"[DRY-RUN] Would delete {f}")
+                else:
+                    f.unlink()
+                count += 1
     return count
 
 

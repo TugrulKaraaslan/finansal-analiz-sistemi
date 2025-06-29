@@ -109,7 +109,7 @@ def extract_columns_from_filters_cached(
 
 
 def purge_old_logs(dir_path: str = "loglar", days: int = 7, dry_run: bool = False):
-    """Delete ``*.log`` files older than ``days`` in ``dir_path``.
+    """Delete ``*.log`` and ``*.lock`` files older than ``days``.
 
     Parameters match the legacy helper for backward compatibility.
     """

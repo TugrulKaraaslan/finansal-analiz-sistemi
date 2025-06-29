@@ -30,7 +30,14 @@ def _sanitize_sys_modules() -> None:
         if isinstance(mod, ModuleType):
             continue
         safe_mod = ModuleType(name)
-        safe_mod.__dict__.update(getattr(mod, "__dict__", {}))
+        attrs = getattr(mod, "__dict__", None)
+        if isinstance(attrs, dict):
+            safe_mod.__dict__.update(attrs)
+        else:  # pragma: no cover - rare edge case
+            try:
+                safe_mod.__dict__.update(vars(mod))
+            except Exception:
+                pass
         fixed[name] = safe_mod
     if fixed:
         logging.getLogger(__name__).debug(
