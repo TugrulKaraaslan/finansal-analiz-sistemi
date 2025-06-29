@@ -8,6 +8,7 @@ class mem_profile:
     def __enter__(self):
         self.proc = psutil.Process(os.getpid())
         self.start = self.proc.memory_info().rss
+        return self
 
     def __exit__(self, *exc):
         peak = self.proc.memory_info().rss

@@ -10,18 +10,18 @@ def purge_old_logs(
 ) -> int:
     """Purge ``*.log`` files older than ``keep_days`` days in ``log_dir``.
 
-    Returns the number of files considered for deletion.
+    Returns the number of matching files (even in dry-run mode).
     """
     cutoff = datetime.now() - timedelta(days=keep_days)
-    deleted = 0
+    count = 0
     for f in log_dir.glob("*.log*"):
         if datetime.fromtimestamp(f.stat().st_mtime) < cutoff:
             if dry_run:
                 print(f"[DRY-RUN] Would delete {f}")
             else:
                 f.unlink()
-            deleted += 1
-    return deleted
+            count += 1
+    return count
 
 
 if __name__ == "__main__":
