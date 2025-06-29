@@ -21,6 +21,13 @@ from finansal_analiz_sistemi.log_tools import setup_logger
 from logging_config import get_logger
 from utils.date_utils import parse_date
 
+try:
+    from config import CORE_INDICATORS
+except Exception as e:  # noqa: BLE001 - show real error
+    import logging
+    logging.error("Başlatma hatası:", exc_info=e)
+    sys.exit(1)
+
 
 def _parse_date(dt_str: str) -> pd.Timestamp:
     """Parse date from 'DD.MM.YYYY' or ISO 'YYYY-MM-DD'."""
@@ -275,7 +282,9 @@ def run_pipeline(
     return report_generator.generate_full_report(rapor_df, detay_df, [], output)
 
 
-if __name__ == "__main__":
+def main(argv: list[str] | None = None) -> None:
+    """Komut satırından çalıştırıldığında ana backtest akışını yürüt."""
+
     logger.info("=" * 80)
     logger.info(
         f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT BAŞLATIYOR ======="
@@ -305,7 +314,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--ind-set", choices=["core", "full"], default="core")
     parser.add_argument("--chunk-size", type=int, default=config.CHUNK_SIZE)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     out_file = Path(args.output)
     out_file.parent.mkdir(parents=True, exist_ok=True)
@@ -382,3 +391,7 @@ if __name__ == "__main__":
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
         utils.purge_old_logs("loglar", days=30)
+
+
+if __name__ == "__main__":  # pragma: no cover - manual execution
+    main()

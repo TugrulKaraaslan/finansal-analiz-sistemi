@@ -1,3 +1,4 @@
-import runpy
+import run
 
-runpy.run_module("run", run_name="__main__")
+if __name__ == "__main__":
+    run.main()
