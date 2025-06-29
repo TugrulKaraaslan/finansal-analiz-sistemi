@@ -1,3 +1,6 @@
+__all__ = ["unique_name"]
+
+
 def unique_name(base: str, seen: set[str]) -> str:
     """Return a unique column name by appending _1, _2, ..."""
     if base not in seen:

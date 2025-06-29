@@ -9,7 +9,8 @@ class FailedFilter:
     hint: str = ""
 
 
-failures = defaultdict(list)  # {'indicators': [...], 'filters': [...], ...}
+# {'indicators': [...], 'filters': [...], ...}
+failures: defaultdict[str, list[FailedFilter]] = defaultdict(list)
 
 
 def clear_failures() -> None:
@@ -23,6 +24,8 @@ def log_failure(category: str, item: str, reason: str, hint: str = "") -> None:
 
 
 def get_failures(as_dict: bool = False):
+    """Return collected failures."""
+
     if as_dict:
         return {c: [asdict(r) for r in rows] for c, rows in failures.items()}
     return failures
