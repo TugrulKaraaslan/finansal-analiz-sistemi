@@ -60,6 +60,7 @@ DTYPES_MAP: dict[str, str] = {
 CHUNK_SIZE: int = 1
 
 # minimal indicator subset used for smoke tests and CLI defaults
+# This example list can be overridden in 'config.yml' if needed
 CORE_INDICATORS: list[str] = [
     "ema_10",
     "ema_20",
