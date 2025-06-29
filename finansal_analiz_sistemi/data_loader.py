@@ -43,6 +43,13 @@ def load_data(path: str) -> pd.DataFrame:
 def load_filter_csv(path: str) -> pd.DataFrame:
     """CSV'yi okunur ve kolon hizasını garanti eder."""
 
+    # Önce başlıksız okuma dene (eski format: sadece 2 kolon)
+    raw = pd.read_csv(path, sep=";")
+    if list(raw.columns) == ["filtre_kodu", "PythonQuery"]:
+        raw.insert(0, "tarih", pd.NA)
+        raw.columns = COLS
+        return raw
+
     df = pd.read_csv(
         path,
         names=COLS,  # beklenen kolon listesi
