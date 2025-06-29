@@ -31,3 +31,16 @@ INDIKATOR_AD_ESLESTIRME.setdefault("its_9", "ichimoku_conversionline")
 
 # Legacy `cfg` alias
 cfg = sys.modules.setdefault("cfg", sys.modules[__name__])
+
+# default chunk size for indicator calculations
+CHUNK_SIZE: int = 1
+
+# -------------------------------------------------
+# Minimal gösterge listesi – AttributeError almamak için gereklidir
+# -------------------------------------------------
+CORE_INDICATORS = [
+    "ema_10",  # 10-periyot EMA
+    "ema_20",  # 20-periyot EMA
+    "rsi_14",  # 14-periyot RSI
+    "macd",  # MACD (12-26-9 varsayılan)
+]

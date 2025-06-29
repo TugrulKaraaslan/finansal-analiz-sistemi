@@ -11,6 +11,14 @@ IS_COLAB: bool = False
 CACHE_PATH: Path = Path("veri/birlesik_hisse_verileri.parquet")
 DEFAULT_CSV_PATH: Path = Path("data/raw/all_prices.csv")
 
+# default data directory and filename patterns
+VERI_KLASORU: Path = Path("tests/smoke_data")
+HISSE_DOSYA_PATTERN: str = str(VERI_KLASORU / "*.csv")
+PARQUET_ANA_DOSYA_YOLU: Path = CACHE_PATH
+
+# default filter rules CSV path
+FILTRE_DOSYA_YOLU: Path = Path("veri/15.csv")
+
 # Load optional configuration overrides from 'config.yml'
 _CFG_FILE = Path(__file__).with_name("config.yml")
 if _CFG_FILE.exists():
