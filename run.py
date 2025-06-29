@@ -22,8 +22,8 @@ from logging_config import get_logger
 from utils.date_utils import parse_date
 
 if not hasattr(config, "CORE_INDICATORS"):
-    logging.error("Başlatma hatası: config.CORE_INDICATORS eksik")
-    sys.exit(1)
+    logging.exception("Başlatma hatası: config.CORE_INDICATORS eksik")
+    raise RuntimeError("CORE_INDICATORS eksik")
 
 
 def _parse_date(dt_str: str) -> pd.Timestamp:
