@@ -48,6 +48,14 @@ DTYPES_MAP: dict[str, str] = {
 # chunk size for indicator calculation
 CHUNK_SIZE: int = 1
 
+# minimal indicator subset used for smoke tests and CLI defaults
+CORE_INDICATORS: list[str] = [
+    "ema_10",
+    "ema_20",
+    "rsi_14",
+    "macd",
+]
+
 # ---------------------------------------------------------------------------
 # Optional defaults
 if "ALIM_ZAMANI" not in globals():
