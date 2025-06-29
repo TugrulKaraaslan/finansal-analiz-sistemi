@@ -25,6 +25,7 @@ try:
     from config import CORE_INDICATORS
 except Exception as e:  # noqa: BLE001 - show real error
     import logging
+
     logging.error("Başlatma hatası:", exc_info=e)
     sys.exit(1)
 
