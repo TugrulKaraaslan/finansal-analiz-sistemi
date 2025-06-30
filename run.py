@@ -17,7 +17,7 @@ import yaml
 
 import config
 import utils
-from finansal_analiz_sistemi.log_tools import setup_logger
+from finansal_analiz_sistemi.log_tools import CounterFilter, setup_logger
 from logging_config import get_logger
 from utils.date_utils import parse_date
 
@@ -73,7 +73,7 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
 
 
 logger = get_logger(__name__)
-log_counter = setup_logger()
+log_counter: CounterFilter | None = None
 
 
 def veri_yukle(force_excel_reload: bool = False):
@@ -295,6 +295,9 @@ def run_pipeline(
     price_csv: str | Path, filter_def: str | Path, output: str | Path
 ) -> Path:
     """Run a minimal pipeline using provided CSV/filters and save Excel report."""
+    global log_counter
+    if log_counter is None:
+        log_counter = setup_logger()
     df = pd.read_csv(
         price_csv,
         comment="#",
@@ -326,11 +329,6 @@ def run_pipeline(
 def main(argv: list[str] | None = None) -> None:
     """Komut satırından çalıştırıldığında ana backtest akışını yürüt."""
 
-    logger.info("=" * 80)
-    logger.info(
-        f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT BAŞLATIYOR ======="
-    )
-
     parser = argparse.ArgumentParser(description="Finansal analiz ve backtest")
     parser.add_argument(
         "--tarama",
@@ -355,7 +353,21 @@ def main(argv: list[str] | None = None) -> None:
     )
     parser.add_argument("--ind-set", choices=["core", "full"], default="core")
     parser.add_argument("--chunk-size", type=int, default=config.CHUNK_SIZE)
+    parser.add_argument(
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+        help="Log seviyesi",
+    )
     args = parser.parse_args(argv)
+
+    global log_counter
+    log_counter = setup_logger(level=getattr(logging, args.log_level))
+
+    logger.info("=" * 80)
+    logger.info(
+        f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT BAŞLATIYOR ======="
+    )
 
     out_file = Path(args.output)
     out_file.parent.mkdir(parents=True, exist_ok=True)

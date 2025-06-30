@@ -1,3 +1,4 @@
+import logging
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
@@ -28,11 +29,22 @@ def parse_args() -> Path:
         required=True,
         help="İşlenecek CSV dosyası",
     )
+    p.add_argument(
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+        help="Log seviyesi",
+    )
 
     args = p.parse_args()
 
     if not args.dosya.exists():
         p.error(f"Dosya bulunamadı: {args.dosya}")
+
+    logging.basicConfig(
+        level=getattr(logging, args.log_level.upper()),
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
 
     return args.dosya
 

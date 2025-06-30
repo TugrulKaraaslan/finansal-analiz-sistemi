@@ -11,11 +11,6 @@ import config  # noqa: WPS433  # local import pattern is intentional
 from finansal.parquet_cache import ParquetCacheManager
 from indicator_calculator import calculate_chunked
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
-
 
 @click.command(help="Parquet cache yoneticisi")
 @click.option(
@@ -30,13 +25,25 @@ logging.basicConfig(
 )
 @click.option("--ind-set", type=click.Choice(["core", "full"]), default="core")
 @click.option("--chunk-size", type=int, default=config.CHUNK_SIZE)
+@click.option(
+    "--log-level",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"], case_sensitive=False),
+    default="INFO",
+    show_default=True,
+    help="Log seviyesi",
+)
 def main(
     csv_path: str,
     cache_path: str,
     refresh_cache: bool,
     ind_set: str,
     chunk_size: int,
+    log_level: str,
 ) -> None:  # noqa: D401
+    logging.basicConfig(
+        level=getattr(logging, log_level.upper()),
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
     manager = ParquetCacheManager(Path(cache_path))
 
     if refresh_cache or not Path(cache_path).exists():
