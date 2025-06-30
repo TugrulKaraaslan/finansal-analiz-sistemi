@@ -27,7 +27,6 @@ def test_yaml_values_loaded():
     assert "T31" in config.get("passive_filters", [])
 
 
-
 def test_config_exposes_paths():
     for name in [
         "VERI_KLASORU",
