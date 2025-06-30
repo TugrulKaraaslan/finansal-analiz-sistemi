@@ -8,6 +8,7 @@
 import keyword
 import os
 import re
+from typing import Any
 
 import pandas as pd
 import yaml
@@ -360,9 +361,10 @@ def uygula_filtreler(
         f"Tarama günü DataFrame sütunları (ilk 10): {df_tarama_gunu.columns.tolist()[:10]}"
     )
 
-    filtre_sonuclar = {}
-    atlanmis_filtreler_log_dict = {}
-    kontrol_log = []
+    filtre_sonuclar: dict[str, dict] = {}
+    # Log dictionary containing skipped filters and error details.
+    atlanmis_filtreler_log_dict: dict[str, Any] = {}
+    kontrol_log: list[dict] = []
 
     def kaydet_hata(kod, error_type, msg, eksik=None):
         hack = {
