@@ -175,6 +175,7 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
         report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
     logger.info(f"Excel raporu oluşturuldu: {out_path}")
 
+
 # Ana modülleri import et
 try:
     import backtest_core
