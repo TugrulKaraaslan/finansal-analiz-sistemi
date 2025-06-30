@@ -4,6 +4,7 @@ def test_config_has_core_indicators():
     Hata varsa, net Türkçe açıklama verir.
     """
     import config as cfg
+
     # Tanımlı mı?
     assert hasattr(cfg, "CORE_INDICATORS"), "config.py'de CORE_INDICATORS YOK!"
     # Liste mi?
