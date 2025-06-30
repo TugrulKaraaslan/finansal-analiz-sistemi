@@ -77,11 +77,15 @@ class DataLoaderCache:
 
 
 def _read_parquet(ticker: str, start: str, end: str) -> pd.DataFrame:
+    """Simulate reading parquet data for a ticker between two dates."""
+
     dates = pd.date_range(start, end, freq="D")
     return pd.DataFrame({"hisse_kodu": ticker, "tarih": dates})
 
 
-def get_df(ticker: str, start, end):
+def get_df(ticker: str, start: str, end: str) -> pd.DataFrame:
+    """Return cached DataFrame for ``ticker`` between ``start`` and ``end``."""
+
     key = f"{ticker}_{start}_{end}"
     if key in CACHE:
         return CACHE[key]
@@ -91,4 +95,6 @@ def get_df(ticker: str, start, end):
 
 
 def clear_cache() -> None:
+    """Empty the global cache."""
+
     CACHE.clear()

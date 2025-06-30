@@ -95,7 +95,24 @@ def calistir_basit_backtest(
     tarama_tarihi_str: str,
     logger_param=None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Filtre sonuçlarını kullanarak basit backtest çalıştırır."""
+    """Run a simple backtest using the given filter results.
+
+    Parameters
+    ----------
+    filtre_sonuc_dict : dict
+        Mapping of filter codes to selected stocks.
+    df_tum_veri : pd.DataFrame
+        Full price dataset containing all tickers.
+    satis_tarihi_str : str
+        Sale date in ``dd.mm.yyyy`` format.
+    tarama_tarihi_str : str
+        Screening date in ``dd.mm.yyyy`` format.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame]
+        Tuple of summary and detail DataFrames.
+    """
     if logger_param is None:
         logger_param = logger
     fn_logger = logger_param

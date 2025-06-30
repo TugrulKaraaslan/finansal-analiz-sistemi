@@ -1,7 +1,12 @@
 # report_utils.py
+from typing import TYPE_CHECKING
+
 import pandas as pd
 from openpyxl.chart import BarChart, Reference
 from openpyxl.utils import get_column_letter
+
+if TYPE_CHECKING:  # pragma: no cover - import for type hints
+    from plotly.graph_objects import Figure
 
 import report_stats
 
@@ -44,6 +49,8 @@ def build_ozet_df(
     tarama_tarihi: str = "",
     satis_tarihi: str = "",
 ) -> pd.DataFrame:
+    """Return summary dataframe in canonical column order."""
+
     df = report_stats.build_ozet_df(
         summary_df,
         detail_df,
@@ -58,6 +65,8 @@ def build_detay_df(
     detail_df: pd.DataFrame,
     strateji: str | None = None,
 ) -> pd.DataFrame:
+    """Return detail dataframe in canonical column order."""
+
     df = report_stats.build_detay_df(
         summary_df,
         detail_df,
@@ -67,6 +76,8 @@ def build_detay_df(
 
 
 def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate summary statistics from the provided dataframe."""
+
     df = report_stats.build_stats_df(ozet_df)
     return df.reindex(columns=DEFAULT_STATS_COLS)
 
@@ -75,7 +86,9 @@ def plot_summary_stats(
     ozet_df: pd.DataFrame,
     detail_df: pd.DataFrame,
     std_threshold: float = 5.0,
-):
+) -> Figure:
+    """Create plotly ``Figure`` summarizing best and worst filters."""
+
     return report_stats.plot_summary_stats(
         ozet_df,
         detail_df,
