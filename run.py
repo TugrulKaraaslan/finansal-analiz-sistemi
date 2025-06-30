@@ -401,7 +401,7 @@ def main(argv: list[str] | None = None) -> None:
         if not error_list:
             logging.warning("Uyarı: error_list boş—'Hatalar' sheet'i yazılmayacak!")
 
-                rapor_path = report_generator.generate_full_report(
+        rapor_path = report_generator.generate_full_report(
             summary_df,
             detail_df,
             error_list,
