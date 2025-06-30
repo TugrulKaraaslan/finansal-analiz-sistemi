@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
-from log_tools import CounterFilter, setup_logger
+from finansal_analiz_sistemi.log_tools import CounterFilter, setup_logger
 
 import config
 import utils
