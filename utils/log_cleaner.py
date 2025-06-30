@@ -42,7 +42,10 @@ def purge_old_logs(
                     lock.unlink(missing_ok=True)
                     deleted += 1
     for fp in Path(dir_path).glob("*.lock"):
-        if not fp.with_suffix(".log").exists() and datetime.fromtimestamp(fp.stat().st_mtime) < cutoff:
+        if (
+            not fp.with_suffix(".log").exists()
+            and datetime.fromtimestamp(fp.stat().st_mtime) < cutoff
+        ):
             _LOG.info("%s %s", "Would delete" if dry_run else "Deleted", fp)
             if not dry_run:
                 fp.unlink(missing_ok=True)
