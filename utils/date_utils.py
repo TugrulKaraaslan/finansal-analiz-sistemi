@@ -3,9 +3,10 @@ from typing import Union
 
 import pandas as pd
 from dateutil import parser
+from pandas._libs.tslibs.nattype import NaTType
 
 
-def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | type(pd.NaT):
+def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | NaTType:
     """Parse TR/EU or ISO date strings safely.
 
     Returns ``pd.NaT`` for invalid inputs instead of raising ``ValueError``.
