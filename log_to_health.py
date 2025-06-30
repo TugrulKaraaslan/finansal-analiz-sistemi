@@ -45,7 +45,18 @@ def _apply_return_colors(ws, column_index):
 
 
 def generate(log_path: str | os.PathLike, excel_paths: list[str | os.PathLike]) -> str:
-    """Create health report from log and excel files."""
+    """Generate an XLSX health report from a log file and excel results.
+
+    Args:
+        log_path: Path to the log file that produced the run.
+        excel_paths: List of Excel workbooks to aggregate. Only ``Özet`` and
+            ``Detay`` sheets are read when present.
+
+    Returns
+    -------
+    str
+        Path to the generated health report workbook.
+    """
     run_dir = Path(log_path).resolve().parent
     run_dir.mkdir(exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M")

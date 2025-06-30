@@ -24,12 +24,16 @@ __all__ = [
 logger = get_logger(__name__)
 
 
-def _align(a: pd.Series, b: pd.Series):
+def _align(a: pd.Series, b: pd.Series) -> tuple[pd.Series, pd.Series]:
+    """Return the pair aligned to their intersection index."""
+
     x, y = a.align(b, join="inner")
     return x, y
 
 
 def crosses_above(a: pd.Series, b: pd.Series) -> pd.Series:
+    """Return ``True`` where ``a`` crosses above ``b``."""
+
     if a is None or b is None:
         return pd.Series(False, index=[])
     x, y = _align(a, b)
@@ -37,6 +41,8 @@ def crosses_above(a: pd.Series, b: pd.Series) -> pd.Series:
 
 
 def crosses_below(a: pd.Series, b: pd.Series) -> pd.Series:
+    """Return ``True`` where ``a`` crosses below ``b``."""
+
     if a is None or b is None:
         return pd.Series(False, index=[])
     x, y = _align(a, b)

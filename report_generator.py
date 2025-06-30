@@ -86,7 +86,9 @@ def generate_summary(results: list[dict]) -> pd.DataFrame:
     return summary_df
 
 
-def add_error_sheet(writer, error_list: Iterable[tuple]):
+def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None:
+    """Write error list to a ``Hatalar`` sheet if any errors are present."""
+
     if error_list:
         safe_to_excel(
             pd.DataFrame(error_list, columns=["timestamp", "level", "message"]),
@@ -101,6 +103,8 @@ def olustur_ozet_rapor(
     cikti_klasoru: str,
     logger_param=None,
 ) -> str | None:
+    """Create CSV summary report from raw backtest results."""
+
     if logger_param is None:
         logger_param = logger
     os.makedirs(cikti_klasoru, exist_ok=True)
@@ -153,6 +157,8 @@ def olustur_hisse_bazli_rapor(
     cikti_klasoru: str,
     logger_param=None,
 ) -> str | None:
+    """Create per-stock CSV report from raw results."""
+
     if logger_param is None:
         logger_param = logger
     os.makedirs(cikti_klasoru, exist_ok=True)
@@ -199,6 +205,8 @@ def olustur_hisse_bazli_rapor(
 
 
 def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
+    """Write problematic filters to ``Hatalar`` sheet if provided."""
+
     if isinstance(kontrol_df, dict):
         hatalar = kontrol_df.get("hatalar", [])
         if hatalar:
@@ -241,6 +249,8 @@ def olustur_excel_raporu(
     fname: str | Path,
     logger_param=None,
 ) -> Path | None:
+    """Create a three-sheet Excel report from provided records."""
+
     if logger_param is None:
         logger_param = logger
     if not kayitlar:
@@ -262,6 +272,8 @@ def kaydet_uc_sekmeli_excel(
     istatistik_df: pd.DataFrame,
     logger_param=None,
 ) -> Path:
+    """Save ``ozet``, ``detay`` and ``istatistik`` DataFrames into ``fname``."""
+
     if logger_param is None:
         logger_param = logger
     fname = Path(fname)
@@ -299,6 +311,8 @@ def kaydet_raporlar(
     filepath: Path,
     logger_param=None,
 ) -> Path:
+    """Append three report sheets to an existing workbook."""
+
     if logger_param is None:
         logger_param = logger
     filepath = Path(filepath)
@@ -509,6 +523,8 @@ def generate_full_report(
     quick: bool = True,
     logger_param=None,
 ) -> Path:
+    """Create full Excel report with optional charts and error sheets."""
+
     if logger_param is None:
         logger_param = logger
     if keep_legacy:
