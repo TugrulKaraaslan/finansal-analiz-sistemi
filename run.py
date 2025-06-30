@@ -17,7 +17,7 @@ import yaml
 
 import config
 import utils
-from finansal_analiz_sistemi.log_tools import CounterFilter, setup_logger
+from log_tools import CounterFilter, setup_logger
 from logging_config import get_logger
 from utils.date_utils import parse_date
 
@@ -183,8 +183,7 @@ try:
     import indicator_calculator
     import preprocessor
     import report_generator
-    from finansal_analiz_sistemi import data_loader
-
+    import data_loader
     logger.info("Tüm ana modüller başarıyla import edildi.")
 except ImportError as e_import_main:
     logger.critical(
