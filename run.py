@@ -14,10 +14,10 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
+from log_tools import CounterFilter, setup_logger
 
 import config
 import utils
-from finansal_analiz_sistemi.log_tools import CounterFilter, setup_logger
 from logging_config import get_logger
 from utils.date_utils import parse_date
 
@@ -178,12 +178,13 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
 
 # Ana modülleri import et
 try:
+    import data_loader
+
     import backtest_core
     import filter_engine
     import indicator_calculator
     import preprocessor
     import report_generator
-    from finansal_analiz_sistemi import data_loader
 
     logger.info("Tüm ana modüller başarıyla import edildi.")
 except ImportError as e_import_main:
