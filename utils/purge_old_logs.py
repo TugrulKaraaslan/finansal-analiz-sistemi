@@ -29,7 +29,10 @@ def purge_old_logs(
                     lock.unlink()
                 count += 1
     for f in log_dir.glob("*.lock"):
-        if not f.with_suffix(".log").exists() and datetime.fromtimestamp(f.stat().st_mtime) < cutoff:
+        if (
+            not f.with_suffix(".log").exists()
+            and datetime.fromtimestamp(f.stat().st_mtime) < cutoff
+        ):
             if dry_run:
                 print(f"[DRY-RUN] Would delete {f}")
             else:
