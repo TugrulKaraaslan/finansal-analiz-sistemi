@@ -24,8 +24,11 @@ from utils.date_utils import parse_date
 # --- EKLENEN KRİTİK KONTROL ---
 if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
     logging.exception("Başlatma hatası: config.CORE_INDICATORS eksik veya boş.")
-    raise RuntimeError("CORE_INDICATORS eksik veya boş! Lütfen config.py dosyasını kontrol edin.")
+    raise RuntimeError(
+        "CORE_INDICATORS eksik veya boş! Lütfen config.py dosyasını kontrol edin."
+    )
 # ------------------------------
+
 
 def _parse_date(dt_str: str) -> pd.Timestamp:
     """Parse date from 'DD.MM.YYYY' or ISO 'YYYY-MM-DD'."""
@@ -76,6 +79,7 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
 logger = get_logger(__name__)
 log_counter: CounterFilter | None = None
 
+
 def veri_yukle(force_excel_reload: bool = False):
     """Load filter rules and raw price data.
 
@@ -98,6 +102,7 @@ def veri_yukle(force_excel_reload: bool = False):
         sys.exit(1)
     return df_filters, df_raw
 
+
 def on_isle(df: pd.DataFrame) -> pd.DataFrame:
     """Preprocess raw stock data."""
     processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
@@ -105,6 +110,7 @@ def on_isle(df: pd.DataFrame) -> pd.DataFrame:
         logger.critical("Veri ön işleme başarısız.")
         sys.exit(1)
     return processed
+
 
 def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate indicators and crossovers."""
@@ -127,11 +133,13 @@ def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
         sys.exit(1)
     return result
 
+
 def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
     """Apply filter rules to indicator data."""
     return filter_engine.uygula_filtreler(
         df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
     )
+
 
 def backtest_yap(
     df: pd.DataFrame,
@@ -152,6 +160,7 @@ def backtest_yap(
         sys.exit(1)
     return rapor_df, detay_df
 
+
 def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     """Save Excel report if data available."""
     if rapor_df.empty:
@@ -165,6 +174,7 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     with mem_profile():
         report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
     logger.info(f"Excel raporu oluşturuldu: {out_path}")
+
 
 # Ana modülleri import et
 try:
@@ -182,6 +192,7 @@ except ImportError as e_import_main:
         exc_info=True,
     )
     raise ImportError(e_import_main)
+
 
 def calistir_tum_sistemi(
     tarama_tarihi_str: str,
@@ -283,6 +294,7 @@ def calistir_tum_sistemi(
 
     return rapor_df, detay_df, atlanmis
 
+
 def run_pipeline(
     price_csv: str | Path, filter_def: str | Path, output: str | Path
 ) -> Path:
@@ -316,6 +328,7 @@ def run_pipeline(
         tarama_tarihi_str=tarama_dt.strftime("%d.%m.%Y"),
     )
     return report_generator.generate_full_report(rapor_df, detay_df, [], output)
+
 
 def main(argv: list[str] | None = None) -> None:
     """Komut satırından çalıştırıldığında ana backtest akışını yürüt."""
