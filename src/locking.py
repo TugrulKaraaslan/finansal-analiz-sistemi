@@ -11,6 +11,7 @@ LOCK_PATH = Path(tempfile.gettempdir()) / f"{uuid4()}.lock"
 # Timeout: lock kilidi almak için maksimum bekleme süresi (saniye)
 LOCK_TIMEOUT = int(os.getenv("LOCK_TIMEOUT", 10))  # ortamdan al, yoksa 10 sn
 
+
 def acquire_lock():
     """
     Güvenli dosya kilidi döndürür.
