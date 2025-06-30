@@ -178,9 +178,8 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
 
 # Ana modülleri import et
 try:
-    import data_loader
-
     import backtest_core
+    import data_loader
     import filter_engine
     import indicator_calculator
     import preprocessor
