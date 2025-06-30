@@ -1,7 +1,12 @@
 # report_utils.py
+from typing import TYPE_CHECKING
+
 import pandas as pd
 from openpyxl.chart import BarChart, Reference
 from openpyxl.utils import get_column_letter
+
+if TYPE_CHECKING:  # pragma: no cover - import for type hints
+    from plotly.graph_objects import Figure
 
 import report_stats
 
@@ -81,7 +86,7 @@ def plot_summary_stats(
     ozet_df: pd.DataFrame,
     detail_df: pd.DataFrame,
     std_threshold: float = 5.0,
-) -> "Figure":
+) -> Figure:
     """Create plotly ``Figure`` summarizing best and worst filters."""
 
     return report_stats.plot_summary_stats(
