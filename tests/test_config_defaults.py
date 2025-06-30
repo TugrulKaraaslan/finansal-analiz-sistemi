@@ -25,3 +25,14 @@ def test_yaml_values_loaded():
     """YAML'deki değerler modüle yüklenmeli."""
     assert config.get("filter_weights", {}).get("T31") == 0.0
     assert "T31" in config.get("passive_filters", [])
+
+
+
+def test_config_exposes_paths():
+    for name in [
+        "VERI_KLASORU",
+        "HISSE_DOSYA_PATTERN",
+        "PARQUET_ANA_DOSYA_YOLU",
+        "FILTRE_DOSYA_YOLU",
+    ]:
+        assert hasattr(config, name)
