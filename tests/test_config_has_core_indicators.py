@@ -1,12 +1,13 @@
-import importlib
-import os
-import sys
+def test_config_has_core_indicators():
+    """
+    config.py dosyasında CORE_INDICATORS sabiti var mı ve içi boş değil mi?
+    Hata varsa, net Türkçe açıklama verir.
+    """
+    import config as cfg
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-
-def test_core_indicators_defined():
-    cfg = importlib.import_module("config")
-    assert hasattr(cfg, "CORE_INDICATORS")
-    assert isinstance(cfg.CORE_INDICATORS, list)
-    assert len(cfg.CORE_INDICATORS) > 0
+    # Tanımlı mı?
+    assert hasattr(cfg, "CORE_INDICATORS"), "config.py'de CORE_INDICATORS YOK!"
+    # Liste mi?
+    assert isinstance(cfg.CORE_INDICATORS, list), "CORE_INDICATORS bir liste değil!"
+    # Boş mu?
+    assert len(cfg.CORE_INDICATORS) > 0, "CORE_INDICATORS listesi boş!"
