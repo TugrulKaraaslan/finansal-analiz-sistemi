@@ -21,9 +21,13 @@ from finansal_analiz_sistemi.log_tools import CounterFilter, setup_logger
 from logging_config import get_logger
 from utils.date_utils import parse_date
 
-if not hasattr(config, "CORE_INDICATORS"):
-    logging.exception("Başlatma hatası: config.CORE_INDICATORS eksik")
-    raise RuntimeError("CORE_INDICATORS eksik")
+# --- EKLENEN KRİTİK KONTROL ---
+if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
+    logging.exception("Başlatma hatası: config.CORE_INDICATORS eksik veya boş.")
+    raise RuntimeError(
+        "CORE_INDICATORS eksik veya boş! Lütfen config.py dosyasını kontrol edin."
+    )
+# ------------------------------
 
 
 def _parse_date(dt_str: str) -> pd.Timestamp:
