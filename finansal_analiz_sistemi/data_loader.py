@@ -41,17 +41,13 @@ def load_data(path: str) -> pd.DataFrame:
 
 
 def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
-    """Read price CSV using a best-effort delimiter guess.
-
-    The first line is inspected to choose between comma or semicolon
-    delimiters. If neither is detected, ``sep=None`` is used so pandas
-    can auto-detect the separator via the ``python`` engine.
     """
-
+    Fiyat CSV'sini akıllı ayraç tespitiyle oku. İlk satıra bakılır:
+    ; çoksa noktalı virgül, , çoksa virgül, yoksa sep=None bırakılır.
+    """
     encoding = kwargs.get("encoding", "utf-8")
     with open(path, encoding=encoding) as f:
         first = f.readline().lstrip("#")
-
     delimiter: str | None
     if first.count(";") > first.count(","):
         delimiter = ";"
@@ -59,7 +55,6 @@ def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
         delimiter = ","
     else:
         delimiter = None
-
     kwargs.setdefault("engine", "python")
     return pd.read_csv(path, sep=delimiter, **kwargs)
 
