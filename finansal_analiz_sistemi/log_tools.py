@@ -6,7 +6,10 @@ import sys
 import time
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 from typing import Dict, Tuple
+
+import config
 
 PCT_STEP = 10
 
@@ -71,22 +74,26 @@ def setup_logging(window: float = 2.0, pct_step: int = 10) -> logging.Logger:
 
 
 def setup_logger(level: int = logging.INFO) -> CounterFilter:
-    """Configure root logger with console and rotating file handlers."""
+    """Configure root logger for console and file output."""
 
     root = logging.getLogger()
     if root.handlers:
         return _counter_filter
 
-    log_dir = os.path.join("loglar")
-    os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, "rapor.log")
+    log_dir = Path("loglar")
+    log_dir.mkdir(exist_ok=True)
+    if config.IS_COLAB:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_file = log_dir / f"colab_run_{timestamp}.log"
+        file_handler = logging.FileHandler(log_file, encoding="utf-8")
+    else:
+        log_file = log_dir / "rapor.log"
+        file_handler = RotatingFileHandler(
+            log_file, maxBytes=2_000_000, backupCount=20, encoding="utf-8"
+        )
 
     formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-    )
-
-    file_handler = RotatingFileHandler(
-        log_file, maxBytes=2_000_000, backupCount=20, encoding="utf-8"
+        "%(asctime)s | %(name)s | %(levelname)s | %(message)s"
     )
     console_handler = logging.StreamHandler(sys.stdout)
 
