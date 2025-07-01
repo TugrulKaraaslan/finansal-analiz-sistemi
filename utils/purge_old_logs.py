@@ -14,14 +14,30 @@ def purge_old_logs(
     """
     cutoff = datetime.now() - timedelta(days=keep_days)
     count = 0
-    for pattern in ("*.log*", "*.lock"):
-        for f in log_dir.glob(pattern):
-            if datetime.fromtimestamp(f.stat().st_mtime) < cutoff:
+    for f in log_dir.glob("*.log*"):
+        if datetime.fromtimestamp(f.stat().st_mtime) < cutoff:
+            if dry_run:
+                print(f"[DRY-RUN] Would delete {f}")
+            else:
+                f.unlink()
+            count += 1
+            lock = f.with_suffix(".lock")
+            if lock.exists():
                 if dry_run:
-                    print(f"[DRY-RUN] Would delete {f}")
+                    print(f"[DRY-RUN] Would delete {lock}")
                 else:
-                    f.unlink()
+                    lock.unlink()
                 count += 1
+    for f in log_dir.glob("*.lock"):
+        if (
+            not f.with_suffix(".log").exists()
+            and datetime.fromtimestamp(f.stat().st_mtime) < cutoff
+        ):
+            if dry_run:
+                print(f"[DRY-RUN] Would delete {f}")
+            else:
+                f.unlink()
+            count += 1
     return count
 
 
