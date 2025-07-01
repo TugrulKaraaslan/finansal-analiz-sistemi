@@ -15,7 +15,8 @@ CACHE_PATH: Path = BASE_DIR / "veri" / "birlesik_hisse_verileri.parquet"
 DEFAULT_CSV_PATH: Path = BASE_DIR / "data" / "raw" / "all_prices.csv"
 
 # default data directory and filename patterns
-VERI_KLASORU: Path = BASE_DIR / "tests" / "smoke_data"
+# Use real data directory by default
+VERI_KLASORU: Path = BASE_DIR / "veri"
 HISSE_DOSYA_PATTERN: str = str(VERI_KLASORU / "*.csv")
 PARQUET_ANA_DOSYA_YOLU: Path = CACHE_PATH
 
