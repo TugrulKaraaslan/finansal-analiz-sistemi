@@ -11,6 +11,7 @@ import utils.failure_tracker as ft
 psutil = pytest.importorskip("psutil")
 
 
+@pytest.mark.slow
 def test_memory_clean(tmp_path, monkeypatch):
     mp_file = Path("reports/memory_profile.csv")
     if mp_file.exists():

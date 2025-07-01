@@ -1,7 +1,10 @@
 import subprocess
 import sys
 
+import pytest
 
+
+@pytest.mark.slow
 def test_no_pkg_conflict():
     pip_check = subprocess.run(
         [sys.executable, "-m", "pip", "check"], capture_output=True, text=True

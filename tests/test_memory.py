@@ -5,10 +5,12 @@ Stress-test cache growth: ensure <=5 MB additional RAM after repeated loads.
 import gc
 
 import psutil
+import pytest
 
 import data_loader_cache as dlc
 
 
+@pytest.mark.slow
 def test_cache_memory():
     proc = psutil.Process()
     base = proc.memory_info().rss

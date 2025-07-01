@@ -1,4 +1,6 @@
 # report_utils.py
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import pandas as pd

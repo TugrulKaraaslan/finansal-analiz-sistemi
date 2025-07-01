@@ -3,8 +3,10 @@ from pathlib import Path
 
 import pandas as pd
 import psutil
+import pytest
 
 
+@pytest.mark.slow
 def test_memory_usage(tmp_path: Path):
     csv = tmp_path / "mini.csv"
     pd.DataFrame(
