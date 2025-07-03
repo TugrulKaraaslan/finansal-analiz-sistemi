@@ -1,7 +1,7 @@
 # Stabil Colab kurulumu icin gereken paketler
 # Colab'in on yüklu kutuphaneleriyle uyumlu surumler
 attrs==25.3.0
-cachetools==6.1.0
+cachetools==5.5.2
 certifi==2025.6.15
 charset-normalizer==3.4.2
 choreographer==1.0.9
@@ -9,7 +9,7 @@ click==8.2.1
 et_xmlfile==2.0.0
 logistro==1.1.0
 narwhals==1.45.0
-numpy==2.3.1
+numpy==2.0.2
 openpyxl==3.1.5
 orjson==3.10.18
 pandas==2.2.2
