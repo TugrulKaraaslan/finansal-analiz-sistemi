@@ -30,7 +30,7 @@ drive.mount('/content/drive')
 ## 3. Kütüphaneleri Kur (Sürüm Sabitleme)
 ```bash
 !pip install --upgrade pip
-!pip install -q -r requirements.txt
+!pip install -q -r requirements-colab.txt
 !pip install -q -r requirements-dev.txt
 !pip install -e .
 ```
@@ -103,7 +103,7 @@ Yaygın hatalar ve olası çözümler için tablo:
 
 | Mesaj | Sebep | Çözüm |
 |-------|-------|-------|
-| `ModuleNotFoundError` | Eksik paket | `pip install -r requirements.txt` adımını kontrol edin |
+| `ModuleNotFoundError` | Eksik paket | `pip install -r requirements-colab.txt` adımını kontrol edin |
 | `KeyError: 'filtre_kodu'` | Yanlış/eksik veri dosyası | Veri yollarını ve tarihleri gözden geçirin |
 | `Permission denied` | Drive dosyası salt okunur | Dosya izinlerini ve konumu kontrol edin |
 
