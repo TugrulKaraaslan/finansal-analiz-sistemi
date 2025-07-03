@@ -22,7 +22,13 @@ def _capture(msg: str) -> str:
         console = Console(file=buf, force_terminal=True)
         handler = RichHandler(console=console, show_time=False, rich_tracebacks=True)
     logger = logging_config.setup_logging()
-    logger.handlers = [handler]
+    for h in list(logger.handlers):
+        logger.removeHandler(h)
+        try:
+            h.close()
+        except Exception:
+            pass
+    logger.addHandler(handler)
     logger.warning(msg)
     return buf.getvalue()
 
