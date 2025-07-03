@@ -87,6 +87,13 @@ def _mock_http():
         yield
 
 
+@pytest.fixture(autouse=True)
+def _fix_sys_modules():
+    """Ensure newly imported modules are hashable for Hypothesis."""
+    _sanitize_sys_modules()
+    yield
+
+
 def pytest_sessionstart(session: pytest.Session) -> None:  # noqa: D401
     """Test oturumu başlamadan önce ``sys.modules``'u temizle."""
 
