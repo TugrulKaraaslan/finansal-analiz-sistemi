@@ -29,3 +29,5 @@ tzdata==2025.2
 urllib3==2.5.0
 xlsxwriter==3.2.5
 zipp==3.23.0
+pydantic==2.9.2
+jedi>=0.16

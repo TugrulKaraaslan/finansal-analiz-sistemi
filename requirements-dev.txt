@@ -12,7 +12,8 @@ nodeenv==1.9.1
 packaging>=23,<25
 pathspec==0.12.1
 pluggy==1.6.0
-pydantic==2.7.4
+pydantic==2.9.2
+jedi>=0.16
 Pygments==2.19.1
 pyright==1.1.402
 pytest==8.4.0
