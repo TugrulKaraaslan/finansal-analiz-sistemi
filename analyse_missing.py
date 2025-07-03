@@ -1,8 +1,8 @@
 import argparse
-import sys
 import re
-from pathlib import Path
+import sys
 from difflib import get_close_matches
+from pathlib import Path
 
 import pandas as pd
 
