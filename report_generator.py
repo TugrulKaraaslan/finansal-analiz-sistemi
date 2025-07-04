@@ -49,6 +49,7 @@ def save_hatalar_excel(df: pd.DataFrame, out_path: str | Path) -> None:
             columns=HATALAR_COLUMNS,
         )
 
+
 logger = get_logger(__name__)
 
 PADDING_COMMENT = " ".join(uuid.uuid4().hex for _ in range(1200))
