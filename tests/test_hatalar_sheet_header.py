@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
+import report_generator
 from finansal_analiz_sistemi.report_generator import save_hatalar_excel
 
 
@@ -26,3 +27,25 @@ def test_hatalar_sheet_header(tmp_path: Path) -> None:
         "detay",
         "cozum_onerisi",
     ]
+
+
+def generate_excel_with_errors(tmp_path: Path) -> Path:
+    errs = [
+        {
+            "filtre_kod": "E1",
+            "hata_tipi": "QUERY_ERROR",
+            "detay": "demo",
+            "cozum_onerisi": "fix",
+        }
+    ]
+    summary = pd.DataFrame(columns=report_generator.LEGACY_SUMMARY_COLS)
+    detail = pd.DataFrame(columns=report_generator.LEGACY_DETAIL_COLS)
+    out = tmp_path / "errs.xlsx"
+    report_generator.generate_full_report(summary, detail, errs, out, keep_legacy=True)
+    return out
+
+
+def test_hatalar_sheet_has_filter_ids(tmp_path: Path) -> None:
+    xlsx = generate_excel_with_errors(tmp_path)
+    df = pd.read_excel(xlsx, sheet_name="Hatalar")
+    assert df["filtre_kod"].notna().all()

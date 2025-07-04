@@ -228,7 +228,7 @@ def run_single_filter(kod: str, query: str) -> dict:
         msg = str(qe)
         atlanmis.setdefault("hatalar", []).append(
             {
-                "filtre_kodu": kod,
+                "filtre_kod": kod,
                 "hata_tipi": "QUERY_ERROR",
                 "detay": msg,
                 "cozum_onerisi": _build_solution("QUERY_ERROR", msg),
@@ -247,7 +247,7 @@ def run_single_filter(kod: str, query: str) -> dict:
         msg = str(me)
         atlanmis.setdefault("hatalar", []).append(
             {
-                "filtre_kodu": kod,
+                "filtre_kod": kod,
                 "hata_tipi": "GENERIC",
                 "eksik_ad": me.missing,
                 "detay": msg,
@@ -368,7 +368,7 @@ def uygula_filtreler(
 
     def kaydet_hata(kod, error_type, msg, eksik=None):
         hack = {
-            "filtre_kodu": kod,
+            "filtre_kod": kod,
             "hata_tipi": error_type,
             "eksik_ad": eksik or "",
             "detay": msg,
@@ -434,7 +434,7 @@ def uygula_filtreler(
             msg = str(qe)
             atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
                 {
-                    "filtre_kodu": filtre_kodu,
+                    "filtre_kod": filtre_kodu,
                     "hata_tipi": "QUERY_ERROR",
                     "detay": msg,
                     "cozum_onerisi": _build_solution("QUERY_ERROR", msg),
@@ -454,7 +454,7 @@ def uygula_filtreler(
             msg = str(me)
             atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(
                 {
-                    "filtre_kodu": filtre_kodu,
+                    "filtre_kod": filtre_kodu,
                     "hata_tipi": "GENERIC",
                     "eksik_ad": me.missing,
                     "detay": msg,

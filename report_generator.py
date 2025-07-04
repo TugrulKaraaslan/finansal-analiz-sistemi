@@ -497,8 +497,10 @@ def _write_error_sheet(
     from dataclasses import asdict, is_dataclass
 
     df_err = pd.DataFrame([asdict(e) if is_dataclass(e) else e for e in error_list])
+    if "filtre_kod" not in df_err.columns and "filtre_kodu" in df_err.columns:
+        df_err = df_err.rename(columns={"filtre_kodu": "filtre_kod"})
     for col in [
-        "filtre_kodu",
+        "filtre_kod",
         "hata_tipi",
         "eksik_ad",
         "detay",
@@ -513,13 +515,13 @@ def _write_error_sheet(
         non_ok = summary_df[summary_df["sebep_kodu"] != "OK"]
         if not non_ok.empty:
             base_records = []
-            existing = set(df_err.get("filtre_kodu", []))
+            existing = set(df_err.get("filtre_kod", []))
             for _, row in non_ok.iterrows():
                 if row["filtre_kodu"] in existing:
                     continue
                 base_records.append(
                     {
-                        "filtre_kodu": row["filtre_kodu"],
+                        "filtre_kod": row["filtre_kodu"],
                         "hata_tipi": row["sebep_kodu"],
                         "detay": row.get("sebep_aciklama", "-") or "-",
                         "cozum_onerisi": "-",
