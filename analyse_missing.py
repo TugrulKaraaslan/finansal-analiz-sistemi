@@ -53,7 +53,7 @@ def column_calculated(col: str, py_files: list[Path]) -> bool:
     return False
 
 
-def analyse(df: pd.DataFrame, project_root: Path) -> pd.DataFrame:
+def analyse(df: pd.DataFrame, project_root: Path, filtre_col: str) -> pd.DataFrame:
     py_files = list(project_root.glob("**/*.py"))
     all_names = scan_project_columns(py_files)
     results = []
@@ -85,7 +85,7 @@ def analyse(df: pd.DataFrame, project_root: Path) -> pd.DataFrame:
                     suggestion = f"{std_col} hesaplamasını ekleyin"
             results.append(
                 {
-                    "filtre_kod": row.get("filtre_kod"),
+                    "filtre_kodu": row.get(filtre_col),
                     "eksik_sutun": orig_col,
                     "muhtemel_sebep": cause,
                     "cozum_onerisi": suggestion,
@@ -104,12 +104,20 @@ def main() -> int:
     df = pd.read_excel(args.excel, sheet_name="Hatalar", engine="openpyxl")
     df = df[df["hata_tipi"] == "QUERY_ERROR"].copy()
 
-    summary = analyse(df, Path(args.project_root))
+    filtre_col = None
+    if "filtre_kodu" in df.columns:
+        filtre_col = "filtre_kodu"
+    elif "filtre_kod" in df.columns:
+        filtre_col = "filtre_kod"
+    else:
+        raise KeyError("Excel sheet must contain 'filtre_kodu' or 'filtre_kod' column")
+
+    summary = analyse(df, Path(args.project_root), filtre_col)
     if not summary.empty:
         summary.to_csv("eksik_ozet.csv", index=False)
         summary.to_markdown("eksik_ozet.md", index=False)
 
-    top_filt = df["filtre_kod"].nunique()
+    top_filt = df[filtre_col].nunique()
     uniq_cols = summary["eksik_sutun"].nunique() if not summary.empty else 0
     print(f"Toplam {top_filt} filtrede {uniq_cols} benzersiz eksik sütun bulundu.")
 
