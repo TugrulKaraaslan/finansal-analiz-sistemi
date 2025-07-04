@@ -24,7 +24,12 @@ if not hasattr(np, "NaN"):
 import gc
 from pathlib import Path
 
-import pandas_ta as ta
+try:
+    import pandas_ta as ta
+except ImportError as exc:  # pragma: no cover - dependency missing
+    raise RuntimeError(
+        "pandas-ta not installed. Run: pip install pandas-ta==0.3.14b0"
+    ) from exc
 
 try:  # pragma: no cover - optional indicator
     from pandas_ta import psar as ta_psar
