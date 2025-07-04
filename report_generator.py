@@ -24,6 +24,31 @@ import report_stats
 from logging_config import get_logger
 from utils.compat import safe_concat, safe_to_excel
 
+HATALAR_COLUMNS = [
+    "filtre_kod",
+    "hata_tipi",
+    "eksik_ad",
+    "detay",
+    "cozum_onerisi",
+    "reason",
+    "hint",
+]
+
+
+def save_hatalar_excel(df: pd.DataFrame, out_path: str | Path) -> None:
+    """Save errors DataFrame to an Excel file with normalized header."""
+
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df = df.reindex(columns=HATALAR_COLUMNS, fill_value="-")
+    with pd.ExcelWriter(out_path, engine="openpyxl") as writer:
+        df.to_excel(
+            writer,
+            sheet_name="Hatalar",
+            index=False,
+            columns=HATALAR_COLUMNS,
+        )
+
 logger = get_logger(__name__)
 
 PADDING_COMMENT = " ".join(uuid.uuid4().hex for _ in range(1200))
@@ -510,7 +535,15 @@ def _write_error_sheet(
     if df_err.empty:
         return  # liste boşsa sheet oluşturma
 
-    safe_to_excel(df_err, wr, sheet_name="Hatalar", index=False)
+    df_err = df_err.reindex(columns=HATALAR_COLUMNS, fill_value="-")
+    safe_to_excel(
+        df_err,
+        wr,
+        sheet_name="Hatalar",
+        index=False,
+        columns=HATALAR_COLUMNS,
+        engine="openpyxl",
+    )
 
 
 def generate_full_report(
@@ -716,6 +749,7 @@ def generate_full_report(
 
 __all__ = [
     "add_error_sheet",
+    "save_hatalar_excel",
     "olustur_ozet_rapor",
     "olustur_hisse_bazli_rapor",
     "olustur_hatali_filtre_raporu",
