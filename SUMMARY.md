@@ -1,0 +1,5 @@
+- Added pandas-ta requirement with correct package name.
+- Indicator calculator now fails fast if pandas-ta missing.
+- Created simple dependency test ensuring pandas_ta import.
+- Colab guide includes new step to install pandas-ta.
+- Updated install and test logs after running tests.

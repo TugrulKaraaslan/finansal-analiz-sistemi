@@ -9,6 +9,11 @@ verilmiştir.
 
 ---
 
+## 0. pandas-ta Kurulumu
+```bash
+!pip install -q pandas-ta==0.3.14b0
+```
+
 ## 1. (İsteğe bağlı) Google Drive Bağlama
 Aşağıdaki komutla Drive'ı bağlayarak raporları kalıcı saklayabilirsiniz.
 ```python
