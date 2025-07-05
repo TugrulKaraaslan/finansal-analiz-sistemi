@@ -6,7 +6,8 @@ from typing import Any
 
 import yaml
 
-DEFAULT_MAX_FILTER_DEPTH = 7
+DEFAULT_MAX_FILTER_DEPTH = 15
+FALLBACK_MAX_FILTER_DEPTH = 7
 
 
 def _load_cfg() -> dict[str, Any]:
@@ -19,7 +20,7 @@ def _load_cfg() -> dict[str, Any]:
             with cfg_file.open() as f:
                 return yaml.safe_load(f) or {}
         except yaml.YAMLError:
-            return {}
+            return {"max_filter_depth": FALLBACK_MAX_FILTER_DEPTH}
     return {}
 
 
@@ -34,6 +35,10 @@ def _as_int(value: Any, default: int) -> int:
         return default
 
 
-MAX_FILTER_DEPTH: int = _as_int(_cfg.get("max_filter_depth"), DEFAULT_MAX_FILTER_DEPTH)
+value = _cfg.get("max_filter_depth")
+if value is None:
+    MAX_FILTER_DEPTH = DEFAULT_MAX_FILTER_DEPTH
+else:
+    MAX_FILTER_DEPTH = _as_int(value, FALLBACK_MAX_FILTER_DEPTH)
 
 __all__ = ["MAX_FILTER_DEPTH"]
