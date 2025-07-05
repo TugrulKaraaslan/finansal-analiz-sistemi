@@ -96,7 +96,9 @@ def setup_logger(level: int = logging.INFO) -> CounterFilter:
                     log_file, maxBytes=2_000_000, backupCount=20, encoding="utf-8"
                 )
             fh.setFormatter(
-                logging.Formatter("%(asctime)s | %(name)s | %(levelname)s | %(message)s")
+                logging.Formatter(
+                    "%(asctime)s | %(name)s | %(levelname)s | %(message)s"
+                )
             )
             fh.addFilter(DuplicateFilter())
             root.addHandler(fh)
