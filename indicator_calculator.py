@@ -6,8 +6,8 @@
 # Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index
 # düzeltildi, filtre uyumu artırıldı v2)
 
-import warnings
 import re
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -38,9 +38,9 @@ except Exception:  # pragma: no cover - missing indicator
     ta_psar = None  # type: ignore[misc]
 
 import utils
+from config_loader import load_ema_close_crossovers
 from finansal.utils import lazy_chunk, safe_set
 from finansal_analiz_sistemi import config
-from config_loader import load_ema_close_crossovers
 from finansal_analiz_sistemi.config import CHUNK_SIZE
 from finansal_analiz_sistemi.log_tools import PCT_STEP
 from logging_config import get_logger
@@ -90,6 +90,7 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
             continue
         raise ValueError(f"Bilinmeyen crossover format\u0131: {name}")
     return df
+
 
 # --- Yeni Özel İndikatör Fonksiyonları (Filtrelerle Uyum İçin) ---
 

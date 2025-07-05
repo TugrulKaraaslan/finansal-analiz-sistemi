@@ -3,14 +3,16 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-import indicator_calculator as ic
 import config_loader
+import indicator_calculator as ic
 
 
 def test_add_crossovers_basic(tmp_path):
-    df = pd.DataFrame({
-        "close": [1, 2, 3, 4, 5],
-    })
+    df = pd.DataFrame(
+        {
+            "close": [1, 2, 3, 4, 5],
+        }
+    )
     names = ["ema_3_keser_close_yukari", "ema_3_keser_close_asagi"]
     out = ic.add_crossovers(df.copy(), names)
     for n in names:
