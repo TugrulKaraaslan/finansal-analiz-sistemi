@@ -13,7 +13,7 @@ from logging_config import get_logger
 from utils.compat import safe_concat
 
 # Sabitler
-COLS = ["tarih", "filtre_kodu", "python_query"]
+COLS = ["tarih", "filtre_kodu", "PythonQuery"]
 
 # data_loader.py
 # -*- coding: utf-8 -*-

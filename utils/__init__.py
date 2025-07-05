@@ -107,7 +107,7 @@ def extract_columns_from_filters_cached(
     df_filters = None
     if df_filters_csv:
         try:
-            df_filters = pd.read_csv(StringIO(df_filters_csv))
+            df_filters = pd.read_csv(StringIO(df_filters_csv), sep=";")
         except Exception:
             df_filters = None
 

@@ -29,7 +29,7 @@ def _summary() -> None:
 
 def run_analysis(csv_path: Path) -> Path:
     """Read CSV and write Excel report next to it."""
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(csv_path, sep=";")
     out_path = csv_path.with_suffix(".xlsx")
     ReportWriter().write_report(df, out_path)
     return out_path
