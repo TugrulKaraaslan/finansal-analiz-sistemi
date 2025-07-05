@@ -35,8 +35,8 @@ drive.mount('/content/drive')
 ## 3. Kütüphaneleri Kur (Sürüm Sabitleme)
 ```bash
 !pip install --upgrade pip
-!pip install -q -r requirements-colab.txt   # Colab'a uyumlu temel paketler
-!pip install -q -r requirements-dev.txt    # test ve geliştirme bağımlılıkları
+!pip install -q -r requirements-colab.txt
+!pip install -q -r requirements-dev.txt
 !pip install -e .
 ```
 `requirements-dev.txt` dosyası, Parquet desteği için gerekli **pyarrow** gibi test
