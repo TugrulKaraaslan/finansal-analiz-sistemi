@@ -103,7 +103,14 @@ else:
     INDIKATOR_AD_ESLESTIRME.setdefault("its_9", "ichimoku_conversionline")
 
 if "SERIES_SERIES_CROSSOVERS" not in globals():
-    SERIES_SERIES_CROSSOVERS: list = []
+    SERIES_SERIES_CROSSOVERS: list = [
+        (
+            "close",
+            "classicpivots_1h_p",
+            "close_keser_classicpivots_1h_p_yukari",
+            "close_keser_classicpivots_1h_p_asagi",
+        )
+    ]
 
 sys.modules.setdefault("cfg", sys.modules[__name__])
 
@@ -131,7 +138,9 @@ if not hasattr(sys.modules[__name__], "passive_filters"):
 if not hasattr(sys.modules[__name__], "filter_weights"):
     filter_weights: dict = {}
 if not hasattr(sys.modules[__name__], "OZEL_SUTUN_PARAMS"):
-    OZEL_SUTUN_PARAMS: dict = {}  # D3
+    OZEL_SUTUN_PARAMS: list[dict] = [
+        {"name": "classicpivots_1h_p", "function": "_calculate_classicpivots_1h_p"}
+    ]
 
 # ---------------------------------------------------------------------------
 # Teknik analizde zorunlu olarak üretilecek hareketli ortalamalar
