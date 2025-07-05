@@ -16,7 +16,7 @@ if SimpleNamespace.__hash__ is None:
     # ``SimpleNamespace`` is typed as ``Final`` in ``types`` stubs so direct
     # assignment triggers ``Cannot assign to final name``. Use ``setattr``
     # instead to satisfy ``mypy`` while keeping runtime behaviour the same.
-    setattr(types, "SimpleNamespace", _SimpleNamespaceHashable)
+    types.SimpleNamespace = _SimpleNamespaceHashable
 
 # numpy>=2 removed the ``NaN`` alias. Some optional dependencies still import it.
 if not hasattr(np, "NaN"):

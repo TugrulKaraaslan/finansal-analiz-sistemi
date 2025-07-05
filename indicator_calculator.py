@@ -507,7 +507,7 @@ def calculate_chunked(
     """Process DataFrame per ticker and append to Parquet."""
     pq_path = Path("veri/gosterge.parquet")
     for kods in lazy_chunk(df.groupby("ticker", sort=False), chunk_size):
-        for kod, group in kods:
+        for _, group in kods:
             mini = group.sort_values("date").copy()
             mini = apply_indicators(mini, active_inds)
             try:
