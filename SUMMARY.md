@@ -1,5 +1,10 @@
-- Added pandas-ta requirement with correct package name.
-- Indicator calculator now fails fast if pandas-ta missing.
-- Created simple dependency test ensuring pandas_ta import.
-- Colab guide includes new step to install pandas-ta.
-- Updated install and test logs after running tests.
+- Added cache_builder module to assemble CSV files into a single Parquet.
+- config exposes PARQUET_CACHE_PATH for unified cache location.
+- data_loader.load_dataset loads the Parquet and rebuilds when missing.
+- cli.py now accepts --rebuild-cache to trigger cache build before running.
+- FileLock prevents simultaneous writes.
+- Dockerfile and CI workflow install filelock package.
+- Small sample raw CSVs placed under veri/ham for tests.
+- cache_build_log.txt records first build and cache-hit runs.
+- New test ensures cache rebuild creates non-empty Parquet.
+- All unit tests run successfully after changes.
