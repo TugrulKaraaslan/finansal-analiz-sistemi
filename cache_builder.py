@@ -1,7 +1,8 @@
 from pathlib import Path
+
 import pandas as pd
-from loguru import logger
 from filelock import FileLock
+from loguru import logger
 
 import config
 
