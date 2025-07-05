@@ -8,7 +8,7 @@
 import keyword
 import os
 import re
-from typing import Any
+from typing import Any, Iterable
 
 import pandas as pd
 import yaml
@@ -56,9 +56,6 @@ _undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)'")
 # Recursion guard
 FAILED_FILTERS: list[dict] = []
 
-# Maximum depth for nested filter evaluation
-MAX_DEPTH = 50
-
 
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
@@ -67,6 +64,22 @@ def clear_failed() -> None:
 
 class CircularError(QueryError):
     """Raised when a circular filter reference is detected."""
+
+
+class CyclicFilterError(RuntimeError):
+    """Raised when a cycle is found during filter evaluation."""
+
+
+class MaxDepthError(RuntimeError):
+    """Raised when maximum recursion depth is exceeded."""
+
+
+FILTER_DEFS: dict[str, dict] = {}
+
+
+def apply_filter_logic(fid: str) -> Any:
+    """Placeholder logic for filter execution."""
+    return fid
 
 
 def _build_solution(err_type: str, msg: str) -> str:
@@ -87,19 +100,27 @@ def _build_solution(err_type: str, msg: str) -> str:
     return ""
 
 
-def evaluate_filter(expr, df, depth: int = 0):
-    """Evaluate filter expression with recursion guard."""
-    if depth > MAX_DEPTH:
-        logger.error("Recursion limit exceeded for %s", expr)
-        raise RecursionError("Filtre döngüsel olabilir")
+def evaluate_filter(fid: str, depth: int = 0, seen: set[str] | None = None) -> Any:
+    """Recursively evaluate filter tree by ``fid``.
 
-    if isinstance(expr, str):
-        return df.query(expr)
+    Raises ``CyclicFilterError`` when a cycle is detected and ``MaxDepthError``
+    when ``settings.MAX_FILTER_DEPTH`` is exceeded.
+    """
 
-    if isinstance(expr, dict) and "sub_expr" in expr:
-        return evaluate_filter(expr["sub_expr"], df, depth + 1)
+    seen = seen or set()
+    if fid in seen:
+        raise CyclicFilterError(f"Cyclic dependency → {' > '.join(list(seen) + [fid])}")
+    if depth > settings.MAX_FILTER_DEPTH:
+        raise MaxDepthError(f"Depth {depth} exceeded on {fid}")
 
-    raise QueryError("Invalid expression")
+    node = FILTER_DEFS.get(fid)
+    if node is None:
+        raise KeyError(f"Unknown filter: {fid}")
+
+    seen.add(fid)
+    for child in node.get("children", []):
+        evaluate_filter(child, depth + 1, seen)
+    return apply_filter_logic(fid)
 
 
 def safe_eval(expr, df, depth: int = 0, visited=None):
