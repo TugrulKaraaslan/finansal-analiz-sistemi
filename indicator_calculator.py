@@ -36,10 +36,10 @@ try:  # pragma: no cover - optional indicator
 except Exception:  # pragma: no cover - missing indicator
     ta_psar = None  # type: ignore[misc]
 
-import config
 import utils
-from config import CHUNK_SIZE
 from finansal.utils import lazy_chunk, safe_set
+from finansal_analiz_sistemi import config
+from finansal_analiz_sistemi.config import CHUNK_SIZE
 from finansal_analiz_sistemi.log_tools import PCT_STEP
 from logging_config import get_logger
 from utilities.naming import unique_name

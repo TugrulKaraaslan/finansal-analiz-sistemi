@@ -3,7 +3,7 @@ def test_config_has_core_indicators():
     config.py dosyasında CORE_INDICATORS sabiti var mı ve içi boş değil mi?
     Hata varsa, net Türkçe açıklama verir.
     """
-    import config as cfg
+    from finansal_analiz_sistemi import config as cfg
 
     # Tanımlı mı?
     assert hasattr(cfg, "CORE_INDICATORS"), "config.py'de CORE_INDICATORS YOK!"

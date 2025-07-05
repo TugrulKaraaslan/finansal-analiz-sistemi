@@ -60,7 +60,7 @@ Bu ayar yerel modüllerin (`import finansal_analiz_sistemi` vb.) sorunsuz
 
 ## 5. (İsteğe Bağlı) Colab Renkli Log
 ```python
-import config
+from finansal_analiz_sistemi import config
 config.IS_COLAB = True
 ```
 Renkli log çıktısı için `IS_COLAB` bayrağını açabilirsiniz.

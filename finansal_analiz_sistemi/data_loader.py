@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pandas as pd
 
-import config
 from data_loader_cache import DataLoaderCache
+from finansal_analiz_sistemi import config
 from logging_config import get_logger
 from utils.compat import safe_concat
 

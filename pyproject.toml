@@ -32,3 +32,6 @@ ignore_missing_imports = true
 explicit_package_bases = true
 ignore_errors = true
 
+[tool.poetry.packages]
+include = "finansal_analiz_sistemi"
+

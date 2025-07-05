@@ -1,7 +1,6 @@
 import pandas as pd
 
-import config
-from finansal_analiz_sistemi import cache_builder, data_loader
+from finansal_analiz_sistemi import cache_builder, config, data_loader
 
 
 def test_rebuild_creates_nonempty_parquet(tmp_path, monkeypatch):

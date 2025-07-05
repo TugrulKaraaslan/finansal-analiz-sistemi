@@ -8,9 +8,12 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      APP_ENV: ${{ matrix.app-env }}
     strategy:
       matrix:
         python-version: ['3.11']
+        app-env: [dev, prod]
     steps:
       - uses: actions/checkout@v4
 

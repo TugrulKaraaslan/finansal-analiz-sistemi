@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from pandas import CategoricalDtype
 
-import config
+from finansal_analiz_sistemi import config
 from logging_config import get_logger
 
 logger = get_logger(__name__)

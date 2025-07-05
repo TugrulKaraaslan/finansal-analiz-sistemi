@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-import config
+from finansal_analiz_sistemi import config
 
 
 def safe_set(df: pd.DataFrame, column: str, values) -> None:

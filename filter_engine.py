@@ -244,7 +244,7 @@ def _apply_single_filter(df, kod, query):
 def run_filter(code, df, expr):
     """Simple wrapper for running a filter expression."""
     # Pasif filtreler listede mi?
-    from config import cfg
+    from finansal_analiz_sistemi.config import cfg
 
     if code in cfg.get("passive_filters", []):
         logger.info("Filter %s marked passive, skipped.", code)

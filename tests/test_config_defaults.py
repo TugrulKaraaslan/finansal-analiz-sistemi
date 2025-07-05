@@ -1,6 +1,6 @@
 import importlib
 
-import config
+from finansal_analiz_sistemi import config
 
 CONSTANTS = [
     "ALIM_ZAMANI",

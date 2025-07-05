@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-import config
 from finansal.utils import safe_set
+from finansal_analiz_sistemi import config
 
 
 def test_safe_set_casts_to_config_dtype():

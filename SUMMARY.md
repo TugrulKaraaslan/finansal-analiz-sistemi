@@ -18,3 +18,13 @@
 - Validation exits with status 2 when cycles are present.
 - Placeholder apply_filter_logic returns filter id for now.
 - Two cycles detected in synthetic tests during development.
+- Consolidated configuration into paket `finansal_analiz_sistemi.config`.
+- Renamed old root config to `config_local.py` to prevent shadowing.
+- Added `config_resolver.py` for runtime detection and log level control.
+- Updated imports to require explicit package config usage.
+- Packaging now installs only `finansal_analiz_sistemi`.
+- `APP_ENV` environment toggles logging level via resolver.
+- Dockerfile sets `APP_ENV=prod` by default.
+- CI workflow tests both dev and prod environments.
+- New unit test verifies shadow config detection.
+- `flake8-bugbear` added; mutable default ignored with `# noqa: B006`.
