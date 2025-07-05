@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
+import cache_builder
 import config
 from finansal_analiz_sistemi.data_loader import (
     _standardize_date_column,
@@ -19,7 +20,6 @@ from finansal_analiz_sistemi.data_loader import (
     yukle_filtre_dosyasi,
     yukle_hisse_verileri,
 )
-import cache_builder
 
 __all__ = [
     "load_data",
