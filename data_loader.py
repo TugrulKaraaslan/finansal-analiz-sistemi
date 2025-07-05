@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 import cache_builder
-import config
+from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.data_loader import (
     _standardize_date_column,
     _standardize_ohlcv_columns,

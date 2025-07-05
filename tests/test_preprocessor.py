@@ -3,8 +3,8 @@ import sys
 
 import pandas as pd
 
-import config
 import preprocessor
+from finansal_analiz_sistemi import config
 
 # Ensure modules are importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))

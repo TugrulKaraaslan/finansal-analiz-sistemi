@@ -36,10 +36,10 @@ try:  # pragma: no cover - optional indicator
 except Exception:  # pragma: no cover - missing indicator
     ta_psar = None  # type: ignore[misc]
 
-import config
 import utils
-from config import CHUNK_SIZE
 from finansal.utils import lazy_chunk, safe_set
+from finansal_analiz_sistemi import config
+from finansal_analiz_sistemi.config import CHUNK_SIZE
 from finansal_analiz_sistemi.log_tools import PCT_STEP
 from logging_config import get_logger
 from utilities.naming import unique_name
@@ -951,6 +951,27 @@ def _calculate_group_indicators_and_crossovers(
     # eksik olan temel bazı indikatörleri manuel olarak üretelim.
 
     manual_cols = {}
+    if (
+        set(wanted_cols or []) & {"ITS_9", "its_9", "ichimoku_conversionline"}
+        and "ITS_9" not in df_final_group.columns
+        and {"high", "low", "close"}.issubset(df_final_group.columns)
+    ):
+        try:
+            ich_df, _ = ta.ichimoku(
+                df_final_group["high"],
+                df_final_group["low"],
+                df_final_group["close"],
+            )
+            if ich_df is not None and "ITS_9" in ich_df:
+                manual_cols["ITS_9"] = ich_df["ITS_9"]
+                local_logger.debug(
+                    f"{hisse_kodu}: 'ITS_9' sütunu manuel olarak hesaplandı."
+                )
+        except Exception as e_ich:
+            local_logger.error(
+                f"{hisse_kodu}: 'ITS_9' hesaplanırken hata: {e_ich}",
+                exc_info=False,
+            )
     if "ema_8" not in df_final_group.columns and "close" in df_final_group.columns:
         manual_cols["ema_8"] = df_final_group["close"].ewm(span=8, adjust=False).mean()
         local_logger.debug(f"{hisse_kodu}: 'ema_8' sütunu manuel olarak hesaplandı.")

@@ -8,7 +8,7 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Dict, Tuple
 
-import config
+from finansal_analiz_sistemi import config
 
 PCT_STEP = 10
 

@@ -13,8 +13,8 @@ if not hasattr(ta, "psar"):
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.modules.pop("pandas_ta", None)  # Ensure real pandas_ta is used in this test
 
-import config  # noqa: E402
 import indicator_calculator as ic  # noqa: E402
+from finansal_analiz_sistemi import config  # noqa: E402
 
 
 def test_classicpivots_crossover_column_exists():

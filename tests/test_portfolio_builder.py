@@ -1,7 +1,7 @@
 import pandas as pd
 
-import config
 import portfolio_builder
+from finansal_analiz_sistemi import config
 
 
 def test_calculate_total_return_weight(monkeypatch):

@@ -4,7 +4,7 @@ import pandas as pd
 from filelock import FileLock
 from loguru import logger
 
-import config
+from finansal_analiz_sistemi import config
 
 RAW_DIR = Path("veri/ham")
 CACHE = Path(config.PARQUET_CACHE_PATH)

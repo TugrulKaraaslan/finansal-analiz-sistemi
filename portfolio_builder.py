@@ -8,7 +8,7 @@ def calculate_total_return(code: str, pos_df: pd.DataFrame) -> float:
     ``raw_return`` column results in ``0.0``.
     """
 
-    from config import cfg
+    from finansal_analiz_sistemi.config import cfg
 
     weight = float(cfg.get("filter_weights", {}).get(code, 1.0))
 
