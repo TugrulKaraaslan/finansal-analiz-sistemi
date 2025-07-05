@@ -412,7 +412,7 @@ def uygula_filtreler(
         }
         atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(hack)
 
-    for index, row in df_filtre_kurallari.iterrows():
+    for _, row in df_filtre_kurallari.iterrows():
         filtre_kodu = row.get("FilterCode")
         if filtre_kodu is None:
             filtre_kodu = row.get("filtre_kodu")

@@ -23,9 +23,9 @@ def load_crossover_names(csv_path: str | Path | None = None) -> list[str]:
     if "PythonQuery" in df.columns:
         for expr in df["PythonQuery"].dropna().astype(str):
             names.update(CROSSOVER_NAME_RE.findall(expr))
-    for a, b, above, below in getattr(config, "SERIES_SERIES_CROSSOVERS", []):
+    for _, _, above, below in getattr(config, "SERIES_SERIES_CROSSOVERS", []):
         names.update([above, below])
-    for col, val, suff in getattr(config, "SERIES_VALUE_CROSSOVERS", []):
+    for col, _, suff in getattr(config, "SERIES_VALUE_CROSSOVERS", []):
         suf = str(suff).replace(".", "p")
         names.update([f"{col}_keser_{suf}_yukari", f"{col}_keser_{suf}_asagi"])
     return sorted(names)

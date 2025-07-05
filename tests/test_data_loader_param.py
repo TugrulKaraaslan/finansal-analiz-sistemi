@@ -20,7 +20,7 @@ def test_load_data_param(tmp_path: Path, content: str, expected_rows: int):
 def test_load_data_empty(tmp_path: Path):
     p = tmp_path / "empty.csv"
     p.write_text("")
-    with pytest.raises(Exception):
+    with pytest.raises(pd.errors.EmptyDataError):
         data_loader.load_data(str(p))
 
 

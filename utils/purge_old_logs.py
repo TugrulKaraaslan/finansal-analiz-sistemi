@@ -6,12 +6,17 @@ from pathlib import Path
 
 
 def purge_old_logs(
-    *, log_dir: Path = Path("loglar"), keep_days: int = 7, dry_run: bool = False
+    *, log_dir: Path | None = None, keep_days: int = 7, dry_run: bool = False
 ) -> int:
     """Purge ``*.log`` and ``*.lock`` files older than ``keep_days`` days.
 
     Returns the number of matching files (even in dry-run mode).
     """
+    if log_dir is None:
+        log_dir = Path("loglar")
+    else:
+        log_dir = Path(log_dir)
+
     cutoff = datetime.now() - timedelta(days=keep_days)
     count = 0
     for f in log_dir.glob("*.log*"):
