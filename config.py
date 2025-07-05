@@ -11,7 +11,9 @@ IS_COLAB: bool = False
 # Project root path so config can resolve files from any CWD
 BASE_DIR: Path = Path(__file__).resolve().parent
 
-CACHE_PATH: Path = BASE_DIR / "veri" / "birlesik_hisse_verileri.parquet"
+# unified Parquet cache location relative to project root
+PARQUET_CACHE_PATH: str = "veri/birlesik_hisse_verileri.parquet"
+CACHE_PATH: Path = BASE_DIR / PARQUET_CACHE_PATH
 DEFAULT_CSV_PATH: Path = BASE_DIR / "data" / "raw" / "all_prices.csv"
 
 # default data directory and filename patterns

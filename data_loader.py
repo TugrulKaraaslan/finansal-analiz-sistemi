@@ -3,6 +3,12 @@
 Explicit imports keep flake8 happy while exposing the same public API.
 """
 
+from pathlib import Path
+
+import pandas as pd
+
+import cache_builder
+import config
 from finansal_analiz_sistemi.data_loader import (
     _standardize_date_column,
     _standardize_ohlcv_columns,
@@ -25,4 +31,18 @@ __all__ = [
     "_standardize_ohlcv_columns",
     "yukle_filtre_dosyasi",
     "yukle_hisse_verileri",
+    "load_dataset",
 ]
+
+
+def load_dataset(rebuild: bool = False) -> pd.DataFrame:
+    """Return cached stock dataset, rebuilding if requested or missing."""
+    parquet_path = Path(config.PARQUET_CACHE_PATH)
+    if rebuild or not parquet_path.exists():
+        cache_builder.build()
+    if not parquet_path.exists():
+        raise FileNotFoundError(parquet_path)
+    df = pd.read_parquet(parquet_path)
+    if df.empty:
+        raise ValueError("Parquet cache empty")
+    return df
