@@ -995,7 +995,10 @@ def _calculate_group_indicators_and_crossovers(
                 df_final_group["close"],
             )
             if ich_df is not None and "ITS_9" in ich_df:
-                manual_cols["ITS_9"] = ich_df["ITS_9"]
+                target = config.INDIKATOR_AD_ESLESTIRME.get(
+                    "ITS_9", "ichimoku_conversionline"
+                )
+                manual_cols[target] = ich_df["ITS_9"]
                 local_logger.debug(
                     f"{hisse_kodu}: 'ITS_9' sütunu manuel olarak hesaplandı."
                 )
@@ -1024,6 +1027,53 @@ def _calculate_group_indicators_and_crossovers(
         local_logger.debug(
             f"{hisse_kodu}: 'momentum_10' sütunu manuel olarak hesaplandı."
         )
+
+    if "rsi_14" not in df_final_group.columns and "close" in df_final_group.columns:
+        try:
+            manual_cols["rsi_14"] = ta.rsi(df_final_group["close"], length=14)
+            local_logger.debug(
+                f"{hisse_kodu}: 'rsi_14' sütunu manuel olarak hesaplandı."
+            )
+        except Exception as e_rsi:
+            local_logger.error(
+                f"{hisse_kodu}: rsi_14 hesaplanırken hata: {e_rsi}", exc_info=False
+            )
+
+    if (
+        {"macd_line", "macd_signal"} - set(df_final_group.columns)
+    ) and "close" in df_final_group.columns:
+        try:
+            macd_df = ta.macd(df_final_group["close"], fast=12, slow=26, signal=9)
+            if isinstance(macd_df, pd.DataFrame):
+                if "macd_line" not in df_final_group.columns:
+                    manual_cols["macd_line"] = macd_df.iloc[:, 0]
+                if "macd_signal" not in df_final_group.columns:
+                    manual_cols["macd_signal"] = macd_df.iloc[:, 1]
+            local_logger.debug(
+                f"{hisse_kodu}: 'macd_line' ve 'macd_signal' sütunları manuel olarak hesaplandı."
+            )
+        except Exception as e_macd:
+            local_logger.error(
+                f"{hisse_kodu}: macd hesaplanırken hata: {e_macd}", exc_info=False
+            )
+
+    if (
+        {"stochrsi_k", "stochrsi_d"} - set(df_final_group.columns)
+    ) and "close" in df_final_group.columns:
+        try:
+            stoch_df = ta.stochrsi(df_final_group["close"], length=14)
+            if isinstance(stoch_df, pd.DataFrame):
+                if "stochrsi_k" not in df_final_group.columns:
+                    manual_cols["stochrsi_k"] = stoch_df.iloc[:, 0]
+                if "stochrsi_d" not in df_final_group.columns:
+                    manual_cols["stochrsi_d"] = stoch_df.iloc[:, 1]
+            local_logger.debug(
+                f"{hisse_kodu}: 'stochrsi_k/d' sütunları manuel olarak hesaplandı."
+            )
+        except Exception as e_stoch:
+            local_logger.error(
+                f"{hisse_kodu}: stochrsi hesaplanırken hata: {e_stoch}", exc_info=False
+            )
 
     if manual_cols:
         for alias, vals in manual_cols.items():

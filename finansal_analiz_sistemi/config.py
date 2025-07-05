@@ -113,10 +113,16 @@ if "INDIKATOR_AD_ESLESTIRME" not in globals():
     INDIKATOR_AD_ESLESTIRME: dict = {
         "ITS_9": "ichimoku_conversionline",
         "its_9": "ichimoku_conversionline",
+        "IKS_26": "ichimoku_baseline",
+        "ISA_9": "ichimoku_leadingspana",
+        "ISB_26": "ichimoku_leadingspanb",
     }
 else:
     INDIKATOR_AD_ESLESTIRME.setdefault("ITS_9", "ichimoku_conversionline")
     INDIKATOR_AD_ESLESTIRME.setdefault("its_9", "ichimoku_conversionline")
+    INDIKATOR_AD_ESLESTIRME.setdefault("IKS_26", "ichimoku_baseline")
+    INDIKATOR_AD_ESLESTIRME.setdefault("ISA_9", "ichimoku_leadingspana")
+    INDIKATOR_AD_ESLESTIRME.setdefault("ISB_26", "ichimoku_leadingspanb")
 
 if "SERIES_SERIES_CROSSOVERS" not in globals():
     SERIES_SERIES_CROSSOVERS: list = [
@@ -142,7 +148,41 @@ if not hasattr(sys.modules[__name__], "cfg"):
 if not hasattr(sys.modules[__name__], "KOMISYON_ORANI"):
     KOMISYON_ORANI = 0.001
 if not hasattr(sys.modules[__name__], "TA_STRATEGY"):
-    TA_STRATEGY: dict = {}
+    TA_STRATEGY: dict = {
+        "name": "core",
+        "ta": [
+            {
+                "kind": "rsi",
+                "length": 14,
+                "col_names": ["rsi_14"],
+            },
+            {
+                "kind": "macd",
+                "fast": 12,
+                "slow": 26,
+                "signal": 9,
+                "col_names": ["macd_line", "macd_signal", "macd_hist"],
+            },
+            {
+                "kind": "stochrsi",
+                "length": 14,
+                "col_names": ["stochrsi_k", "stochrsi_d"],
+            },
+            {
+                "kind": "ichimoku",
+                "tenkan": 9,
+                "kijun": 26,
+                "senkou": 52,
+                "col_names": [
+                    "ichimoku_leadingspana",
+                    "ichimoku_leadingspanb",
+                    "ITS_9",
+                    "IKS_26",
+                    "ICS_26",
+                ],
+            },
+        ],
+    }
 if not hasattr(sys.modules[__name__], "get"):
 
     def get(key, default=None):
