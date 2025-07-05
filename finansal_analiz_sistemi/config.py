@@ -94,7 +94,13 @@ if "OHLCV_MAP" not in globals():
     }
 
 if "INDIKATOR_AD_ESLESTIRME" not in globals():
-    INDIKATOR_AD_ESLESTIRME: dict = {}
+    INDIKATOR_AD_ESLESTIRME: dict = {
+        "ITS_9": "ichimoku_conversionline",
+        "its_9": "ichimoku_conversionline",
+    }
+else:
+    INDIKATOR_AD_ESLESTIRME.setdefault("ITS_9", "ichimoku_conversionline")
+    INDIKATOR_AD_ESLESTIRME.setdefault("its_9", "ichimoku_conversionline")
 
 if "SERIES_SERIES_CROSSOVERS" not in globals():
     SERIES_SERIES_CROSSOVERS: list = []
