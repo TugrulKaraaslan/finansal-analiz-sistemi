@@ -111,3 +111,26 @@ def test_psar_no_error():
     )
     result = ic._calculate_combined_psar(df)
     assert len(result) == len(df)
+
+
+def test_core_strategy_indicators_exist():
+    df = pd.DataFrame(
+        {
+            "hisse_kodu": ["AAA"] * 60,
+            "tarih": pd.date_range("2024-01-01", periods=60, freq="D"),
+            "open": np.linspace(1, 60, 60),
+            "high": np.linspace(1, 60, 60) + 1,
+            "low": np.linspace(1, 60, 60) - 1,
+            "close": np.linspace(1, 60, 60),
+            "volume": np.arange(60),
+        }
+    )
+    result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    for col in [
+        "rsi_14",
+        "macd_line",
+        "macd_signal",
+        "ichimoku_conversionline",
+    ]:
+        assert col in result.columns
+        assert result[col].notna().any()
