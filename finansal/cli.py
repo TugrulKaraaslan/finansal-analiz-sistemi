@@ -7,7 +7,9 @@ from pathlib import Path
 
 import click
 
+import cache_builder
 import config  # noqa: WPS433  # local import pattern is intentional
+import data_loader
 from finansal.parquet_cache import ParquetCacheManager
 from indicator_calculator import calculate_chunked
 
@@ -23,6 +25,12 @@ from indicator_calculator import calculate_chunked
     default=False,
     help="Cache’i CSV’den yeniden olustur",
 )
+@click.option(
+    "--rebuild-cache",
+    is_flag=True,
+    default=False,
+    help="veri/ham klasorunden Parquet cache'i yeniden olustur",
+)
 @click.option("--ind-set", type=click.Choice(["core", "full"]), default="core")
 @click.option("--chunk-size", type=int, default=config.CHUNK_SIZE)
 @click.option(
@@ -36,6 +44,7 @@ def main(
     csv_path: str,
     cache_path: str,
     refresh_cache: bool,
+    rebuild_cache: bool,
     ind_set: str,
     chunk_size: int,
     log_level: str,
@@ -46,7 +55,10 @@ def main(
     )
     manager = ParquetCacheManager(Path(cache_path))
 
-    if refresh_cache or not Path(cache_path).exists():
+    if rebuild_cache:
+        cache_builder.build()
+        df = data_loader.load_dataset()
+    elif refresh_cache or not Path(cache_path).exists():
         df = manager.refresh(Path(csv_path))
     else:
         df = manager.load()
