@@ -1,0 +1,24 @@
+version: 1
+formatters:
+  standard:
+    format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+filters:
+  error_counter:
+    "()": finansal_analiz_sistemi.logging_utils.ErrorCountingFilter
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: standard
+    filters: [error_counter]
+  file:
+    class: logging.handlers.TimedRotatingFileHandler
+    filename: logs/fas_%Y-%m-%d.log
+    level: DEBUG
+    formatter: standard
+    when: midnight
+    backupCount: 14
+    filters: [error_counter]
+root:
+  level: INFO
+  handlers: [console, file]
