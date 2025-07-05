@@ -75,5 +75,5 @@ def test_recursive_filter_detection():
     f2["sub_expr"] = f3
     f3["sub_expr"] = f1
 
-    with pytest.raises(RecursionError):
+    with pytest.raises(filter_engine.CyclicFilterError):
         filter_engine.evaluate_filter(f1, df)
