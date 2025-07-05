@@ -1,6 +1,6 @@
+import atexit
 import logging
 import sys
-import atexit
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -10,8 +10,8 @@ if __package__ is None:  # pragma: no cover - safe guard for manual execution
 
 import pandas as pd
 
-from finansal_analiz_sistemi.report_writer import ReportWriter
 from finansal_analiz_sistemi.logging_utils import ERROR_COUNTER
+from finansal_analiz_sistemi.report_writer import ReportWriter
 
 logger = logging.getLogger(__name__)
 
