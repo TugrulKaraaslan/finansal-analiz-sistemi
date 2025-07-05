@@ -351,6 +351,11 @@ def main(argv: list[str] | None = None) -> None:
         help="Parquet yerine Excel/CSV dosyalarını yeniden yükle",
     )
     parser.add_argument(
+        "--settings-file",
+        dest="settings_file",
+        help="settings.yaml yolunu elle belirt",
+    )
+    parser.add_argument(
         "--output",
         required=True,
         help="Excel .xlsx son dosya yolu",
@@ -364,6 +369,15 @@ def main(argv: list[str] | None = None) -> None:
         help="Log seviyesi",
     )
     args = parser.parse_args(argv)
+
+    # Ensure settings file can be located early
+    try:
+        from finansal_analiz_sistemi import settings_loader
+
+        settings_loader.load_settings(args.settings_file)
+    except Exception as exc:  # pragma: no cover - CLI safeguard
+        print(exc)
+        sys.exit(1)
 
     global log_counter
     log_counter = setup_logger(level=getattr(logging, args.log_level))

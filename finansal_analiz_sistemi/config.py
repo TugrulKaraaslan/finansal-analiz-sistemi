@@ -1,9 +1,25 @@
 """Global yapılandırma sabitleri."""
 
-import sys  # isort: skip
+import os
 from pathlib import Path
 
 import yaml
+
+import sys  # isort: skip
+
+
+def get_settings_path(custom: str | None = None) -> Path:
+    """Return absolute path to ``settings.yaml`` considering the environment."""
+    if custom:
+        return Path(custom).expanduser().resolve()
+    env_path = os.getenv("FAS_SETTINGS_FILE")
+    if env_path:
+        return Path(env_path).expanduser().resolve()
+    is_colab = "google.colab" in sys.modules or bool(os.getenv("COLAB_GPU"))
+    if is_colab:
+        return Path("/content/drive/MyDrive/finansal-analiz-sistemi/settings.yaml")
+    return Path(__file__).resolve().parent.parent / "settings.yaml"
+
 
 # Flag to indicate the application is running in Google Colab
 IS_COLAB: bool = False
