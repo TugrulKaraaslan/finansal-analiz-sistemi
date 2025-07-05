@@ -32,3 +32,9 @@
 - `flake8-bugbear` added; mutable default ignored with `# noqa: B006`.
 - `packages` list in setup.cfg uses newline form to avoid install error.
 - Config maps `ITS_9` aliases to `ichimoku_conversionline` and calculator computes it when requested.
+- Added automatic EMA/close crossover generator and config loader.
+- Config defaults now include classic pivot column and crossovers.
+- indicator_calculator.add_crossovers parses names via regex.
+- config_loader.load_crossover_names collects all crossover names.
+- New tests cover crossover generation and logging.
+

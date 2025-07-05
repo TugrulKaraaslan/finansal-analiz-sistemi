@@ -6,6 +6,7 @@
 # Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index
 # düzeltildi, filtre uyumu artırıldı v2)
 
+import re
 import warnings
 
 import numpy as np
@@ -37,6 +38,7 @@ except Exception:  # pragma: no cover - missing indicator
     ta_psar = None  # type: ignore[misc]
 
 import utils
+from config_loader import load_ema_close_crossovers
 from finansal.utils import lazy_chunk, safe_set
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.config import CHUNK_SIZE
@@ -59,6 +61,36 @@ warnings.filterwarnings(
 )
 
 logger = get_logger(__name__)
+
+# ---------------------------------------------------------------------------
+# Otomatik EMA/kapanış kesişim sütunları
+# ---------------------------------------------------------------------------
+EMA_CLOSE_PATTERN = re.compile(r"ema_(\d+)_keser_close_(yukari|asagi)")
+
+
+def _calc_ema(df: pd.DataFrame, n: int) -> pd.Series:
+    if "close" not in df.columns:
+        return pd.Series(np.nan, index=df.index)
+    return df["close"].ewm(span=n, adjust=False).mean()
+
+
+def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
+    """Generate crossover columns based on naming patterns."""
+    for name in cross_names:
+        m = EMA_CLOSE_PATTERN.fullmatch(name)
+        if m:
+            span = int(m.group(1))
+            direction = m.group(2)
+            ema = _calc_ema(df, span)
+            if direction == "yukari":
+                cross = utils.crosses_above(ema, df["close"]).astype(int)
+            else:
+                cross = utils.crosses_below(ema, df["close"]).astype(int)
+            df[name] = cross
+            continue
+        raise ValueError(f"Bilinmeyen crossover format\u0131: {name}")
+    return df
+
 
 # --- Yeni Özel İndikatör Fonksiyonları (Filtrelerle Uyum İçin) ---
 
@@ -1105,6 +1137,13 @@ def _calculate_group_indicators_and_crossovers(
                 np.full(len(df_final_group), np.nan),
                 seen_names,
             )
+
+    auto_names = load_ema_close_crossovers()
+    if auto_names:
+        try:
+            add_crossovers(df_final_group, auto_names)
+        except ValueError as e_auto:
+            local_logger.error(f"{hisse_kodu}: {e_auto}")
     if (
         "bbm_20_2" in df_final_group.columns
         and "BBM_20_2" not in df_final_group.columns
