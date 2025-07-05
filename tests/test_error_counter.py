@@ -1,4 +1,5 @@
 import logging
+
 from finansal_analiz_sistemi.logging_utils import ERROR_COUNTER, ErrorCountingFilter
 
 

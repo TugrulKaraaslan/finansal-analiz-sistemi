@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import importlib
 import logging.config
-from pathlib import Path
 import types
+from pathlib import Path
 
 import yaml
 
