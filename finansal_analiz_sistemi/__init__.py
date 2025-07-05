@@ -4,10 +4,23 @@ from __future__ import annotations
 
 import importlib
 import types
+from logging.config import dictConfig
+from pathlib import Path
+
+import yaml
 
 from . import config, logging_config
 
+# Import solely for side-effects (YAML filter resolution).
+from .logging_utils import ErrorCountingFilter  # noqa: F401
+
 __all__ = ["config", "logging_config", "cache_builder", "data_loader"]
+
+# Load logging configuration at import time if available
+_yaml_path = Path(__file__).resolve().parent.parent / "logging_config.yaml"
+if _yaml_path.exists():
+    with _yaml_path.open(encoding="utf-8") as fh:
+        dictConfig(yaml.safe_load(fh))
 
 
 def __getattr__(name: str) -> types.ModuleType:

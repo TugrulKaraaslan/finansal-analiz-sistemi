@@ -1,5 +1,6 @@
 import logging
 import sys
+import atexit
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -10,6 +11,9 @@ if __package__ is None:  # pragma: no cover - safe guard for manual execution
 import pandas as pd
 
 from finansal_analiz_sistemi.report_writer import ReportWriter
+from finansal_analiz_sistemi.logging_utils import ERROR_COUNTER
+
+logger = logging.getLogger(__name__)
 
 
 def run_analysis(csv_path: Path) -> Path:
@@ -68,3 +72,14 @@ if __name__ == "__main__":
     else:
         out = run_analysis(args.dosya)
         print(f"Rapor oluşturuldu -> {out}")
+
+
+@atexit.register
+def _summary() -> None:
+    logger.info(
+        "[SUMMARY] run finished — errors=%d warnings=%d",
+        ERROR_COUNTER["errors"],
+        ERROR_COUNTER["warnings"],
+    )
+    if ERROR_COUNTER["errors"]:
+        sys.exit(1)
