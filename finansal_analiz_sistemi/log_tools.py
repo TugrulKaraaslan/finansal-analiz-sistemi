@@ -76,11 +76,36 @@ def setup_logger(level: int = logging.INFO) -> CounterFilter:
     """Configure root logger for console and file output."""
 
     root = logging.getLogger()
-    if root.handlers:
-        return _counter_filter
-
     log_dir = Path("loglar")
     log_dir.mkdir(exist_ok=True)
+
+    if root.handlers:
+        root.setLevel(level)
+        if not any(
+            isinstance(h, (RotatingFileHandler, logging.FileHandler))
+            and Path(getattr(h, "baseFilename", "")).parent == log_dir
+            for h in root.handlers
+        ):
+            if config.IS_COLAB:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                log_file = log_dir / f"colab_run_{timestamp}.log"
+                fh = logging.FileHandler(log_file, encoding="utf-8")
+            else:
+                log_file = log_dir / "rapor.log"
+                fh = RotatingFileHandler(
+                    log_file, maxBytes=2_000_000, backupCount=20, encoding="utf-8"
+                )
+            fh.setFormatter(
+                logging.Formatter(
+                    "%(asctime)s | %(name)s | %(levelname)s | %(message)s"
+                )
+            )
+            fh.addFilter(DuplicateFilter())
+            root.addHandler(fh)
+        if _counter_filter not in root.filters:
+            root.addFilter(_counter_filter)
+        root.propagate = False
+        return _counter_filter
     if config.IS_COLAB:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         log_file = log_dir / f"colab_run_{timestamp}.log"
