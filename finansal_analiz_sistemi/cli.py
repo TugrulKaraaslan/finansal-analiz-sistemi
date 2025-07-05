@@ -20,8 +20,8 @@ def run_analysis(csv_path: Path) -> Path:
     return out_path
 
 
-def parse_args() -> Path:
-    p = ArgumentParser(description="Rapor üret")
+def parse_args():
+    p = ArgumentParser(description="Rapor üret veya filtreleri doğrula")
 
     p.add_argument(
         "--dosya",
@@ -35,6 +35,11 @@ def parse_args() -> Path:
         default="INFO",
         help="Log seviyesi",
     )
+    p.add_argument(
+        "--validate-filters",
+        action="store_true",
+        help="Sadece filtre tanımlarını doğrula",
+    )
 
     args = p.parse_args()
 
@@ -46,10 +51,20 @@ def parse_args() -> Path:
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
 
-    return args.dosya
+    return args
 
 
 if __name__ == "__main__":
-    csv_path = parse_args()
-    out = run_analysis(csv_path)
-    print(f"Rapor oluşturuldu -> {out}")
+    args = parse_args()
+    if args.validate_filters:
+        from filter_validator import validate_filters
+
+        errors = validate_filters()
+        if errors:
+            for line in errors:
+                print(line)
+            sys.exit(2)
+        print("All filters valid ✅")
+    else:
+        out = run_analysis(args.dosya)
+        print(f"Rapor oluşturuldu -> {out}")

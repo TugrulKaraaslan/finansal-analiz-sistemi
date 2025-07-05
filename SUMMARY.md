@@ -8,3 +8,13 @@
 - cache_build_log.txt records first build and cache-hit runs.
 - New test ensures cache rebuild creates non-empty Parquet.
 - All unit tests run successfully after changes.
+- Added cycle detection and depth guard for filter trees.
+- New MAX_FILTER_DEPTH default is 15.
+- filter_engine.evaluate_filter now raises CyclicFilterError and MaxDepthError.
+- Introduced filter_validator.validate_filters helper.
+- cli.py gains --validate-filters option to verify definitions only.
+- New unit tests cover cycle and depth errors.
+- cycle_test_log.txt captures test run output.
+- Validation exits with status 2 when cycles are present.
+- Placeholder apply_filter_logic returns filter id for now.
+- Two cycles detected in synthetic tests during development.
