@@ -311,7 +311,9 @@ def uygula_filtreler(
 
     Args:
         df_ana_veri (pd.DataFrame): İndikatörleri hesaplanmış tüm hisse verilerini içeren DataFrame.
-        df_filtre_kurallari (pd.DataFrame): 'FilterCode' ve 'PythonQuery' sütunlarını içeren DataFrame.
+        df_filtre_kurallari (pd.DataFrame):
+            'filtre_kodu' (veya eski sürümlerde 'FilterCode') ile
+            'PythonQuery' sütunlarını içeren DataFrame.
         tarama_tarihi (pd.Timestamp): Hangi tarihteki verilere göre tarama yapılacağı.
         logger_param: Kullanılacak logger nesnesi (opsiyonel).
 
@@ -412,6 +414,8 @@ def uygula_filtreler(
 
     for index, row in df_filtre_kurallari.iterrows():
         filtre_kodu = row.get("FilterCode")
+        if filtre_kodu is None:
+            filtre_kodu = row.get("filtre_kodu")
         python_sorgusu_raw = row.get("PythonQuery")
 
         if pd.isna(python_sorgusu_raw) or not str(python_sorgusu_raw).strip():
