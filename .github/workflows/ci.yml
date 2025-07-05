@@ -31,6 +31,7 @@ jobs:
           pip install -q pip-tools
           pip install -q -r requirements.txt
           python -m pip install -e .   # editable install, varsa setup.cfg
+          pip install -q filelock
           pip install -q "hypothesis>=6.102,<7"
           pip install -q pre-commit mypy pytest-cov
           pip install -q -r requirements-dev.txt  # <-- TEST BAĞIMLILIKLARI BURADA
