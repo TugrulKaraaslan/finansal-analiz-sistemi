@@ -28,3 +28,4 @@
 - CI workflow tests both dev and prod environments.
 - New unit test verifies shadow config detection.
 - `flake8-bugbear` added; mutable default ignored with `# noqa: B006`.
+- `packages` list in setup.cfg uses newline form to avoid install error.
