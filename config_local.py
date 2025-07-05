@@ -131,7 +131,11 @@ if not hasattr(sys.modules[__name__], "TA_STRATEGY"):
                 "signal": 9,
                 "col_names": ["macd_line", "macd_signal", "macd_hist"],
             },
-            {"kind": "stochrsi", "length": 14, "col_names": ["stochrsi_k", "stochrsi_d"]},
+            {
+                "kind": "stochrsi",
+                "length": 14,
+                "col_names": ["stochrsi_k", "stochrsi_d"],
+            },
             {
                 "kind": "ichimoku",
                 "tenkan": 9,
