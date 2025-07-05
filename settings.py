@@ -6,7 +6,7 @@ from typing import Any
 
 import yaml
 
-DEFAULT_MAX_FILTER_DEPTH = 7
+DEFAULT_MAX_FILTER_DEPTH = 15
 
 
 def _load_cfg() -> dict[str, Any]:
