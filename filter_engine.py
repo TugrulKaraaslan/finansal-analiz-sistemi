@@ -56,6 +56,7 @@ _undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)'")
 # Recursion guard
 FAILED_FILTERS: list[dict] = []
 
+
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
     FAILED_FILTERS.clear()
