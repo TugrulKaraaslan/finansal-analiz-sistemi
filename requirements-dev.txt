@@ -14,7 +14,7 @@ pathspec==0.12.1
 pluggy==1.6.0
 pydantic==2.9.2
 jedi>=0.16
-Pygments==2.19.1
+Pygments==2.19.2
 pyright==1.1.402
 pytest==8.4.0
 pytest-timeout==2.4.0
