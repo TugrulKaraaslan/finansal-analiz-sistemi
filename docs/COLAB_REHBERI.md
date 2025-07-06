@@ -9,9 +9,9 @@ verilmiştir.
 
 ---
 
-## 0. pandas-ta Kurulumu
+## 0. OpenBB Kurulumu
 ```bash
-!pip install -q pandas-ta==0.3.14b0
+!pip install -q pandas-ta-openbb
 ```
 
 ## 1. (İsteğe bağlı) Google Drive Bağlama
