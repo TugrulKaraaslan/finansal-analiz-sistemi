@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import re
 import warnings
+# Ensure pandas_ta can locate its distribution info
+import importlib.metadata  # noqa: F401
 
 import numpy as np
 import pandas as pd
