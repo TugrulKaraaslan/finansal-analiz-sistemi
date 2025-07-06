@@ -14,6 +14,7 @@ try:  # pragma: no cover - optional dependency
 except Exception:  # pragma: no cover - optional dependency
     obb = None
 
+
 def tema(*_args, **_kwargs):
     """Placeholder for :func:`pandas_ta.tema`."""
     raise NotImplementedError("openbb equivalent for 'tema' is missing")
@@ -37,9 +38,7 @@ def psar(*_args, **_kwargs):
 def _call_openbb(func_name: str, **kwargs):
     """Invoke an OpenBB technical analysis function if available."""
     if obb is None:
-        raise NotImplementedError(
-            f"openbb equivalent for '{func_name}' is missing"
-        )
+        raise NotImplementedError(f"openbb equivalent for '{func_name}' is missing")
     func = getattr(obb.technical, func_name, None)
     if func is None:
         raise NotImplementedError(f"openbb equivalent for '{func_name}' is missing")
