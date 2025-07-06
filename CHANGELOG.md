@@ -9,6 +9,8 @@
 - 2025-06-22  Added Rich color logs for Colab (LOG-03)
 - TEST-04-C: memory & rich-logging tests; CI updates.
 - TEST-04-B: helper & loader tests.
+- Proje OpenBB ile uyumlu hale getirildi, pandas-ta desteği kaldırıldı.
+- OpenBB fonksiyon çağrıları için `openbb_missing.py` eklendi.
 
 ## [0.9.3] – 2025-06-22
 ### Added
