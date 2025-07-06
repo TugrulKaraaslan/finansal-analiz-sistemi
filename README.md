@@ -30,3 +30,6 @@ Bu proje artık OpenBB ile uyumludur. Eski pandas-ta desteği kaldırıldı.
 1. `requirements.txt` içinde `pandas-ta-openbb` satırını `pandas-ta==0.3.14b0` ile değiştirin.
 2. `openbb_missing.py` yerine eski pandas-ta fonksiyonlarını içeren modülleri geri yükleyin.
 3. Testleri tekrar çalıştırarak uyumluluğu doğrulayın.
+
+## Son Benchmark Sonucu
+En son calisma suresi: 0.5651 saniye
