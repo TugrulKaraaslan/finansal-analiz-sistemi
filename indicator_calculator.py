@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+# Ensure pandas_ta can locate its distribution info
+import importlib.metadata  # noqa: F401
 import re
 import warnings
 
