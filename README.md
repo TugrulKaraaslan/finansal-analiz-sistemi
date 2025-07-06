@@ -3,6 +3,10 @@
 [![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
  
 ```bash
+# otomatik kurulum
+bash scripts/install.sh
+
+# veya manuel kurulum
 pip install -r requirements.txt                  # temel paketler
 # Colab kullanıyorsanız: pip install -r requirements-colab.txt
 pip install -r requirements-dev.txt             # test ve geliştirme araçları
