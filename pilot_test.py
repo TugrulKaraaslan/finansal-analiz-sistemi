@@ -1,7 +1,7 @@
-import time
 import importlib
 import importlib.metadata
 import sys
+import time
 
 import numpy as np
 import pandas as pd
@@ -14,7 +14,9 @@ if not hasattr(np, "NaN"):
 import pandas_ta as ta_legacy
 
 # remove pandas_ta modules to import openbb version in isolation
-legacy_modules = {name: mod for name, mod in sys.modules.items() if name.startswith("pandas_ta")}
+legacy_modules = {
+    name: mod for name, mod in sys.modules.items() if name.startswith("pandas_ta")
+}
 for name in list(sys.modules):
     if name.startswith("pandas_ta"):
         del sys.modules[name]
@@ -36,6 +38,7 @@ DF = pd.read_csv("sample_OHLC.csv")
 
 # Helper to compute indicators using a pandas_ta module
 
+
 def compute(mod):
     start = time.perf_counter()
     rsi = mod.rsi(DF["close"], length=14)
@@ -43,6 +46,7 @@ def compute(mod):
     macd = mod.macd(DF["close"], fast=12, slow=26, signal=9)
     dur = time.perf_counter() - start
     return rsi, sma, macd, dur
+
 
 rsi_legacy, sma_legacy, macd_legacy, t_legacy = compute(ta_legacy)
 rsi_openbb, sma_openbb, macd_openbb, t_openbb = compute(ta_openbb)
