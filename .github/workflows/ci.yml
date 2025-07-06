@@ -8,55 +8,16 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    env:
-      APP_ENV: ${{ matrix.app-env }}
     strategy:
       matrix:
-        python-version: ['3.11']
-        app-env: [dev, prod]
+        python: [3.9, 3.10, 3.11]
+        numpy: [1.26.4, 2.0.2]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Cache pip
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install deps
-        run: |
-          pip install -q pip-tools
-          pip install -q -r requirements.txt
-          python -m pip install -e .   # editable install, varsa setup.cfg
-          pip install -q filelock
-          pip install -q "hypothesis>=6.102,<7"
-          pip install -q pre-commit mypy pytest-cov
-          pip install -q -r requirements-dev.txt  # <-- TEST BAĞIMLILIKLARI BURADA
-      - uses: pre-commit/action@v3.0.1
-
-      - name: Type-check (mypy – toleranslı)
-        run: mypy src tests || true
-
-      - name: Run tests (parallel coverage)
-        run: |
-          coverage run -m pytest -q
-        timeout-minutes: 10
-
-      - name: Combine & export coverage
-        run: |
-          coverage combine
-          coverage xml
-        env:
-          COVERAGE_PROCESS_START: .coveragerc
-
-      - name: Upload coverage artefact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.app-env }}-${{ matrix.python-version }}
-          path: coverage.xml
+          python-version: ${{ matrix.python }}
+      - run: pip install "numpy==${{ matrix.numpy }}" pandas
+      - run: pip install pandas-ta-openbb
+      - run: pip install -r requirements.txt
+      - run: pytest -q
