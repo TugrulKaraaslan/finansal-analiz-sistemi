@@ -11,13 +11,13 @@ jobs:
     strategy:
       matrix:
         python: ['3.9', '3.10', '3.11']
-        numpy: ['1.26.4', '2.0.2']
+        numpy: ['2.0.2']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: pip install "numpy==${{ matrix.numpy }}" pandas
+      - run: pip install "numpy==${{ matrix.numpy }}"
       - run: pip install pandas-ta-openbb
       - run: pip install -r requirements.txt
       - run: pip install -r requirements-dev.txt
