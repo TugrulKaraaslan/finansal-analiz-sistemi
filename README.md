@@ -13,5 +13,20 @@ python run.py --help
  Örnek kullanım:
  
  ```bash
- python -m finansal.cli --csv veri/prices.csv --log-level DEBUG
- ```
+python -m finansal.cli --csv veri/prices.csv --log-level DEBUG
+```
+
+## OpenBB Uyumluluğu
+
+Bu proje artık OpenBB ile uyumludur. Eski pandas-ta desteği kaldırıldı.
+
+### Önemli Değişiklikler
+- pandas-ta fonksiyonlarının yerine `openbb_missing.py` aracılığıyla OpenBB çağrıları kullanılır.
+- `requirements.txt` dosyasında `pandas-ta-openbb` paketi yer alır.
+- Eski pandas-ta tabanlı testler güncellendi veya kaldırıldı.
+- Teknik analiz fonksiyonlarının tamamı OpenBB arayüzüne geçirilmiştir.
+
+### Rollback (Geri Alma)
+1. `requirements.txt` içinde `pandas-ta-openbb` satırını `pandas-ta==0.3.14b0` ile değiştirin.
+2. `openbb_missing.py` yerine eski pandas-ta fonksiyonlarını içeren modülleri geri yükleyin.
+3. Testleri tekrar çalıştırarak uyumluluğu doğrulayın.
