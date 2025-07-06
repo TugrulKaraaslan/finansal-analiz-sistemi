@@ -9,3 +9,12 @@ Benchmark tamamlandığında sonuç `benchmark_output.txt` dosyasına yazılır 
 ## Olası hata/iyileştirme önerileri
 - Farklı işlem yükleriyle daha gerçekçi testler oluşturabilirsiniz.
 - Dosya oluşturulamazsa veya çalışma süresi beklenenden uzunsa iş akışı başarısız olur ve loglarda hata mesajı yer alır.
+
+
+## Göstergeler için Performans Karşılaştırması
+
+| Gösterge | Süre (s) |
+| --- | --- |
+| RSI | 1.0806 |
+| SMA | 0.3431 |
+| MACD | 1.7428 |
