@@ -9,7 +9,7 @@ isort==6.0.1
 mypy==1.16.1
 mypy_extensions==1.1.0
 nodeenv==1.9.1
-packaging>=23,<26
+packaging>=25,<26
 pathspec==0.12.1
 pluggy==1.6.0
 pydantic==2.9.2
