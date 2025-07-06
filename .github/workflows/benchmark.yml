@@ -29,7 +29,7 @@ jobs:
       - name: Display result
         run: cat benchmarks/benchmark_output.txt
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: benchmark_output
           path: benchmarks/benchmark_output.txt

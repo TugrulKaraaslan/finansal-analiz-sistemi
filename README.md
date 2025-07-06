@@ -32,4 +32,4 @@ Bu proje artık OpenBB ile uyumludur. Eski pandas-ta desteği kaldırıldı.
 3. Testleri tekrar çalıştırarak uyumluluğu doğrulayın.
 
 ## Son Benchmark Sonucu
-En son calisma suresi: 0.5651 saniye
+En son calisma suresi: 0.5397 saniye
