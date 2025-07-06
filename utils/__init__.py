@@ -3,7 +3,8 @@
 # Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
 # Modül: Yardımcı Fonksiyonlar (Örn: Kesişimler)
 # Tuğrul Karaaslan & Gemini
-# Tarih: 18 Mayıs 2025 (Yorumlar eklendi, NaN yönetimi teyit edildi)
+
+from __future__ import annotations
 
 from functools import lru_cache
 from io import StringIO
@@ -12,6 +13,9 @@ from pathlib import Path
 import pandas as pd
 
 from logging_config import get_logger
+
+# Tarih: 18 Mayıs 2025 (Yorumlar eklendi, NaN yönetimi teyit edildi)
+
 
 __all__ = [
     "crosses_above",

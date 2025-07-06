@@ -3,8 +3,8 @@
 # Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
 # Modül: Teknik İndikatörler ve Kesişim Sinyalleri Hesaplama
 # Tuğrul Karaaslan & Gemini
-# Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index
-# düzeltildi, filtre uyumu artırıldı v2)
+
+from __future__ import annotations
 
 import re
 import warnings
@@ -15,6 +15,10 @@ import pandas.errors
 
 from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
 from utils.compat import safe_concat
+
+# Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index
+# düzeltildi, filtre uyumu artırıldı v2)
+
 
 # numpy>=2.0 paketlerinde `NaN` sabiti kaldırıldı. pandas_ta halen bu adı
 # kullandığından import sırasında hata oluşabiliyor. Eğer `np.NaN` mevcut

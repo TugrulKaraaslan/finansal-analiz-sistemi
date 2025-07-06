@@ -5,6 +5,8 @@
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (Erken hata durdurma mantığı eklendi, loglama iyileştirildi)
 
+from __future__ import annotations
+
 import argparse
 import logging
 import os
