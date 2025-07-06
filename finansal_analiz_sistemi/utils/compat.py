@@ -1,5 +1,7 @@
 """Compatibility helpers for finansal_analiz_sistemi package."""
 
+from __future__ import annotations
+
 import pandas as pd
 
 

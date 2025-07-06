@@ -10,7 +10,7 @@ cachetools==5.5.2
     # via -r requirements.txt
 choreographer==1.0.9
     # via kaleido
-click==8.2.1
+click==8.1.8
     # via -r requirements.txt
 et-xmlfile==2.0.0
     # via openpyxl
@@ -43,6 +43,8 @@ pandas-ta==0.3.14b0
 plotly==6.2.0
     # via -r requirements.txt
 portalocker==3.2.0
+    # via -r requirements.txt
+filelock==3.13.1
     # via -r requirements.txt
 psutil==7.0.0
     # via -r requirements.txt

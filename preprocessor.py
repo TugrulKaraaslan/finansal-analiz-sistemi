@@ -3,7 +3,8 @@
 # Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
 # Modül: Veri Ön İşleme
 # Tuğrul Karaaslan & Gemini
-# Tarih: 18 Mayıs 2025 (Sütun adı standardizasyonu sonrası, loglama iyileştirmeleri)
+
+from __future__ import annotations
 
 import re
 
@@ -13,6 +14,9 @@ from pandas import CategoricalDtype
 
 from finansal_analiz_sistemi import config
 from logging_config import get_logger
+
+# Tarih: 18 Mayıs 2025 (Sütun adı standardizasyonu sonrası, loglama iyileştirmeleri)
+
 
 logger = get_logger(__name__)
 

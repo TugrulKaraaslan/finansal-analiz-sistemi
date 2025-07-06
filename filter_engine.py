@@ -5,6 +5,8 @@
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (Loglama ve hata yönetimi iyileştirmeleri)
 
+from __future__ import annotations
+
 import keyword
 import os
 import re

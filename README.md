@@ -1,4 +1,6 @@
- # Finansal Parquet Cache Sistemi
+# Finansal Parquet Cache Sistemi
+
+[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
  
 ```bash
 pip install -r requirements.txt                  # temel paketler

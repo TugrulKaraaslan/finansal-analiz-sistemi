@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import glob
 
 # Stdlib / 3rd-party importlar en üstte olmalı
