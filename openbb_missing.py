@@ -7,6 +7,12 @@ to signal that an equivalent implementation is unavailable.
 
 from __future__ import annotations
 
+import pandas as pd
+
+try:  # pragma: no cover - optional dependency
+    from openbb import obb  # type: ignore
+except Exception:  # pragma: no cover - optional dependency
+    obb = None
 
 def tema(*_args, **_kwargs):
     """Placeholder for :func:`pandas_ta.tema`."""
@@ -28,17 +34,12 @@ def psar(*_args, **_kwargs):
     raise NotImplementedError("openbb equivalent for 'psar' is missing")
 
 
-import pandas as pd
-
-
 def _call_openbb(func_name: str, **kwargs):
     """Invoke an OpenBB technical analysis function if available."""
-    try:
-        from openbb import obb  # type: ignore
-    except Exception as exc:  # pragma: no cover - optional dependency
+    if obb is None:
         raise NotImplementedError(
             f"openbb equivalent for '{func_name}' is missing"
-        ) from exc
+        )
     func = getattr(obb.technical, func_name, None)
     if func is None:
         raise NotImplementedError(f"openbb equivalent for '{func_name}' is missing")
