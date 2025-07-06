@@ -6,7 +6,9 @@ if not hasattr(np, "NaN"):
     np.NaN = np.nan
 
 import pandas_ta as ta
-from openbb_missing import rsi as obb_rsi, macd as obb_macd
+
+from openbb_missing import macd as obb_macd
+from openbb_missing import rsi as obb_rsi
 
 INPUT_FILE = "sample_OHLC.csv"
 TOL = 1e-6
