@@ -15,6 +15,7 @@ import responses
 
 # Ensure runtime patches (e.g., numpy.NaN) are applied early
 import sitecustomize
+
 _ = sitecustomize  # ensure side-effects
 
 

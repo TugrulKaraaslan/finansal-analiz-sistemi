@@ -11,6 +11,7 @@ import yaml
 
 # Import solely for side-effects (YAML filter resolution).  # noqa: F401
 from .logging_utils import ErrorCountingFilter
+
 _error_filter = ErrorCountingFilter  # side-effect import for YAML logging
 
 # Configure logging from YAML at package import time
