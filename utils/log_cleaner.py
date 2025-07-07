@@ -14,7 +14,11 @@ def purge_old_logs(
     *,
     dry_run: bool = False,
 ) -> int:
-    """Belirtilen klasördeki ``*.log`` ve ``*.lock`` dosyalarını temizle."""
+    """Belirtilen klasördeki ``*.log`` ve ``*.lock`` dosyalarını temizle.
+
+    Returns the number of deleted files. When ``dry_run`` is *True*, no files
+    are removed and ``0`` is returned.
+    """
 
     _LOG.debug(
         "purge_old_logs called with dir_path=%s days=%d dry_run=%s",
@@ -22,4 +26,5 @@ def purge_old_logs(
         days,
         dry_run,
     )
-    return _impl(log_dir=Path(dir_path), keep_days=days, dry_run=dry_run)
+    count = _impl(log_dir=Path(dir_path), keep_days=days, dry_run=dry_run)
+    return 0 if dry_run else count
