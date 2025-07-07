@@ -19,7 +19,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import pandas.errors
 
 import utils
 from config_loader import load_ema_close_crossovers
