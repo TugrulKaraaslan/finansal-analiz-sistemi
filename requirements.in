@@ -3,7 +3,7 @@ numpy
 packaging
 PyYAML
 jedi
-pandas-ta
+pandas-ta-openbb
 holidays
 openpyxl
 xlsxwriter

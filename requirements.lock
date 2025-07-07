@@ -5,64 +5,116 @@
 #    pip-compile --output-file=requirements.lock requirements.txt
 #
 attrs==25.3.0
-    # via hypothesis
+    # via -r requirements.txt
 cachetools==5.5.2
     # via -r requirements.txt
+certifi==2025.6.15
+    # via
+    #   -r requirements.txt
+    #   requests
+charset-normalizer==3.4.2
+    # via
+    #   -r requirements.txt
+    #   requests
 choreographer==1.0.9
-    # via kaleido
+    # via -r requirements.txt
 click==8.1.8
     # via -r requirements.txt
 et-xmlfile==2.0.0
-    # via openpyxl
-hypothesis==6.135.16
+    # via
+    #   -r requirements.txt
+    #   openpyxl
+filelock==3.13.1
     # via -r requirements.txt
-kaleido==1.0.0
-    # via -r requirements.txt
+idna==3.10
+    # via requests
+llvmlite==0.44.0
+    # via numba
 logistro==1.1.0
     # via
+    #   -r requirements.txt
     #   choreographer
-    #   kaleido
-narwhals==1.44.0
-    # via plotly
+loguru==0.7.3
+    # via -r requirements.txt
+narwhals==1.45.0
+    # via
+    #   -r requirements.txt
+    #   plotly
+numba==0.61.2
+    # via pandas-ta-openbb
 numpy==2.0.2
-    # via pandas
+    # via
+    #   -r requirements.txt
+    #   numba
+    #   pandas
+    #   pandas-ta-openbb
+    #   patsy
+    #   scipy
+    #   statsmodels
 openpyxl==3.1.5
     # via -r requirements.txt
 orjson==3.10.18
-    # via kaleido
+    # via -r requirements.txt
 packaging==25.0
     # via
-    #   kaleido
     #   plotly
+    #   statsmodels
 pandas==2.2.2
     # via
     #   -r requirements.txt
-    #   pandas-ta
-pandas-ta==0.3.14b0
+    #   pandas-ta-openbb
+    #   statsmodels
+pandas-ta-openbb==0.4.22
+    # via -r requirements.txt
+patsy==1.0.1
+    # via statsmodels
+platformdirs==4.3.8
     # via -r requirements.txt
 plotly==6.2.0
     # via -r requirements.txt
 portalocker==3.2.0
     # via -r requirements.txt
-filelock==3.13.1
-    # via -r requirements.txt
 psutil==7.0.0
     # via -r requirements.txt
-pyarrow==19.0.1
+pyarrow==20.0.0
     # via -r requirements.txt
 python-dateutil==2.9.0.post0
-    # via pandas
+    # via
+    #   -r requirements.txt
+    #   pandas
 pytz==2025.2
-    # via pandas
+    # via
+    #   -r requirements.txt
+    #   pandas
 pyyaml==6.0.2
     # via -r requirements.txt
+requests==2.32.4
+    # via -r requirements.txt
+scipy==1.15.3
+    # via
+    #   pandas-ta-openbb
+    #   statsmodels
 simplejson==3.20.1
-    # via choreographer
+    # via
+    #   -r requirements.txt
+    #   choreographer
 six==1.17.0
-    # via python-dateutil
+    # via
+    #   -r requirements.txt
+    #   python-dateutil
 sortedcontainers==2.4.0
-    # via hypothesis
+    # via -r requirements.txt
+statsmodels==0.14.4
+    # via pandas-ta-openbb
 tzdata==2025.2
-    # via pandas
+    # via
+    #   -r requirements.txt
+    #   pandas
+urllib3==2.5.0
+    # via
+    #   -r requirements.txt
+    #   requests
 xlsxwriter==3.2.5
+    # via -r requirements.txt
+zipp==3.23.0
     # via -r requirements.txt

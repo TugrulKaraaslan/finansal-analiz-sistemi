@@ -9,14 +9,14 @@ authors = []
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pandas-ta = "0.3.14b0"
-cachetools = "6.1.0"
-numpy = "*"
-pandas = "^2.2"
-xlsxwriter = "^3.1"
+pandas-ta-openbb = "0.4.22"
+cachetools = "5.5.2"
+numpy = "2.0.2"
+pandas = "2.2.2"
+xlsxwriter = "3.2.5"
 hypothesis = ">=6.102"
-openpyxl = ">=3.1.2"
-zipp = ">=3.20.2"
+openpyxl = "3.1.5"
+zipp = "3.23.0"
 
 [tool.flake8]
 max-line-length = 88
