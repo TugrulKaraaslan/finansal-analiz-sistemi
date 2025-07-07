@@ -376,7 +376,9 @@ def main(argv: list[str] | None = None) -> None:
     try:
         from finansal_analiz_sistemi import settings_loader
 
-        settings_loader.load_settings(args.settings_file)
+        loaded_cfg = settings_loader.load_settings(args.settings_file)
+        if loaded_cfg:
+            logger.info("Yüklü ayarlar: %s", loaded_cfg)
     except Exception as exc:  # pragma: no cover - CLI safeguard
         print(exc)
         sys.exit(1)
