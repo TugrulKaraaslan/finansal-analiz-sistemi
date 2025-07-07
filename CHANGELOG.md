@@ -11,6 +11,7 @@
 - TEST-04-B: helper & loader tests.
 - Proje OpenBB ile uyumlu hale getirildi, pandas-ta desteği kaldırıldı.
 - OpenBB fonksiyon çağrıları için `openbb_missing.py` eklendi.
+- Unused indicator helper functions removed (_calculate_change_percent, _calculate_sma, _get_previous_bar_value, _calculate_percentage_from_period_high_low, _calculate_percentage_from_all_time_high).
 - Yeni `benchmark.py` scripti ve `.github/workflows/benchmark.yml` iş akışı eklendi; her push ve pull request'te performans ölçümü yapıp çıktıyı artefakt olarak kaydediyor.
 
 ## [0.9.3] – 2025-06-22
