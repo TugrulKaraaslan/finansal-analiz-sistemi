@@ -4,9 +4,8 @@ import time
 
 def run_bench():
     start = time.perf_counter()
-    total = 0
-    for _ in range(1000000):
-        total += random.randint(1, 100)
+    # intentionally compute a meaningless sum to keep the loop workload
+    _ = sum(random.randint(1, 100) for _ in range(1_000_000))
     duration = time.perf_counter() - start
     print(f"Benchmark Sonucu: {duration:.4f} saniye")
     with open("benchmarks/benchmark_output.txt", "w") as f:
