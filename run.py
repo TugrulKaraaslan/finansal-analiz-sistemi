@@ -32,11 +32,6 @@ if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
 # ------------------------------
 
 
-def _parse_date(dt_str: str) -> pd.Timestamp:
-    """Parse date from 'DD.MM.YYYY' or ISO 'YYYY-MM-DD'."""
-    return parse_date(dt_str)
-
-
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
     """Rapor için örnek özet, detay ve istatistik DataFrame'leri üretir."""
     if rapor_df is None or rapor_df.empty:
