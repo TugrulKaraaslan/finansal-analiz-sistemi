@@ -32,7 +32,6 @@ if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
 # ------------------------------
 
 
-
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
     """Rapor için örnek özet, detay ve istatistik DataFrame'leri üretir."""
     if rapor_df is None or rapor_df.empty:
