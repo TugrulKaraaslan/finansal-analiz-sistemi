@@ -1,3 +1,0 @@
-rsi: openbb error 'App' object has no attribute 'technical'
-sma: match=True, max_diff=0.0
-macd: openbb error 'App' object has no attribute 'technical'

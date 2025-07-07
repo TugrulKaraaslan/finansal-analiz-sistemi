@@ -133,95 +133,6 @@ def _calculate_combined_psar(group_df: pd.DataFrame) -> pd.Series:
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
 
 
-def _calculate_relative_volume(
-    group_df: pd.DataFrame, window: int, col_name_prefix: str = "volume"
-) -> pd.Series:
-    hisse_str = (
-        group_df["hisse_kodu"].iloc[0]
-        if not group_df.empty and "hisse_kodu" in group_df.columns
-        else "Bilinmeyen Hisse"
-    )
-    sutun_adi = next(
-        (
-            item["name"]
-            for item in config.OZEL_SUTUN_PARAMS
-            if item["function"] == "_calculate_relative_volume"
-        ),
-        "relative_volume_default",
-    )
-    try:
-        vol_column = col_name_prefix
-        if vol_column not in group_df.columns:
-            logger.debug(
-                f"{hisse_str}: Relative Volume ({sutun_adi}) için '{vol_column}' sütunu bulunamadı."
-            )
-            return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
-        if len(group_df) < window:
-            logger.debug(
-                f"{hisse_str}: {sutun_adi} hesaplamak için yeterli veri yok ({len(group_df)} satır, {window} periyot gerekli)."
-            )
-            return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
-        avg_vol = group_df[vol_column].rolling(window=window, min_periods=window).mean()
-        relative_volume_series = group_df[vol_column] / avg_vol.replace(0, np.nan)
-        return relative_volume_series.rename(sutun_adi)
-    except Exception as e:
-        logger.error(
-            f"{hisse_str}: Relative Volume ({sutun_adi}, {window}) hesaplanırken hata: {e}",
-            exc_info=False,
-        )
-        try:
-            from utils.failure_tracker import log_failure
-
-            log_failure("indicators", sutun_adi, str(e))
-        except Exception:
-            pass
-        return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
-
-
-def _calculate_volume_price(
-    group_df: pd.DataFrame,
-    col_name_prefix_vol: str = "volume",
-    col_name_prefix_price: str = "close",
-) -> pd.Series:
-    hisse_str = (
-        group_df["hisse_kodu"].iloc[0]
-        if not group_df.empty and "hisse_kodu" in group_df.columns
-        else "Bilinmeyen Hisse"
-    )
-    sutun_adi = next(
-        (
-            item["name"]
-            for item in config.OZEL_SUTUN_PARAMS
-            if item["function"] == "_calculate_volume_price"
-        ),
-        "volume_price_default",
-    )
-    try:
-        if (
-            col_name_prefix_vol not in group_df.columns
-            or col_name_prefix_price not in group_df.columns
-        ):
-            logger.debug(
-                f"{hisse_str}: Hacim*Fiyat ({sutun_adi}) için '{col_name_prefix_vol}' veya '{col_name_prefix_price}' sütunu eksik."
-            )
-            return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
-        return (group_df[col_name_prefix_vol] * group_df[col_name_prefix_price]).rename(
-            sutun_adi
-        )
-    except Exception as e:
-        logger.error(
-            f"{hisse_str}: Hacim*Fiyat ({sutun_adi}) hesaplanırken hata: {e}",
-            exc_info=False,
-        )
-        try:
-            from utils.failure_tracker import log_failure
-
-            log_failure("indicators", sutun_adi, str(e))
-        except Exception:
-            pass
-        return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
-
-
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
     """Eksikse basit veya üssel hareketli ortalama kolonu ekler."""
     if logger_param is None:
@@ -253,14 +164,6 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
             log_failure("indicators", col, str(e))
         except Exception:
             pass
-
-
-def safe_get(df: pd.DataFrame, col: str) -> pd.Series | None:
-    """DataFrame'den güvenli sütun erişimi yapar."""
-    if col not in df.columns:
-        logger.debug(f"{col} eksik – crossover atlandı")
-        return None
-    return df[col]
 
 
 def add_series(
@@ -403,45 +306,6 @@ def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
     except Exception as e:
         logger.error(
             f"{hisse_str}: {sutun_adi} hesaplanırken hata: {e}", exc_info=False
-        )
-        return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
-
-
-def _calculate_change_from_open(
-    group_df: pd.DataFrame, col_name_open: str = "open", col_name_close: str = "close"
-) -> pd.Series:
-    hisse_str = (
-        group_df["hisse_kodu"].iloc[0]
-        if not group_df.empty and "hisse_kodu" in group_df.columns
-        else "Bilinmeyen Hisse"
-    )
-    sutun_adi = next(
-        (
-            item["name"]
-            for item in config.OZEL_SUTUN_PARAMS
-            if item["function"] == "_calculate_change_from_open"
-        ),
-        "change_from_open_percent_default",
-    )
-    try:
-        if (
-            col_name_open not in group_df.columns
-            or col_name_close not in group_df.columns
-        ):
-            logger.debug(
-                f"{hisse_str}: Açılıştan değişim ({sutun_adi}) için '{col_name_open}' veya '{col_name_close}' sütunu eksik."
-            )
-            return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
-        change = (
-            (group_df[col_name_close] - group_df[col_name_open])
-            / group_df[col_name_open].replace(0, np.nan)
-            * 100
-        )
-        return change.round(2).rename(sutun_adi)
-    except Exception as e:
-        logger.error(
-            f"{hisse_str}: Açılıştan değişim ({sutun_adi}) hesaplanırken hata: {e}",
-            exc_info=False,
         )
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
 
