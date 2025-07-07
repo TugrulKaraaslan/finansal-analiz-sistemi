@@ -226,9 +226,6 @@ def calculate_indicators(
     return out
 
 
-def apply_indicators(df: pd.DataFrame, indicators: list[str]) -> pd.DataFrame:
-    """Small wrapper to apply ``calculate_indicators``."""
-    return calculate_indicators(df, indicators)
 
 
 def calculate_chunked(
@@ -239,7 +236,7 @@ def calculate_chunked(
     for kods in lazy_chunk(df.groupby("ticker", sort=False), chunk_size):
         for _, group in kods:
             mini = group.sort_values("date").copy()
-            mini = apply_indicators(mini, active_inds)
+            mini = calculate_indicators(mini, active_inds)
             try:
                 mini.to_parquet(pq_path, partition_cols=["ticker"], append=True)
             except TypeError:
