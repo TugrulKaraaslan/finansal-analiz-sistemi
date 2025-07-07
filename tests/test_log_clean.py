@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from utils.log_cleaner import purge_old_logs
+from utils.purge_old_logs import purge_old_logs
 
 
 @pytest.mark.parametrize("dry_run", [True, False])
@@ -21,9 +21,15 @@ def test_purge_old_logs(tmp_path: Path, dry_run: bool):
     old_time = time.time() - 10 * 86400
     os.utime(old, (old_time, old_time))
 
-    removed = purge_old_logs(tmp_path, days=7, dry_run=dry_run)
+    removed = purge_old_logs(log_dir=tmp_path, keep_days=7, dry_run=dry_run)
 
-    assert removed == (0 if dry_run else 2)
+    assert removed == 2
+    if not dry_run:
+        assert not old.exists()
+        assert not lock_old.exists()
+    else:
+        assert old.exists()
+        assert lock_old.exists()
     assert new.exists()
     assert old.exists() is dry_run
     assert lock_old.exists() is dry_run
