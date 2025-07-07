@@ -11,7 +11,7 @@
 - Added cycle detection and depth guard for filter trees.
 - New MAX_FILTER_DEPTH default is 15.
 - filter_engine.evaluate_filter now raises CyclicFilterError and MaxDepthError.
-- Introduced filter_validator.validate_filters helper.
+- Validation helper moved to `filtre_dogrulama.validate`.
 - cli.py gains --validate-filters option to verify definitions only.
 - New unit tests cover cycle and depth errors.
 - cycle_test_log.txt captures test run output.
