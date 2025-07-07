@@ -38,7 +38,7 @@ try:
     import pandas_ta as ta
 except ImportError as exc:  # pragma: no cover - dependency missing
     raise RuntimeError(
-        "pandas-ta not installed. Run: pip install pandas-ta==0.3.14b0"
+        "pandas-ta-openbb not installed. Run: pip install pandas-ta-openbb"
     ) from exc
 
 try:  # pragma: no cover - optional indicator
@@ -925,9 +925,9 @@ def _calculate_group_indicators_and_crossovers(
                 local_logger.error(f"{hisse_kodu}: PSAR hesaplanırken hata: {e_psar}")
     except Exception as e_ta:
         local_logger.error(
-            f"{hisse_kodu}: pandas-ta stratejisi hatası: {e_ta}", exc_info=True
+            f"{hisse_kodu}: OpenBB stratejisi hatası: {e_ta}", exc_info=True
         )
-        # Hata durumunda, pandas-ta indikatörleri eklenemez ama devam edilir.
+        # Hata durumunda, gösterge stratejisi indikatörleri eklenemez ama devam edilir.
         group_df_dt_indexed = group_df_dt_indexed.copy()
 
     # Ad eşleştirmeyi DatetimeIndex'li DataFrame üzerinde yap
@@ -987,7 +987,7 @@ def _calculate_group_indicators_and_crossovers(
         for c, vals in valid_cols.items():
             safe_set(df_final_group, c, vals)
 
-    # Bazı durumlarda pandas-ta stratejisinden beklenen indikatörler veri
+    # Bazı durumlarda OpenBB stratejisinden beklenen indikatörler veri
     # yetersizliği nedeniyle oluşmayabilir. Filtrelerin sorunsuz çalışması için
     # eksik olan temel bazı indikatörleri manuel olarak üretelim.
 
