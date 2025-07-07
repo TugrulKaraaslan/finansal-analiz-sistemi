@@ -10,6 +10,7 @@ bash scripts/install.sh
 pip install -r requirements.txt                  # temel paketler
 # Colab kullanıyorsanız: pip install -r requirements-colab.txt
 pip install -r requirements-dev.txt             # test ve geliştirme araçları
+pre-commit install                              # sürüm tutarlılığını kontrol eder
 python -m finansal.cli --help
 python run.py --help
 ```

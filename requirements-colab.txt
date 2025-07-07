@@ -5,7 +5,7 @@ cachetools==5.5.2
 certifi==2025.6.15
 charset-normalizer==3.4.2
 choreographer==1.0.9
-click==8.2.1
+click==8.1.8
 et_xmlfile==2.0.0
 logistro==1.1.0
 narwhals==1.45.0
@@ -13,10 +13,13 @@ numpy==2.0.2
 openpyxl==3.1.5
 orjson==3.10.18
 pandas==2.2.2
-pandas_ta==0.3.14b0
+pandas-ta-openbb
+loguru==0.7.3
 platformdirs==4.3.8
 plotly==6.2.0
 portalocker==3.2.0
+filelock==3.13.1
+pyarrow==20.0.0
 psutil==7.0.0
 python-dateutil==2.9.0.post0
 pytz==2025.2
@@ -29,5 +32,3 @@ tzdata==2025.2
 urllib3==2.5.0
 xlsxwriter==3.2.5
 zipp==3.23.0
-pydantic==2.9.2
-jedi>=0.16

@@ -13,3 +13,9 @@ repos:
     hooks:
       - id: mypy
         args: ["--config-file", "pyproject.toml"]
+  - repo: local
+    hooks:
+      - id: check-requirements
+        name: "Check requirements consistency"
+        entry: python scripts/check_requirements_consistency.py
+        language: system
