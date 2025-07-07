@@ -13,12 +13,14 @@ pip install -r requirements-dev.txt             # test ve geliştirme araçları
 pre-commit install                              # sürüm tutarlılığını kontrol eder
 python -m finansal.cli --help
 python run.py --help
+python -m finansal_analiz_sistemi --help
 ```
  
  Örnek kullanım:
  
- ```bash
+```bash
 python -m finansal.cli --csv veri/prices.csv --log-level DEBUG
+python -m finansal_analiz_sistemi.cli --dosya veri/prices.csv
 ```
 
 ## OpenBB Uyumluluğu
