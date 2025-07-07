@@ -9,3 +9,5 @@ cikti/
 venv/
 .venv/
 .coverage
+reports/
+crossover_test_log.txt
