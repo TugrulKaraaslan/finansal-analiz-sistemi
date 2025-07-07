@@ -72,14 +72,15 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     if args.validate_filters:
-        from filter_validator import validate_filters
+        from filtre_dogrulama import validate
 
-        errors = validate_filters()
+        df = pd.read_csv(args.dosya, sep=";")
+        errors = validate(df)
         if errors:
-            for line in errors:
-                print(line)
+            for err in errors:
+                print(f"{err.hata_tipi}: {err.detay}")
             sys.exit(2)
-        print("All filters valid ✅")
+        print("Filtreler geçerli ✅")
     else:
         out = run_analysis(args.dosya)
         print(f"Rapor oluşturuldu -> {out}")
