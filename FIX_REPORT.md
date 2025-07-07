@@ -9,7 +9,7 @@
 - Added regression test ensuring `filtre_kod` values are never empty.
 
 ## Root Cause
-The "Hatalar" sheet was written without enforcing column order and engine, causing headers to shift during later reads. This resulted in `analyse_missing.py` reporting zero filters due to mismatched column names.
+The "Hatalar" sheet was written without enforcing column order and engine, causing headers to shift during later reads. This resulted in the now-removed `analyse_missing.py` script reporting zero filters due to mismatched column names.
 
 ## Resolution
 All error-sheet writes now specify `index=False` and column order. A dedicated helper saves the sheet with OpenPyXL, ensuring consistent headers.
@@ -21,4 +21,4 @@ Include similar helpers for other Excel outputs and ensure column names remain c
 * Root cause: errors.append omitted filtre_kod → NaNs
 * Resolution: pass filt.kod when logging QUERY_ERROR, enforce via HATALAR_COLUMNS
 * Tests: added regression test_hatalar_sheet_has_filter_ids
-* Outcome: analyse_missing.py now reports correct filter count
+* Outcome: the (now-removed) analyse_missing.py script now reports the correct filter count
