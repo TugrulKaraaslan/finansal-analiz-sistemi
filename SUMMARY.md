@@ -16,7 +16,7 @@
 - New unit tests cover cycle and depth errors.
 - cycle_test_log.txt captures test run output.
 - Validation exits with status 2 when cycles are present.
-- Placeholder apply_filter_logic returns filter id for now.
+- apply_filter_logic helper removed; evaluate_filter now returns the filter id directly.
 - Two cycles detected in synthetic tests during development.
 - Consolidated configuration into paket `finansal_analiz_sistemi.config`.
 - Renamed old root config to `config_local.py` to prevent shadowing.

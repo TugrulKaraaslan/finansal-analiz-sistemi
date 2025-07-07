@@ -79,10 +79,6 @@ class MaxDepthError(RuntimeError):
 FILTER_DEFS: dict[str, dict] = {}
 
 
-def apply_filter_logic(fid: str) -> Any:
-    """Placeholder logic for filter execution."""
-    return fid
-
 
 def _build_solution(err_type: str, msg: str) -> str:
     if err_type == "GENERIC":
@@ -135,7 +131,9 @@ def evaluate_filter(
     seen.add(key)
     for child in children:
         evaluate_filter(child, df=df, depth=depth + 1, seen=seen)
-    return apply_filter_logic(key)
+    # Previously returned apply_filter_logic(key) which merely echoed the id.
+    # Returning the filter identifier directly simplifies the API.
+    return key
 
 
 def safe_eval(expr, df, depth: int = 0, visited=None):
