@@ -10,9 +10,7 @@ import click
 import cache_builder
 import data_loader
 from finansal.parquet_cache import ParquetCacheManager
-from finansal_analiz_sistemi import (  # noqa: WPS433  # local import pattern is intentional
-    config,
-)
+from finansal_analiz_sistemi import config
 from indicator_calculator import calculate_chunked
 
 
