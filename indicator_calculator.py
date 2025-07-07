@@ -101,8 +101,6 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     return df
 
 
-
-
 def _calculate_combined_psar(group_df: pd.DataFrame) -> pd.Series:
     hisse_str = (
         group_df["hisse_kodu"].iloc[0]
@@ -129,7 +127,6 @@ def _calculate_combined_psar(group_df: pd.DataFrame) -> pd.Series:
             f"{hisse_str}: Birleşik PSAR hesaplanırken hata: {e}", exc_info=False
         )
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
-
 
 
 def _calculate_relative_volume(
