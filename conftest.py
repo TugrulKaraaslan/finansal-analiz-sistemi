@@ -14,7 +14,9 @@ import pytest  # pytest fixture’ları için gerekli
 import responses
 
 # Ensure runtime patches (e.g., numpy.NaN) are applied early
-import sitecustomize  # noqa: F401
+import sitecustomize
+
+_ = sitecustomize  # ensure side-effects
 
 
 def _sanitize_sys_modules() -> None:

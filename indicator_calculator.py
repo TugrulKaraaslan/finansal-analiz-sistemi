@@ -6,8 +6,13 @@
 
 from __future__ import annotations
 
-# Ensure pandas_ta can locate its distribution info
-import importlib.metadata  # noqa: F401
+# Ensure pandas_ta can locate its distribution info. Some environments lazily
+# query ``importlib.metadata`` so simply importing the module can help locate
+# the package metadata. Assign the module to a dummy variable to silence
+# linters complaining about an unused import.
+from importlib import metadata as _metadata
+
+_unused_metadata = _metadata
 import re
 import warnings
 
