@@ -11,6 +11,7 @@ from __future__ import annotations
 # the package metadata. Assign the module to a dummy variable to silence
 # linters complaining about an unused import.
 from importlib import metadata as _metadata
+
 _unused_metadata = _metadata
 import re
 import warnings
