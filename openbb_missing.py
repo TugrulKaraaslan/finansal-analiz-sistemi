@@ -15,26 +15,6 @@ except Exception:  # pragma: no cover - optional dependency
     obb = None
 
 
-def tema(*_args, **_kwargs):
-    """Placeholder for :func:`pandas_ta.tema`."""
-    raise NotImplementedError("openbb equivalent for 'tema' is missing")
-
-
-def Strategy(*_args, **_kwargs):  # noqa: N802
-    """Placeholder for :class:`pandas_ta.Strategy`."""
-    raise NotImplementedError("openbb equivalent for 'Strategy' is missing")
-
-
-def strategy(*_args, **_kwargs):
-    """Placeholder for ``DataFrame.ta.strategy``."""
-    raise NotImplementedError("openbb equivalent for 'strategy' is missing")
-
-
-def psar(*_args, **_kwargs):
-    """Placeholder for ``DataFrame.ta.psar`` or :func:`pandas_ta.psar`."""
-    raise NotImplementedError("openbb equivalent for 'psar' is missing")
-
-
 def _call_openbb(func_name: str, **kwargs):
     """Invoke an OpenBB technical analysis function if available."""
     if obb is None:
@@ -120,17 +100,3 @@ def macd(
     res_df = pd.DataFrame(obb_obj.results).set_index("date")
     macd_cols = [c for c in res_df.columns if c.lower().startswith("close_macd")]
     return res_df[macd_cols]
-
-
-def stochrsi(*_args, **_kwargs):
-    """Placeholder for :func:`pandas_ta.stochrsi`."""
-    raise NotImplementedError("openbb equivalent for 'stochrsi' is missing")
-
-
-MISSING_FUNCTIONS = [
-    "tema",
-    "Strategy",
-    "strategy",
-    "psar",
-    "stochrsi",
-]
