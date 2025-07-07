@@ -4,8 +4,8 @@
 ☑️ OpenBB migration tamamlandı  
 ☑️ pandas-ta bağımlılığı tamamen kaldırıldı  
 ☑️ Codex uyumlu filter engine oluşturuldu  
-☑️ pre-commit, CI ve pytest tümleşik hale getirildi  
-☑️ Benchmark testleri başarıyla çalıştı  
+☑️ pre-commit, CI ve pytest tümleşik hale getirildi
+☑️ Benchmark testleri ve GitHub Actions iş akışı eklendi
 ☑️ Dependabot güncellemeleri entegre edildi (requests, ruff, pygments, typing-extensions)
 
 ### 🔄 Devam Edenler
