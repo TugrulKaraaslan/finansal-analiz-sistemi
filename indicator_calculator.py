@@ -12,8 +12,8 @@ import warnings
 
 # Ensure pandas_ta can locate its distribution info. Some environments lazily
 # query ``importlib.metadata`` so simply importing the module can help locate
-# the package metadata. Assign the module to a dummy variable to silence
-# linters complaining about an unused import.
+# the package metadata. Use a trivial ``version`` call so ``pyflakes`` marks
+# the import as used without affecting runtime when the package is missing.
 from importlib import metadata as _metadata
 from pathlib import Path
 
@@ -34,7 +34,10 @@ from openbb_missing import rsi as obb_rsi
 from utilities.naming import unique_name
 from utils.compat import safe_concat
 
-_unused_metadata = _metadata
+try:  # pragma: no cover - optional dependency may be absent
+    _metadata.version("pandas_ta")
+except Exception:
+    pass
 
 # Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index
 # düzeltildi, filtre uyumu artırıldı v2)
