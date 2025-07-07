@@ -11,6 +11,7 @@
 - TEST-04-B: helper & loader tests.
 - Proje OpenBB ile uyumlu hale getirildi, pandas-ta desteği kaldırıldı.
 - OpenBB fonksiyon çağrıları için `openbb_missing.py` eklendi.
+- Yeni `benchmark.py` scripti ve `.github/workflows/benchmark.yml` iş akışı eklendi; her push ve pull request'te performans ölçümü yapıp çıktıyı artefakt olarak kaydediyor.
 
 ## [0.9.3] – 2025-06-22
 ### Added

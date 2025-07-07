@@ -37,3 +37,13 @@ Bu proje artık OpenBB ile uyumludur. Eski pandas-ta desteği kaldırıldı.
 
 ## Son Benchmark Sonucu
 En son calisma suresi: 0.5397 saniye
+
+## Benchmark Çalıştırma
+`benchmarks/benchmark.py` betiği bir milyon rasgele sayı toplayarak süreyi ölçer. 
+Yerelde çalıştırmak için:
+
+```bash
+python benchmarks/benchmark.py
+```
+
+GitHub Actions üzerindeki [Benchmark iş akışı](.github/workflows/benchmark.yml) her push ve pull request'te bu betiği çağırır, oluşan `benchmark_output.txt` dosyasını doğrular ve çıktıyı bir artefakt olarak yükler.
