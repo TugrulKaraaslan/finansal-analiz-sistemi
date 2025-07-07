@@ -60,11 +60,6 @@ def dogrula_filtre_dataframe(
     return sorunlu
 
 
-def kod_icin_aciklama(kod: str) -> str:
-    """SEBEP_KODLARI icindeki aciklamayi dondurur."""
-    return SEBEP_KODLARI.get(kod, "")
-
-
 def validate(
     df_filtre: pd.DataFrame, zorunlu_kolonlar=None, logger=None
 ) -> list[ValidationError]:
