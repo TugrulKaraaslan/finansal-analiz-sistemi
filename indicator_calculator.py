@@ -226,8 +226,6 @@ def calculate_indicators(
     return out
 
 
-
-
 def calculate_chunked(
     df: pd.DataFrame, active_inds: list[str], chunk_size: int = CHUNK_SIZE
 ) -> None:
