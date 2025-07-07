@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from logging_config import get_logger
+from finansal_analiz_sistemi.logging_config import get_logger
 
 # Tarih: 18 Mayıs 2025 (Yorumlar eklendi, NaN yönetimi teyit edildi)
 

@@ -12,7 +12,7 @@ import pandas as pd
 
 import data_loader_cache as dlc
 from finansal_analiz_sistemi import config
-from logging_config import get_logger
+from finansal_analiz_sistemi.logging_config import get_logger
 
 logger = get_logger(__name__)
 atexit.register(dlc.clear_cache)

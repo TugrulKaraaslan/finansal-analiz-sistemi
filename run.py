@@ -20,7 +20,7 @@ import yaml
 import utils
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.log_tools import CounterFilter, setup_logger
-from logging_config import get_logger
+from finansal_analiz_sistemi.logging_config import get_logger
 from utils.date_utils import parse_date
 
 # --- EKLENEN KRİTİK KONTROL ---

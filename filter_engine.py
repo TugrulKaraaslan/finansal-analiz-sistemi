@@ -17,7 +17,7 @@ import yaml
 from pandas.errors import UndefinedVariableError as QueryError
 
 import settings
-from logging_config import get_logger
+from finansal_analiz_sistemi.logging_config import get_logger
 
 
 class MissingColumnError(Exception):
