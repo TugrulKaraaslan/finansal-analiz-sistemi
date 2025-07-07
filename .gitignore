@@ -11,3 +11,6 @@ venv/
 .coverage
 reports/
 crossover_test_log.txt
+
+# hypothesis cache
+.hypothesis/
