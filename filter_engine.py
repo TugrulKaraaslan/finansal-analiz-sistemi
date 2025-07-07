@@ -79,7 +79,6 @@ class MaxDepthError(RuntimeError):
 FILTER_DEFS: dict[str, dict] = {}
 
 
-
 def _build_solution(err_type: str, msg: str) -> str:
     if err_type == "GENERIC":
         m1 = _missing_re.search(msg)
