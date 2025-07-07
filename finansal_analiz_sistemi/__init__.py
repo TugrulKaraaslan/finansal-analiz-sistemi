@@ -14,7 +14,7 @@ from .logging_utils import ErrorCountingFilter  # noqa: F401
 
 # Configure logging from YAML at package import time
 base = Path(__file__).resolve().parent.parent
-(base / "logs").mkdir(exist_ok=True)
+(base / "loglar").mkdir(exist_ok=True)
 with open(base / "logging_config.yaml", "r", encoding="utf-8") as fh:
     logging.config.dictConfig(yaml.safe_load(fh))
 
