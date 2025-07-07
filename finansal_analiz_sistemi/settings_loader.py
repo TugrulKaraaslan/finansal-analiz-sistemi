@@ -11,9 +11,22 @@ logger = logging.getLogger(__name__)
 
 
 def load_settings(path: str | None = None) -> dict:
-    """Load YAML settings from detected path."""
+    """Load YAML settings and apply known options to ``settings`` module."""
+
     settings_path = get_settings_path(path)
     if not Path(settings_path).exists():
         raise RuntimeError(f"settings.yaml not found at {settings_path}")
+
     with open(settings_path) as fh:
-        return yaml.safe_load(fh) or {}
+        data = yaml.safe_load(fh) or {}
+
+    try:  # pragma: no cover - best effort
+        import settings as _settings
+
+        max_depth = data.get("max_filter_depth")
+        if isinstance(max_depth, int):
+            _settings.MAX_FILTER_DEPTH = max_depth
+    except Exception:
+        logger.debug("Settings module not available for patching")
+
+    return data
