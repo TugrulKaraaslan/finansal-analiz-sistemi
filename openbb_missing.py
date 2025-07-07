@@ -100,4 +100,3 @@ def macd(
     res_df = pd.DataFrame(obb_obj.results).set_index("date")
     macd_cols = [c for c in res_df.columns if c.lower().startswith("close_macd")]
     return res_df[macd_cols]
-
