@@ -13,7 +13,7 @@ handlers:
     filters: [error_counter]
   file:
     class: logging.handlers.TimedRotatingFileHandler
-    filename: logs/fas_%Y-%m-%d.log
+    filename: loglar/fas_%Y-%m-%d.log
     level: DEBUG
     formatter: standard
     when: midnight
