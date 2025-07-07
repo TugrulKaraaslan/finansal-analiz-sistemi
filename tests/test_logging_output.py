@@ -1,6 +1,6 @@
 import logging
 
-from logging_config import get_logger
+from finansal_analiz_sistemi.logging_config import get_logger
 
 
 def test_info_log_emitted(caplog):

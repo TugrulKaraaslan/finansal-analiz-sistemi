@@ -26,8 +26,8 @@ from finansal.utils import lazy_chunk, safe_set
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.config import CHUNK_SIZE
 from finansal_analiz_sistemi.log_tools import PCT_STEP
+from finansal_analiz_sistemi.logging_config import get_logger
 from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
-from logging_config import get_logger
 from openbb_missing import ichimoku as obb_ichimoku
 from openbb_missing import macd as obb_macd
 from openbb_missing import rsi as obb_rsi

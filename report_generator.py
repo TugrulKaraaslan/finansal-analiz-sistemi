@@ -21,7 +21,7 @@ import pandas as pd
 from openpyxl.utils import get_column_letter
 
 import report_stats
-from logging_config import get_logger
+from finansal_analiz_sistemi.logging_config import get_logger
 from utils.compat import safe_concat, safe_to_excel
 
 HATALAR_COLUMNS = [
