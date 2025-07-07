@@ -16,7 +16,7 @@ REASON_MAP: Dict[str, Tuple[str, str]] = {
 DEFAULT_REASON: Tuple[str, str] = ("Bilinmeyen Hata", "Detay i\u00e7in loglara bak")
 
 
-def get_reason_hint(exc: Exception, locale: str = "tr") -> Tuple[str, str]:
+def get_reason_hint(exc: Exception, _locale: str = "tr") -> Tuple[str, str]:
     """Return a user friendly reason/hint tuple for given exception."""
 
     # ``locale`` is reserved for future localization support
