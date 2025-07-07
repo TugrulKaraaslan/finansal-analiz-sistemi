@@ -227,17 +227,17 @@ def calistir_tum_sistemi(
     logger.info("*" * 30 + " TÜM BACKTEST SİSTEMİ ÇALIŞTIRILIYOR " + "*" * 30)
 
     try:
-        print("veri_yukle BAŞLIYOR")
+        logger.info("veri_yukle BAŞLIYOR")
         steps_report.append("veri_yukle: BAŞLADI")
         df_filtre_kurallari, df_raw = veri_yukle(force_excel_reload_param)
         steps_report.append("veri_yukle: BAŞARILI")
 
-        print("on_isle BAŞLIYOR")
+        logger.info("on_isle BAŞLIYOR")
         steps_report.append("on_isle: BAŞLADI")
         df_processed = on_isle(df_raw)
         steps_report.append("on_isle: BAŞARILI")
 
-        print("indikator_hesapla BAŞLIYOR")
+        logger.info("indikator_hesapla BAŞLIYOR")
         steps_report.append("indikator_hesapla: BAŞLADI")
         df_indicator = indikator_hesapla(df_processed)
         steps_report.append("indikator_hesapla: BAŞARILI")
@@ -245,12 +245,12 @@ def calistir_tum_sistemi(
         tarama_dt = parse_date(tarama_tarihi_str)
         parse_date(satis_tarihi_str)
 
-        print("filtre_uygula BAŞLIYOR")
+        logger.info("filtre_uygula BAŞLIYOR")
         steps_report.append("filtre_uygula: BAŞLADI")
         filtre_sonuclar, atlanmis = filtre_uygula(df_indicator, tarama_dt)
         steps_report.append("filtre_uygula: BAŞARILI")
 
-        print("backtest_yap BAŞLIYOR")
+        logger.info("backtest_yap BAŞLIYOR")
         steps_report.append("backtest_yap: BAŞLADI")
         rapor_df, detay_df = backtest_yap(
             df_indicator,
@@ -273,7 +273,7 @@ def calistir_tum_sistemi(
             raporla(rapor_df, detay_df)
 
         steps_report.append("TÜM ADIMLAR TAMAMLANDI")
-        print("TÜM ADIMLAR BAŞARIYLA TAMAMLANDI")
+        logger.info("TÜM ADIMLAR BAŞARIYLA TAMAMLANDI")
 
     except Exception as e:
         import traceback
@@ -283,10 +283,10 @@ def calistir_tum_sistemi(
         raise
 
     finally:
-        print("\n=== ADIM RAPORU ===")
+        logger.info("\n=== ADIM RAPORU ===")
         for adim in steps_report:
-            print(adim)
-        print("=== RAPOR SONU ===\n")
+            logger.info(adim)
+        logger.info("=== RAPOR SONU ===\n")
         gc.collect()
 
     return rapor_df, detay_df, atlanmis
