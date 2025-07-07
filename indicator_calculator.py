@@ -6,20 +6,36 @@
 
 from __future__ import annotations
 
-# Ensure pandas_ta can locate its distribution info
-import importlib.metadata  # noqa: F401
+import gc
 import re
 import warnings
+
+# Ensure pandas_ta can locate its distribution info. Some environments lazily
+# query ``importlib.metadata`` so simply importing the module can help locate
+# the package metadata. Assign the module to a dummy variable to silence
+# linters complaining about an unused import.
+from importlib import metadata as _metadata
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pandas.errors
 
+import utils
+from config_loader import load_ema_close_crossovers
+from finansal.utils import lazy_chunk, safe_set
+from finansal_analiz_sistemi import config
+from finansal_analiz_sistemi.config import CHUNK_SIZE
+from finansal_analiz_sistemi.log_tools import PCT_STEP
 from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
+from logging_config import get_logger
 from openbb_missing import ichimoku as obb_ichimoku
 from openbb_missing import macd as obb_macd
 from openbb_missing import rsi as obb_rsi
+from utilities.naming import unique_name
 from utils.compat import safe_concat
+
+_unused_metadata = _metadata
 
 # Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index
 # düzeltildi, filtre uyumu artırıldı v2)
@@ -31,8 +47,6 @@ from utils.compat import safe_concat
 if not hasattr(np, "NaN"):
     np.NaN = np.nan
 
-import gc
-from pathlib import Path
 
 try:
     import pandas_ta as ta
@@ -45,15 +59,6 @@ try:  # pragma: no cover - optional indicator
     from pandas_ta import psar as ta_psar
 except Exception:  # pragma: no cover - missing indicator
     ta_psar = None  # type: ignore[misc]
-
-import utils
-from config_loader import load_ema_close_crossovers
-from finansal.utils import lazy_chunk, safe_set
-from finansal_analiz_sistemi import config
-from finansal_analiz_sistemi.config import CHUNK_SIZE
-from finansal_analiz_sistemi.log_tools import PCT_STEP
-from logging_config import get_logger
-from utilities.naming import unique_name
 
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 warnings.filterwarnings(
