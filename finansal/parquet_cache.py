@@ -1,4 +1,4 @@
-"""Parquet cache okuma/yazma ve yenileme mantigi."""
+"""Utilities for reading, writing and refreshing the Parquet cache."""
 
 from __future__ import annotations
 
