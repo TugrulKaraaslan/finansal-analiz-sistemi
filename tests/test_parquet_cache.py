@@ -3,6 +3,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+pytest.importorskip("pyarrow")
+
 from finansal.parquet_cache import ParquetCacheManager
 
 

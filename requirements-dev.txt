@@ -7,4 +7,3 @@ packaging>=25,<26
 pytest==8.4.0
 responses==0.25.7
 ruff==0.12.2
-pyarrow==19.0.1
