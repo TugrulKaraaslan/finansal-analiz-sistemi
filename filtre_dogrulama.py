@@ -17,13 +17,12 @@ SEBEP_KODLARI = {
 def dogrula_filtre_dataframe(
     df_filtre: pd.DataFrame, zorunlu_kolonlar=None, logger=None
 ) -> dict:
-    """
-    Filtre DataFrame'inde flag/query eksikliği veya bozukluğu kontrol eder.
-    Uygunsuz filtreleri ``{'filter_code': 'açıklama'}`` şeklinde döndürür.
+    """Validate a filter DataFrame and return problematic rows.
 
-    Varsayılan ``zorunlu_kolonlar`` değeri ``["flag", "query"]`` olup,
-    bunlar CSV'de sırasıyla ``FilterCode`` ve ``PythonQuery`` sütunlarına
-    karşılık gelir.
+    Checks for missing or malformed ``flag`` and ``query`` columns and
+    returns a mapping ``{'filter_code': 'reason'}`` for invalid rows.
+    The default ``zorunlu_kolonlar`` value is ``["flag", "query"]``,
+    corresponding to ``FilterCode`` and ``PythonQuery`` in the CSV file.
     """
     sorunlu = {}
     zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]

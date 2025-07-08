@@ -72,7 +72,7 @@ def main(
         + [f"sma_{n}" for n in (50, 100, 200)]
     )
     active = config.CORE_INDICATORS if ind_set == "core" else full_inds
-    calculate_chunked(df, active, chunk_size=chunk_size)  # yazim: indicator_calculator
+    calculate_chunked(df, active, chunk_size=chunk_size)
 
 
 if __name__ == "__main__":  # pragma: no cover
