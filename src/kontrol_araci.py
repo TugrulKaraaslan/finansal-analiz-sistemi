@@ -1,4 +1,4 @@
-"""Run all filters once to verify queries and return metadata."""
+"""Execute each filter definition once and collect diagnostic metadata."""
 
 import pandas as pd
 

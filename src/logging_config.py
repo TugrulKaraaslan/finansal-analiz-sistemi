@@ -1,4 +1,8 @@
-"""Simpler logging setup for local helpers."""
+"""Minimal logging configuration using a rotating file handler.
+
+The log directory defaults to ``LOG_DIR`` or ``loglar`` and can be
+overridden via the environment variable of the same name.
+"""
 
 from __future__ import annotations
 
@@ -6,7 +10,6 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-# Configuration
 LOG_DIR = os.getenv("LOG_DIR", "loglar")
 os.makedirs(LOG_DIR, exist_ok=True)
 
