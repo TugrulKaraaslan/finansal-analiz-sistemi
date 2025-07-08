@@ -193,7 +193,7 @@ if not hasattr(sys.modules[__name__], "get"):
 
 
 if not hasattr(sys.modules[__name__], "passive_filters"):
-    passive_filters = ["T31"]  # D2
+    passive_filters = ["T31"]
 if not hasattr(sys.modules[__name__], "filter_weights"):
     filter_weights: dict = {}
 if not hasattr(sys.modules[__name__], "OZEL_SUTUN_PARAMS"):

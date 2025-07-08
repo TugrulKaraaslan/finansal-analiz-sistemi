@@ -11,7 +11,7 @@ def test_filter_none_skipped(tmp_path, monkeypatch):
         get_logger=logging.getLogger,
         setup_logging=lambda: logging.getLogger(),
     )
-    sys.modules["finansal_analiz_sistemi.logging_config"] = dummy
+    monkeypatch.setitem(sys.modules, "finansal_analiz_sistemi.logging_config", dummy)
 
     from finansal_analiz_sistemi.data_loader import yukle_filtre_dosyasi
 

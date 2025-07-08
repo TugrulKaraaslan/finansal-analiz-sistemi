@@ -64,7 +64,6 @@ def _get_fiyat(
                         f"'{zaman_sutun_adi}' sütunundaki değer ('{fiyat}') float'a çevrilemedi. Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}"
                     )
                     return np.nan
-            # log.debug(f"Fiyat '{zaman_sutun_adi}' sütununda NaN bulundu. Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}")
             return np.nan  # Fiyat NaN ise NaN döndür
         else:
             log.warning(
@@ -130,7 +129,7 @@ def calistir_basit_backtest(
     alim_fiyat_sutunu = config.ALIM_ZAMANI  # örn: 'open'
     satis_fiyat_sutunu = config.SATIS_ZAMANI  # örn: 'open' veya 'close'
     komisyon_orani = config.KOMISYON_ORANI
-    # D1 fallback – open yoksa close’u kullan
+    # Fallback: use 'close' when the 'open' column is missing
     if alim_fiyat_sutunu not in df_tum_veri.columns:
         alim_fiyat_sutunu = "close"
     if satis_fiyat_sutunu not in df_tum_veri.columns:

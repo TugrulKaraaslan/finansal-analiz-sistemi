@@ -77,10 +77,6 @@ def load_filter_csv(path: str) -> pd.DataFrame:
 
     return df
 
-
-# İkinci çağrıda dosya diske erişilmez, cache'den gelir.
-
-
 def check_and_create_dirs(*dir_paths):
     """Create missing directories if they do not exist."""
     for dir_path in dir_paths:
@@ -150,8 +146,6 @@ def _standardize_date_column(
             log.debug(
                 f"'{os.path.basename(file_path_for_log)}': Tarih sütunu '{bulunan_tarih_sutunu}' -> 'tarih' olarak adlandırıldı."
             )
-        # else:
-        # log.debug(f"'{os.path.basename(file_path_for_log)}': Tarih sütunu zaten 'tarih' adında.")
     else:
         log.warning(
             f"'{os.path.basename(file_path_for_log)}': Standart tarih sütunu ('Tarih' vb.) bulunamadı. Mevcut sütunlar: {df.columns.tolist()}"
@@ -196,19 +190,16 @@ def _standardize_ohlcv_columns(
                     f"'{file_name_short}': Eşleştirme bulundu: '{raw_name_from_config}' -> '{standard_name_target}' (rename_map'e eklendi)"
                 )
             elif raw_name_from_config == standard_name_target:
-                # log.debug(f"'{file_name_short}': Sütun '{raw_name_from_config}' zaten standart adında.")
                 pass
             elif (
                 standard_name_target in current_columns_set
                 or standard_name_target in df.columns
             ):
-                # log.debug(f"'{file_name_short}': Hedef standart ad '{standard_name_target}' DataFrame'de zaten mevcut. '{raw_name_from_config}' için işlem yapılmadı.")
                 pass
             elif standard_name_target in rename_map.values():
-                # log.debug(f"'{file_name_short}': Hedef standart ad '{standard_name_target}' zaten başka bir sütun için rename_map'te. '{raw_name_from_config}' için işlem yapılmadı.")
                 pass
         # else:
-        # log.debug(f"'{file_name_short}': Config'deki ham ad '{raw_name_from_config}' DataFrame'de bulunamadı.")
+        # Raw name from config not present in DataFrame
 
     if rename_map:
         log.info(
