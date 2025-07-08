@@ -203,7 +203,7 @@ def kaydet_uc_sekmeli_excel(
         safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
         safe_to_excel(detay_df, w, sheet_name="Detay", index=False)
         safe_to_excel(istatistik_df, w, sheet_name="İstatistik", index=False)
-    # run-spesifik log handler
+    # Per-run log handler
     run_log = fname.with_suffix(".log")
     fh = logging.FileHandler(run_log, encoding="utf-8")
     fh.setFormatter(
@@ -472,7 +472,7 @@ def generate_full_report(
     summary_df = summary_df.dropna(subset=["filtre_kodu"])
     detail_df = detail_df.dropna(subset=["filtre_kodu"])
 
-    # ----- ➤ sebep_aciklama'ları doldur (Hatalar sheet'inden) -----
+    # Fill missing 'sebep_aciklama' values from the error list
     if error_list:
         from dataclasses import asdict, is_dataclass
 
@@ -620,7 +620,7 @@ def generate_full_report(
         out_path.exists(),
         out_path.stat().st_size if out_path.exists() else 0,
     )
-    # run-spesifik log handler
+    # Per-run log handler
     run_log = out_path.with_suffix(".log")
     fh = logging.FileHandler(run_log, encoding="utf-8")
     fh.setFormatter(
