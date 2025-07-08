@@ -87,3 +87,10 @@ docs/_build/
 *.pkl
 *.pickle
 *.parquet
+
+# Profiling outputs
+*.prof
+*.profile
+*.profraw
+profile/
+profiling/
