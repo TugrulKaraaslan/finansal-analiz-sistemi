@@ -1,10 +1,8 @@
-"""Thin wrappers around optional OpenBB technical analysis functions.
+"""Wrappers around optional OpenBB technical indicators.
 
-The functions in this module defer to :mod:`openbb` if it is installed and
-provides the requested indicator.  When OpenBB is unavailable, a
-``NotImplementedError`` is raised.  This keeps the rest of the codebase
-agnostic to the optional dependency while still failing loudly when a
-required feature is missing.
+Functions call into :mod:`openbb` when available and raise
+``NotImplementedError`` otherwise to keep the rest of the codebase
+agnostic to the optional dependency.
 """
 
 from __future__ import annotations

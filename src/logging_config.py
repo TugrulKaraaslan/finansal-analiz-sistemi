@@ -6,7 +6,7 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-# ——— Config ———
+# Configuration
 LOG_DIR = os.getenv("LOG_DIR", "loglar")
 os.makedirs(LOG_DIR, exist_ok=True)
 
