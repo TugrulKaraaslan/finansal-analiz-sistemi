@@ -18,12 +18,12 @@ class ParquetCacheManager:
     """Handle loading and refreshing the Parquet cache file."""
 
     def __init__(self, cache_path: Path) -> None:
-        """Create manager for ``cache_path`` ensuring directory exists."""
+        """Initialize with ``cache_path`` and ensure the directory exists."""
         self.cache_path = cache_path
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
 
-    def load(self) -> DataFrame:  # noqa: D401, D403
-        """Load the cached Parquet file or raise ``FileNotFoundError``."""
+    def load(self) -> DataFrame:
+        """Return the cached Parquet file as a DataFrame."""
         import pandas as pd
 
         if not self.cache_path.exists():
@@ -32,8 +32,8 @@ class ParquetCacheManager:
         logger.info("Cache loaded: %s rows", len(df))
         return df
 
-    def refresh(self, csv_path: Path) -> DataFrame:  # noqa: D401, D403
-        """Read a CSV file and update the cache in place."""
+    def refresh(self, csv_path: Path) -> DataFrame:
+        """Update the cache from ``csv_path`` and return the DataFrame."""
         import pandas as pd  # local import to speed CLI --help
 
         read_kwargs = {}

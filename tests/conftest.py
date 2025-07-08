@@ -10,7 +10,7 @@ import pytest
 
 @pytest.fixture(autouse=True, scope="session")
 def _cleanup_stale_locks():
-    """Test _cleanup_stale_locks."""
+    """Remove leftover ``.lock`` files from the temp directory."""
     for fp in glob.glob(os.path.join(tempfile.gettempdir(), "*.lock")):
         try:
             os.remove(fp)
