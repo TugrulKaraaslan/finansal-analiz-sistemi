@@ -35,6 +35,7 @@ crossover_test_log.txt
 *.swp
 nohup.out
 logs/
+log/
 tmp/
 output/
 **/output/
@@ -48,6 +49,7 @@ cache/
 **/temp/
 **/tmp/
 **/logs/
+**/log/
 **/output/
 
 # Editor and IDE directories
