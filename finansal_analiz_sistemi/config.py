@@ -188,6 +188,7 @@ if not hasattr(sys.modules[__name__], "TA_STRATEGY"):
 if not hasattr(sys.modules[__name__], "get"):
 
     def get(key, default=None):
+        """Return configuration variable ``key`` or ``default`` if missing."""
         return globals().get(key, default)
 
 

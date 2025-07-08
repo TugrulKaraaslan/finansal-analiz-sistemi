@@ -20,11 +20,11 @@ _ = sitecustomize  # ensure side-effects
 
 
 def _sanitize_sys_modules() -> None:
-    """Hypothesis'in ``unhashable module`` hatasını önle.
+    """Ensure all ``sys.modules`` entries are hashable for Hypothesis.
 
-    ``sys.modules`` içinde gerçek :class:`ModuleType` olmayan girdileri tespit
-    eder; aynı isimle yeni bir :class:`ModuleType` üretip orijinal
-    öznitelikleri kopyalar. Böylece **hashable** hâle gelirler.
+    Detect items that are not real :class:`ModuleType` instances, create a
+    new ``ModuleType`` with the same name and copy their attributes so that
+    ``sys.modules`` only contains hashable objects.
     """
 
     fixed: dict[str, ModuleType] = {}
@@ -68,6 +68,7 @@ if not hasattr(SimpleNamespace, "__hash__"):
 
 @pytest.fixture
 def big_df() -> pd.DataFrame:
+    """Return a large DataFrame for performance-oriented tests."""
     rows = 10_000
     return pd.DataFrame(
         {

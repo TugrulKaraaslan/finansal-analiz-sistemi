@@ -4,11 +4,12 @@ import pandas as pd
 
 
 def normalize_filtre_kodu(df: pd.DataFrame) -> pd.DataFrame:
-    """'filtre_kodu' sütununu standartlaştır.
+    """Normalize the ``filtre_kodu`` column name.
 
-    ``FilterCode`` veya ``filtercode`` gibi olası isimleri, baştaki ve sondaki
-    boşluklara aldırmadan ``filtre_kodu`` adına dönüştürür. Birden fazla eşleşen
-    sütun varsa sadece ilki tutulur. Sütun yoksa ``KeyError`` yükseltilir.
+    Possible variants like ``FilterCode`` or ``filtercode`` are converted to
+    ``filtre_kodu`` after stripping surrounding whitespace. When multiple
+    columns match, only the first is kept. Raises ``KeyError`` if no matching
+    column exists.
     """
 
     # Harici müdahalelerden etkilenmemek için kopya üzerinde çalış
