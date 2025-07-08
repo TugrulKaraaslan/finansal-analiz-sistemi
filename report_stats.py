@@ -51,8 +51,6 @@ def _normalize_pct(s: pd.Series) -> pd.Series:
     return s.round(2)
 
 
-
-
 def build_detay_df(
     summary_df: pd.DataFrame,
     detail_df: pd.DataFrame,
