@@ -100,19 +100,6 @@ def test_crossover_skips_when_column_missing():
     assert result is None
 
 
-def test_psar_no_error():
-    """_calculate_combined_psar çalışırken istisna fırlatmamalı."""
-    df = pd.DataFrame(
-        {
-            "hisse_kodu": ["TEST"] * 3,
-            "psar_long": [np.nan, 11.0, 12.0],
-            "psar_short": [10.0, np.nan, np.nan],
-        }
-    )
-    result = ic._calculate_combined_psar(df)
-    assert len(result) == len(df)
-
-
 def test_core_strategy_indicators_exist():
     df = pd.DataFrame(
         {

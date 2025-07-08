@@ -108,32 +108,10 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     return df
 
 
-def _calculate_combined_psar(group_df: pd.DataFrame) -> pd.Series:
-    hisse_str = (
-        group_df["hisse_kodu"].iloc[0]
-        if not group_df.empty and "hisse_kodu" in group_df.columns
-        else "Bilinmeyen Hisse"
-    )
-    sutun_adi = "psar"
-    try:
-        if "psar" in group_df.columns:
-            psar_col = group_df["psar"]
-            if isinstance(psar_col, pd.DataFrame):
-                psar_col = psar_col.iloc[:, 0]
-            return psar_col.rename(sutun_adi)
-        if "psar_long" in group_df.columns and "psar_short" in group_df.columns:
-            combined_psar = group_df["psar_long"].fillna(group_df["psar_short"])
-            return combined_psar.rename(sutun_adi)
-        else:
-            logger.debug(
-                f"{hisse_str}: Birleşik PSAR için 'psar_long' veya 'psar_short' sütunları bulunamadı."
-            )
-            return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
-    except Exception as e:
-        logger.error(
-            f"{hisse_str}: Birleşik PSAR hesaplanırken hata: {e}", exc_info=False
-        )
-        return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
+# Previously this module exposed ``_calculate_combined_psar`` as a helper to
+# merge ``psar_long``/``psar_short`` columns. The production code never invoked
+# it and tests only ensured it didn't raise.  The function is removed to keep
+# the module focused on actively used calculations.
 
 
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
