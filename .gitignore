@@ -47,6 +47,8 @@ outputs/
 cache/
 **/cache/
 *.cache
+.cache/
+**/.cache/
 
 # Additional temporary directories
 **/temp/
