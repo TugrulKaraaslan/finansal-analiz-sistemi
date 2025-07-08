@@ -56,3 +56,9 @@ ehthumbs.db
 
 # Benchmark outputs
 benchmark_output.txt
+
+# Misc temporary files
+*.db
+*.sqlite
+*.pkl
+*.pickle
