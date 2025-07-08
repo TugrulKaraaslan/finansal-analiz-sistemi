@@ -94,3 +94,10 @@ docs/_build/
 *.profraw
 profile/
 profiling/
+
+# Additional coverage and test directories
+.tox/
+coverage/
+
+# Additional editor swap files
+*.swo
