@@ -77,6 +77,7 @@ def load_filter_csv(path: str) -> pd.DataFrame:
 
     return df
 
+
 def check_and_create_dirs(*dir_paths):
     """Create missing directories if they do not exist."""
     for dir_path in dir_paths:
