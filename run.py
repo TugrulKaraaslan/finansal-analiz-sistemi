@@ -379,7 +379,22 @@ def calistir_tum_sistemi(
 def run_pipeline(
     price_csv: str | Path, filter_def: str | Path, output: str | Path
 ) -> Path:
-    """Run a minimal pipeline using provided CSV/filters and save Excel report."""
+    """Execute a lightweight pipeline and produce an Excel report.
+
+    Parameters
+    ----------
+    price_csv : str or Path
+        CSV file containing historical price data.
+    filter_def : str or Path
+        JSON/YAML file with filter definitions.
+    output : str or Path
+        Target Excel file path for the generated report.
+
+    Returns
+    -------
+    Path
+        Location of the created Excel report.
+    """
     global log_counter
     if log_counter is None:
         log_counter = setup_logger()
