@@ -1,8 +1,10 @@
-"""Stubs for missing OpenBB functionality.
+"""Thin wrappers around optional OpenBB technical analysis functions.
 
-This module defines placeholder functions for pandas-ta features not yet
-supported by OpenBB. Each function simply raises ``NotImplementedError``
-to signal that an equivalent implementation is unavailable.
+The functions in this module defer to :mod:`openbb` if it is installed and
+provides the requested indicator.  When OpenBB is unavailable, a
+``NotImplementedError`` is raised.  This keeps the rest of the codebase
+agnostic to the optional dependency while still failing loudly when a
+required feature is missing.
 """
 
 from __future__ import annotations
