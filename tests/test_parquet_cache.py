@@ -5,6 +5,8 @@ import pytest
 
 from finansal.parquet_cache import ParquetCacheManager
 
+pytest.importorskip("pyarrow")
+
 
 def test_refresh_and_load(tmp_path: Path) -> None:
     csv_path = tmp_path / "sample.csv"

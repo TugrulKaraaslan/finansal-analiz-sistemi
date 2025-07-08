@@ -37,8 +37,8 @@ drive.mount('/content/drive')
 !bash scripts/install.sh
 !pip install -e .
 ```
-`requirements-dev.txt` dosyası, Parquet desteği için gerekli **pyarrow** gibi test
-bağımlılıklarını da içerir. Bu adım proje ve test bağımlılıklarını tam sürüm
+`requirements-dev.txt` dosyası, isteğe bağlı test bağımlılıklarını (örneğin
+**pyarrow**) da içerir. Bu adım proje ve test bağımlılıklarını tam sürüm
 uyumuyla kurar.
 
 ---
