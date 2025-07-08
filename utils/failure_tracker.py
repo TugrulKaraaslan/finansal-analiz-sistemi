@@ -23,12 +23,16 @@ def clear_failures() -> None:
 
 
 def log_failure(category: str, item: str, reason: str, hint: str = "") -> None:
-    """Log a failure under given category."""
+    """Record a failed item under ``category`` with an optional hint."""
     failures[category].append(FailedFilter(item, reason, hint))
 
 
 def get_failures(as_dict: bool = False):
-    """Return collected failures."""
+    """Return collected failures.
+
+    When ``as_dict`` is ``True`` the result is returned as a plain dictionary
+    suitable for serialization.
+    """
     if as_dict:
         return {c: [asdict(r) for r in rows] for c, rows in failures.items()}
     return failures
