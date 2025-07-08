@@ -48,3 +48,11 @@ dist/
 .mypy_cache/
 htmlcov/
 coverage.xml
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Benchmark outputs
+benchmark_output.txt
