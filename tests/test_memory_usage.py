@@ -8,7 +8,7 @@ import pytest
 
 @pytest.mark.slow
 def test_memory_usage(tmp_path: Path):
-    """Test test_memory_usage."""
+    """Ensure the CLI process stays below 200 MB of RSS memory."""
     csv = tmp_path / "mini.csv"
     pd.DataFrame(
         {

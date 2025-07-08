@@ -18,7 +18,25 @@ except Exception:  # pragma: no cover - optional dependency
 
 
 def _call_openbb(func_name: str, **kwargs):
-    """Invoke an OpenBB technical analysis function if available."""
+    """Invoke an OpenBB technical analysis function if available.
+
+    Parameters
+    ----------
+    func_name : str
+        Name of the function under ``obb.technical``.
+    **kwargs : Any
+        Arguments forwarded to the underlying OpenBB call.
+
+    Returns
+    -------
+    Any
+        Result returned by the OpenBB function.
+
+    Raises
+    ------
+    NotImplementedError
+        If the :mod:`openbb` package or the requested function is missing.
+    """
     if obb is None:
         raise NotImplementedError(f"openbb equivalent for '{func_name}' is missing")
     func = getattr(obb.technical, func_name, None)
