@@ -10,7 +10,6 @@ import pandas as pd
 
 from finansal_analiz_sistemi.logging_config import get_logger
 
-
 __all__ = [
     "crosses_above",
     "crosses_below",
@@ -45,8 +44,6 @@ def crosses_below(a: pd.Series, b: pd.Series) -> pd.Series:
         return pd.Series(False, index=[])
     x, y = _align(a, b)
     return (x.shift(1) > y.shift(1)) & (x <= y)
-
-
 
 
 def extract_columns_from_filters(
