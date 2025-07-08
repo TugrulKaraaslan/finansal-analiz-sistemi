@@ -4,7 +4,20 @@ __all__ = ["unique_name"]
 
 
 def unique_name(base: str, seen: set[str]) -> str:
-    """Return a unique column name by appending _1, _2, ..."""
+    """Return ``base`` or a numbered variant not present in ``seen``.
+
+    Parameters
+    ----------
+    base : str
+        Desired column name.
+    seen : set[str]
+        Set of names already in use.
+
+    Returns
+    -------
+    str
+        ``base`` itself if unused, otherwise ``base_1``, ``base_2``, ...
+    """
     if base not in seen:
         seen.add(base)
         return base
