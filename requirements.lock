@@ -76,10 +76,6 @@ portalocker==3.2.0
     # via -r requirements.txt
 psutil==7.0.0
     # via -r requirements.txt
-python-dateutil==2.9.0.post0
-    # via
-    #   -r requirements.txt
-    #   pandas
 pytz==2025.2
     # via
     #   -r requirements.txt
@@ -96,10 +92,6 @@ simplejson==3.20.1
     # via
     #   -r requirements.txt
     #   choreographer
-six==1.17.0
-    # via
-    #   -r requirements.txt
-    #   python-dateutil
 sortedcontainers==2.4.0
     # via -r requirements.txt
 statsmodels==0.14.4
