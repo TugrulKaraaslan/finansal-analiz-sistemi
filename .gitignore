@@ -16,8 +16,11 @@ cikti/
 **/cikti/
 venv/
 .venv/
+**/venv/
+**/.venv/
 .coverage
 reports/
+**/reports/
 crossover_test_log.txt
 
 # hypothesis cache
@@ -34,7 +37,9 @@ nohup.out
 logs/
 tmp/
 output/
+**/output/
 outputs/
+**/outputs/
 cache/
 **/cache/
 *.cache
