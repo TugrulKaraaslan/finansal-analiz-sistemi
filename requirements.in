@@ -2,17 +2,12 @@ pandas
 numpy
 packaging
 PyYAML
-jedi
 pandas-ta-openbb
 holidays
 openpyxl
 xlsxwriter
 plotly
-kaleido
 rich
-python-dotenv
-pytest
-hypothesis
 click
 psutil
 portalocker
