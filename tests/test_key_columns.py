@@ -1,3 +1,5 @@
+"""Test module for test_key_columns."""
+
 import pandas as pd
 import pytest
 

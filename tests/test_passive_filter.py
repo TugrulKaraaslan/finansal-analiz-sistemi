@@ -1,3 +1,5 @@
+"""Test module for test_passive_filter."""
+
 import pandas as pd
 
 from filter_engine import run_filter

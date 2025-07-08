@@ -1,3 +1,5 @@
+"""Test module for test_filter_fix."""
+
 import os
 import sys
 

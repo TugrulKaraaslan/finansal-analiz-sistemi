@@ -1,3 +1,5 @@
+"""Test module for test_no_data_loss."""
+
 import pandas as pd
 
 from report_generator import generate_full_report

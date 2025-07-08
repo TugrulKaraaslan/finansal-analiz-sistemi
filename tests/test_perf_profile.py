@@ -1,3 +1,5 @@
+"""Test module for test_perf_profile."""
+
 import os
 import sys
 

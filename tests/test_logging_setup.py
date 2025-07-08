@@ -1,3 +1,5 @@
+"""Test module for test_logging_setup."""
+
 import io
 import logging
 import time

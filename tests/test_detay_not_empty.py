@@ -1,3 +1,5 @@
+"""Test module for test_detay_not_empty."""
+
 import pandas as pd
 
 from report_generator import _build_detay_df

@@ -1,3 +1,5 @@
+"""Test module for test_filter_engine."""
+
 import os
 import sys
 

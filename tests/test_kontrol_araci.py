@@ -1,3 +1,5 @@
+"""Test module for test_kontrol_araci."""
+
 import os
 import sys
 

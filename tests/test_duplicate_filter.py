@@ -1,3 +1,5 @@
+"""Test module for test_duplicate_filter."""
+
 import io
 import logging
 import time

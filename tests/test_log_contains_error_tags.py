@@ -1,3 +1,5 @@
+"""Test module for test_log_contains_error_tags."""
+
 import logging
 import re
 

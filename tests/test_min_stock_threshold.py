@@ -1,3 +1,5 @@
+"""Test module for test_min_stock_threshold."""
+
 import pandas as pd
 
 import filter_engine

@@ -1,3 +1,5 @@
+"""Test module for test_query_columns."""
+
 import pandas as pd
 
 import filter_engine

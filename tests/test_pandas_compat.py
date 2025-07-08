@@ -1,3 +1,5 @@
+"""Test module for test_pandas_compat."""
+
 import pandas as pd
 
 from utils.compat import safe_concat, safe_to_excel

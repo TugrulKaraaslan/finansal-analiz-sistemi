@@ -1,3 +1,5 @@
+"""Test module for test_memory_usage."""
+
 import subprocess
 from pathlib import Path
 

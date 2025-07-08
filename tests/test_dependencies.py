@@ -1,3 +1,5 @@
+"""Test module for test_dependencies."""
+
 import importlib.metadata
 import importlib.util
 

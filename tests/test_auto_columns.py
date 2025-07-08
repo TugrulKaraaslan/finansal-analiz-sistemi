@@ -1,3 +1,5 @@
+"""Test module for test_auto_columns."""
+
 import pandas as pd
 
 import preprocessor

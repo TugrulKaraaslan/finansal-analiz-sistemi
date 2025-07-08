@@ -1,3 +1,5 @@
+"""Test module for test_report."""
+
 import pandas as pd
 import pytest
 

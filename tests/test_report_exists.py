@@ -1,3 +1,5 @@
+"""Test module for test_report_exists."""
+
 import pandas as pd
 
 import run as main_mod

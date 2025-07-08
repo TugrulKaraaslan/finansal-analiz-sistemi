@@ -1,3 +1,5 @@
+"""Test module for test_smoke_report."""
+
 from pathlib import Path
 
 import openpyxl

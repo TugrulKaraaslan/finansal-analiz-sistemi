@@ -1,3 +1,5 @@
+"""Test module for test_no_pkg_conflict."""
+
 import subprocess
 import sys
 

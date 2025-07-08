@@ -1,3 +1,5 @@
+"""Test module for test_no_futurewarnings."""
+
 import os
 import subprocess
 import sys

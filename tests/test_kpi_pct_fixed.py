@@ -1,3 +1,5 @@
+"""Test module for test_kpi_pct_fixed."""
+
 import pandas as pd
 
 from report_stats import _normalize_pct

@@ -1,3 +1,5 @@
+"""Test module for test_indicator_calculator."""
+
 import os
 import sys
 import warnings

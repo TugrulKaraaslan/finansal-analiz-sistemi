@@ -1,3 +1,5 @@
+"""Test module for test_config_defaults."""
+
 import importlib
 
 from finansal_analiz_sistemi import config

@@ -1,3 +1,5 @@
+"""Test module for test_no_errors."""
+
 import subprocess
 import sys
 from pathlib import Path

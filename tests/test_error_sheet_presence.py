@@ -1,3 +1,5 @@
+"""Test module for test_error_sheet_presence."""
+
 import os
 import sys
 

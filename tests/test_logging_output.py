@@ -1,3 +1,5 @@
+"""Test module for test_logging_output."""
+
 import logging
 
 from finansal_analiz_sistemi.logging_config import get_logger

@@ -1,3 +1,5 @@
+"""Test module for test_report_format."""
+
 import os
 import sys
 

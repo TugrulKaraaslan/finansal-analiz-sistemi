@@ -1,3 +1,5 @@
+"""Test module for test_indicator_calc_hyp."""
+
 import pandas as pd
 import pytest
 

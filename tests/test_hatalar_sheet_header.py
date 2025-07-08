@@ -1,3 +1,5 @@
+"""Test module for test_hatalar_sheet_header."""
+
 from pathlib import Path
 
 import pandas as pd

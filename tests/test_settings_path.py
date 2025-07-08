@@ -1,3 +1,5 @@
+"""Test module for test_settings_path."""
+
 import sys
 from pathlib import Path
 

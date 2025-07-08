@@ -1,3 +1,5 @@
+"""Test module for test_option_guard."""
+
 import pandas as pd
 
 from utils.pandas_option_safe import ensure_option

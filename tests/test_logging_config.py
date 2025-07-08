@@ -1,3 +1,5 @@
+"""Test module for test_logging_config."""
+
 import logging
 
 from finansal_analiz_sistemi import logging_config

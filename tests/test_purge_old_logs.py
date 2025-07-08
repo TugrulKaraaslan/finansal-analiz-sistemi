@@ -1,3 +1,5 @@
+"""Test module for test_purge_old_logs."""
+
 from utils.purge_old_logs import purge_old_logs
 
 

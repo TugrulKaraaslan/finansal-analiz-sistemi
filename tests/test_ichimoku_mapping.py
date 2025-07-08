@@ -1,3 +1,5 @@
+"""Test module for test_ichimoku_mapping."""
+
 import importlib
 import os
 import sys
