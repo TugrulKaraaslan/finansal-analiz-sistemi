@@ -1,4 +1,4 @@
-"""Test module for test_no_futurewarnings."""
+"""Unit tests for no_futurewarnings."""
 
 import os
 import subprocess

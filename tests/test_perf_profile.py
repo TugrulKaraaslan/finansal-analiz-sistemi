@@ -1,4 +1,4 @@
-"""Test module for test_perf_profile."""
+"""Unit tests for perf_profile."""
 
 import os
 import sys

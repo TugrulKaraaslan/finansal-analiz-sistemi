@@ -1,4 +1,4 @@
-"""Test module for test_excel_memory."""
+"""Unit tests for excel_memory."""
 
 import openpyxl
 import pandas as pd

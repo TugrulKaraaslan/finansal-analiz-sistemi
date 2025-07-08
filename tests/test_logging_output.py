@@ -1,4 +1,4 @@
-"""Test module for test_logging_output."""
+"""Unit tests for logging_output."""
 
 import logging
 

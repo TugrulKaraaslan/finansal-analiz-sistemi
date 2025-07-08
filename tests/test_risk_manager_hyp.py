@@ -1,4 +1,4 @@
-"""Test module for test_risk_manager_hyp."""
+"""Unit tests for risk_manager_hyp."""
 
 import pandas as pd
 import pytest

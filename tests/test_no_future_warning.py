@@ -1,4 +1,4 @@
-"""Test module for test_no_future_warning."""
+"""Unit tests for no_future_warning."""
 
 import warnings
 

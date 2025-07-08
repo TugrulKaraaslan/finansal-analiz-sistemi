@@ -1,4 +1,4 @@
-"""Test module for test_filter_loader_formats."""
+"""Unit tests for filter_loader_formats."""
 
 import tempfile
 from pathlib import Path

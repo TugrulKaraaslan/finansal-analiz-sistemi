@@ -1,4 +1,4 @@
-"""Test module for test_imports."""
+"""Unit tests for imports."""
 
 import importlib
 

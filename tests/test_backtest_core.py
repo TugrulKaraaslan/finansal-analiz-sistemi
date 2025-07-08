@@ -1,4 +1,4 @@
-"""Test module for test_backtest_core."""
+"""Unit tests for backtest_core."""
 
 import os
 import sys

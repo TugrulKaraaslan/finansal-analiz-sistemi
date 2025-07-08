@@ -1,4 +1,4 @@
-"""Test module for test_join_handles_none."""
+"""Unit tests for join_handles_none."""
 
 
 def test_join_handles_none():

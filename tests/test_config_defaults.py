@@ -1,4 +1,4 @@
-"""Test module for test_config_defaults."""
+"""Unit tests for config_defaults."""
 
 import importlib
 

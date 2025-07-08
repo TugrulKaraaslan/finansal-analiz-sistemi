@@ -1,4 +1,4 @@
-"""Test module for test_max_depth."""
+"""Unit tests for max_depth."""
 
 import pandas as pd
 import pytest

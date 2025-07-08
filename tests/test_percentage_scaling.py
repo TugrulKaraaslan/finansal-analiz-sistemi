@@ -1,4 +1,4 @@
-"""Test module for test_percentage_scaling."""
+"""Unit tests for percentage_scaling."""
 
 import os
 import sys

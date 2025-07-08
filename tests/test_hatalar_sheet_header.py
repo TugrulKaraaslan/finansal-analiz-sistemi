@@ -1,4 +1,4 @@
-"""Test module for test_hatalar_sheet_header."""
+"""Unit tests for hatalar_sheet_header."""
 
 from pathlib import Path
 

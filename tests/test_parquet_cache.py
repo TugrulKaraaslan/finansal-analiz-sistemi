@@ -1,4 +1,4 @@
-"""Test module for test_parquet_cache."""
+"""Unit tests for parquet_cache."""
 
 from pathlib import Path
 

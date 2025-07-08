@@ -1,4 +1,4 @@
-"""Test module for test_log_clean."""
+"""Unit tests for log_clean."""
 
 import os
 import time

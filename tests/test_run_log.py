@@ -1,4 +1,4 @@
-"""Test module for test_run_log."""
+"""Unit tests for run_log."""
 
 from pathlib import Path
 

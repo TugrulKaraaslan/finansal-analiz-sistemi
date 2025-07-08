@@ -1,4 +1,4 @@
-"""Test module for test_error_sheet_presence."""
+"""Unit tests for error_sheet_presence."""
 
 import os
 import sys

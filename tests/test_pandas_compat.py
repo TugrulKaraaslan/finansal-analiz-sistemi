@@ -1,4 +1,4 @@
-"""Test module for test_pandas_compat."""
+"""Unit tests for pandas_compat."""
 
 import pandas as pd
 

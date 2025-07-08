@@ -1,4 +1,4 @@
-"""Test module for test_date_parse."""
+"""Unit tests for date_parse."""
 
 import pandas as pd
 

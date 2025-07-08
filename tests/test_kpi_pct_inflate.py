@@ -1,4 +1,4 @@
-"""Test module for test_kpi_pct_inflate."""
+"""Unit tests for kpi_pct_inflate."""
 
 import pandas as pd
 

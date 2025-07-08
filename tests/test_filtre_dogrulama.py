@@ -1,4 +1,4 @@
-"""Test module for test_filtre_dogrulama."""
+"""Unit tests for filtre_dogrulama."""
 
 import os
 import sys

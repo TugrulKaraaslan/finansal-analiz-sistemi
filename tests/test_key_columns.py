@@ -1,4 +1,4 @@
-"""Test module for test_key_columns."""
+"""Unit tests for key_columns."""
 
 import pandas as pd
 import pytest

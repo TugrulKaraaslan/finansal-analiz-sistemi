@@ -1,4 +1,4 @@
-"""Test module for test_data_gap."""
+"""Unit tests for data_gap."""
 
 import os
 import sys

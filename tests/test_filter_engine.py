@@ -1,4 +1,4 @@
-"""Test module for test_filter_engine."""
+"""Unit tests for filter_engine."""
 
 import os
 import sys

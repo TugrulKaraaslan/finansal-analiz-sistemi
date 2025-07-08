@@ -1,4 +1,4 @@
-"""Test module for test_recursion_guard."""
+"""Unit tests for recursion_guard."""
 
 import pandas as pd
 import pytest

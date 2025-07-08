@@ -1,4 +1,4 @@
-"""Test module for test_transpose."""
+"""Unit tests for transpose."""
 
 import pandas as pd
 import pytest

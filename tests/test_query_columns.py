@@ -1,4 +1,4 @@
-"""Test module for test_query_columns."""
+"""Unit tests for query_columns."""
 
 import pandas as pd
 

@@ -1,4 +1,4 @@
-"""Test module for test_no_errors."""
+"""Unit tests for no_errors."""
 
 import subprocess
 import sys
