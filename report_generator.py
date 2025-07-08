@@ -50,7 +50,6 @@ def _build_detay_df(
     return detay_df
 
 
-
 logger = get_logger(__name__)
 
 PADDING_COMMENT = " ".join(uuid.uuid4().hex for _ in range(1200))
@@ -166,7 +165,6 @@ def _write_error_sheet(
     )
 
 
-
 def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     """Write a lightweight health summary sheet."""
     toplam = len(df_sum)
@@ -249,7 +247,6 @@ def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
         ws.insert_chart("A5", chart, {"x_scale": 1.2, "y_scale": 1.2})
 
 
-
 def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     """Write summary statistics to the given Excel writer."""
     toplam = len(df_sum)
@@ -272,7 +269,6 @@ def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     safe_to_excel(pd.DataFrame(stats), wr, sheet_name="İstatistik", index=False)
 
 
-
 def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None:
     """Append ``error_list`` to a ``Hatalar`` sheet when not empty."""
     if error_list:
@@ -282,7 +278,6 @@ def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None
             sheet_name="Hatalar",
             index=False,
         )
-
 
 
 def generate_full_report(
@@ -485,7 +480,6 @@ def generate_full_report(
     return out_path
 
 
-
 def generate_summary(results: list[dict]) -> pd.DataFrame:
     """Build a summary DataFrame from backtest result records.
 
@@ -500,7 +494,6 @@ def generate_summary(results: list[dict]) -> pd.DataFrame:
         logger.warning("generate_summary: sonuç listesi boş")
 
     return summary_df
-
 
 
 def kaydet_raporlar(
@@ -528,7 +521,6 @@ def kaydet_raporlar(
         log_fn = logger_param.warning
     log_fn("Rapor kaydedildi → %s", filepath)
     return filepath
-
 
 
 def kaydet_uc_sekmeli_excel(
@@ -569,7 +561,6 @@ def kaydet_uc_sekmeli_excel(
     return fname
 
 
-
 def olustur_excel_raporu(
     kayitlar: list[dict],
     fname: str | Path,
@@ -588,7 +579,6 @@ def olustur_excel_raporu(
         pd.DataFrame(),
         pd.DataFrame(),
     )
-
 
 
 def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
@@ -628,7 +618,6 @@ def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
         for i, col in enumerate(sorunlu.columns, 1):
             max_len = max(10, sorunlu[col].astype(str).str.len().max() + 2)
             ws.column_dimensions[get_column_letter(i)].width = max_len
-
 
 
 def save_hatalar_excel(df: pd.DataFrame, out_path: str | Path) -> None:
@@ -691,7 +680,6 @@ EXPECTED_COLUMNS = [
     "risk_skoru",
     "notlar",
 ]
-
 
 
 __all__ = [
