@@ -73,6 +73,8 @@ def test_logging_config_import(monkeypatch):
     import logging
 
     class DummyHandler(logging.Handler):
+        """Minimal handler used to capture log file configuration."""
+
         def __init__(self, filename, maxBytes=None, backupCount=None, encoding=None):
             """Test __init__."""
             super().__init__()
