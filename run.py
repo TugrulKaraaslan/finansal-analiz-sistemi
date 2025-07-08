@@ -27,7 +27,7 @@ if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Rapor için örnek özet, detay ve istatistik DataFrame'leri üretir."""
+    """Return sample summary, detail and stats frames for reports."""
     if rapor_df is None or rapor_df.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
@@ -322,7 +322,7 @@ def run_pipeline(
 
 
 def main(argv: list[str] | None = None) -> None:
-    """Komut satırından çalıştırıldığında ana backtest akışını yürüt."""
+    """Execute the main backtest workflow for CLI usage."""
     parser = argparse.ArgumentParser(description="Finansal analiz ve backtest")
     parser.add_argument(
         "--tarama",

@@ -35,10 +35,10 @@ def load_data(path: str) -> pd.DataFrame:
 
 
 def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
-    """Read price CSV with delimiter auto-detection.
+    """Read a price CSV using delimiter auto-detection.
 
-    Fiyat CSV'sini akıllı ayraç tespitiyle oku. İlk satıra bakılır:
-    ';' çoksa noktalı virgül, ',' çoksa virgül, yoksa ``sep=None`` bırakılır.
+    The first line is inspected to choose ``;`` when semicolons dominate,
+    "," when commas dominate or ``sep=None`` otherwise.
     """
     encoding = kwargs.get("encoding", "utf-8")
     with open(path, encoding=encoding) as f:
