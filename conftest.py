@@ -1,4 +1,4 @@
-"""Pytest genel ayarları ve yardımcı araçlar."""
+"""Pytest configuration and helper utilities."""
 
 import logging
 import sys
@@ -98,5 +98,5 @@ def _fix_sys_modules():
 
 
 def pytest_sessionstart(session: pytest.Session) -> None:  # noqa: D401
-    """Test oturumu başlamadan önce ``sys.modules``'u temizle."""
+    """Clean ``sys.modules`` before the test session starts."""
     _sanitize_sys_modules()

@@ -38,7 +38,7 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
 
 
 def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Sonuçları basit bir Streamlit arayüzünde gösterir."""
+    """Display results in a lightweight Streamlit interface."""
     import streamlit as st
 
     st.sidebar.title("Menü")
@@ -72,13 +72,12 @@ log_counter: CounterFilter | None = None
 
 
 def veri_yukle(force_excel_reload: bool = False):
-    """Load filter rules and raw price data.
+    """Load filter definitions and raw price data.
 
     Parameters
     ----------
     force_excel_reload : bool, optional
-        Parquet dosyası bulunsa bile hisse verisini Excel/CSV'den yeniden
-        yükle.
+        Reload stock data from Excel/CSV even when the Parquet cache is present.
     """
     df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
     if df_filters is None or df_filters.empty:
@@ -167,7 +166,6 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     logger.info(f"Excel raporu oluşturuldu: {out_path}")
 
 
-# Ana modülleri import et
 try:
     import backtest_core
     import data_loader
