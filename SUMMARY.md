@@ -29,7 +29,6 @@
 - Coverage artefacts now include env and Python version in the filename to
   prevent name conflicts.
 - New unit test verifies shadow config detection.
-- `flake8-bugbear` added; mutable default ignored with `# noqa: B006`.
 - `packages` list in setup.cfg uses newline form to avoid install error.
 - Config maps `ITS_9` aliases to `ichimoku_conversionline` and calculator computes it when requested.
 - Added automatic EMA/close crossover generator and config loader.
