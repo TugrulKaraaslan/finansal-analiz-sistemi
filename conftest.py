@@ -85,6 +85,7 @@ def big_df() -> pd.DataFrame:
 
 @pytest.fixture(autouse=True)
 def _mock_http():
+    """Isolate tests from external HTTP calls."""
     with responses.RequestsMock() as rsps:
         rsps.add_passthru("http://localhost")
         yield

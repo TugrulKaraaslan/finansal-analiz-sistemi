@@ -6,6 +6,8 @@ from dataclasses import asdict, dataclass
 
 @dataclass
 class FailedFilter:
+    """Record a failed operation and the associated reason."""
+
     item: str
     reason: str
     hint: str = ""

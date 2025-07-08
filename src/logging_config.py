@@ -12,6 +12,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 
 def _create_handler() -> RotatingFileHandler:
+    """Return a file handler with default rotation settings."""
     handler = RotatingFileHandler(
         f"{LOG_DIR}/run.log",
         maxBytes=2_000_000,  # 2 MB

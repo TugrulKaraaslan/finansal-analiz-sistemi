@@ -14,8 +14,11 @@ if TYPE_CHECKING:  # pragma: no cover - used for type hints only
 logger: Final[logging.Logger] = logging.getLogger(__name__)
 
 
-class ParquetCacheManager:  # noqa: D101
+class ParquetCacheManager:
+    """Handle loading and refreshing the Parquet cache file."""
+
     def __init__(self, cache_path: Path) -> None:
+        """Create manager for ``cache_path`` ensuring directory exists."""
         self.cache_path = cache_path
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
 

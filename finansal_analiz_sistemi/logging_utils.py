@@ -9,6 +9,7 @@ class ErrorCountingFilter(logging.Filter):
     """Count ERROR and WARNING logs."""
 
     def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
+        """Increment global counters and allow the record."""
         if record.levelno >= logging.ERROR:
             ERROR_COUNTER["errors"] += 1
         elif record.levelno == logging.WARNING:
