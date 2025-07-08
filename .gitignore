@@ -94,6 +94,7 @@ docs/_build/
 *.pkl
 *.pickle
 *.parquet
+*.feather
 
 # Profiling outputs
 *.prof
