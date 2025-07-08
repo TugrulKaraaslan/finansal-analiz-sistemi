@@ -8,6 +8,7 @@ from utils.compat import safe_to_excel
 
 
 def test_generate_summary_warns_on_empty(caplog):
+    """Test test_generate_summary_warns_on_empty."""
     with caplog.at_level(logging.WARNING):
         df = report_generator.generate_summary([])
     assert df.empty
@@ -19,6 +20,7 @@ def test_generate_summary_warns_on_empty(caplog):
 
 
 def test_safe_to_excel_warns(tmp_path, caplog):
+    """Test test_safe_to_excel_warns."""
     file = tmp_path / "empty.xlsx"
     with caplog.at_level(logging.WARNING):
         with pd.ExcelWriter(file) as wr:

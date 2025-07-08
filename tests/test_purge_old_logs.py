@@ -2,6 +2,7 @@ from utils.purge_old_logs import purge_old_logs
 
 
 def test_purge_dry_run(tmp_path):
+    """Test test_purge_dry_run."""
     old = tmp_path / "old.log"
     lock_old = tmp_path / "old.lock"
     old.write_text("")

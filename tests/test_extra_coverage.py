@@ -9,12 +9,14 @@ from src.utils import excel_reader
 
 
 def test_fill_missing_business_day():
+    """Test test_fill_missing_business_day."""
     df = pd.DataFrame({"tarih": ["2025-03-07", None, "2025-03-10"]})
     out = fill_missing_business_day(df)
     assert out["tarih"].iloc[1] == pd.Timestamp("2025-03-07")
 
 
 def test_excel_reader_cache(tmp_path):
+    """Test test_excel_reader_cache."""
     path = tmp_path / "t.xlsx"
     df = pd.DataFrame({"a": [1, 2]})
     df.to_excel(path, index=False)
@@ -27,6 +29,7 @@ def test_excel_reader_cache(tmp_path):
 
 
 def test_excel_reader_cache_refresh(tmp_path):
+    """Test test_excel_reader_cache_refresh."""
     path = tmp_path / "t.xlsx"
     df1 = pd.DataFrame({"a": [1]})
     df1.to_excel(path, index=False)
@@ -42,10 +45,12 @@ def test_excel_reader_cache_refresh(tmp_path):
 
 
 def test_tarama_denetimi_summary(monkeypatch):
+    """Test test_tarama_denetimi_summary."""
     df_filtreler = pd.DataFrame({"kod": ["F1"], "PythonQuery": ["close > open"]})
     df_ind = pd.DataFrame()
 
     def fake_apply(df, kod, query):
+        """Test fake_apply."""
         return None, {
             "kod": kod,
             "tip": "tarama",
@@ -63,18 +68,22 @@ def test_tarama_denetimi_summary(monkeypatch):
 
 
 def test_logging_config_import(monkeypatch):
+    """Test test_logging_config_import."""
     calls = {}
     import logging
 
     class DummyHandler(logging.Handler):
         def __init__(self, filename, maxBytes=None, backupCount=None, encoding=None):
+            """Test __init__."""
             super().__init__()
             calls["file"] = filename
 
         def setFormatter(self, fmt):
+            """Test setFormatter."""
             calls["formatter"] = True
 
         def emit(self, record):
+            """Test emit."""
             pass
 
     import importlib
@@ -89,6 +98,7 @@ def test_logging_config_import(monkeypatch):
 
 
 def test_report_writer_accepts_str(tmp_path):
+    """Test test_report_writer_accepts_str."""
     df = pd.DataFrame({"a": [1]})
     nested = tmp_path / "nested" / "out.xlsx"
     ReportWriter().write_report(df, str(nested))

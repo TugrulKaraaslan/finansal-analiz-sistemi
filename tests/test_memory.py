@@ -11,6 +11,7 @@ from cachetools import TTLCache
 
 
 def _read_parquet(ticker: str, start: str, end: str) -> pd.DataFrame:
+    """Test _read_parquet."""
     dates = pd.date_range(start, end, freq="D")
     return pd.DataFrame({"hisse_kodu": ticker, "tarih": dates})
 
@@ -19,6 +20,7 @@ _CACHE = TTLCache(maxsize=256, ttl=4 * 60 * 60)
 
 
 def get_df(ticker: str, start: str, end: str) -> pd.DataFrame:
+    """Test get_df."""
     key = f"{ticker}_{start}_{end}"
     if key not in _CACHE:
         _CACHE[key] = _read_parquet(ticker, start, end)
@@ -26,11 +28,13 @@ def get_df(ticker: str, start: str, end: str) -> pd.DataFrame:
 
 
 def clear_cache() -> None:
+    """Test clear_cache."""
     _CACHE.clear()
 
 
 @pytest.mark.slow
 def test_cache_memory():
+    """Test test_cache_memory."""
     proc = psutil.Process()
     base = proc.memory_info().rss
     for _ in range(200):

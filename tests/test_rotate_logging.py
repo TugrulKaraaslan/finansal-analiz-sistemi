@@ -5,6 +5,7 @@ from finansal_analiz_sistemi import log_tools as logging_setup
 
 
 def test_log_rotation(tmp_path, monkeypatch):
+    """Test test_log_rotation."""
     root = logging.getLogger()
     old_handlers = root.handlers[:]
     old_filters = root.filters[:]
@@ -14,6 +15,7 @@ def test_log_rotation(tmp_path, monkeypatch):
 
     class TinyHandler(RotatingFileHandler):
         def __init__(self, filename, *args, **kwargs):
+            """Test __init__."""
             super().__init__(filename, maxBytes=200, backupCount=1, encoding="utf-8")
 
     monkeypatch.setattr(logging_setup, "RotatingFileHandler", TinyHandler)

@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_hatalar_sheet(tmp_path):
+    """Test test_hatalar_sheet."""
     fname = tmp_path / "test.xlsx"
     # create base workbook
     with pd.ExcelWriter(fname) as w:

@@ -7,6 +7,7 @@ from finansal.parquet_cache import ParquetCacheManager
 
 
 def test_refresh_and_load(tmp_path: Path) -> None:
+    """Test test_refresh_and_load."""
     csv_path = tmp_path / "sample.csv"
     cache_path = tmp_path / "cache.parquet"
 
@@ -23,6 +24,7 @@ def test_refresh_and_load(tmp_path: Path) -> None:
 
 
 def test_load_missing(tmp_path: Path) -> None:  # noqa: D401
+    """Test test_load_missing."""
     mngr = ParquetCacheManager(tmp_path / "missing.parquet")
     with pytest.raises(FileNotFoundError):
         _ = mngr.load()

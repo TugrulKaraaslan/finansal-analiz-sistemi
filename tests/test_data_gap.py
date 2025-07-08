@@ -10,6 +10,7 @@ from src.preprocessor import fill_missing_business_day  # noqa: E402
 
 
 def test_get_fiyat_moves_to_next_date():
+    """Test test_get_fiyat_moves_to_next_date."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA", "AAA"],
@@ -28,6 +29,7 @@ def test_get_fiyat_moves_to_next_date():
 
 
 def test_fill_missing_business_day_shifts_nat():
+    """Test test_fill_missing_business_day_shifts_nat."""
     raw = pd.DataFrame(
         {
             "tarih": [pd.NaT, pd.to_datetime("11.03.2025", dayfirst=True)],

@@ -4,6 +4,7 @@ import report_generator
 
 
 def test_report_file_created(tmp_path):
+    """Test test_report_file_created."""
     out = tmp_path / "t.xlsx"
     summary_df = pd.DataFrame(columns=report_generator.LEGACY_SUMMARY_COLS)
     detail_df = pd.DataFrame(columns=report_generator.LEGACY_DETAIL_COLS)

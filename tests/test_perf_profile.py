@@ -9,6 +9,7 @@ import indicator_calculator as ic  # noqa: E402
 
 
 def test_ema_columns_notna():
+    """Test test_ema_columns_notna."""
     dates = pd.date_range("2024-01-01", periods=10, freq="D")
     df = pd.DataFrame(
         {

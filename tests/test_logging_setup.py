@@ -10,6 +10,7 @@ from finansal_analiz_sistemi.log_tools import (
 
 
 def test_utils_setup_logger_adds_duplicate_filter_and_disables_propagation():
+    """Test test_utils_setup_logger_adds_duplicate_filter_and_disables_propagation."""
     root = logging.getLogger()
     old_handlers = root.handlers[:]
     old_filters = root.filters[:]

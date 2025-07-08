@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_crosses_above_simple_numeric():
+    """Test test_crosses_above_simple_numeric."""
     s1 = pd.Series([1, 2, 3, 4])
     s2 = pd.Series([4, 3, 2, 1])
     result = crosses_above(s1, s2)
@@ -20,6 +21,7 @@ def test_crosses_above_simple_numeric():
 
 
 def test_crosses_below_simple_numeric():
+    """Test test_crosses_below_simple_numeric."""
     s1 = pd.Series([4, 3, 2, 1])
     s2 = pd.Series([1, 2, 3, 4])
     result = crosses_below(s1, s2)
@@ -28,6 +30,7 @@ def test_crosses_below_simple_numeric():
 
 
 def test_crosses_above_with_nan_returns_false():
+    """Test test_crosses_above_with_nan_returns_false."""
     s1 = pd.Series([1, 2, np.nan, 4])
     s2 = pd.Series([4, 3, 2, 1])
     result = crosses_above(s1, s2)
@@ -36,6 +39,7 @@ def test_crosses_above_with_nan_returns_false():
 
 
 def test_crosses_below_with_nan_returns_false():
+    """Test test_crosses_below_with_nan_returns_false."""
     s1 = pd.Series([4, 3, np.nan, 1])
     s2 = pd.Series([1, 2, 3, 4])
     result = crosses_below(s1, s2)
@@ -45,6 +49,7 @@ def test_crosses_below_with_nan_returns_false():
 
 @pytest.mark.parametrize("func", [crosses_above, crosses_below])
 def test_cross_functions_equal_series_return_false(func):
+    """Test test_cross_functions_equal_series_return_false."""
     s = pd.Series([1, 1, 1, 1])
     result = func(s, s)
     expected = pd.Series([False, False, False, False], dtype=bool)
@@ -53,6 +58,7 @@ def test_cross_functions_equal_series_return_false(func):
 
 
 def test_crosses_above_misaligned_index_length_matches_intersection():
+    """Test test_crosses_above_misaligned_index_length_matches_intersection."""
     s1 = pd.Series([1, 2, 3, 4], index=[0, 1, 2, 3])
     s2 = pd.Series([4, 3, 2, 1], index=[2, 3, 4, 5])
     result = crosses_above(s1, s2)
@@ -60,6 +66,7 @@ def test_crosses_above_misaligned_index_length_matches_intersection():
 
 
 def test_crosses_below_misaligned_index_length_matches_intersection():
+    """Test test_crosses_below_misaligned_index_length_matches_intersection."""
     s1 = pd.Series([4, 3, 2, 1], index=[0, 1, 2, 3])
     s2 = pd.Series([1, 2, 3, 4], index=[2, 3, 4, 5])
     result = crosses_below(s1, s2)
@@ -68,6 +75,7 @@ def test_crosses_below_misaligned_index_length_matches_intersection():
 
 @pytest.mark.parametrize("func", [crosses_above, crosses_below])
 def test_cross_functions_with_none_returns_empty_false_series(func):
+    """Test test_cross_functions_with_none_returns_empty_false_series."""
     s = pd.Series([1, 2, 3])
     result = func(None, s)
     expected = pd.Series(False, index=[])
@@ -75,6 +83,7 @@ def test_cross_functions_with_none_returns_empty_false_series(func):
 
 
 def test_cross_functions_all_nan_do_not_fail():
+    """Test test_cross_functions_all_nan_do_not_fail."""
     s_nan = pd.Series([np.nan, np.nan, np.nan])
     expected = pd.Series([False, False, False], index=s_nan.index, dtype=bool)
     result_above = crosses_above(s_nan, s_nan)

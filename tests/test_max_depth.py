@@ -6,6 +6,7 @@ import settings
 
 
 def _nested(depth: int):
+    """Test _nested."""
     expr = "x>0"
     for i in range(depth, 0, -1):
         expr = {"code": f"F{i}", "sub_expr": expr}
@@ -13,6 +14,7 @@ def _nested(depth: int):
 
 
 def test_max_depth_guard(monkeypatch):
+    """Test test_max_depth_guard."""
     df = pd.DataFrame({"x": [1]})
     monkeypatch.setattr(settings, "MAX_FILTER_DEPTH", 5)
     with pytest.raises(fe.QueryError):

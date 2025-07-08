@@ -15,6 +15,7 @@ sys.modules.setdefault("pandas_ta", types.SimpleNamespace(Strategy=lambda **kw: 
 
 
 def test_get_fiyat_no_data_nearby():
+    """Test test_get_fiyat_no_data_nearby."""
     df = pd.DataFrame({"hisse_kodu": [], "tarih": [], "close": []})
     out = backtest_core._get_fiyat(
         df, pd.to_datetime("01.03.2025", dayfirst=True), "close"
@@ -23,6 +24,7 @@ def test_get_fiyat_no_data_nearby():
 
 
 def test_get_fiyat_invalid_value():
+    """Test test_get_fiyat_invalid_value."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],
@@ -37,6 +39,7 @@ def test_get_fiyat_invalid_value():
 
 
 def test_backtest_empty_data():
+    """Test test_backtest_empty_data."""
     rapor_df, detay_df = backtest_core.calistir_basit_backtest(
         {"F1": {"hisseler": [], "sebep": "OK", "hisse_sayisi": 0}},
         pd.DataFrame(),
@@ -47,6 +50,7 @@ def test_backtest_empty_data():
 
 
 def test_backtest_invalid_dates():
+    """Test test_backtest_invalid_dates."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],

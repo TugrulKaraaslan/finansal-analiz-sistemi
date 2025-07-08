@@ -15,6 +15,7 @@ psutil = pytest.importorskip("psutil")
 
 @pytest.mark.slow
 def test_memory_clean(tmp_path, monkeypatch):
+    """Test test_memory_clean."""
     mp_file = Path("reports/memory_profile.csv")
     if mp_file.exists():
         mp_file.unlink()
@@ -27,6 +28,7 @@ def test_memory_clean(tmp_path, monkeypatch):
     monkeypatch.setattr(main, "on_isle", lambda df: df)
 
     def fake_ind(df):
+        """Test fake_ind."""
         from utils.memory_profile import mem_profile
 
         with mem_profile():
@@ -44,6 +46,7 @@ def test_memory_clean(tmp_path, monkeypatch):
     )
 
     def fake_rapor(summary, detail):
+        """Test fake_rapor."""
         from utils.memory_profile import mem_profile
 
         with mem_profile():

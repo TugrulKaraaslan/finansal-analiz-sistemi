@@ -4,6 +4,7 @@ from report_stats import build_stats_df
 
 
 def test_kpi_pct_inflate():
+    """Test test_kpi_pct_inflate."""
     df = pd.DataFrame(
         {
             "filtre_kodu": ["F"],

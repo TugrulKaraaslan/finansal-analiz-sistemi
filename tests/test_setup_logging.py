@@ -7,6 +7,7 @@ from finansal_analiz_sistemi.log_tools import DuplicateFilter, setup_logging
 
 
 def test_setup_logging_deduplicates_and_sets_propagate():
+    """Test test_setup_logging_deduplicates_and_sets_propagate."""
     root = logging.getLogger()
     old_handlers = root.handlers[:]
     old_filters = root.filters[:]

@@ -10,6 +10,7 @@ sys.modules.pop("pandas_ta", None)
 
 
 def test_duplicate_columns():
+    """Test test_duplicate_columns."""
     df = pd.DataFrame({"close": [1, 2, 3, 4, 5]})
     out = calculate_indicators(df.copy(), indicators=["ema_5", "ema_5"])
     assert not out.columns.duplicated().any(), "Duplicate column oluştu!"

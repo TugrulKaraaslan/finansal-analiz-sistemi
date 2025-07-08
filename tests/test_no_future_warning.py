@@ -6,6 +6,7 @@ from utils.compat import safe_concat, safe_to_excel
 
 
 def test_no_future_warning(tmp_path):
+    """Test test_no_future_warning."""
     df = pd.DataFrame({"a": [1]})
     with warnings.catch_warnings(record=True) as rec:
         warnings.simplefilter("error", FutureWarning)

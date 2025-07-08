@@ -15,6 +15,7 @@ config = _cfg
 
 
 def test_ichimoku_mapping_extends_raw_columns():
+    """Test test_ichimoku_mapping_extends_raw_columns."""
     filters = pd.DataFrame(
         {"FilterCode": ["F1"], "PythonQuery": ["ichimoku_conversionline > 0"]}
     )

@@ -4,6 +4,7 @@ from report_generator import LEGACY_SUMMARY_COLS, generate_full_report
 
 
 def test_error_list_writes_sheet(tmp_path):
+    """Test test_error_list_writes_sheet."""
     errs = [
         {
             "filtre_kodu": "T1",

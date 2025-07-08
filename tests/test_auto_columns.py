@@ -4,6 +4,7 @@ import preprocessor
 
 
 def test_volume_tl_auto_added():
+    """Test test_volume_tl_auto_added."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],

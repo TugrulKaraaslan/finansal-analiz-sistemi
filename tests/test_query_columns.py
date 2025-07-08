@@ -4,11 +4,13 @@ import filter_engine
 
 
 def test_extract_ignore_string_literals():
+    """Test test_extract_ignore_string_literals."""
     cols = filter_engine._extract_query_columns('aciklama == "BETA" and close > 0')
     assert cols == {"aciklama", "close"}
 
 
 def test_apply_single_filter_string_literal():
+    """Test test_apply_single_filter_string_literal."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],

@@ -8,6 +8,7 @@ import pytest
 
 @pytest.mark.slow
 def test_memory_usage(tmp_path: Path):
+    """Test test_memory_usage."""
     csv = tmp_path / "mini.csv"
     pd.DataFrame(
         {

@@ -4,6 +4,7 @@ from finansal_analiz_sistemi.logging_utils import ERROR_COUNTER, ErrorCountingFi
 
 
 def test_counter_increments():
+    """Test test_counter_increments."""
     ERROR_COUNTER["errors"] = 0
     ERROR_COUNTER["warnings"] = 0
     logger = logging.getLogger("dummy_test")

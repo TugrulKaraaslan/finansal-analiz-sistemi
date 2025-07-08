@@ -19,5 +19,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
     ],
 )
 def test_normalize_pct(raw, expected):
+    """Test test_normalize_pct."""
     result = normalize_pct(pd.Series([raw]))[0]
     assert result == pytest.approx(expected)
