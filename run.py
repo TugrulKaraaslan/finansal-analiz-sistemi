@@ -27,7 +27,18 @@ if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Return sample summary, detail and stats frames for reports."""
+    """Return basic summary, detail and stats frames for reports.
+
+    Parameters
+    ----------
+    rapor_df : pd.DataFrame
+        Combined backtest results.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+        ``ozet_df`` summary, ``detay_df`` detail and ``istatistik_df`` frames.
+    """
     if rapor_df is None or rapor_df.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
@@ -38,7 +49,15 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
 
 
 def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Display results in a lightweight Streamlit interface."""
+    """Display results in a lightweight Streamlit interface.
+
+    Parameters
+    ----------
+    ozet_df : pd.DataFrame
+        Summary results to present on the overview tab.
+    detay_df : pd.DataFrame
+        Detailed results shown on the second tab.
+    """
     import streamlit as st
 
     st.sidebar.title("Menü")
@@ -78,6 +97,11 @@ def veri_yukle(force_excel_reload: bool = False):
     ----------
     force_excel_reload : bool, optional
         Reload stock data from Excel/CSV even when the Parquet cache is present.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame]
+        ``df_filters`` and ``df_raw`` DataFrames.
     """
     df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
     if df_filters is None or df_filters.empty:
@@ -94,7 +118,18 @@ def veri_yukle(force_excel_reload: bool = False):
 
 
 def on_isle(df: pd.DataFrame) -> pd.DataFrame:
-    """Preprocess raw stock data."""
+    """Preprocess raw stock data.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Raw dataset loaded from the CSV/Parquet files.
+
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned dataset ready for indicator calculation.
+    """
     processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
     if processed is None or processed.empty:
         logger.critical("Veri ön işleme başarısız.")
@@ -103,7 +138,18 @@ def on_isle(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate indicators and crossovers."""
+    """Calculate indicators and crossover columns.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Preprocessed stock dataset.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing calculated indicator columns.
+    """
     wanted_cols = utils.extract_columns_from_filters_cached(
         df_filtre_kurallari.to_csv(index=False),
         tuple(config.SERIES_SERIES_CROSSOVERS),
@@ -125,7 +171,20 @@ def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
-    """Apply filter rules to indicator data."""
+    """Apply filter rules to indicator data.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Indicator dataset containing crossover columns.
+    tarama_tarihi : datetime-like
+        Screening date used to select rows.
+
+    Returns
+    -------
+    tuple[dict, dict]
+        Filter results and skipped-filter log dictionary.
+    """
     return filter_engine.uygula_filtreler(
         df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
     )
@@ -137,7 +196,24 @@ def backtest_yap(
     tarama_tarihi: str,
     satis_tarihi: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Run simple backtest on filtered results."""
+    """Run simple backtest on filtered results.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Indicator dataset used for price lookup.
+    filtre_sonuclari : dict
+        Mapping of filter code to list of tickers.
+    tarama_tarihi : str
+        Screening date in ``dd.mm.yyyy`` format.
+    satis_tarihi : str
+        Sell date in ``dd.mm.yyyy`` format.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame]
+        Summary and detail DataFrames for reporting.
+    """
     rapor_df, detay_df = backtest_core.calistir_basit_backtest(
         filtre_sonuc_dict=filtre_sonuclari,
         df_tum_veri=df,
@@ -152,7 +228,15 @@ def backtest_yap(
 
 
 def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Save Excel report if data available."""
+    """Save Excel report if data is available.
+
+    Parameters
+    ----------
+    rapor_df : pd.DataFrame
+        Summary table returned from the backtest.
+    detay_df : pd.DataFrame
+        Detail table with per-stock results.
+    """
     if rapor_df.empty:
         logger.info("Rapor verisi boş.")
         return
@@ -195,12 +279,20 @@ def calistir_tum_sistemi(
     Parameters
     ----------
     tarama_tarihi_str : str
-        Filtrelerin uygulanacağı tarama tarihi (``dd.mm.yyyy``).
+        Screening date in ``dd.mm.yyyy`` format.
     satis_tarihi_str : str
-        Geri test satış tarihi (``dd.mm.yyyy``).
+        Sell date in ``dd.mm.yyyy`` format.
     force_excel_reload_param : bool, optional
-        Parquet dosyası mevcut olsa bile veri setini Excel/CSV kaynaklarından
-        yeniden yükle.
+        Reload raw data from Excel/CSV even when the Parquet cache exists.
+    logger_param : optional
+        Logger instance for progress output.
+    output_path : str or Path, optional
+        Excel report path. When ``None`` only CLI output is produced.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame, dict | None]
+        Summary DataFrame, detail DataFrame and skipped-filter log.
     """
     import gc
 
