@@ -1,9 +1,4 @@
-# run.py
-# -*- coding: utf-8 -*-
-# Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
-# Ana Çalıştırma Script'i
-# Tuğrul Karaaslan & Gemini
-# Tarih: 18 Mayıs 2025 (Erken hata durdurma mantığı eklendi, loglama iyileştirildi)
+"""Command line entry point for the backtest workflow."""
 
 from __future__ import annotations
 

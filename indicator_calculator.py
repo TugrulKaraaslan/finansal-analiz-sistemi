@@ -1,8 +1,4 @@
-# indicator_calculator.py
-# -*- coding: utf-8 -*-
-# Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
-# Modül: Teknik İndikatörler ve Kesişim Sinyalleri Hesaplama
-# Tuğrul Karaaslan & Gemini
+"""Utilities for computing technical indicators and crossover signals."""
 
 from __future__ import annotations
 

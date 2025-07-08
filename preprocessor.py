@@ -1,8 +1,4 @@
-# preprocessor.py
-# -*- coding: utf-8 -*-
-# Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
-# Modül: Veri Ön İşleme
-# Tuğrul Karaaslan & Gemini
+"""Data preprocessing helpers for stock price datasets."""
 
 from __future__ import annotations
 
@@ -14,9 +10,6 @@ from pandas import CategoricalDtype
 
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.logging_config import get_logger
-
-# Tarih: 18 Mayıs 2025 (Sütun adı standardizasyonu sonrası, loglama iyileştirmeleri)
-
 
 logger = get_logger(__name__)
 

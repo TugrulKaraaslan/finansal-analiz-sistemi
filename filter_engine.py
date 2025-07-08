@@ -1,9 +1,4 @@
-# filter_engine.py
-# -*- coding: utf-8 -*-
-# Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
-# Modül: Filtreleme Motoru
-# Tuğrul Karaaslan & Gemini
-# Tarih: 18 Mayıs 2025 (Loglama ve hata yönetimi iyileştirmeleri)
+"""Evaluate stock filter expressions and manage filter definitions."""
 
 from __future__ import annotations
 
