@@ -124,8 +124,6 @@ def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None
         )
 
 
-
-
 def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
     """Write problematic filters to ``Hatalar`` sheet if provided."""
 
