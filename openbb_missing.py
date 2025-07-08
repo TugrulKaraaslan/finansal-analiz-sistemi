@@ -16,7 +16,7 @@ except Exception:  # pragma: no cover - optional dependency
 
 
 def _call_openbb(func_name: str, **kwargs):
-    """Invoke an OpenBB technical analysis function if available.
+    """Invoke an OpenBB technical analysis function when installed.
 
     Parameters
     ----------

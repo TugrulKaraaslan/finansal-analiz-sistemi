@@ -28,7 +28,10 @@ def _align(a: pd.Series, b: pd.Series) -> tuple[pd.Series, pd.Series]:
 
 
 def crosses_above(a: pd.Series, b: pd.Series) -> pd.Series:
-    """Return ``True`` where ``a`` crosses above ``b``."""
+    """Return ``True`` where ``a`` crosses above ``b``.
+
+    When either input is ``None`` an empty boolean series is returned.
+    """
     if a is None or b is None:
         return pd.Series(False, index=[])
     x, y = _align(a, b)
@@ -36,7 +39,10 @@ def crosses_above(a: pd.Series, b: pd.Series) -> pd.Series:
 
 
 def crosses_below(a: pd.Series, b: pd.Series) -> pd.Series:
-    """Return ``True`` where ``a`` crosses below ``b``."""
+    """Return ``True`` where ``a`` crosses below ``b``.
+
+    When either input is ``None`` an empty boolean series is returned.
+    """
     if a is None or b is None:
         return pd.Series(False, index=[])
     x, y = _align(a, b)
