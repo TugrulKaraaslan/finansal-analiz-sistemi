@@ -27,7 +27,9 @@ def tarama_denetimi(
         ["kod", "tip", "durum", "sebep", "eksik_sutunlar", "nan_sutunlar", "secim_adedi"]
     """
     if "kod" not in df_filtreler.columns and "FilterCode" in df_filtreler.columns:
-        df_filtreler = df_filtreler.rename(columns={"FilterCode": "kod"})  # pragma: no cover
+        df_filtreler = df_filtreler.rename(
+            columns={"FilterCode": "kod"}
+        )  # pragma: no cover
     kayıtlar = []
     for _, sat in df_filtreler.iterrows():
         _, info = _apply_single_filter(df_indikator, sat["kod"], sat["PythonQuery"])

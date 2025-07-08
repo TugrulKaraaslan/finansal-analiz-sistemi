@@ -36,7 +36,6 @@ except Exception:
     pass
 
 
-
 # numpy>=2.0 paketlerinde `NaN` sabiti kaldırıldı. pandas_ta halen bu adı
 # kullandığından import sırasında hata oluşabiliyor. Eğer `np.NaN` mevcut
 # değilse `np.nan` değerini aynı isimle tanımlayarak uyumluluk sağlanır.
