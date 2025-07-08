@@ -1,3 +1,5 @@
+"""Additional coverage tests for utility modules."""
+
 import pandas as pd
 
 import src.kontrol_araci as kontrol_araci

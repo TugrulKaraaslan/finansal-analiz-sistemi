@@ -1,3 +1,5 @@
+"""Delete aged log and lock files from the given directory."""
+
 from __future__ import annotations
 
 import argparse
