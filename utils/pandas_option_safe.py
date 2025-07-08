@@ -1,3 +1,5 @@
+"""Helpers to safely set pandas options across versions."""
+
 from collections.abc import Iterator
 from contextlib import contextmanager
 

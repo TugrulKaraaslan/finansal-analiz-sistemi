@@ -1,3 +1,5 @@
+"""Ensure memory profile cleanup behaves as expected."""
+
 import os
 from pathlib import Path
 

@@ -1,3 +1,5 @@
+"""Check that summary counts appear in log output."""
+
 import logging
 import os
 import sys

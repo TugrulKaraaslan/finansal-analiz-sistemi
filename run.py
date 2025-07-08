@@ -18,13 +18,12 @@ from finansal_analiz_sistemi.log_tools import CounterFilter, setup_logger
 from finansal_analiz_sistemi.logging_config import get_logger
 from utils.date_utils import parse_date
 
-# --- EKLENEN KRİTİK KONTROL ---
+# Ensure mandatory indicators list is defined
 if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
     logging.exception("Başlatma hatası: config.CORE_INDICATORS eksik veya boş.")
     raise RuntimeError(
         "CORE_INDICATORS eksik veya boş! Lütfen config.py dosyasını kontrol edin."
     )
-# ------------------------------
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
