@@ -7,8 +7,6 @@ from cachetools import TTLCache
 from finansal_analiz_sistemi import config
 from src.utils.excel_reader import open_excel_cached
 
-CACHE: TTLCache = TTLCache(maxsize=256, ttl=4 * 60 * 60)  # 4 saat LRU+TTL
-
 
 class DataLoaderCache:
     """Basit dosya okuma önbelleği.
@@ -74,27 +72,3 @@ class DataLoaderCache:
     def clear(self) -> None:
         """Clear the internal cache."""
         self.loaded_data.clear()
-
-
-def _read_parquet(ticker: str, start: str, end: str) -> pd.DataFrame:
-    """Simulate reading parquet data for a ticker between two dates."""
-
-    dates = pd.date_range(start, end, freq="D")
-    return pd.DataFrame({"hisse_kodu": ticker, "tarih": dates})
-
-
-def get_df(ticker: str, start: str, end: str) -> pd.DataFrame:
-    """Return cached DataFrame for ``ticker`` between ``start`` and ``end``."""
-
-    key = f"{ticker}_{start}_{end}"
-    if key in CACHE:
-        return CACHE[key]
-    df = _read_parquet(ticker, start, end)
-    CACHE[key] = df
-    return df
-
-
-def clear_cache() -> None:
-    """Empty the global cache."""
-
-    CACHE.clear()

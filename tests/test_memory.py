@@ -7,7 +7,25 @@ import gc
 import psutil
 import pytest
 
-import data_loader_cache as dlc
+from cachetools import TTLCache
+import pandas as pd
+
+def _read_parquet(ticker: str, start: str, end: str) -> pd.DataFrame:
+    dates = pd.date_range(start, end, freq="D")
+    return pd.DataFrame({"hisse_kodu": ticker, "tarih": dates})
+
+_CACHE = TTLCache(maxsize=256, ttl=4 * 60 * 60)
+
+
+def get_df(ticker: str, start: str, end: str) -> pd.DataFrame:
+    key = f"{ticker}_{start}_{end}"
+    if key not in _CACHE:
+        _CACHE[key] = _read_parquet(ticker, start, end)
+    return _CACHE[key]
+
+
+def clear_cache() -> None:
+    _CACHE.clear()
 
 
 @pytest.mark.slow
@@ -15,11 +33,11 @@ def test_cache_memory():
     proc = psutil.Process()
     base = proc.memory_info().rss
     for _ in range(200):
-        dlc.get_df("AKBNK", "2023-01-01", "2023-12-29")
+        get_df("AKBNK", "2023-01-01", "2023-12-29")
     # Küçük dalgalanmaları elimine et
     gc.collect()
     after = proc.memory_info().rss
 
     # Toleransı 15 MB'a çek (CI container'larında hafıza tahsisi burst yapabiliyor)
     assert after - base < 15 * 1024 * 1024  # <15 MB artış
-    dlc.clear_cache()
+    clear_cache()
