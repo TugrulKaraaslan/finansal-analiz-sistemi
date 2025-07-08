@@ -11,7 +11,11 @@ class ReportWriter:
     """Simple Excel writer utility."""
 
     def write_report(self, df: pd.DataFrame, output_path: Path | str) -> None:
-        """Write DataFrame to Excel creating parent directories if needed."""
+        """Export ``df`` to ``output_path`` as an Excel workbook.
+
+        Parent directories are created automatically before calling
+        :meth:`pandas.DataFrame.to_excel`.
+        """
         output_path = Path(output_path)
         # Ebeveyn klasörleri otomatik oluştur
         output_path.parent.mkdir(parents=True, exist_ok=True)

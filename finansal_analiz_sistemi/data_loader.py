@@ -30,7 +30,11 @@ def _read_excel_cached(path: str) -> pd.DataFrame:
 
 
 def load_data(path: str) -> pd.DataFrame:
-    """Read a CSV file using the shared cache."""
+    """Return cached CSV contents as a DataFrame.
+
+    This helper delegates to :class:`DataLoaderCache` so repeated reads of the
+    same file avoid disk I/O.
+    """
     return _cache_loader.load_csv(path)
 
 

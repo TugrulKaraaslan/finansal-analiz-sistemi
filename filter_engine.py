@@ -167,7 +167,22 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
 
 
 def _apply_single_filter(df, kod, query):
-    """Execute a single filter query and return detailed info."""
+    """Execute ``query`` on ``df`` and return the result with status info.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Indicator dataset containing the referenced columns.
+    kod : str
+        Filter identifier used for logging.
+    query : str
+        pandas-compatible query expression.
+
+    Returns
+    -------
+    tuple[pandas.DataFrame | None, dict]
+        Selected rows and a dictionary describing execution outcome.
+    """
     info = {
         "kod": kod,
         "tip": "tarama",
