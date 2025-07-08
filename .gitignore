@@ -1,6 +1,9 @@
 __pycache__/
 pycache/
 .pytest_cache/
+**/__pycache__/
+**/pycache/
+**/.pytest_cache/
 .env
 *.log
 *.log.*
@@ -8,6 +11,9 @@ pycache/
 loglar/
 raporlar/
 cikti/
+**/loglar/
+**/raporlar/
+**/cikti/
 venv/
 .venv/
 .coverage
@@ -30,6 +36,7 @@ tmp/
 output/
 outputs/
 cache/
+**/cache/
 *.cache
 
 # Additional temporary directories
