@@ -74,3 +74,4 @@ docs/_build/
 *.sqlite
 *.pkl
 *.pickle
+*.parquet
