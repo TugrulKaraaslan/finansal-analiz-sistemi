@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 @atexit.register
 def _summary() -> None:
+    """Log a final summary and exit with error status if needed."""
     logger.info(
         "[SUMMARY] run finished — errors=%d warnings=%d",
         ERROR_COUNTER["errors"],
@@ -36,6 +37,7 @@ def run_analysis(csv_path: Path) -> Path:
 
 
 def parse_args():
+    """Parse command-line arguments for the CLI."""
     p = ArgumentParser(description="Rapor üret veya filtreleri doğrula")
 
     p.add_argument(

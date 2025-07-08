@@ -121,6 +121,7 @@ def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
 def _standardize_date_column(
     df: pd.DataFrame, file_path_for_log: str = "", logger_param=None
 ) -> pd.DataFrame:
+    """Rename the date column to ``tarih`` if a known variant exists."""
     if logger_param is None:
         logger_param = logger
     log = logger_param
@@ -160,6 +161,7 @@ def _standardize_date_column(
 def _standardize_ohlcv_columns(
     df: pd.DataFrame, file_path_for_log: str = "", logger_param=None
 ) -> pd.DataFrame:
+    """Normalize OHLCV column names according to ``config.OHLCV_MAP``."""
     if logger_param is None:
         logger_param = logger
     log = logger_param

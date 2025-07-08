@@ -78,6 +78,7 @@ EMA_CLOSE_PATTERN = re.compile(r"ema_(\d+)_keser_close_(yukari|asagi)")
 
 
 def _calc_ema(df: pd.DataFrame, n: int) -> pd.Series:
+    """Return the ``n`` period EMA of ``close`` or ``NaN`` if missing."""
     if "close" not in df.columns:
         return pd.Series(np.nan, index=df.index)
     return df["close"].ewm(span=n, adjust=False).mean()

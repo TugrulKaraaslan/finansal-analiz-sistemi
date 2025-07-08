@@ -75,6 +75,7 @@ FILTER_DEFS: dict[str, dict] = {}
 
 
 def _build_solution(err_type: str, msg: str) -> str:
+    """Return a human friendly hint for the given error."""
     if err_type == "GENERIC":
         m1 = _missing_re.search(msg)
         if m1:
