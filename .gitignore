@@ -30,6 +30,12 @@ outputs/
 cache/
 *.cache
 
+# Additional temporary directories
+**/temp/
+**/tmp/
+**/logs/
+**/output/
+
 # Editor and IDE directories
 .vscode/
 .idea/
