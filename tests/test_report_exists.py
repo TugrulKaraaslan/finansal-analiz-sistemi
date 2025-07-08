@@ -5,7 +5,7 @@ from finansal_analiz_sistemi.main import calistir_tum_sistemi
 
 
 def test_report_file_created(tmp_path, monkeypatch):
-    """Test test_report_file_created."""
+    """Verify that ``calistir_tum_sistemi`` writes an Excel report."""
     out = tmp_path / "test.xlsx"
 
     # Stub dependencies to avoid heavy operations
@@ -19,7 +19,7 @@ def test_report_file_created(tmp_path, monkeypatch):
     monkeypatch.setattr(main_mod, "filtre_uygula", lambda df, tarama_tarihi: ({}, {}))
 
     def fake_backtest(df, filtre_sonuclari, tarama_tarihi_str, satis_tarihi_str):
-        """Test fake_backtest."""
+        """Return minimal summary and detail frames for backtest stubbing."""
         summary = pd.DataFrame(
             {
                 "filtre_kodu": ["F1"],

@@ -4,7 +4,7 @@ from utils.compat import safe_concat, safe_to_excel
 
 
 def test_safe_to_excel(tmp_path):
-    """Test test_safe_to_excel."""
+    """Ensure :func:`safe_to_excel` writes a file without errors."""
     df = pd.DataFrame({"a": [1]})
     file = tmp_path / "t.xlsx"
     with pd.ExcelWriter(file) as wr:
@@ -13,6 +13,6 @@ def test_safe_to_excel(tmp_path):
 
 
 def test_safe_concat_empty():
-    """Test test_safe_concat_empty."""
+    """Ensure :func:`safe_concat` returns an empty DataFrame for empty input."""
     out = safe_concat([])
     assert out.empty and isinstance(out, pd.DataFrame)
