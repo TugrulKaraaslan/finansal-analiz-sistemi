@@ -14,13 +14,13 @@ CONSTANTS = [
 
 
 def test_config_has_defaults():
-    """Test test_config_has_defaults."""
+    """Every expected constant should exist in ``config``."""
     for name in CONSTANTS:
         assert hasattr(config, name)
 
 
 def test_cfg_alias():
-    """Test test_cfg_alias."""
+    """Module ``cfg`` must import ``config`` for backward compatibility."""
     mod = importlib.import_module("cfg")
     assert mod is config
 
@@ -32,7 +32,7 @@ def test_yaml_values_loaded():
 
 
 def test_config_exposes_paths():
-    """Test test_config_exposes_paths."""
+    """Configuration module should expose common path variables."""
     for name in [
         "VERI_KLASORU",
         "HISSE_DOSYA_PATTERN",

@@ -16,7 +16,7 @@ def _nested(depth: int):
 
 
 def test_max_depth_guard(monkeypatch):
-    """Test test_max_depth_guard."""
+    """Evaluation should fail when filter nesting exceeds the limit."""
     df = pd.DataFrame({"x": [1]})
     monkeypatch.setattr(settings, "MAX_FILTER_DEPTH", 5)
     with pytest.raises(fe.QueryError):

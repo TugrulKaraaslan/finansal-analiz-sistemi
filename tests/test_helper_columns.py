@@ -4,7 +4,7 @@ import preprocessor
 
 
 def test_auto_columns_generated(big_df):
-    """Test test_auto_columns_generated."""
+    """Preprocessor should compute helper columns like ``volume_tl``."""
     slim = big_df.head(1000).copy()
     slim["psar_long"] = slim["high"]
     slim["psar_short"] = slim["low"]

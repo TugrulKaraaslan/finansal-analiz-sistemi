@@ -12,7 +12,7 @@ from run import run_pipeline  # noqa: E402
 
 
 def test_cli_creates_report(tmp_path):
-    """Test test_cli_creates_report."""
+    """CLI pipeline should write an Excel report to disk."""
     out = tmp_path / "cli_report.xlsx"
     root = Path(__file__).parent / "smoke_data"
     result = run_pipeline(

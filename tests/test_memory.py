@@ -34,7 +34,7 @@ def clear_cache() -> None:
 
 @pytest.mark.slow
 def test_cache_memory():
-    """Test test_cache_memory."""
+    """Repeated loads should not increase memory usage significantly."""
     proc = psutil.Process()
     base = proc.memory_info().rss
     for _ in range(200):

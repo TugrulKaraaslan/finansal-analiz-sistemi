@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_t17_t500_ok():
-    """Test test_t17_t500_ok."""
+    """Specific composite filter ``T17_T500`` should evaluate to ``OK``."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],

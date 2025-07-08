@@ -8,7 +8,7 @@ from report_generator import generate_full_report
 
 
 def test_run_side_log(tmp_path: Path) -> None:
-    """Test test_run_side_log."""
+    """Excel report generation should also produce a log file."""
     out = tmp_path / "demo.xlsx"
     summary = pd.DataFrame(
         {

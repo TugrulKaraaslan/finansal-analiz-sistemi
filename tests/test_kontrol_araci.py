@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_tarama_denetimi_collects_info():
-    """Test test_tarama_denetimi_collects_info."""
+    """Filter scans should collect result details for each code."""
     df_filtreler = pd.DataFrame(
         {
             "kod": ["F1", "F2"],
@@ -49,7 +49,7 @@ def test_tarama_denetimi_collects_info():
 
 
 def test_tarama_denetimi_empty_filters():
-    """Test test_tarama_denetimi_empty_filters."""
+    """Return summary-only output when no filters are provided."""
     df_filtreler = pd.DataFrame(columns=["kod", "PythonQuery"])
     out = kontrol_araci.tarama_denetimi(df_filtreler, pd.DataFrame())
     assert len(out) == 1
@@ -57,7 +57,7 @@ def test_tarama_denetimi_empty_filters():
 
 
 def test_tarama_denetimi_filtercode_renamed():
-    """Test test_tarama_denetimi_filtercode_renamed."""
+    """Accept ``FilterCode`` column name as an alternative to ``kod``."""
     df_filtreler = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 0"]})
     df_ind = pd.DataFrame({"close": [1]})
     out = kontrol_araci.tarama_denetimi(df_filtreler, df_ind)

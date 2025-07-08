@@ -13,7 +13,7 @@ import backtest_core  # noqa: E402
 
 
 def _df():
-    """Test _df."""
+    """Return a tiny DataFrame used by error-code tests."""
     return pd.DataFrame(
         {
             "hisse_kodu": ["AAA", "AAA"],
@@ -28,7 +28,7 @@ def _df():
 
 
 def test_sebep_kodu_passthrough_ok():
-    """Test test_sebep_kodu_passthrough_ok."""
+    """Preserve ``OK`` codes from input filters."""
     filtre = {"F1": {"hisseler": ["AAA"], "sebep": "OK", "hisse_sayisi": 1}}
     rapor_df, _ = backtest_core.calistir_basit_backtest(
         filtre, _df(), "10.03.2025", "07.03.2025"
@@ -37,7 +37,7 @@ def test_sebep_kodu_passthrough_ok():
 
 
 def test_error_code_preserved():
-    """Test test_error_code_preserved."""
+    """Retain error codes returned by the backtest."""
     filtre = {"F1": {"hisseler": [], "sebep": "QUERY_ERROR", "hisse_sayisi": 0}}
     rapor_df, _ = backtest_core.calistir_basit_backtest(
         filtre, _df(), "10.03.2025", "07.03.2025"

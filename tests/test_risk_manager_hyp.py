@@ -27,7 +27,7 @@ max_dt = pd.Timestamp("2262-04-11").to_pydatetime()
     )
 )
 def test_fill_missing_business_day_no_nulls(dates):
-    """Test test_fill_missing_business_day_no_nulls."""
+    """Filled business days should not introduce ``NaN`` values."""
     df = pd.DataFrame({"tarih": dates})
     result = fill_missing_business_day(df)
     if pd.Series(dates).notna().any():
@@ -41,7 +41,7 @@ def test_fill_missing_business_day_no_nulls(dates):
     st.lists(st.floats(0, 100), min_size=1, max_size=20),
 )
 def test_tarama_denetimi_counts_selected(threshold, closes):
-    """Test test_tarama_denetimi_counts_selected."""
+    """Return the correct stock count when scanning with a threshold."""
     df_filtreler = pd.DataFrame({"kod": ["F"], "PythonQuery": [f"close > {threshold}"]})
     df_ind = pd.DataFrame({"close": closes})
     result = kontrol_araci.tarama_denetimi(df_filtreler, df_ind)

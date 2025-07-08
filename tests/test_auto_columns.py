@@ -6,7 +6,7 @@ import preprocessor
 
 
 def test_volume_tl_auto_added():
-    """Test test_volume_tl_auto_added."""
+    """Ensure ``volume_tl`` column is created when missing."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],

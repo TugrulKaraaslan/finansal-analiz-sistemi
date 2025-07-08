@@ -12,7 +12,7 @@ pytest.importorskip("pyarrow")
 
 
 def test_filter_loader_formats():
-    """Test test_filter_loader_formats."""
+    """Loader should support both Excel and Parquet filter files."""
     df = pd.DataFrame({"filtre_kodu": ["F1"], "notlar": [""]})
     with tempfile.TemporaryDirectory() as td:
         p = Path(td) / "filter.xlsx"

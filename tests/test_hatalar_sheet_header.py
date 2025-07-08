@@ -9,7 +9,7 @@ from finansal_analiz_sistemi.report_generator import save_hatalar_excel
 
 
 def test_hatalar_sheet_header(tmp_path: Path) -> None:
-    """Test test_hatalar_sheet_header."""
+    """Ensure saved error sheets use the expected column header order."""
     df = pd.DataFrame(
         {
             "filtre_kod": ["TST1"],
@@ -33,7 +33,7 @@ def test_hatalar_sheet_header(tmp_path: Path) -> None:
 
 
 def generate_excel_with_errors(tmp_path: Path) -> Path:
-    """Test generate_excel_with_errors."""
+    """Helper to create an Excel file containing error records."""
     errs = [
         {
             "filtre_kod": "E1",
@@ -50,7 +50,7 @@ def generate_excel_with_errors(tmp_path: Path) -> Path:
 
 
 def test_hatalar_sheet_has_filter_ids(tmp_path: Path) -> None:
-    """Test test_hatalar_sheet_has_filter_ids."""
+    """Exported error sheets should retain filter identifiers."""
     xlsx = generate_excel_with_errors(tmp_path)
     df = pd.read_excel(xlsx, sheet_name="Hatalar")
     assert df["filtre_kod"].notna().all()

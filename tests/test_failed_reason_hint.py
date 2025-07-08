@@ -27,7 +27,7 @@ def _build_report(tmp_path):
 
 
 def test_reason_hint_filled(tmp_path):
-    """Test test_reason_hint_filled."""
+    """Failure reports should contain reason and hint columns."""
     failures.clear()
     _generate_failure()
     df = _build_report(tmp_path)

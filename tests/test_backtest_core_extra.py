@@ -17,7 +17,7 @@ sys.modules.setdefault("pandas_ta", types.SimpleNamespace(Strategy=lambda **kw: 
 
 
 def test_get_fiyat_no_data_nearby():
-    """Test test_get_fiyat_no_data_nearby."""
+    """Return ``NaN`` when no price exists near the target date."""
     df = pd.DataFrame({"hisse_kodu": [], "tarih": [], "close": []})
     out = backtest_core._get_fiyat(
         df, pd.to_datetime("01.03.2025", dayfirst=True), "close"
@@ -26,7 +26,7 @@ def test_get_fiyat_no_data_nearby():
 
 
 def test_get_fiyat_invalid_value():
-    """Test test_get_fiyat_invalid_value."""
+    """Return ``NaN`` when price cannot be converted to float."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],
@@ -41,7 +41,7 @@ def test_get_fiyat_invalid_value():
 
 
 def test_backtest_empty_data():
-    """Test test_backtest_empty_data."""
+    """Backtest should yield empty results for empty datasets."""
     rapor_df, detay_df = backtest_core.calistir_basit_backtest(
         {"F1": {"hisseler": [], "sebep": "OK", "hisse_sayisi": 0}},
         pd.DataFrame(),
@@ -52,7 +52,7 @@ def test_backtest_empty_data():
 
 
 def test_backtest_invalid_dates():
-    """Test test_backtest_invalid_dates."""
+    """Handle unparsable date strings gracefully."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],

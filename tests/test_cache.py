@@ -9,7 +9,7 @@ pytest.importorskip("pyarrow")
 
 
 def test_rebuild_creates_nonempty_parquet(tmp_path, monkeypatch):
-    """Test test_rebuild_creates_nonempty_parquet."""
+    """Building the cache should produce a non-empty Parquet file."""
     csv = tmp_path / "a.csv"
     pd.DataFrame(
         {

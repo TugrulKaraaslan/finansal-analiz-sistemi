@@ -6,7 +6,7 @@ from report_stats import build_stats_df
 
 
 def test_kpi_pct_inflate():
-    """Test test_kpi_pct_inflate."""
+    """Percent columns over 1.5 should be divided by 100 once."""
     df = pd.DataFrame(
         {
             "filtre_kodu": ["F"],
