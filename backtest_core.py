@@ -15,7 +15,24 @@ def _get_fiyat(
     zaman_sutun_adi: str,
     logger_param=None,
 ) -> float:
-    """Return the price for a stock on ``tarih`` using ``zaman_sutun_adi``."""
+    """Return the price for ``tarih`` using the given column.
+
+    Parameters
+    ----------
+    df_hisse_veri : pd.DataFrame
+        Stock data for a single ticker.
+    tarih : pd.Timestamp
+        Date of interest.
+    zaman_sutun_adi : str
+        Column name holding the desired price.
+    logger_param : optional
+        Logger instance for debug output.
+
+    Returns
+    -------
+    float
+        Price as ``float`` or ``NaN`` when unavailable.
+    """
     if logger_param is None:
         logger_param = logger
     log = logger_param
@@ -26,7 +43,8 @@ def _get_fiyat(
     )
 
     try:
-        # Tarih sütununun datetime olduğundan emin ol (preprocessor bunu yapmalı)
+        # Ensure the date column is of datetime type. The preprocessor should
+        # normally handle this conversion.
         if not pd.api.types.is_datetime64_any_dtype(df_hisse_veri["tarih"]):
             df_hisse_veri["tarih"] = pd.to_datetime(
                 df_hisse_veri["tarih"],
@@ -59,12 +77,12 @@ def _get_fiyat(
             if pd.notna(fiyat):
                 try:
                     return float(fiyat)
-                except ValueError:  # Sayıya çevrilemiyorsa
+                except ValueError:  # Could not convert to float
                     log.warning(
                         f"'{zaman_sutun_adi}' sütunundaki değer ('{fiyat}') float'a çevrilemedi. Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}"
                     )
                     return np.nan
-            return np.nan  # Fiyat NaN ise NaN döndür
+            return np.nan  # propagate NaN values
         else:
             log.warning(
                 f"Fiyat almak için beklenen sütun '{zaman_sutun_adi}' bulunamadı. Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}. Mevcut Sütunlar: {df_hisse_veri.columns.tolist()}"
@@ -125,16 +143,16 @@ def calistir_basit_backtest(
         )
         return pd.DataFrame(), pd.DataFrame()
 
-    # config'den alım/satım zamanı ve komisyonu al
-    alim_fiyat_sutunu = config.ALIM_ZAMANI  # örn: 'open'
-    satis_fiyat_sutunu = config.SATIS_ZAMANI  # örn: 'open' veya 'close'
+    # Retrieve buy/sell timing configuration and commission
+    alim_fiyat_sutunu = config.ALIM_ZAMANI  # e.g. "open"
+    satis_fiyat_sutunu = config.SATIS_ZAMANI  # e.g. "open" or "close"
     komisyon_orani = config.KOMISYON_ORANI
-    # Fallback: use 'close' when the 'open' column is missing
+    # Fallback: use ``close`` when the ``open`` column is missing
     if alim_fiyat_sutunu not in df_tum_veri.columns:
         alim_fiyat_sutunu = "close"
     if satis_fiyat_sutunu not in df_tum_veri.columns:
         satis_fiyat_sutunu = "close"
-    # Uygulanan strateji bilgisini konfigürasyona yaz
+    # Record the strategy type for downstream reporting
     config.UYGULANAN_STRATEJI = "basit_backtest"
 
     summary_records = []
