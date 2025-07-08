@@ -37,7 +37,6 @@ HATALAR_COLUMNS = [
 
 def save_hatalar_excel(df: pd.DataFrame, out_path: str | Path) -> None:
     """Save errors DataFrame to an Excel file with normalized header."""
-
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df = df.reindex(columns=HATALAR_COLUMNS, fill_value="-")
@@ -114,7 +113,6 @@ def generate_summary(results: list[dict]) -> pd.DataFrame:
 
 def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None:
     """Write error list to a ``Hatalar`` sheet if any errors are present."""
-
     if error_list:
         safe_to_excel(
             pd.DataFrame(error_list, columns=["timestamp", "level", "message"]),
@@ -126,7 +124,6 @@ def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None
 
 def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
     """Write problematic filters to ``Hatalar`` sheet if provided."""
-
     if isinstance(kontrol_df, dict):
         hatalar = kontrol_df.get("hatalar", [])
         if hatalar:
@@ -170,7 +167,6 @@ def olustur_excel_raporu(
     logger_param=None,
 ) -> Path | None:
     """Create a three-sheet Excel report from provided records."""
-
     if logger_param is None:
         logger_param = logger
     if not kayitlar:
@@ -193,7 +189,6 @@ def kaydet_uc_sekmeli_excel(
     logger_param=None,
 ) -> Path:
     """Save ``ozet``, ``detay`` and ``istatistik`` DataFrames into ``fname``."""
-
     if logger_param is None:
         logger_param = logger
     fname = Path(fname)
@@ -232,7 +227,6 @@ def kaydet_raporlar(
     logger_param=None,
 ) -> Path:
     """Append three report sheets to an existing workbook."""
-
     if logger_param is None:
         logger_param = logger
     filepath = Path(filepath)
@@ -387,7 +381,6 @@ def _write_error_sheet(
     summary_df : pd.DataFrame, optional
         Summary table used to ensure every non-``OK`` record is represented.
     """
-
     from dataclasses import asdict, is_dataclass
 
     df_err = pd.DataFrame([asdict(e) if is_dataclass(e) else e for e in error_list])
@@ -454,7 +447,6 @@ def generate_full_report(
     logger_param=None,
 ) -> Path:
     """Create full Excel report with optional charts and error sheets."""
-
     if logger_param is None:
         logger_param = logger
     if keep_legacy:

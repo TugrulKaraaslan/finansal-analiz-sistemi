@@ -23,7 +23,6 @@ from finansal_analiz_sistemi import config
 
 def _ensure_rich_handler(log: logging.Logger) -> None:
     """Ensure that ``log`` has a ``RichHandler`` attached."""
-
     if not _HAVE_RICH:
         return
 
@@ -79,7 +78,6 @@ def setup_logging() -> logging.Logger:
 
 def get_logger(name: str | None = None) -> logging.Logger:
     """Return (and create) a logger with the given name."""
-
     log = logging.getLogger(name)
     if not os.getenv("LOG_SIMPLE"):
         _ensure_rich_handler(log)

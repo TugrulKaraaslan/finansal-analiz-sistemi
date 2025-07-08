@@ -37,7 +37,7 @@ def ichimoku(
     offset: int = 26,
     lookahead: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Wrapper for OpenBB ``ichimoku`` returning pandas objects."""
+    """Return Ichimoku indicator results via OpenBB."""
     df = pd.DataFrame(
         {
             "date": close.index,
@@ -67,7 +67,7 @@ def rsi(
     scalar: float = 100.0,
     drift: int = 1,
 ) -> pd.Series:
-    """Wrapper for OpenBB ``rsi`` returning a Series."""
+    """Return the RSI Series calculated by OpenBB."""
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
         "rsi",
@@ -89,7 +89,7 @@ def macd(
     slow: int = 26,
     signal: int = 9,
 ) -> pd.DataFrame:
-    """Wrapper for OpenBB ``macd`` returning a DataFrame."""
+    """Return MACD indicator DataFrame from OpenBB."""
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
         "macd",

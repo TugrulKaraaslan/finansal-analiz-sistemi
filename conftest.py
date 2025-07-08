@@ -26,7 +26,6 @@ def _sanitize_sys_modules() -> None:
     new ``ModuleType`` with the same name and copy their attributes so that
     ``sys.modules`` only contains hashable objects.
     """
-
     fixed: dict[str, ModuleType] = {}
     for name, mod in list(sys.modules.items()):
         if isinstance(mod, ModuleType):
@@ -100,5 +99,4 @@ def _fix_sys_modules():
 
 def pytest_sessionstart(session: pytest.Session) -> None:  # noqa: D401
     """Test oturumu başlamadan önce ``sys.modules``'u temizle."""
-
     _sanitize_sys_modules()

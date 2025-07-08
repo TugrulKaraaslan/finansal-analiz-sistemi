@@ -1,3 +1,5 @@
+"""Test helpers and common configuration."""
+
 import warnings
 
 import pytest

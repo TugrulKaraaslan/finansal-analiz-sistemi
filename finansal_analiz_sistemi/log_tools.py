@@ -68,7 +68,6 @@ _counter_filter = CounterFilter()
 
 def setup_logging(window: float = 2.0, pct_step: int = 10) -> logging.Logger:
     """Attach :class:`DuplicateFilter` to root logger and disable propagation."""
-
     global PCT_STEP
     PCT_STEP = max(1, pct_step)
     root = logging.getLogger()
@@ -80,7 +79,6 @@ def setup_logging(window: float = 2.0, pct_step: int = 10) -> logging.Logger:
 
 def setup_logger(level: int = logging.INFO) -> CounterFilter:
     """Configure root logger for console and file output."""
-
     root = logging.getLogger()
     log_dir = Path("loglar")
     log_dir.mkdir(exist_ok=True)
@@ -140,5 +138,4 @@ def setup_logger(level: int = logging.INFO) -> CounterFilter:
 
 def get_logger(name: str) -> logging.Logger:
     """Return a module-level logger."""
-
     return logging.getLogger(name)
