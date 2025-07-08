@@ -11,6 +11,5 @@ rich
 click
 psutil
 portalocker
-pyarrow
 cachetools
 loguru
