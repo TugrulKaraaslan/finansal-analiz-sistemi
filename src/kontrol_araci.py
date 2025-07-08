@@ -21,19 +21,13 @@ except ImportError:  # pragma: no cover - fallback when run as script
 def tarama_denetimi(
     df_filtreler: pd.DataFrame, df_indikator: pd.DataFrame
 ) -> pd.DataFrame:
-    """Her filtre satırını çalıştırıp _apply_single_filter'in info sözlüğünü
-    toplar.
+    """Execute each filter row and gather metadata from ``_apply_single_filter``.
 
-    Çıktı kolonları:
-        ["kod", "tip", "durum", "sebep",
-         "eksik_sutunlar", "nan_sutunlar", "secim_adedi"]
+    Returns a DataFrame with columns:
+        ["kod", "tip", "durum", "sebep", "eksik_sutunlar", "nan_sutunlar", "secim_adedi"]
     """
-    # --- HOT-PATCH C2: kolon uyum katmanı -----------------
     if "kod" not in df_filtreler.columns and "FilterCode" in df_filtreler.columns:
-        df_filtreler = df_filtreler.rename(
-            columns={"FilterCode": "kod"}
-        )  # pragma: no cover
-    # ------------------------------------------------------
+        df_filtreler = df_filtreler.rename(columns={"FilterCode": "kod"})  # pragma: no cover
     kayıtlar = []
     for _, sat in df_filtreler.iterrows():
         _, info = _apply_single_filter(df_indikator, sat["kod"], sat["PythonQuery"])

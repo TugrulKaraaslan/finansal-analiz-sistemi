@@ -165,7 +165,7 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
 
 
 def _apply_single_filter(df, kod, query):
-    """Tek filtre sorgusunu çalıştır ve detaylı info döndür."""
+    """Execute a single filter query and return detailed info."""
     info = {
         "kod": kod,
         "tip": "tarama",
@@ -239,7 +239,7 @@ def run_filter(code, df, expr):
 
 
 def run_single_filter(kod: str, query: str) -> dict:
-    """Küçük bir DataFrame üzerinde tek filtreyi çalıştır."""
+    """Run a filter expression against a minimal DataFrame."""
     df = pd.DataFrame({"close": [1]})
     atlanmis: dict = {}
     try:
@@ -292,27 +292,23 @@ def uygula_filtreler(
     tarama_tarihi: pd.Timestamp,
     logger_param=None,
 ) -> tuple[dict, dict]:
-    """
-    Verilen ana veri üzerinde, filtre kurallarını kullanarak hisseleri tarar.
+    """Apply filter rules on ``df_ana_veri`` and return results.
 
-    Args:
-        df_ana_veri (pd.DataFrame): İndikatörleri hesaplanmış tüm hisse verilerini içeren DataFrame.
-        df_filtre_kurallari (pd.DataFrame):
-            'filtre_kodu' (veya eski sürümlerde 'FilterCode') ile
-            'PythonQuery' sütunlarını içeren DataFrame.
-        tarama_tarihi (pd.Timestamp): Hangi tarihteki verilere göre tarama yapılacağı.
-        logger_param: Kullanılacak logger nesnesi (opsiyonel).
+    Parameters
+    ----------
+    df_ana_veri : pd.DataFrame
+        Dataset containing all indicator columns.
+    df_filtre_kurallari : pd.DataFrame
+        DataFrame with ``filtre_kodu``/``FilterCode`` and ``PythonQuery`` columns.
+    tarama_tarihi : pd.Timestamp
+        Date for which the screening is executed.
+    logger_param : optional
+        Logger instance to use.
 
-    Returns:
-        tuple[dict, dict]:
-            - filtre_sonuclar: {
-                filtre_kodu: {
-                    "hisseler": list[str],
-                    "sebep": str,
-                    "hisse_sayisi": int,
-                }
-            }
-            - atlanmis_filtreler_log_dict: {filtre_kodu: hata_mesajı}
+    Returns
+    -------
+    tuple[dict, dict]
+        ``filtre_sonuclar`` and ``atlanmis_filtreler_log_dict``.
     """
     if logger_param is None:
         logger_param = logger

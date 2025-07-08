@@ -35,8 +35,6 @@ try:  # pragma: no cover - optional dependency may be absent
 except Exception:
     pass
 
-# Tarih: 19 Mayıs 2025 (Tüm özel fonksiyonlar eklendi, reset_index
-# düzeltildi, filtre uyumu artırıldı v2)
 
 
 # numpy>=2.0 paketlerinde `NaN` sabiti kaldırıldı. pandas_ta halen bu adı
