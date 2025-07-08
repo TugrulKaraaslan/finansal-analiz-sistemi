@@ -1,3 +1,5 @@
+"""Runtime patches for optional dependencies used during tests."""
+
 from __future__ import annotations
 
 import types

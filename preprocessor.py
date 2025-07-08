@@ -25,10 +25,10 @@ except ImportError:
 
 
 def _temizle_sayisal_deger(deger):
-    """
-    Bir değeri sayısal (float) tipe dönüştürmeye çalışır.
-    Binlik ayıracı olarak nokta, ondalık ayıracı olarak virgül içeren string'leri de handle etmeye çalışır.
-    Başarısız olursa NaN döndürür.
+    """Convert ``deger`` to ``float`` if possible.
+
+    Handles thousand separators using ``.`` and decimal commas. Returns
+    ``np.nan`` when conversion fails.
     """
     if pd.isna(deger):
         return np.nan
@@ -64,13 +64,13 @@ def _temizle_sayisal_deger(deger):
 def on_isle_hisse_verileri(
     df_ham: pd.DataFrame, logger_param=None
 ) -> pd.DataFrame | None:
-    """
-    Ham hisse senedi verilerini ön işler:
-    - Tarih formatını düzeltir ve NaT değerleri yönetir.
-    - OHLCV ve volume sütunlarını sayısal tipe dönüştürür.
-    - Kritik sütunlardaki NaN değerleri yönetir.
-    - Veriyi sıralar.
-    - İsteğe bağlı olarak BIST tatil günlerini çıkarır.
+    """Preprocess raw equity data.
+
+    - Fix date format and handle ``NaT`` values.
+    - Convert OHLCV and volume columns to numeric.
+    - Manage NaN values in critical columns.
+    - Sort the dataset.
+    - Optionally remove BIST holidays.
     """
     if logger_param is None:
         logger_param = logger
