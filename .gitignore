@@ -29,3 +29,14 @@ output/
 outputs/
 cache/
 *.cache
+
+# Editor and IDE directories
+.vscode/
+.idea/
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Python cache files
+*.py[cod]
