@@ -11,7 +11,7 @@ def ensure_option(name: str, value) -> None:
     try:
         pd.set_option(name, value)
     except (AttributeError, KeyError, pd.errors.OptionError):
-        # Pandas <2.2'de bu seçenek yok; sessizce atla.
+        # Option missing in older pandas versions; skip silently
         pass
 
 
