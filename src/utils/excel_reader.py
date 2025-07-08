@@ -13,6 +13,16 @@ import pandas as pd
 _excel_cache: Dict[str, tuple[float, pd.ExcelFile]] = {}
 
 
+def clear_cache() -> None:
+    """Clear the internal ExcelFile cache and close workbooks."""
+    for _, xls in _excel_cache.values():
+        try:
+            xls.close()
+        except Exception:
+            pass
+    _excel_cache.clear()
+
+
 def open_excel_cached(path: str | os.PathLike[str], **kwargs: Any) -> pd.ExcelFile:
     """Return a cached ``ExcelFile`` object for the given path.
 
@@ -37,13 +47,3 @@ def read_excel_cached(
     """Parse ``sheet_name`` from a cached Excel workbook."""
     xls = open_excel_cached(path)
     return xls.parse(sheet_name=sheet_name, **kwargs)
-
-
-def clear_cache() -> None:
-    """Clear the internal ExcelFile cache and close workbooks."""
-    for _, xls in _excel_cache.values():
-        try:
-            xls.close()
-        except Exception:
-            pass
-    _excel_cache.clear()

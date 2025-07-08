@@ -43,20 +43,54 @@ warnings.filterwarnings(
 )
 
 
-# --- Helper: normalize_pct ---
-def normalize_pct(series):
-    """Strip ``%`` sign, convert to float and divide by 100 when values exceed 100."""
-    s = series.astype(str).str.replace("%", "", regex=False)
-    s = pd.to_numeric(s, errors="coerce")
-    return np.where(s.abs() > 100, s / 100.0, s).round(2)
-
-
 def _normalize_pct(s: pd.Series) -> pd.Series:
     """Convert whole-number percentages to fractional scale (÷100 once)."""
     s = pd.to_numeric(s, errors="coerce").copy()
     mask = s.abs() > 1.5
     s.loc[mask] = s.loc[mask] / 100
     return s.round(2)
+
+
+def build_detay_df(
+    summary_df: pd.DataFrame,
+    detail_df: pd.DataFrame,
+    strateji: str | None = None,
+) -> pd.DataFrame:
+    """Add strategy and reason code info to detail dataframe."""
+    strateji = strateji or getattr(config, "UYGULANAN_STRATEJI", "")
+    if "filtre_kodu" not in detail_df.columns:
+        merged = pd.DataFrame(
+            columns=[
+                "filtre_kodu",
+                "hisse_kodu",
+                "getiri_%",
+                "basari",
+                "strateji",
+                "sebep_kodu",
+            ]
+        )
+    else:
+        detail_df = detail_df.drop(columns=["sebep_kodu"], errors="ignore")
+        merged = detail_df.merge(
+            summary_df[["filtre_kodu", "sebep_kodu"]],
+            on="filtre_kodu",
+            how="left",
+        )
+    merged["strateji"] = strateji
+    if "getiri_yuzde" in merged.columns:
+        merged.rename(columns={"getiri_yuzde": "getiri_%"}, inplace=True)
+    if "getiri_%" in merged.columns:
+        merged["getiri_%"] = _normalize_pct(merged["getiri_%"]).round(2)
+    return merged[
+        [
+            "filtre_kodu",
+            "hisse_kodu",
+            "getiri_%",
+            "basari",
+            "strateji",
+            "sebep_kodu",
+        ]
+    ]
 
 
 def build_ozet_df(
@@ -153,48 +187,6 @@ def build_ozet_df(
     return subset
 
 
-def build_detay_df(
-    summary_df: pd.DataFrame,
-    detail_df: pd.DataFrame,
-    strateji: str | None = None,
-) -> pd.DataFrame:
-    """Add strategy and reason code info to detail dataframe."""
-    strateji = strateji or getattr(config, "UYGULANAN_STRATEJI", "")
-    if "filtre_kodu" not in detail_df.columns:
-        merged = pd.DataFrame(
-            columns=[
-                "filtre_kodu",
-                "hisse_kodu",
-                "getiri_%",
-                "basari",
-                "strateji",
-                "sebep_kodu",
-            ]
-        )
-    else:
-        detail_df = detail_df.drop(columns=["sebep_kodu"], errors="ignore")
-        merged = detail_df.merge(
-            summary_df[["filtre_kodu", "sebep_kodu"]],
-            on="filtre_kodu",
-            how="left",
-        )
-    merged["strateji"] = strateji
-    if "getiri_yuzde" in merged.columns:
-        merged.rename(columns={"getiri_yuzde": "getiri_%"}, inplace=True)
-    if "getiri_%" in merged.columns:
-        merged["getiri_%"] = _normalize_pct(merged["getiri_%"]).round(2)
-    return merged[
-        [
-            "filtre_kodu",
-            "hisse_kodu",
-            "getiri_%",
-            "basari",
-            "strateji",
-            "sebep_kodu",
-        ]
-    ]
-
-
 def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
     """Compute aggregated performance statistics."""
     toplam = len(ozet_df)
@@ -231,6 +223,14 @@ def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
             }
         ]
     )
+
+
+# --- Helper: normalize_pct ---
+def normalize_pct(series):
+    """Strip ``%`` sign, convert to float and divide by 100 when values exceed 100."""
+    s = series.astype(str).str.replace("%", "", regex=False)
+    s = pd.to_numeric(s, errors="coerce")
+    return np.where(s.abs() > 100, s / 100.0, s).round(2)
 
 
 def plot_summary_stats(
