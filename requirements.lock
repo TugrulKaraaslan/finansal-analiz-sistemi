@@ -76,8 +76,6 @@ portalocker==3.2.0
     # via -r requirements.txt
 psutil==7.0.0
     # via -r requirements.txt
-pyarrow==20.0.0
-    # via -r requirements.txt
 python-dateutil==2.9.0.post0
     # via
     #   -r requirements.txt
