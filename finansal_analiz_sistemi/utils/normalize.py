@@ -1,3 +1,5 @@
+"""Helpers for normalizing filter CSV column names."""
+
 import pandas as pd
 
 

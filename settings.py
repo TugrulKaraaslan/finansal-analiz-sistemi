@@ -1,3 +1,5 @@
+"""Load optional YAML settings controlling recursion depth."""
+
 from __future__ import annotations
 
 import os

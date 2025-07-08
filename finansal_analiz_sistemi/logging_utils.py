@@ -1,3 +1,5 @@
+"""Helpers for counting log messages during execution."""
+
 import logging
 
 ERROR_COUNTER: dict[str, int] = {"errors": 0, "warnings": 0}

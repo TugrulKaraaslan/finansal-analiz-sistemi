@@ -1,3 +1,5 @@
+"""Check that requirement lists are kept in sync across files."""
+
 import re
 import sys
 from pathlib import Path

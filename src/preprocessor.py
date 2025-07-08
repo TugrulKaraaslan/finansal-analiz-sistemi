@@ -1,3 +1,5 @@
+"""Minimal preprocessing utilities used by the CLI helpers."""
+
 import pandas as pd
 
 

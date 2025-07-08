@@ -1,4 +1,5 @@
-# data_loader_cache.py
+"""In-memory cache for CSV and Excel loaders."""
+
 import os
 
 import pandas as pd

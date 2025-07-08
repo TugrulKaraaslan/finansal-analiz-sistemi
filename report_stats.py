@@ -1,3 +1,5 @@
+"""Dataframe helpers for backtest result statistics and charts."""
+
 from __future__ import annotations
 
 import warnings
