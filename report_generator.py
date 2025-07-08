@@ -35,22 +35,20 @@ HATALAR_COLUMNS = [
 ]
 
 
-def save_hatalar_excel(df: pd.DataFrame, out_path: str | Path) -> None:
-    """Write error records to an Excel file.
-
-    The DataFrame columns are normalized to ``HATALAR_COLUMNS`` before writing
-    to ensure consistent output.
-    """
-    out_path = Path(out_path)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    df = df.reindex(columns=HATALAR_COLUMNS, fill_value="-")
-    with pd.ExcelWriter(out_path, engine="openpyxl") as writer:
-        df.to_excel(
-            writer,
-            sheet_name="Hatalar",
-            index=False,
-            columns=HATALAR_COLUMNS,
+def _build_detay_df(
+    detay_list: list[pd.DataFrame], trades: pd.DataFrame
+) -> pd.DataFrame:
+    """Combine partial detail frames and merge with trade results."""
+    detay_df = pd.concat(detay_list, ignore_index=True)
+    if trades is not None and not trades.empty:
+        detay_df = detay_df.merge(
+            trades,
+            on=["filtre_kodu", "hisse_kodu"],
+            how="left",
+            validate="one_to_one",
         )
+    return detay_df
+
 
 
 logger = get_logger(__name__)
@@ -97,192 +95,76 @@ EXPECTED_COLUMNS = [
 ]
 
 
-def generate_summary(results: list[dict]) -> pd.DataFrame:
-    """Build a summary DataFrame from backtest result records.
+def _write_error_sheet(
+    wr: pd.ExcelWriter,
+    error_list: Iterable,
+    summary_df: pd.DataFrame | None = None,
+) -> None:
+    """Write errors to ``Hatalar`` sheet.
 
-    The returned frame always contains the columns defined in
-    ``EXPECTED_COLUMNS`` in the same order.
+    Parameters
+    ----------
+    wr : pd.ExcelWriter
+        Writer object to write the sheet into.
+    error_list : Iterable
+        Explicit error entries generated during processing.
+    summary_df : pd.DataFrame, optional
+        Summary table used to ensure every non-``OK`` record is represented.
     """
-    summary_df = pd.DataFrame(results)
-    # Kolonları tam ve sabit sırada tut
-    summary_df = summary_df.reindex(columns=EXPECTED_COLUMNS, fill_value=np.nan)
+    from dataclasses import asdict, is_dataclass
 
-    if summary_df.empty:
-        logger.warning("generate_summary: sonuç listesi boş")
+    df_err = pd.DataFrame([asdict(e) if is_dataclass(e) else e for e in error_list])
+    if "filtre_kod" not in df_err.columns and "filtre_kodu" in df_err.columns:
+        df_err = df_err.rename(columns={"filtre_kodu": "filtre_kod"})
+    for col in [
+        "filtre_kod",
+        "hata_tipi",
+        "eksik_ad",
+        "detay",
+        "cozum_onerisi",
+        "reason",
+        "hint",
+    ]:
+        if col not in df_err.columns:
+            df_err[col] = "-"
 
-    return summary_df
+    if summary_df is not None and not summary_df.empty:
+        non_ok = summary_df[summary_df["sebep_kodu"] != "OK"]
+        if not non_ok.empty:
+            base_records = []
+            existing = set(df_err.get("filtre_kod", []))
+            for _, row in non_ok.iterrows():
+                if row["filtre_kodu"] in existing:
+                    continue
+                base_records.append(
+                    {
+                        "filtre_kod": row["filtre_kodu"],
+                        "hata_tipi": row["sebep_kodu"],
+                        "detay": row.get("sebep_aciklama", "-") or "-",
+                        "cozum_onerisi": "-",
+                        "eksik_ad": "-",
+                        "reason": "-",
+                        "hint": "-",
+                    }
+                )
+            if base_records:
+                df_err = safe_concat(
+                    [df_err, pd.DataFrame(base_records)], ignore_index=True
+                )
 
+    if df_err.empty:
+        return  # liste boşsa sheet oluşturma
 
-def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None:
-    """Append ``error_list`` to a ``Hatalar`` sheet when not empty."""
-    if error_list:
-        safe_to_excel(
-            pd.DataFrame(error_list, columns=["timestamp", "level", "message"]),
-            writer,
-            sheet_name="Hatalar",
-            index=False,
-        )
-
-
-def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
-    """Write problematic filters to ``Hatalar`` sheet if provided."""
-    if isinstance(kontrol_df, dict):
-        hatalar = kontrol_df.get("hatalar", [])
-        if hatalar:
-            safe_to_excel(
-                pd.DataFrame(hatalar),
-                writer,
-                sheet_name="Hatalar",
-                index=False,
-            )
-        return
-    if not isinstance(kontrol_df, pd.DataFrame) or kontrol_df.empty:
-        return
-    sorunlu = kontrol_df[
-        kontrol_df["durum"].isin(["CALISTIRILAMADI", "HATA", "DATASIZ"])
-    ]
-    cols = [
-        "kod",
-        "durum",
-        "sebep",
-        "eksik_sutunlar",
-        "nan_sutunlar",
-        "secim_adedi",
-    ]
-    sorunlu = sorunlu[cols]
-    sheet_name = "Hatalar"
-    safe_to_excel(sorunlu, writer, sheet_name=sheet_name, index=False)
-    ws = writer.sheets[sheet_name]
-    if hasattr(ws, "set_column"):
-        for i, col in enumerate(sorunlu.columns):
-            max_len = max(10, sorunlu[col].astype(str).str.len().max() + 2)
-            ws.set_column(i, i, max_len)
-    else:
-        for i, col in enumerate(sorunlu.columns, 1):
-            max_len = max(10, sorunlu[col].astype(str).str.len().max() + 2)
-            ws.column_dimensions[get_column_letter(i)].width = max_len
-
-
-def olustur_excel_raporu(
-    kayitlar: list[dict],
-    fname: str | Path,
-    logger_param=None,
-) -> Path | None:
-    """Create a three-sheet Excel report from provided records."""
-    if logger_param is None:
-        logger_param = logger
-    if not kayitlar:
-        logger_param.warning("Hiç kayıt yok – Excel raporu atlandı.")
-        return None
-    rapor_df = pd.DataFrame(kayitlar).sort_values("filtre_kodu")
-    return kaydet_uc_sekmeli_excel(
-        fname,
-        rapor_df,
-        pd.DataFrame(),
-        pd.DataFrame(),
-    )
-
-
-def kaydet_uc_sekmeli_excel(
-    fname: str | Path,
-    ozet_df: pd.DataFrame,
-    detay_df: pd.DataFrame,
-    istatistik_df: pd.DataFrame,
-    logger_param=None,
-) -> Path:
-    """Save ``ozet``, ``detay`` and ``istatistik`` DataFrames into ``fname``."""
-    if logger_param is None:
-        logger_param = logger
-    fname = Path(fname)
-    fname.parent.mkdir(parents=True, exist_ok=True)
-    with pd.ExcelWriter(
-        fname,
-        engine="xlsxwriter",
-        mode="w",
-    ) as w:
-        safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
-        safe_to_excel(detay_df, w, sheet_name="Detay", index=False)
-        safe_to_excel(istatistik_df, w, sheet_name="İstatistik", index=False)
-    # Per-run log handler
-    run_log = fname.with_suffix(".log")
-    fh = logging.FileHandler(run_log, encoding="utf-8")
-    fh.setFormatter(
-        logging.Formatter(
-            "%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S"
-        )
-    )
-    logging.getLogger().addHandler(fh)
-
-    log_fn = logger_param.info
-    if ozet_df.empty and detay_df.empty and istatistik_df.empty:
-        log_fn = logger_param.warning
-    log_fn("Saved report to %s", fname)
-    logger_param.info("Per-run log file: %s", run_log)
-    return fname
-
-
-def kaydet_raporlar(
-    ozet_df: pd.DataFrame,
-    detay_df: pd.DataFrame,
-    istat_df: pd.DataFrame,
-    filepath: Path,
-    logger_param=None,
-) -> Path:
-    """Append three report sheets to an existing workbook."""
-    if logger_param is None:
-        logger_param = logger
-    filepath = Path(filepath)
-    with pd.ExcelWriter(
-        filepath,
+    df_err = df_err.reindex(columns=HATALAR_COLUMNS, fill_value="-")
+    safe_to_excel(
+        df_err,
+        wr,
+        sheet_name="Hatalar",
+        index=False,
+        columns=HATALAR_COLUMNS,
         engine="openpyxl",
-        mode="a",
-        if_sheet_exists="replace",
-    ) as w:
-        safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
-        safe_to_excel(detay_df, w, sheet_name="Detay", index=False)
-        safe_to_excel(istat_df, w, sheet_name="İstatistik", index=False)
-    log_fn = logger_param.info
-    if ozet_df.empty and detay_df.empty and istat_df.empty:
-        log_fn = logger_param.warning
-    log_fn("Rapor kaydedildi → %s", filepath)
-    return filepath
+    )
 
-
-def _build_detay_df(
-    detay_list: list[pd.DataFrame], trades: pd.DataFrame
-) -> pd.DataFrame:
-    """Combine partial detail frames and merge with trade results."""
-    detay_df = pd.concat(detay_list, ignore_index=True)
-    if trades is not None and not trades.empty:
-        detay_df = detay_df.merge(
-            trades,
-            on=["filtre_kodu", "hisse_kodu"],
-            how="left",
-            validate="one_to_one",
-        )
-    return detay_df
-
-
-def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
-    """Write summary statistics to the given Excel writer."""
-    toplam = len(df_sum)
-    islemli = (df_sum["hisse_sayisi"] > 0).sum()
-    islemsiz = (df_sum["sebep_kodu"] == "NO_STOCK").sum()
-    hatali = toplam - islemli - islemsiz
-    gen_bas = round(islemli / toplam * 100, 2) if toplam else 0
-    gen_avg = round(df_sum["ort_getiri_%"].mean(skipna=True), 2)
-
-    stats = [
-        {
-            "toplam_filtre": toplam,
-            "islemli": islemli,
-            "işlemsiz": islemsiz,
-            "hatalı": hatali,
-            "genel_başarı_%": gen_bas,
-            "genel_ortalama_%": gen_avg,
-        }
-    ]
-    safe_to_excel(pd.DataFrame(stats), wr, sheet_name="İstatistik", index=False)
 
 
 def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
@@ -367,75 +249,40 @@ def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
         ws.insert_chart("A5", chart, {"x_scale": 1.2, "y_scale": 1.2})
 
 
-def _write_error_sheet(
-    wr: pd.ExcelWriter,
-    error_list: Iterable,
-    summary_df: pd.DataFrame | None = None,
-) -> None:
-    """Write errors to ``Hatalar`` sheet.
 
-    Parameters
-    ----------
-    wr : pd.ExcelWriter
-        Writer object to write the sheet into.
-    error_list : Iterable
-        Explicit error entries generated during processing.
-    summary_df : pd.DataFrame, optional
-        Summary table used to ensure every non-``OK`` record is represented.
-    """
-    from dataclasses import asdict, is_dataclass
+def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
+    """Write summary statistics to the given Excel writer."""
+    toplam = len(df_sum)
+    islemli = (df_sum["hisse_sayisi"] > 0).sum()
+    islemsiz = (df_sum["sebep_kodu"] == "NO_STOCK").sum()
+    hatali = toplam - islemli - islemsiz
+    gen_bas = round(islemli / toplam * 100, 2) if toplam else 0
+    gen_avg = round(df_sum["ort_getiri_%"].mean(skipna=True), 2)
 
-    df_err = pd.DataFrame([asdict(e) if is_dataclass(e) else e for e in error_list])
-    if "filtre_kod" not in df_err.columns and "filtre_kodu" in df_err.columns:
-        df_err = df_err.rename(columns={"filtre_kodu": "filtre_kod"})
-    for col in [
-        "filtre_kod",
-        "hata_tipi",
-        "eksik_ad",
-        "detay",
-        "cozum_onerisi",
-        "reason",
-        "hint",
-    ]:
-        if col not in df_err.columns:
-            df_err[col] = "-"
+    stats = [
+        {
+            "toplam_filtre": toplam,
+            "islemli": islemli,
+            "işlemsiz": islemsiz,
+            "hatalı": hatali,
+            "genel_başarı_%": gen_bas,
+            "genel_ortalama_%": gen_avg,
+        }
+    ]
+    safe_to_excel(pd.DataFrame(stats), wr, sheet_name="İstatistik", index=False)
 
-    if summary_df is not None and not summary_df.empty:
-        non_ok = summary_df[summary_df["sebep_kodu"] != "OK"]
-        if not non_ok.empty:
-            base_records = []
-            existing = set(df_err.get("filtre_kod", []))
-            for _, row in non_ok.iterrows():
-                if row["filtre_kodu"] in existing:
-                    continue
-                base_records.append(
-                    {
-                        "filtre_kod": row["filtre_kodu"],
-                        "hata_tipi": row["sebep_kodu"],
-                        "detay": row.get("sebep_aciklama", "-") or "-",
-                        "cozum_onerisi": "-",
-                        "eksik_ad": "-",
-                        "reason": "-",
-                        "hint": "-",
-                    }
-                )
-            if base_records:
-                df_err = safe_concat(
-                    [df_err, pd.DataFrame(base_records)], ignore_index=True
-                )
 
-    if df_err.empty:
-        return  # liste boşsa sheet oluşturma
 
-    df_err = df_err.reindex(columns=HATALAR_COLUMNS, fill_value="-")
-    safe_to_excel(
-        df_err,
-        wr,
-        sheet_name="Hatalar",
-        index=False,
-        columns=HATALAR_COLUMNS,
-        engine="openpyxl",
-    )
+def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None:
+    """Append ``error_list`` to a ``Hatalar`` sheet when not empty."""
+    if error_list:
+        safe_to_excel(
+            pd.DataFrame(error_list, columns=["timestamp", "level", "message"]),
+            writer,
+            sheet_name="Hatalar",
+            index=False,
+        )
+
 
 
 def generate_full_report(
@@ -638,17 +485,226 @@ def generate_full_report(
     return out_path
 
 
+
+def generate_summary(results: list[dict]) -> pd.DataFrame:
+    """Build a summary DataFrame from backtest result records.
+
+    The returned frame always contains the columns defined in
+    ``EXPECTED_COLUMNS`` in the same order.
+    """
+    summary_df = pd.DataFrame(results)
+    # Kolonları tam ve sabit sırada tut
+    summary_df = summary_df.reindex(columns=EXPECTED_COLUMNS, fill_value=np.nan)
+
+    if summary_df.empty:
+        logger.warning("generate_summary: sonuç listesi boş")
+
+    return summary_df
+
+
+
+def kaydet_raporlar(
+    ozet_df: pd.DataFrame,
+    detay_df: pd.DataFrame,
+    istat_df: pd.DataFrame,
+    filepath: Path,
+    logger_param=None,
+) -> Path:
+    """Append three report sheets to an existing workbook."""
+    if logger_param is None:
+        logger_param = logger
+    filepath = Path(filepath)
+    with pd.ExcelWriter(
+        filepath,
+        engine="openpyxl",
+        mode="a",
+        if_sheet_exists="replace",
+    ) as w:
+        safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
+        safe_to_excel(detay_df, w, sheet_name="Detay", index=False)
+        safe_to_excel(istat_df, w, sheet_name="İstatistik", index=False)
+    log_fn = logger_param.info
+    if ozet_df.empty and detay_df.empty and istat_df.empty:
+        log_fn = logger_param.warning
+    log_fn("Rapor kaydedildi → %s", filepath)
+    return filepath
+
+
+
+def kaydet_uc_sekmeli_excel(
+    fname: str | Path,
+    ozet_df: pd.DataFrame,
+    detay_df: pd.DataFrame,
+    istatistik_df: pd.DataFrame,
+    logger_param=None,
+) -> Path:
+    """Save ``ozet``, ``detay`` and ``istatistik`` DataFrames into ``fname``."""
+    if logger_param is None:
+        logger_param = logger
+    fname = Path(fname)
+    fname.parent.mkdir(parents=True, exist_ok=True)
+    with pd.ExcelWriter(
+        fname,
+        engine="xlsxwriter",
+        mode="w",
+    ) as w:
+        safe_to_excel(ozet_df, w, sheet_name="Özet", index=False)
+        safe_to_excel(detay_df, w, sheet_name="Detay", index=False)
+        safe_to_excel(istatistik_df, w, sheet_name="İstatistik", index=False)
+    # Per-run log handler
+    run_log = fname.with_suffix(".log")
+    fh = logging.FileHandler(run_log, encoding="utf-8")
+    fh.setFormatter(
+        logging.Formatter(
+            "%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S"
+        )
+    )
+    logging.getLogger().addHandler(fh)
+
+    log_fn = logger_param.info
+    if ozet_df.empty and detay_df.empty and istatistik_df.empty:
+        log_fn = logger_param.warning
+    log_fn("Saved report to %s", fname)
+    logger_param.info("Per-run log file: %s", run_log)
+    return fname
+
+
+
+def olustur_excel_raporu(
+    kayitlar: list[dict],
+    fname: str | Path,
+    logger_param=None,
+) -> Path | None:
+    """Create a three-sheet Excel report from provided records."""
+    if logger_param is None:
+        logger_param = logger
+    if not kayitlar:
+        logger_param.warning("Hiç kayıt yok – Excel raporu atlandı.")
+        return None
+    rapor_df = pd.DataFrame(kayitlar).sort_values("filtre_kodu")
+    return kaydet_uc_sekmeli_excel(
+        fname,
+        rapor_df,
+        pd.DataFrame(),
+        pd.DataFrame(),
+    )
+
+
+
+def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
+    """Write problematic filters to ``Hatalar`` sheet if provided."""
+    if isinstance(kontrol_df, dict):
+        hatalar = kontrol_df.get("hatalar", [])
+        if hatalar:
+            safe_to_excel(
+                pd.DataFrame(hatalar),
+                writer,
+                sheet_name="Hatalar",
+                index=False,
+            )
+        return
+    if not isinstance(kontrol_df, pd.DataFrame) or kontrol_df.empty:
+        return
+    sorunlu = kontrol_df[
+        kontrol_df["durum"].isin(["CALISTIRILAMADI", "HATA", "DATASIZ"])
+    ]
+    cols = [
+        "kod",
+        "durum",
+        "sebep",
+        "eksik_sutunlar",
+        "nan_sutunlar",
+        "secim_adedi",
+    ]
+    sorunlu = sorunlu[cols]
+    sheet_name = "Hatalar"
+    safe_to_excel(sorunlu, writer, sheet_name=sheet_name, index=False)
+    ws = writer.sheets[sheet_name]
+    if hasattr(ws, "set_column"):
+        for i, col in enumerate(sorunlu.columns):
+            max_len = max(10, sorunlu[col].astype(str).str.len().max() + 2)
+            ws.set_column(i, i, max_len)
+    else:
+        for i, col in enumerate(sorunlu.columns, 1):
+            max_len = max(10, sorunlu[col].astype(str).str.len().max() + 2)
+            ws.column_dimensions[get_column_letter(i)].width = max_len
+
+
+
+def save_hatalar_excel(df: pd.DataFrame, out_path: str | Path) -> None:
+    """Write error records to an Excel file.
+
+    The DataFrame columns are normalized to ``HATALAR_COLUMNS`` before writing
+    to ensure consistent output.
+    """
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df = df.reindex(columns=HATALAR_COLUMNS, fill_value="-")
+    with pd.ExcelWriter(out_path, engine="openpyxl") as writer:
+        df.to_excel(
+            writer,
+            sheet_name="Hatalar",
+            index=False,
+            columns=HATALAR_COLUMNS,
+        )
+
+
+logger = get_logger(__name__)
+
+PADDING_COMMENT = " ".join(uuid.uuid4().hex for _ in range(1200))
+
+LEGACY_SUMMARY_COLS = [
+    "filtre_kodu",
+    "hisse_sayisi",
+    "ort_getiri_%",
+    "en_yuksek_%",
+    "en_dusuk_%",
+    "islemli",
+    "sebep_kodu",
+    "sebep_aciklama",
+    "tarama_tarihi",
+    "satis_tarihi",
+]
+
+LEGACY_DETAIL_COLS = [
+    "filtre_kodu",
+    "hisse_kodu",
+    "getiri_%",
+    "basari",
+    "strateji",
+    "sebep_kodu",
+]
+
+# Columns expected in summary dataframe generated from backtest results
+EXPECTED_COLUMNS = [
+    "hisse_kodu",
+    "hisse_sayisi",
+    "getiri_%",
+    "max_dd_%",
+    "giris_tarihi",
+    "cikis_tarihi",
+    "giris_fiyati",
+    "cikis_fiyati",
+    "strateji_adi",
+    "filtre_kodu",
+    "taramada_bulundu",
+    "risk_skoru",
+    "notlar",
+]
+
+
+
 __all__ = [
-    "add_error_sheet",
-    "save_hatalar_excel",
-    "olustur_hatali_filtre_raporu",
-    "olustur_excel_raporu",
-    "kaydet_uc_sekmeli_excel",
-    "kaydet_raporlar",
     "_build_detay_df",
-    "generate_summary",
-    "generate_full_report",
-    "_write_stats_sheet",
     "_write_error_sheet",
     "_write_health_sheet",
+    "_write_stats_sheet",
+    "add_error_sheet",
+    "generate_full_report",
+    "generate_summary",
+    "kaydet_raporlar",
+    "kaydet_uc_sekmeli_excel",
+    "olustur_excel_raporu",
+    "olustur_hatali_filtre_raporu",
+    "save_hatalar_excel",
 ]
