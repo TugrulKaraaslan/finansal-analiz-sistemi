@@ -9,10 +9,8 @@ from pathlib import Path
 
 import yaml
 
-# Import solely for side-effects (YAML filter resolution).  # noqa: F401
-from .logging_utils import ErrorCountingFilter
-
-_error_filter = ErrorCountingFilter  # side-effect import for YAML logging
+# Import solely for side-effects (YAML filter resolution).
+from .logging_utils import ErrorCountingFilter  # noqa: F401
 
 # Configure logging from YAML at package import time
 base = Path(__file__).resolve().parent.parent
