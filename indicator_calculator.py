@@ -36,9 +36,8 @@ except Exception:
     pass
 
 
-# numpy>=2.0 paketlerinde `NaN` sabiti kaldırıldı. pandas_ta halen bu adı
-# kullandığından import sırasında hata oluşabiliyor. Eğer `np.NaN` mevcut
-# değilse `np.nan` değerini aynı isimle tanımlayarak uyumluluk sağlanır.
+# numpy>=2.0 removed the ``NaN`` constant while ``pandas_ta`` still expects it.
+# Create an alias when missing to maintain backwards compatibility.
 if not hasattr(np, "NaN"):
     np.NaN = np.nan
 
@@ -603,9 +602,9 @@ def _calculate_group_indicators_and_crossovers(
         for c, vals in valid_cols.items():
             safe_set(df_final_group, c, vals)
 
-    # Bazı durumlarda OpenBB stratejisinden beklenen indikatörler veri
-    # yetersizliği nedeniyle oluşmayabilir. Filtrelerin sorunsuz çalışması için
-    # eksik olan temel bazı indikatörleri manuel olarak üretelim.
+    # In some cases OpenBB may fail to produce expected indicators due to
+    # limited data. Generate a few essential indicators manually to keep
+    # filters operational.
 
     manual_cols = {}
     if (
@@ -859,7 +858,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
         )
         return None
 
-    # NaN ön temizlik: OHLCV kolonlarındaki boşlukları 3 satıra kadar ileri taşı
+    # Pre-clean NaN: forward-fill OHLCV gaps up to three rows
     ind_cols = [
         c
         for c in ["open", "high", "low", "close", "volume"]
@@ -901,14 +900,14 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
         group_df_original,
     ) in (
         groupby_obj
-    ):  # group_df_original zaten 'tarih'e göre sıralı geliyor (preprocessor'dan)
+    ):  # ``group_df_original`` comes sorted by ``tarih`` from the preprocessor
         current_processed_count_main += 1
-        # _calculate_group_indicators_and_crossovers fonksiyonuna RangeIndex'li ve 'tarih' sütunlu df gönderiyoruz.
-        # Bu fonksiyon içinde DatetimeIndex'e çevrilip, sonra tekrar RangeIndex'e
-        # ve 'tarih' sütununa sahip olarak dönüyor.
+        # ``_calculate_group_indicators_and_crossovers`` expects a RangeIndex and
+        # ``tarih`` column. It converts to ``DatetimeIndex`` internally and then
+        # returns back with ``tarih`` restored.
         group_df_for_calc = group_df_original.reset_index(
             drop=True
-        )  # Her ihtimale karşı indeksi sıfırla
+        )  # Reset index defensively
 
         step = max(1, int(total_stocks * PCT_STEP / 100))
         msg = f"({current_processed_count_main}/{total_stocks}) {hisse_kodu} için indikatör hesaplama..."

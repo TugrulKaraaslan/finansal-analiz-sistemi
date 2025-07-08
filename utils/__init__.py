@@ -52,7 +52,7 @@ def extract_columns_from_filters(
     try:
         from filter_engine import _extract_query_columns
     except Exception:
-        # filter_engine import edilemezse boş set döndür
+        # Return an empty set when ``filter_engine`` is unavailable
         return set()
 
     wanted = set()
