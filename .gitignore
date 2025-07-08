@@ -3,6 +3,8 @@ pycache/
 .pytest_cache/
 .env
 *.log
+*.log.*
+*.err
 loglar/
 raporlar/
 cikti/
