@@ -19,6 +19,9 @@ venv/
 **/venv/
 **/.venv/
 .coverage
+.coverage.*
+*.coverage
+coverage.*
 reports/
 **/reports/
 crossover_test_log.txt
@@ -96,6 +99,8 @@ docs/_build/
 *.profraw
 profile/
 profiling/
+**/profile/
+**/profiling/
 
 # Additional coverage and test directories
 .tox/
