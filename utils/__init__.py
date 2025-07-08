@@ -48,7 +48,7 @@ def extract_columns_from_filters(
     series_series: list | None,
     series_value: list | None,
 ) -> set:
-    """Filtre sorgularında ve crossover tanımlarında geçen kolon adlarını döndürür."""
+    """Return column names referenced in filters and crossover definitions."""
     try:
         from filter_engine import _extract_query_columns
     except Exception:
@@ -82,16 +82,11 @@ def extract_columns_from_filters_cached(
     series_series: list | None,
     series_value: list | None,
 ) -> set:
-    """Cacheable wrapper for ``extract_columns_from_filters``.
+    """Return referenced columns using a CSV string for caching.
 
-    Parameters
-    ----------
-    df_filters_csv : str
-        CSV representation of the filters DataFrame.
-    series_series : list | None
-        Definitions for series/series crossovers.
-    series_value : list | None
-        Definitions for series/value crossovers.
+    This is a cache-friendly wrapper around
+    :func:`extract_columns_from_filters` that accepts the filters DataFrame as a
+    CSV string.
     """
     df_filters = None
     if df_filters_csv:

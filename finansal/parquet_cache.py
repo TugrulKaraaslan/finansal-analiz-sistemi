@@ -23,7 +23,7 @@ class ParquetCacheManager:
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
 
     def load(self) -> DataFrame:  # noqa: D401, D403
-        """Load the cached parquet. Raise FileNotFoundError if absent."""
+        """Load the cached Parquet file or raise ``FileNotFoundError``."""
         import pandas as pd
 
         if not self.cache_path.exists():
@@ -33,7 +33,7 @@ class ParquetCacheManager:
         return df
 
     def refresh(self, csv_path: Path) -> DataFrame:  # noqa: D401, D403
-        """Read CSV (header or comment-style) and update the cache."""
+        """Read a CSV file and update the cache in place."""
         import pandas as pd  # local import to speed CLI --help
 
         read_kwargs = {}
