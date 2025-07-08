@@ -51,6 +51,14 @@ def _normalize_pct(s: pd.Series) -> pd.Series:
     return s.round(2)
 
 
+# --- Helper: normalize_pct ---
+def normalize_pct(series):
+    """Strip ``%`` sign, convert to float and divide by 100 when values exceed 100."""
+    s = series.astype(str).str.replace("%", "", regex=False)
+    s = pd.to_numeric(s, errors="coerce")
+    return np.where(s.abs() > 100, s / 100.0, s).round(2)
+
+
 def build_detay_df(
     summary_df: pd.DataFrame,
     detail_df: pd.DataFrame,
@@ -223,14 +231,6 @@ def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
             }
         ]
     )
-
-
-# --- Helper: normalize_pct ---
-def normalize_pct(series):
-    """Strip ``%`` sign, convert to float and divide by 100 when values exceed 100."""
-    s = series.astype(str).str.replace("%", "", regex=False)
-    s = pd.to_numeric(s, errors="coerce")
-    return np.where(s.abs() > 100, s / 100.0, s).round(2)
 
 
 def plot_summary_stats(
