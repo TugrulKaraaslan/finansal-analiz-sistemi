@@ -1,4 +1,4 @@
-"""Test module for test_report_memory."""
+"""Unit tests for report_memory."""
 
 import time
 

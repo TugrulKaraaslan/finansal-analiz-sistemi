@@ -1,4 +1,4 @@
-"""Test module for test_iso_date."""
+"""Unit tests for iso_date."""
 
 from utils.date_utils import parse_date
 

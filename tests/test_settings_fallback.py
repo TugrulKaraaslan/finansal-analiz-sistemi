@@ -1,4 +1,4 @@
-"""Test module for test_settings_fallback."""
+"""Unit tests for settings_fallback."""
 
 import importlib
 

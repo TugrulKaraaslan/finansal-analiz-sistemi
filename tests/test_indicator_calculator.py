@@ -1,4 +1,4 @@
-"""Test module for test_indicator_calculator."""
+"""Unit tests for indicator_calculator."""
 
 import os
 import sys

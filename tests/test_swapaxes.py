@@ -1,4 +1,4 @@
-"""Test module for test_swapaxes."""
+"""Unit tests for swapaxes."""
 
 import pandas as pd
 import pytest

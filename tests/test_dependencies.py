@@ -1,4 +1,4 @@
-"""Test module for test_dependencies."""
+"""Unit tests for dependencies."""
 
 import importlib.metadata
 import importlib.util

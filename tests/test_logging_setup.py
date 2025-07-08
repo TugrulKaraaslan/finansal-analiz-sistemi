@@ -1,4 +1,4 @@
-"""Test module for test_logging_setup."""
+"""Unit tests for logging_setup."""
 
 import io
 import logging

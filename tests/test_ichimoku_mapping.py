@@ -1,4 +1,4 @@
-"""Test module for test_ichimoku_mapping."""
+"""Unit tests for ichimoku_mapping."""
 
 import importlib
 import os

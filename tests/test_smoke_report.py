@@ -1,4 +1,4 @@
-"""Test module for test_smoke_report."""
+"""Unit tests for smoke_report."""
 
 from pathlib import Path
 

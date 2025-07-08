@@ -1,4 +1,4 @@
-"""Test module for test_min_stock_threshold."""
+"""Unit tests for min_stock_threshold."""
 
 import pandas as pd
 

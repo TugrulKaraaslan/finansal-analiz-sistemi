@@ -1,4 +1,4 @@
-"""Test module for test_detay_not_empty."""
+"""Unit tests for detay_not_empty."""
 
 import pandas as pd
 

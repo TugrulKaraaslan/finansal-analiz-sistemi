@@ -1,4 +1,4 @@
-"""Test module for test_data_loader_param."""
+"""Unit tests for data_loader_param."""
 
 from pathlib import Path
 

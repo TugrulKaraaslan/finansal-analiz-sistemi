@@ -1,4 +1,4 @@
-"""Test module for test_backtest_core_param."""
+"""Unit tests for backtest_core_param."""
 
 import warnings
 

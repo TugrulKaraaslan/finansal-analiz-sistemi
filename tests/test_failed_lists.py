@@ -1,4 +1,4 @@
-"""Test module for test_failed_lists."""
+"""Unit tests for failed_lists."""
 
 import os
 import sys

@@ -1,4 +1,4 @@
-"""Test module for test_auto_columns."""
+"""Unit tests for auto_columns."""
 
 import pandas as pd
 

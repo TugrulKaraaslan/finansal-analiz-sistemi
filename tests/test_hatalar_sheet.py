@@ -1,4 +1,4 @@
-"""Test module for test_hatalar_sheet."""
+"""Unit tests for hatalar_sheet."""
 
 import os
 import sys

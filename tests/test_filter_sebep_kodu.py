@@ -1,4 +1,4 @@
-"""Test module for test_filter_sebep_kodu."""
+"""Unit tests for filter_sebep_kodu."""
 
 import os
 import sys

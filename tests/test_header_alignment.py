@@ -1,4 +1,4 @@
-"""Test module for test_header_alignment."""
+"""Unit tests for header_alignment."""
 
 from finansal_analiz_sistemi.data_loader import load_filter_csv
 

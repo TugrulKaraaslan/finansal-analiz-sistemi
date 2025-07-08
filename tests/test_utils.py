@@ -1,4 +1,4 @@
-"""Test module for test_utils."""
+"""Unit tests for utils."""
 
 import os
 import sys

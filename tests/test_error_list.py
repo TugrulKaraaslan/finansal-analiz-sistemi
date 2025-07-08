@@ -1,4 +1,4 @@
-"""Test module for test_error_list."""
+"""Unit tests for error_list."""
 
 import pandas as pd
 

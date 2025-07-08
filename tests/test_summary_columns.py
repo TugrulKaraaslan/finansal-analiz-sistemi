@@ -1,4 +1,4 @@
-"""Test module for test_summary_columns."""
+"""Unit tests for summary_columns."""
 
 from report_generator import generate_summary
 

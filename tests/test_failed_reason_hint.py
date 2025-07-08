@@ -1,4 +1,4 @@
-"""Test module for test_failed_reason_hint."""
+"""Unit tests for failed_reason_hint."""
 
 import pandas as pd
 

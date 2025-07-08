@@ -1,4 +1,4 @@
-"""Test module for test_filter_depth."""
+"""Unit tests for filter_depth."""
 
 import pandas as pd
 

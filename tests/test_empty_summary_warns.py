@@ -1,4 +1,4 @@
-"""Test module for test_empty_summary_warns."""
+"""Unit tests for empty_summary_warns."""
 
 import logging
 

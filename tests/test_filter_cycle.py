@@ -1,4 +1,4 @@
-"""Test module for test_filter_cycle."""
+"""Unit tests for filter_cycle."""
 
 import pytest
 

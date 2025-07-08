@@ -1,4 +1,4 @@
-"""Test module for test_helper_columns."""
+"""Unit tests for helper_columns."""
 
 import preprocessor
 

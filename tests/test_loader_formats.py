@@ -1,4 +1,4 @@
-"""Test module for test_loader_formats."""
+"""Unit tests for loader_formats."""
 
 import pandas as pd
 import pytest

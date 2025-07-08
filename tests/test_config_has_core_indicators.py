@@ -1,4 +1,4 @@
-"""Test module for test_config_has_core_indicators."""
+"""Unit tests for config_has_core_indicators."""
 
 
 def test_config_has_core_indicators():

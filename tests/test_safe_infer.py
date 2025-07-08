@@ -1,4 +1,4 @@
-"""Test module for test_safe_infer."""
+"""Unit tests for safe_infer."""
 
 import pandas as pd
 

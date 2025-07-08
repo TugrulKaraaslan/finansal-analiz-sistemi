@@ -1,4 +1,4 @@
-"""Test module for test_cache."""
+"""Unit tests for cache."""
 
 import pandas as pd
 import pytest

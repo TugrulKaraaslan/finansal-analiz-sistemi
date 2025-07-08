@@ -1,4 +1,4 @@
-"""Test module for test_report."""
+"""Unit tests for report."""
 
 import pandas as pd
 import pytest

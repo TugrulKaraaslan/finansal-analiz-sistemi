@@ -1,4 +1,4 @@
-"""Test module for test_duplicate_filter."""
+"""Unit tests for duplicate_filter."""
 
 import io
 import logging

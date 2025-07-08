@@ -1,4 +1,4 @@
-"""Test module for test_lazy_chunk."""
+"""Unit tests for lazy_chunk."""
 
 import pytest
 

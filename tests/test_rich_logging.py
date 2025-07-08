@@ -1,4 +1,4 @@
-"""Test module for test_rich_logging."""
+"""Unit tests for rich_logging."""
 
 import importlib
 import logging

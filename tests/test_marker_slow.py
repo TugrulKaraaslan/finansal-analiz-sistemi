@@ -1,4 +1,4 @@
-"""Test module for test_marker_slow."""
+"""Unit tests for marker_slow."""
 
 import pytest
 

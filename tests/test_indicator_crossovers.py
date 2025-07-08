@@ -1,4 +1,4 @@
-"""Test module for test_indicator_crossovers."""
+"""Unit tests for indicator_crossovers."""
 
 from pathlib import Path
 
