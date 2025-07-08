@@ -127,7 +127,7 @@ def build_ozet_df(
         },
         inplace=True,
     )
-    # --- Şişkin yüzde kolonlarını normalize et ---
+    # Normalize percentage columns to ``0-1`` scale when necessary
     pct_cols_idx = [i for i, c in enumerate(df.columns) if c.endswith("_%")]
     for i in pct_cols_idx:
         df.iloc[:, i] = normalize_pct(df.iloc[:, i])
@@ -251,7 +251,6 @@ def plot_summary_stats(
         ),
     )
 
-    # Bar 1
     fig.add_trace(
         go.Bar(
             x=["toplam", "işlemli", "işlemsiz", "hatalı"],
@@ -266,23 +265,18 @@ def plot_summary_stats(
         col=1,
     )
 
-    # Bar 2 - best
     best = ozet_df.sort_values("ort_getiri_%", ascending=False).head(10)
     fig.add_trace(
         go.Bar(x=best["filtre_kodu"], y=best["ort_getiri_%"]),
         row=1,
         col=2,
     )
-
-    # Bar 3 - worst
     worst = ozet_df.sort_values("ort_getiri_%").head(10)
     fig.add_trace(
         go.Bar(x=worst["filtre_kodu"], y=worst["ort_getiri_%"]),
         row=2,
         col=1,
     )
-
-    # Bar 4 - reliability
     col = None
     if "getiri_yuzde" in detail_df.columns:
         col = "getiri_yuzde"
