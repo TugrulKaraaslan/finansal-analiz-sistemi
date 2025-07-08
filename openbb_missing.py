@@ -77,6 +77,27 @@ def ichimoku(
     return res_df[ich_cols], res_df[span_cols]
 
 
+def macd(
+    close: pd.Series,
+    fast: int = 12,
+    slow: int = 26,
+    signal: int = 9,
+) -> pd.DataFrame:
+    """Return MACD indicator DataFrame from OpenBB."""
+    df = pd.DataFrame({"date": close.index, "close": close.values})
+    obb_obj = _call_openbb(
+        "macd",
+        data=df.to_dict("records"),
+        target="close",
+        fast=fast,
+        slow=slow,
+        signal=signal,
+    )
+    res_df = pd.DataFrame(obb_obj.results).set_index("date")
+    macd_cols = [c for c in res_df.columns if c.lower().startswith("close_macd")]
+    return res_df[macd_cols]
+
+
 def rsi(
     close: pd.Series,
     length: int = 14,
@@ -97,24 +118,3 @@ def rsi(
     rsi_col = [c for c in res_df.columns if c.lower().startswith("close_rsi")]
     col = rsi_col[0] if rsi_col else res_df.columns[-1]
     return res_df[col].rename(close.name)
-
-
-def macd(
-    close: pd.Series,
-    fast: int = 12,
-    slow: int = 26,
-    signal: int = 9,
-) -> pd.DataFrame:
-    """Return MACD indicator DataFrame from OpenBB."""
-    df = pd.DataFrame({"date": close.index, "close": close.values})
-    obb_obj = _call_openbb(
-        "macd",
-        data=df.to_dict("records"),
-        target="close",
-        fast=fast,
-        slow=slow,
-        signal=signal,
-    )
-    res_df = pd.DataFrame(obb_obj.results).set_index("date")
-    macd_cols = [c for c in res_df.columns if c.lower().startswith("close_macd")]
-    return res_df[macd_cols]
