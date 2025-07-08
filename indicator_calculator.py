@@ -466,7 +466,8 @@ def _calculate_group_indicators_and_crossovers(
                     group_df_dt_indexed = group_df_dt_indexed.sort_index()
             except Exception as e_set_index:
                 local_logger.error(
-                    f"{hisse_kodu}: 'tarih' DatetimeIndex olarak ayarlanamadı: {e_set_index}. Orijinal RangeIndex ile devam ediliyor."
+                    f"{hisse_kodu}: 'tarih' DatetimeIndex olarak ayarlanamadı: {e_set_index}. "
+                    "Orijinal RangeIndex ile devam ediliyor."
                 )
                 group_df_dt_indexed = (
                     group_df_input.copy()
@@ -970,11 +971,13 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
         df_sonuc = df_sonuc.loc[:, ~df_sonuc.columns.duplicated()]
 
         ana_logger.info(
-            f"Tüm {current_processed_count_main} hisse için indikatör ve kesişim hesaplamaları tamamlandı. Son DataFrame boyutu: {df_sonuc.shape}"
+            f"Tüm {current_processed_count_main} hisse için indikatör ve kesişim hesaplamaları tamamlandı. "
+            f"Son DataFrame boyutu: {df_sonuc.shape}"
         )
         if not df_sonuc.empty:
             ana_logger.info(
-                f"Filtrelemeye gönderilecek DataFrame sütunları ({len(df_sonuc.columns)} adet): {df_sonuc.columns.tolist()}"
+                f"Filtrelemeye gönderilecek DataFrame sütunları ({len(df_sonuc.columns)} adet): "
+                f"{df_sonuc.columns.tolist()}"
             )
         return df_sonuc
     except Exception as e_concat:

@@ -63,12 +63,14 @@ def _get_fiyat(
 
             if tarih2 is not None:
                 log.info(
-                    f"{hisse_kodu_log} için {tarih.strftime('%d.%m.%Y')} tarihli fiyat bulunamadı. {tarih2.strftime('%d.%m.%Y')} tarihine kaydırıldı."
+                    f"{hisse_kodu_log} için {tarih.strftime('%d.%m.%Y')} tarihli fiyat bulunamadı. "
+                    f"{tarih2.strftime('%d.%m.%Y')} tarihine kaydırıldı."
                 )
                 veri_satiri = df_hisse_veri[df_hisse_veri["tarih"] == tarih2]
             else:
                 log.warning(
-                    f"{hisse_kodu_log} için {tarih.strftime('%d.%m.%Y')} ve civarındaki fiyat verisi bulunamadı."
+                    f"{hisse_kodu_log} için {tarih.strftime('%d.%m.%Y')} ve "
+                    "civarındaki fiyat verisi bulunamadı."
                 )
                 return np.nan
 
@@ -79,13 +81,16 @@ def _get_fiyat(
                     return float(fiyat)
                 except ValueError:  # Could not convert to float
                     log.warning(
-                        f"'{zaman_sutun_adi}' sütunundaki değer ('{fiyat}') float'a çevrilemedi. Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}"
+                        f"'{zaman_sutun_adi}' sütunundaki değer ('{fiyat}') "
+                        f"float'a çevrilemedi. Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}"
                     )
                     return np.nan
             return np.nan  # propagate NaN values
         else:
             log.warning(
-                f"Fiyat almak için beklenen sütun '{zaman_sutun_adi}' bulunamadı. Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}. Mevcut Sütunlar: {df_hisse_veri.columns.tolist()}"
+                f"Fiyat almak için beklenen sütun '{zaman_sutun_adi}' bulunamadı. "
+                f"Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}. "
+                f"Mevcut Sütunlar: {df_hisse_veri.columns.tolist()}"
             )
             return np.nan
     except Exception as e:
@@ -139,7 +144,8 @@ def calistir_basit_backtest(
         tarama_tarihi = pd.to_datetime(tarama_tarihi_str, format="%d.%m.%Y")
     except ValueError:
         fn_logger.critical(
-            f"Satış tarihi '{satis_tarihi_str}' veya tarama tarihi '{tarama_tarihi_str}' geçerli bir formatta (dd.mm.yyyy) değil. Backtest durduruluyor."
+            f"Satış tarihi '{satis_tarihi_str}' veya tarama tarihi '{tarama_tarihi_str}' "
+            "geçerli bir formatta (dd.mm.yyyy) değil. Backtest durduruluyor."
         )
         return pd.DataFrame(), pd.DataFrame()
 

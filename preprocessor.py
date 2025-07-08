@@ -57,7 +57,12 @@ def _temizle_sayisal_deger(deger):
                     temizlenmis_deger
                 )  # Orijinal string'den sadece sayısal olmayanları attık
             except ValueError:
-                # logger.debug(f"Sayısal değere dönüştürme hatası (2. deneme): '{deger}' -> '{temizlenmis_deger}' / '{temizlenmis_deger_standart}'")
+                # logger.debug(
+                #     (
+                #         f"Sayısal değere dönüştürme hatası (2. deneme): '{deger}' "
+                #         f"-> '{temizlenmis_deger}' / '{temizlenmis_deger_standart}'"
+                #     )
+                # )
                 return np.nan
     return np.nan  # Diğer tüm beklenmedik tipler için
 
@@ -111,7 +116,8 @@ def on_isle_hisse_verileri(
             )
         except Exception as e_date_conv:
             fn_logger.error(
-                f"'tarih' sütunu preprocessor'da da datetime'a dönüştürülemedi: {e_date_conv}. Hatalı değerler NaT olacak.",
+                f"'tarih' sütunu preprocessor'da da datetime'a dönüştürülemedi: {e_date_conv}. "
+                "Hatalı değerler NaT olacak.",
                 exc_info=True,
             )
             # Hata durumunda bile devam et, NaT olanlar aşağıda drop edilecek.
@@ -161,7 +167,8 @@ def on_isle_hisse_verileri(
                 nan_after = df[col].isnull().sum()
                 if nan_after > nan_before:
                     fn_logger.warning(
-                        f"'{col}' (orijinal tip: {original_type}) sütununda sayısal dönüşüm sonrası NaN sayısı arttı ({nan_before} -> {nan_after})."
+                        f"'{col}' (orijinal tip: {original_type}) sütununda sayısal dönüşüm sonrası NaN sayısı arttı "
+                        f"({nan_before} -> {nan_after})."
                     )
             elif not pd.api.types.is_numeric_dtype(
                 df[col]
@@ -224,7 +231,8 @@ def on_isle_hisse_verileri(
     eksik_kritik_sutunlar = [s for s in kritik_ohlc_sutunlar if s not in df.columns]
     if eksik_kritik_sutunlar:
         fn_logger.error(
-            f"Kritik OHLC sütunlarından bazıları yükleme/standardizasyon sonrası hala eksik: {eksik_kritik_sutunlar}. NaN temizliği bu sütunlar olmadan yapılamaz."
+            f"Kritik OHLC sütunlarından bazıları yükleme/standardizasyon sonrası hala eksik: "
+            f"{eksik_kritik_sutunlar}. NaN temizliği bu sütunlar olmadan yapılamaz."
         )
         # Eğer temel OHLC eksikse, devam etmek anlamsız olabilir.
         if len(eksik_kritik_sutunlar) == len(kritik_ohlc_sutunlar):  # Hepsi eksikse
@@ -240,7 +248,8 @@ def on_isle_hisse_verileri(
         rows_dropped_for_ohlc_nan = nan_oncesi_satir_sayisi - len(df)
         if rows_dropped_for_ohlc_nan > 0:
             fn_logger.info(
-                f"Kritik OHLC sütunlarındaki (en az birinde) NaN değerler nedeniyle {rows_dropped_for_ohlc_nan} satır çıkarıldı."
+                f"Kritik OHLC sütunlarındaki (en az birinde) NaN değerler nedeniyle "
+                f"{rows_dropped_for_ohlc_nan} satır çıkarıldı."
             )
 
     # 4. Hacimdeki NaN'ları 0 İle Doldur (Opsiyonel, stratejiye göre değişebilir)
