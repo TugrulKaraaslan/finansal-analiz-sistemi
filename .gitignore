@@ -63,6 +63,8 @@ ehthumbs.db
 # Benchmark outputs
 benchmark_output.txt
 benchmarks/benchmark_output.txt
+cache_build_log.txt
+cycle_test_log.txt
 docs/_build/
 
 # Misc temporary files
