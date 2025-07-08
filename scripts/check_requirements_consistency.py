@@ -1,4 +1,4 @@
-"""Check that requirement lists are kept in sync across files."""
+"""Verify that all requirement lists remain synchronized across files."""
 
 import re
 import sys
