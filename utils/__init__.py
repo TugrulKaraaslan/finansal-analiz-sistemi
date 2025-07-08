@@ -101,9 +101,10 @@ def extract_columns_from_filters_cached(
 
 
 def purge_old_logs(dir_path: str = "loglar", days: int = 7, dry_run: bool = False):
-    """Delete ``*.log`` and ``*.lock`` files older than ``days``.
+    """Delete aged log and lock files and report the count.
 
-    Parameters match the legacy helper for backward compatibility.
+    Parameters match the legacy helper for backward compatibility and the
+    function returns the number of processed files.
     """
     from .purge_old_logs import purge_old_logs as _impl
 

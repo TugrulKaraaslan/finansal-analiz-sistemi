@@ -241,7 +241,11 @@ def run_filter(code, df, expr):
 
 
 def run_single_filter(kod: str, query: str) -> dict:
-    """Run a filter expression against a minimal DataFrame."""
+    """Validate ``query`` against a dummy frame and return error info.
+
+    The returned mapping contains a ``hatalar`` list when ``query`` fails
+    to execute; on success it is an empty dictionary.
+    """
     df = pd.DataFrame({"close": [1]})
     atlanmis: dict = {}
     try:

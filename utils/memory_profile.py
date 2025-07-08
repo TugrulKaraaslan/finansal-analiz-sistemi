@@ -16,7 +16,7 @@ class mem_profile:
         return self
 
     def __exit__(self, *exc):
-        """Write memory usage delta to CSV on exit."""
+        """Write memory usage delta to CSV and propagate exceptions."""
         peak = self.proc.memory_info().rss
         diff = peak - self.start
         os.makedirs("reports", exist_ok=True)
