@@ -16,7 +16,7 @@ sys.modules.setdefault("pandas_ta", types.SimpleNamespace(Strategy=lambda **kw: 
 
 
 def test_bireysel_performanslar_contains_new_keys():
-    """Test test_bireysel_performanslar_contains_new_keys."""
+    """Report frames should include new performance columns."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA", "AAA"],
@@ -43,7 +43,7 @@ def test_bireysel_performanslar_contains_new_keys():
 
 
 def test_missing_buy_price_sets_data_gap():
-    """Test test_missing_buy_price_sets_data_gap."""
+    """Fallback to nearby date when the buy price is missing."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],

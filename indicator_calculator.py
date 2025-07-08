@@ -210,7 +210,7 @@ def calculate_chunked(
 
 
 def _tema20(series: pd.Series) -> pd.Series:
-    """TEMA 20 – pandas_ta fallback."""
+    """Compute the 20-period TEMA, falling back to manual calculation."""
     if hasattr(ta, "tema"):
         try:
             return ta.tema(series, length=20)
@@ -223,7 +223,7 @@ def _tema20(series: pd.Series) -> pd.Series:
 
 
 def _ekle_psar(df: pd.DataFrame) -> None:
-    """PSAR kolonlarını hesaplar ve ekler."""
+    """Calculate Parabolic SAR columns and append them to ``df``."""
     gerekli = ["high", "low", "close"]
     if any(c not in df.columns for c in gerekli):
         logger.debug("PSAR hesaplamak için gerekli sütunlar eksik")

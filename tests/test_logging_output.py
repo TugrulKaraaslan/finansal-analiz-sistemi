@@ -6,7 +6,7 @@ from finansal_analiz_sistemi.logging_config import get_logger
 
 
 def test_info_log_emitted(caplog):
-    """Test test_info_log_emitted."""
+    """Configured logger should emit info messages to handlers."""
     logger = get_logger("dummy")
     with caplog.at_level(logging.INFO):
         logger.info("Saved report to XYZ")

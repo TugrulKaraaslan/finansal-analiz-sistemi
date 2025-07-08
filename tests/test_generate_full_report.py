@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_generate_full_report_creates_files(tmp_path):
-    """Test test_generate_full_report_creates_files."""
+    """Generating a full report should output Excel sheets and return the path."""
     summary = pd.DataFrame(
         {
             "filtre_kodu": ["F1"],

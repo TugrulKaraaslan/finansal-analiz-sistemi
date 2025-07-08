@@ -11,7 +11,7 @@ from utils.purge_old_logs import purge_old_logs
 
 @pytest.mark.parametrize("dry_run", [True, False])
 def test_purge_old_logs(tmp_path: Path, dry_run: bool):
-    """Test test_purge_old_logs."""
+    """Old log files should be purged while newer ones remain."""
     old = tmp_path / "old.log"
     new = tmp_path / "new.log"
     lock_old = tmp_path / "old.lock"

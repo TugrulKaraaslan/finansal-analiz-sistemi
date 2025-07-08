@@ -12,7 +12,7 @@ CSV_CONTENT = "col\n1\n2\n3"
 
 @pytest.mark.parametrize("content,expected_rows", [(CSV_CONTENT, 3), ("col\n42", 1)])
 def test_load_data_param(tmp_path: Path, content: str, expected_rows: int):
-    """Test test_load_data_param."""
+    """Loaded DataFrame should have the expected row count."""
     p = tmp_path / "sample.csv"
     p.write_text(content)
     df = data_loader.load_data(str(p))
@@ -21,7 +21,7 @@ def test_load_data_param(tmp_path: Path, content: str, expected_rows: int):
 
 
 def test_load_data_empty(tmp_path: Path):
-    """Test test_load_data_empty."""
+    """Attempting to load an empty file should raise ``EmptyDataError``."""
     p = tmp_path / "empty.csv"
     p.write_text("")
     with pytest.raises(pd.errors.EmptyDataError):
@@ -29,7 +29,7 @@ def test_load_data_empty(tmp_path: Path):
 
 
 def test_load_data_cache_refresh(tmp_path: Path):
-    """Test test_load_data_cache_refresh."""
+    """Reload data when the underlying CSV file changes."""
     p = tmp_path / "sample.csv"
     p.write_text("col\n1\n2")
     df1 = data_loader.load_data(str(p))
@@ -41,7 +41,7 @@ def test_load_data_cache_refresh(tmp_path: Path):
 
 @pytest.mark.parametrize("colname", ["Date", "Tarih", "tarih", "TARİH", "Unnamed: 0"])
 def test_standardize_date_column(colname):
-    """Test test_standardize_date_column."""
+    """Rename various date column names to ``tarih`` consistently."""
     df = pd.DataFrame({colname: ["2025-03-07"]})
     out = data_loader._standardize_date_column(df, "dummy")
     assert "tarih" in out.columns
@@ -49,7 +49,7 @@ def test_standardize_date_column(colname):
 
 
 def test_standardize_date_column_no_match():
-    """Test test_standardize_date_column_no_match."""
+    """Leave DataFrame unchanged when no date-like columns exist."""
     df = pd.DataFrame({"x": [1]})
     out = data_loader._standardize_date_column(df, "dummy")
     assert out.columns.tolist() == ["x"]

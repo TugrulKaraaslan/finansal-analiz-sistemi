@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_log_summary_present(caplog):
-    """Test test_log_summary_present."""
+    """Summary counts should appear in the log output."""
     log_counter = setup_logger()
     logger = logging.getLogger("summary_test")
     logger.setLevel(logging.INFO)

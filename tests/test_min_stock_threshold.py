@@ -6,7 +6,7 @@ import filter_engine
 
 
 def test_filter_skipped_when_below_threshold(monkeypatch):
-    """Test test_filter_skipped_when_below_threshold."""
+    """Filters below the minimum stock count should be skipped."""
     monkeypatch.setattr(filter_engine, "MIN_STOCKS_PER_FILTER", 2)
     df = pd.DataFrame(
         {

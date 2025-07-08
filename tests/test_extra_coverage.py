@@ -9,14 +9,14 @@ from src.utils import excel_reader
 
 
 def test_fill_missing_business_day():
-    """Test test_fill_missing_business_day."""
+    """Fill missing business days with the previous trading day."""
     df = pd.DataFrame({"tarih": ["2025-03-07", None, "2025-03-10"]})
     out = fill_missing_business_day(df)
     assert out["tarih"].iloc[1] == pd.Timestamp("2025-03-07")
 
 
 def test_excel_reader_cache(tmp_path):
-    """Test test_excel_reader_cache."""
+    """Cached ``ExcelFile`` objects should be reused across calls."""
     path = tmp_path / "t.xlsx"
     df = pd.DataFrame({"a": [1, 2]})
     df.to_excel(path, index=False)
@@ -29,7 +29,7 @@ def test_excel_reader_cache(tmp_path):
 
 
 def test_excel_reader_cache_refresh(tmp_path):
-    """Test test_excel_reader_cache_refresh."""
+    """Refresh the cache when the Excel file is modified."""
     path = tmp_path / "t.xlsx"
     df1 = pd.DataFrame({"a": [1]})
     df1.to_excel(path, index=False)
@@ -45,7 +45,7 @@ def test_excel_reader_cache_refresh(tmp_path):
 
 
 def test_tarama_denetimi_summary(monkeypatch):
-    """Test test_tarama_denetimi_summary."""
+    """Summary row should be appended after scanning filters."""
     df_filtreler = pd.DataFrame({"kod": ["F1"], "PythonQuery": ["close > open"]})
     df_ind = pd.DataFrame()
 
@@ -68,7 +68,7 @@ def test_tarama_denetimi_summary(monkeypatch):
 
 
 def test_logging_config_import(monkeypatch):
-    """Test test_logging_config_import."""
+    """Importing ``logging_config`` should initialize file handlers."""
     calls = {}
     import logging
 
@@ -76,16 +76,16 @@ def test_logging_config_import(monkeypatch):
         """Minimal handler used to capture log file configuration."""
 
         def __init__(self, filename, maxBytes=None, backupCount=None, encoding=None):
-            """Test __init__."""
+            """Store log file parameters during initialization."""
             super().__init__()
             calls["file"] = filename
 
         def setFormatter(self, fmt):
-            """Test setFormatter."""
+            """Record that a formatter was configured."""
             calls["formatter"] = True
 
         def emit(self, record):
-            """Test emit."""
+            """No-op ``emit`` used only for initialization testing."""
             pass
 
     import importlib
@@ -100,7 +100,7 @@ def test_logging_config_import(monkeypatch):
 
 
 def test_report_writer_accepts_str(tmp_path):
-    """Test test_report_writer_accepts_str."""
+    """``ReportWriter`` should accept a path string as destination."""
     df = pd.DataFrame({"a": [1]})
     nested = tmp_path / "nested" / "out.xlsx"
     ReportWriter().write_report(df, str(nested))

@@ -8,7 +8,7 @@ from finansal_analiz_sistemi.log_tools import DuplicateFilter
 
 
 def test_duplicate_filter():
-    """Test test_duplicate_filter."""
+    """Duplicate log messages within the window should be dropped."""
     logger = logging.getLogger("dup")
     logger.setLevel(logging.INFO)
     logger.handlers.clear()

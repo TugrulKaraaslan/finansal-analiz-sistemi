@@ -5,5 +5,5 @@ import pytest
 
 @pytest.mark.slow
 def test_marker_slow():
-    """Test test_marker_slow."""
+    """Dummy slow test used to exercise pytest markers."""
     assert True

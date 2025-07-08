@@ -39,7 +39,7 @@ DF = pd.DataFrame(
     ],
 )
 def test_get_fiyat_param(tarih, col, expected):
-    """Test test_get_fiyat_param."""
+    """Return expected value when the price is present."""
     out = bc._get_fiyat(DF.copy(), tarih, col)
     if np.isnan(expected):
         assert np.isnan(out)
@@ -48,7 +48,7 @@ def test_get_fiyat_param(tarih, col, expected):
 
 
 def test_get_fiyat_non_numeric():
-    """Test test_get_fiyat_non_numeric."""
+    """Return ``NaN`` when price column contains non-numeric data."""
     df = DF.copy()
     df.loc[0, "close"] = np.nan  # avoids object→float warning
     out = bc._get_fiyat(df, df.loc[0, "tarih"], "close")
@@ -56,7 +56,7 @@ def test_get_fiyat_non_numeric():
 
 
 def test_get_fiyat_string_dates():
-    """Test test_get_fiyat_string_dates."""
+    """Handle date strings when locating the target price."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA", "AAA"],

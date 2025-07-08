@@ -6,7 +6,7 @@ from report_generator import _build_detay_df
 
 
 def test_detay_not_empty():
-    """Test test_detay_not_empty."""
+    """Detail report should remain populated after merge operations."""
     trades = pd.DataFrame(
         {
             "filtre_kodu": ["F1", "F1"],

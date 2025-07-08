@@ -55,7 +55,7 @@ def report_path(tmp_path):
 
 
 def test_error_sheet_presence(report_path):
-    """Test test_error_sheet_presence."""
+    """Reports must include a populated ``Hatalar`` worksheet."""
     with pd.ExcelFile(report_path) as xls:
         assert "Hatalar" in xls.sheet_names
         df = pd.read_excel(report_path, "Hatalar")

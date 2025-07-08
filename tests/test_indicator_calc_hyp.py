@@ -19,7 +19,7 @@ import indicator_calculator as ic  # noqa: E402
 
 @given(st.lists(st.floats(-1e6, 1e6), min_size=10, max_size=200))
 def test_safe_ma_adds_column(xs):
-    """Test test_safe_ma_adds_column."""
+    """``safe_ma`` should append a moving-average column to the DataFrame."""
     df = pd.DataFrame({"close": xs})
     ic.safe_ma(df, 5, "sma")
     assert "sma_5" in df.columns
