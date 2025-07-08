@@ -1,3 +1,5 @@
+"""Run all filters once to verify queries and return metadata."""
+
 import pandas as pd
 
 EXPECTED_COLUMNS = [

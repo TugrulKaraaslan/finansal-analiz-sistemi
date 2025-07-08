@@ -1,3 +1,5 @@
+"""Load YAML settings file and apply options to :mod:`settings`."""
+
 from __future__ import annotations
 
 import logging

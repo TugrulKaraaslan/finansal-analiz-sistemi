@@ -1,3 +1,5 @@
+"""Lightweight Excel reporting utility."""
+
 from __future__ import annotations
 
 from pathlib import Path

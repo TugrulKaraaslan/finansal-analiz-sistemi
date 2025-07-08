@@ -1,3 +1,5 @@
+"""Utility filters and setup helpers for project logging."""
+
 from __future__ import annotations
 
 import logging

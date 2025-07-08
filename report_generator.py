@@ -1,3 +1,5 @@
+"""Excel report generation helpers used by tests and CLI."""
+
 from __future__ import annotations
 
 import importlib.util
