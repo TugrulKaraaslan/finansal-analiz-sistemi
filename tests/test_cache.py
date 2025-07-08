@@ -1,7 +1,6 @@
 import pandas as pd
 import pytest
 
-
 pytest.importorskip("pyarrow")
 
 from finansal_analiz_sistemi import cache_builder, config, data_loader
