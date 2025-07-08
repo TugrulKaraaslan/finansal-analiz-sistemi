@@ -1,6 +1,9 @@
 import pandas as pd
+import pytest
 
 from finansal_analiz_sistemi import cache_builder, config, data_loader
+
+pytest.importorskip("pyarrow")
 
 
 def test_rebuild_creates_nonempty_parquet(tmp_path, monkeypatch):
