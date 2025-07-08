@@ -181,15 +181,7 @@ def _apply_single_filter(df, kod, query):
         "secim_adedi": 0,
     }
 
-    try:
-        from .utils import _extract_columns as _cols  # type: ignore
-    except Exception:  # pragma: no cover - fallback for non-package usage
-        try:
-            from .utils import _extract_columns_from_query as _cols  # type: ignore
-        except Exception:
-            _cols = _extract_columns_from_query
-
-    req_cols = _cols(query)
+    req_cols = _extract_columns_from_query(query)
     missing = [c for c in req_cols if c not in df.columns]
     if missing:
         info.update(
