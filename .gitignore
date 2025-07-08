@@ -25,3 +25,7 @@ crossover_test_log.txt
 nohup.out
 logs/
 tmp/
+output/
+outputs/
+cache/
+*.cache
