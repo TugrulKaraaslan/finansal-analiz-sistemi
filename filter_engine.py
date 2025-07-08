@@ -14,6 +14,25 @@ from pandas.errors import UndefinedVariableError as QueryError
 import settings
 from finansal_analiz_sistemi.logging_config import get_logger
 
+logger = get_logger(__name__)
+
+# Konfigürasyon dosyasından minimum hisse eşiğini oku
+_cfg_path = os.path.join(os.path.dirname(__file__), "config.yml")
+if os.path.exists(_cfg_path):
+    with open(_cfg_path) as f:
+        _cfg = yaml.safe_load(f) or {}
+else:
+    _cfg = {}
+MIN_STOCKS_PER_FILTER = _cfg.get("min_stocks_per_filter", 1)
+
+# Regular expressions for error parsing
+_missing_re = re.compile(r"Eksik sütunlar?:\s*(?P<col>[A-Za-z0-9_]+)")
+_undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)")
+
+# Global containers
+FAILED_FILTERS: list[dict] = []
+FILTER_DEFS: dict[str, dict] = {}
+
 
 class MissingColumnError(Exception):
     """Raised when a required column is absent."""
@@ -37,25 +56,6 @@ def _extract_columns_from_query(query: str) -> set:
     return _extract_query_columns(query)
 
 
-logger = get_logger(__name__)
-
-# Konfigürasyon dosyasından minimum hisse eşiğini oku
-_cfg_path = os.path.join(os.path.dirname(__file__), "config.yml")
-if os.path.exists(_cfg_path):
-    with open(_cfg_path) as f:
-        _cfg = yaml.safe_load(f) or {}
-else:
-    _cfg = {}
-MIN_STOCKS_PER_FILTER = _cfg.get("min_stocks_per_filter", 1)
-
-# Regular expressions for error parsing
-_missing_re = re.compile(r"Eksik sütunlar?:\s*(?P<col>[A-Za-z0-9_]+)")
-_undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)'")
-
-# Recursion guard
-FAILED_FILTERS: list[dict] = []
-
-
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
     FAILED_FILTERS.clear()
@@ -71,9 +71,6 @@ class CyclicFilterError(RuntimeError):
 
 class MaxDepthError(RuntimeError):
     """Raised when maximum recursion depth is exceeded."""
-
-
-FILTER_DEFS: dict[str, dict] = {}
 
 
 def _build_solution(err_type: str, msg: str) -> str:
