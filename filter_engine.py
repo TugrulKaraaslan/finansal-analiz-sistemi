@@ -198,7 +198,7 @@ def _apply_single_filter(df, kod, query):
 
     try:
         seç = df.query(query)
-        # --- 0 hisse skip mekaniği ---
+        # Skip filters returning too few stocks
         if len(seç) < MIN_STOCKS_PER_FILTER:
             logger.debug(
                 "Filter %s skipped (len=%s < %s)",
