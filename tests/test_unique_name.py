@@ -1,3 +1,5 @@
+"""Test module for test_unique_name."""
+
 from utilities.naming import unique_name
 
 

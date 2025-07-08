@@ -1,3 +1,5 @@
+"""Test module for test_error_list."""
+
 import pandas as pd
 
 from report_generator import LEGACY_SUMMARY_COLS, generate_full_report

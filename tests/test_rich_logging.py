@@ -1,3 +1,5 @@
+"""Test module for test_rich_logging."""
+
 import importlib
 import logging
 import os

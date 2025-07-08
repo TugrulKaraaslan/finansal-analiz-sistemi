@@ -1,3 +1,5 @@
+"""Test module for test_filter_depth."""
+
 import pandas as pd
 
 from filter_engine import FAILED_FILTERS, safe_eval

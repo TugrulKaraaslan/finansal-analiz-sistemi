@@ -1,3 +1,5 @@
+"""Test module for test_filter_loader_formats."""
+
 import tempfile
 from pathlib import Path
 

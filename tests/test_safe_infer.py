@@ -1,3 +1,5 @@
+"""Test module for test_safe_infer."""
+
 import pandas as pd
 
 from utils.compat import safe_infer_objects

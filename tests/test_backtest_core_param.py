@@ -1,3 +1,5 @@
+"""Test module for test_backtest_core_param."""
+
 import warnings
 
 import numpy as np

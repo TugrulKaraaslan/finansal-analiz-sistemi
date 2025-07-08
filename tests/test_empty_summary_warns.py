@@ -1,3 +1,5 @@
+"""Test module for test_empty_summary_warns."""
+
 import logging
 
 import openpyxl

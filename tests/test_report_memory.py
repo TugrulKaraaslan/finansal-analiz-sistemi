@@ -1,3 +1,5 @@
+"""Test module for test_report_memory."""
+
 import time
 
 import pandas as pd

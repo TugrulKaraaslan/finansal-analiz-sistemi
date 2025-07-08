@@ -1,3 +1,5 @@
+"""Test module for test_backtest_core."""
+
 import os
 import sys
 import types

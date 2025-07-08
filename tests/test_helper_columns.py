@@ -1,3 +1,5 @@
+"""Test module for test_helper_columns."""
+
 import preprocessor
 
 

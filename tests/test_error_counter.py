@@ -1,3 +1,5 @@
+"""Test module for test_error_counter."""
+
 import logging
 
 from finansal_analiz_sistemi.logging_utils import ERROR_COUNTER, ErrorCountingFilter

@@ -1,3 +1,5 @@
+"""Test module for test_data_gap."""
+
 import os
 import sys
 

@@ -1,3 +1,5 @@
+"""Test module for test_percentage_scaling."""
+
 import os
 import sys
 

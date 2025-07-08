@@ -1,3 +1,5 @@
+"""Test module for test_read_prices."""
+
 import pandas as pd
 
 from finansal_analiz_sistemi import data_loader

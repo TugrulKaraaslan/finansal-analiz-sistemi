@@ -1,3 +1,5 @@
+"""Test module for test_indicator_crossovers."""
+
 from pathlib import Path
 
 import pandas as pd

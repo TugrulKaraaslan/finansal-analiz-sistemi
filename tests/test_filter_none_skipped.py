@@ -1,3 +1,5 @@
+"""Test module for test_filter_none_skipped."""
+
 import sys
 import types
 

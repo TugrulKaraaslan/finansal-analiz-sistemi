@@ -1,3 +1,5 @@
+"""Test module for test_cli_output."""
+
 from pathlib import Path
 
 import pytest

@@ -1,3 +1,5 @@
+"""Test module for test_loader_formats."""
+
 import pandas as pd
 import pytest
 

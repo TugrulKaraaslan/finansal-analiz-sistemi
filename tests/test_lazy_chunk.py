@@ -1,3 +1,5 @@
+"""Test module for test_lazy_chunk."""
+
 import pytest
 
 from finansal.utils import lazy_chunk

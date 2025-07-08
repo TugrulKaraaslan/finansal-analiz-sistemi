@@ -1,3 +1,5 @@
+"""Test module for test_report_write."""
+
 import pandas as pd
 
 import report_generator

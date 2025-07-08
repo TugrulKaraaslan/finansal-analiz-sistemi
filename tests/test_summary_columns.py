@@ -1,3 +1,5 @@
+"""Test module for test_summary_columns."""
+
 from report_generator import generate_summary
 
 

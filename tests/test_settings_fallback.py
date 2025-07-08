@@ -1,3 +1,5 @@
+"""Test module for test_settings_fallback."""
+
 import importlib
 
 import settings

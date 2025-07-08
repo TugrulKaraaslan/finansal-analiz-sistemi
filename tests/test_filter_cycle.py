@@ -1,3 +1,5 @@
+"""Test module for test_filter_cycle."""
+
 import pytest
 
 import filter_engine as fe

@@ -1,3 +1,5 @@
+"""Test module for test_parquet_cache."""
+
 from pathlib import Path
 
 import pandas as pd

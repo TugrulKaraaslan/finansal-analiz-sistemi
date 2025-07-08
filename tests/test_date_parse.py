@@ -1,3 +1,5 @@
+"""Test module for test_date_parse."""
+
 import pandas as pd
 
 from utils.date_utils import parse_date

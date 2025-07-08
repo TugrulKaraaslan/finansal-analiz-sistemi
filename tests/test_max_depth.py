@@ -1,3 +1,5 @@
+"""Test module for test_max_depth."""
+
 import pandas as pd
 import pytest
 

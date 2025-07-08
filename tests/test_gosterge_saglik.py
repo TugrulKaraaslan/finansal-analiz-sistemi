@@ -1,3 +1,5 @@
+"""Test module for test_gosterge_saglik."""
+
 import os
 import sys
 

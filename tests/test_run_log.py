@@ -1,3 +1,5 @@
+"""Test module for test_run_log."""
+
 from pathlib import Path
 
 import pandas as pd

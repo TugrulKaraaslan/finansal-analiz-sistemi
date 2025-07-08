@@ -1,3 +1,5 @@
+"""Test module for test_stats_sheet."""
+
 import os
 import sys
 

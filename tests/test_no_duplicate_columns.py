@@ -1,3 +1,5 @@
+"""Test module for test_no_duplicate_columns."""
+
 import os
 import sys
 
