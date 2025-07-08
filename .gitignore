@@ -114,3 +114,7 @@ __pypackages__/
 # Pip generated files
 pip-log.txt
 pip-delete-this-directory.txt
+
+# Ruff linter cache
+.ruff_cache/
+**/.ruff_cache/
