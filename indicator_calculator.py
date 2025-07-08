@@ -100,7 +100,7 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
 
 
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
-    """Eksikse basit veya üssel hareketli ortalama kolonu ekler."""
+    """Add the given SMA/EMA column when missing."""
     if logger_param is None:
         logger_param = logger
     local_logger = logger_param
