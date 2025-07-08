@@ -18,7 +18,21 @@ class DataLoaderCache:
         self.logger = logger
 
     def load_excel(self, filepath: str, **kwargs) -> pd.ExcelFile:
-        """Return ``ExcelFile`` from cache or disk."""
+        """Return ``ExcelFile`` from cache or read it from disk.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the Excel file.
+        **kwargs : Any
+            Additional options passed to :func:`pandas.ExcelFile` when loading
+            from disk.
+
+        Returns
+        -------
+        pd.ExcelFile
+            Cached or freshly loaded ``ExcelFile`` instance.
+        """
         key = (os.path.abspath(filepath), "__excel__")
         if key in self.loaded_data:
             if self.logger:
@@ -37,7 +51,20 @@ class DataLoaderCache:
             raise
 
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
-        """Read CSV using cached result if unmodified."""
+        """Read a CSV file, caching the result by path and modification time.
+
+        Parameters
+        ----------
+        filepath : str
+            CSV file path.
+        **kwargs : Any
+            Options forwarded to :func:`pandas.read_csv` when reading.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame from cache or newly read from disk.
+        """
         abs_path = os.path.abspath(filepath)
         key = (abs_path, "__csv__")
         stat = os.stat(abs_path)
