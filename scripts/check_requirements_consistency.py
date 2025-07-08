@@ -14,6 +14,8 @@ _pat = re.compile(r"^([A-Za-z0-9_.-]+)(?:==([^=]+))?$")
 
 
 def parse_requirements(path):
+    """Return a ``dict`` of package names to pinned versions."""
+
     pkgs = {}
     for line in path.read_text().splitlines():
         line = line.strip()

@@ -82,6 +82,7 @@ def load_filter_csv(path: str) -> pd.DataFrame:
 
 
 def check_and_create_dirs(*dir_paths):
+    """Create missing directories if they do not exist."""
     for dir_path in dir_paths:
         if dir_path and not os.path.exists(dir_path):
             try:
@@ -299,6 +300,7 @@ def yukle_hisse_verileri(
     force_excel_reload=False,
     logger_param=None,
 ) -> pd.DataFrame | None:
+    """Load raw stock data from CSV/Excel sources into a single DataFrame."""
     if logger_param is None:
         logger_param = logger
     fn_logger = logger_param
