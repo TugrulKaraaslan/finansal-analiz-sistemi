@@ -1,4 +1,4 @@
-"""Komut satiri arayuzu."""
+"""Command-line interface for Parquet cache management."""
 
 from __future__ import annotations
 

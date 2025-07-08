@@ -1,6 +1,6 @@
-"""Thin wrappers around optional OpenBB technical indicators.
+"""Lightweight wrappers for optional OpenBB technical indicators.
 
-Each function delegates to :mod:`openbb` when the package is installed
+Each function forwards to :mod:`openbb` when the package is available
 and otherwise raises ``NotImplementedError`` so the rest of the codebase
 remains optional-dependency agnostic.
 """
