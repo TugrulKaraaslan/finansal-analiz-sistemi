@@ -123,7 +123,5 @@ def validate(
 
     if logger:
         for err in errors:
-            logger.warning(
-                f"Filtre doğrulama uyarısı ({err.eksik_ad}): {err.detay}"
-            )
+            logger.warning(f"Filtre doğrulama uyarısı ({err.eksik_ad}): {err.detay}")
     return errors
