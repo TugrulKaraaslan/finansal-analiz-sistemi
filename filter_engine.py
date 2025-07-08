@@ -24,6 +24,8 @@ class MissingColumnError(Exception):
 
 
 def _extract_query_columns(query: str) -> set:
+    """Return column-like identifiers referenced in a filter query."""
+
     query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
     tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
     reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
@@ -31,7 +33,8 @@ def _extract_query_columns(query: str) -> set:
 
 
 def _extract_columns_from_query(query: str) -> set:
-    """Yeni isimlendirme için yardımcı."""
+    """Compatibility wrapper for the new naming scheme."""
+
     return _extract_query_columns(query)
 
 

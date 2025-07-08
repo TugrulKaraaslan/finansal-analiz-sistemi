@@ -254,6 +254,7 @@ def _ekle_psar(df: pd.DataFrame) -> None:
 
 
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
+    """Return 1H classic pivot point for ``group_df``."""
     hisse_str = (
         group_df["hisse_kodu"].iloc[0]
         if not group_df.empty and "hisse_kodu" in group_df.columns
@@ -282,6 +283,7 @@ def _calculate_series_series_crossover(
     col_name_below: str,
     logger_param=None,
 ) -> tuple[pd.Series, pd.Series] | None:
+    """Detect crossovers between two series."""
     if logger_param is None:
         logger_param = logger
     local_logger = logger_param
@@ -334,6 +336,7 @@ def _calculate_series_value_crossover(
     suffix: str,
     logger_param=None,
 ) -> tuple[pd.Series, pd.Series] | None:
+    """Detect where a series crosses a constant ``value``."""
     if logger_param is None:
         logger_param = logger
     local_logger = logger_param
@@ -387,6 +390,7 @@ def _calculate_group_indicators_and_crossovers(
     wanted_cols=None,
     df_filters: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
+    """Calculate indicators and crossover columns for a single ticker."""
     local_logger = logger
     hisse_kodu = (
         _grp_df["hisse_kodu"].iloc[0]
@@ -827,6 +831,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
     df_filters: pd.DataFrame | None = None,
     logger_param=None,
 ) -> pd.DataFrame | None:
+    """Main entry to compute indicators and crossover signals."""
     if logger_param is None:
         logger_param = logger
     ana_logger = logger_param

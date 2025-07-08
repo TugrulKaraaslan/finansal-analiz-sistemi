@@ -15,7 +15,7 @@ def _get_fiyat(
     zaman_sutun_adi: str,
     logger_param=None,
 ) -> float:
-    """Belirli bir hisse için, verilen tarihteki ve zamandaki (sütun adı) fiyatı alır."""
+    """Return the price for a stock on ``tarih`` using ``zaman_sutun_adi``."""
     if logger_param is None:
         logger_param = logger
     log = logger_param
