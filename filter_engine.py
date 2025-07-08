@@ -14,7 +14,6 @@ from pandas.errors import UndefinedVariableError as QueryError
 import settings
 from finansal_analiz_sistemi.logging_config import get_logger
 
-
 logger = get_logger(__name__)
 
 # Konfigürasyon dosyasından minimum hisse eşiğini oku
@@ -56,6 +55,7 @@ def _extract_columns_from_query(query: str) -> set:
     """Compatibility wrapper for the new naming scheme."""
     return _extract_query_columns(query)
 
+
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
     FAILED_FILTERS.clear()
@@ -71,7 +71,6 @@ class CyclicFilterError(RuntimeError):
 
 class MaxDepthError(RuntimeError):
     """Raised when maximum recursion depth is exceeded."""
-
 
 
 def _build_solution(err_type: str, msg: str) -> str:
