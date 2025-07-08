@@ -19,6 +19,7 @@ class MissingColumnError(Exception):
     """Raised when a required column is absent."""
 
     def __init__(self, missing: str):
+        """Store the missing column name."""
         super().__init__(missing)
         self.missing = missing
 
@@ -389,6 +390,7 @@ def uygula_filtreler(
     kontrol_log: list[dict] = []
 
     def kaydet_hata(kod, error_type, msg, eksik=None):
+        """Append a structured error entry to ``atlanmis_filtreler_log_dict``."""
         hack = {
             "filtre_kod": kod,
             "hata_tipi": error_type,

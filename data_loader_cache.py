@@ -10,23 +10,15 @@ from src.utils.excel_reader import open_excel_cached
 
 
 class DataLoaderCache:
-    """Basit dosya okuma önbelleği.
-
-    Bu sınıf, CSV ve Excel dosyalarının diskten her okunuşunda tekrar
-    yüklenmesini önlemek için basit bir bellek içi önbellek tutar. ``load_csv``
-    ve ``load_excel`` metodları aynı dosya yolu için daha önce yüklenmiş bir
-    nesne varsa bunu döndürür, aksi halde dosyayı okuyup önbelleğe ekler.
-
-    Args:
-        logger (logging.Logger, optional): İşlemler hakkında bilgi vermek için
-            kullanılacak logger nesnesi.
-    """
+    """Simple in-memory cache for CSV and Excel readers."""
 
     def __init__(self, logger=None, *, ttl: int = 4 * 60 * 60, maxsize: int = 64):
+        """Initialize cache with optional logger and TTL settings."""
         self.loaded_data: TTLCache = TTLCache(maxsize=maxsize, ttl=ttl)
         self.logger = logger
 
     def load_excel(self, filepath: str, **kwargs) -> pd.ExcelFile:
+        """Return ``ExcelFile`` from cache or disk."""
         key = (os.path.abspath(filepath), "__excel__")
         if key in self.loaded_data:
             if self.logger:
@@ -45,6 +37,7 @@ class DataLoaderCache:
             raise
 
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
+        """Read CSV using cached result if unmodified."""
         abs_path = os.path.abspath(filepath)
         key = (abs_path, "__csv__")
         stat = os.stat(abs_path)

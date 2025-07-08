@@ -19,11 +19,13 @@ class DuplicateFilter(logging.Filter):
     """Filter out repeated log messages within a time window."""
 
     def __init__(self, window: float = 2.0) -> None:
+        """Initialize filter with repeat detection window."""
         super().__init__("duplicate")
         self.window = window
         self._seen: Dict[Tuple[int, str], float] = {}
 
     def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
+        """Allow a log record if it has not been seen recently."""
         now = time.monotonic()
         key = (record.levelno, record.getMessage())
         last = self._seen.get(key)
@@ -39,12 +41,14 @@ class CounterFilter(logging.Filter):
     """Count warnings and errors for summary reporting."""
 
     def __init__(self) -> None:
+        """Prepare counters and error list."""
         super().__init__("counter")
         self.errors = 0
         self.warnings = 0
         self.error_list: list[tuple[str, str, str]] = []
 
     def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
+        """Update counters based on the log level."""
         if record.levelno == logging.ERROR:
             self.errors += 1
             self.error_list.append(

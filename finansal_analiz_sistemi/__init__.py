@@ -24,6 +24,7 @@ __all__ = ["config", "logging_config", "cache_builder", "data_loader"]
 
 
 def __getattr__(name: str) -> types.ModuleType:
+    """Lazily import selected submodules on first access."""
     if name in {"cache_builder", "data_loader"}:
         module = importlib.import_module(name)
         globals()[name] = module
