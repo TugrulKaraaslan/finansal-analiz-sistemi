@@ -45,7 +45,12 @@ warnings.filterwarnings(
 
 # --- Helper: normalize_pct ---
 def normalize_pct(series):
-    """Strip ``%`` sign, convert to float and divide by 100 when values exceed 100."""
+    """Return numeric percentages scaled to a fractional range.
+
+    The ``%`` sign is removed first and the remaining string is converted
+    to ``float``. Values greater than ``100`` are divided by ``100`` so the
+    result is always on a ``0-1`` scale.
+    """
     s = series.astype(str).str.replace("%", "", regex=False)
     s = pd.to_numeric(s, errors="coerce")
     return np.where(s.abs() > 100, s / 100.0, s).round(2)
