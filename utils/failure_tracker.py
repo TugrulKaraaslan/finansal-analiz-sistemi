@@ -1,3 +1,5 @@
+"""Track failed operations and reasons for reporting."""
+
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 

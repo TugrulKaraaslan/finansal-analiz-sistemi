@@ -1,8 +1,8 @@
+"""Helpers for loading CSV, Excel and Parquet datasets."""
+
 from __future__ import annotations
 
 import glob
-
-# Stdlib / 3rd-party importlar en üstte olmalı
 import os
 from functools import lru_cache, partial
 from pathlib import Path
@@ -14,15 +14,7 @@ from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.logging_config import get_logger
 from utils.compat import safe_concat
 
-# Sabitler
 COLS = ["tarih", "filtre_kodu", "PythonQuery"]
-
-# data_loader.py
-# -*- coding: utf-8 -*-
-# Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
-# Modül: Veri Yükleme (Excel/CSV/Parquet) ve Filtre Dosyası Okuma
-# Tuğrul Karaaslan & Gemini
-# Tarih: 18 Mayıs 2025 (OHLCV_MAP kullanımı ve loglama detaylandırıldı)
 
 logger = get_logger(__name__)
 

@@ -1,3 +1,5 @@
+"""Backward compatible wrappers for pandas utilities."""
+
 import logging
 from typing import List
 

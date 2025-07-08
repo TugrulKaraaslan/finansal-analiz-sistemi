@@ -1,5 +1,4 @@
-# filtre_dogrulama.py
-# Bu modül CSV filtre dosyasındaki flag/query hatalarını tespit eder
+"""Validate filter CSV files for missing flags or malformed queries."""
 
 import re
 

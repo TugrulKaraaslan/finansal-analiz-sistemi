@@ -1,3 +1,5 @@
+"""Map exceptions to user friendly reason/hint pairs."""
+
 from typing import Dict, Tuple
 
 __all__ = ["get_reason_hint"]

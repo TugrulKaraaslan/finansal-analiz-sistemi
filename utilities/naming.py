@@ -1,3 +1,5 @@
+"""Helpers for generating unique column names."""
+
 __all__ = ["unique_name"]
 
 
