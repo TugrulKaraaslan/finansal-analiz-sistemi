@@ -1,3 +1,5 @@
+"""Utilities for building and updating the Parquet cache."""
+
 from pathlib import Path
 
 import pandas as pd

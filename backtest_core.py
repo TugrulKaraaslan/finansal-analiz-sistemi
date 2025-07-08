@@ -1,10 +1,4 @@
-# backtest_core.py
-# -*- coding: utf-8 -*-
-# Proje: Finansal Analiz ve Backtest Sistemi Geliştirme
-# Modül: Basit Backtest Motoru
-# Tuğrul Karaaslan & Gemini
-# Tarih: 18 Mayıs 2025 (Loglama iyileştirmeleri, not yönetimi)
-
+"""Simplified backtesting utilities used by the CLI."""
 
 import numpy as np
 import pandas as pd

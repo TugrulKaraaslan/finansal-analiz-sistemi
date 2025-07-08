@@ -1,3 +1,5 @@
+"""Load configuration data used for indicator calculations."""
+
 from __future__ import annotations
 
 import re

@@ -1,3 +1,5 @@
+"""Context manager to log memory usage during execution."""
+
 import os
 import time
 
@@ -5,6 +7,8 @@ import psutil
 
 
 class mem_profile:
+    """Write peak memory usage to ``reports/memory_profile.csv``."""
+
     def __enter__(self):
         self.proc = psutil.Process(os.getpid())
         self.start = self.proc.memory_info().rss
