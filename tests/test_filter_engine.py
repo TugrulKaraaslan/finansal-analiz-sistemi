@@ -12,7 +12,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_no_stock_reason_for_empty_result():
-def test_no_stock_reason_for_empty_result():
     """Return ``NO_STOCK`` when a filter selects nothing."""
     df = pd.DataFrame(
         {
@@ -28,7 +27,6 @@ def test_no_stock_reason_for_empty_result():
     assert result["F1"]["hisse_sayisi"] == 0
 
 
-def test_volume_tl_generated_if_missing():
 def test_volume_tl_generated_if_missing():
     """Generate ``volume_tl`` column automatically if needed."""
     df = pd.DataFrame(
@@ -47,7 +45,6 @@ def test_volume_tl_generated_if_missing():
 
 
 def test_apply_single_filter_ok():
-def test_apply_single_filter_ok():
     """Single filter should mark rows as selected when conditions match."""
     df = pd.DataFrame(
         {
@@ -62,7 +59,6 @@ def test_apply_single_filter_ok():
 
 
 def test_apply_single_filter_missing_column():
-def test_apply_single_filter_missing_column():
     """Return error info when a referenced column is absent."""
     df = pd.DataFrame(
         {
@@ -76,7 +72,6 @@ def test_apply_single_filter_missing_column():
     assert "olmayan_kolon" in info["eksik_sutunlar"]
 
 
-def test_recursive_filter_detection():
 def test_recursive_filter_detection():
     """Detect cyclic filter references and raise an error."""
     df = pd.DataFrame({"x": [1]})
