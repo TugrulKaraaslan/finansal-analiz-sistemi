@@ -4,15 +4,16 @@ Stress-test cache growth: ensure <=5 MB additional RAM after repeated loads.
 
 import gc
 
+import pandas as pd
 import psutil
 import pytest
-
 from cachetools import TTLCache
-import pandas as pd
+
 
 def _read_parquet(ticker: str, start: str, end: str) -> pd.DataFrame:
     dates = pd.date_range(start, end, freq="D")
     return pd.DataFrame({"hisse_kodu": ticker, "tarih": dates})
+
 
 _CACHE = TTLCache(maxsize=256, ttl=4 * 60 * 60)
 
