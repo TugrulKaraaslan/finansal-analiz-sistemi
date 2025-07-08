@@ -11,7 +11,6 @@ def normalize_filtre_kodu(df: pd.DataFrame) -> pd.DataFrame:
     columns match, only the first is kept. Raises ``KeyError`` if no matching
     column exists.
     """
-
     # Harici müdahalelerden etkilenmemek için kopya üzerinde çalış
     out = df.copy()
 

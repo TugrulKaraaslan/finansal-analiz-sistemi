@@ -27,7 +27,6 @@ def _create_handler() -> RotatingFileHandler:
 
 def setup_logging() -> logging.Logger:
     """Configure root logger with a rotating file handler."""
-
     root = logging.getLogger()
     for h in list(root.handlers):
         if isinstance(h, RotatingFileHandler):
@@ -40,7 +39,6 @@ def setup_logging() -> logging.Logger:
 
 def get_logger(name: str | None = None) -> logging.Logger:
     """Return a named logger after ensuring the root is configured."""
-
     if (
         not logging.getLogger().handlers
     ):  # pragma: no cover - already configured in tests

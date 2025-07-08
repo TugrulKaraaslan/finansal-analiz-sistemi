@@ -323,7 +323,6 @@ def run_pipeline(
 
 def main(argv: list[str] | None = None) -> None:
     """Komut satırından çalıştırıldığında ana backtest akışını yürüt."""
-
     parser = argparse.ArgumentParser(description="Finansal analiz ve backtest")
     parser.add_argument(
         "--tarama",

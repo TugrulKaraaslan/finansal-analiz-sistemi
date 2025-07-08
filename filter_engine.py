@@ -26,7 +26,6 @@ class MissingColumnError(Exception):
 
 def _extract_query_columns(query: str) -> set:
     """Return column-like identifiers referenced in a filter query."""
-
     query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
     tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
     reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
@@ -35,7 +34,6 @@ def _extract_query_columns(query: str) -> set:
 
 def _extract_columns_from_query(query: str) -> set:
     """Compatibility wrapper for the new naming scheme."""
-
     return _extract_query_columns(query)
 
 
@@ -109,7 +107,6 @@ def evaluate_filter(
     ``FILTER_DEFS``. Raises ``CyclicFilterError`` for cycles and
     ``MaxDepthError`` when ``settings.MAX_FILTER_DEPTH`` is exceeded.
     """
-
     seen = seen or set()
 
     if isinstance(fid, dict):
@@ -233,7 +230,7 @@ def _apply_single_filter(df, kod, query):
 
 
 def run_filter(code, df, expr):
-    """Simple wrapper for running a filter expression."""
+    """Run a filter expression and return the resulting DataFrame."""
     # Pasif filtreler listede mi?
     from finansal_analiz_sistemi.config import cfg
 

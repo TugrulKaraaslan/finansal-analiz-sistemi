@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 def load_settings(path: str | None = None) -> dict:
     """Load YAML settings and apply known options to ``settings`` module."""
-
     settings_path = get_settings_path(path)
     if not Path(settings_path).exists():
         raise RuntimeError(f"settings.yaml not found at {settings_path}")

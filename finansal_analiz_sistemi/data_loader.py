@@ -35,9 +35,10 @@ def load_data(path: str) -> pd.DataFrame:
 
 
 def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
-    """
+    """Read price CSV with delimiter auto-detection.
+
     Fiyat CSV'sini akıllı ayraç tespitiyle oku. İlk satıra bakılır:
-    ; çoksa noktalı virgül, , çoksa virgül, yoksa sep=None bırakılır.
+    ';' çoksa noktalı virgül, ',' çoksa virgül, yoksa ``sep=None`` bırakılır.
     """
     encoding = kwargs.get("encoding", "utf-8")
     with open(path, encoding=encoding) as f:
@@ -54,8 +55,7 @@ def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
 
 
 def load_filter_csv(path: str) -> pd.DataFrame:
-    """CSV'yi okunur ve kolon hizasını garanti eder."""
-
+    """Load CSV file and ensure column alignment."""
     # Önce başlıksız okuma dene (eski format: sadece 2 kolon)
     raw = pd.read_csv(path, sep=";")
     if list(raw.columns) == ["filtre_kodu", "PythonQuery"]:
@@ -246,7 +246,6 @@ def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.Da
     Accepts CSV (`;` separated), Excel (.xlsx/.xls, first sheet) and Parquet
     files.
     """
-
     if logger_param is None:
         logger_param = logger
     log = logger_param

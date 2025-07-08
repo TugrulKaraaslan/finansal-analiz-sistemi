@@ -15,7 +15,6 @@ def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | NaTType:
 
     Returns ``pd.NaT`` for invalid inputs instead of raising ``ValueError``.
     """
-
     if pd.isna(date_str) or str(date_str).strip() == "":
         return pd.NaT
 

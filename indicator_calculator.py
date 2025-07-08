@@ -831,7 +831,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
     df_filters: pd.DataFrame | None = None,
     logger_param=None,
 ) -> pd.DataFrame | None:
-    """Main entry to compute indicators and crossover signals."""
+    """Compute indicators and crossover signals."""
     if logger_param is None:
         logger_param = logger
     ana_logger = logger_param
