@@ -345,7 +345,8 @@ def uygula_filtreler(
 
     if "hisse_kodu" not in df_ana_veri.columns or "tarih" not in df_ana_veri.columns:
         fn_logger.error(
-            f"Ana veride 'hisse_kodu' veya 'tarih' sütunları eksik. Filtreleme yapılamaz. Mevcut sütunlar: {df_ana_veri.columns.tolist()}"
+            f"Ana veride 'hisse_kodu' veya 'tarih' sütunları eksik. Filtreleme yapılamaz. "
+            f"Mevcut sütunlar: {df_ana_veri.columns.tolist()}"
         )
         return {}, {
             "TUM_FILTRELER_ATLADI": "Ana veride hisse_kodu veya tarih sütunu eksik."
@@ -371,7 +372,9 @@ def uygula_filtreler(
                     f"Belirtilen tarama tarihi ({tarama_tarihi.strftime('%d.%m.%Y')}) ve öncesi için veri yok."
                 )
                 return {}, {
-                    "TUM_FILTRELER_ATLADI": f'Tarama tarihinde ({tarama_tarihi.strftime("%d.%m.%Y")}) ve önceki günlerde veri yok.'
+                    "TUM_FILTRELER_ATLADI": (
+                        f'Tarama tarihinde ({tarama_tarihi.strftime("%d.%m.%Y")}) ve önceki günlerde veri yok.'
+                    )
                 }
     except Exception as e_tarih_hazirlik:
         fn_logger.error(
@@ -391,7 +394,8 @@ def uygula_filtreler(
         }
 
     fn_logger.info(
-        f"Tarama gününe ({tarama_tarihi.strftime('%d.%m.%Y')}) ait {len(df_tarama_gunu)} hisse satırı (benzersiz hisse sayısı: {df_tarama_gunu['hisse_kodu'].nunique()}) üzerinde filtreler uygulanacak."
+        f"Tarama gününe ({tarama_tarihi.strftime('%d.%m.%Y')}) ait {len(df_tarama_gunu)} hisse satırı "
+        f"(benzersiz hisse sayısı: {df_tarama_gunu['hisse_kodu'].nunique()}) üzerinde filtreler uygulanacak."
     )
     fn_logger.debug(
         f"Tarama günü DataFrame sütunları (ilk 10): {df_tarama_gunu.columns.tolist()[:10]}"
@@ -561,7 +565,8 @@ def uygula_filtreler(
     )
     if atlanmis_filtreler_log_dict:
         fn_logger.warning(
-            f"Atlanan/hatalı filtre sayısı: {len(atlanmis_filtreler_log_dict)}. Detaylar için bir sonraki log seviyesine bakınız veya raporu inceleyiniz."
+            f"Atlanan/hatalı filtre sayısı: {len(atlanmis_filtreler_log_dict)}. "
+            "Detaylar için bir sonraki log seviyesine bakınız veya raporu inceleyiniz."
         )
         for fk, err_msg in atlanmis_filtreler_log_dict.items():
             fn_logger.debug(f"  Atlanan/Hatalı Filtre '{fk}': {err_msg}")

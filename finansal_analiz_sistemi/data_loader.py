@@ -159,11 +159,13 @@ def _standardize_date_column(
         if bulunan_tarih_sutunu != "tarih":
             df.rename(columns={bulunan_tarih_sutunu: "tarih"}, inplace=True)
             log.debug(
-                f"'{os.path.basename(file_path_for_log)}': Tarih sütunu '{bulunan_tarih_sutunu}' -> 'tarih' olarak adlandırıldı."
+                f"'{os.path.basename(file_path_for_log)}': Tarih sütunu '{bulunan_tarih_sutunu}' "
+                "-> 'tarih' olarak adlandırıldı."
             )
     else:
         log.warning(
-            f"'{os.path.basename(file_path_for_log)}': Standart tarih sütunu ('Tarih' vb.) bulunamadı. Mevcut sütunlar: {df.columns.tolist()}"
+            f"'{os.path.basename(file_path_for_log)}': Standart tarih sütunu ('Tarih' vb.) bulunamadı. "
+            f"Mevcut sütunlar: {df.columns.tolist()}"
         )
     return df
 
@@ -202,7 +204,8 @@ def _standardize_ohlcv_columns(
             ):  # Bu standart ada daha önce başka bir sütun atanmamışsa
                 rename_map[raw_name_from_config] = standard_name_target
                 log.debug(
-                    f"'{file_name_short}': Eşleştirme bulundu: '{raw_name_from_config}' -> '{standard_name_target}' (rename_map'e eklendi)"
+                    f"'{file_name_short}': Eşleştirme bulundu: '{raw_name_from_config}' "
+                    f"-> '{standard_name_target}' (rename_map'e eklendi)"
                 )
             elif raw_name_from_config == standard_name_target:
                 pass
@@ -232,7 +235,8 @@ def _standardize_ohlcv_columns(
             )
     else:
         log.debug(
-            f"'{file_name_short}': OHLCV için yeniden adlandırılacak sütun bulunamadı (ya zaten standart ya da MAP'te eşleşme yok)."
+            f"'{file_name_short}': OHLCV için yeniden adlandırılacak sütun bulunamadı "
+            "(ya zaten standart ya da MAP'te eşleşme yok)."
         )
 
     # Son kontrol: Hedeflediğimiz standart sütunlar var mı?
@@ -244,11 +248,13 @@ def _standardize_ohlcv_columns(
 
     if eksik_temel_sutunlar:
         log.warning(
-            f"'{file_name_short}': Standartlaştırma sonrası TEMEL HEDEF OHLCV sütunlarından bazıları hala eksik: {eksik_temel_sutunlar}."
+            f"'{file_name_short}': Standartlaştırma sonrası TEMEL HEDEF OHLCV sütunlarından bazıları hala eksik: "
+            f"{eksik_temel_sutunlar}."
         )
     else:
         log.info(
-            f"'{file_name_short}': Tüm temel hedef OHLCV sütunları ('open', 'high', 'low', 'close', 'volume') başarıyla oluşturuldu/bulundu."
+            f"'{file_name_short}': Tüm temel hedef OHLCV sütunları ('open', 'high', 'low', 'close', 'volume') "
+            "başarıyla oluşturuldu/bulundu."
         )
     log.debug(f"--- '{file_name_short}': OHLCV Standardizasyonu Tamamlandı ---")
     return df
@@ -326,7 +332,8 @@ def yukle_hisse_verileri(
         try:
             df_birlesik = pd.read_parquet(parquet_dosya_yolu)
             fn_logger.info(
-                f"Birleşik hisse verileri Parquet dosyasından yüklendi: {parquet_dosya_yolu} ({len(df_birlesik)} satır)"
+                f"Birleşik hisse verileri Parquet dosyasından yüklendi: {parquet_dosya_yolu} "
+                f"({len(df_birlesik)} satır)"
             )
             if not df_birlesik.empty and "hisse_kodu" in df_birlesik.columns:
                 fn_logger.debug(
@@ -337,12 +344,14 @@ def yukle_hisse_verileri(
             return df_birlesik
         except Exception as e:
             fn_logger.warning(
-                f"Parquet dosyası ({parquet_dosya_yolu}) okunamadı, Excel/CSV'den yeniden yüklenecek. Hata: {e}",
+                f"Parquet dosyası ({parquet_dosya_yolu}) okunamadı, Excel/CSV'den yeniden yüklenecek. "
+                f"Hata: {e}",
                 exc_info=False,
             )
 
     fn_logger.info(
-        "Parquet dosyası bulunamadı/kullanılmadı veya zorla yeniden yükleme aktif. Kaynak CSV/Excel dosyaları okunacak..."
+        "Parquet dosyası bulunamadı/kullanılmadı veya zorla yeniden yükleme aktif. "
+        "Kaynak CSV/Excel dosyaları okunacak..."
     )
 
     excel_dosyalari = glob.glob(os.path.join(veri_klasoru, "*.xlsx")) + glob.glob(
@@ -366,7 +375,8 @@ def yukle_hisse_verileri(
 
     if not excel_dosyalari and not csv_dosyalari:
         fn_logger.critical(
-            f"Belirtilen pattern'de ({hisse_dosya_pattern} ve Excel varyasyonları) kaynak veri dosyası bulunamadı ({veri_klasoru}). Sistem devam edemez."
+            f"Belirtilen pattern'de ({hisse_dosya_pattern} ve Excel varyasyonları) kaynak veri dosyası bulunamadı "
+            f"({veri_klasoru}). Sistem devam edemez."
         )
         return None
 
@@ -386,7 +396,8 @@ def yukle_hisse_verileri(
                 tum_hisse_datalari.append(df_hisse)
         except Exception as e:
             fn_logger.error(
-                f"Excel dosyası ({dosya_yolu} - Sayfa: {hisse_kodu_excel if hisse_kodu_excel else 'BILINMIYOR'}) işlenirken hata: {e}",
+                f"Excel dosyası ({dosya_yolu} - Sayfa: {hisse_kodu_excel if hisse_kodu_excel else 'BILINMIYOR'}) "
+                f"işlenirken hata: {e}",
                 exc_info=False,
             )
 
@@ -426,7 +437,8 @@ def yukle_hisse_verileri(
     try:
         df_birlesik = safe_concat(tum_hisse_datalari, ignore_index=True)
         fn_logger.info(
-            f"Toplam {len(df_birlesik)} satır ve {df_birlesik['hisse_kodu'].nunique()} farklı hisse verisi birleştirildi."
+            f"Toplam {len(df_birlesik)} satır ve {df_birlesik['hisse_kodu'].nunique()} farklı hisse verisi "
+            "birleştirildi."
         )
     except Exception as e:
         fn_logger.critical(
@@ -457,7 +469,8 @@ def yukle_hisse_verileri(
             ]
             if eksik_sutunlar_kayit_oncesi:
                 fn_logger.warning(
-                    f"Parquet'e kaydetmeden önce birleştirilmiş DataFrame'de temel sütunlar eksik: {eksik_sutunlar_kayit_oncesi}. Bu durum sorunlara yol açabilir."
+                    f"Parquet'e kaydetmeden önce birleştirilmiş DataFrame'de temel sütunlar eksik: "
+                    f"{eksik_sutunlar_kayit_oncesi}. Bu durum sorunlara yol açabilir."
                 )
             else:
                 fn_logger.debug(
