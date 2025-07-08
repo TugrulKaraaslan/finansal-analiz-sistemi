@@ -5,17 +5,14 @@
 # Tuğrul Karaaslan & Gemini
 # Tarih: 18 Mayıs 2025 (Loglama iyileştirmeleri, not yönetimi)
 
-import atexit
 
 import numpy as np
 import pandas as pd
 
-import data_loader_cache as dlc
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.logging_config import get_logger
 
 logger = get_logger(__name__)
-atexit.register(dlc.clear_cache)
 
 
 def _get_fiyat(
