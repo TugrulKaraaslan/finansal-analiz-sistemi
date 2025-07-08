@@ -1,8 +1,8 @@
-"""Wrappers around optional OpenBB technical indicators.
+"""Thin wrappers around optional OpenBB technical indicators.
 
-Functions call into :mod:`openbb` when available and raise
-``NotImplementedError`` otherwise to keep the rest of the codebase
-agnostic to the optional dependency.
+Each function delegates to :mod:`openbb` when the package is installed
+and otherwise raises ``NotImplementedError`` so the rest of the codebase
+remains optional-dependency agnostic.
 """
 
 from __future__ import annotations
