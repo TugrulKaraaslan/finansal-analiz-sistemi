@@ -5,6 +5,7 @@ import report_generator
 
 
 def test_detay_sheet_chunked(tmp_path):
+    """Test test_detay_sheet_chunked."""
     summary = pd.DataFrame(
         {"filtre_kodu": ["F1"], "ort_getiri_%": [1.0], "sebep_kodu": ["OK"]}
     )

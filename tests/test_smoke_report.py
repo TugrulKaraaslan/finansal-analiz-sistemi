@@ -6,6 +6,7 @@ from run import run_pipeline
 
 
 def test_smoke_report(tmp_path):
+    """Test test_smoke_report."""
     out_file = tmp_path / "smoke.xlsx"
     root = Path(__file__).parent / "smoke_data"
     run_pipeline(

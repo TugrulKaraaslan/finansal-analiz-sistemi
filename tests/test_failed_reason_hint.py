@@ -10,11 +10,13 @@ from utils.failure_tracker import failures
 
 
 def _generate_failure():
+    """Test _generate_failure."""
     df = pd.DataFrame({"x": [1]})
     filter_engine._apply_single_filter(df, "T0", "0/0")
 
 
 def _build_report(tmp_path):
+    """Test _build_report."""
     out = tmp_path / "fail.xlsx"
     summary = pd.DataFrame(columns=LEGACY_SUMMARY_COLS)
     detail = pd.DataFrame(columns=LEGACY_DETAIL_COLS)
@@ -23,6 +25,7 @@ def _build_report(tmp_path):
 
 
 def test_reason_hint_filled(tmp_path):
+    """Test test_reason_hint_filled."""
     failures.clear()
     _generate_failure()
     df = _build_report(tmp_path)

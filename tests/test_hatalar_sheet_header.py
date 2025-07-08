@@ -7,6 +7,7 @@ from finansal_analiz_sistemi.report_generator import save_hatalar_excel
 
 
 def test_hatalar_sheet_header(tmp_path: Path) -> None:
+    """Test test_hatalar_sheet_header."""
     df = pd.DataFrame(
         {
             "filtre_kod": ["TST1"],
@@ -30,6 +31,7 @@ def test_hatalar_sheet_header(tmp_path: Path) -> None:
 
 
 def generate_excel_with_errors(tmp_path: Path) -> Path:
+    """Test generate_excel_with_errors."""
     errs = [
         {
             "filtre_kod": "E1",
@@ -46,6 +48,7 @@ def generate_excel_with_errors(tmp_path: Path) -> Path:
 
 
 def test_hatalar_sheet_has_filter_ids(tmp_path: Path) -> None:
+    """Test test_hatalar_sheet_has_filter_ids."""
     xlsx = generate_excel_with_errors(tmp_path)
     df = pd.read_excel(xlsx, sheet_name="Hatalar")
     assert df["filtre_kod"].notna().all()

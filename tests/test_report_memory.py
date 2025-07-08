@@ -9,6 +9,7 @@ import report_generator
 
 @pytest.mark.slow
 def test_generate_full_report_memory(tmp_path, big_df):
+    """Test test_generate_full_report_memory."""
     base = psutil.Process().memory_info().rss
     out = tmp_path / "rep.xlsx"
     t0 = time.time()

@@ -4,6 +4,7 @@ from finansal_analiz_sistemi import data_loader
 
 
 def test_read_prices_detects_delimiter(tmp_path):
+    """Test test_read_prices_detects_delimiter."""
     csv = tmp_path / "p.csv"
     df = pd.DataFrame({"code": ["AAA"], "date": ["2025-01-01"], "open": [1]})
     df.to_csv(csv, sep=";", index=False)

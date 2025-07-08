@@ -5,6 +5,7 @@ from utils.failure_tracker import failures
 
 
 def test_filter_depth_ok():
+    """Test test_filter_depth_ok."""
     df = pd.DataFrame({"x": [1]})
     expr = {
         "code": "A",

@@ -6,6 +6,7 @@ from finansal_analiz_sistemi.log_tools import DuplicateFilter
 
 
 def test_duplicate_filter():
+    """Test test_duplicate_filter."""
     logger = logging.getLogger("dup")
     logger.setLevel(logging.INFO)
     logger.handlers.clear()

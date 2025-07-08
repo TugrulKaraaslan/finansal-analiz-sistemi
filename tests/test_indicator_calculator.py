@@ -18,6 +18,7 @@ from finansal_analiz_sistemi import config  # noqa: E402
 
 
 def test_classicpivots_crossover_column_exists():
+    """Test test_classicpivots_crossover_column_exists."""
     data = {
         "hisse_kodu": ["AAA"] * 30,
         "tarih": pd.date_range("2024-01-01", periods=30, freq="D"),
@@ -38,6 +39,7 @@ def test_classicpivots_crossover_column_exists():
 
 
 def test_fallback_indicators_created_when_missing():
+    """Test test_fallback_indicators_created_when_missing."""
     data = {
         "hisse_kodu": ["AAA"] * 50,
         "tarih": pd.date_range("2024-01-01", periods=50, freq="D"),
@@ -63,6 +65,7 @@ def test_fallback_indicators_created_when_missing():
 
 @pytest.mark.parametrize("bars", [30, 60, 252])
 def test_ma_columns_exist_for_various_lengths(bars):
+    """Test test_ma_columns_exist_for_various_lengths."""
     data = {
         "hisse_kodu": ["AAA"] * bars,
         "tarih": pd.date_range("2024-01-01", periods=bars, freq="D"),
@@ -84,6 +87,7 @@ def test_ma_columns_exist_for_various_lengths(bars):
 
 
 def test_crossover_skips_when_column_missing():
+    """Test test_crossover_skips_when_column_missing."""
     data = {
         "hisse_kodu": ["AAA"] * 5,
         "tarih": pd.date_range("2024-01-01", periods=5, freq="D"),
@@ -101,6 +105,7 @@ def test_crossover_skips_when_column_missing():
 
 
 def test_core_strategy_indicators_exist():
+    """Test test_core_strategy_indicators_exist."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"] * 60,

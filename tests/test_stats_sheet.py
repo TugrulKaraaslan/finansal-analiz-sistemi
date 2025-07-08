@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_stats_values(tmp_path):
+    """Test test_stats_values."""
     df = pd.DataFrame(
         {
             "filtre_kodu": ["T1", "T2", "T3"],

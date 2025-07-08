@@ -4,6 +4,7 @@ from finansal_analiz_sistemi import cache_builder, config, data_loader
 
 
 def test_rebuild_creates_nonempty_parquet(tmp_path, monkeypatch):
+    """Test test_rebuild_creates_nonempty_parquet."""
     csv = tmp_path / "a.csv"
     pd.DataFrame(
         {

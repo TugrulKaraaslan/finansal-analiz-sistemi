@@ -3,6 +3,7 @@ from pathlib import Path
 
 
 def test_env_override(monkeypatch):
+    """Test test_env_override."""
     monkeypatch.setenv("FAS_SETTINGS_FILE", "/tmp/custom.yaml")
     from finansal_analiz_sistemi.config import get_settings_path
 
@@ -10,6 +11,7 @@ def test_env_override(monkeypatch):
 
 
 def test_colab_path(monkeypatch):
+    """Test test_colab_path."""
     monkeypatch.delenv("FAS_SETTINGS_FILE", raising=False)
     monkeypatch.setitem(sys.modules, "google.colab", object())
     from finansal_analiz_sistemi.config import get_settings_path
@@ -19,6 +21,7 @@ def test_colab_path(monkeypatch):
 
 
 def test_local_path(monkeypatch):
+    """Test test_local_path."""
     monkeypatch.delenv("FAS_SETTINGS_FILE", raising=False)
     sys.modules.pop("google.colab", None)
     from finansal_analiz_sistemi.config import get_settings_path

@@ -5,6 +5,7 @@ from filter_engine import QueryError, safe_eval
 
 
 def test_safe_eval_recursion_guard():
+    """Test test_safe_eval_recursion_guard."""
     df = pd.DataFrame({"x": [1]})
     expr = {
         "code": "A",

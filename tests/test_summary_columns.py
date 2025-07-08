@@ -2,6 +2,7 @@ from report_generator import generate_summary
 
 
 def dummy_results():
+    """Test dummy_results."""
     return [
         {"hisse_kodu": "AAA", "getiri_%": 12.3},
         {"hisse_kodu": "BBB", "getiri_%": -3.1},
@@ -26,5 +27,6 @@ EXPECTED_COLUMNS = [
 
 
 def test_summary_columns_complete():
+    """Test test_summary_columns_complete."""
     df = generate_summary(dummy_results())
     assert list(df.columns)[:13] == EXPECTED_COLUMNS

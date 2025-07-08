@@ -13,6 +13,7 @@ if ROOT_DIR not in sys.path:
 
 @pytest.fixture
 def report_path(tmp_path):
+    """Test report_path."""
     df_sum = pd.DataFrame(
         [
             ["T1", 1, 2.0, 2, -1, 1, "OK", "", "", ""],
@@ -52,6 +53,7 @@ def report_path(tmp_path):
 
 
 def test_error_sheet_presence(report_path):
+    """Test test_error_sheet_presence."""
     with pd.ExcelFile(report_path) as xls:
         assert "Hatalar" in xls.sheet_names
         df = pd.read_excel(report_path, "Hatalar")

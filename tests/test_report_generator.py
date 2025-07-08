@@ -12,6 +12,7 @@ sys.path.insert(0, after_path)
 
 
 def test_excel_report_file_size(tmp_path):
+    """Test test_excel_report_file_size."""
     sonuclar = []
     for i in range(20):
         sonuclar.append(
@@ -60,6 +61,7 @@ def test_excel_report_file_size(tmp_path):
 
 
 def test_uc_sekmeli_excel_yaz(tmp_path):
+    """Test test_uc_sekmeli_excel_yaz."""
     df1 = pd.DataFrame({"a": [1]})
     df2 = pd.DataFrame({"b": [2]})
     df3 = pd.DataFrame({"c": [3]})
@@ -73,6 +75,7 @@ def test_uc_sekmeli_excel_yaz(tmp_path):
 
 
 def test_kaydet_raporlar_appends(tmp_path):
+    """Test test_kaydet_raporlar_appends."""
     base = pd.DataFrame({"x": [1]})
     fname = tmp_path / "report.xlsx"
     with pd.ExcelWriter(fname) as wr:
@@ -91,6 +94,7 @@ def test_kaydet_raporlar_appends(tmp_path):
 
 
 def test_generate_full_report(tmp_path):
+    """Test test_generate_full_report."""
     summary = pd.DataFrame(
         {
             "filtre_kodu": ["F1"],

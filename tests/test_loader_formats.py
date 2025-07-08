@@ -9,6 +9,7 @@ pytest.importorskip("pyarrow")
 
 
 def test_excel_and_parquet(tmp_path):
+    """Test test_excel_and_parquet."""
     df = pd.DataFrame({"filtre_kodu": ["F1"], "notlar": [""]})
     xlsx = tmp_path / "f.xlsx"
     df.to_excel(xlsx, index=False)

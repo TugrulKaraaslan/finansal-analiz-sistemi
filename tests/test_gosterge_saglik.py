@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_tarama_denetimi_returns_expected_cols(sample_filtreler, sample_indikator_df):
+    """Test test_tarama_denetimi_returns_expected_cols."""
     df = kontrol_araci.tarama_denetimi(sample_filtreler, sample_indikator_df)
     expected = {
         "kod",
@@ -21,5 +22,6 @@ def test_tarama_denetimi_returns_expected_cols(sample_filtreler, sample_indikato
 
 
 def test_at_least_one_error(sample_filtreler, sample_indikator_df):
+    """Test test_at_least_one_error."""
     df = kontrol_araci.tarama_denetimi(sample_filtreler, sample_indikator_df)
     assert (df["durum"] != "OK").any(), "En az bir sorun satırı bekleniyordu"

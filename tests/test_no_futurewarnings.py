@@ -8,6 +8,7 @@ import pytest
 
 @pytest.mark.slow
 def test_no_futurewarnings(tmp_path):
+    """Test test_no_futurewarnings."""
     pkg_root = Path(__file__).resolve().parent.parent
     result = subprocess.run(
         [

@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_no_stock_reason_for_empty_result():
+    """Test test_no_stock_reason_for_empty_result."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],
@@ -25,6 +26,7 @@ def test_no_stock_reason_for_empty_result():
 
 
 def test_volume_tl_generated_if_missing():
+    """Test test_volume_tl_generated_if_missing."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],
@@ -41,6 +43,7 @@ def test_volume_tl_generated_if_missing():
 
 
 def test_apply_single_filter_ok():
+    """Test test_apply_single_filter_ok."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],
@@ -54,6 +57,7 @@ def test_apply_single_filter_ok():
 
 
 def test_apply_single_filter_missing_column():
+    """Test test_apply_single_filter_missing_column."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],
@@ -67,6 +71,7 @@ def test_apply_single_filter_missing_column():
 
 
 def test_recursive_filter_detection():
+    """Test test_recursive_filter_detection."""
     df = pd.DataFrame({"x": [1]})
     f1: dict = {"code": "F1"}
     f2: dict = {"code": "F2"}

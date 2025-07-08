@@ -5,6 +5,7 @@ import pandas as pd
 
 
 def test_filter_none_skipped(tmp_path, monkeypatch):
+    """Test test_filter_none_skipped."""
     import logging
 
     dummy = types.SimpleNamespace(

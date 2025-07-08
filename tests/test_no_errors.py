@@ -7,6 +7,7 @@ import pytest
 
 @pytest.mark.slow
 def test_no_errors(tmp_path):
+    """Test test_no_errors."""
     pkg_root = Path(__file__).resolve().parent.parent
     result = subprocess.run(
         [sys.executable, "-m", "pytest", "-q", "tests", "-k", "not test_no_errors"],

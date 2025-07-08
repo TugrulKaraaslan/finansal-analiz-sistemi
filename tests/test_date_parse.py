@@ -4,6 +4,7 @@ from utils.date_utils import parse_date
 
 
 def test_parse_date_variants():
+    """Test test_parse_date_variants."""
     cases = {
         "07.03.2025": "2025-03-07",
         "2025-03-07": "2025-03-07",

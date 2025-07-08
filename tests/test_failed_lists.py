@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_failed_sheets_created(tmp_path):
+    """Test test_failed_sheets_created."""
     failures.clear()
     log_failure("filters", "T99", "missing column")
     out = tmp_path / "rep.xlsx"

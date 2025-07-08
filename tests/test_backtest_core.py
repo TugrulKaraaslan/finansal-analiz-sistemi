@@ -14,6 +14,7 @@ sys.modules.setdefault("pandas_ta", types.SimpleNamespace(Strategy=lambda **kw: 
 
 
 def test_bireysel_performanslar_contains_new_keys():
+    """Test test_bireysel_performanslar_contains_new_keys."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA", "AAA"],
@@ -40,6 +41,7 @@ def test_bireysel_performanslar_contains_new_keys():
 
 
 def test_missing_buy_price_sets_data_gap():
+    """Test test_missing_buy_price_sets_data_gap."""
     df = pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],

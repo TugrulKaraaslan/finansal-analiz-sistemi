@@ -4,6 +4,7 @@ import settings
 
 
 def test_invalid_depth_fallback(tmp_path, monkeypatch):
+    """Test test_invalid_depth_fallback."""
     cfg = tmp_path / "settings.yaml"
     cfg.write_text("max_filter_depth: bad\n")
     monkeypatch.setenv("FAS_SETTINGS_FILE", str(cfg))
@@ -15,6 +16,7 @@ def test_invalid_depth_fallback(tmp_path, monkeypatch):
 
 
 def test_invalid_yaml_fallback(tmp_path, monkeypatch):
+    """Test test_invalid_yaml_fallback."""
     cfg = tmp_path / "settings.yaml"
     cfg.write_text("invalid: [\n")
     monkeypatch.setenv("FAS_SETTINGS_FILE", str(cfg))
