@@ -14,3 +14,14 @@ crossover_test_log.txt
 
 # hypothesis cache
 .hypothesis/
+
+# Temporary and log files
+*.tmp
+*.temp
+*.out
+*.bak
+*~
+*.swp
+nohup.out
+logs/
+tmp/
