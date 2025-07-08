@@ -390,7 +390,14 @@ def _calculate_group_indicators_and_crossovers(
     wanted_cols=None,
     df_filters: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-    """Calculate indicators and crossover columns for a single ticker."""
+    """Compute indicators and crossover columns for one ticker.
+
+    The input DataFrame should contain OHLCV columns and a ``tarih`` column. The
+    function applies the configured pandas-ta strategy, renames indicator
+    columns according to ``INDIKATOR_AD_ESLESTIRME`` and appends crossover
+    signals. The resulting DataFrame preserves ``RangeIndex`` and the ``tarih``
+    column for further processing.
+    """
     local_logger = logger
     hisse_kodu = (
         _grp_df["hisse_kodu"].iloc[0]
@@ -542,9 +549,8 @@ def _calculate_group_indicators_and_crossovers(
         # Hata durumunda, gösterge stratejisi indikatörleri eklenemez ama devam edilir.
         group_df_dt_indexed = group_df_dt_indexed.copy()
 
-    # Ad eşleştirmeyi DatetimeIndex'li DataFrame üzerinde yap
+    # Apply column name mappings on the DataFrame with DatetimeIndex
     if ad_eslestirme:
-        # ... (önceki ad eşleştirme bloğu - aynen kalabilir) ...
         active_rename_map = {}
         df_cols_lower_map = {str(c).lower(): c for c in group_df_dt_indexed.columns}
         for pta_raw_name, cfg_target_name in ad_eslestirme.items():
