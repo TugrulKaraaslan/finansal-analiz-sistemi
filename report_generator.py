@@ -36,7 +36,11 @@ HATALAR_COLUMNS = [
 
 
 def save_hatalar_excel(df: pd.DataFrame, out_path: str | Path) -> None:
-    """Save errors DataFrame to an Excel file with normalized header."""
+    """Write error records to an Excel file.
+
+    The DataFrame columns are normalized to ``HATALAR_COLUMNS`` before writing
+    to ensure consistent output.
+    """
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df = df.reindex(columns=HATALAR_COLUMNS, fill_value="-")
@@ -94,13 +98,7 @@ EXPECTED_COLUMNS = [
 
 
 def generate_summary(results: list[dict]) -> pd.DataFrame:
-    """Create summary dataframe from raw result records.
-
-    Parameters
-    ----------
-    results : list[dict]
-        Raw backtest results.
-    """
+    """Return a summary DataFrame derived from backtest results."""
     summary_df = pd.DataFrame(results)
     # Kolonları tam ve sabit sırada tut
     summary_df = summary_df.reindex(columns=EXPECTED_COLUMNS, fill_value=np.nan)
@@ -112,7 +110,7 @@ def generate_summary(results: list[dict]) -> pd.DataFrame:
 
 
 def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None:
-    """Write error list to a ``Hatalar`` sheet if any errors are present."""
+    """Append ``error_list`` to a ``Hatalar`` sheet when not empty."""
     if error_list:
         safe_to_excel(
             pd.DataFrame(error_list, columns=["timestamp", "level", "message"]),

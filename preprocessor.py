@@ -25,10 +25,11 @@ except ImportError:
 
 
 def _temizle_sayisal_deger(deger):
-    """Convert ``deger`` to ``float`` if possible.
+    """Return ``deger`` as ``float`` if it can be parsed.
 
-    Handles thousand separators using ``.`` and decimal commas. Returns
-    ``np.nan`` when conversion fails.
+    Strings are stripped of non-numeric characters and Turkish style
+    thousand/decimal separators are normalized. ``np.nan`` is returned when
+    conversion fails.
     """
     if pd.isna(deger):
         return np.nan
