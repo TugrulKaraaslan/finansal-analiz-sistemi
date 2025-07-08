@@ -107,13 +107,6 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
         raise ValueError(f"Bilinmeyen crossover format\u0131: {name}")
     return df
 
-
-# Previously this module exposed ``_calculate_combined_psar`` as a helper to
-# merge ``psar_long``/``psar_short`` columns. The production code never invoked
-# it and tests only ensured it didn't raise.  The function is removed to keep
-# the module focused on actively used calculations.
-
-
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
     """Eksikse basit veya üssel hareketli ortalama kolonu ekler."""
     if logger_param is None:
