@@ -25,7 +25,7 @@ _read_excel = partial(pd.read_excel, engine="openpyxl")
 
 @lru_cache(maxsize=None)
 def _read_excel_cached(path: str) -> pd.DataFrame:
-    """Read Excel files with LRU caching."""
+    """Return an Excel file via openpyxl with LRU caching."""
     return _read_excel(path)
 
 
@@ -55,8 +55,12 @@ def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
 
 
 def load_filter_csv(path: str) -> pd.DataFrame:
-    """Load CSV file and ensure column alignment."""
-    # Önce başlıksız okuma dene (eski format: sadece 2 kolon)
+    """Load filter CSV ensuring the expected column layout.
+
+    Legacy files with only ``filtre_kodu`` and ``PythonQuery`` are
+    upgraded by inserting a ``tarih`` column.
+    """
+    # Try headerless read first (legacy files have only two columns)
     raw = pd.read_csv(path, sep=";")
     if list(raw.columns) == ["filtre_kodu", "PythonQuery"]:
         raw.insert(0, "tarih", pd.NA)
@@ -71,7 +75,7 @@ def load_filter_csv(path: str) -> pd.DataFrame:
         sep=";",
     )
 
-    # Güvenlik: kolonlar beklenenden farklıysa CI kırmızı olsun
+    # Safety check: fail loudly if columns differ from expectation
     if list(df.columns) != COLS:
         raise ValueError(f"Beklenen kolonlar {COLS}, gelen: {df.columns}")
 
