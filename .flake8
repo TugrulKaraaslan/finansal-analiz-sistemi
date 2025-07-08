@@ -1,7 +1,2 @@
 [flake8]
 extend-ignore = E203, W503, E501
-per-file-ignores =
-    finansal_analiz_sistemi/main.py:F401
-    tests/test_report_exists.py:F401
-    tests/test_smoke_report.py:F401,E401
-    conftest.py:F811
