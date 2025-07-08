@@ -107,6 +107,7 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
         raise ValueError(f"Bilinmeyen crossover format\u0131: {name}")
     return df
 
+
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
     """Eksikse basit veya üssel hareketli ortalama kolonu ekler."""
     if logger_param is None:
