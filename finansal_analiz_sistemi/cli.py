@@ -1,3 +1,5 @@
+"""Minimal command line interface for running reports and validations."""
+
 import atexit
 import logging
 import sys
