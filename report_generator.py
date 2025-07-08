@@ -124,112 +124,6 @@ def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None
         )
 
 
-def olustur_ozet_rapor(
-    sonuclar_listesi: list,
-    cikti_klasoru: str,
-    logger_param=None,
-) -> str | None:
-    """Create CSV summary report from raw backtest results."""
-
-    if logger_param is None:
-        logger_param = logger
-    os.makedirs(cikti_klasoru, exist_ok=True)
-    kayitlar = []
-    for sonuc in sonuclar_listesi:
-        if not isinstance(sonuc, dict):
-            logger_param.warning(
-                "Beklenmeyen sonuç tipi: %s → %s",
-                type(sonuc),
-                sonuc,
-            )
-            continue
-        secilen = sonuc.get("hisseler", [])
-        if not secilen:
-            logger_param.warning(
-                "Filtre '%s' sonucu: Hiç hisse seçilmedi."
-                " Boş rapor satırı yazılacak.",
-                sonuc.get("filtre_kodu", "?"),
-            )
-        getiriler = [
-            h.get("getiri_yuzde", 0)
-            for h in secilen
-            if isinstance(h, dict) and h.get("getiri_yuzde") is not None
-        ]
-        ort = round(sum(getiriler) / len(getiriler), 2) if getiriler else 0
-        kayitlar.append(
-            {
-                "filtre_kodu": sonuc.get("filtre_kodu", ""),
-                "bulunan_hisse_sayisi": len(secilen),
-                "ortalama_getiri": ort,
-                "notlar": sonuc.get("notlar", ""),
-                "tarama_tarihi": sonuc.get("tarama_tarihi", ""),
-                "satis_tarihi": sonuc.get("satis_tarihi", ""),
-            }
-        )
-    if not kayitlar:
-        return None
-    df = pd.DataFrame(kayitlar)
-    dosya_adi = os.path.join(
-        cikti_klasoru,
-        f"ozet_rapor_{datetime.now():%Y%m%d_%H%M%S}.csv",
-    )
-    df.to_csv(dosya_adi, index=False, encoding="utf-8-sig")
-    logger_param.info("Özet rapor oluşturuldu: %s", dosya_adi)
-    return dosya_adi
-
-
-def olustur_hisse_bazli_rapor(
-    sonuclar_listesi: list,
-    cikti_klasoru: str,
-    logger_param=None,
-) -> str | None:
-    """Create per-stock CSV report from raw results."""
-
-    if logger_param is None:
-        logger_param = logger
-    os.makedirs(cikti_klasoru, exist_ok=True)
-    detayli_kayitlar = []
-    for sonuc in sonuclar_listesi:
-        if not isinstance(sonuc, dict):
-            logger_param.warning("Geçersiz filtre sonucu tipi: %s", type(sonuc))
-            continue
-        filtre_kodu = sonuc.get("filtre_kodu", "")
-        notlar = sonuc.get("notlar", "")
-        tarama_ortalama = sonuc.get("tarama_ortalama", "")
-        tarama_tarihi = sonuc.get("tarama_tarihi", "")
-        satis_tarihi = sonuc.get("satis_tarihi", "")
-        secilenler = sonuc.get("hisseler", [])
-        for hisse in secilenler:
-            if not isinstance(hisse, dict):
-                continue
-            detayli_kayitlar.append(
-                {
-                    "filtre_kodu": filtre_kodu,
-                    "hisse_kodu": hisse.get("hisse_kodu", ""),
-                    "alis_tarihi": hisse.get("alis_tarihi", ""),
-                    "satis_tarihi": hisse.get("satis_tarihi", ""),
-                    "alis_fiyati": hisse.get("alis_fiyati", ""),
-                    "satis_fiyati": hisse.get("satis_fiyati", ""),
-                    "getiri_yuzde": hisse.get("getiri_yuzde", ""),
-                    "uygulanan_strateji": hisse.get("uygulanan_strateji", ""),
-                    "tarama_tarihi": tarama_tarihi,
-                    "satis_tarihi_genel": satis_tarihi,
-                    "notlar": notlar,
-                    "tarama_ortalama": tarama_ortalama,
-                }
-            )
-    if not detayli_kayitlar:
-        return None
-    df = pd.DataFrame(detayli_kayitlar)
-    dosya_adi = os.path.join(
-        cikti_klasoru,
-        f"hisse_bazli_rapor_{datetime.now():%Y%m%d_%H%M%S}.csv",
-    )
-    df.to_csv(dosya_adi, index=False, encoding="utf-8-sig")
-    logger_param.info("Hisse bazlı detaylı rapor oluşturuldu: %s", dosya_adi)
-    return dosya_adi
-
-
 def olustur_hatali_filtre_raporu(writer, kontrol_df) -> None:
     """Write problematic filters to ``Hatalar`` sheet if provided."""
 
@@ -753,8 +647,6 @@ def generate_full_report(
 __all__ = [
     "add_error_sheet",
     "save_hatalar_excel",
-    "olustur_ozet_rapor",
-    "olustur_hisse_bazli_rapor",
     "olustur_hatali_filtre_raporu",
     "olustur_excel_raporu",
     "kaydet_uc_sekmeli_excel",
