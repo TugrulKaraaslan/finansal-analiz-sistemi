@@ -123,15 +123,7 @@ def validate(
 
     if logger:
         for err in errors:
-            logger.warning(f"Filtre doğrulama uyarısı ({err.eksik_ad}): {err.detay}")
+            logger.warning(
+                f"Filtre doğrulama uyarısı ({err.eksik_ad}): {err.detay}"
+            )
     return errors
-
-
-# ENTEGRASYON (data_loader.py içinde):
-# from filtre_dogrulama import dogrula_filtre_dataframe
-# ...
-# df_filtreler = pd.read_csv(filtre_dosya_yolu, ...)
-# hatalar = dogrula_filtre_dataframe(df_filtreler, logger=logger)
-# if hatalar:
-#     for kod, mesaj in hatalar.items():
-#         logger.warning(f"Hatalı filtre: {kod} - {mesaj}")

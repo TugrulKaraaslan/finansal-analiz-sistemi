@@ -98,7 +98,11 @@ EXPECTED_COLUMNS = [
 
 
 def generate_summary(results: list[dict]) -> pd.DataFrame:
-    """Return a summary DataFrame derived from backtest results."""
+    """Build a summary DataFrame from backtest result records.
+
+    The returned frame always contains the columns defined in
+    ``EXPECTED_COLUMNS`` in the same order.
+    """
     summary_df = pd.DataFrame(results)
     # Kolonları tam ve sabit sırada tut
     summary_df = summary_df.reindex(columns=EXPECTED_COLUMNS, fill_value=np.nan)
