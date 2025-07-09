@@ -2,10 +2,7 @@
 
 
 def test_config_has_core_indicators():
-    """
-    config.py dosyasında CORE_INDICATORS sabiti var mı ve içi boş değil mi?
-    Hata varsa, net Türkçe açıklama verir.
-    """
+    """Check that ``CORE_INDICATORS`` exists and is not empty."""
     from finansal_analiz_sistemi import config as cfg
 
     # Tanımlı mı?
