@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 from finansal_analiz_sistemi import config
-from finansal_analiz_sistemi.logging_config import get_logger as _cfg_get_logger
 from finansal_analiz_sistemi.logging_config import setup_logging as _cfg_setup_logging
 from finansal_analiz_sistemi.logging_utils import ErrorCountingFilter
 
@@ -41,11 +40,6 @@ class DuplicateFilter(logging.Filter):
             if now - ts > self.window:
                 del self._seen[k]
         return last is None or (now - last) > self.window
-
-
-def get_logger(name: str) -> logging.Logger:
-    """Return a module-level logger via :mod:`logging_config`."""
-    return _cfg_get_logger(name)
 
 
 def setup_logger(level: int = logging.INFO) -> ErrorCountingFilter:
