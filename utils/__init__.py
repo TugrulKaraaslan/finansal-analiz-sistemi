@@ -1,7 +1,7 @@
-"""Utility helpers used across the financial analysis project.
+"""Shared utility helpers for the analysis project.
 
-Functions combine series comparisons, column extraction and log cleanup
-helpers for CLI modules.
+This package bundles crossover detection, filter column extraction and
+log maintenance utilities used by CLI and report modules.
 """
 
 from __future__ import annotations

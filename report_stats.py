@@ -66,7 +66,22 @@ def build_detay_df(
     detail_df: pd.DataFrame,
     strateji: str | None = None,
 ) -> pd.DataFrame:
-    """Add strategy and reason code info to the detail DataFrame."""
+    """Return detail records enriched with strategy and reason codes.
+
+    Parameters
+    ----------
+    summary_df : pd.DataFrame
+        Summary data containing ``sebep_kodu`` columns.
+    detail_df : pd.DataFrame
+        Raw detail DataFrame listing tickers per filter.
+    strateji : str, optional
+        Strategy name inserted into the output.
+
+    Returns
+    -------
+    pd.DataFrame
+        Normalized detail table ready for Excel export.
+    """
     strateji = strateji or getattr(config, "UYGULANAN_STRATEJI", "")
     if "filtre_kodu" not in detail_df.columns:
         merged = pd.DataFrame(
@@ -109,7 +124,12 @@ def build_ozet_df(
     tarama_tarihi: str = "",
     satis_tarihi: str = "",
 ) -> pd.DataFrame:
-    """Build summary DataFrame combining backtest results and details."""
+    """Return a normalized summary DataFrame for reporting.
+
+    The raw summary and detail tables produced by the backtest are
+    merged together and annotated with reason explanations as well as
+    scan and sell dates.
+    """
     if summary_df is None:
         summary_df = pd.DataFrame()
     if detail_df is None:
