@@ -55,8 +55,6 @@ class MissingColumnError(Exception):
         self.missing = missing
 
 
-
-
 def _apply_single_filter(df, kod, query):
     """Execute ``query`` on ``df`` and return the result with status info."""
 
@@ -192,9 +190,6 @@ def evaluate_filter(
     # Previously returned apply_filter_logic(key) which merely echoed the id.
     # Returning the filter identifier directly simplifies the API.
     return key
-
-
-
 
 
 def run_filter(code, df, expr):
