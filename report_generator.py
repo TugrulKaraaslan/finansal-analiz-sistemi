@@ -64,7 +64,7 @@ LEGACY_DETAIL_COLS = [
     "sebep_kodu",
 ]
 
-# Columns expected in summary dataframe generated from backtest results
+# Columns expected in summary DataFrame generated from backtest results
 EXPECTED_COLUMNS = [
     "hisse_kodu",
     "hisse_sayisi",

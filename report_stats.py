@@ -75,7 +75,7 @@ def build_detay_df(
     detail_df: pd.DataFrame,
     strateji: str | None = None,
 ) -> pd.DataFrame:
-    """Add strategy and reason code info to detail dataframe."""
+    """Add strategy and reason code info to the detail DataFrame."""
     strateji = strateji or getattr(config, "UYGULANAN_STRATEJI", "")
     if "filtre_kodu" not in detail_df.columns:
         merged = pd.DataFrame(
@@ -118,7 +118,7 @@ def build_ozet_df(
     tarama_tarihi: str = "",
     satis_tarihi: str = "",
 ) -> pd.DataFrame:
-    """Build summary dataframe combining backtest results and details."""
+    """Build summary DataFrame combining backtest results and details."""
     if summary_df is None:
         summary_df = pd.DataFrame()
     if detail_df is None:
