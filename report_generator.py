@@ -50,50 +50,6 @@ def _build_detay_df(
     return detay_df
 
 
-logger = get_logger(__name__)
-
-PADDING_COMMENT = " ".join(uuid.uuid4().hex for _ in range(1200))
-
-LEGACY_SUMMARY_COLS = [
-    "filtre_kodu",
-    "hisse_sayisi",
-    "ort_getiri_%",
-    "en_yuksek_%",
-    "en_dusuk_%",
-    "islemli",
-    "sebep_kodu",
-    "sebep_aciklama",
-    "tarama_tarihi",
-    "satis_tarihi",
-]
-
-LEGACY_DETAIL_COLS = [
-    "filtre_kodu",
-    "hisse_kodu",
-    "getiri_%",
-    "basari",
-    "strateji",
-    "sebep_kodu",
-]
-
-# Columns expected in summary dataframe generated from backtest results
-EXPECTED_COLUMNS = [
-    "hisse_kodu",
-    "hisse_sayisi",
-    "getiri_%",
-    "max_dd_%",
-    "giris_tarihi",
-    "cikis_tarihi",
-    "giris_fiyati",
-    "cikis_fiyati",
-    "strateji_adi",
-    "filtre_kodu",
-    "taramada_bulundu",
-    "risk_skoru",
-    "notlar",
-]
-
-
 def _write_error_sheet(
     wr: pd.ExcelWriter,
     error_list: Iterable,
