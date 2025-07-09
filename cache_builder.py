@@ -1,4 +1,8 @@
-"""Helpers for creating or refreshing the project's Parquet cache."""
+"""Helpers for creating or refreshing the project's Parquet cache.
+
+Raw CSV files are concatenated and written to the configured cache path
+when needed.
+"""
 
 from pathlib import Path
 

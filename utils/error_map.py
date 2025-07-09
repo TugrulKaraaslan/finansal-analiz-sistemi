@@ -1,4 +1,8 @@
-"""Map exceptions to user friendly reason/hint pairs."""
+"""Map exceptions to user friendly reason/hint pairs.
+
+Provides a lightweight translation layer from Python exception names to
+localized error messages.
+"""
 
 from typing import Dict, Tuple
 

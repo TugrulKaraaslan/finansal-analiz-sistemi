@@ -1,4 +1,8 @@
-"""Load configuration data used for indicator calculations."""
+"""Load configuration data used for indicator calculations.
+
+This module exposes helpers for extracting crossover names from filter
+files and configuration lists.
+"""
 
 from __future__ import annotations
 

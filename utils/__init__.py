@@ -1,4 +1,8 @@
-"""Utility helpers used across the financial analysis project."""
+"""Utility helpers used across the financial analysis project.
+
+Functions combine series comparisons, column extraction and log cleanup
+helpers for CLI modules.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,8 @@
-"""CLI entry point for executing the full backtest workflow."""
+"""CLI entry point for executing the full backtest workflow.
+
+Provides argument parsing and orchestrates data loading, indicator
+computation and report generation.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,8 @@
-"""Excel report generation helpers used by tests and CLI."""
+"""Excel report generation helpers used by tests and CLI.
+
+These utilities assemble performance statistics into an XLSX workbook
+with optional charts and error sheets.
+"""
 
 from __future__ import annotations
 

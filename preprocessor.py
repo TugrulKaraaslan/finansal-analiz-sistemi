@@ -1,4 +1,8 @@
-"""Data preprocessing helpers for stock price datasets."""
+"""Data preprocessing helpers for stock price datasets.
+
+Utilities here clean numeric values and align dates before indicators
+are computed.
+"""
 
 from __future__ import annotations
 

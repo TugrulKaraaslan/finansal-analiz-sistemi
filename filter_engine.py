@@ -1,4 +1,8 @@
-"""Evaluate stock filter expressions and manage filter definitions."""
+"""Evaluate stock filter expressions and manage filter definitions.
+
+The module handles parsing, dependency resolution and execution of
+filter queries used throughout the project.
+"""
 
 from __future__ import annotations
 
