@@ -136,6 +136,21 @@ def _build_solution(err_type: str, msg: str) -> str:
     return ""
 
 
+def _extract_columns_from_query(query: str) -> set:
+    """Compatibility wrapper for the new naming scheme."""
+    return _extract_query_columns(query)
+
+
+def _extract_query_columns(query: str) -> set:
+    """Return column-like identifiers referenced in a filter query."""
+    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
+    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
+    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
+    return tokens - reserved
+
+
+
+
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
     FAILED_FILTERS.clear()
@@ -194,6 +209,17 @@ def kaydet_hata(
     log_dict.setdefault("hatalar", []).append(entry)
 
 
+def run_filter(code, df, expr):
+    """Run a filter expression and return the resulting DataFrame."""
+    # Pasif filtreler listede mi?
+    from finansal_analiz_sistemi.config import cfg
+
+    if code in cfg.get("passive_filters", []):
+        logger.info("Filter %s marked passive, skipped.", code)
+        return pd.DataFrame()
+    return safe_eval(expr, df)
+
+
 def run_single_filter(kod: str, query: str) -> dict:
     """Validate ``query`` against a dummy frame and return error info.
 
@@ -246,17 +272,6 @@ def run_single_filter(kod: str, query: str) -> dict:
     return atlanmis
 
 
-def run_filter(code, df, expr):
-    """Run a filter expression and return the resulting DataFrame."""
-    # Pasif filtreler listede mi?
-    from finansal_analiz_sistemi.config import cfg
-
-    if code in cfg.get("passive_filters", []):
-        logger.info("Filter %s marked passive, skipped.", code)
-        return pd.DataFrame()
-    return safe_eval(expr, df)
-
-
 def safe_eval(expr, df, depth: int = 0, visited=None):
     """Evaluate filter safely with depth and circular guards."""
     if visited is None:
@@ -291,17 +306,6 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
     raise QueryError("Invalid expression")
 
 
-def _extract_columns_from_query(query: str) -> set:
-    """Compatibility wrapper for the new naming scheme."""
-    return _extract_query_columns(query)
-
-
-def _extract_query_columns(query: str) -> set:
-    """Return column-like identifiers referenced in a filter query."""
-    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
-    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
-    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
-    return tokens - reserved
 
 
 def uygula_filtreler(
