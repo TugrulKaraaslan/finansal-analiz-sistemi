@@ -6,7 +6,7 @@ import run as main_mod
 from finansal_analiz_sistemi.main import calistir_tum_sistemi
 
 
-def test_report_file_created(tmp_path, monkeypatch):
+def test_system_report_file_created(tmp_path, monkeypatch):
     """Verify that ``calistir_tum_sistemi`` writes an Excel report."""
     out = tmp_path / "test.xlsx"
 
