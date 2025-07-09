@@ -55,8 +55,24 @@ class MissingColumnError(Exception):
         self.missing = missing
 
 
-def _apply_single_filter(df, kod, query):
-    """Execute ``query`` on ``df`` and return the result with status info."""
+def _apply_single_filter(df: pd.DataFrame, kod: str, query: str):
+    """Execute ``query`` on ``df`` and return the result with status info.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Dataset to evaluate the expression against.
+    kod : str
+        Identifier of the filter being applied.
+    query : str
+        Expression in ``pandas.query`` syntax.
+
+    Returns
+    -------
+    tuple[pd.DataFrame | None, dict]
+        ``DataFrame`` containing matched rows (or ``None`` on error) and a
+        dictionary summarizing execution details.
+    """
     info = {
         "kod": kod,
         "tip": "tarama",
