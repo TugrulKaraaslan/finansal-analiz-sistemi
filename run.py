@@ -1,4 +1,4 @@
-"""Command-line interface orchestrating the full backtest pipeline."""
+"""CLI entry point for executing the full backtest workflow."""
 
 from __future__ import annotations
 

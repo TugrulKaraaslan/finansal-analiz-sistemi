@@ -1,4 +1,4 @@
-"""Utilities for building and updating the Parquet cache."""
+"""Helpers for creating or refreshing the project's Parquet cache."""
 
 from pathlib import Path
 

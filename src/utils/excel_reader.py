@@ -1,4 +1,4 @@
-"""Excel reading utilities with simple caching."""
+"""Read Excel workbooks using a lightweight cache."""
 
 from __future__ import annotations
 
