@@ -1,7 +1,7 @@
-"""Expose :mod:`finansal_analiz_sistemi.data_loader` under a stable API.
+"""Thin wrapper around :mod:`finansal_analiz_sistemi.data_loader`.
 
-The explicit imports below mirror the real module so that external users can
-import helpers directly from :mod:`data_loader` while keeping linters satisfied.
+Helper functions are re-exported so callers can import them directly from
+``data_loader`` without using the full package path.
 """
 
 from pathlib import Path
