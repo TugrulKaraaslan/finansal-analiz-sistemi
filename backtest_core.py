@@ -12,6 +12,7 @@ from finansal_analiz_sistemi.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+
 def calistir_basit_backtest(
     filtre_sonuc_dict: dict,
     df_tum_veri: pd.DataFrame,
@@ -118,6 +119,7 @@ def calistir_basit_backtest(
 
     return rapor_df, detay_df
 
+
 def _get_fiyat(
     df_hisse_veri: pd.DataFrame,
     tarih: pd.Timestamp,
@@ -211,4 +213,3 @@ def _get_fiyat(
             exc_info=False,
         )
         return np.nan
-
