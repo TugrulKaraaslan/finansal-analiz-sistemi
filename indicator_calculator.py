@@ -125,8 +125,6 @@ def _ekle_psar(df: pd.DataFrame) -> None:
             pass
 
 
-
-
 def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     """Generate crossover columns based on naming patterns."""
     for name in cross_names:
@@ -250,8 +248,6 @@ def calculate_chunked(
                 mini.to_parquet(pq_path, partition_cols=["ticker"])
             del mini
         gc.collect()
-
-
 
 
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
