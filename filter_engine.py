@@ -55,19 +55,6 @@ class MissingColumnError(Exception):
         self.missing = missing
 
 
-def _extract_query_columns(query: str) -> set:
-    """Return column-like identifiers referenced in a filter query."""
-    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
-    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
-    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
-    return tokens - reserved
-
-
-def _extract_columns_from_query(query: str) -> set:
-    """Compatibility wrapper for the new naming scheme."""
-    return _extract_query_columns(query)
-
-
 def _apply_single_filter(df, kod, query):
     """Execute ``query`` on ``df`` and return the result with status info."""
     info = {
@@ -147,6 +134,19 @@ def _build_solution(err_type: str, msg: str) -> str:
     if err_type == "NO_STOCK":
         return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
     return ""
+
+
+def _extract_columns_from_query(query: str) -> set:
+    """Compatibility wrapper for the new naming scheme."""
+    return _extract_query_columns(query)
+
+
+def _extract_query_columns(query: str) -> set:
+    """Return column-like identifiers referenced in a filter query."""
+    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
+    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
+    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
+    return tokens - reserved
 
 
 def clear_failed() -> None:
