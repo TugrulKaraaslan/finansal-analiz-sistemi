@@ -28,6 +28,8 @@ import report_stats
 from finansal_analiz_sistemi.logging_config import get_logger
 from utils.compat import safe_concat, safe_to_excel
 
+logger = get_logger(__name__)
+
 HATALAR_COLUMNS = [
     "filtre_kod",
     "hata_tipi",
@@ -36,6 +38,47 @@ HATALAR_COLUMNS = [
     "cozum_onerisi",
     "reason",
     "hint",
+]
+
+PADDING_COMMENT = " ".join(uuid.uuid4().hex for _ in range(1200))
+
+LEGACY_SUMMARY_COLS = [
+    "filtre_kodu",
+    "hisse_sayisi",
+    "ort_getiri_%",
+    "en_yuksek_%",
+    "en_dusuk_%",
+    "islemli",
+    "sebep_kodu",
+    "sebep_aciklama",
+    "tarama_tarihi",
+    "satis_tarihi",
+]
+
+LEGACY_DETAIL_COLS = [
+    "filtre_kodu",
+    "hisse_kodu",
+    "getiri_%",
+    "basari",
+    "strateji",
+    "sebep_kodu",
+]
+
+# Columns expected in summary dataframe generated from backtest results
+EXPECTED_COLUMNS = [
+    "hisse_kodu",
+    "hisse_sayisi",
+    "getiri_%",
+    "max_dd_%",
+    "giris_tarihi",
+    "cikis_tarihi",
+    "giris_fiyati",
+    "cikis_fiyati",
+    "strateji_adi",
+    "filtre_kodu",
+    "taramada_bulundu",
+    "risk_skoru",
+    "notlar",
 ]
 
 
@@ -602,48 +645,6 @@ def save_hatalar_excel(df: pd.DataFrame, out_path: str | Path) -> None:
         )
 
 
-logger = get_logger(__name__)
-
-PADDING_COMMENT = " ".join(uuid.uuid4().hex for _ in range(1200))
-
-LEGACY_SUMMARY_COLS = [
-    "filtre_kodu",
-    "hisse_sayisi",
-    "ort_getiri_%",
-    "en_yuksek_%",
-    "en_dusuk_%",
-    "islemli",
-    "sebep_kodu",
-    "sebep_aciklama",
-    "tarama_tarihi",
-    "satis_tarihi",
-]
-
-LEGACY_DETAIL_COLS = [
-    "filtre_kodu",
-    "hisse_kodu",
-    "getiri_%",
-    "basari",
-    "strateji",
-    "sebep_kodu",
-]
-
-# Columns expected in summary dataframe generated from backtest results
-EXPECTED_COLUMNS = [
-    "hisse_kodu",
-    "hisse_sayisi",
-    "getiri_%",
-    "max_dd_%",
-    "giris_tarihi",
-    "cikis_tarihi",
-    "giris_fiyati",
-    "cikis_fiyati",
-    "strateji_adi",
-    "filtre_kodu",
-    "taramada_bulundu",
-    "risk_skoru",
-    "notlar",
-]
 
 
 __all__ = [
