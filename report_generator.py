@@ -50,8 +50,6 @@ def _build_detay_df(
     return detay_df
 
 
-
-
 def _write_error_sheet(
     wr: pd.ExcelWriter,
     error_list: Iterable,
