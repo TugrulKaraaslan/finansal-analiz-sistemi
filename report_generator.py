@@ -426,13 +426,17 @@ def generate_full_report(
             "%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S"
         )
     )
-    logging.getLogger().addHandler(fh)
-
-    log_fn = logger_param.info
-    if summary_df.empty and detail_empty:
-        log_fn = logger_param.warning
-    log_fn("Rapor kaydedildi → %s", out_path)
-    logger_param.info("Per-run log file: %s", run_log)
+    root = logging.getLogger()
+    root.addHandler(fh)
+    try:
+        log_fn = logger_param.info
+        if summary_df.empty and detail_empty:
+            log_fn = logger_param.warning
+        log_fn("Rapor kaydedildi → %s", out_path)
+        logger_param.info("Per-run log file: %s", run_log)
+    finally:
+        root.removeHandler(fh)
+        fh.close()
     return out_path
 
 
