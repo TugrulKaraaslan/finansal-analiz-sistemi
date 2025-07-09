@@ -140,6 +140,19 @@ def _build_solution(err_type: str, msg: str) -> str:
     return ""
 
 
+def _extract_columns_from_query(query: str) -> set:
+    """Compatibility wrapper for the new naming scheme."""
+    return _extract_query_columns(query)
+
+
+def _extract_query_columns(query: str) -> set:
+    """Return column-like identifiers referenced in a filter query."""
+    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
+    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
+    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
+    return tokens - reserved
+
+
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
     FAILED_FILTERS.clear()
@@ -178,19 +191,6 @@ def evaluate_filter(
     for child in children:
         evaluate_filter(child, df=df, depth=depth + 1, seen=seen)
     return key
-
-
-def _extract_columns_from_query(query: str) -> set:
-    """Compatibility wrapper for the new naming scheme."""
-    return _extract_query_columns(query)
-
-
-def _extract_query_columns(query: str) -> set:
-    """Return column-like identifiers referenced in a filter query."""
-    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
-    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
-    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
-    return tokens - reserved
 
 
 def kaydet_hata(
