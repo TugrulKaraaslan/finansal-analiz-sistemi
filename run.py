@@ -364,14 +364,14 @@ def calistir_tum_sistemi(
 def run_pipeline(
     price_csv: str | Path, filter_def: str | Path, output: str | Path
 ) -> Path:
-    """Execute a lightweight pipeline and produce an Excel report.
+    """Run the pipeline on ``price_csv`` and ``filter_def``.
 
     Parameters
     ----------
     price_csv : str or Path
         CSV file containing historical price data.
     filter_def : str or Path
-        JSON/YAML file with filter definitions.
+        JSON or YAML file with filter definitions.
     output : str or Path
         Target Excel file path for the generated report.
 

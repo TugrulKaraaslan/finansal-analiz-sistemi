@@ -227,9 +227,23 @@ def kaydet_hata(
     log_dict.setdefault("hatalar", []).append(entry)
 
 
-def run_filter(code, df, expr):
-    """Run a filter expression and return the resulting DataFrame."""
-    # Pasif filtreler listede mi?
+def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
+    """Execute ``expr`` on ``df`` unless the filter is marked passive.
+
+    Parameters
+    ----------
+    code : str
+        Identifier of the filter to run.
+    df : pd.DataFrame
+        DataFrame containing indicator columns.
+    expr : str
+        Filter expression in ``pandas.query`` syntax.
+
+    Returns
+    -------
+    pd.DataFrame
+        Resulting DataFrame or an empty frame when skipped.
+    """
     from finansal_analiz_sistemi.config import cfg
 
     if code in cfg.get("passive_filters", []):
