@@ -81,19 +81,6 @@ def _calc_ema(df: pd.DataFrame, n: int) -> pd.Series:
     return df["close"].ewm(span=n, adjust=False).mean()
 
 
-def _tema20(series: pd.Series) -> pd.Series:
-    """Compute the 20-period TEMA, falling back to manual calculation."""
-    if hasattr(ta, "tema"):
-        try:
-            return ta.tema(series, length=20)
-        except Exception:  # pragma: no cover - manual fallback
-            pass
-    ema1 = series.ewm(span=20, adjust=False).mean()
-    ema2 = ema1.ewm(span=20, adjust=False).mean()
-    ema3 = ema2.ewm(span=20, adjust=False).mean()
-    return (3 * ema1) - (3 * ema2) + ema3
-
-
 def _ekle_psar(df: pd.DataFrame) -> None:
     """Calculate Parabolic SAR columns and append them to ``df``."""
     gerekli = ["high", "low", "close"]
@@ -125,6 +112,19 @@ def _ekle_psar(df: pd.DataFrame) -> None:
             pass
 
 
+def _tema20(series: pd.Series) -> pd.Series:
+    """Compute the 20-period TEMA, falling back to manual calculation."""
+    if hasattr(ta, "tema"):
+        try:
+            return ta.tema(series, length=20)
+        except Exception:  # pragma: no cover - manual fallback
+            pass
+    ema1 = series.ewm(span=20, adjust=False).mean()
+    ema2 = ema1.ewm(span=20, adjust=False).mean()
+    ema3 = ema2.ewm(span=20, adjust=False).mean()
+    return (3 * ema1) - (3 * ema2) + ema3
+
+
 def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     """Generate crossover columns based on naming patterns."""
     for name in cross_names:
@@ -141,6 +141,16 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
             continue
         raise ValueError(f"Bilinmeyen crossover format\u0131: {name}")
     return df
+
+
+def add_series(
+    df: pd.DataFrame, name: str, values, seen_names: set[str] | None = None
+) -> None:
+    """Add a column ensuring the name is unique."""
+    if seen_names is None:
+        seen_names = set(df.columns)
+    safe = unique_name(name, seen_names)
+    safe_set(df, safe, values)
 
 
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
@@ -174,16 +184,6 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
             log_failure("indicators", col, str(e))
         except Exception:
             pass
-
-
-def add_series(
-    df: pd.DataFrame, name: str, values, seen_names: set[str] | None = None
-) -> None:
-    """Add a column ensuring the name is unique."""
-    if seen_names is None:
-        seen_names = set(df.columns)
-    safe = unique_name(name, seen_names)
-    safe_set(df, safe, values)
 
 
 def calculate_indicators(
