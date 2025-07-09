@@ -14,10 +14,10 @@ LOCK_FILE = CACHE.with_suffix(".lock")
 
 
 def build() -> None:
-    """Build the Parquet cache from raw CSV files if it doesn't exist.
+    """Create the Parquet cache from raw CSV files.
 
-    Combines all CSVs under ``RAW_DIR`` and writes the result to ``CACHE``.
-    The function does nothing when a populated cache already exists.
+    All CSVs under :data:`RAW_DIR` are concatenated into :data:`CACHE` when the
+    cache file is missing or empty.
     """
     with FileLock(str(LOCK_FILE)):
         if CACHE.exists() and CACHE.stat().st_size > 0:

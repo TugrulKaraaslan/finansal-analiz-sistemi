@@ -7,7 +7,6 @@ import time
 def run_bench() -> float:
     """Return the runtime of a dummy integer summation loop."""
     start = time.perf_counter()
-    # intentionally compute a meaningless sum to keep the loop workload
     _ = sum(random.randint(1, 100) for _ in range(1_000_000))
     duration = time.perf_counter() - start
     print(f"Benchmark Sonucu: {duration:.4f} saniye")

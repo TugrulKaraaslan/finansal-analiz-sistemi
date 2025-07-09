@@ -160,7 +160,13 @@ def _standardize_ohlcv_columns(
 
 
 def check_and_create_dirs(*dir_paths):
-    """Ensure each directory in ``dir_paths`` exists."""
+    """Create any missing directories.
+
+    Parameters
+    ----------
+    *dir_paths : str or Path
+        One or more directory paths that should exist.
+    """
     for dir_path in dir_paths:
         if dir_path and not os.path.exists(dir_path):
             try:
