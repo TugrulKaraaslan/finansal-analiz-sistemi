@@ -5,3 +5,5 @@ As of 2025-07-09 the repository briefly contained two local branches, `main` and
 Verification on 2025-07-09 reconfirmed that `main` was the only branch. A later check on 2025-07-23 again found the `work` branch present. It was removed so that only `main` remains.
 
 2025-07-23: Removed stray `work` branch after audit. `main` is the sole branch.
+
+2025-08-01: Removed stray `work` branch discovered during audit. `main` remains the sole branch.
