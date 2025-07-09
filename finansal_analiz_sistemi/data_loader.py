@@ -187,24 +187,29 @@ def load_data(path: str) -> pd.DataFrame:
     return _cache_loader.load_csv(path)
 
 
-def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
-    """Read a price CSV using delimiter auto-detection.
+def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
+    """Load an Excel file and cache the result, writing Parquet if needed."""
+    if logger_param is None:
+        logger_param = logger
+    log = logger_param
+    try:
+        df = _read_excel_cached(path)
+    except Exception as e:
+        log.error(f"Excel dosyası ({path}) okunamadı: {e}", exc_info=False)
+        return None
 
-    The first line is inspected to choose ``;`` when semicolons dominate,
-    "," when commas dominate or ``sep=None`` otherwise.
-    """
-    encoding = kwargs.get("encoding", "utf-8")
-    with open(path, encoding=encoding) as f:
-        first = f.readline().lstrip("#")
-    delimiter: str | None
-    if first.count(";") > first.count(","):
-        delimiter = ";"
-    elif "," in first:
-        delimiter = ","
-    else:
-        delimiter = None
-    kwargs.setdefault("engine", "python")
-    return pd.read_csv(path, sep=delimiter, **kwargs)
+    df.columns = df.columns.str.strip().str.lower()
+    if len(df) < 252:
+        log.debug(f"{path} kısa veri – atlandı")
+        return None
+
+    parquet_p = path.replace(".xlsx", ".parquet")
+    if not os.path.exists(parquet_p):
+        try:
+            df.to_parquet(parquet_p)
+        except Exception as e:
+            log.warning(f"Parquet kaydedilemedi: {parquet_p}: {e}", exc_info=False)
+    return df
 
 
 def load_filter_csv(path: str) -> pd.DataFrame:
@@ -235,29 +240,26 @@ def load_filter_csv(path: str) -> pd.DataFrame:
     return df
 
 
-def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
-    """Load an Excel file and cache the result, writing Parquet if needed."""
-    if logger_param is None:
-        logger_param = logger
-    log = logger_param
-    try:
-        df = _read_excel_cached(path)
-    except Exception as e:
-        log.error(f"Excel dosyası ({path}) okunamadı: {e}", exc_info=False)
-        return None
+def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
+    """Read a price CSV using delimiter auto-detection.
 
-    df.columns = df.columns.str.strip().str.lower()
-    if len(df) < 252:
-        log.debug(f"{path} kısa veri – atlandı")
-        return None
+    The first line is inspected to choose ``;`` when semicolons dominate,
+    "," when commas dominate or ``sep=None`` otherwise.
+    """
+    encoding = kwargs.get("encoding", "utf-8")
+    with open(path, encoding=encoding) as f:
+        first = f.readline().lstrip("#")
+    delimiter: str | None
+    if first.count(";") > first.count(","):
+        delimiter = ";"
+    elif "," in first:
+        delimiter = ","
+    else:
+        delimiter = None
+    kwargs.setdefault("engine", "python")
+    return pd.read_csv(path, sep=delimiter, **kwargs)
 
-    parquet_p = path.replace(".xlsx", ".parquet")
-    if not os.path.exists(parquet_p):
-        try:
-            df.to_parquet(parquet_p)
-        except Exception as e:
-            log.warning(f"Parquet kaydedilemedi: {parquet_p}: {e}", exc_info=False)
-    return df
+
 
 
 def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.DataFrame:
