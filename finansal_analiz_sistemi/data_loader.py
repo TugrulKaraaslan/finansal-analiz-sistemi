@@ -29,107 +29,6 @@ def _read_excel_cached(path: str) -> pd.DataFrame:
     return _read_excel(path)
 
 
-def load_data(path: str) -> pd.DataFrame:
-    """Return cached CSV contents as a DataFrame.
-
-    This helper delegates to :class:`DataLoaderCache` so repeated reads of the
-    same file avoid disk I/O.
-    """
-    return _cache_loader.load_csv(path)
-
-
-def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
-    """Read a price CSV using delimiter auto-detection.
-
-    The first line is inspected to choose ``;`` when semicolons dominate,
-    "," when commas dominate or ``sep=None`` otherwise.
-    """
-    encoding = kwargs.get("encoding", "utf-8")
-    with open(path, encoding=encoding) as f:
-        first = f.readline().lstrip("#")
-    delimiter: str | None
-    if first.count(";") > first.count(","):
-        delimiter = ";"
-    elif "," in first:
-        delimiter = ","
-    else:
-        delimiter = None
-    kwargs.setdefault("engine", "python")
-    return pd.read_csv(path, sep=delimiter, **kwargs)
-
-
-def load_filter_csv(path: str) -> pd.DataFrame:
-    """Load filter CSV ensuring the expected column layout.
-
-    Legacy files with only ``filtre_kodu`` and ``PythonQuery`` are
-    upgraded by inserting a ``tarih`` column.
-    """
-    # Try headerless read first (legacy files have only two columns)
-    raw = pd.read_csv(path, sep=";")
-    if list(raw.columns) == ["filtre_kodu", "PythonQuery"]:
-        raw.insert(0, "tarih", pd.NA)
-        raw.columns = COLS
-        return raw
-
-    df = pd.read_csv(
-        path,
-        names=COLS,  # beklenen kolon listesi
-        header=None,  # dosya başlıksız
-        skiprows=1,  # ilk dummy satırı atla
-        sep=";",
-    )
-
-    # Safety check: fail loudly if columns differ from expectation
-    if list(df.columns) != COLS:
-        raise ValueError(f"Beklenen kolonlar {COLS}, gelen: {df.columns}")
-
-    return df
-
-
-def check_and_create_dirs(*dir_paths):
-    """Ensure each directory in ``dir_paths`` exists.
-
-    Parameters
-    ----------
-    *dir_paths : str
-        Arbitrary directory paths. ``None`` values are ignored.
-    """
-    for dir_path in dir_paths:
-        if dir_path and not os.path.exists(dir_path):
-            try:
-                os.makedirs(dir_path, exist_ok=True)
-                logger.info(f"Dizin oluşturuldu: {dir_path}")
-            except Exception as e:
-                logger.error(
-                    f"Dizin oluşturulamadı: {dir_path}. Hata: {e}", exc_info=True
-                )
-
-
-def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
-    """Load an Excel file and cache the result, writing Parquet if needed."""
-    if logger_param is None:
-        logger_param = logger
-    log = logger_param
-    try:
-        df = _read_excel_cached(path)
-    except Exception as e:
-        log.error(f"Excel dosyası ({path}) okunamadı: {e}", exc_info=False)
-        return None
-
-    df.columns = df.columns.str.strip().str.lower()
-    if len(df) < 252:
-        log.debug(f"{path} kısa veri – atlandı")
-        return None
-
-    parquet_p = path.replace(".xlsx", ".parquet")
-    if not os.path.exists(parquet_p):
-        try:
-            df.to_parquet(parquet_p)
-        except Exception as e:
-            log.warning(f"Parquet kaydedilemedi: {parquet_p}: {e}", exc_info=False)
-    return df
-
-
 def _standardize_date_column(
     df: pd.DataFrame, file_path_for_log: str = "", logger_param=None
 ) -> pd.DataFrame:
@@ -257,6 +156,101 @@ def _standardize_ohlcv_columns(
             "başarıyla oluşturuldu/bulundu."
         )
     log.debug(f"--- '{file_name_short}': OHLCV Standardizasyonu Tamamlandı ---")
+    return df
+
+
+def check_and_create_dirs(*dir_paths):
+    """Ensure each directory in ``dir_paths`` exists."""
+    for dir_path in dir_paths:
+        if dir_path and not os.path.exists(dir_path):
+            try:
+                os.makedirs(dir_path, exist_ok=True)
+                logger.info(f"Dizin oluşturuldu: {dir_path}")
+            except Exception as e:
+                logger.error(
+                    f"Dizin oluşturulamadı: {dir_path}. Hata: {e}", exc_info=True
+                )
+
+
+def load_data(path: str) -> pd.DataFrame:
+    """Return cached CSV contents as a DataFrame.
+
+    This helper delegates to :class:`DataLoaderCache` so repeated reads of the
+    same file avoid disk I/O.
+    """
+    return _cache_loader.load_csv(path)
+
+
+def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
+    """Read a price CSV using delimiter auto-detection.
+
+    The first line is inspected to choose ``;`` when semicolons dominate,
+    "," when commas dominate or ``sep=None`` otherwise.
+    """
+    encoding = kwargs.get("encoding", "utf-8")
+    with open(path, encoding=encoding) as f:
+        first = f.readline().lstrip("#")
+    delimiter: str | None
+    if first.count(";") > first.count(","):
+        delimiter = ";"
+    elif "," in first:
+        delimiter = ","
+    else:
+        delimiter = None
+    kwargs.setdefault("engine", "python")
+    return pd.read_csv(path, sep=delimiter, **kwargs)
+
+
+def load_filter_csv(path: str) -> pd.DataFrame:
+    """Load filter CSV ensuring the expected column layout.
+
+    Legacy files with only ``filtre_kodu`` and ``PythonQuery`` are
+    upgraded by inserting a ``tarih`` column.
+    """
+    # Try headerless read first (legacy files have only two columns)
+    raw = pd.read_csv(path, sep=";")
+    if list(raw.columns) == ["filtre_kodu", "PythonQuery"]:
+        raw.insert(0, "tarih", pd.NA)
+        raw.columns = COLS
+        return raw
+
+    df = pd.read_csv(
+        path,
+        names=COLS,  # beklenen kolon listesi
+        header=None,  # dosya başlıksız
+        skiprows=1,  # ilk dummy satırı atla
+        sep=";",
+    )
+
+    # Safety check: fail loudly if columns differ from expectation
+    if list(df.columns) != COLS:
+        raise ValueError(f"Beklenen kolonlar {COLS}, gelen: {df.columns}")
+
+    return df
+
+
+def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
+    """Load an Excel file and cache the result, writing Parquet if needed."""
+    if logger_param is None:
+        logger_param = logger
+    log = logger_param
+    try:
+        df = _read_excel_cached(path)
+    except Exception as e:
+        log.error(f"Excel dosyası ({path}) okunamadı: {e}", exc_info=False)
+        return None
+
+    df.columns = df.columns.str.strip().str.lower()
+    if len(df) < 252:
+        log.debug(f"{path} kısa veri – atlandı")
+        return None
+
+    parquet_p = path.replace(".xlsx", ".parquet")
+    if not os.path.exists(parquet_p):
+        try:
+            df.to_parquet(parquet_p)
+        except Exception as e:
+            log.warning(f"Parquet kaydedilemedi: {parquet_p}: {e}", exc_info=False)
     return df
 
 
