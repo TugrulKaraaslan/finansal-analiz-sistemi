@@ -519,31 +519,7 @@ def _calculate_group_indicators_and_crossovers(
             min_periods=1,
             unique=True,
         )
-        if (
-            "psar_long" not in group_df_dt_indexed.columns
-            or "psar_short" not in group_df_dt_indexed.columns
-        ):
-            try:
-                psar_raw = group_df_dt_indexed.ta.psar()
-                if isinstance(psar_raw, pd.DataFrame):
-                    psar_df = psar_raw.iloc[:, :2].copy()
-                    psar_df.columns = ["psar_long", "psar_short"]
-                else:
-                    psar_long, psar_short = psar_raw
-                    psar_df = safe_concat([psar_long, psar_short], axis=1)
-                    psar_df.columns = ["psar_long", "psar_short"]
-                group_df_dt_indexed = safe_concat(
-                    [group_df_dt_indexed, psar_df], axis=1
-                )
-                safe_set(
-                    group_df_dt_indexed,
-                    "psar",
-                    group_df_dt_indexed["psar_long"]
-                    .fillna(group_df_dt_indexed["psar_short"])
-                    .values,
-                )
-            except Exception as e_psar:
-                local_logger.error(f"{hisse_kodu}: PSAR hesaplanırken hata: {e_psar}")
+        _ekle_psar(group_df_dt_indexed)
     except Exception as e_ta:
         local_logger.error(
             f"{hisse_kodu}: OpenBB stratejisi hatası: {e_ta}", exc_info=True
