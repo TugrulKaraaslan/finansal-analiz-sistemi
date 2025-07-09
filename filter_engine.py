@@ -250,7 +250,6 @@ def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
         return pd.DataFrame()
     return safe_eval(expr, df)
 
-
     """Execute ``expr`` on ``df`` unless the filter is marked passive.
 
     Parameters
