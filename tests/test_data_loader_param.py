@@ -96,4 +96,3 @@ def test_yukle_filtre_dosyasi_missing(tmp_path: Path):
     pd.DataFrame({"x": [1]}).to_csv(p, sep=";", index=False)
     with pytest.raises(KeyError):
         data_loader.yukle_filtre_dosyasi(p)
-
