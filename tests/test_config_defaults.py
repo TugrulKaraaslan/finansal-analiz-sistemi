@@ -13,22 +13,10 @@ CONSTANTS = [
 ]
 
 
-def test_config_has_defaults():
-    """Every expected constant should exist in ``config``."""
-    for name in CONSTANTS:
-        assert hasattr(config, name)
-
-
 def test_cfg_alias():
     """Module ``cfg`` must import ``config`` for backward compatibility."""
     mod = importlib.import_module("cfg")
     assert mod is config
-
-
-def test_yaml_values_loaded():
-    """YAML'deki değerler modüle yüklenmeli."""
-    assert config.get("filter_weights", {}).get("T31") == 0.0
-    assert "T31" in config.get("passive_filters", [])
 
 
 def test_config_exposes_paths():
@@ -40,3 +28,15 @@ def test_config_exposes_paths():
         "FILTRE_DOSYA_YOLU",
     ]:
         assert hasattr(config, name)
+
+
+def test_config_has_defaults():
+    """Every expected constant should exist in ``config``."""
+    for name in CONSTANTS:
+        assert hasattr(config, name)
+
+
+def test_yaml_values_loaded():
+    """YAML'deki değerler modüle yüklenmeli."""
+    assert config.get("filter_weights", {}).get("T31") == 0.0
+    assert "T31" in config.get("passive_filters", [])
