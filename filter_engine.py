@@ -140,10 +140,6 @@ def _build_solution(err_type: str, msg: str) -> str:
     return ""
 
 
-
-
-
-
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
     FAILED_FILTERS.clear()

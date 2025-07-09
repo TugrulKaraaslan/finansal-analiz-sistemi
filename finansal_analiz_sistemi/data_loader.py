@@ -260,8 +260,6 @@ def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
     return pd.read_csv(path, sep=delimiter, **kwargs)
 
 
-
-
 def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.DataFrame:
     """Load filter definitions.
 
