@@ -1,7 +1,7 @@
 """Lightweight wrappers for optional OpenBB technical indicators.
 
-Each function forwards to :mod:`openbb` when the package is available
-and otherwise raises ``NotImplementedError`` so the rest of the codebase
+Each helper calls into :mod:`openbb` when the library is installed and
+otherwise raises ``NotImplementedError`` so the rest of the codebase
 remains optional-dependency agnostic.
 """
 

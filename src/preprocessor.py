@@ -6,19 +6,23 @@ import pandas as pd
 def fill_missing_business_day(
     df: pd.DataFrame, date_col: str = "tarih"
 ) -> pd.DataFrame:
-    """Shift ``NaT`` rows backward to the previous business day.
+    """Replace ``NaT`` values with the previous business day.
+
+    Rows with missing dates are shifted backward so every entry aligns with a
+    valid trading day.
 
     Parameters
     ----------
     df : pd.DataFrame
         Input DataFrame containing a date column.
     date_col : str, optional
-        Name of the date column, by default "tarih".
+        Name of the date column, by default ``"tarih"``.
 
     Returns
     -------
     pd.DataFrame
-        DataFrame where NaT dates are replaced with the previous business day.
+        DataFrame where missing dates are backfilled with the prior business
+        day.
     """
     if date_col not in df.columns:
         return df
