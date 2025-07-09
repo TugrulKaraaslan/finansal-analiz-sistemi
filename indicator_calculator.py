@@ -393,11 +393,11 @@ def _calculate_group_indicators_and_crossovers(
 ) -> pd.DataFrame:
     """Compute indicators and crossover columns for one ticker.
 
-    The input DataFrame should contain OHLCV columns and a ``tarih`` column. The
-    function applies the configured pandas-ta strategy, renames indicator
-    columns according to ``INDIKATOR_AD_ESLESTIRME`` and appends crossover
-    signals. The resulting DataFrame preserves ``RangeIndex`` and the ``tarih``
-    column for further processing.
+    The input DataFrame should contain OHLCV columns and a ``tarih`` column.
+    Configured indicator functions (pandas-ta or OpenBB) are applied, indicator
+    names are remapped according to ``INDIKATOR_AD_ESLESTIRME`` and crossover
+    signals are generated. The resulting DataFrame preserves ``RangeIndex`` and
+    the ``tarih`` column for further processing.
     """
     local_logger = logger
     hisse_kodu = (
@@ -421,7 +421,7 @@ def _calculate_group_indicators_and_crossovers(
                 extended.add(str(raw).upper())
         wanted_cols = extended
 
-    # pandas-ta için DatetimeIndex'e çevir
+    # İndikator hesaplamaları için DatetimeIndex'e çevir
     group_df_dt_indexed = group_df_input.copy()
 
     grouped = group_df_dt_indexed.groupby(
@@ -549,10 +549,10 @@ def _calculate_group_indicators_and_crossovers(
             )
 
     # Şimdi tüm hesaplamaların (özel ve kesişimler) yapılacağı RangeIndex'li DataFrame'i hazırlayalım.
-    # Bu DataFrame, pandas-ta tarafından hesaplanan indikatörleri de içermeli.
+    # Bu DataFrame, hesaplanan indikatörleri de içermeli.
     # group_df_input (RangeIndex, 'tarih' sütunlu, OHLCV)
     # group_df_dt_indexed (DatetimeIndex, 'tarih' SÜTUNU YOK, OHLCV +
-    # pandas-ta indikatörleri)
+    # indikatör sütunları)
 
     # En temiz yol: group_df_dt_indexed'in indeksini sıfırlayıp 'tarih' sütununu geri getirmek
     # ve orijinal group_df_input ile birleştirmek (sadece yeni eklenen
@@ -563,12 +563,12 @@ def _calculate_group_indicators_and_crossovers(
     )  # Temel olarak orijinal df'i alalım (RangeIndex, 'tarih' sütunlu)
     seen_names = set(df_final_group.columns)
 
-    # pandas-ta ile hesaplanan sütunları (DatetimeIndex'li df'ten) RangeIndex'li df_final_group'a aktar
+    # Hesaplanan indikatör sütunlarını (DatetimeIndex'li df'ten) RangeIndex'li df_final_group'a aktar
     # İndeksler farklı olduğu için doğrudan merge yerine, değerleri .values ile atamak daha güvenli olabilir,
     # ancak her iki df'in de aynı sayıda satıra sahip olması ve sıralı olması gerekir.
     # group_df_sorted_range_indexed en başta oluşturulmuştu.
 
-    # pandas-ta'nın eklediği yeni sütunları alalım (OHLCV hariç)
+    # Yeni indikatör sütunlarını alalım (OHLCV hariç)
     new_ta_cols_list = [
         col
         for col in group_df_dt_indexed.columns
