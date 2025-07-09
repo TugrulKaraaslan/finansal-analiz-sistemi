@@ -67,9 +67,10 @@ def test_tarama_denetimi_summary(monkeypatch):
     assert result.iloc[-1]["kod"] == "_SUMMARY"
 
 
-def test_logging_config_import(monkeypatch):
-    """Importing ``logging_config`` should initialize file handlers."""
+def test_logging_config_import(monkeypatch, tmp_path):
+    """Importing ``log_tools`` should initialize file handlers."""
     calls = {}
+    import importlib
     import logging
 
     class DummyHandler(logging.Handler):
@@ -88,15 +89,27 @@ def test_logging_config_import(monkeypatch):
             """No-op ``emit`` used only for initialization testing."""
             pass
 
-    import importlib
+    import logging.config
     import logging.handlers
 
-    import src.logging_config as lc
+    import finansal_analiz_sistemi as fas
 
+    monkeypatch.setattr(logging.config, "dictConfig", lambda cfg: None)
     monkeypatch.setattr(logging.handlers, "RotatingFileHandler", DummyHandler)
-    monkeypatch.setattr(lc.os, "makedirs", lambda *a, **k: None)
-    importlib.reload(lc)
-    assert calls["file"].endswith("run.log")
+
+    importlib.reload(fas)
+    lc = importlib.import_module("finansal_analiz_sistemi.log_tools")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(lc.config, "IS_COLAB", False)
+    root = logging.getLogger()
+    for h in list(root.handlers):
+        try:
+            h.close()
+        finally:
+            root.removeHandler(h)
+    lc.setup_logger()
+    assert str(calls["file"]).endswith("rapor.log")
 
 
 def test_report_writer_accepts_str(tmp_path):
