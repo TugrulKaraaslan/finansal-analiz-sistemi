@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def test_temizle_sayisal_deger_thousand_comma():
-    """Test test_temizle_sayisal_deger_thousand_comma."""
+    """Parse numbers with Turkish thousands separators correctly."""
     cases = {
         "1.234,56": 1234.56,
         "12.345,67": 12345.67,
@@ -25,7 +25,7 @@ def test_temizle_sayisal_deger_thousand_comma():
 
 
 def test_on_isle_hisse_verileri_invalid_dates_dropped_and_numeric():
-    """Test test_on_isle_hisse_verileri_invalid_dates_dropped_and_numeric."""
+    """Invalid dates are dropped and numeric columns cast to float."""
     data = {
         "hisse_kodu": ["AAA", "AAA", "AAA"],
         "tarih": ["01.03.2025", "31.02.2025", "02.03.2025"],

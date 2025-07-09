@@ -4,7 +4,7 @@ from utils.purge_old_logs import purge_old_logs
 
 
 def test_purge_dry_run(tmp_path):
-    """Test test_purge_dry_run."""
+    """Dry-run should count deletable files without removing them."""
     old = tmp_path / "old.log"
     lock_old = tmp_path / "old.lock"
     old.write_text("")

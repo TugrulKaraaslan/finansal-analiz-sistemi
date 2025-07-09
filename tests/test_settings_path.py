@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 def test_env_override(monkeypatch):
-    """Test test_env_override."""
+    """Environment variable should override the default settings path."""
     monkeypatch.setenv("FAS_SETTINGS_FILE", "/tmp/custom.yaml")
     from finansal_analiz_sistemi.config import get_settings_path
 
@@ -13,7 +13,7 @@ def test_env_override(monkeypatch):
 
 
 def test_colab_path(monkeypatch):
-    """Test test_colab_path."""
+    """Colab runtime must point to the drive-mounted settings file."""
     monkeypatch.delenv("FAS_SETTINGS_FILE", raising=False)
     monkeypatch.setitem(sys.modules, "google.colab", object())
     from finansal_analiz_sistemi.config import get_settings_path
@@ -23,7 +23,7 @@ def test_colab_path(monkeypatch):
 
 
 def test_local_path(monkeypatch):
-    """Test test_local_path."""
+    """Local environment falls back to repository ``settings.yaml``."""
     monkeypatch.delenv("FAS_SETTINGS_FILE", raising=False)
     sys.modules.pop("google.colab", None)
     from finansal_analiz_sistemi.config import get_settings_path

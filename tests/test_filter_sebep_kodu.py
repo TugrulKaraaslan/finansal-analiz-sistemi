@@ -32,19 +32,19 @@ def _apply(query: str) -> str:
 
 
 def test_ok_code():
-    """Test test_ok_code."""
+    """Return ``OK`` when the query executes without issues."""
     code = _apply("close > 5")
     assert code == "OK"
     assert code in SEBEP_KODLARI
 
 
 def test_missing_column_returns_missing_col():
-    """Test test_missing_column_returns_missing_col."""
+    """Missing columns should trigger the ``QUERY_ERROR`` code."""
     code = _apply("missing > 0")
     assert code == "QUERY_ERROR"
 
 
 def test_syntax_error_returns_query_error():
-    """Test test_syntax_error_returns_query_error."""
+    """Syntax errors are reported as ``QUERY_ERROR``."""
     code = _apply("close >")
     assert code == "QUERY_ERROR"

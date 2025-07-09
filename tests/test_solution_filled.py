@@ -17,7 +17,7 @@ if ROOT_DIR not in sys.path:
 
 
 def test_solution_not_empty(tmp_path):
-    """Test test_solution_not_empty."""
+    """Generated error sheet should include solution hints."""
     errs = [
         {
             "filtre_kodu": "T500",

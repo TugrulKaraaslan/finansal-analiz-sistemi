@@ -11,7 +11,7 @@ pytest.importorskip("pyarrow")
 
 
 def test_refresh_and_load(tmp_path: Path) -> None:
-    """Test test_refresh_and_load."""
+    """Refresh cache from CSV and ensure subsequent loads match."""
     csv_path = tmp_path / "sample.csv"
     cache_path = tmp_path / "cache.parquet"
 
@@ -28,7 +28,7 @@ def test_refresh_and_load(tmp_path: Path) -> None:
 
 
 def test_load_missing(tmp_path: Path) -> None:  # noqa: D401
-    """Test test_load_missing."""
+    """Loading a missing Parquet file should raise ``FileNotFoundError``."""
     mngr = ParquetCacheManager(tmp_path / "missing.parquet")
     with pytest.raises(FileNotFoundError):
         _ = mngr.load()

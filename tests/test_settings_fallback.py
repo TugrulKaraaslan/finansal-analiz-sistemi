@@ -6,7 +6,7 @@ import settings
 
 
 def test_invalid_depth_fallback(tmp_path, monkeypatch):
-    """Test test_invalid_depth_fallback."""
+    """Invalid integer values fall back to the default depth."""
     cfg = tmp_path / "settings.yaml"
     cfg.write_text("max_filter_depth: bad\n")
     monkeypatch.setenv("FAS_SETTINGS_FILE", str(cfg))
@@ -18,7 +18,7 @@ def test_invalid_depth_fallback(tmp_path, monkeypatch):
 
 
 def test_invalid_yaml_fallback(tmp_path, monkeypatch):
-    """Test test_invalid_yaml_fallback."""
+    """Malformed YAML should not override configuration defaults."""
     cfg = tmp_path / "settings.yaml"
     cfg.write_text("invalid: [\n")
     monkeypatch.setenv("FAS_SETTINGS_FILE", str(cfg))
