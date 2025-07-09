@@ -27,8 +27,8 @@ def test_refresh_and_load(tmp_path: Path) -> None:
     pd.testing.assert_frame_equal(df_cached, df_loaded)
 
 
-def test_load_missing(tmp_path: Path) -> None:  # noqa: D401
-    """Loading a missing Parquet file should raise ``FileNotFoundError``."""
+def test_load_missing(tmp_path: Path) -> None:
+    """Raise ``FileNotFoundError`` when the Parquet file is missing."""
     mngr = ParquetCacheManager(tmp_path / "missing.parquet")
     with pytest.raises(FileNotFoundError):
         _ = mngr.load()
