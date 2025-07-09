@@ -5,3 +5,4 @@ After the cleanup, only the `main` branch remains. The repository was checked ag
 Rechecked as of 2025: 'work' has been fully deleted.
 Reconfirmed: only 'main' exists.
 Revalidated on 2025-07-09 after remote fetch: only 'main' branch remains.
+Reaudited again on 2025-07-09: stray `work` branch was deleted once more.
