@@ -13,7 +13,17 @@ class DataLoaderCache:
     """Simple in-memory cache for CSV and Excel readers."""
 
     def __init__(self, logger=None, *, ttl: int = 4 * 60 * 60, maxsize: int = 64):
-        """Initialize cache with optional logger and TTL settings."""
+        """Initialize the cache and configure expiration policy.
+
+        Parameters
+        ----------
+        logger : optional
+            Logger used for debug messages.
+        ttl : int, optional
+            Time-to-live for cached entries in seconds.
+        maxsize : int, optional
+            Maximum number of cached datasets.
+        """
         self.loaded_data: TTLCache = TTLCache(maxsize=maxsize, ttl=ttl)
         self.logger = logger
 
