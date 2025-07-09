@@ -26,7 +26,6 @@ if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
     )
 
 
-
 logger = get_logger(__name__)
 log_counter: CounterFilter | None = None
 
