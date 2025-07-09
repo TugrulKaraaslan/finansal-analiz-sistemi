@@ -89,6 +89,7 @@ def test_logging_config_import(monkeypatch, tmp_path):
             pass
 
     import logging.handlers
+
     from finansal_analiz_sistemi import log_tools as lc
 
     monkeypatch.setattr(logging.handlers, "RotatingFileHandler", DummyHandler)
