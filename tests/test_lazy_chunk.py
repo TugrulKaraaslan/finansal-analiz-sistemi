@@ -1,4 +1,4 @@
-"""Unit tests for lazy_chunk."""
+"""Tests for the ``lazy_chunk`` helper function."""
 
 import pytest
 

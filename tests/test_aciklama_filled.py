@@ -1,4 +1,4 @@
-"""Unit tests for aciklama_filled."""
+"""Ensure summary rows include descriptive explanations."""
 
 import os
 import sys

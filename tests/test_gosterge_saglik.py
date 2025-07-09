@@ -1,4 +1,4 @@
-"""Unit tests for gosterge_saglik."""
+"""Tests for the indicator health-check utility."""
 
 import os
 import sys

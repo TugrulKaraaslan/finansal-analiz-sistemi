@@ -1,4 +1,4 @@
-"""Unit tests for report_generator."""
+"""Tests for Excel report generation utilities."""
 
 import os
 import sys

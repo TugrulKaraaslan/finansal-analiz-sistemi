@@ -1,4 +1,4 @@
-"""Unit tests for error_list."""
+"""Tests for error list handling in the report generator."""
 
 import pandas as pd
 

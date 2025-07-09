@@ -1,4 +1,4 @@
-"""Unit tests for config_has_core_indicators."""
+"""Tests ensuring :mod:`config` exposes required indicators."""
 
 
 def test_config_has_core_indicators():

@@ -1,4 +1,4 @@
-"""Unit tests for read_prices."""
+"""Tests for delimiter auto-detection in ``read_prices``."""
 
 import pandas as pd
 

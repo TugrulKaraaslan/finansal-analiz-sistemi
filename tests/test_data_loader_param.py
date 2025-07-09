@@ -1,4 +1,4 @@
-"""Unit tests for data_loader_param."""
+"""Tests validating the parameterized data loader helpers."""
 
 from pathlib import Path
 
@@ -56,14 +56,14 @@ def test_standardize_date_column_no_match():
 
 
 def test_check_and_create_dirs(tmp_path: Path):
-    """Test test_check_and_create_dirs."""
+    """Created directories should exist after invocation."""
     new_dir = tmp_path / "nested"
     data_loader.check_and_create_dirs(new_dir)
     assert new_dir.exists()
 
 
 def test_load_excel_katalogu_short(tmp_path: Path):
-    """Test test_load_excel_katalogu_short."""
+    """Excel files under 252 rows should return ``None``."""
     df = pd.DataFrame({"a": range(10)})
     p = tmp_path / "s.xlsx"
     df.to_excel(p, index=False)
@@ -71,7 +71,7 @@ def test_load_excel_katalogu_short(tmp_path: Path):
 
 
 def test_load_excel_katalogu_long(tmp_path: Path):
-    """Test test_load_excel_katalogu_long."""
+    """Large Excel files should be loaded and saved as Parquet."""
     pytest.importorskip("pyarrow")
     df = pd.DataFrame({"a": range(252)})
     p = tmp_path / "s2.xlsx"
@@ -83,7 +83,7 @@ def test_load_excel_katalogu_long(tmp_path: Path):
 
 
 def test_yukle_filtre_dosyasi_alias(tmp_path: Path):
-    """Test test_yukle_filtre_dosyasi_alias."""
+    """CSV files with ``FilterCode`` should be normalized."""
     p = tmp_path / "f.csv"
     pd.DataFrame({"FilterCode": ["F1"]}).to_csv(p, sep=";", index=False)
     df = data_loader.yukle_filtre_dosyasi(p)
@@ -91,7 +91,7 @@ def test_yukle_filtre_dosyasi_alias(tmp_path: Path):
 
 
 def test_yukle_filtre_dosyasi_missing(tmp_path: Path):
-    """Test test_yukle_filtre_dosyasi_missing."""
+    """Loading a CSV without ``filtre_kodu`` should raise ``KeyError``."""
     p = tmp_path / "f.csv"
     pd.DataFrame({"x": [1]}).to_csv(p, sep=";", index=False)
     with pytest.raises(KeyError):

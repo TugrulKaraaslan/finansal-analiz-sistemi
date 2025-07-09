@@ -1,4 +1,4 @@
-"""Unit tests for filter_cycle."""
+"""Tests detecting cyclic dependencies in filter definitions."""
 
 import pytest
 

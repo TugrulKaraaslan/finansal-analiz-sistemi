@@ -1,4 +1,4 @@
-"""Unit tests for header_alignment."""
+"""Tests for consistent CSV header normalization."""
 
 from finansal_analiz_sistemi.data_loader import load_filter_csv
 

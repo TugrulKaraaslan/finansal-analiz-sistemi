@@ -1,4 +1,4 @@
-"""Unit tests for perf_profile."""
+"""Tests covering the performance profiling utilities."""
 
 import os
 import sys
@@ -11,7 +11,7 @@ import indicator_calculator as ic  # noqa: E402
 
 
 def test_ema_columns_notna():
-    """Test test_ema_columns_notna."""
+    """EMA columns should contain no missing values after calculation."""
     dates = pd.date_range("2024-01-01", periods=10, freq="D")
     df = pd.DataFrame(
         {
