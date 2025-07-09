@@ -97,6 +97,6 @@ def _fix_sys_modules():
     yield
 
 
-def pytest_sessionstart(session: pytest.Session) -> None:  # noqa: D401
-    """Clean ``sys.modules`` before the test session starts."""
+def pytest_sessionstart(session: pytest.Session) -> None:
+    """Clean up ``sys.modules`` before the test session starts."""
     _sanitize_sys_modules()

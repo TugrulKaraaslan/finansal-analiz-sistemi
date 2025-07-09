@@ -48,8 +48,8 @@ def main(
     ind_set: str,
     chunk_size: int,
     log_level: str,
-) -> None:  # noqa: D401
-    """Manage the Parquet cache and compute indicators from the CLI."""
+) -> None:
+    """Run the CLI to manage the Parquet cache and compute indicators."""
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
