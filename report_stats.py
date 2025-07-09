@@ -57,6 +57,19 @@ def _normalize_pct(s: pd.Series) -> pd.Series:
     return s.round(2)
 
 
+# --- Helper: normalize_pct ---
+def normalize_pct(series):
+    """Return numeric percentages scaled to a fractional range.
+
+    The ``%`` sign is removed first and the remaining string is converted
+    to ``float``. Values greater than ``100`` are divided by ``100`` so the
+    result is always on a ``0-1`` scale.
+    """
+    s = series.astype(str).str.replace("%", "", regex=False)
+    s = pd.to_numeric(s, errors="coerce")
+    return np.where(s.abs() > 100, s / 100.0, s).round(2)
+
+
 def build_detay_df(
     summary_df: pd.DataFrame,
     detail_df: pd.DataFrame,
@@ -229,19 +242,6 @@ def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
             }
         ]
     )
-
-
-# --- Helper: normalize_pct ---
-def normalize_pct(series):
-    """Return numeric percentages scaled to a fractional range.
-
-    The ``%`` sign is removed first and the remaining string is converted
-    to ``float``. Values greater than ``100`` are divided by ``100`` so the
-    result is always on a ``0-1`` scale.
-    """
-    s = series.astype(str).str.replace("%", "", regex=False)
-    s = pd.to_numeric(s, errors="coerce")
-    return np.where(s.abs() > 100, s / 100.0, s).round(2)
 
 
 def plot_summary_stats(
