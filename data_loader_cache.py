@@ -17,38 +17,9 @@ class DataLoaderCache:
         self.loaded_data: TTLCache = TTLCache(maxsize=maxsize, ttl=ttl)
         self.logger = logger
 
-    def load_excel(self, filepath: str, **kwargs) -> pd.ExcelFile:
-        """Return ``ExcelFile`` from cache or read it from disk.
-
-        Parameters
-        ----------
-        filepath : str
-            Path to the Excel file.
-        **kwargs : Any
-            Additional options passed to :func:`pandas.ExcelFile` when loading
-            from disk.
-
-        Returns
-        -------
-        pd.ExcelFile
-            Cached or freshly loaded ``ExcelFile`` instance.
-        """
-        key = (os.path.abspath(filepath), "__excel__")
-        if key in self.loaded_data:
-            if self.logger:
-                self.logger.debug(f"Cache hit: {key}")
-            return self.loaded_data[key]
-
-        try:
-            xls = open_excel_cached(filepath, **kwargs)
-            self.loaded_data[key] = xls
-            if self.logger:
-                self.logger.info(f"ExcelFile yüklendi: {filepath}")
-            return xls
-        except Exception as e:
-            if self.logger:
-                self.logger.error(f"ExcelFile yükleme hatası: {filepath}: {e}")
-            raise
+    def clear(self) -> None:
+        """Clear the internal cache."""
+        self.loaded_data.clear()
 
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
         """Read a CSV file, caching the result by path and modification time.
@@ -90,6 +61,35 @@ class DataLoaderCache:
                 self.logger.error(f"CSV yükleme hatası: {filepath}: {e}")
             raise
 
-    def clear(self) -> None:
-        """Clear the internal cache."""
-        self.loaded_data.clear()
+    def load_excel(self, filepath: str, **kwargs) -> pd.ExcelFile:
+        """Return ``ExcelFile`` from cache or read it from disk.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the Excel file.
+        **kwargs : Any
+            Additional options passed to :func:`pandas.ExcelFile` when loading
+            from disk.
+
+        Returns
+        -------
+        pd.ExcelFile
+            Cached or freshly loaded ``ExcelFile`` instance.
+        """
+        key = (os.path.abspath(filepath), "__excel__")
+        if key in self.loaded_data:
+            if self.logger:
+                self.logger.debug(f"Cache hit: {key}")
+            return self.loaded_data[key]
+
+        try:
+            xls = open_excel_cached(filepath, **kwargs)
+            self.loaded_data[key] = xls
+            if self.logger:
+                self.logger.info(f"ExcelFile yüklendi: {filepath}")
+            return xls
+        except Exception as e:
+            if self.logger:
+                self.logger.error(f"ExcelFile yükleme hatası: {filepath}: {e}")
+            raise
