@@ -5,7 +5,8 @@ import logging
 import time
 
 from finansal_analiz_sistemi import log_tools
-from finansal_analiz_sistemi.log_tools import DuplicateFilter, setup_logging
+from finansal_analiz_sistemi.log_tools import DuplicateFilter
+from finansal_analiz_sistemi.logging_config import setup_logging
 
 
 def test_setup_logging_deduplicates_and_sets_propagate():
