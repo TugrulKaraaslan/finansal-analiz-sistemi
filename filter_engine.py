@@ -59,6 +59,38 @@ class MissingColumnError(Exception):
         self.missing = missing
 
 
+def _extract_query_columns(query: str) -> set:
+    """Return column-like identifiers referenced in a filter query."""
+    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
+    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
+    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
+    return tokens - reserved
+
+
+def _extract_columns_from_query(query: str) -> set:
+    """Compatibility wrapper for the new naming scheme."""
+    return _extract_query_columns(query)
+
+
+def _build_solution(err_type: str, msg: str) -> str:
+    """Return a human-friendly hint for the given error."""
+    if err_type == "GENERIC":
+        m1 = _missing_re.search(msg)
+        if m1:
+            col = m1.group("col")
+            return f'"{col}" indikatörünü hesaplama listesine ekleyin.'
+        m2 = _undefined_re.search(msg)
+        if m2:
+            col = m2.group("col")
+            return f'Sorguda geçen "{col}" sütununu veri setine ekleyin veya sorgudan çıkarın.'
+        return "Eksik veriyi veya sorgu değişkenini düzeltin."
+    if err_type == "QUERY_ERROR":
+        return "Query ifadesini pandas.query() sözdizimine göre düzeltin."
+    if err_type == "NO_STOCK":
+        return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
+    return ""
+
+
 def _apply_single_filter(df, kod, query):
     """Run a filter expression on ``df`` and collect diagnostics.
 
@@ -137,78 +169,6 @@ def _apply_single_filter(df, kod, query):
         return None, info
 
 
-def _build_solution(err_type: str, msg: str) -> str:
-    """Return a human-friendly hint for the given error."""
-    if err_type == "GENERIC":
-        m1 = _missing_re.search(msg)
-        if m1:
-            col = m1.group("col")
-            return f'"{col}" indikatörünü hesaplama listesine ekleyin.'
-        m2 = _undefined_re.search(msg)
-        if m2:
-            col = m2.group("col")
-            return f'Sorguda geçen "{col}" sütununu veri setine ekleyin veya sorgudan çıkarın.'
-        return "Eksik veriyi veya sorgu değişkenini düzeltin."
-    if err_type == "QUERY_ERROR":
-        return "Query ifadesini pandas.query() sözdizimine göre düzeltin."
-    if err_type == "NO_STOCK":
-        return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
-    return ""
-
-
-def _extract_columns_from_query(query: str) -> set:
-    """Compatibility wrapper for the new naming scheme."""
-    return _extract_query_columns(query)
-
-
-def _extract_query_columns(query: str) -> set:
-    """Return column-like identifiers referenced in a filter query."""
-    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
-    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
-    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
-    return tokens - reserved
-
-
-def clear_failed() -> None:
-    """Clear global FAILED_FILTERS list."""
-    FAILED_FILTERS.clear()
-
-
-def evaluate_filter(
-    fid: str | dict,
-    df: Any | None = None,
-    depth: int = 0,
-    seen: set[str] | None = None,
-) -> Any:
-    """Recursively evaluate filter trees referenced by ``fid`` or definition dict.
-
-    Supports both legacy dict-based expressions and string identifiers stored in
-    ``FILTER_DEFS``. Raises ``CyclicFilterError`` for cycles and
-    ``MaxDepthError`` when ``settings.MAX_FILTER_DEPTH`` is exceeded.
-    """
-    seen = seen or set()
-
-    if isinstance(fid, dict):
-        key = fid.get("code", repr(fid))
-        children = [fid["sub_expr"]] if "sub_expr" in fid else []
-    else:
-        key = fid
-        node = FILTER_DEFS.get(fid)
-        if node is None:
-            raise KeyError(f"Unknown filter: {fid}")
-        children = node.get("children", [])
-
-    if key in seen:
-        raise CyclicFilterError(f"Cyclic dependency → {' > '.join(list(seen) + [key])}")
-    if depth > settings.MAX_FILTER_DEPTH:
-        raise MaxDepthError(f"Depth {depth} exceeded on {key}")
-
-    seen.add(key)
-    for child in children:
-        evaluate_filter(child, df=df, depth=depth + 1, seen=seen)
-    return key
-
-
 def kaydet_hata(
     log_dict: dict[str, Any],
     kod: str,
@@ -225,6 +185,45 @@ def kaydet_hata(
         "cozum_onerisi": _build_solution(error_type, msg if msg else ""),
     }
     log_dict.setdefault("hatalar", []).append(entry)
+
+
+def clear_failed() -> None:
+    """Clear global FAILED_FILTERS list."""
+    FAILED_FILTERS.clear()
+
+
+def safe_eval(expr, df, depth: int = 0, visited=None):
+    """Evaluate filter safely with depth and circular guards."""
+    if visited is None:
+        visited = set()
+    if depth > settings.MAX_FILTER_DEPTH:
+        raise QueryError(f"Max recursion depth ({settings.MAX_FILTER_DEPTH}) exceeded")
+
+    if isinstance(expr, str):
+        return df.query(expr)
+
+    if isinstance(expr, dict) and "sub_expr" in expr:
+        current = expr.get("code")
+        if current is not None:
+            if current in visited:
+                raise CircularError(f"Circular reference: {current}")
+            visited.add(current)
+        try:
+            return safe_eval(expr["sub_expr"], df, depth + 1, visited)
+        except QueryError as e:
+            FAILED_FILTERS.append({"filtre_kodu": expr.get("code"), "hata": str(e)})
+            logger.warning("QUERY_ERROR %s", e)
+            try:
+                from utils.error_map import get_reason_hint
+                from utils.failure_tracker import log_failure
+
+                reason, hint = get_reason_hint(e)
+                log_failure("filters", expr.get("code", "unknown"), reason, hint)
+            except Exception:
+                pass
+            raise
+
+    raise QueryError("Invalid expression")
 
 
 def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
@@ -251,8 +250,31 @@ def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
         return pd.DataFrame()
     return safe_eval(expr, df)
 
+    """Execute ``expr`` on ``df`` unless the filter is marked passive.
 
-def run_single_filter(kod: str, query: str) -> dict:
+    Parameters
+    ----------
+    code : str
+        Identifier of the filter to run.
+    df : pd.DataFrame
+        DataFrame containing indicator columns.
+    expr : str
+        Filter expression in ``pandas.query`` syntax.
+
+    Returns
+    -------
+    pd.DataFrame
+        Resulting DataFrame or an empty frame when skipped.
+    """
+    from finansal_analiz_sistemi.config import cfg
+
+    if code in cfg.get("passive_filters", []):
+        logger.info("Filter %s marked passive, skipped.", code)
+        return pd.DataFrame()
+    return safe_eval(expr, df)
+
+
+def run_single_filter(kod: str, query: str) -> dict[str, Any]:
     """Validate ``query`` against a dummy frame and return error info.
 
     The returned mapping contains a ``hatalar`` list when ``query`` fails
@@ -304,38 +326,39 @@ def run_single_filter(kod: str, query: str) -> dict:
     return atlanmis
 
 
-def safe_eval(expr, df, depth: int = 0, visited=None):
-    """Evaluate filter safely with depth and circular guards."""
-    if visited is None:
-        visited = set()
+def evaluate_filter(
+    fid: str | dict,
+    df: Any | None = None,
+    depth: int = 0,
+    seen: set[str] | None = None,
+) -> Any:
+    """Recursively evaluate filter trees referenced by ``fid`` or definition dict.
+
+    Supports both legacy dict-based expressions and string identifiers stored in
+    ``FILTER_DEFS``. Raises ``CyclicFilterError`` for cycles and
+    ``MaxDepthError`` when ``settings.MAX_FILTER_DEPTH`` is exceeded.
+    """
+    seen = seen or set()
+
+    if isinstance(fid, dict):
+        key = fid.get("code", repr(fid))
+        children = [fid["sub_expr"]] if "sub_expr" in fid else []
+    else:
+        key = fid
+        node = FILTER_DEFS.get(fid)
+        if node is None:
+            raise KeyError(f"Unknown filter: {fid}")
+        children = node.get("children", [])
+
+    if key in seen:
+        raise CyclicFilterError(f"Cyclic dependency → {' > '.join(list(seen) + [key])}")
     if depth > settings.MAX_FILTER_DEPTH:
-        raise QueryError(f"Max recursion depth ({settings.MAX_FILTER_DEPTH}) exceeded")
+        raise MaxDepthError(f"Depth {depth} exceeded on {key}")
 
-    if isinstance(expr, str):
-        return df.query(expr)
-
-    if isinstance(expr, dict) and "sub_expr" in expr:
-        current = expr.get("code")
-        if current is not None:
-            if current in visited:
-                raise CircularError(f"Circular reference: {current}")
-            visited.add(current)
-        try:
-            return safe_eval(expr["sub_expr"], df, depth + 1, visited)
-        except QueryError as e:
-            FAILED_FILTERS.append({"filtre_kodu": expr.get("code"), "hata": str(e)})
-            logger.warning("QUERY_ERROR %s", e)
-            try:
-                from utils.error_map import get_reason_hint
-                from utils.failure_tracker import log_failure
-
-                reason, hint = get_reason_hint(e)
-                log_failure("filters", expr.get("code", "unknown"), reason, hint)
-            except Exception:
-                pass
-            raise
-
-    raise QueryError("Invalid expression")
+    seen.add(key)
+    for child in children:
+        evaluate_filter(child, df=df, depth=depth + 1, seen=seen)
+    return key
 
 
 def uygula_filtreler(
