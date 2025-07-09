@@ -3,7 +3,7 @@
 import atexit
 import logging
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 # allow running this file directly
@@ -38,8 +38,11 @@ def run_analysis(csv_path: Path) -> Path:
     return out_path
 
 
-def parse_args():
-    """Parse command-line arguments for the CLI."""
+def parse_args() -> Namespace:
+    """Return parsed arguments for this CLI.
+
+    Parses options controlling report generation and filter validation.
+    """
     p = ArgumentParser(description="Rapor üret veya filtreleri doğrula")
 
     p.add_argument(
