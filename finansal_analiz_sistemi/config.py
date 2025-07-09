@@ -61,7 +61,7 @@ DTYPES: dict[str, str] = {
     "volume": "int32",
 }
 
-# final dataframe dtypes
+# Final DataFrame dtypes
 DTYPES_MAP: dict[str, str] = {
     "open": "float32",
     "high": "float32",
