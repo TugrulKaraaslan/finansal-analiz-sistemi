@@ -17,12 +17,22 @@ SEBEP_KODLARI = {
 def dogrula_filtre_dataframe(
     df_filtre: pd.DataFrame, zorunlu_kolonlar=None, logger=None
 ) -> dict:
-    """Validate a filter DataFrame and return problematic rows.
+    """Validate a filter DataFrame and map invalid rows to a reason.
 
-    Checks for missing or malformed ``flag`` and ``query`` columns and
-    returns a mapping ``{'filter_code': 'reason'}`` for invalid rows.
-    The default ``zorunlu_kolonlar`` value is ``["flag", "query"]``,
-    corresponding to ``FilterCode`` and ``PythonQuery`` in the CSV file.
+    Parameters
+    ----------
+    df_filtre : pd.DataFrame
+        Filter definitions to verify.
+    zorunlu_kolonlar : list[str] | None, optional
+        Columns expected in ``df_filtre``. Defaults to ``["flag", "query"]``.
+    logger : optional
+        Logger instance for warning messages.
+
+    Returns
+    -------
+    dict
+        Mapping of ``filter_code`` to a short description when the row is
+        invalid.
     """
     sorunlu = {}
     zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]
@@ -61,7 +71,22 @@ def dogrula_filtre_dataframe(
 def validate(
     df_filtre: pd.DataFrame, zorunlu_kolonlar=None, logger=None
 ) -> list[ValidationError]:
-    """Return list of ValidationError for filter dataframe."""
+    """Return ``ValidationError`` objects for each invalid filter row.
+
+    Parameters
+    ----------
+    df_filtre : pd.DataFrame
+        Filter definitions to validate.
+    zorunlu_kolonlar : list[str] | None, optional
+        Required column names, defaults to ``["flag", "query"]``.
+    logger : optional
+        Logger for warnings.
+
+    Returns
+    -------
+    list[ValidationError]
+        Structured error objects describing validation failures.
+    """
     zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]
     errors: list[ValidationError] = []
 
