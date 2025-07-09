@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import warnings
 
-import numpy as np
 import pandas as pd
 
 from filtre_dogrulama import SEBEP_KODLARI
@@ -49,12 +48,17 @@ warnings.filterwarnings(
 )
 
 
-def _normalize_pct(s: pd.Series) -> pd.Series:
-    """Convert whole-number percentages to fractional scale (÷100 once)."""
-    s = pd.to_numeric(s, errors="coerce").copy()
-    mask = s.abs() > 1.5
+def _normalize_pct_values(series: pd.Series, *, threshold: float) -> pd.Series:
+    """Return numeric percentages scaled when above ``threshold``."""
+    s = pd.to_numeric(series, errors="coerce").copy()
+    mask = s.abs() > threshold
     s.loc[mask] = s.loc[mask] / 100
     return s.round(2)
+
+
+def _normalize_pct(s: pd.Series) -> pd.Series:
+    """Convert whole-number percentages to fractional scale (÷100 once)."""
+    return _normalize_pct_values(s, threshold=1.5)
 
 
 def build_detay_df(
@@ -62,7 +66,22 @@ def build_detay_df(
     detail_df: pd.DataFrame,
     strateji: str | None = None,
 ) -> pd.DataFrame:
-    """Add strategy and reason code info to the detail DataFrame."""
+    """Return detail records enriched with strategy and reason codes.
+
+    Parameters
+    ----------
+    summary_df : pd.DataFrame
+        Summary data containing ``sebep_kodu`` columns.
+    detail_df : pd.DataFrame
+        Raw detail DataFrame listing tickers per filter.
+    strateji : str, optional
+        Strategy name inserted into the output.
+
+    Returns
+    -------
+    pd.DataFrame
+        Normalized detail table ready for Excel export.
+    """
     strateji = strateji or getattr(config, "UYGULANAN_STRATEJI", "")
     if "filtre_kodu" not in detail_df.columns:
         merged = pd.DataFrame(
@@ -105,7 +124,12 @@ def build_ozet_df(
     tarama_tarihi: str = "",
     satis_tarihi: str = "",
 ) -> pd.DataFrame:
-    """Build summary DataFrame combining backtest results and details."""
+    """Return a normalized summary DataFrame for reporting.
+
+    The raw summary and detail tables produced by the backtest are
+    merged together and annotated with reason explanations as well as
+    scan and sell dates.
+    """
     if summary_df is None:
         summary_df = pd.DataFrame()
     if detail_df is None:
@@ -239,9 +263,8 @@ def normalize_pct(series):
     to ``float``. Values greater than ``100`` are divided by ``100`` so the
     result is always on a ``0-1`` scale.
     """
-    s = series.astype(str).str.replace("%", "", regex=False)
-    s = pd.to_numeric(s, errors="coerce")
-    return np.where(s.abs() > 100, s / 100.0, s).round(2)
+    cleaned = series.astype(str).str.replace("%", "", regex=False)
+    return _normalize_pct_values(cleaned, threshold=100.0)
 
 
 def plot_summary_stats(
