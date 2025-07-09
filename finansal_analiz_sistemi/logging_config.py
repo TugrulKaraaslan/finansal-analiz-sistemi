@@ -47,6 +47,15 @@ def _want_rich() -> bool:
     return config.IS_COLAB or sys.stderr is None
 
 
+def get_logger(name: str | None = None) -> logging.Logger:
+    """Return (and create) a logger with the given name."""
+    log = logging.getLogger(name)
+    if not os.getenv("LOG_SIMPLE"):
+        _ensure_rich_handler(log)
+
+    return log
+
+
 def setup_logging() -> logging.Logger:
     """Configure root logger and return it."""
     level_str = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -74,15 +83,6 @@ def setup_logging() -> logging.Logger:
         root.addHandler(handler)
 
     return root
-
-
-def get_logger(name: str | None = None) -> logging.Logger:
-    """Return (and create) a logger with the given name."""
-    log = logging.getLogger(name)
-    if not os.getenv("LOG_SIMPLE"):
-        _ensure_rich_handler(log)
-
-    return log
 
 
 __all__ = ["get_logger", "setup_logging"]
