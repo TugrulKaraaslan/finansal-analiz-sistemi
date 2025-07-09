@@ -16,7 +16,19 @@ except Exception:  # pragma: no cover - optional dependency
 
 
 def _call_openbb(func_name: str, **kwargs):
-    """Call ``obb.technical.func_name`` if available.
+    """Execute an OpenBB technical indicator.
+
+    Parameters
+    ----------
+    func_name : str
+        Name of the function under ``obb.technical``.
+    **kwargs : Any
+        Keyword arguments forwarded to the OpenBB call.
+
+    Returns
+    -------
+    Any
+        Result returned by the OpenBB function.
 
     Raises
     ------
@@ -41,7 +53,32 @@ def ichimoku(
     offset: int = 26,
     lookahead: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Return Ichimoku indicator DataFrames using OpenBB."""
+    """Return Ichimoku indicator DataFrames using OpenBB.
+
+    Parameters
+    ----------
+    high : pd.Series
+        High price series.
+    low : pd.Series
+        Low price series.
+    close : pd.Series
+        Close price series.
+    conversion : int, optional
+        Conversion line period.
+    base : int, optional
+        Base line period.
+    lagging : int, optional
+        Lagging span period.
+    offset : int, optional
+        Displacement for span lines.
+    lookahead : bool, optional
+        Whether to shift leading spans forward.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame]
+        Two DataFrames containing classic Ichimoku and span columns.
+    """
     df = pd.DataFrame(
         {
             "date": close.index,
@@ -71,7 +108,24 @@ def macd(
     slow: int = 26,
     signal: int = 9,
 ) -> pd.DataFrame:
-    """Return MACD indicator columns using OpenBB."""
+    """Return MACD indicator columns using OpenBB.
+
+    Parameters
+    ----------
+    close : pd.Series
+        Close price series.
+    fast : int, optional
+        Fast EMA period.
+    slow : int, optional
+        Slow EMA period.
+    signal : int, optional
+        Signal line period.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with MACD, signal and histogram columns.
+    """
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
         "macd",
@@ -92,7 +146,24 @@ def rsi(
     scalar: float = 100.0,
     drift: int = 1,
 ) -> pd.Series:
-    """Return the RSI series computed via OpenBB."""
+    """Return the RSI series computed via OpenBB.
+
+    Parameters
+    ----------
+    close : pd.Series
+        Close price series.
+    length : int, optional
+        Lookback period.
+    scalar : float, optional
+        Multiplier used in calculation.
+    drift : int, optional
+        Difference period.
+
+    Returns
+    -------
+    pd.Series
+        Relative strength index series.
+    """
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
         "rsi",
