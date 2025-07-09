@@ -355,8 +355,6 @@ def calistir_tum_sistemi(
         logger.info("TÜM ADIMLAR BAŞARIYLA TAMAMLANDI")
 
     except Exception as e:
-        import traceback
-
         traceback.print_exc()
         steps_report.append(f"HATA: {type(e).__name__}: {str(e)}")
         raise
