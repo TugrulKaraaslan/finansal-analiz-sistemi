@@ -187,8 +187,6 @@ def evaluate_filter(
     seen.add(key)
     for child in children:
         evaluate_filter(child, df=df, depth=depth + 1, seen=seen)
-    # Previously returned apply_filter_logic(key) which merely echoed the id.
-    # Returning the filter identifier directly simplifies the API.
     return key
 
 

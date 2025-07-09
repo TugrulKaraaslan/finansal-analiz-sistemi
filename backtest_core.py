@@ -17,6 +17,9 @@ def _get_fiyat(
 ) -> float:
     """Return the price for ``tarih`` using the given column.
 
+    Falls back to the nearest available date when an exact match is
+    missing.
+
     Parameters
     ----------
     df_hisse_veri : pd.DataFrame
