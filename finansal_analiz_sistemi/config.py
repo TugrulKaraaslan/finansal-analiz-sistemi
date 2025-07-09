@@ -1,4 +1,4 @@
-"""Global yapılandırma sabitleri."""
+"""Global configuration constants and helper functions."""
 
 from __future__ import annotations
 

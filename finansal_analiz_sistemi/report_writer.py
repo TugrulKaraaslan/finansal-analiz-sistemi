@@ -1,4 +1,4 @@
-"""Lightweight Excel reporting utility."""
+"""Utility class for writing analysis results to Excel files."""
 
 from __future__ import annotations
 

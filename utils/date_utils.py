@@ -1,4 +1,4 @@
-"""Safe date parsing utilities."""
+"""Utilities for safely parsing dates without raising errors."""
 
 from __future__ import annotations
 
