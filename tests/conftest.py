@@ -31,3 +31,9 @@ def sample_filtreler():
 def sample_indikator_df():
     """Tiny indicator DataFrame used by health-check tests."""
     return pd.DataFrame({"ichimoku_conversionline": [1.23]})
+
+
+@pytest.fixture
+def summary_df():
+    """Minimal summary DataFrame for report tests."""
+    return pd.DataFrame({"filtre_kodu": ["AAA"], "hisse_kodu": ["AAA"]})
