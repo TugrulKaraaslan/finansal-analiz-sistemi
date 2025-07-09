@@ -18,7 +18,7 @@ import yaml
 
 import utils
 from finansal_analiz_sistemi import config
-from finansal_analiz_sistemi.log_tools import CounterFilter, setup_logger
+from finansal_analiz_sistemi.log_tools import ErrorCountingFilter, setup_logger
 from finansal_analiz_sistemi.logging_config import get_logger
 from utils.date_utils import parse_date
 
@@ -31,7 +31,7 @@ if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
 
 
 logger = get_logger(__name__)
-log_counter: CounterFilter | None = None
+log_counter: ErrorCountingFilter | None = None
 
 
 def veri_yukle(force_excel_reload: bool = False):
@@ -195,7 +195,18 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Return basic summary, detail and stats frames for reports."""
+    """Split report data into summary, detail and stats frames.
+
+    Parameters
+    ----------
+    rapor_df : pd.DataFrame
+        Combined report DataFrame returned from the backtest.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+        ``(summary_df, detail_df, stats_df)`` tuple ready for export.
+    """
     if rapor_df is None or rapor_df.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
@@ -364,14 +375,14 @@ def calistir_tum_sistemi(
 def run_pipeline(
     price_csv: str | Path, filter_def: str | Path, output: str | Path
 ) -> Path:
-    """Execute a lightweight pipeline and produce an Excel report.
+    """Run the pipeline on ``price_csv`` and ``filter_def``.
 
     Parameters
     ----------
     price_csv : str or Path
         CSV file containing historical price data.
     filter_def : str or Path
-        JSON/YAML file with filter definitions.
+        JSON or YAML file with filter definitions.
     output : str or Path
         Target Excel file path for the generated report.
 

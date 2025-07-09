@@ -5,8 +5,8 @@ import logging
 import time
 
 from finansal_analiz_sistemi.log_tools import (
-    CounterFilter,
     DuplicateFilter,
+    ErrorCountingFilter,
     setup_logger,
 )
 
@@ -25,7 +25,7 @@ def test_utils_setup_logger_adds_duplicate_filter_and_disables_propagation():
 
     counter = setup_logger()
 
-    assert isinstance(counter, CounterFilter)
+    assert isinstance(counter, ErrorCountingFilter)
     assert root.propagate is False
     assert any(isinstance(f, DuplicateFilter) for h in root.handlers for f in h.filters)
 
