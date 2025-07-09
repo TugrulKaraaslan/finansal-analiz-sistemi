@@ -16,24 +16,12 @@ except Exception:  # pragma: no cover - optional dependency
 
 
 def _call_openbb(func_name: str, **kwargs):
-    """Invoke an OpenBB technical analysis function when installed.
-
-    Parameters
-    ----------
-    func_name : str
-        Name of the function under ``obb.technical``.
-    **kwargs : Any
-        Arguments forwarded to the underlying OpenBB call.
-
-    Returns
-    -------
-    Any
-        Result returned by the OpenBB function.
+    """Call ``obb.technical.func_name`` if available.
 
     Raises
     ------
     NotImplementedError
-        If the :mod:`openbb` package or the requested function is missing.
+        If :mod:`openbb` or the requested function is missing.
     """
     if obb is None:
         raise NotImplementedError(f"openbb equivalent for '{func_name}' is missing")
@@ -53,13 +41,7 @@ def ichimoku(
     offset: int = 26,
     lookahead: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Compute Ichimoku indicator using OpenBB.
-
-    Returns
-    -------
-    tuple[pd.DataFrame, pd.DataFrame]
-        DataFrames with core Ichimoku columns and span columns.
-    """
+    """Return Ichimoku indicator DataFrames using OpenBB."""
     df = pd.DataFrame(
         {
             "date": close.index,
@@ -89,13 +71,7 @@ def macd(
     slow: int = 26,
     signal: int = 9,
 ) -> pd.DataFrame:
-    """Compute MACD indicators via OpenBB.
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with MACD line and signal columns.
-    """
+    """Return MACD indicator columns using OpenBB."""
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
         "macd",
@@ -116,13 +92,7 @@ def rsi(
     scalar: float = 100.0,
     drift: int = 1,
 ) -> pd.Series:
-    """Compute the RSI series via OpenBB.
-
-    Returns
-    -------
-    pd.Series
-        Series containing the RSI values with the same index as ``close``.
-    """
+    """Return the RSI series computed via OpenBB."""
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
         "rsi",
