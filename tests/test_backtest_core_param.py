@@ -29,6 +29,14 @@ DF = pd.DataFrame(
 )
 
 
+def test_get_fiyat_non_numeric():
+    """Return ``NaN`` when price column contains non-numeric data."""
+    df = DF.copy()
+    df.loc[0, "close"] = np.nan  # avoids object→float warning
+    out = bc._get_fiyat(df, df.loc[0, "tarih"], "close")
+    assert np.isnan(out)
+
+
 @pytest.mark.parametrize(
     "tarih,col,expected",
     [
@@ -45,14 +53,6 @@ def test_get_fiyat_param(tarih, col, expected):
         assert np.isnan(out)
     else:
         assert out == expected
-
-
-def test_get_fiyat_non_numeric():
-    """Return ``NaN`` when price column contains non-numeric data."""
-    df = DF.copy()
-    df.loc[0, "close"] = np.nan  # avoids object→float warning
-    out = bc._get_fiyat(df, df.loc[0, "tarih"], "close")
-    assert np.isnan(out)
 
 
 def test_get_fiyat_string_dates():
