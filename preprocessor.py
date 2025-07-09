@@ -57,12 +57,6 @@ def _temizle_sayisal_deger(deger):
                     temizlenmis_deger
                 )  # Orijinal string'den sadece sayısal olmayanları attık
             except ValueError:
-                # logger.debug(
-                #     (
-                #         f"Sayısal değere dönüştürme hatası (2. deneme): '{deger}' "
-                #         f"-> '{temizlenmis_deger}' / '{temizlenmis_deger_standart}'"
-                #     )
-                # )
                 return np.nan
     return np.nan  # Diğer tüm beklenmedik tipler için
 
