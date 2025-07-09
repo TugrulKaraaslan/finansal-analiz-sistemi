@@ -17,28 +17,6 @@ from finansal_analiz_sistemi.logging_config import setup_logging as _cfg_setup_l
 PCT_STEP = 10
 
 
-class DuplicateFilter(logging.Filter):
-    """Filter out repeated log messages within a time window."""
-
-    def __init__(self, window: float = 2.0) -> None:
-        """Initialize filter with repeat detection window."""
-        super().__init__("duplicate")
-        self.window = window
-        self._seen: Dict[Tuple[int, str], float] = {}
-
-    def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
-        """Allow a log record if it has not been seen recently."""
-        now = time.monotonic()
-        key = (record.levelno, record.getMessage())
-        last = self._seen.get(key)
-        self._seen[key] = now
-        # purge old entries
-        for k, ts in list(self._seen.items()):
-            if now - ts > self.window:
-                del self._seen[k]
-        return last is None or (now - last) > self.window
-
-
 class CounterFilter(logging.Filter):
     """Count warnings and errors for summary reporting."""
 
@@ -68,15 +46,31 @@ class CounterFilter(logging.Filter):
 _counter_filter = CounterFilter()
 
 
-def setup_logging(window: float = 2.0, pct_step: int = 10) -> logging.Logger:
-    """Initialize logging via :mod:`logging_config` and attach de-dup filter."""
-    global PCT_STEP
-    PCT_STEP = max(1, pct_step)
-    root = _cfg_setup_logging()
-    if not any(isinstance(f, DuplicateFilter) for f in root.filters):
-        root.addFilter(DuplicateFilter(window))
-    root.propagate = False
-    return root
+class DuplicateFilter(logging.Filter):
+    """Filter out repeated log messages within a time window."""
+
+    def __init__(self, window: float = 2.0) -> None:
+        """Initialize filter with repeat detection window."""
+        super().__init__("duplicate")
+        self.window = window
+        self._seen: Dict[Tuple[int, str], float] = {}
+
+    def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
+        """Allow a log record if it has not been seen recently."""
+        now = time.monotonic()
+        key = (record.levelno, record.getMessage())
+        last = self._seen.get(key)
+        self._seen[key] = now
+        # purge old entries
+        for k, ts in list(self._seen.items()):
+            if now - ts > self.window:
+                del self._seen[k]
+        return last is None or (now - last) > self.window
+
+
+def get_logger(name: str) -> logging.Logger:
+    """Return a module-level logger via :mod:`logging_config`."""
+    return _cfg_get_logger(name)
 
 
 def setup_logger(level: int = logging.INFO) -> CounterFilter:
@@ -138,6 +132,12 @@ def setup_logger(level: int = logging.INFO) -> CounterFilter:
     return _counter_filter
 
 
-def get_logger(name: str) -> logging.Logger:
-    """Return a module-level logger via :mod:`logging_config`."""
-    return _cfg_get_logger(name)
+def setup_logging(window: float = 2.0, pct_step: int = 10) -> logging.Logger:
+    """Initialize logging via :mod:`logging_config` and attach de-dup filter."""
+    global PCT_STEP
+    PCT_STEP = max(1, pct_step)
+    root = _cfg_setup_logging()
+    if not any(isinstance(f, DuplicateFilter) for f in root.filters):
+        root.addFilter(DuplicateFilter(window))
+    root.propagate = False
+    return root
