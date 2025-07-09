@@ -645,8 +645,6 @@ def save_hatalar_excel(df: pd.DataFrame, out_path: str | Path) -> None:
         )
 
 
-
-
 __all__ = [
     "_build_detay_df",
     "_write_error_sheet",
