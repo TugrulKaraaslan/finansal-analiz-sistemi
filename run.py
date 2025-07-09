@@ -18,7 +18,7 @@ import yaml
 
 import utils
 from finansal_analiz_sistemi import config
-from finansal_analiz_sistemi.log_tools import CounterFilter, setup_logger
+from finansal_analiz_sistemi.log_tools import ErrorCountingFilter, setup_logger
 from finansal_analiz_sistemi.logging_config import get_logger
 from utils.date_utils import parse_date
 
@@ -31,7 +31,7 @@ if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
 
 
 logger = get_logger(__name__)
-log_counter: CounterFilter | None = None
+log_counter: ErrorCountingFilter | None = None
 
 
 def veri_yukle(force_excel_reload: bool = False):
