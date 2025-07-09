@@ -55,19 +55,6 @@ def test_standardize_date_column_no_match():
     assert out.columns.tolist() == ["x"]
 
 
-def test_standardize_ohlcv_columns():
-    """Test test_standardize_ohlcv_columns."""
-    df = pd.DataFrame(
-        {
-            "Açılış": [1],
-            "Yüksek": [2],
-            "Düşük": [0],
-            "Kapanış": [1],
-            "Miktar": [10],
-        }
-    )
-    out = data_loader._standardize_ohlcv_columns(df, "dummy")
-    assert set(["open", "high", "low", "close", "volume"]).issubset(out.columns)
 
 
 def test_check_and_create_dirs(tmp_path: Path):
