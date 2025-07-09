@@ -9,3 +9,4 @@ Reaudited again on 2025-07-09: detected a stray `work` branch. It was removed
 to keep `main` as the sole branch.
 
 Reaudit on 2025-07-09: confirmed only `main` branch present.
+Reaudit on 2025-07-09: stray `work` branch removed yet again.
