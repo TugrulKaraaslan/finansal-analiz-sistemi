@@ -13,37 +13,12 @@ from typing import Dict, Tuple
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.logging_config import get_logger as _cfg_get_logger
 from finansal_analiz_sistemi.logging_config import setup_logging as _cfg_setup_logging
+from finansal_analiz_sistemi.logging_utils import ErrorCountingFilter
 
 PCT_STEP = 10
 
 
-class CounterFilter(logging.Filter):
-    """Count warnings and errors for summary reporting."""
-
-    def __init__(self) -> None:
-        """Prepare counters and error list."""
-        super().__init__("counter")
-        self.errors = 0
-        self.warnings = 0
-        self.error_list: list[tuple[str, str, str]] = []
-
-    def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
-        """Update counters based on the log level."""
-        if record.levelno == logging.ERROR:
-            self.errors += 1
-            self.error_list.append(
-                (
-                    datetime.now().isoformat(timespec="seconds"),
-                    "ERROR",
-                    record.getMessage(),
-                )
-            )
-        elif record.levelno == logging.WARNING:
-            self.warnings += 1
-        return True
-
-
-_counter_filter = CounterFilter()
+_counter_filter = ErrorCountingFilter()
 
 
 class DuplicateFilter(logging.Filter):
@@ -73,7 +48,7 @@ def get_logger(name: str) -> logging.Logger:
     return _cfg_get_logger(name)
 
 
-def setup_logger(level: int = logging.INFO) -> CounterFilter:
+def setup_logger(level: int = logging.INFO) -> ErrorCountingFilter:
     """Configure root logger for console and file output."""
     root = logging.getLogger()
     log_dir = Path("loglar")
