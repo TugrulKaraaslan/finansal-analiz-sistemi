@@ -323,7 +323,6 @@ def calistir_tum_sistemi(
         steps_report.append("indikator_hesapla: BAŞARILI")
 
         tarama_dt = parse_date(tarama_tarihi_str)
-        parse_date(satis_tarihi_str)
 
         logger.info("filtre_uygula BAŞLIYOR")
         steps_report.append("filtre_uygula: BAŞLADI")
