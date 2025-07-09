@@ -195,7 +195,18 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Return basic summary, detail and stats frames for reports."""
+    """Split report data into summary, detail and stats frames.
+
+    Parameters
+    ----------
+    rapor_df : pd.DataFrame
+        Combined report DataFrame returned from the backtest.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+        ``(summary_df, detail_df, stats_df)`` tuple ready for export.
+    """
     if rapor_df is None or rapor_df.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 

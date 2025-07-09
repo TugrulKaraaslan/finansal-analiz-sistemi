@@ -313,7 +313,7 @@ def generate_full_report(
         summary_df = report_stats.build_ozet_df(summary_df, detail_df)
         detail_df = report_stats.build_detay_df(summary_df, detail_df)
 
-    # NaN temizliği: sadece filtre kodu olmayan satırlar atılır
+    # Drop rows that are missing a ``filtre_kodu`` value
     summary_df = summary_df.dropna(subset=["filtre_kodu"])
     detail_df = detail_df.dropna(subset=["filtre_kodu"])
 
