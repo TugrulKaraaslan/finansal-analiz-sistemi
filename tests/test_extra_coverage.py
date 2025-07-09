@@ -70,8 +70,8 @@ def test_tarama_denetimi_summary(monkeypatch):
 def test_logging_config_import(monkeypatch, tmp_path):
     """Importing ``log_tools`` should initialize file handlers."""
     calls = {}
-    import logging
     import importlib
+    import logging
 
     class DummyHandler(logging.Handler):
         """Minimal handler used to capture log file configuration."""
@@ -89,8 +89,9 @@ def test_logging_config_import(monkeypatch, tmp_path):
             """No-op ``emit`` used only for initialization testing."""
             pass
 
-    import logging.handlers
     import logging.config
+    import logging.handlers
+
     import finansal_analiz_sistemi as fas
 
     monkeypatch.setattr(logging.config, "dictConfig", lambda cfg: None)
