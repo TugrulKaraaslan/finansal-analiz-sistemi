@@ -29,6 +29,6 @@ EXPECTED_COLUMNS = [
 
 
 def test_summary_columns_complete():
-    """Test test_summary_columns_complete."""
+    """Summary DataFrame should include all expected columns."""
     df = generate_summary(dummy_results())
     assert list(df.columns)[:13] == EXPECTED_COLUMNS

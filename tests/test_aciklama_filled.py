@@ -13,7 +13,7 @@ if ROOT_DIR not in sys.path:
 
 
 def test_aciklama_filled(tmp_path):
-    """Test test_aciklama_filled."""
+    """Summary rows should be populated with explanation text."""
     # 1 satır OK, 1 satır QUERY_ERROR
     df_sum = pd.DataFrame(
         [
@@ -53,7 +53,7 @@ def test_aciklama_filled(tmp_path):
 
 
 def test_aciklama_dedup(tmp_path):
-    """Test test_aciklama_dedup."""
+    """Error descriptions should not duplicate within the summary sheet."""
     df_sum = pd.DataFrame(
         [
             ["T1", 1, 1.0, 1, 0, 1, "OK", "", "", ""],

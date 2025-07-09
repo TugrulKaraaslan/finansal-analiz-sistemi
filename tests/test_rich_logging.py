@@ -37,7 +37,7 @@ def _capture(msg: str) -> str:
 
 
 def test_rich_enabled(monkeypatch):
-    """Test test_rich_enabled."""
+    """Rich logging should activate when environment allows."""
     monkeypatch.delenv("LOG_SIMPLE", raising=False)
     monkeypatch.setattr("finansal_analiz_sistemi.config.IS_COLAB", True)
     importlib.reload(logging_config)  # reload to apply monkeypatch
@@ -46,7 +46,7 @@ def test_rich_enabled(monkeypatch):
 
 
 def test_rich_disabled(monkeypatch):
-    """Test test_rich_disabled."""
+    """Rich logging is disabled when ``LOG_SIMPLE`` is set."""
     monkeypatch.setenv("LOG_SIMPLE", "1")
     importlib.reload(logging_config)
     out = _capture("warn")
@@ -54,7 +54,7 @@ def test_rich_disabled(monkeypatch):
 
 
 def test_rich_handler_added(monkeypatch):
-    """Test test_rich_handler_added."""
+    """A ``RichHandler`` is attached to loggers in supported setups."""
     monkeypatch.delenv("LOG_SIMPLE", raising=False)
     monkeypatch.setattr("finansal_analiz_sistemi.config.IS_COLAB", True)
     logging.getLogger().handlers.clear()

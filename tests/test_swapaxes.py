@@ -7,7 +7,7 @@ from finansal_analiz_sistemi.utils import swapaxes
 
 
 def test_swapaxes_basic():
-    """Test test_swapaxes_basic."""
+    """swapaxes wrapper should behave like ``DataFrame.T`` by default."""
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
     out = swapaxes(df)
     expected = df.T
@@ -15,7 +15,7 @@ def test_swapaxes_basic():
 
 
 def test_swapaxes_axis_args():
-    """Test test_swapaxes_axis_args."""
+    """swapaxes accepts axis parameters identical to ``DataFrame.swapaxes``."""
     df = pd.DataFrame({"x": [5, 6]})
     out = swapaxes(df, 0, 1)
     expected = df.T
@@ -23,7 +23,7 @@ def test_swapaxes_axis_args():
 
 
 def test_swapaxes_invalid_axis():
-    """Test test_swapaxes_invalid_axis."""
+    """Invalid axis values raise ``ValueError``."""
     df = pd.DataFrame({"x": [5, 6]})
     with pytest.raises(ValueError):
         swapaxes(df, 2, 0)

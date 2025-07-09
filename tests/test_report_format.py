@@ -18,7 +18,7 @@ if ROOT_DIR not in sys.path:
 
 
 def test_legacy_columns_preserved(tmp_path):
-    """Test test_legacy_columns_preserved."""
+    """Generated report should keep the legacy column layout."""
     path = tmp_path / "rapor.xlsx"
     summary = pd.DataFrame(
         {
@@ -65,7 +65,7 @@ def test_legacy_columns_preserved(tmp_path):
 
 
 def test_error_sheet_not_empty(tmp_path):
-    """Test test_error_sheet_not_empty."""
+    """Error sheet must contain rows when a list is provided."""
     # sahte QUERY_ERROR satırı ekle
     errs = [
         {

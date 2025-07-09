@@ -7,7 +7,7 @@ from finansal_analiz_sistemi import log_tools as logging_setup
 
 
 def test_log_rotation(tmp_path, monkeypatch):
-    """Test test_log_rotation."""
+    """Log files should rotate when they exceed the size limit."""
     root = logging.getLogger()
     old_handlers = root.handlers[:]
     old_filters = root.filters[:]

@@ -6,7 +6,7 @@ from report_generator import generate_full_report
 
 
 def test_no_data_loss(tmp_path):
-    """Test test_no_data_loss."""
+    """Report generation should preserve rows even when values are NaN."""
     # NaN'li ama silinmemesi gereken satır
     df_sum = pd.DataFrame(
         [
