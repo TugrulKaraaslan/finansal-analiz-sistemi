@@ -1,4 +1,10 @@
-"""Verify that all requirement lists remain synchronized across files."""
+"""Ensure dependency versions match across requirement files and ``pyproject``.
+
+The script compares ``requirements.txt`` and ``requirements-colab.txt`` with
+the ``[tool.poetry.dependencies]`` section of ``pyproject.toml``.  Any
+discrepancies between these sources cause a non-zero exit status so that CI
+jobs can detect version drift early.
+"""
 
 import re
 import sys
@@ -13,8 +19,20 @@ pyproject = root / "pyproject.toml"
 _pat = re.compile(r"^([A-Za-z0-9_.-]+)(?:==([^=]+))?$")
 
 
-def parse_requirements(path):
-    """Return a ``dict`` of package names to pinned versions."""
+def parse_requirements(path: Path) -> dict[str, str]:
+    """Return a mapping of package names to pinned versions.
+
+    Parameters
+    ----------
+    path : Path
+        Requirements file to parse.
+
+    Returns
+    -------
+    dict[str, str]
+        Package names mapped to their pinned version strings. Missing
+        versions are stored as an empty string.
+    """
     pkgs = {}
     for line in path.read_text().splitlines():
         line = line.strip()
