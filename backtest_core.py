@@ -14,7 +14,6 @@ def _get_fiyat(
     tarih: pd.Timestamp,
     zaman_sutun_adi: str,
     logger_param=None,
-
 ) -> float:
     """Return the price for ``tarih`` using the given column.
 
