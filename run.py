@@ -26,66 +26,6 @@ if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
     )
 
 
-def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Return basic summary, detail and stats frames for reports.
-
-    Parameters
-    ----------
-    rapor_df : pd.DataFrame
-        Combined backtest results.
-
-    Returns
-    -------
-    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
-        ``ozet_df`` summary, ``detay_df`` detail and ``istatistik_df`` frames.
-    """
-    if rapor_df is None or rapor_df.empty:
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-
-    ozet_df = rapor_df.copy()
-    detay_df = rapor_df.copy()
-    istatistik_df = rapor_df.describe().reset_index()
-    return ozet_df, detay_df, istatistik_df
-
-
-def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Display results in a lightweight Streamlit interface.
-
-    Parameters
-    ----------
-    ozet_df : pd.DataFrame
-        Summary results to present on the overview tab.
-    detay_df : pd.DataFrame
-        Detailed results shown on the second tab.
-    """
-    import streamlit as st
-
-    st.sidebar.title("Menü")
-    sayfa = st.sidebar.radio("Sayfa", ("Özet", "Detay", "Grafik"))
-
-    df_to_show = (
-        ozet_df if sayfa == "Özet" else detay_df if sayfa == "Detay" else ozet_df
-    )
-
-    if df_to_show.empty:
-        msg = "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
-        st.warning(msg)
-        print(msg)
-        if "logger" in globals():
-            logger.warning(msg)
-        return
-
-    if sayfa == "Özet":
-        st.dataframe(ozet_df)
-    elif sayfa == "Detay":
-        st.dataframe(detay_df)
-    else:
-        if "ort_getiri_%" in ozet_df:
-            st.bar_chart(ozet_df.set_index("filtre_kodu")["ort_getiri_%"])
-        else:
-            st.write("Grafik için veri yok")
-
-
 logger = get_logger(__name__)
 log_counter: CounterFilter | None = None
 
@@ -248,6 +188,47 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     with mem_profile():
         report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
     logger.info(f"Excel raporu oluşturuldu: {out_path}")
+
+
+def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
+    """Return basic summary, detail and stats frames for reports."""
+    if rapor_df is None or rapor_df.empty:
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+    ozet_df = rapor_df.copy()
+    detay_df = rapor_df.copy()
+    istatistik_df = rapor_df.describe().reset_index()
+    return ozet_df, detay_df, istatistik_df
+
+
+def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
+    """Display results in a lightweight Streamlit interface."""
+    import streamlit as st
+
+    st.sidebar.title("Menü")
+    sayfa = st.sidebar.radio("Sayfa", ("Özet", "Detay", "Grafik"))
+
+    df_to_show = (
+        ozet_df if sayfa == "Özet" else detay_df if sayfa == "Detay" else ozet_df
+    )
+
+    if df_to_show.empty:
+        msg = "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
+        st.warning(msg)
+        print(msg)
+        if "logger" in globals():
+            logger.warning(msg)
+        return
+
+    if sayfa == "Özet":
+        st.dataframe(ozet_df)
+    elif sayfa == "Detay":
+        st.dataframe(detay_df)
+    else:
+        if "ort_getiri_%" in ozet_df:
+            st.bar_chart(ozet_df.set_index("filtre_kodu")["ort_getiri_%"])
+        else:
+            st.write("Grafik için veri yok")
 
 
 try:
