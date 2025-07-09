@@ -14,8 +14,12 @@ def _get_fiyat(
     tarih: pd.Timestamp,
     zaman_sutun_adi: str,
     logger_param=None,
+
 ) -> float:
     """Return the price for ``tarih`` using the given column.
+
+    Falls back to the nearest available date when an exact match is
+    missing.
 
     Parameters
     ----------
