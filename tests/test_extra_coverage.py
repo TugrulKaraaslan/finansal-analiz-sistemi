@@ -67,7 +67,7 @@ def test_tarama_denetimi_summary(monkeypatch):
     assert result.iloc[-1]["kod"] == "_SUMMARY"
 
 
-def test_logging_config_import(monkeypatch):
+def test_logging_config_import(monkeypatch, tmp_path):
     """Importing ``logging_config`` should initialize file handlers."""
     calls = {}
     import logging
@@ -88,15 +88,16 @@ def test_logging_config_import(monkeypatch):
             """No-op ``emit`` used only for initialization testing."""
             pass
 
-    import importlib
     import logging.handlers
 
-    import src.logging_config as lc
+    from finansal_analiz_sistemi import log_tools as lc
 
     monkeypatch.setattr(logging.handlers, "RotatingFileHandler", DummyHandler)
-    monkeypatch.setattr(lc.os, "makedirs", lambda *a, **k: None)
-    importlib.reload(lc)
-    assert calls["file"].endswith("run.log")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(lc.config, "IS_COLAB", False)
+    logging.getLogger().handlers.clear()
+    lc.setup_logger()
+    assert calls["file"].endswith("rapor.log")
 
 
 def test_report_writer_accepts_str(tmp_path):
