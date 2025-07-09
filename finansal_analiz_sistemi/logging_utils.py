@@ -10,6 +10,7 @@ class ErrorCountingFilter(logging.Filter):
     """Count ERROR and WARNING logs and store encountered error messages."""
 
     def __init__(self) -> None:
+        """Initialize counters and internal error list."""
         super().__init__("counter")
         self.errors = 0
         self.warnings = 0
