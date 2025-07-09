@@ -1,4 +1,4 @@
-"""Context manager to log memory usage during execution."""
+"""Context manager that logs memory usage during execution."""
 
 import os
 import time

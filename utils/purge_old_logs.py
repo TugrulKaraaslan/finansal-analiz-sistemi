@@ -10,7 +10,7 @@ from pathlib import Path
 def purge_old_logs(
     *, log_dir: Path | None = None, keep_days: int = 7, dry_run: bool = False
 ) -> int:
-    """Delete log files older than ``keep_days`` days.
+    """Remove log and lock files older than ``keep_days`` days.
 
     Parameters
     ----------

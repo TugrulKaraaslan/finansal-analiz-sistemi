@@ -10,15 +10,15 @@ __all__ = ["safe_concat", "safe_to_excel", "safe_infer_objects"]
 
 
 def safe_concat(frames: List[pd.DataFrame], **kwargs) -> pd.DataFrame:
-    """Ignore empty frames and concatenate the rest."""
+    """Concatenate non-empty frames or return an empty ``DataFrame``."""
     frames = [f for f in frames if not f.empty]
     return pd.concat(frames, **kwargs) if frames else pd.DataFrame()
 
 
 def safe_to_excel(df: pd.DataFrame, wr, *, sheet_name: str, **kwargs) -> None:
-    """Keyword-only ``sheet_name`` for pandas>=3 and backward compatible.
+    """Write ``df`` to an Excel writer using keyword-only ``sheet_name``.
 
-    Logs a warning when ``df`` is empty to alert the caller.
+    Logs a warning when ``df`` is empty. Compatible with ``pandas>=3``.
     """
     if df.empty:
         logging.getLogger(__name__).warning(
