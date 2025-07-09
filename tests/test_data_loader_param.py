@@ -55,8 +55,6 @@ def test_standardize_date_column_no_match():
     assert out.columns.tolist() == ["x"]
 
 
-
-
 def test_check_and_create_dirs(tmp_path: Path):
     """Test test_check_and_create_dirs."""
     new_dir = tmp_path / "nested"
