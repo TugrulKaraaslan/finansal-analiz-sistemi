@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 from finansal_analiz_sistemi import config
+from finansal_analiz_sistemi.logging_config import get_logger as _cfg_get_logger
+from finansal_analiz_sistemi.logging_config import setup_logging as _cfg_setup_logging
 
 PCT_STEP = 10
 
@@ -67,10 +69,10 @@ _counter_filter = CounterFilter()
 
 
 def setup_logging(window: float = 2.0, pct_step: int = 10) -> logging.Logger:
-    """Attach :class:`DuplicateFilter` to root logger and disable propagation."""
+    """Initialize logging via :mod:`logging_config` and attach de-dup filter."""
     global PCT_STEP
     PCT_STEP = max(1, pct_step)
-    root = logging.getLogger()
+    root = _cfg_setup_logging()
     if not any(isinstance(f, DuplicateFilter) for f in root.filters):
         root.addFilter(DuplicateFilter(window))
     root.propagate = False
@@ -137,5 +139,5 @@ def setup_logger(level: int = logging.INFO) -> CounterFilter:
 
 
 def get_logger(name: str) -> logging.Logger:
-    """Return a module-level logger."""
-    return logging.getLogger(name)
+    """Return a module-level logger via :mod:`logging_config`."""
+    return _cfg_get_logger(name)
