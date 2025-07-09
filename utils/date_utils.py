@@ -1,4 +1,8 @@
-"""Utilities for safely parsing dates without raising errors."""
+"""Utilities for safely parsing dates without raising errors.
+
+The :func:`parse_date` helper normalizes various date strings to
+``pd.Timestamp`` objects.
+"""
 
 from __future__ import annotations
 

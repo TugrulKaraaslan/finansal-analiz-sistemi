@@ -1,4 +1,7 @@
-"""Helpers to safely set pandas options across versions."""
+"""Helpers to safely set pandas options across versions.
+
+Unknown options are ignored instead of raising ``OptionError``.
+"""
 
 from collections.abc import Iterator
 from contextlib import contextmanager

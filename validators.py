@@ -1,4 +1,8 @@
-"""Custom validation helpers used across the project."""
+"""Custom validation helpers used across the project.
+
+Defines the :class:`ValidationError` dataclass for structured error
+reporting.
+"""
 
 from dataclasses import dataclass
 

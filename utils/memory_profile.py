@@ -1,4 +1,7 @@
-"""Context manager that logs memory usage during execution."""
+"""Context manager that logs memory usage during execution.
+
+Records the peak process memory into ``reports/memory_profile.csv``.
+"""
 
 import os
 import time

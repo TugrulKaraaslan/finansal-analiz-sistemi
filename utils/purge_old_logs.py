@@ -1,4 +1,8 @@
-"""Delete aged log and lock files from the given directory."""
+"""Delete aged log and lock files from the given directory.
+
+The helper is used by maintenance scripts and can operate in dry-run
+mode to preview deletions.
+"""
 
 from __future__ import annotations
 

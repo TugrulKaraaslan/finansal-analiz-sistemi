@@ -1,4 +1,8 @@
-"""Utilities for computing technical indicators and crossover signals."""
+"""Compute technical indicators and generate crossover signals.
+
+This module wraps ``pandas_ta`` functions and optional OpenBB helpers to
+produce normalized indicator columns used across the project.
+"""
 
 from __future__ import annotations
 
