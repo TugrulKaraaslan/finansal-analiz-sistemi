@@ -6,7 +6,7 @@ import pandas as pd
 def fill_missing_business_day(
     df: pd.DataFrame, date_col: str = "tarih"
 ) -> pd.DataFrame:
-"""Shift ``NaT`` rows backward to the previous business day.
+    """Shift ``NaT`` rows backward to the previous business day.
 
     Parameters
     ----------
