@@ -81,6 +81,50 @@ def _calc_ema(df: pd.DataFrame, n: int) -> pd.Series:
     return df["close"].ewm(span=n, adjust=False).mean()
 
 
+def _tema20(series: pd.Series) -> pd.Series:
+    """Compute the 20-period TEMA, falling back to manual calculation."""
+    if hasattr(ta, "tema"):
+        try:
+            return ta.tema(series, length=20)
+        except Exception:  # pragma: no cover - manual fallback
+            pass
+    ema1 = series.ewm(span=20, adjust=False).mean()
+    ema2 = ema1.ewm(span=20, adjust=False).mean()
+    ema3 = ema2.ewm(span=20, adjust=False).mean()
+    return (3 * ema1) - (3 * ema2) + ema3
+
+
+def _ekle_psar(df: pd.DataFrame) -> None:
+    """Calculate Parabolic SAR columns and append them to ``df``."""
+    gerekli = ["high", "low", "close"]
+    if any(c not in df.columns for c in gerekli):
+        logger.debug("PSAR hesaplamak için gerekli sütunlar eksik")
+        return
+    if ta_psar is None:
+        logger.debug("pandas_ta.psar bulunamadı, PSAR hesaplanamadı")
+        return
+    try:
+        psar_raw = ta_psar(high=df["high"], low=df["low"], close=df["close"])
+        if isinstance(psar_raw, pd.DataFrame):
+            psar_df = psar_raw.iloc[:, :2].copy()
+            psar_df.columns = ["psar_long", "psar_short"]
+        else:
+            psar_long, psar_short = psar_raw
+            psar_df = safe_concat([psar_long, psar_short], axis=1)
+            psar_df.columns = ["psar_long", "psar_short"]
+        safe_set(df, "psar_long", psar_df["psar_long"].values)
+        safe_set(df, "psar_short", psar_df["psar_short"].values)
+        safe_set(df, "psar", df["psar_long"].fillna(df["psar_short"]).values)
+    except Exception as e:
+        logger.error(f"PSAR hesaplanırken hata: {e}")
+        try:
+            from utils.failure_tracker import log_failure
+
+            log_failure("indicators", "psar", str(e))
+        except Exception:
+            pass
+
+
 def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     """Generate crossover columns based on naming patterns."""
     for name in cross_names:
@@ -204,50 +248,6 @@ def calculate_chunked(
                 mini.to_parquet(pq_path, partition_cols=["ticker"])
             del mini
         gc.collect()
-
-
-def _tema20(series: pd.Series) -> pd.Series:
-    """Compute the 20-period TEMA, falling back to manual calculation."""
-    if hasattr(ta, "tema"):
-        try:
-            return ta.tema(series, length=20)
-        except Exception:  # pragma: no cover - manual fallback
-            pass
-    ema1 = series.ewm(span=20, adjust=False).mean()
-    ema2 = ema1.ewm(span=20, adjust=False).mean()
-    ema3 = ema2.ewm(span=20, adjust=False).mean()
-    return (3 * ema1) - (3 * ema2) + ema3
-
-
-def _ekle_psar(df: pd.DataFrame) -> None:
-    """Calculate Parabolic SAR columns and append them to ``df``."""
-    gerekli = ["high", "low", "close"]
-    if any(c not in df.columns for c in gerekli):
-        logger.debug("PSAR hesaplamak için gerekli sütunlar eksik")
-        return
-    if ta_psar is None:
-        logger.debug("pandas_ta.psar bulunamadı, PSAR hesaplanamadı")
-        return
-    try:
-        psar_raw = ta_psar(high=df["high"], low=df["low"], close=df["close"])
-        if isinstance(psar_raw, pd.DataFrame):
-            psar_df = psar_raw.iloc[:, :2].copy()
-            psar_df.columns = ["psar_long", "psar_short"]
-        else:
-            psar_long, psar_short = psar_raw
-            psar_df = safe_concat([psar_long, psar_short], axis=1)
-            psar_df.columns = ["psar_long", "psar_short"]
-        safe_set(df, "psar_long", psar_df["psar_long"].values)
-        safe_set(df, "psar_short", psar_df["psar_short"].values)
-        safe_set(df, "psar", df["psar_long"].fillna(df["psar_short"]).values)
-    except Exception as e:
-        logger.error(f"PSAR hesaplanırken hata: {e}")
-        try:
-            from utils.failure_tracker import log_failure
-
-            log_failure("indicators", "psar", str(e))
-        except Exception:
-            pass
 
 
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
