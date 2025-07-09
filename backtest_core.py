@@ -12,102 +12,6 @@ from finansal_analiz_sistemi.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-
-def _get_fiyat(
-    df_hisse_veri: pd.DataFrame,
-    tarih: pd.Timestamp,
-    zaman_sutun_adi: str,
-    logger_param=None,
-) -> float:
-    """Return the price for ``tarih`` using the given column.
-
-    Falls back to the nearest available date when an exact match is
-    missing.
-
-    Parameters
-    ----------
-    df_hisse_veri : pd.DataFrame
-        Stock data for a single ticker.
-    tarih : pd.Timestamp
-        Date of interest.
-    zaman_sutun_adi : str
-        Column name holding the desired price.
-    logger_param : optional
-        Logger instance for debug output.
-
-    Returns
-    -------
-    float
-        Price as ``float`` or ``NaN`` when unavailable.
-    """
-    if logger_param is None:
-        logger_param = logger
-    log = logger_param
-    hisse_kodu_log = (
-        df_hisse_veri["hisse_kodu"].iloc[0]
-        if not df_hisse_veri.empty and "hisse_kodu" in df_hisse_veri.columns
-        else "Bilinmeyen Hisse"
-    )
-
-    try:
-        # Ensure the date column is of datetime type. The preprocessor should
-        # normally handle this conversion.
-        if not pd.api.types.is_datetime64_any_dtype(df_hisse_veri["tarih"]):
-            df_hisse_veri["tarih"] = pd.to_datetime(
-                df_hisse_veri["tarih"],
-                dayfirst=True,
-                errors="coerce",
-            )
-
-        veri_satiri = df_hisse_veri[df_hisse_veri["tarih"] == tarih]
-        if veri_satiri.empty:
-            sonraki = df_hisse_veri[df_hisse_veri["tarih"] > tarih]
-            if not sonraki.empty:
-                tarih2 = sonraki["tarih"].min()
-            else:
-                onceki = df_hisse_veri[df_hisse_veri["tarih"] < tarih]
-                tarih2 = onceki["tarih"].max() if not onceki.empty else None
-
-            if tarih2 is not None:
-                log.info(
-                    f"{hisse_kodu_log} için {tarih.strftime('%d.%m.%Y')} tarihli fiyat bulunamadı. "
-                    f"{tarih2.strftime('%d.%m.%Y')} tarihine kaydırıldı."
-                )
-                veri_satiri = df_hisse_veri[df_hisse_veri["tarih"] == tarih2]
-            else:
-                log.warning(
-                    f"{hisse_kodu_log} için {tarih.strftime('%d.%m.%Y')} ve "
-                    "civarındaki fiyat verisi bulunamadı."
-                )
-                return np.nan
-
-        if zaman_sutun_adi in veri_satiri.columns:
-            fiyat = veri_satiri[zaman_sutun_adi].iloc[0]
-            if pd.notna(fiyat):
-                try:
-                    return float(fiyat)
-                except ValueError:  # Could not convert to float
-                    log.warning(
-                        f"'{zaman_sutun_adi}' sütunundaki değer ('{fiyat}') "
-                        f"float'a çevrilemedi. Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}"
-                    )
-                    return np.nan
-            return np.nan  # propagate NaN values
-        else:
-            log.warning(
-                f"Fiyat almak için beklenen sütun '{zaman_sutun_adi}' bulunamadı. "
-                f"Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}. "
-                f"Mevcut Sütunlar: {df_hisse_veri.columns.tolist()}"
-            )
-            return np.nan
-    except Exception as e:
-        log.error(
-            f"{hisse_kodu_log} için fiyat alınırken ({tarih.strftime('%d.%m.%Y')} {zaman_sutun_adi}) hata: {e}",
-            exc_info=False,
-        )
-        return np.nan
-
-
 def calistir_basit_backtest(
     filtre_sonuc_dict: dict,
     df_tum_veri: pd.DataFrame,
@@ -213,3 +117,98 @@ def calistir_basit_backtest(
     detay_df = pd.DataFrame(detail_records)
 
     return rapor_df, detay_df
+
+def _get_fiyat(
+    df_hisse_veri: pd.DataFrame,
+    tarih: pd.Timestamp,
+    zaman_sutun_adi: str,
+    logger_param=None,
+) -> float:
+    """Return the price for ``tarih`` using the given column.
+
+    Falls back to the nearest available date when an exact match is
+    missing.
+
+    Parameters
+    ----------
+    df_hisse_veri : pd.DataFrame
+        Stock data for a single ticker.
+    tarih : pd.Timestamp
+        Date of interest.
+    zaman_sutun_adi : str
+        Column name holding the desired price.
+    logger_param : optional
+        Logger instance for debug output.
+
+    Returns
+    -------
+    float
+        Price as ``float`` or ``NaN`` when unavailable.
+    """
+    if logger_param is None:
+        logger_param = logger
+    log = logger_param
+    hisse_kodu_log = (
+        df_hisse_veri["hisse_kodu"].iloc[0]
+        if not df_hisse_veri.empty and "hisse_kodu" in df_hisse_veri.columns
+        else "Bilinmeyen Hisse"
+    )
+
+    try:
+        # Ensure the date column is of datetime type. The preprocessor should
+        # normally handle this conversion.
+        if not pd.api.types.is_datetime64_any_dtype(df_hisse_veri["tarih"]):
+            df_hisse_veri["tarih"] = pd.to_datetime(
+                df_hisse_veri["tarih"],
+                dayfirst=True,
+                errors="coerce",
+            )
+
+        veri_satiri = df_hisse_veri[df_hisse_veri["tarih"] == tarih]
+        if veri_satiri.empty:
+            sonraki = df_hisse_veri[df_hisse_veri["tarih"] > tarih]
+            if not sonraki.empty:
+                tarih2 = sonraki["tarih"].min()
+            else:
+                onceki = df_hisse_veri[df_hisse_veri["tarih"] < tarih]
+                tarih2 = onceki["tarih"].max() if not onceki.empty else None
+
+            if tarih2 is not None:
+                log.info(
+                    f"{hisse_kodu_log} için {tarih.strftime('%d.%m.%Y')} tarihli fiyat bulunamadı. "
+                    f"{tarih2.strftime('%d.%m.%Y')} tarihine kaydırıldı."
+                )
+                veri_satiri = df_hisse_veri[df_hisse_veri["tarih"] == tarih2]
+            else:
+                log.warning(
+                    f"{hisse_kodu_log} için {tarih.strftime('%d.%m.%Y')} ve "
+                    "civarındaki fiyat verisi bulunamadı."
+                )
+                return np.nan
+
+        if zaman_sutun_adi in veri_satiri.columns:
+            fiyat = veri_satiri[zaman_sutun_adi].iloc[0]
+            if pd.notna(fiyat):
+                try:
+                    return float(fiyat)
+                except ValueError:  # Could not convert to float
+                    log.warning(
+                        f"'{zaman_sutun_adi}' sütunundaki değer ('{fiyat}') "
+                        f"float'a çevrilemedi. Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}"
+                    )
+                    return np.nan
+            return np.nan  # propagate NaN values
+        else:
+            log.warning(
+                f"Fiyat almak için beklenen sütun '{zaman_sutun_adi}' bulunamadı. "
+                f"Hisse: {hisse_kodu_log}, Tarih: {tarih.strftime('%d.%m.%Y')}. "
+                f"Mevcut Sütunlar: {df_hisse_veri.columns.tolist()}"
+            )
+            return np.nan
+    except Exception as e:
+        log.error(
+            f"{hisse_kodu_log} için fiyat alınırken ({tarih.strftime('%d.%m.%Y')} {zaman_sutun_adi}) hata: {e}",
+            exc_info=False,
+        )
+        return np.nan
+
