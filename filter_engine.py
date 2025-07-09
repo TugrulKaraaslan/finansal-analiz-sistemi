@@ -58,6 +58,7 @@ class MissingColumnError(Exception):
         super().__init__(missing)
         self.missing = missing
 
+
 def _extract_query_columns(query: str) -> set:
     """Return column-like identifiers referenced in a filter query."""
     query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
@@ -65,9 +66,11 @@ def _extract_query_columns(query: str) -> set:
     reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
     return tokens - reserved
 
+
 def _extract_columns_from_query(query: str) -> set:
     """Compatibility wrapper for the new naming scheme."""
     return _extract_query_columns(query)
+
 
 def _build_solution(err_type: str, msg: str) -> str:
     """Return a human-friendly hint for the given error."""
@@ -86,6 +89,7 @@ def _build_solution(err_type: str, msg: str) -> str:
     if err_type == "NO_STOCK":
         return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
     return ""
+
 
 def _apply_single_filter(df, kod, query):
     """Run a filter expression on ``df`` and collect diagnostics.
@@ -164,6 +168,7 @@ def _apply_single_filter(df, kod, query):
             pass
         return None, info
 
+
 def kaydet_hata(
     log_dict: dict[str, Any],
     kod: str,
@@ -181,9 +186,11 @@ def kaydet_hata(
     }
     log_dict.setdefault("hatalar", []).append(entry)
 
+
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
     FAILED_FILTERS.clear()
+
 
 def safe_eval(expr, df, depth: int = 0, visited=None):
     """Evaluate filter safely with depth and circular guards."""
@@ -218,6 +225,7 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
 
     raise QueryError("Invalid expression")
 
+
 def run_filter(code, df, expr):
     """Run a filter expression and return the resulting DataFrame."""
     # Pasif filtreler listede mi?
@@ -227,6 +235,7 @@ def run_filter(code, df, expr):
         logger.info("Filter %s marked passive, skipped.", code)
         return pd.DataFrame()
     return safe_eval(expr, df)
+
 
 def run_single_filter(kod: str, query: str) -> dict:
     """Validate ``query`` against a dummy frame and return error info.
@@ -278,6 +287,7 @@ def run_single_filter(kod: str, query: str) -> dict:
         except Exception:
             pass
     return atlanmis
+
 
 def evaluate_filter(
     fid: str | dict,
