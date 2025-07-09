@@ -13,7 +13,13 @@ from utils.pandas_option_safe import option_context
 
 
 def _get_plotly():
-    """Lazily import plotly when needed."""
+    """Import plotly lazily and return the graphing modules.
+
+    Returns
+    -------
+    tuple
+        Pair of :mod:`plotly.graph_objects` and :func:`plotly.subplots.make_subplots`.
+    """
     try:
         import plotly.graph_objects as go_mod
         from plotly.subplots import make_subplots as make_subplots_mod

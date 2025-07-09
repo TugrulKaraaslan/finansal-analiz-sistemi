@@ -1,8 +1,8 @@
 """Lightweight wrappers for optional OpenBB technical indicators.
 
 Each helper calls into :mod:`openbb` when the library is installed and
-otherwise raises ``NotImplementedError`` so the rest of the codebase
-remains optional-dependency agnostic.
+otherwise raises :class:`NotImplementedError`.  This keeps the rest of the
+codebase agnostic to whether OpenBB is available.
 """
 
 from __future__ import annotations
@@ -53,7 +53,13 @@ def ichimoku(
     offset: int = 26,
     lookahead: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Return Ichimoku indicator results via OpenBB."""
+    """Compute Ichimoku indicator using OpenBB.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame]
+        DataFrames with core Ichimoku columns and span columns.
+    """
     df = pd.DataFrame(
         {
             "date": close.index,
@@ -83,7 +89,13 @@ def macd(
     slow: int = 26,
     signal: int = 9,
 ) -> pd.DataFrame:
-    """Return MACD indicator DataFrame from OpenBB."""
+    """Compute MACD indicators via OpenBB.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with MACD line and signal columns.
+    """
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
         "macd",
@@ -104,7 +116,13 @@ def rsi(
     scalar: float = 100.0,
     drift: int = 1,
 ) -> pd.Series:
-    """Return the RSI Series calculated by OpenBB."""
+    """Compute the RSI series via OpenBB.
+
+    Returns
+    -------
+    pd.Series
+        Series containing the RSI values with the same index as ``close``.
+    """
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
         "rsi",
