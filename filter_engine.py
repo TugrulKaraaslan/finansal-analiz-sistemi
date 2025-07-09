@@ -55,38 +55,6 @@ class MissingColumnError(Exception):
         self.missing = missing
 
 
-def _extract_query_columns(query: str) -> set:
-    """Return column-like identifiers referenced in a filter query."""
-    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
-    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
-    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
-    return tokens - reserved
-
-
-def _extract_columns_from_query(query: str) -> set:
-    """Compatibility wrapper for the new naming scheme."""
-    return _extract_query_columns(query)
-
-
-def _build_solution(err_type: str, msg: str) -> str:
-    """Return a human-friendly hint for the given error."""
-    if err_type == "GENERIC":
-        m1 = _missing_re.search(msg)
-        if m1:
-            col = m1.group("col")
-            return f'"{col}" indikatörünü hesaplama listesine ekleyin.'
-        m2 = _undefined_re.search(msg)
-        if m2:
-            col = m2.group("col")
-            return f'Sorguda geçen "{col}" sütununu veri setine ekleyin veya sorgudan çıkarın.'
-        return "Eksik veriyi veya sorgu değişkenini düzeltin."
-    if err_type == "QUERY_ERROR":
-        return "Query ifadesini pandas.query() sözdizimine göre düzeltin."
-    if err_type == "NO_STOCK":
-        return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
-    return ""
-
-
 def _apply_single_filter(df, kod, query):
     """Execute ``query`` on ``df`` and return the result with status info."""
 
@@ -149,11 +117,38 @@ def _apply_single_filter(df, kod, query):
             pass
         return None, info
 
+def _build_solution(err_type: str, msg: str) -> str:
+    """Return a human-friendly hint for the given error."""
+    if err_type == "GENERIC":
+        m1 = _missing_re.search(msg)
+        if m1:
+            col = m1.group("col")
+            return f'"{col}" indikatörünü hesaplama listesine ekleyin.'
+        m2 = _undefined_re.search(msg)
+        if m2:
+            col = m2.group("col")
+            return f'Sorguda geçen "{col}" sütununu veri setine ekleyin veya sorgudan çıkarın.'
+        return "Eksik veriyi veya sorgu değişkenini düzeltin."
+    if err_type == "QUERY_ERROR":
+        return "Query ifadesini pandas.query() sözdizimine göre düzeltin."
+    if err_type == "NO_STOCK":
+        return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
+    return ""
+
+def _extract_columns_from_query(query: str) -> set:
+    """Compatibility wrapper for the new naming scheme."""
+    return _extract_query_columns(query)
+
+def _extract_query_columns(query: str) -> set:
+    """Return column-like identifiers referenced in a filter query."""
+    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
+    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
+    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
+    return tokens - reserved
 
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
     FAILED_FILTERS.clear()
-
 
 def evaluate_filter(
     fid: str | dict,
@@ -189,6 +184,16 @@ def evaluate_filter(
         evaluate_filter(child, df=df, depth=depth + 1, seen=seen)
     return key
 
+def kaydet_hata(log_dict: dict[str, Any], kod: str, error_type: str, msg: str, eksik: str | None = None) -> None:
+    """Append a structured error entry to ``log_dict``."""
+    entry = {
+        "filtre_kod": kod,
+        "hata_tipi": error_type,
+        "eksik_ad": eksik or "",
+        "detay": msg,
+        "cozum_onerisi": _build_solution(error_type, msg if msg else ""),
+    }
+    log_dict.setdefault("hatalar", []).append(entry)
 
 def run_filter(code, df, expr):
     """Run a filter expression and return the resulting DataFrame."""
@@ -199,7 +204,6 @@ def run_filter(code, df, expr):
         logger.info("Filter %s marked passive, skipped.", code)
         return pd.DataFrame()
     return safe_eval(expr, df)
-
 
 def run_single_filter(kod: str, query: str) -> dict:
     """Validate ``query`` against a dummy frame and return error info.
@@ -252,7 +256,6 @@ def run_single_filter(kod: str, query: str) -> dict:
             pass
     return atlanmis
 
-
 def safe_eval(expr, df, depth: int = 0, visited=None):
     """Evaluate filter safely with depth and circular guards."""
     if visited is None:
@@ -285,7 +288,6 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
             raise
 
     raise QueryError("Invalid expression")
-
 
 def uygula_filtreler(
     df_ana_veri: pd.DataFrame,
@@ -389,17 +391,6 @@ def uygula_filtreler(
     atlanmis_filtreler_log_dict: dict[str, Any] = {}
     kontrol_log: list[dict] = []
 
-    def kaydet_hata(kod, error_type, msg, eksik=None):
-        """Append a structured error entry to ``atlanmis_filtreler_log_dict``."""
-        hack = {
-            "filtre_kod": kod,
-            "hata_tipi": error_type,
-            "eksik_ad": eksik or "",
-            "detay": msg,
-            "cozum_onerisi": _build_solution(error_type, msg if msg else ""),
-        }
-        atlanmis_filtreler_log_dict.setdefault("hatalar", []).append(hack)
-
     for _, row in df_filtre_kurallari.iterrows():
         filtre_kodu = row.get("FilterCode")
         if filtre_kodu is None:
@@ -417,7 +408,7 @@ def uygula_filtreler(
                 "sebep": "GENERIC",
                 "hisse_sayisi": 0,
             }
-            kaydet_hata(filtre_kodu, "GENERIC", msg)
+            kaydet_hata(atlanmis_filtreler_log_dict, filtre_kodu, "GENERIC", msg)
             continue
 
         python_sorgusu = str(python_sorgusu_raw)
@@ -435,7 +426,7 @@ def uygula_filtreler(
                 "sebep": "QUERY_ERROR",
                 "hisse_sayisi": 0,
             }
-            kaydet_hata(filtre_kodu, "QUERY_ERROR", hata_mesaji)
+            kaydet_hata(atlanmis_filtreler_log_dict, filtre_kodu, "QUERY_ERROR", hata_mesaji)
             continue
         kullanilan_sutunlar = _extract_columns_from_query(python_sorgusu)
         if "volume_tl" in kullanilan_sutunlar and {"volume", "close"} <= set(
@@ -508,7 +499,7 @@ def uygula_filtreler(
                 "sebep": "QUERY_ERROR",
                 "hisse_sayisi": 0,
             }
-            kaydet_hata(
+            kaydet_hata(atlanmis_filtreler_log_dict, 
                 filtre_kodu,
                 "QUERY_ERROR",
                 msg,
@@ -523,7 +514,7 @@ def uygula_filtreler(
                 "sebep": "QUERY_ERROR",
                 "hisse_sayisi": 0,
             }
-            kaydet_hata(filtre_kodu, "QUERY_ERROR", msg)
+            kaydet_hata(atlanmis_filtreler_log_dict, filtre_kodu, "QUERY_ERROR", msg)
             continue
 
         hisse_kodlari_listesi = []
@@ -541,7 +532,7 @@ def uygula_filtreler(
             "hisse_sayisi": len(hisse_kodlari_listesi),
         }
         if sebep_kodu in {"QUERY_ERROR", "GENERIC"}:
-            kaydet_hata(filtre_kodu, sebep_kodu, info.get("sebep", ""))
+            kaydet_hata(atlanmis_filtreler_log_dict, filtre_kodu, sebep_kodu, info.get("sebep", ""))
 
     fn_logger.info(
         f"Tüm filtreler uygulandı. {len(filtre_sonuclar)} filtre için sonuç listesi üretildi."
