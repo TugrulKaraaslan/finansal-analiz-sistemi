@@ -17,6 +17,6 @@ class ReportWriter:
         :meth:`pandas.DataFrame.to_excel`.
         """
         output_path = Path(output_path)
-        # Ebeveyn klasörleri otomatik oluştur
+        # Create parent directories automatically
         output_path.parent.mkdir(parents=True, exist_ok=True)
         df.to_excel(output_path, index=False)

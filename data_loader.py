@@ -1,6 +1,7 @@
-"""Compatibility wrapper for ``finansal_analiz_sistemi.data_loader``.
+"""Expose :mod:`finansal_analiz_sistemi.data_loader` under a stable API.
 
-Explicit imports keep flake8 happy while exposing the same public API.
+The explicit imports below mirror the real module so that external users can
+import helpers directly from :mod:`data_loader` while keeping linters satisfied.
 """
 
 from pathlib import Path

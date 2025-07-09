@@ -1,4 +1,4 @@
-"""Test helpers and common configuration."""
+"""Shared test utilities and global pytest configuration."""
 
 import warnings
 
