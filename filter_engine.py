@@ -57,7 +57,6 @@ class MissingColumnError(Exception):
 
 def _apply_single_filter(df, kod, query):
     """Execute ``query`` on ``df`` and return the result with status info."""
-
     info = {
         "kod": kod,
         "tip": "tarama",
