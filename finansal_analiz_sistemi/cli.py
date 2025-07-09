@@ -30,14 +30,6 @@ def _summary() -> None:
         sys.exit(1)
 
 
-def run_analysis(csv_path: Path) -> Path:
-    """Read CSV and write Excel report next to it."""
-    df = pd.read_csv(csv_path, sep=";")
-    out_path = csv_path.with_suffix(".xlsx")
-    ReportWriter().write_report(df, out_path)
-    return out_path
-
-
 def parse_args() -> Namespace:
     """Return parsed arguments for this CLI.
 
@@ -74,6 +66,14 @@ def parse_args() -> Namespace:
     )
 
     return args
+
+
+def run_analysis(csv_path: Path) -> Path:
+    """Read CSV and write Excel report next to it."""
+    df = pd.read_csv(csv_path, sep=";")
+    out_path = csv_path.with_suffix(".xlsx")
+    ReportWriter().write_report(df, out_path)
+    return out_path
 
 
 if __name__ == "__main__":
