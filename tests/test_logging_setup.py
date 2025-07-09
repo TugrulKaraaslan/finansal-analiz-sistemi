@@ -5,8 +5,8 @@ import logging
 import time
 
 from finansal_analiz_sistemi.log_tools import (
-    ErrorCountingFilter,
     DuplicateFilter,
+    ErrorCountingFilter,
     setup_logger,
 )
 
