@@ -1,4 +1,4 @@
-"""Unit tests for cli_output."""
+"""Tests exercising the CLI report pipeline."""
 
 from pathlib import Path
 
@@ -12,7 +12,7 @@ from run import run_pipeline  # noqa: E402
 
 
 def test_cli_creates_report(tmp_path):
-    """CLI pipeline should write an Excel report to disk."""
+    """Running the pipeline should write an Excel report."""
     out = tmp_path / "cli_report.xlsx"
     root = Path(__file__).parent / "smoke_data"
     result = run_pipeline(

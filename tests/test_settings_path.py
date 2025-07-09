@@ -1,4 +1,4 @@
-"""Unit tests for settings_path."""
+"""Tests for resolving the configuration file path."""
 
 import sys
 from pathlib import Path

@@ -1,4 +1,4 @@
-"""Unit tests for kpi_pct_inflate."""
+"""Tests for percentage scaling in KPI statistics."""
 
 import pandas as pd
 

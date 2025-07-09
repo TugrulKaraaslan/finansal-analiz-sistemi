@@ -1,10 +1,10 @@
-"""Unit tests for summary_columns."""
+"""Tests for helper functions that build summary tables."""
 
 from report_generator import generate_summary
 
 
 def dummy_results():
-    """Test dummy_results."""
+    """Return example rows for summary column tests."""
     return [
         {"hisse_kodu": "AAA", "getiri_%": 12.3},
         {"hisse_kodu": "BBB", "getiri_%": -3.1},

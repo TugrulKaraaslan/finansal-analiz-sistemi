@@ -1,4 +1,4 @@
-"""Unit tests for excel_memory."""
+"""Verify memory-safe Excel output for large detail sheets."""
 
 import openpyxl
 import pandas as pd

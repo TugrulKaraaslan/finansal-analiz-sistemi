@@ -1,4 +1,4 @@
-"""Unit tests for indicator_calculator."""
+"""Tests for the technical indicator calculation module."""
 
 import os
 import sys

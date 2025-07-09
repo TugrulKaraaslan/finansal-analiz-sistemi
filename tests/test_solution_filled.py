@@ -1,4 +1,4 @@
-"""Unit tests for solution_filled."""
+"""Tests verifying solution hints are written to reports."""
 
 import os
 import sys

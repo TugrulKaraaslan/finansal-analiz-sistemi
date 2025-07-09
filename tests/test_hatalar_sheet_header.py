@@ -1,4 +1,4 @@
-"""Unit tests for hatalar_sheet_header."""
+"""Tests verifying the header layout of saved error sheets."""
 
 from pathlib import Path
 

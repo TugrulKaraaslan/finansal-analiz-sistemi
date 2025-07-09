@@ -1,4 +1,4 @@
-"""Unit tests for marker_slow."""
+"""Minimal test marked as slow for CI demonstrations."""
 
 import pytest
 
