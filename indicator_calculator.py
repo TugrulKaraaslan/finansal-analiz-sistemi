@@ -193,7 +193,7 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
 def calculate_indicators(
     df: pd.DataFrame, indicators: list[str] | None = None
 ) -> pd.DataFrame:
-    """Calculate simple indicators like EMA/SMA for given list.
+    """Calculate basic indicators such as EMA or SMA.
 
     Duplicate column names are skipped with a warning.
     """
@@ -240,7 +240,7 @@ def calculate_indicators(
 def calculate_chunked(
     df: pd.DataFrame, active_inds: list[str], chunk_size: int = CHUNK_SIZE
 ) -> None:
-    """Process DataFrame per ticker and append to Parquet."""
+    """Process indicators in chunks and append results to Parquet."""
     pq_path = Path("veri/gosterge.parquet")
     for kods in lazy_chunk(df.groupby("ticker", sort=False), chunk_size):
         for _, group in kods:
@@ -255,7 +255,7 @@ def calculate_chunked(
 
 
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
-    """Return 1H classic pivot point for ``group_df``."""
+    """Return the 1H classic pivot point for ``group_df``."""
     hisse_str = (
         group_df["hisse_kodu"].iloc[0]
         if not group_df.empty and "hisse_kodu" in group_df.columns
@@ -284,7 +284,7 @@ def _calculate_series_series_crossover(
     col_name_below: str,
     logger_param=None,
 ) -> tuple[pd.Series, pd.Series] | None:
-    """Detect crossovers between two series."""
+    """Detect where ``s1_col`` crosses ``s2_col`` in ``group_df``."""
     if logger_param is None:
         logger_param = logger
     local_logger = logger_param
@@ -337,7 +337,7 @@ def _calculate_series_value_crossover(
     suffix: str,
     logger_param=None,
 ) -> tuple[pd.Series, pd.Series] | None:
-    """Detect where a series crosses a constant ``value``."""
+    """Return crossover signals when ``s_col`` crosses ``value``."""
     if logger_param is None:
         logger_param = logger
     local_logger = logger_param
