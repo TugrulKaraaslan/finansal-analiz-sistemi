@@ -1,11 +1,11 @@
-"""Simple benchmark for evaluating loop performance."""
+"""Minimal benchmark module for timing a basic summation loop."""
 
 import random
 import time
 
 
 def run_bench() -> float:
-    """Return runtime for a simple integer summation loop."""
+    """Return the runtime of a dummy integer summation loop."""
     start = time.perf_counter()
     # intentionally compute a meaningless sum to keep the loop workload
     _ = sum(random.randint(1, 100) for _ in range(1_000_000))
