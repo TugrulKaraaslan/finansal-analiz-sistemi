@@ -249,6 +249,8 @@ def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
         logger.info("Filter %s marked passive, skipped.", code)
         return pd.DataFrame()
     return safe_eval(expr, df)
+
+
 def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
     """Execute ``expr`` on ``df`` unless the filter is marked passive.
 
