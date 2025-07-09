@@ -149,8 +149,6 @@ def _extract_query_columns(query: str) -> set:
     return tokens - reserved
 
 
-
-
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
     FAILED_FILTERS.clear()
@@ -304,8 +302,6 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
             raise
 
     raise QueryError("Invalid expression")
-
-
 
 
 def uygula_filtreler(
