@@ -1,4 +1,4 @@
-"""Utility class for writing analysis results to Excel files."""
+"""Lightweight helper for exporting DataFrames to Excel."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import pandas as pd
 
 
 class ReportWriter:
-    """Simple Excel writer utility."""
+    """Write DataFrames to Excel creating parent directories as needed."""
 
     def write_report(self, df: pd.DataFrame, output_path: Path | str) -> None:
         """Write ``df`` to ``output_path`` in Excel format.
