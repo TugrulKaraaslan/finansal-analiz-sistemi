@@ -120,9 +120,7 @@ def on_isle_hisse_verileri(
         fn_logger.warning(
             f"After conversion {nat_count_initial} NaT (Not a Time) values were found in the 'tarih' column."
         )
-    df.dropna(
-        subset=["tarih"], inplace=True
-    )  # Drop rows without valid dates
+    df.dropna(subset=["tarih"], inplace=True)  # Drop rows without valid dates
     rows_dropped_for_nat = nat_count_initial - df["tarih"].isnull().sum()
     if rows_dropped_for_nat > 0:
         fn_logger.info(
