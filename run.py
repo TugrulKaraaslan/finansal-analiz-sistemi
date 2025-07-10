@@ -34,8 +34,6 @@ logger = get_logger(__name__)
 log_counter: ErrorCountingFilter | None = None
 
 
-
-
 def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate indicators and crossover columns.
 
