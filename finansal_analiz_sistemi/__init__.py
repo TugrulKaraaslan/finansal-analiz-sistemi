@@ -9,11 +9,8 @@ from pathlib import Path
 
 import yaml
 
-# Import solely for side-effects (YAML filter resolution).
+# Import solely for side effects so YAML-based log filters are registered.
 from .logging_utils import ErrorCountingFilter  # noqa: F401
-
-# Referans için erişilmez; yan etki importunu pyflakes'tan gizlemek amacıyla
-ErrorCountingFilter
 
 # Configure logging from YAML at package import time
 base = Path(__file__).resolve().parent.parent
