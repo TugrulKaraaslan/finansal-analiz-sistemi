@@ -1,7 +1,7 @@
-"""Utilities for generating unique DataFrame column names.
+"""Helpers for generating unique DataFrame column names.
 
-The :func:`unique_name` helper appends a numeric suffix when ``base`` is
-already present in the provided set.
+The :func:`unique_name` helper appends a numeric suffix to ``base`` when it
+already exists in the provided set.
 """
 
 __all__ = ["unique_name"]

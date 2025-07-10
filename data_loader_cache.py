@@ -10,7 +10,11 @@ from src.utils.excel_reader import open_excel_cached
 
 
 class DataLoaderCache:
-    """Simple in-memory cache for CSV and Excel readers."""
+    """In-memory caching wrapper for CSV and Excel loaders.
+
+    The cache tracks file modification time and size to avoid redundant
+    disk reads across repeated data-loading operations.
+    """
 
     def __init__(self, logger=None, *, ttl: int = 4 * 60 * 60, maxsize: int = 64):
         """Initialize the cache and configure expiration policy.

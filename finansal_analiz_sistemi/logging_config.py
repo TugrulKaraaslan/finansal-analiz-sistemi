@@ -1,4 +1,8 @@
-"""Logging configuration with optional rich handling."""
+"""Utilities to configure application logging.
+
+The module exposes helpers that attach rich handlers when available and
+fallback to standard stream logging otherwise.
+"""
 
 from __future__ import annotations
 
