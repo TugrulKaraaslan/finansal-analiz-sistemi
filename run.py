@@ -71,6 +71,22 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
     return ozet_df, detay_df, istatistik_df
 
 
+def veri_yukle(force_excel_reload: bool = False):
+    """Load filter definitions and raw price data."""
+    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
+    if df_filters is None or df_filters.empty:
+        logger.critical("Filtre kuralları yüklenemedi veya boş.")
+        sys.exit(1)
+
+    df_raw = data_loader.yukle_hisse_verileri(
+        force_excel_reload=force_excel_reload, logger_param=logger
+    )
+    if df_raw is None or df_raw.empty:
+        logger.critical("Hisse verileri yüklenemedi veya boş.")
+        sys.exit(1)
+    return df_filters, df_raw
+
+
 def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     """Display summary or detail tables in a simple Streamlit UI.
 
@@ -456,22 +472,6 @@ def run_pipeline(
         tarama_tarihi_str=tarama_dt.strftime("%d.%m.%Y"),
     )
     return report_generator.generate_full_report(rapor_df, detay_df, [], output)
-
-
-def veri_yukle(force_excel_reload: bool = False):
-    """Load filter definitions and raw price data."""
-    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
-    if df_filters is None or df_filters.empty:
-        logger.critical("Filtre kuralları yüklenemedi veya boş.")
-        sys.exit(1)
-
-    df_raw = data_loader.yukle_hisse_verileri(
-        force_excel_reload=force_excel_reload, logger_param=logger
-    )
-    if df_raw is None or df_raw.empty:
-        logger.critical("Hisse verileri yüklenemedi veya boş.")
-        sys.exit(1)
-    return df_filters, df_raw
 
 
 if __name__ == "__main__":  # pragma: no cover - manual execution
