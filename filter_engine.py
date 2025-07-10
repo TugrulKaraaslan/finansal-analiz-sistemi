@@ -154,18 +154,26 @@ def _build_solution(err_type: str, msg: str) -> str:
     if err_type == "NO_STOCK":
         return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
     return ""
+
+
 def _extract_columns_from_query(query: str) -> set:
     """Return referenced columns using the unified naming scheme."""
     return _extract_query_columns(query)
+
+
 def _extract_query_columns(query: str) -> set:
     """Return column-like identifiers referenced in a filter query."""
     query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
     tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
     reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
     return tokens - reserved
+
+
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
     FAILED_FILTERS.clear()
+
+
 def evaluate_filter(
     fid: str | dict,
     df: Any | None = None,
@@ -198,6 +206,8 @@ def evaluate_filter(
     for child in children:
         evaluate_filter(child, df=df, depth=depth + 1, seen=seen | {key})
     return key
+
+
 def kaydet_hata(
     log_dict: dict[str, Any],
     kod: str,
@@ -214,6 +224,8 @@ def kaydet_hata(
         "cozum_onerisi": _build_solution(error_type, msg if msg else ""),
     }
     log_dict.setdefault("hatalar", []).append(entry)
+
+
 def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
     """Execute ``expr`` on ``df`` unless the filter is marked passive.
 
@@ -237,6 +249,7 @@ def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
         logger.info("Filter %s marked passive, skipped.", code)
         return pd.DataFrame()
     return safe_eval(expr, df)
+
 
 def run_single_filter(kod: str, query: str) -> dict[str, Any]:
     """Validate ``query`` against a dummy frame and return error info.
@@ -288,6 +301,8 @@ def run_single_filter(kod: str, query: str) -> dict[str, Any]:
         except Exception:
             pass
     return atlanmis
+
+
 def safe_eval(expr, df, depth: int = 0, visited=None):
     """Evaluate filter safely with depth and circular guards."""
     if visited is None:
@@ -320,6 +335,7 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
             raise
 
     raise QueryError("Invalid expression")
+
 
 def uygula_filtreler(
     df_ana_veri: pd.DataFrame,
