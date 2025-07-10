@@ -231,9 +231,7 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
     if visited is None:
         visited = set()
     if depth > settings.MAX_FILTER_DEPTH:
-        raise QueryError(
-            f"Max recursion depth ({settings.MAX_FILTER_DEPTH}) exceeded"
-        )
+        raise QueryError(f"Max recursion depth ({settings.MAX_FILTER_DEPTH}) exceeded")
 
     if isinstance(expr, str):
         return df.query(expr)
