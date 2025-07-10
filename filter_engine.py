@@ -139,7 +139,20 @@ def _apply_single_filter(df, kod, query):
 
 
 def _build_solution(err_type: str, msg: str) -> str:
-    """Return a human-friendly hint for the given error."""
+    """Return a user facing suggestion for an error type.
+
+    Parameters
+    ----------
+    err_type : str
+        Normalized error code such as ``GENERIC`` or ``QUERY_ERROR``.
+    msg : str
+        Raw error message to inspect for clues.
+
+    Returns
+    -------
+    str
+        Localized hint text suitable for displaying to the user.
+    """
     if err_type == "GENERIC":
         m1 = _missing_re.search(msg)
         if m1:
