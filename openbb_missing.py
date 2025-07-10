@@ -1,7 +1,7 @@
-"""Lightweight wrappers for optional OpenBB indicators.
+"""Fallback wrappers for optional OpenBB indicators.
 
-Functions call ``openbb`` when available and raise
-:class:`NotImplementedError` otherwise to keep the codebase optional.
+Calls into :mod:`openbb` when available and raises
+:class:`NotImplementedError` otherwise.
 """
 
 from __future__ import annotations
