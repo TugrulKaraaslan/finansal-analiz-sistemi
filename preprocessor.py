@@ -39,30 +39,29 @@ def _temizle_sayisal_deger(deger):
         return np.nan
     if isinstance(
         deger, (int, float, np.number)
-    ):  # np.number, numpy'nin sayısal tiplerini de kapsar
+    ):  # np.number covers numpy numeric types as well
         return float(deger)
     if isinstance(deger, str):
-        # Sadece rakam, virgül, nokta ve eksi işaretini tut, diğerlerini temizle
+        # Keep digits, commas, dots and minus signs only
         temizlenmis_deger = re.sub(r"[^\d,.-]+", "", deger.strip())
-        # Türkçe sayı formatı (binlik ayıracı nokta, ondalık ayıracı virgül) ise:
-        # Önce tüm binlik ayraçlarını (noktaları) kaldır
+        # If using Turkish number format (dot thousands, comma decimals):
+        # remove thousand separators first
         temizlenmis_deger_noktasiz = temizlenmis_deger.replace(".", "")
-        # Sonra ondalık ayıracını (virgülü) noktaya çevir
+        # then replace the decimal comma with a dot
         temizlenmis_deger_standart = temizlenmis_deger_noktasiz.replace(",", ".")
 
-        # Eğer ilk denemede (noktasız, virgül->nokta) float'a dönüşürse kullan
+        # First try parsing after removing dots and replacing comma
         try:
             return float(temizlenmis_deger_standart)
         except ValueError:
-            # Eğer yukarıdaki başarısız olursa, orijinal temizlenmiş değeri (belki
-            # zaten standart 1.234,56 değil de 1234.56 formatındadır) dene
+            # If that fails, parse the raw cleaned value
             try:
                 return float(
                     temizlenmis_deger
-                )  # Orijinal string'den sadece sayısal olmayanları attık
+                )  # original string stripped of non-numeric chars
             except ValueError:
                 return np.nan
-    return np.nan  # Diğer tüm beklenmedik tipler için
+    return np.nan  # fallback for all other unexpected types
 
 
 def on_isle_hisse_verileri(

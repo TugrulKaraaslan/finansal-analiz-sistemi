@@ -344,21 +344,25 @@ def main(argv: list[str] | None = None) -> None:
         default=getattr(config, "SATIS_TARIHI_DEFAULT", "2020-12-31"),
         help="dd.mm.yyyy formatında satış tarihi",
     )
-    parser.add_argument("--gui", action="store_true", help="Basit Streamlit arayüzü")
+    parser.add_argument(
+        "--gui",
+        action="store_true",
+        help="Show a simple Streamlit UI",
+    )
     parser.add_argument(
         "--force-excel-reload",
         action="store_true",
-        help="Parquet yerine Excel/CSV dosyalarını yeniden yükle",
+        help="Reload Excel/CSV files instead of the Parquet cache",
     )
     parser.add_argument(
         "--settings-file",
         dest="settings_file",
-        help="settings.yaml yolunu elle belirt",
+        help="Manually specify the settings.yaml path",
     )
     parser.add_argument(
         "--output",
         required=True,
-        help="Excel .xlsx son dosya yolu",
+        help="Destination Excel .xlsx path",
     )
     parser.add_argument("--ind-set", choices=["core", "full"], default="core")
     parser.add_argument("--chunk-size", type=int, default=config.CHUNK_SIZE)
