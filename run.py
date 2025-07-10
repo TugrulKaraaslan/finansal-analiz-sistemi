@@ -34,33 +34,6 @@ logger = get_logger(__name__)
 log_counter: ErrorCountingFilter | None = None
 
 
-def veri_yukle(force_excel_reload: bool = False):
-    """Load filter definitions and raw price data.
-
-    Parameters
-    ----------
-    force_excel_reload : bool, optional
-        Reload stock data from Excel/CSV even when the Parquet cache is present.
-
-    Returns
-    -------
-    tuple[pd.DataFrame, pd.DataFrame]
-        ``df_filters`` and ``df_raw`` DataFrames.
-    """
-    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
-    if df_filters is None or df_filters.empty:
-        logger.critical("Filtre kuralları yüklenemedi veya boş.")
-        sys.exit(1)
-
-    df_raw = data_loader.yukle_hisse_verileri(
-        force_excel_reload=force_excel_reload, logger_param=logger
-    )
-    if df_raw is None or df_raw.empty:
-        logger.critical("Hisse verileri yüklenemedi veya boş.")
-        sys.exit(1)
-    return df_filters, df_raw
-
-
 def on_isle(df: pd.DataFrame) -> pd.DataFrame:
     """Preprocess raw stock data.
 
@@ -417,6 +390,23 @@ def run_pipeline(
         tarama_tarihi_str=tarama_dt.strftime("%d.%m.%Y"),
     )
     return report_generator.generate_full_report(rapor_df, detay_df, [], output)
+
+
+def veri_yukle(force_excel_reload: bool = False):
+    """Load filter definitions and raw price data."""
+
+    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
+    if df_filters is None or df_filters.empty:
+        logger.critical("Filtre kuralları yüklenemedi veya boş.")
+        sys.exit(1)
+
+    df_raw = data_loader.yukle_hisse_verileri(
+        force_excel_reload=force_excel_reload, logger_param=logger
+    )
+    if df_raw is None or df_raw.empty:
+        logger.critical("Hisse verileri yüklenemedi veya boş.")
+        sys.exit(1)
+    return df_filters, df_raw
 
 
 def main(argv: list[str] | None = None) -> None:
