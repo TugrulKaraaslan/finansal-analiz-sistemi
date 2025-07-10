@@ -89,8 +89,7 @@ def on_isle_hisse_verileri(
     fn_logger.debug(f"Ön işleme başlangıç satır sayısı: {len(df)}")
 
     # 1. Tarih Sütunu Kontrolü ve Dönüşümü
-    # data_loader'da 'tarih' sütununun varlığı ve temel standardizasyonu yapıldı.
-    # Burada datetime tipinde olduğundan emin olalım ve NaT'leri yönetelim.
+    # Ensure the date column is in datetime format and drop any NaT rows.
     if "tarih" not in df.columns:
         fn_logger.critical(
             "'tarih' sütunu DataFrame'de bulunamadı. Ön işleme devam edemez."
@@ -138,8 +137,7 @@ def on_isle_hisse_verileri(
         return None
 
     # 2. OHLCV ve Volume Sütunlarını Sayısal Tipe Dönüştürme
-    # data_loader bu sütunları 'open', 'high', 'low', 'close', 'volume' olarak
-    # standartlaştırdı.
+    # Numeric OHLCV columns expected after data_loader normalisation.
     sayisal_hedef_sutunlar = ["open", "high", "low", "close", "volume"]
     if (
         "adj_close" in df.columns and "adj_close" not in sayisal_hedef_sutunlar
@@ -181,8 +179,7 @@ def on_isle_hisse_verileri(
                 # olmalı)
                 df[col] = df[col].astype(float, errors="ignore")
         else:
-            # Bu uyarı data_loader'da daha detaylı verildi, burada tekrar etmeye gerek yok.
-            # Sadece ana OHLCV için bir son kontrol yapılabilir.
+            # Skip verbose warning, final check for missing core OHLCV columns.
             if col in ["open", "high", "low", "close", "volume"]:
                 fn_logger.warning(
                     f"Ön işleme için beklenen temel sütun '{col}' DataFrame'de bulunamadı."

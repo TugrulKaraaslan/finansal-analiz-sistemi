@@ -1,6 +1,6 @@
-"""Custom validation helpers used across the project.
+"""Validation utilities used across the project.
 
-Defines the :class:`ValidationError` dataclass for structured error
+This module exposes :class:`ValidationError` for structured error
 reporting.
 """
 
