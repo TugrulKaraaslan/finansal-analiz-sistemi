@@ -157,6 +157,23 @@ def add_series(
     safe_set(df, safe, values)
 
 
+def calculate_chunked(
+    df: pd.DataFrame, active_inds: list[str], chunk_size: int = CHUNK_SIZE
+) -> None:
+    """Process indicators in chunks and append results to Parquet."""
+    pq_path = Path("veri/gosterge.parquet")
+    for kods in lazy_chunk(df.groupby("ticker", sort=False), chunk_size):
+        for _, group in kods:
+            mini = group.sort_values("date").copy()
+            mini = calculate_indicators(mini, active_inds)
+            try:
+                mini.to_parquet(pq_path, partition_cols=["ticker"], append=True)
+            except TypeError:
+                mini.to_parquet(pq_path, partition_cols=["ticker"])
+            del mini
+        gc.collect()
+
+
 def calculate_indicators(
     df: pd.DataFrame, indicators: list[str] | None = None
 ) -> pd.DataFrame:
@@ -202,23 +219,6 @@ def calculate_indicators(
 
     out = out.loc[:, ~out.columns.duplicated()]
     return out
-
-
-def calculate_chunked(
-    df: pd.DataFrame, active_inds: list[str], chunk_size: int = CHUNK_SIZE
-) -> None:
-    """Process indicators in chunks and append results to Parquet."""
-    pq_path = Path("veri/gosterge.parquet")
-    for kods in lazy_chunk(df.groupby("ticker", sort=False), chunk_size):
-        for _, group in kods:
-            mini = group.sort_values("date").copy()
-            mini = calculate_indicators(mini, active_inds)
-            try:
-                mini.to_parquet(pq_path, partition_cols=["ticker"], append=True)
-            except TypeError:
-                mini.to_parquet(pq_path, partition_cols=["ticker"])
-            del mini
-        gc.collect()
 
 
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
