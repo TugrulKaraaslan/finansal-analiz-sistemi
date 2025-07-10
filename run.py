@@ -34,6 +34,85 @@ logger = get_logger(__name__)
 log_counter: ErrorCountingFilter | None = None
 
 
+def backtest_yap(
+    df: pd.DataFrame,
+    filtre_sonuclari: dict,
+    tarama_tarihi: str,
+    satis_tarihi: str,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Run simple backtest on filtered results.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Indicator dataset used for price lookup.
+    filtre_sonuclari : dict
+        Mapping of filter code to list of tickers.
+    tarama_tarihi : str
+        Screening date in ``dd.mm.yyyy`` format.
+    satis_tarihi : str
+        Sell date in ``dd.mm.yyyy`` format.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame]
+        Summary and detail DataFrames for reporting.
+    """
+    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
+        filtre_sonuc_dict=filtre_sonuclari,
+        df_tum_veri=df,
+        satis_tarihi_str=satis_tarihi,
+        tarama_tarihi_str=tarama_tarihi,
+        logger_param=logger,
+    )
+    if rapor_df is None:
+        logger.critical("Backtest sonuç üretmedi.")
+        sys.exit(1)
+    return rapor_df, detay_df
+
+
+def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
+    """Apply filter rules to indicator data.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Indicator dataset containing crossover columns.
+    tarama_tarihi : datetime-like
+        Screening date used to select rows.
+
+    Returns
+    -------
+    tuple[dict, dict]
+        Filter results and skipped-filter log dictionary.
+    """
+    return filter_engine.uygula_filtreler(
+        df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
+    )
+
+
+def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
+    """Split report data into summary, detail and stats frames.
+
+    Parameters
+    ----------
+    rapor_df : pd.DataFrame
+        Combined report DataFrame returned from the backtest.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+        ``(summary_df, detail_df, stats_df)`` tuple ready for export.
+    """
+    if rapor_df is None or rapor_df.empty:
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+    ozet_df = rapor_df.copy()
+    detay_df = rapor_df.copy()
+    istatistik_df = rapor_df.describe().reset_index()
+    return ozet_df, detay_df, istatistik_df
+
+
 def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate indicators and crossover columns.
 
@@ -74,85 +153,6 @@ def on_isle(df: pd.DataFrame) -> pd.DataFrame:
         logger.critical("Veri ön işleme başarısız.")
         sys.exit(1)
     return processed
-
-
-def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
-    """Apply filter rules to indicator data.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Indicator dataset containing crossover columns.
-    tarama_tarihi : datetime-like
-        Screening date used to select rows.
-
-    Returns
-    -------
-    tuple[dict, dict]
-        Filter results and skipped-filter log dictionary.
-    """
-    return filter_engine.uygula_filtreler(
-        df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
-    )
-
-
-def backtest_yap(
-    df: pd.DataFrame,
-    filtre_sonuclari: dict,
-    tarama_tarihi: str,
-    satis_tarihi: str,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Run simple backtest on filtered results.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Indicator dataset used for price lookup.
-    filtre_sonuclari : dict
-        Mapping of filter code to list of tickers.
-    tarama_tarihi : str
-        Screening date in ``dd.mm.yyyy`` format.
-    satis_tarihi : str
-        Sell date in ``dd.mm.yyyy`` format.
-
-    Returns
-    -------
-    tuple[pd.DataFrame, pd.DataFrame]
-        Summary and detail DataFrames for reporting.
-    """
-    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
-        filtre_sonuc_dict=filtre_sonuclari,
-        df_tum_veri=df,
-        satis_tarihi_str=satis_tarihi,
-        tarama_tarihi_str=tarama_tarihi,
-        logger_param=logger,
-    )
-    if rapor_df is None:
-        logger.critical("Backtest sonuç üretmedi.")
-        sys.exit(1)
-    return rapor_df, detay_df
-
-
-def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Split report data into summary, detail and stats frames.
-
-    Parameters
-    ----------
-    rapor_df : pd.DataFrame
-        Combined report DataFrame returned from the backtest.
-
-    Returns
-    -------
-    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
-        ``(summary_df, detail_df, stats_df)`` tuple ready for export.
-    """
-    if rapor_df is None or rapor_df.empty:
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-
-    ozet_df = rapor_df.copy()
-    detay_df = rapor_df.copy()
-    istatistik_df = rapor_df.describe().reset_index()
-    return ozet_df, detay_df, istatistik_df
 
 
 def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
@@ -331,72 +331,6 @@ def calistir_tum_sistemi(
     return rapor_df, detay_df, atlanmis
 
 
-def run_pipeline(
-    price_csv: str | Path, filter_def: str | Path, output: str | Path
-) -> Path:
-    """Run the pipeline on ``price_csv`` and ``filter_def``.
-
-    Parameters
-    ----------
-    price_csv : str or Path
-        CSV file containing historical price data.
-    filter_def : str or Path
-        JSON or YAML file with filter definitions.
-    output : str or Path
-        Target Excel file path for the generated report.
-
-    Returns
-    -------
-    Path
-        Location of the created Excel report.
-    """
-    global log_counter
-    if log_counter is None:
-        log_counter = setup_logger()
-    df = pd.read_csv(
-        price_csv,
-        comment="#",
-        header=None,
-        names=["code", "date", "open", "high", "low", "close", "volume"],
-    )
-    df = df.rename(columns={"code": "hisse_kodu", "date": "tarih"})
-    df["tarih"] = pd.to_datetime(df["tarih"])
-
-    with open(filter_def) as f:
-        filt = yaml.safe_load(f) or []
-    filt_df = pd.DataFrame(filt).rename(
-        columns={"code": "FilterCode", "clause": "PythonQuery"}
-    )
-
-    tarama_dt = df["tarih"].min()
-    satis_dt = df["tarih"].max()
-
-    filtre_sonuclar, _ = filter_engine.uygula_filtreler(df, filt_df, tarama_dt)
-    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
-        filtre_sonuclar,
-        df,
-        satis_tarihi_str=satis_dt.strftime("%d.%m.%Y"),
-        tarama_tarihi_str=tarama_dt.strftime("%d.%m.%Y"),
-    )
-    return report_generator.generate_full_report(rapor_df, detay_df, [], output)
-
-
-def veri_yukle(force_excel_reload: bool = False):
-    """Load filter definitions and raw price data."""
-    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
-    if df_filters is None or df_filters.empty:
-        logger.critical("Filtre kuralları yüklenemedi veya boş.")
-        sys.exit(1)
-
-    df_raw = data_loader.yukle_hisse_verileri(
-        force_excel_reload=force_excel_reload, logger_param=logger
-    )
-    if df_raw is None or df_raw.empty:
-        logger.critical("Hisse verileri yüklenemedi veya boş.")
-        sys.exit(1)
-    return df_filters, df_raw
-
-
 def main(argv: list[str] | None = None) -> None:
     """Execute the main backtest workflow for CLI usage."""
     parser = argparse.ArgumentParser(description="Finansal analiz ve backtest")
@@ -530,6 +464,72 @@ def main(argv: list[str] | None = None) -> None:
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
         utils.purge_old_logs("loglar", days=30)
+
+
+def run_pipeline(
+    price_csv: str | Path, filter_def: str | Path, output: str | Path
+) -> Path:
+    """Run the pipeline on ``price_csv`` and ``filter_def``.
+
+    Parameters
+    ----------
+    price_csv : str or Path
+        CSV file containing historical price data.
+    filter_def : str or Path
+        JSON or YAML file with filter definitions.
+    output : str or Path
+        Target Excel file path for the generated report.
+
+    Returns
+    -------
+    Path
+        Location of the created Excel report.
+    """
+    global log_counter
+    if log_counter is None:
+        log_counter = setup_logger()
+    df = pd.read_csv(
+        price_csv,
+        comment="#",
+        header=None,
+        names=["code", "date", "open", "high", "low", "close", "volume"],
+    )
+    df = df.rename(columns={"code": "hisse_kodu", "date": "tarih"})
+    df["tarih"] = pd.to_datetime(df["tarih"])
+
+    with open(filter_def) as f:
+        filt = yaml.safe_load(f) or []
+    filt_df = pd.DataFrame(filt).rename(
+        columns={"code": "FilterCode", "clause": "PythonQuery"}
+    )
+
+    tarama_dt = df["tarih"].min()
+    satis_dt = df["tarih"].max()
+
+    filtre_sonuclar, _ = filter_engine.uygula_filtreler(df, filt_df, tarama_dt)
+    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
+        filtre_sonuclar,
+        df,
+        satis_tarihi_str=satis_dt.strftime("%d.%m.%Y"),
+        tarama_tarihi_str=tarama_dt.strftime("%d.%m.%Y"),
+    )
+    return report_generator.generate_full_report(rapor_df, detay_df, [], output)
+
+
+def veri_yukle(force_excel_reload: bool = False):
+    """Load filter definitions and raw price data."""
+    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
+    if df_filters is None or df_filters.empty:
+        logger.critical("Filtre kuralları yüklenemedi veya boş.")
+        sys.exit(1)
+
+    df_raw = data_loader.yukle_hisse_verileri(
+        force_excel_reload=force_excel_reload, logger_param=logger
+    )
+    if df_raw is None or df_raw.empty:
+        logger.critical("Hisse verileri yüklenemedi veya boş.")
+        sys.exit(1)
+    return df_filters, df_raw
 
 
 if __name__ == "__main__":  # pragma: no cover - manual execution
