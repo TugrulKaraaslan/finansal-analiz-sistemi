@@ -339,8 +339,6 @@ def yukle_hisse_verileri(
                 fn_logger.debug(
                     f"Parquet'ten yüklenen hisse kodları (ilk 5): {df_birlesik['hisse_kodu'].unique()[:5]}"
                 )
-            # Parquet'ten yüklenen verinin de sütunlarının kontrol edilmesi iyi bir pratik olabilir.
-            # Ancak şu anki akışta standardizasyon CSV/Excel'den sonra yapılıyor.
             return df_birlesik
         except Exception as e:
             fn_logger.warning(
