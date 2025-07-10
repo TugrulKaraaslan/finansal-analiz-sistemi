@@ -38,18 +38,18 @@ def _temizle_sayisal_deger(deger):
         return np.nan
     if isinstance(
         deger, (int, float, np.number)
-    ):  # np.number covers numpy numeric types as well
+    ):  # ``np.number`` covers numpy numeric types as well
         return float(deger)
     if isinstance(deger, str):
         # Keep digits, commas, dots and minus signs only
         temizlenmis_deger = re.sub(r"[^\d,.-]+", "", deger.strip())
-        # If using Turkish number format (dot thousands, comma decimals):
-        # remove thousand separators first
+        # When using the Turkish number format (dot thousands, comma decimals):
+        # Remove thousand separators first
         temizlenmis_deger_noktasiz = temizlenmis_deger.replace(".", "")
-        # then replace the decimal comma with a dot
+        # Then replace the decimal comma with a dot
         temizlenmis_deger_standart = temizlenmis_deger_noktasiz.replace(",", ".")
 
-        # First try parsing after removing dots and replacing comma
+        # First try parsing after cleaning the value
         try:
             return float(temizlenmis_deger_standart)
         except ValueError:
@@ -57,10 +57,10 @@ def _temizle_sayisal_deger(deger):
             try:
                 return float(
                     temizlenmis_deger
-                )  # original string stripped of non-numeric chars
+                )  # Original string stripped of non-numeric characters
             except ValueError:
                 return np.nan
-    return np.nan  # fallback for all other unexpected types
+    return np.nan  # Fallback for all other unexpected types
 
 
 def on_isle_hisse_verileri(
@@ -86,7 +86,7 @@ def on_isle_hisse_verileri(
     df = df_ham.copy()
     fn_logger.debug(f"Ön işleme başlangıç satır sayısı: {len(df)}")
 
-    # 1. Tarih Sütunu Kontrolü ve Dönüşümü
+    # 1. Date column validation and conversion
     # Ensure the date column is in datetime format and drop any NaT rows.
     if "tarih" not in df.columns:
         fn_logger.critical(
@@ -99,11 +99,11 @@ def on_isle_hisse_verileri(
             "'tarih' sütunu henüz datetime formatında değil, dönüştürülüyor (preprocessor)..."
         )
         try:
-            # Olası farklı formatları dene (genellikle pd.to_datetime bunu otomatik
-            # yapar ama garanti olsun)
+            # Try common date formats even though ``pd.to_datetime`` usually
+            # handles them automatically
             df["tarih"] = pd.to_datetime(df["tarih"], errors="coerce", dayfirst=True)
-            # errors='coerce' geçersiz tarihleri NaT (Not a Time) yapar.
-            # dayfirst=True, dd.mm.yyyy formatını önceliklendirir.
+            # ``errors='coerce'`` converts invalid dates to NaT (Not a Time)
+            # ``dayfirst=True`` prioritizes ``dd.mm.yyyy`` format
             fn_logger.info(
                 "'tarih' sütunu preprocessor'da başarıyla datetime formatına dönüştürüldü."
             )
@@ -113,49 +113,46 @@ def on_isle_hisse_verileri(
                 "Hatalı değerler NaT olacak.",
                 exc_info=True,
             )
-            # Hata durumunda bile devam et, NaT olanlar aşağıda drop edilecek.
+            # Continue even on error; NaT values will be dropped below
 
     nat_count_initial = df["tarih"].isnull().sum()
     if nat_count_initial > 0:
         fn_logger.warning(
-            f"Dönüşüm sonrası 'tarih' sütununda {nat_count_initial} adet NaT (Not a Time) değer bulundu."
+            f"After conversion {nat_count_initial} NaT (Not a Time) values were found in the 'tarih' column."
         )
-    df.dropna(
-        subset=["tarih"], inplace=True
-    )  # Tarih bilgisi olmayan (NaT) satırları çıkar
+    df.dropna(subset=["tarih"], inplace=True)  # Drop rows without valid dates
     rows_dropped_for_nat = nat_count_initial - df["tarih"].isnull().sum()
     if rows_dropped_for_nat > 0:
         fn_logger.info(
-            f"Tarih sütunundaki NaT değerler nedeniyle {rows_dropped_for_nat} satır çıkarıldı."
+            f"Dropped {rows_dropped_for_nat} rows due to NaT values in the 'tarih' column."
         )
     if df.empty:
         fn_logger.error(
-            "Tarih sütunundaki tüm değerler NaT olduğu için DataFrame boş kaldı. Ön işleme durduruluyor."
+            "All entries in the 'tarih' column were NaT. Preprocessing aborted."
         )
         return None
 
-    # 2. OHLCV ve Volume Sütunlarını Sayısal Tipe Dönüştürme
-    # Numeric OHLCV columns expected after data_loader normalisation.
+    # 2. Convert OHLCV and volume columns to numeric types
+    # Numeric OHLCV columns are expected after data_loader normalization
     sayisal_hedef_sutunlar = ["open", "high", "low", "close", "volume"]
     if (
         "adj_close" in df.columns and "adj_close" not in sayisal_hedef_sutunlar
-    ):  # Eğer varsa adj_close'u da dahil et
+    ):  # Include adj_close when present
         sayisal_hedef_sutunlar.append("adj_close")
     if (
         "volume_tl" in df.columns and "volume_tl" not in sayisal_hedef_sutunlar
-    ):  # Eğer varsa volume_tl'yi de dahil et (sayısal olmalı)
+    ):  # Include volume_tl when available (should be numeric)
         sayisal_hedef_sutunlar.append("volume_tl")
 
     for col in sayisal_hedef_sutunlar:
         if col in df.columns:
-            # Eğer sütun object (string) tipindeyse veya kategorikse, sayısal yapmaya
-            # çalış
+            # Convert object or categorical columns to float when needed
             if df[col].dtype == "object" or isinstance(df[col].dtype, CategoricalDtype):
                 nan_before = df[col].isnull().sum()
                 original_type = df[col].dtype
                 df[col] = (
                     df[col].apply(_temizle_sayisal_deger).astype(float)
-                )  # _temizle_sayisal_deger NaN veya float döner
+                )  # ``_temizle_sayisal_deger`` returns NaN or float
                 nan_after = df[col].isnull().sum()
                 if nan_after > nan_before:
                     fn_logger.warning(
@@ -164,17 +161,16 @@ def on_isle_hisse_verileri(
                     )
             elif not pd.api.types.is_numeric_dtype(
                 df[col]
-            ):  # Sayısal değilse ama object de değilse (örn: boolean?)
+            ):  # Not numeric and not object (e.g., boolean)
                 fn_logger.warning(
-                    f"'{col}' sütunu beklenmedik bir tipte ({df[col].dtype}), float'a dönüştürülmeye çalışılıyor."
+                    f"Column '{col}' has unexpected type ({df[col].dtype}); attempting float conversion."
                 )
                 df[col] = pd.to_numeric(
                     df[col], errors="coerce"
-                )  # Hataları NaT/NaN yapar
-            # Eğer zaten sayısal bir tipse ve float değilse, float'a çevir
+                )  # Convert errors to NaT/NaN
+            # Cast numeric columns to float when not already
             elif df[col].dtype != float:
-                # errors='ignore' sorunlu dönüşümlerde orijinal değeri korur (nadiren
-                # olmalı)
+                # ``errors='ignore'`` preserves the original value on rare conversion issues
                 df[col] = df[col].astype(float, errors="ignore")
         else:
             # Skip verbose warning, final check for missing core OHLCV columns.
@@ -212,20 +208,20 @@ def on_isle_hisse_verileri(
         df["change_from_open_percent"] = (df["close"] - df["open"]) / df["open"] * 100
         fn_logger.debug("'change_from_open_percent' sütunu otomatik eklendi.")
 
-    # 3. Kritik OHLC Sütunlarında NaN Varsa Satırları Çıkar
+    # 3. Drop rows with NaN values in critical OHLC columns
     kritik_ohlc_sutunlar = [
         "open",
         "high",
         "low",
         "close",
-    ]  # 'volume' NaN'ları 0 ile doldurulabilir.
+    ]  # 'volume' NaN values can be filled with zero
     eksik_kritik_sutunlar = [s for s in kritik_ohlc_sutunlar if s not in df.columns]
     if eksik_kritik_sutunlar:
         fn_logger.error(
             f"Kritik OHLC sütunlarından bazıları yükleme/standardizasyon sonrası hala eksik: "
             f"{eksik_kritik_sutunlar}. NaN temizliği bu sütunlar olmadan yapılamaz."
         )
-        # Eğer temel OHLC eksikse, devam etmek anlamsız olabilir.
+        # Stop entirely if all core OHLC columns are missing
         if len(eksik_kritik_sutunlar) == len(kritik_ohlc_sutunlar):  # Hepsi eksikse
             fn_logger.critical(
                 "Tüm kritik OHLC sütunları eksik. Ön işleme durduruluyor."
@@ -235,7 +231,7 @@ def on_isle_hisse_verileri(
         nan_oncesi_satir_sayisi = len(df)
         df.dropna(
             subset=kritik_ohlc_sutunlar, inplace=True
-        )  # how='any' (varsayılan): Herhangi birinde NaN varsa satırı çıkar
+        )  # how='any': drop row when any critical column is NaN
         rows_dropped_for_ohlc_nan = nan_oncesi_satir_sayisi - len(df)
         if rows_dropped_for_ohlc_nan > 0:
             fn_logger.info(
@@ -243,7 +239,7 @@ def on_isle_hisse_verileri(
                 f"{rows_dropped_for_ohlc_nan} satır çıkarıldı."
             )
 
-    # 4. Hacimdeki NaN'ları 0 İle Doldur (Opsiyonel, stratejiye göre değişebilir)
+    # 4. Fill NaN values in volume with zero (optional per strategy)
     if "volume" in df.columns and df["volume"].isnull().any():
         nan_count_volume_before_fill = df["volume"].isnull().sum()
         df["volume"].fillna(0, inplace=True)
@@ -258,7 +254,7 @@ def on_isle_hisse_verileri(
         return None
     fn_logger.info("Kritik NaN değer yönetimi tamamlandı.")
 
-    # 5. Veriyi Hisse Kodu ve Tarihe Göre Sırala
+    # 5. Sort data by ticker code and date
     if "hisse_kodu" not in df.columns:
         fn_logger.critical(
             "'hisse_kodu' sütunu DataFrame'de bulunamadı. Sıralama yapılamıyor. Ön işleme durduruluyor."
@@ -266,19 +262,18 @@ def on_isle_hisse_verileri(
         return None
 
     df.sort_values(by=["hisse_kodu", "tarih"], ascending=[True, True], inplace=True)
-    df.reset_index(drop=True, inplace=True)  # Temiz bir sıralı indeks oluştur
+    df.reset_index(drop=True, inplace=True)  # Create a clean sequential index
     fn_logger.info("Veri 'hisse_kodu' ve 'tarih'e göre sıralandı, index sıfırlandı.")
 
-    # 6. BIST Tatil Günlerini Çıkar (Opsiyonel)
+    # 6. Remove BIST holidays (optional)
     if holidays and config.TR_HOLIDAYS_REMOVE:
         try:
             unique_years = df["tarih"].dt.year.unique()
             if (
                 len(unique_years) > 0 and pd.notna(unique_years).all()
-            ):  # Geçerli yıllar varsa
+            ):  # Proceed only when the year values are valid
                 tr_holidays = holidays.Turkey(years=unique_years)
-                # Tarihleri karşılaştırmadan önce normalize et (sadece tarih kısmı, saat
-                # bilgisi olmadan)
+                # Normalize to date-only before comparison
                 original_len = len(df)
                 normalized_dates = pd.to_datetime(df["tarih"].dt.normalize())
                 holiday_dates = pd.to_datetime(list(tr_holidays.keys()))
