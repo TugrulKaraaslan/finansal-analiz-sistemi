@@ -171,6 +171,28 @@ def backtest_yap(
     return rapor_df, detay_df
 
 
+def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
+    """Split report data into summary, detail and stats frames.
+
+    Parameters
+    ----------
+    rapor_df : pd.DataFrame
+        Combined report DataFrame returned from the backtest.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+        ``(summary_df, detail_df, stats_df)`` tuple ready for export.
+    """
+    if rapor_df is None or rapor_df.empty:
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+    ozet_df = rapor_df.copy()
+    detay_df = rapor_df.copy()
+    istatistik_df = rapor_df.describe().reset_index()
+    return ozet_df, detay_df, istatistik_df
+
+
 def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     """Save Excel report if data is available.
 
@@ -192,28 +214,6 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     with mem_profile():
         report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
     logger.info(f"Excel raporu oluşturuldu: {out_path}")
-
-
-def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Split report data into summary, detail and stats frames.
-
-    Parameters
-    ----------
-    rapor_df : pd.DataFrame
-        Combined report DataFrame returned from the backtest.
-
-    Returns
-    -------
-    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
-        ``(summary_df, detail_df, stats_df)`` tuple ready for export.
-    """
-    if rapor_df is None or rapor_df.empty:
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-
-    ozet_df = rapor_df.copy()
-    detay_df = rapor_df.copy()
-    istatistik_df = rapor_df.describe().reset_index()
-    return ozet_df, detay_df, istatistik_df
 
 
 def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
