@@ -1,4 +1,4 @@
-"""Lightweight wrappers for optional OpenBB technical indicators.
+"""Lightweight wrappers around optional OpenBB technical indicators.
 
 Each helper calls into :mod:`openbb` when the library is installed and
 otherwise raises :class:`NotImplementedError`.  This keeps the rest of the
