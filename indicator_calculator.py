@@ -87,7 +87,11 @@ def _calc_ema(df: pd.DataFrame, n: int) -> pd.Series:
 
 
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
-    """Return the 1H classic pivot point for ``group_df``."""
+    """Compute the 1H classic pivot point for a ticker group.
+
+    The pivot is the mean of ``high``, ``low`` and ``close`` for each row
+    and is rounded to two decimals.
+    """
     hisse_str = (
         group_df["hisse_kodu"].iloc[0]
         if not group_df.empty and "hisse_kodu" in group_df.columns
