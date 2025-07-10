@@ -1,7 +1,7 @@
 """Simplified backtesting utilities used by the CLI.
 
-Functions here implement a lightweight trading simulator for unit tests
-and command line usage.
+Functions implement a lightweight trading simulator for unit tests and
+command-line usage.
 """
 
 import numpy as np

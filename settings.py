@@ -1,7 +1,7 @@
-"""Load optional YAML settings controlling recursion depth.
+"""Load optional YAML settings for the system.
 
-Configuration is read from ``settings.yaml`` or the path specified via
-the ``FAS_SETTINGS_FILE`` environment variable.
+Configuration is read from ``settings.yaml`` or from the path specified via the
+``FAS_SETTINGS_FILE`` environment variable.
 """
 
 from __future__ import annotations
