@@ -79,12 +79,12 @@ logger = get_logger(__name__)
 EMA_CLOSE_PATTERN = re.compile(r"ema_(\d+)_keser_close_(yukari|asagi)")
 
 
-
 def _calc_ema(df: pd.DataFrame, n: int) -> pd.Series:
     """Return the ``n`` period EMA of ``close`` or ``NaN`` if missing."""
     if "close" not in df.columns:
         return pd.Series(np.nan, index=df.index)
     return df["close"].ewm(span=n, adjust=False).mean()
+
 
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
     """Return the 1H classic pivot point for ``group_df``."""
@@ -106,6 +106,7 @@ def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
             f"{hisse_str}: {sutun_adi} hesaplanırken hata: {e}", exc_info=False
         )
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
+
 
 def _calculate_group_indicators_and_crossovers(
     _grp_df: pd.DataFrame,
@@ -529,6 +530,7 @@ def _calculate_group_indicators_and_crossovers(
     df_final_group = df_final_group.loc[:, ~df_final_group.columns.duplicated()]
     return df_final_group
 
+
 def _calculate_series_series_crossover(
     group_df: pd.DataFrame,
     s1_col: str,
@@ -581,6 +583,7 @@ def _calculate_series_series_crossover(
         except Exception:
             pass
         return empty_above, empty_below
+
 
 def _calculate_series_value_crossover(
     group_df: pd.DataFrame,
@@ -637,6 +640,7 @@ def _calculate_series_value_crossover(
             pass
         return empty_above, empty_below
 
+
 def _ekle_psar(df: pd.DataFrame) -> None:
     """Calculate Parabolic SAR columns and append them to ``df``."""
     gerekli = ["high", "low", "close"]
@@ -667,6 +671,7 @@ def _ekle_psar(df: pd.DataFrame) -> None:
         except Exception:
             pass
 
+
 def _tema20(series: pd.Series) -> pd.Series:
     """Compute the 20-period TEMA, falling back to manual calculation."""
     if hasattr(ta, "tema"):
@@ -678,6 +683,7 @@ def _tema20(series: pd.Series) -> pd.Series:
     ema2 = ema1.ewm(span=20, adjust=False).mean()
     ema3 = ema2.ewm(span=20, adjust=False).mean()
     return (3 * ema1) - (3 * ema2) + ema3
+
 
 def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     """Return ``df`` with extra crossover columns based on ``cross_names``.
@@ -709,6 +715,7 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
         raise ValueError(f"Bilinmeyen crossover format\u0131: {name}")
     return df
 
+
 def add_series(
     df: pd.DataFrame, name: str, values, seen_names: set[str] | None = None
 ) -> None:
@@ -729,6 +736,7 @@ def add_series(
         seen_names = set(df.columns)
     safe = unique_name(name, seen_names)
     safe_set(df, safe, values)
+
 
 def calculate_chunked(
     df: pd.DataFrame, active_inds: list[str], chunk_size: int = CHUNK_SIZE
@@ -755,7 +763,6 @@ def calculate_chunked(
                 mini.to_parquet(pq_path, partition_cols=["ticker"])
             del mini
         gc.collect()
-
 
 
 def calculate_indicators(
@@ -815,6 +822,7 @@ def calculate_indicators(
 
     out = out.loc[:, ~out.columns.duplicated()]
     return out
+
 
 def hesapla_teknik_indikatorler_ve_kesisimler(
     df_islenmis_veri: pd.DataFrame,
@@ -973,6 +981,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             exc_info=True,
         )
 
+
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
     """Add the given SMA/EMA column when missing."""
     if logger_param is None:
@@ -1004,4 +1013,3 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
             log_failure("indicators", col, str(e))
         except Exception:
             pass
-
