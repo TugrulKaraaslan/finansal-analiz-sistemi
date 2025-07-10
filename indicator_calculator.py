@@ -157,39 +157,6 @@ def add_series(
     safe_set(df, safe, values)
 
 
-def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
-    """Add the given SMA/EMA column when missing."""
-    if logger_param is None:
-        logger_param = logger
-    local_logger = logger_param
-    col = f"{kind}_{n}"
-    if col in df.columns and df[col].notna().all() or "close" not in df.columns:
-        return
-    try:
-        if kind == "sma":
-            safe_set(
-                df,
-                col,
-                df["close"].rolling(window=n, min_periods=1).mean().values,
-            )
-        else:
-            safe_set(
-                df,
-                col,
-                df["close"].ewm(span=n, adjust=False, min_periods=1).mean().values,
-            )
-        df[col] = df[col].bfill()
-        local_logger.debug(f"'{col}' sütunu safe_ma ile eklendi.")
-    except Exception as e:
-        local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)
-        try:
-            from utils.failure_tracker import log_failure
-
-            log_failure("indicators", col, str(e))
-        except Exception:
-            pass
-
-
 def calculate_indicators(
     df: pd.DataFrame, indicators: list[str] | None = None
 ) -> pd.DataFrame:
@@ -252,6 +219,39 @@ def calculate_chunked(
                 mini.to_parquet(pq_path, partition_cols=["ticker"])
             del mini
         gc.collect()
+
+
+def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
+    """Add the given SMA/EMA column when missing."""
+    if logger_param is None:
+        logger_param = logger
+    local_logger = logger_param
+    col = f"{kind}_{n}"
+    if col in df.columns and df[col].notna().all() or "close" not in df.columns:
+        return
+    try:
+        if kind == "sma":
+            safe_set(
+                df,
+                col,
+                df["close"].rolling(window=n, min_periods=1).mean().values,
+            )
+        else:
+            safe_set(
+                df,
+                col,
+                df["close"].ewm(span=n, adjust=False, min_periods=1).mean().values,
+            )
+        df[col] = df[col].bfill()
+        local_logger.debug(f"'{col}' sütunu safe_ma ile eklendi.")
+    except Exception as e:
+        local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)
+        try:
+            from utils.failure_tracker import log_failure
+
+            log_failure("indicators", col, str(e))
+        except Exception:
+            pass
 
 
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
