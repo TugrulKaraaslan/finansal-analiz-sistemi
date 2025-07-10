@@ -1,4 +1,7 @@
-"""Log peak memory usage to ``reports/memory_profile.csv``."""
+"""Log peak memory usage to ``reports/memory_profile.csv``.
+
+Use as a context manager around a code block to record memory growth.
+"""
 
 import os
 import time
