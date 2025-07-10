@@ -394,7 +394,6 @@ def run_pipeline(
 
 def veri_yukle(force_excel_reload: bool = False):
     """Load filter definitions and raw price data."""
-
     df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
     if df_filters is None or df_filters.empty:
         logger.critical("Filtre kuralları yüklenemedi veya boş.")
