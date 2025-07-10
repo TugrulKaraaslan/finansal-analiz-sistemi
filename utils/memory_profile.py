@@ -1,7 +1,4 @@
-"""Context manager that logs memory usage during execution.
-
-Records the peak process memory into ``reports/memory_profile.csv``.
-"""
+"""Log peak memory usage to ``reports/memory_profile.csv``."""
 
 import os
 import time
@@ -10,7 +7,7 @@ import psutil
 
 
 class mem_profile:
-    """Record peak memory usage during the with-block."""
+    """Track peak memory usage within a ``with`` block."""
 
     def __enter__(self):
         """Start tracking process memory usage."""

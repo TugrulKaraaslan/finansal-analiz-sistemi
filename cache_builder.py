@@ -1,8 +1,4 @@
-"""Parquet cache builder.
-
-Concatenates raw CSV files from :data:`RAW_DIR` into :data:`CACHE` when
-the cache file is missing or empty.
-"""
+"""Build the Parquet cache from raw CSV files."""
 
 from pathlib import Path
 
@@ -18,11 +14,7 @@ LOCK_FILE = CACHE.with_suffix(".lock")
 
 
 def build() -> None:
-    """Create the Parquet cache from raw CSV files.
-
-    All CSVs under :data:`RAW_DIR` are concatenated into :data:`CACHE` when the
-    cache file is missing or empty.
-    """
+    """Build the Parquet cache when the file is missing or empty."""
     with FileLock(str(LOCK_FILE)):
         if CACHE.exists() and CACHE.stat().st_size > 0:
             logger.info("Cache hit, skipping build")
