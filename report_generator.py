@@ -85,7 +85,20 @@ EXPECTED_COLUMNS = [
 def _build_detay_df(
     detay_list: list[pd.DataFrame], trades: pd.DataFrame
 ) -> pd.DataFrame:
-    """Combine partial detail frames and merge with trade results."""
+    """Return a merged detail DataFrame from partial frames and trades.
+
+    Parameters
+    ----------
+    detay_list : list[pd.DataFrame]
+        Partial detail frames generated per filter.
+    trades : pd.DataFrame
+        Trade information to merge on ``filtre_kodu`` and ``hisse_kodu``.
+
+    Returns
+    -------
+    pd.DataFrame
+        Combined detail rows enriched with trade results when available.
+    """
     detay_df = pd.concat(detay_list, ignore_index=True)
     if trades is not None and not trades.empty:
         detay_df = detay_df.merge(
@@ -169,7 +182,15 @@ def _write_error_sheet(
 
 
 def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
-    """Write a lightweight health summary sheet."""
+    """Write KPI summary and top/bottom charts to ``Sağlık Özeti`` sheet.
+
+    Parameters
+    ----------
+    wr : pd.ExcelWriter
+        Writer object created with ``xlsxwriter``.
+    df_sum : pd.DataFrame
+        Summary statistics used to calculate KPI metrics.
+    """
     toplam = len(df_sum)
     ok = int((df_sum["sebep_kodu"] == "OK").sum())
     nostock = int((df_sum["sebep_kodu"] == "NO_STOCK").sum())
@@ -251,7 +272,15 @@ def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
 
 
 def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
-    """Write summary statistics to the given Excel writer."""
+    """Record aggregate statistics in the ``İstatistik`` sheet.
+
+    Parameters
+    ----------
+    wr : pd.ExcelWriter
+        Excel writer used for output.
+    df_sum : pd.DataFrame
+        Summary data from the backtest run.
+    """
     toplam = len(df_sum)
     islemli = (df_sum["hisse_sayisi"] > 0).sum()
     islemsiz = (df_sum["sebep_kodu"] == "NO_STOCK").sum()
@@ -293,7 +322,30 @@ def generate_full_report(
     quick: bool = True,
     logger_param=None,
 ) -> Path:
-    """Create full Excel report with optional charts and error sheets."""
+    """Create a complete Excel workbook from backtest results.
+
+    Parameters
+    ----------
+    summary_df : pd.DataFrame
+        Summary table produced by the backtest.
+    detail_df : pd.DataFrame
+        Detailed ticker information.
+    error_list : Iterable
+        Optional error entries to include in the report.
+    out_path : str | Path
+        Destination of the generated workbook.
+    keep_legacy : bool, optional
+        Normalize legacy column names when ``True``.
+    quick : bool, optional
+        Skip optional charts when ``True``.
+    logger_param : logging.Logger, optional
+        Logger used for status messages.
+
+    Returns
+    -------
+    Path
+        Path to the written Excel file.
+    """
     if logger_param is None:
         logger_param = logger
     if keep_legacy:
@@ -510,7 +562,26 @@ def kaydet_raporlar(
     filepath: Path,
     logger_param=None,
 ) -> Path:
-    """Append three report sheets to an existing workbook."""
+    """Append summary, detail and stats sheets to an existing workbook.
+
+    Parameters
+    ----------
+    ozet_df : pd.DataFrame
+        Summary sheet contents.
+    detay_df : pd.DataFrame
+        Detail records for tickers.
+    istat_df : pd.DataFrame
+        Aggregated statistics table.
+    filepath : Path
+        Excel file to update.
+    logger_param : optional
+        Logger instance for progress output.
+
+    Returns
+    -------
+    Path
+        ``filepath`` after being written.
+    """
     if logger_param is None:
         logger_param = logger
     filepath = Path(filepath)
@@ -537,7 +608,26 @@ def kaydet_uc_sekmeli_excel(
     istatistik_df: pd.DataFrame,
     logger_param=None,
 ) -> Path:
-    """Save ``ozet``, ``detay`` and ``istatistik`` DataFrames into ``fname``."""
+    """Save summary, detail and statistics frames into ``fname``.
+
+    Parameters
+    ----------
+    fname : str | Path
+        Destination Excel file.
+    ozet_df : pd.DataFrame
+        Summary data to write.
+    detay_df : pd.DataFrame
+        Detail table with ticker rows.
+    istatistik_df : pd.DataFrame
+        Statistics sheet contents.
+    logger_param : optional
+        Logger instance for status messages.
+
+    Returns
+    -------
+    Path
+        Path to the generated workbook.
+    """
     if logger_param is None:
         logger_param = logger
     fname = Path(fname)
