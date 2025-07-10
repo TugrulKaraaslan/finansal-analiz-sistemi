@@ -31,4 +31,4 @@ if not hasattr(np, "NaN"):
 # Ensure ``importlib.metadata`` registers itself on the ``importlib`` module so
 # packages relying on ``importlib.metadata`` as an attribute work consistently.
 import importlib  # noqa: E402
-import importlib.metadata  # noqa: E402
+import importlib.metadata  # noqa: E402,F401
