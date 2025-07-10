@@ -59,6 +59,19 @@ class MissingColumnError(Exception):
         self.missing = missing
 
 
+def _extract_query_columns(query: str) -> set:
+    """Return column-like identifiers referenced in a filter query."""
+    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
+    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
+    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
+    return tokens - reserved
+
+
+def _extract_columns_from_query(query: str) -> set:
+    """Return referenced columns using the unified naming scheme."""
+    return _extract_query_columns(query)
+
+
 def _apply_single_filter(df, kod, query):
     """Run a filter expression on ``df`` and collect diagnostics.
 
@@ -156,19 +169,6 @@ def _build_solution(err_type: str, msg: str) -> str:
     return ""
 
 
-def _extract_columns_from_query(query: str) -> set:
-    """Return referenced columns using the unified naming scheme."""
-    return _extract_query_columns(query)
-
-
-def _extract_query_columns(query: str) -> set:
-    """Return column-like identifiers referenced in a filter query."""
-    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
-    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
-    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
-    return tokens - reserved
-
-
 def clear_failed() -> None:
     """Clear global FAILED_FILTERS list."""
     FAILED_FILTERS.clear()
@@ -224,6 +224,42 @@ def kaydet_hata(
         "cozum_onerisi": _build_solution(error_type, msg if msg else ""),
     }
     log_dict.setdefault("hatalar", []).append(entry)
+
+
+def safe_eval(expr, df, depth: int = 0, visited=None):
+    """Evaluate filter safely with depth and circular guards."""
+    if visited is None:
+        visited = set()
+    if depth > settings.MAX_FILTER_DEPTH:
+        raise QueryError(
+            f"Max recursion depth ({settings.MAX_FILTER_DEPTH}) exceeded"
+        )
+
+    if isinstance(expr, str):
+        return df.query(expr)
+
+    if isinstance(expr, dict) and "sub_expr" in expr:
+        current = expr.get("code")
+        if current is not None:
+            if current in visited:
+                raise CircularError(f"Circular reference: {current}")
+            visited.add(current)
+        try:
+            return safe_eval(expr["sub_expr"], df, depth + 1, visited)
+        except QueryError as e:
+            FAILED_FILTERS.append({"filtre_kodu": expr.get("code"), "hata": str(e)})
+            logger.warning("QUERY_ERROR %s", e)
+            try:
+                from utils.error_map import get_reason_hint
+                from utils.failure_tracker import log_failure
+
+                reason, hint = get_reason_hint(e)
+                log_failure("filters", expr.get("code", "unknown"), reason, hint)
+            except Exception:
+                pass
+            raise
+
+    raise QueryError("Invalid expression")
 
 
 def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
@@ -301,40 +337,6 @@ def run_single_filter(kod: str, query: str) -> dict[str, Any]:
         except Exception:
             pass
     return atlanmis
-
-
-def safe_eval(expr, df, depth: int = 0, visited=None):
-    """Evaluate filter safely with depth and circular guards."""
-    if visited is None:
-        visited = set()
-    if depth > settings.MAX_FILTER_DEPTH:
-        raise QueryError(f"Max recursion depth ({settings.MAX_FILTER_DEPTH}) exceeded")
-
-    if isinstance(expr, str):
-        return df.query(expr)
-
-    if isinstance(expr, dict) and "sub_expr" in expr:
-        current = expr.get("code")
-        if current is not None:
-            if current in visited:
-                raise CircularError(f"Circular reference: {current}")
-            visited.add(current)
-        try:
-            return safe_eval(expr["sub_expr"], df, depth + 1, visited)
-        except QueryError as e:
-            FAILED_FILTERS.append({"filtre_kodu": expr.get("code"), "hata": str(e)})
-            logger.warning("QUERY_ERROR %s", e)
-            try:
-                from utils.error_map import get_reason_hint
-                from utils.failure_tracker import log_failure
-
-                reason, hint = get_reason_hint(e)
-                log_failure("filters", expr.get("code", "unknown"), reason, hint)
-            except Exception:
-                pass
-            raise
-
-    raise QueryError("Invalid expression")
 
 
 def uygula_filtreler(
