@@ -18,16 +18,6 @@ from finansal_analiz_sistemi.report_writer import ReportWriter
 logger = logging.getLogger(__name__)
 
 
-@atexit.register
-def _summary() -> None:
-    """Log a final summary and exit with error status if needed."""
-    logger.info(
-        "[SUMMARY] run finished — errors=%d warnings=%d",
-        ERROR_COUNTER["errors"],
-        ERROR_COUNTER["warnings"],
-    )
-    if ERROR_COUNTER["errors"]:
-        sys.exit(1)
 
 
 def parse_args() -> Namespace:
@@ -74,6 +64,18 @@ def run_analysis(csv_path: Path) -> Path:
     out_path = csv_path.with_suffix(".xlsx")
     ReportWriter().write_report(df, out_path)
     return out_path
+
+
+@atexit.register
+def _summary() -> None:
+    """Log a final summary and exit with error status if needed."""
+    logger.info(
+        "[SUMMARY] run finished — errors=%d warnings=%d",
+        ERROR_COUNTER["errors"],
+        ERROR_COUNTER["warnings"],
+    )
+    if ERROR_COUNTER["errors"]:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
