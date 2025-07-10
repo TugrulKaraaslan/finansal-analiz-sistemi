@@ -85,7 +85,7 @@ EXPECTED_COLUMNS = [
 def _build_detay_df(
     detay_list: list[pd.DataFrame], trades: pd.DataFrame
 ) -> pd.DataFrame:
-    """Return a merged detail DataFrame from partial frames and trades.
+    """Combine partial detail frames and attach trade results.
 
     Parameters
     ----------
