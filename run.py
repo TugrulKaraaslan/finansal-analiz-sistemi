@@ -51,7 +51,7 @@ except ImportError as e_import_main:
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Return summary, detail and statistics DataFrames from ``rapor_df``.
+    """Return summary, detail and statistics DataFrames derived from ``rapor_df``.
 
     Parameters
     ----------
@@ -72,7 +72,7 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
 
 
 def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Display results using a minimal Streamlit interface.
+    """Display summary or detail tables in a simple Streamlit UI.
 
     Parameters
     ----------

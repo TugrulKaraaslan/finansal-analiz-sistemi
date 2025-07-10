@@ -75,7 +75,7 @@ warnings.filterwarnings(
 
 logger = get_logger(__name__)
 
-# Otomatik EMA/kapanış kesişim sütunları için desen
+# Pattern for automatically generated EMA/close crossover columns
 EMA_CLOSE_PATTERN = re.compile(r"ema_(\d+)_keser_close_(yukari|asagi)")
 
 
