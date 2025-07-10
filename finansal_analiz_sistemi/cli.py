@@ -1,4 +1,4 @@
-"""Minimal command line interface for running reports and validations."""
+"""Minimal command-line tool to generate reports or validate filters."""
 
 import atexit
 import logging
