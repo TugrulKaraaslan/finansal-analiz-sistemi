@@ -157,7 +157,7 @@ def _build_solution(err_type: str, msg: str) -> str:
 
 
 def _extract_columns_from_query(query: str) -> set:
-    """Compatibility wrapper for the new naming scheme."""
+    """Return referenced columns using the unified naming scheme."""
     return _extract_query_columns(query)
 
 

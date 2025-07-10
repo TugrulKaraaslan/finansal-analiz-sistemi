@@ -68,13 +68,11 @@ def _temizle_sayisal_deger(deger):
 def on_isle_hisse_verileri(
     df_ham: pd.DataFrame, logger_param=None
 ) -> pd.DataFrame | None:
-    """Preprocess raw equity data.
+    """Return cleaned stock data ready for indicator calculation.
 
-    - Fix date format and handle ``NaT`` values.
-    - Convert OHLCV and volume columns to numeric.
-    - Manage NaN values in critical columns.
-    - Sort the dataset.
-    - Optionally remove BIST holidays.
+    The preprocessing pipeline fixes date formats, converts OHLCV columns
+    to numeric types, manages ``NaN`` values, sorts the dataset and
+    optionally removes BIST holidays.
     """
     if logger_param is None:
         logger_param = logger
