@@ -1,7 +1,7 @@
-"""Build the Parquet cache from raw CSV files.
+"""Utilities to create the unified Parquet cache from raw CSV files.
 
-Raw CSV datasets are combined into a single Parquet file that can be
-loaded efficiently by the rest of the project.
+Raw datasets located under :data:`RAW_DIR` are merged and written to
+``CACHE`` so the rest of the project can load data efficiently.
 """
 
 from pathlib import Path
@@ -18,11 +18,7 @@ LOCK_FILE = CACHE.with_suffix(".lock")
 
 
 def build() -> None:
-    """Build the Parquet cache when the file is missing or empty.
-
-    All CSV files under :data:`RAW_DIR` are concatenated and written to
-    :data:`CACHE` as a Parquet dataset.
-    """
+    """Create or refresh the Parquet cache from the raw CSV files."""
     with FileLock(str(LOCK_FILE)):
         if CACHE.exists() and CACHE.stat().st_size > 0:
             logger.info("Cache hit, skipping build")

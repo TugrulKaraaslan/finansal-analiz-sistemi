@@ -15,7 +15,7 @@ except Exception:  # pragma: no cover - optional dependency
 
 
 def _call_openbb(func_name: str, **kwargs):
-    """Return the result of ``obb.technical.func_name`` if available.
+    """Invoke ``obb.technical.func_name`` when OpenBB is installed.
 
     Parameters
     ----------
@@ -27,7 +27,7 @@ def _call_openbb(func_name: str, **kwargs):
     Returns
     -------
     Any
-        Value returned by the OpenBB function.
+        Value produced by the OpenBB function.
 
     Raises
     ------
