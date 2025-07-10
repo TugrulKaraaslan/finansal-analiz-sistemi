@@ -34,26 +34,6 @@ logger = get_logger(__name__)
 log_counter: ErrorCountingFilter | None = None
 
 
-def on_isle(df: pd.DataFrame) -> pd.DataFrame:
-    """Preprocess raw stock data.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Raw dataset loaded from the CSV/Parquet files.
-
-    Returns
-    -------
-    pd.DataFrame
-        Cleaned dataset ready for indicator calculation.
-    """
-    processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
-    if processed is None or processed.empty:
-        logger.critical("Veri ön işleme başarısız.")
-        sys.exit(1)
-    return processed
-
-
 def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate indicators and crossover columns.
 
@@ -85,6 +65,15 @@ def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
         logger.critical("İndikatör hesaplanamadı.")
         sys.exit(1)
     return result
+
+
+def on_isle(df: pd.DataFrame) -> pd.DataFrame:
+    """Preprocess raw stock data."""
+    processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
+    if processed is None or processed.empty:
+        logger.critical("Veri ön işleme başarısız.")
+        sys.exit(1)
+    return processed
 
 
 def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
