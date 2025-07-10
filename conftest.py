@@ -47,8 +47,8 @@ def _sanitize_sys_modules() -> None:
         sys.modules.update(fixed)
 
 
-# Hypothesis, modüller toplanırken ``sys.modules``'u tarar.
-# Hemen yama uygulayarak koleksiyon hatalarını önle.
+# Hypothesis scans ``sys.modules`` during test collection. Apply the patch
+# immediately to avoid collection-time errors.
 _sanitize_sys_modules()
 
 if hypothesis is not None:
