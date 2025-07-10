@@ -18,8 +18,6 @@ from finansal_analiz_sistemi.report_writer import ReportWriter
 logger = logging.getLogger(__name__)
 
 
-
-
 def parse_args() -> Namespace:
     """Return parsed arguments for this CLI.
 
