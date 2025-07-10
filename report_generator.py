@@ -225,10 +225,10 @@ def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     worst5 = df_sum.sort_values("ort_getiri_%").dropna(subset=["ort_getiri_%"]).head(5)
 
     if not top5.empty and not worst5.empty:
-        ws.write_column(1, 8, top5["filtre_kodu"])  # I column
-        ws.write_column(1, 9, worst5["filtre_kodu"])  # J column
-        ws.write_column(1, 10, top5["ort_getiri_%"])  # K column
-        ws.write_column(1, 11, worst5["ort_getiri_%"])  # L column
+        ws.write_column(1, 8, top5["filtre_kodu"])
+        ws.write_column(1, 9, worst5["filtre_kodu"])
+        ws.write_column(1, 10, top5["ort_getiri_%"])
+        ws.write_column(1, 11, worst5["ort_getiri_%"])
 
         chart = workbook.add_chart({"type": "column"})
         chart.add_series(
