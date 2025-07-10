@@ -174,8 +174,6 @@ def _apply_single_filter(df, kod, query):
         return None, info
 
 
-
-
 def evaluate_filter(
     fid: str | dict,
     df: Any | None = None,
