@@ -11,10 +11,9 @@ import gc
 import re
 import warnings
 
-# Ensure pandas_ta can locate its distribution info. Some environments lazily
-# query ``importlib.metadata`` so simply importing the module can help locate
-# the package metadata. Use a trivial ``version`` call so ``pyflakes`` marks
-# the import as used without affecting runtime when the package is missing.
+# Import distribution metadata so ``pandas_ta`` can be located correctly.  The
+# version call doubles as a no-op reference for linters when the package is
+# absent.
 from importlib import metadata as _metadata
 from pathlib import Path
 
@@ -543,7 +542,25 @@ def _calculate_series_series_crossover(
     col_name_below: str,
     logger_param=None,
 ) -> tuple[pd.Series, pd.Series] | None:
-    """Detect where ``s1_col`` crosses ``s2_col`` in ``group_df``."""
+    """Detect where ``s1_col`` crosses ``s2_col`` in ``group_df``.
+
+    Parameters
+    ----------
+    group_df : pd.DataFrame
+        Input DataFrame for a single ticker.
+    s1_col, s2_col : str
+        Column names to compare.
+    col_name_above, col_name_below : str
+        Names of the resulting crossover columns.
+    logger_param : optional
+        Logger instance for debug output.
+
+    Returns
+    -------
+    tuple[pd.Series, pd.Series] | None
+        Pair of boolean Series for cross-above and cross-below or ``None`` when
+        the columns are missing.
+    """
     if logger_param is None:
         logger_param = logger
     local_logger = logger_param
@@ -596,7 +613,27 @@ def _calculate_series_value_crossover(
     suffix: str,
     logger_param=None,
 ) -> tuple[pd.Series, pd.Series] | None:
-    """Return crossover signals when ``s_col`` crosses ``value``."""
+    """Return crossover signals when ``s_col`` crosses ``value``.
+
+    Parameters
+    ----------
+    group_df : pd.DataFrame
+        DataFrame for a single ticker.
+    s_col : str
+        Column to compare with the constant ``value``.
+    value : float
+        Threshold value used for the crossover.
+    suffix : str
+        Identifier used in the output column names.
+    logger_param : optional
+        Logger instance for debug output.
+
+    Returns
+    -------
+    tuple[pd.Series, pd.Series] | None
+        Series for cross-above and cross-below events or ``None`` when the
+        source column is missing.
+    """
     if logger_param is None:
         logger_param = logger
     local_logger = logger_param
