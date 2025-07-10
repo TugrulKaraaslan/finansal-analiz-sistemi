@@ -29,12 +29,7 @@ except ImportError:
 
 
 def _temizle_sayisal_deger(deger):
-    """Return ``deger`` as ``float`` if it can be parsed.
-
-    Strings are stripped of non-numeric characters and Turkish style
-    thousand/decimal separators are normalized. ``np.nan`` is returned when
-    conversion fails.
-    """
+    """Return numeric ``float`` parsed from ``deger`` or ``np.nan``."""
     if pd.isna(deger):
         return np.nan
     if isinstance(

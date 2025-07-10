@@ -10,7 +10,7 @@ import psutil
 
 
 class mem_profile:
-    """Write peak memory usage to ``reports/memory_profile.csv``."""
+    """Record peak memory usage during the with-block."""
 
     def __enter__(self):
         """Start tracking process memory usage."""
