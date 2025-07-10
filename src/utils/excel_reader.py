@@ -1,4 +1,7 @@
-"""Read Excel workbooks using a lightweight cache."""
+"""Read Excel workbooks using a lightweight cache.
+
+The cache avoids reloading unchanged files by tracking modification time.
+"""
 
 from __future__ import annotations
 

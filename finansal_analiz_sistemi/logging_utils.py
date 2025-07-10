@@ -1,4 +1,8 @@
-"""Helpers for counting log messages during execution."""
+"""Utilities to track log messages during execution.
+
+The module exposes :class:`ErrorCountingFilter` which counts ERROR and
+WARNING records so tests and scripts can assert on logged output.
+"""
 
 import logging
 from datetime import datetime
