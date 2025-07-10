@@ -1,4 +1,8 @@
-"""Track failed operations and reasons for reporting."""
+"""Track failed operations for later reporting.
+
+The helpers here collect failed indicators, filters and other items so
+they can be summarized after a run.
+"""
 
 from collections import defaultdict
 from dataclasses import asdict, dataclass
@@ -13,7 +17,7 @@ class FailedFilter:
     hint: str = ""
 
 
-# {'indicators': [...], 'filters': [...], ...}
+# Global record of failures per category, e.g. ``{"indicators": [], "filters": []}``
 failures: defaultdict[str, list[FailedFilter]] = defaultdict(list)
 
 
