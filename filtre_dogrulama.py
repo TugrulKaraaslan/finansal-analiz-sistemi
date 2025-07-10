@@ -33,6 +33,7 @@ def dogrula_filtre_dataframe(
     dict
         Mapping of ``filter_code`` to a short description when the row is
         invalid.
+
     """
     sorunlu = {}
     zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]
@@ -86,6 +87,7 @@ def validate(
     -------
     list[ValidationError]
         Structured error objects describing validation failures.
+
     """
     zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]
     errors: list[ValidationError] = []

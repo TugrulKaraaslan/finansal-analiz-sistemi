@@ -23,6 +23,7 @@ def fill_missing_business_day(
     pd.DataFrame
         DataFrame where missing dates are backfilled with the prior business
         day.
+
     """
     if date_col not in df.columns:
         return df

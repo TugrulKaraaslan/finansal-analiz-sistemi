@@ -703,6 +703,7 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     -------
     pd.DataFrame
         Input ``df`` with the new crossover columns appended.
+
     """
     for name in cross_names:
         m = EMA_CLOSE_PATTERN.fullmatch(name)
@@ -735,6 +736,7 @@ def add_series(
         Values to assign aligned to ``df.index``.
     seen_names : set[str] | None, optional
         Existing column names used to generate a unique suffix.
+
     """
     if seen_names is None:
         seen_names = set(df.columns)
@@ -755,6 +757,7 @@ def calculate_chunked(
         Indicator names to calculate for each chunk.
     chunk_size : int, optional
         Number of tickers per chunk, by default ``CHUNK_SIZE``.
+
     """
     pq_path = Path("veri/gosterge.parquet")
     for kods in lazy_chunk(df.groupby("ticker", sort=False), chunk_size):
@@ -787,6 +790,7 @@ def calculate_indicators(
     pd.DataFrame
         ``df`` copy with indicator columns added. Duplicate names are skipped
         with a warning.
+
     """
     if indicators is None:
         return df

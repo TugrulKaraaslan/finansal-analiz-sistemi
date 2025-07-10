@@ -30,6 +30,7 @@ def purge_old_logs(
     -------
     int
         Number of files processed (also when ``dry_run`` is ``True``).
+
     """
     if log_dir is None:
         log_dir = Path("loglar")

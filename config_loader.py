@@ -32,6 +32,7 @@ def load_crossover_names(csv_path: str | Path | None = None) -> list[str]:
     -------
     list[str]
         Sorted list of unique crossover column names.
+
     """
     path = Path(csv_path or config.FILTRE_DOSYA_YOLU)
     names: set[str] = set()
@@ -62,5 +63,6 @@ def load_ema_close_crossovers(csv_path: str | Path | None = None) -> list[str]:
     -------
     list[str]
         Sorted list of EMA-close crossover column names.
+
     """
     return [n for n in load_crossover_names(csv_path) if EMA_CLOSE_RE.fullmatch(n)]

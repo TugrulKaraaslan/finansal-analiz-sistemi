@@ -98,6 +98,7 @@ def _build_detay_df(
     -------
     pd.DataFrame
         Combined detail rows enriched with trade results when available.
+
     """
     detay_df = pd.concat(detay_list, ignore_index=True)
     if trades is not None and not trades.empty:
@@ -125,6 +126,7 @@ def _write_error_sheet(
         Explicit error entries generated during processing.
     summary_df : pd.DataFrame, optional
         Summary table used to ensure every non-``OK`` record is represented.
+
     """
     from dataclasses import asdict, is_dataclass
 
@@ -190,6 +192,7 @@ def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
         Writer object created with ``xlsxwriter``.
     df_sum : pd.DataFrame
         Summary statistics used to calculate KPI metrics.
+
     """
     toplam = len(df_sum)
     ok = int((df_sum["sebep_kodu"] == "OK").sum())
@@ -280,6 +283,7 @@ def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
         Excel writer used for output.
     df_sum : pd.DataFrame
         Summary data from the backtest run.
+
     """
     toplam = len(df_sum)
     islemli = (df_sum["hisse_sayisi"] > 0).sum()
@@ -345,6 +349,7 @@ def generate_full_report(
     -------
     Path
         Path to the written Excel file.
+
     """
     if logger_param is None:
         logger_param = logger
@@ -581,6 +586,7 @@ def kaydet_raporlar(
     -------
     Path
         ``filepath`` after being written.
+
     """
     if logger_param is None:
         logger_param = logger
@@ -627,6 +633,7 @@ def kaydet_uc_sekmeli_excel(
     -------
     Path
         Path to the generated workbook.
+
     """
     if logger_param is None:
         logger_param = logger

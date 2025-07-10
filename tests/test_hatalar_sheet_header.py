@@ -33,7 +33,7 @@ def test_hatalar_sheet_header(tmp_path: Path) -> None:
 
 
 def generate_excel_with_errors(tmp_path: Path) -> Path:
-    """Helper to create an Excel file containing error records."""
+    """Create an Excel file containing error records."""
     errs = [
         {
             "filtre_kod": "E1",

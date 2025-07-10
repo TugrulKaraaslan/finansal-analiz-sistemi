@@ -48,6 +48,7 @@ def load_dataset(rebuild: bool = False) -> pd.DataFrame:
     -------
     pd.DataFrame
         Combined stock dataset read from the Parquet cache.
+
     """
     parquet_path = Path(config.PARQUET_CACHE_PATH)
     if rebuild or not parquet_path.exists():

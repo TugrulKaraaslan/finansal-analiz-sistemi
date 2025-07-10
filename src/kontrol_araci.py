@@ -35,6 +35,7 @@ def tarama_denetimi(
     pd.DataFrame
         Summary table with columns ``kod``, ``tip``, ``durum``, ``sebep``,
         ``eksik_sutunlar``, ``nan_sutunlar`` and ``secim_adedi``.
+
     """
     if "kod" not in df_filtreler.columns and "FilterCode" in df_filtreler.columns:
         df_filtreler = df_filtreler.rename(

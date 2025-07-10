@@ -27,6 +27,7 @@ class ValidationError:
         Localized failure reason.
     hint : str
         Localized hint to assist recovery.
+
     """
 
     hata_tipi: str

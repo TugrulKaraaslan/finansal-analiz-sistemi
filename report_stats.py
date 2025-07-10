@@ -18,6 +18,7 @@ def _get_plotly():
     -------
     tuple
         Pair of :mod:`plotly.graph_objects` and :func:`plotly.subplots.make_subplots`.
+
     """
     try:
         import plotly.graph_objects as go_mod
@@ -81,6 +82,7 @@ def build_detay_df(
     -------
     pd.DataFrame
         Normalized detail table ready for Excel export.
+
     """
     strateji = strateji or getattr(config, "UYGULANAN_STRATEJI", "")
     if "filtre_kodu" not in detail_df.columns:

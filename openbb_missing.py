@@ -33,6 +33,7 @@ def _call_openbb(func_name: str, **kwargs):
     ------
     NotImplementedError
         If :mod:`openbb` or the requested function is missing.
+
     """
     if obb is None:
         raise NotImplementedError(f"openbb equivalent for '{func_name}' is missing")
@@ -77,6 +78,7 @@ def ichimoku(
     -------
     tuple[pd.DataFrame, pd.DataFrame]
         Two DataFrames containing classic Ichimoku and span columns.
+
     """
     df = pd.DataFrame(
         {
@@ -124,6 +126,7 @@ def macd(
     -------
     pd.DataFrame
         DataFrame with MACD, signal and histogram columns.
+
     """
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
@@ -162,6 +165,7 @@ def rsi(
     -------
     pd.Series
         Relative strength index series.
+
     """
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(

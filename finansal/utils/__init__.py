@@ -28,6 +28,7 @@ def lazy_chunk(seq: Iterable[T], size: int) -> Generator[Sequence[T], None, None
     ------
     Sequence[T]
         Consecutive chunks from the input sequence.
+
     """
     if size <= 0:
         raise ValueError("size must be positive")

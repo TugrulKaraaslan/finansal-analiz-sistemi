@@ -157,6 +157,7 @@ def check_and_create_dirs(*dir_paths):
     ----------
     *dir_paths : str or Path
         One or more directory paths that should exist.
+
     """
     for dir_path in dir_paths:
         if dir_path and not os.path.exists(dir_path):
