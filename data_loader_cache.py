@@ -27,6 +27,7 @@ class DataLoaderCache:
             Time-to-live for cached entries in seconds.
         maxsize : int, optional
             Maximum number of cached datasets.
+
         """
         self.loaded_data: TTLCache = TTLCache(maxsize=maxsize, ttl=ttl)
         self.logger = logger
@@ -49,6 +50,7 @@ class DataLoaderCache:
         -------
         pd.DataFrame
             DataFrame from cache or newly read from disk.
+
         """
         abs_path = os.path.abspath(filepath)
         key = (abs_path, "__csv__")
@@ -93,6 +95,7 @@ class DataLoaderCache:
         -------
         pd.ExcelFile
             Cached or freshly loaded workbook instance.
+
         """
         key = (os.path.abspath(filepath), "__excel__")
         if key in self.loaded_data:

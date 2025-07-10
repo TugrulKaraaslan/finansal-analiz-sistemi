@@ -21,6 +21,7 @@ def safe_set(df: pd.DataFrame, column: str, values) -> None:
         Column name to assign.
     values : iterable
         Values to be set. ``values`` must be index-aligned with ``df``.
+
     """
     # Ensure the index matches the DataFrame to avoid misaligned assignment
     series = pd.Series(values, index=df.index)

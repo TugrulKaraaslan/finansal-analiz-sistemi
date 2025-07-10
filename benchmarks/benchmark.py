@@ -15,6 +15,7 @@ def run_bench() -> float:
     -------
     float
         Execution time in seconds.
+
     """
     start = time.perf_counter()
     _ = sum(random.randint(1, 100) for _ in range(1_000_000))

@@ -24,6 +24,7 @@ def unique_name(base: str, seen: set[str]) -> str:
     -------
     str
         ``base`` itself if unused, otherwise ``base_1``, ``base_2`` and so on.
+
     """
     if base not in seen:
         seen.add(base)

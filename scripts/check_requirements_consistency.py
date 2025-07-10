@@ -32,6 +32,7 @@ def parse_requirements(path: Path) -> dict[str, str]:
     dict[str, str]
         Package names mapped to their pinned version strings. Missing
         versions are stored as an empty string.
+
     """
     pkgs = {}
     for line in path.read_text().splitlines():

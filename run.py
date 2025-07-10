@@ -62,6 +62,7 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
     -------
     tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
         Separated summary, detail and statistics frames.
+
     """
     if rapor_df is None or rapor_df.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
@@ -96,6 +97,7 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
         Summary table to show on the "Özet" page.
     detay_df : pd.DataFrame
         Detail table displayed when "Detay" is selected.
+
     """
     import streamlit as st
 
@@ -442,6 +444,7 @@ def run_pipeline(
     -------
     Path
         Location of the created Excel report.
+
     """
     global log_counter
     if log_counter is None:

@@ -76,6 +76,7 @@ def _apply_single_filter(df, kod, query):
     tuple[pd.DataFrame | None, dict]
         Resulting DataFrame (or ``None`` on error) and a dictionary describing
         the outcome.
+
     """
     info = {
         "kod": kod,
@@ -242,6 +243,7 @@ def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
     -------
     pd.DataFrame
         Resulting DataFrame or an empty frame when skipped.
+
     """
     from finansal_analiz_sistemi.config import cfg
 
@@ -360,6 +362,7 @@ def uygula_filtreler(
     -------
     tuple[dict, dict]
         ``filtre_sonuclar`` and ``atlanmis_filtreler_log_dict``.
+
     """
     if logger_param is None:
         logger_param = logger

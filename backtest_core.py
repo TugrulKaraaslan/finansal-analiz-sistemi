@@ -39,6 +39,7 @@ def _get_fiyat(
     -------
     float
         Price as ``float`` or ``NaN`` when unavailable.
+
     """
     if logger_param is None:
         logger_param = logger
@@ -127,11 +128,14 @@ def calistir_basit_backtest(
         Sale date in ``dd.mm.yyyy`` format.
     tarama_tarihi_str : str
         Screening date in ``dd.mm.yyyy`` format.
+    logger_param : optional
+        Logger instance for status messages.
 
     Returns
     -------
     tuple[pd.DataFrame, pd.DataFrame]
         Tuple of summary and detail DataFrames.
+
     """
     if logger_param is None:
         logger_param = logger

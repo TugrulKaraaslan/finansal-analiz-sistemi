@@ -36,5 +36,6 @@ def get_reason_hint(exc: Exception, _locale: str = "tr") -> Tuple[str, str]:
     -------
     tuple[str, str]
         ``(reason, hint)`` pair describing the failure.
+
     """
     return REASON_MAP.get(type(exc).__name__, DEFAULT_REASON)
