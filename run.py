@@ -51,7 +51,9 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     st.sidebar.title("Menü")
     sayfa = st.sidebar.radio("Sayfa", ("Özet", "Detay", "Grafik"))
 
-    df_to_show = ozet_df if sayfa == "Özet" else detay_df if sayfa == "Detay" else ozet_df
+    df_to_show = (
+        ozet_df if sayfa == "Özet" else detay_df if sayfa == "Detay" else ozet_df
+    )
 
     if df_to_show.empty:
         msg = "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
@@ -107,6 +109,7 @@ def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
         tuple(config.SERIES_VALUE_CROSSOVERS),
     )
     from utils.memory_profile import mem_profile
+
     with mem_profile():
         result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
             df,
@@ -138,6 +141,7 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     out_path = Path("raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
     out_path.parent.mkdir(exist_ok=True)
     from utils.memory_profile import mem_profile
+
     with mem_profile():
         report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
     logger.info(f"Excel raporu oluşturuldu: {out_path}")
