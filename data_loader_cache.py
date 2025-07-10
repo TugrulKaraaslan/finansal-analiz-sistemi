@@ -76,20 +76,23 @@ class DataLoaderCache:
             raise
 
     def load_excel(self, filepath: str, **kwargs) -> pd.ExcelFile:
-        """Return ``ExcelFile`` from cache or read it from disk.
+        """Return a cached ``ExcelFile`` object for ``filepath``.
+
+        The workbook is read from disk when no cached entry exists or when
+        the cached version has expired. Results are stored using the absolute
+        path as the cache key.
 
         Parameters
         ----------
         filepath : str
             Path to the Excel file.
         **kwargs : Any
-            Additional options passed to :func:`pandas.ExcelFile` when loading
-            from disk.
+            Additional options forwarded to :func:`pandas.ExcelFile`.
 
         Returns
         -------
         pd.ExcelFile
-            Cached or freshly loaded ``ExcelFile`` instance.
+            Cached or freshly loaded workbook instance.
         """
         key = (os.path.abspath(filepath), "__excel__")
         if key in self.loaded_data:
