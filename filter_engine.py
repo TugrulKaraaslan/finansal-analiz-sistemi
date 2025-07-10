@@ -186,7 +186,7 @@ def evaluate_filter(
     ``FILTER_DEFS``. Raises ``CyclicFilterError`` for cycles and
     ``MaxDepthError`` when ``settings.MAX_FILTER_DEPTH`` is exceeded.
     """
-    seen = seen or set()
+    seen = set(seen or ())
 
     if isinstance(fid, dict):
         key = fid.get("code", repr(fid))
@@ -203,9 +203,8 @@ def evaluate_filter(
     if depth > settings.MAX_FILTER_DEPTH:
         raise MaxDepthError(f"Depth {depth} exceeded on {key}")
 
-    seen.add(key)
     for child in children:
-        evaluate_filter(child, df=df, depth=depth + 1, seen=seen)
+        evaluate_filter(child, df=df, depth=depth + 1, seen=seen | {key})
     return key
 
 
