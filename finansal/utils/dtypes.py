@@ -1,4 +1,7 @@
-"""Dtype helpers for safe column assignment."""
+"""Dtype helpers for safe column assignment.
+
+Provides :func:`safe_set` for assigning series with proper dtypes.
+"""
 
 from __future__ import annotations
 
