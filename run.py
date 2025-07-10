@@ -33,6 +33,22 @@ if not hasattr(config, "CORE_INDICATORS") or not config.CORE_INDICATORS:
 logger = get_logger(__name__)
 log_counter: ErrorCountingFilter | None = None
 
+try:
+    import backtest_core
+    import data_loader
+    import filter_engine
+    import indicator_calculator
+    import preprocessor
+    import report_generator
+
+    logger.info("Tüm ana modüller başarıyla import edildi.")
+except ImportError as e_import_main:
+    logger.critical(
+        f"Temel modüllerden biri import edilemedi: {e_import_main}. Sistem durduruluyor.",
+        exc_info=True,
+    )
+    raise ImportError(e_import_main)
+
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
     """Return summary, detail and statistics DataFrames from ``rapor_df``.
@@ -113,103 +129,14 @@ def backtest_yap(
     return rapor_df, detay_df
 
 
-def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
-    """Apply filter rules to indicator data."""
-    return filter_engine.uygula_filtreler(
-        df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
-    )
-
-
-def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate indicators and crossover columns."""
-    wanted_cols = utils.extract_columns_from_filters_cached(
-        df_filtre_kurallari.to_csv(index=False),
-        tuple(config.SERIES_SERIES_CROSSOVERS),
-        tuple(config.SERIES_VALUE_CROSSOVERS),
-    )
-    from utils.memory_profile import mem_profile
-
-    with mem_profile():
-        result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
-            df,
-            wanted_cols=wanted_cols,
-            df_filters=df_filtre_kurallari,
-            logger_param=logger,
-        )
-    if result is None:
-        logger.critical("İndikatör hesaplanamadı.")
-        sys.exit(1)
-    return result
-
-
-def on_isle(df: pd.DataFrame) -> pd.DataFrame:
-    """Preprocess raw stock data."""
-    processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
-    if processed is None or processed.empty:
-        logger.critical("Veri ön işleme başarısız.")
-        sys.exit(1)
-    return processed
-
-
-def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Save Excel report if data is available."""
-    if rapor_df.empty:
-        logger.info("Rapor verisi boş.")
-        return
-    ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
-    out_path = Path("raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
-    out_path.parent.mkdir(exist_ok=True)
-    from utils.memory_profile import mem_profile
-
-    with mem_profile():
-        report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
-    logger.info(f"Excel raporu oluşturuldu: {out_path}")
-
-
-try:
-    import backtest_core
-    import data_loader
-    import filter_engine
-    import indicator_calculator
-    import preprocessor
-    import report_generator
-
-    logger.info("Tüm ana modüller başarıyla import edildi.")
-except ImportError as e_import_main:
-    logger.critical(
-        f"Temel modüllerden biri import edilemedi: {e_import_main}. Sistem durduruluyor.",
-        exc_info=True,
-    )
-    raise ImportError(e_import_main)
-
-
 def calistir_tum_sistemi(
     tarama_tarihi_str: str,
     satis_tarihi_str: str,
     force_excel_reload_param: bool = False,
     logger_param=None,
     output_path: str | Path | None = None,
-):
-    """Run all analysis steps sequentially.
-
-    Parameters
-    ----------
-    tarama_tarihi_str : str
-        Screening date in ``dd.mm.yyyy`` format.
-    satis_tarihi_str : str
-        Sell date in ``dd.mm.yyyy`` format.
-    force_excel_reload_param : bool, optional
-        Reload raw data from Excel/CSV even when the Parquet cache exists.
-    logger_param : optional
-        Logger instance for progress output.
-    output_path : str or Path, optional
-        Excel report path. When ``None`` only CLI output is produced.
-
-    Returns
-    -------
-    tuple[pd.DataFrame, pd.DataFrame, dict | None]
-        Summary DataFrame, detail DataFrame and skipped-filter log.
-    """
+) -> tuple[pd.DataFrame, pd.DataFrame, dict | None]:
+    """Run all analysis steps sequentially."""
     import gc
 
     import filter_engine
@@ -287,6 +214,35 @@ def calistir_tum_sistemi(
         gc.collect()
 
     return rapor_df, detay_df, atlanmis
+
+
+def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
+    """Apply filter rules to indicator data."""
+    return filter_engine.uygula_filtreler(
+        df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
+    )
+
+
+def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculate indicators and crossover columns."""
+    wanted_cols = utils.extract_columns_from_filters_cached(
+        df_filtre_kurallari.to_csv(index=False),
+        tuple(config.SERIES_SERIES_CROSSOVERS),
+        tuple(config.SERIES_VALUE_CROSSOVERS),
+    )
+    from utils.memory_profile import mem_profile
+
+    with mem_profile():
+        result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
+            df,
+            wanted_cols=wanted_cols,
+            df_filters=df_filtre_kurallari,
+            logger_param=logger,
+        )
+    if result is None:
+        logger.critical("İndikatör hesaplanamadı.")
+        sys.exit(1)
+    return result
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -426,6 +382,30 @@ def main(argv: list[str] | None = None) -> None:
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
         utils.purge_old_logs("loglar", days=30)
+
+
+def on_isle(df: pd.DataFrame) -> pd.DataFrame:
+    """Preprocess raw stock data."""
+    processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
+    if processed is None or processed.empty:
+        logger.critical("Veri ön işleme başarısız.")
+        sys.exit(1)
+    return processed
+
+
+def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
+    """Save Excel report if data is available."""
+    if rapor_df.empty:
+        logger.info("Rapor verisi boş.")
+        return
+    ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
+    out_path = Path("raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
+    out_path.parent.mkdir(exist_ok=True)
+    from utils.memory_profile import mem_profile
+
+    with mem_profile():
+        report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
+    logger.info(f"Excel raporu oluşturuldu: {out_path}")
 
 
 def run_pipeline(
