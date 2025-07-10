@@ -15,11 +15,11 @@ from pandas._libs.tslibs.nattype import NaTType
 
 
 def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | NaTType:
-    """Return ``pd.Timestamp`` from various date formats.
+    """Return a parsed timestamp or ``pd.NaT`` on failure.
 
     The parser tries ``YYYY-MM-DD`` first, then ``DD.MM.YYYY`` and finally a
-    generic day-first parse before falling back to :mod:`dateutil`. Invalid
-    inputs yield ``pd.NaT`` instead of raising ``ValueError``.
+    generic day-first parse before falling back to :mod:`dateutil`. Any invalid
+    input yields ``pd.NaT`` instead of raising ``ValueError``.
     """
     if pd.isna(date_str) or str(date_str).strip() == "":
         return pd.NaT

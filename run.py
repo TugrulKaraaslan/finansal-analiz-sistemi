@@ -35,7 +35,18 @@ log_counter: ErrorCountingFilter | None = None
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Split report data into summary, detail and stats frames."""
+    """Return summary, detail and statistics DataFrames from ``rapor_df``.
+
+    Parameters
+    ----------
+    rapor_df : pd.DataFrame
+        Combined report table containing raw results.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+        Separated summary, detail and statistics frames.
+    """
     if rapor_df is None or rapor_df.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     ozet_df = rapor_df.copy()
@@ -45,7 +56,15 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
 
 
 def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Display results in a lightweight Streamlit interface."""
+    """Display results using a minimal Streamlit interface.
+
+    Parameters
+    ----------
+    ozet_df : pd.DataFrame
+        Summary table to show on the "Özet" page.
+    detay_df : pd.DataFrame
+        Detail table displayed when "Detay" is selected.
+    """
     import streamlit as st
 
     st.sidebar.title("Menü")
