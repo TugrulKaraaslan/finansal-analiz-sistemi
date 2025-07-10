@@ -1,8 +1,8 @@
-"""Lightweight wrappers around optional OpenBB technical indicators.
+"""Optional OpenBB indicator wrappers.
 
-Each helper calls into :mod:`openbb` when the library is installed and
-otherwise raises :class:`NotImplementedError`.  This keeps the rest of the
-codebase agnostic to whether OpenBB is available.
+Functions attempt to call ``openbb`` and raise
+:class:`NotImplementedError` when the dependency is missing. This
+keeps the remainder of the codebase independent of OpenBB.
 """
 
 from __future__ import annotations
