@@ -1,4 +1,4 @@
-"""Common utility helpers for the ``finansal`` package.
+"""Utility helpers for the ``finansal`` package.
 
 This module exposes :func:`lazy_chunk` for chunking iterables and
 :func:`safe_set` for dtype-safe DataFrame assignment.

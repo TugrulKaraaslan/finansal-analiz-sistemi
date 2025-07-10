@@ -1,4 +1,7 @@
-"""Shared test utilities and global pytest configuration."""
+"""Shared test utilities and global pytest configuration.
+
+Fixtures defined here are imported across the test suite.
+"""
 
 import warnings
 

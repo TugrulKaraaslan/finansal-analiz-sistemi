@@ -27,3 +27,8 @@ if SimpleNamespace.__hash__ is None:
 # numpy>=2 removed the ``NaN`` alias. Some optional dependencies still import it.
 if not hasattr(np, "NaN"):
     np.NaN = np.nan
+
+# Ensure ``importlib.metadata`` registers itself on the ``importlib`` module so
+# packages relying on ``importlib.metadata`` as an attribute work consistently.
+import importlib  # noqa: E402
+import importlib.metadata  # noqa: E402,F401

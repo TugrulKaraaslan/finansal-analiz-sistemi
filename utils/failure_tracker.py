@@ -1,6 +1,6 @@
 """Track failed operations for later reporting.
 
-The helpers here collect failed indicators, filters and other items so
+The helpers here collect failed indicators, filters, and other items so
 they can be summarized after a run.
 """
 

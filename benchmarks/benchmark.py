@@ -1,4 +1,4 @@
-"""Utilities for measuring a tiny CPU-bound workload.
+"""Small utilities for measuring CPU-bound performance.
 
 The :func:`run_bench` helper executes a simple summation loop and writes
 the elapsed time to ``benchmark_output.txt`` under this module's
