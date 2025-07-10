@@ -364,6 +364,7 @@ def main(argv: list[str] | None = None) -> None:
         logging.shutdown()
         utils.purge_old_logs("loglar", days=30)
 
+
 def on_isle(df: pd.DataFrame) -> pd.DataFrame:
     """Preprocess raw stock data."""
     processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
@@ -386,9 +387,6 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     with mem_profile():
         report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
     logger.info(f"Excel raporu oluşturuldu: {out_path}")
-
-
-
 
 
 def run_pipeline(
