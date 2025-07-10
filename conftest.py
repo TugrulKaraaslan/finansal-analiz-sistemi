@@ -65,6 +65,21 @@ if not hasattr(SimpleNamespace, "__hash__"):
     SimpleNamespace.__hash__ = lambda self: id(self)
 
 
+@pytest.fixture(autouse=True)
+def _fix_sys_modules():
+    """Ensure newly imported modules are hashable for Hypothesis."""
+    _sanitize_sys_modules()
+    yield
+
+
+@pytest.fixture(autouse=True)
+def _mock_http():
+    """Isolate tests from external HTTP calls."""
+    with responses.RequestsMock() as rsps:
+        rsps.add_passthru("http://localhost")
+        yield
+
+
 @pytest.fixture
 def big_df() -> pd.DataFrame:
     """Return a large DataFrame for performance-oriented tests."""
@@ -80,21 +95,6 @@ def big_df() -> pd.DataFrame:
             "volume": np.random.randint(1, 1000, rows),
         }
     )
-
-
-@pytest.fixture(autouse=True)
-def _mock_http():
-    """Isolate tests from external HTTP calls."""
-    with responses.RequestsMock() as rsps:
-        rsps.add_passthru("http://localhost")
-        yield
-
-
-@pytest.fixture(autouse=True)
-def _fix_sys_modules():
-    """Ensure newly imported modules are hashable for Hypothesis."""
-    _sanitize_sys_modules()
-    yield
 
 
 def pytest_sessionstart(session: pytest.Session) -> None:
