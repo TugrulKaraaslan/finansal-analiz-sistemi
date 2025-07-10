@@ -686,7 +686,20 @@ def _tema20(series: pd.Series) -> pd.Series:
 
 
 def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
-    """Generate crossover columns based on naming patterns."""
+    """Return ``df`` with extra crossover columns based on ``cross_names``.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing at least ``close`` prices.
+    cross_names : list[str]
+        Column names describing EMA/close crossovers.
+
+    Returns
+    -------
+    pd.DataFrame
+        Input ``df`` with the new crossover columns appended.
+    """
     for name in cross_names:
         m = EMA_CLOSE_PATTERN.fullmatch(name)
         if m:
@@ -706,7 +719,19 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
 def add_series(
     df: pd.DataFrame, name: str, values, seen_names: set[str] | None = None
 ) -> None:
-    """Add a column ensuring the name is unique."""
+    """Insert ``values`` as a uniquely named column into ``df``.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Target DataFrame to modify.
+    name : str
+        Desired column name before uniqueness adjustment.
+    values : iterable
+        Values to assign aligned to ``df.index``.
+    seen_names : set[str] | None, optional
+        Existing column names used to generate a unique suffix.
+    """
     if seen_names is None:
         seen_names = set(df.columns)
     safe = unique_name(name, seen_names)
@@ -716,7 +741,17 @@ def add_series(
 def calculate_chunked(
     df: pd.DataFrame, active_inds: list[str], chunk_size: int = CHUNK_SIZE
 ) -> None:
-    """Process indicators in chunks and append results to Parquet."""
+    """Process ``df`` in chunks and append indicator results to Parquet.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Full stock dataset sorted by ticker.
+    active_inds : list[str]
+        Indicator names to calculate for each chunk.
+    chunk_size : int, optional
+        Number of tickers per chunk, by default ``CHUNK_SIZE``.
+    """
     pq_path = Path("veri/gosterge.parquet")
     for kods in lazy_chunk(df.groupby("ticker", sort=False), chunk_size):
         for _, group in kods:
@@ -733,9 +768,21 @@ def calculate_chunked(
 def calculate_indicators(
     df: pd.DataFrame, indicators: list[str] | None = None
 ) -> pd.DataFrame:
-    """Calculate basic indicators such as EMA or SMA.
+    """Return ``df`` with calculated indicator columns appended.
 
-    Duplicate column names are skipped with a warning.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input price DataFrame containing at least ``close``.
+    indicators : list[str] | None, optional
+        Indicator names like ``ema_20`` or ``sma_50``. ``None`` returns ``df``
+        unchanged.
+
+    Returns
+    -------
+    pd.DataFrame
+        ``df`` copy with indicator columns added. Duplicate names are skipped
+        with a warning.
     """
     if indicators is None:
         return df
