@@ -1,7 +1,7 @@
 """Utilities for measuring a tiny CPU-bound workload.
 
-The :func:`run_bench` helper executes a simple summation loop and
-writes the elapsed time to ``benchmark_output.txt`` under the module
+The :func:`run_bench` helper executes a simple summation loop and writes
+the elapsed time to ``benchmark_output.txt`` under this module's
 directory.
 """
 

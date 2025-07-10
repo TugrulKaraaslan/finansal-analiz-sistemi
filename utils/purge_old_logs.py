@@ -1,8 +1,8 @@
-"""Remove outdated log and lock files from ``log_dir``.
+"""Remove stale log and lock files from ``log_dir``.
 
 Designed for maintenance scripts, this helper supports a dry-run mode to
-preview deletions. It removes both ``*.log`` files and orphaned ``*.lock``
-files.
+preview deletions. Both ``*.log`` and orphaned ``*.lock`` files are
+removed.
 """
 
 from __future__ import annotations
