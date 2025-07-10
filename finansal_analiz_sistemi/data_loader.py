@@ -106,17 +106,8 @@ def _standardize_ohlcv_columns(
                     f"'{file_name_short}': Eşleştirme bulundu: '{raw_name_from_config}' "
                     f"-> '{standard_name_target}' (rename_map'e eklendi)"
                 )
-            elif raw_name_from_config == standard_name_target:
-                pass
-            elif (
-                standard_name_target in current_columns_set
-                or standard_name_target in df.columns
-            ):
-                pass
-            elif standard_name_target in rename_map.values():
-                pass
-        # else:
-        # Raw name from config not present in DataFrame
+            # Otherwise the column already exists under the target name or has
+            # been mapped previously. No action required in these cases.
 
     if rename_map:
         log.info(
