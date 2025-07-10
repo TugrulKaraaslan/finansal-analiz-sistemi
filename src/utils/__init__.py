@@ -8,8 +8,8 @@ from . import excel_reader
 from .excel_reader import clear_cache, open_excel_cached, read_excel_cached
 
 __all__ = [
+    "clear_cache",
     "excel_reader",
     "open_excel_cached",
     "read_excel_cached",
-    "clear_cache",
 ]

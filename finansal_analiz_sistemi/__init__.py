@@ -20,7 +20,7 @@ with open(base / "logging_config.yaml", "r", encoding="utf-8") as fh:
 
 from . import config, logging_config  # noqa: E402
 
-__all__ = ["config", "logging_config", "cache_builder", "data_loader"]
+__all__ = ["cache_builder", "config", "data_loader", "logging_config"]
 
 
 def __getattr__(name: str) -> types.ModuleType:
