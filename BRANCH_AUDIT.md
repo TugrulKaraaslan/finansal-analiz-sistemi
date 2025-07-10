@@ -12,3 +12,4 @@ Verification on 2025-07-09 reconfirmed that `main` was the only branch. A later 
 
 2025-08-24: Removed stray `work` branch during audit. `main` remains the sole branch.
 2025-09-01: Removed stray `work` branch during audit. `main` remains the sole branch.
+2025-09-08: Removed stray 'work' branch after audit. main remains the sole branch.
