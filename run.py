@@ -34,30 +34,51 @@ logger = get_logger(__name__)
 log_counter: ErrorCountingFilter | None = None
 
 
+def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
+    """Split report data into summary, detail and stats frames."""
+    if rapor_df is None or rapor_df.empty:
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    ozet_df = rapor_df.copy()
+    detay_df = rapor_df.copy()
+    istatistik_df = rapor_df.describe().reset_index()
+    return ozet_df, detay_df, istatistik_df
+
+
+def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
+    """Display results in a lightweight Streamlit interface."""
+    import streamlit as st
+
+    st.sidebar.title("Menü")
+    sayfa = st.sidebar.radio("Sayfa", ("Özet", "Detay", "Grafik"))
+
+    df_to_show = ozet_df if sayfa == "Özet" else detay_df if sayfa == "Detay" else ozet_df
+
+    if df_to_show.empty:
+        msg = "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
+        st.warning(msg)
+        print(msg)
+        if "logger" in globals():
+            logger.warning(msg)
+        return
+
+    if sayfa == "Özet":
+        st.dataframe(ozet_df)
+    elif sayfa == "Detay":
+        st.dataframe(detay_df)
+    else:
+        if "ort_getiri_%" in ozet_df:
+            st.bar_chart(ozet_df.set_index("filtre_kodu")["ort_getiri_%"])
+        else:
+            st.write("Grafik için veri yok")
+
+
 def backtest_yap(
     df: pd.DataFrame,
     filtre_sonuclari: dict,
     tarama_tarihi: str,
     satis_tarihi: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Run simple backtest on filtered results.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Indicator dataset used for price lookup.
-    filtre_sonuclari : dict
-        Mapping of filter code to list of tickers.
-    tarama_tarihi : str
-        Screening date in ``dd.mm.yyyy`` format.
-    satis_tarihi : str
-        Sell date in ``dd.mm.yyyy`` format.
-
-    Returns
-    -------
-    tuple[pd.DataFrame, pd.DataFrame]
-        Summary and detail DataFrames for reporting.
-    """
+    """Run simple backtest on filtered results."""
     rapor_df, detay_df = backtest_core.calistir_basit_backtest(
         filtre_sonuc_dict=filtre_sonuclari,
         df_tum_veri=df,
@@ -72,67 +93,20 @@ def backtest_yap(
 
 
 def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
-    """Apply filter rules to indicator data.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Indicator dataset containing crossover columns.
-    tarama_tarihi : datetime-like
-        Screening date used to select rows.
-
-    Returns
-    -------
-    tuple[dict, dict]
-        Filter results and skipped-filter log dictionary.
-    """
+    """Apply filter rules to indicator data."""
     return filter_engine.uygula_filtreler(
         df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
     )
 
 
-def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Split report data into summary, detail and stats frames.
-
-    Parameters
-    ----------
-    rapor_df : pd.DataFrame
-        Combined report DataFrame returned from the backtest.
-
-    Returns
-    -------
-    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
-        ``(summary_df, detail_df, stats_df)`` tuple ready for export.
-    """
-    if rapor_df is None or rapor_df.empty:
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-
-    ozet_df = rapor_df.copy()
-    detay_df = rapor_df.copy()
-    istatistik_df = rapor_df.describe().reset_index()
-    return ozet_df, detay_df, istatistik_df
-
-
 def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate indicators and crossover columns.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Preprocessed stock dataset.
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame containing calculated indicator columns.
-    """
+    """Calculate indicators and crossover columns."""
     wanted_cols = utils.extract_columns_from_filters_cached(
         df_filtre_kurallari.to_csv(index=False),
         tuple(config.SERIES_SERIES_CROSSOVERS),
         tuple(config.SERIES_VALUE_CROSSOVERS),
     )
     from utils.memory_profile import mem_profile
-
     with mem_profile():
         result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
             df,
@@ -156,15 +130,7 @@ def on_isle(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Save Excel report if data is available.
-
-    Parameters
-    ----------
-    rapor_df : pd.DataFrame
-        Summary table returned from the backtest.
-    detay_df : pd.DataFrame
-        Detail table with per-stock results.
-    """
+    """Save Excel report if data is available."""
     if rapor_df.empty:
         logger.info("Rapor verisi boş.")
         return
@@ -172,40 +138,9 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     out_path = Path("raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
     out_path.parent.mkdir(exist_ok=True)
     from utils.memory_profile import mem_profile
-
     with mem_profile():
         report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
     logger.info(f"Excel raporu oluşturuldu: {out_path}")
-
-
-def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Display results in a lightweight Streamlit interface."""
-    import streamlit as st
-
-    st.sidebar.title("Menü")
-    sayfa = st.sidebar.radio("Sayfa", ("Özet", "Detay", "Grafik"))
-
-    df_to_show = (
-        ozet_df if sayfa == "Özet" else detay_df if sayfa == "Detay" else ozet_df
-    )
-
-    if df_to_show.empty:
-        msg = "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
-        st.warning(msg)
-        print(msg)
-        if "logger" in globals():
-            logger.warning(msg)
-        return
-
-    if sayfa == "Özet":
-        st.dataframe(ozet_df)
-    elif sayfa == "Detay":
-        st.dataframe(detay_df)
-    else:
-        if "ort_getiri_%" in ozet_df:
-            st.bar_chart(ozet_df.set_index("filtre_kodu")["ort_getiri_%"])
-        else:
-            st.write("Grafik için veri yok")
 
 
 try:
