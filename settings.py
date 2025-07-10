@@ -1,7 +1,7 @@
-"""Load optional YAML settings for the system.
+"""Load runtime configuration from ``settings.yaml``.
 
-Configuration is read from ``settings.yaml`` or from the path specified via the
-``FAS_SETTINGS_FILE`` environment variable.
+The file location can be overridden with the ``FAS_SETTINGS_FILE``
+environment variable.
 """
 
 from __future__ import annotations

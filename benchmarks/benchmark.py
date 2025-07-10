@@ -1,8 +1,7 @@
-"""Small utilities for measuring CPU-bound performance.
+"""Utility to measure CPU-bound performance.
 
-The :func:`run_bench` helper executes a simple summation loop and writes
-the elapsed time to ``benchmark_output.txt`` under this module's
-directory.
+The :func:`run_bench` helper sums random integers and records the
+elapsed time in ``benchmark_output.txt``.
 """
 
 import random
