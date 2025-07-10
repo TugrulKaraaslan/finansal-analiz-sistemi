@@ -20,7 +20,7 @@ from finansal_analiz_sistemi.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Konfigürasyon dosyasından minimum hisse eşiğini oku
+# Read minimum stock threshold from the configuration file
 _cfg_path = os.path.join(os.path.dirname(__file__), "config.yml")
 if os.path.exists(_cfg_path):
     with open(_cfg_path) as f:
@@ -387,11 +387,11 @@ def uygula_filtreler(
         }
 
     try:
-        # Tarih sütununun datetime olduğundan emin ol
+        # Ensure the date column is of datetime type
         if not pd.api.types.is_datetime64_any_dtype(df_ana_veri["tarih"]):
             df_ana_veri["tarih"] = pd.to_datetime(df_ana_veri["tarih"], errors="coerce")
 
-        # Sadece tarama gününe ait veriyi al ve üzerinde çalışmak için kopyala
+        # Work on a copy containing only the scan date rows
         df_tarama_gunu = df_ana_veri[df_ana_veri["tarih"] == tarama_tarihi].copy()
         if df_tarama_gunu.empty:
             prev = df_ana_veri[df_ana_veri["tarih"] < tarama_tarihi]["tarih"].max()
