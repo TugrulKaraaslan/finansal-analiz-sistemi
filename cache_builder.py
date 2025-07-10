@@ -1,7 +1,7 @@
-"""Helpers to build the Parquet cache.
+"""Parquet cache builder.
 
-Raw CSV files are concatenated and written to the configured cache
-location when the cache is absent or empty.
+Concatenates raw CSV files from :data:`RAW_DIR` into :data:`CACHE` when
+the cache file is missing or empty.
 """
 
 from pathlib import Path
