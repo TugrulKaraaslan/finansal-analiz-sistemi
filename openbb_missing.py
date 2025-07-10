@@ -1,8 +1,7 @@
-"""Optional OpenBB indicator wrappers.
+"""Lightweight wrappers for optional OpenBB indicators.
 
-Functions attempt to call ``openbb`` and raise
-:class:`NotImplementedError` when the dependency is missing. This
-keeps the remainder of the codebase independent of OpenBB.
+Functions call ``openbb`` when available and raise
+:class:`NotImplementedError` otherwise to keep the codebase optional.
 """
 
 from __future__ import annotations

@@ -1,8 +1,8 @@
-"""Compute technical indicators and generate crossover signals.
+"""Compute technical indicators and crossover signals.
 
-Indicator calculations are provided by ``pandas-ta-openbb`` with
-fallback wrappers in :mod:`openbb_missing` when the OpenBB package is
-absent. The resulting columns are normalized for use across the project.
+Uses ``pandas-ta-openbb`` when available with fallbacks from
+:mod:`openbb_missing`. Resulting columns are normalized for reuse
+across the project.
 """
 
 from __future__ import annotations
