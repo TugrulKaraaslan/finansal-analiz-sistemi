@@ -1,7 +1,7 @@
-"""Common utilities used by the analysis project.
+"""Common helper utilities for the analysis project.
 
-The package bundles crossover detection, filter-column extraction and
-log maintenance helpers used by the CLI and reporting modules.
+This package bundles crossover detection, filter-column extraction and log
+maintenance helpers used by the CLI and reporting modules.
 """
 
 from __future__ import annotations
