@@ -1,4 +1,7 @@
-"""Common helper exports for the :mod:`utilities` package."""
+"""Helper exports for the :mod:`utilities` package.
+
+Only a minimal set of functions is re-exported here for convenience.
+"""
 
 from .naming import unique_name
 

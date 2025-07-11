@@ -1,4 +1,8 @@
-"""Backward compatible wrappers for pandas utilities."""
+"""Backward compatible wrappers for pandas utilities.
+
+These helpers provide small shims around ``pandas`` functions so the
+codebase works consistently across supported versions.
+"""
 
 import logging
 from typing import List

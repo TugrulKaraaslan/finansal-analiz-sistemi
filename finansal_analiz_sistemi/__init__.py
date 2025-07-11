@@ -1,4 +1,9 @@
-"""Package exports with lazy submodule loading."""
+"""Initialize logging and expose lazy-loaded submodules.
+
+Importing :mod:`finansal_analiz_sistemi` configures the logging system and
+provides access to selected helpers such as ``cache_builder`` only when
+they are first referenced.
+"""
 
 from __future__ import annotations
 
