@@ -1,4 +1,8 @@
-"""Convenience exports for :mod:`finansal` package."""
+"""Public shortcuts for the :mod:`finansal` package.
+
+This module exposes commonly used helpers so callers can simply import
+them from ``finansal`` without referring to the submodules directly.
+"""
 
 from importlib import import_module
 
