@@ -1,4 +1,8 @@
-"""Global configuration constants and helper functions."""
+"""Global configuration constants for the analysis system.
+
+Values are populated from ``config.yml`` when available and provide
+defaults for dataset locations, indicator lists and runtime settings.
+"""
 
 from __future__ import annotations
 
