@@ -25,17 +25,11 @@ DEFAULT_REASON: Tuple[str, str] = ("Bilinmeyen Hata", "Detay i\u00e7in loglara b
 def get_reason_hint(exc: Exception, _locale: str = "tr") -> Tuple[str, str]:
     """Return a user-friendly reason/hint tuple for ``exc``.
 
-    Parameters
-    ----------
-    exc : Exception
-        Exception instance to map.
-    _locale : str, optional
-        Reserved for future localization support.
+    Args:
+        exc (Exception): Exception instance to map.
+        _locale (str, optional): Reserved for future localization support.
 
-    Returns
-    -------
-    tuple[str, str]
-        ``(reason, hint)`` pair describing the failure.
-
+    Returns:
+        Tuple[str, str]: ``(reason, hint)`` describing the failure.
     """
     return REASON_MAP.get(type(exc).__name__, DEFAULT_REASON)

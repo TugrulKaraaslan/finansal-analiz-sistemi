@@ -14,7 +14,16 @@ __all__ = ["safe_concat", "safe_infer_objects", "safe_to_excel"]
 
 
 def safe_concat(frames: List[pd.DataFrame], **kwargs) -> pd.DataFrame:
-    """Concatenate non-empty frames or return an empty ``DataFrame``."""
+    """Concatenate non-empty frames or return an empty ``DataFrame``.
+
+    Args:
+        frames (List[pd.DataFrame]): DataFrames to concatenate.
+        **kwargs: Additional arguments forwarded to :func:`pandas.concat`.
+
+    Returns:
+        pd.DataFrame: Concatenated frame or an empty frame when ``frames`` is
+        empty.
+    """
     frames = [f for f in frames if not f.empty]
     return pd.concat(frames, **kwargs) if frames else pd.DataFrame()
 
@@ -23,7 +32,15 @@ _PANDAS_HAS_COPY = _v.parse(pd.__version__) >= _v.parse("2.0.0")
 
 
 def safe_infer_objects(df: pd.DataFrame, *, copy: bool = False) -> pd.DataFrame:
-    """Compatibility wrapper for ``infer_objects`` with copy parameter."""
+    """Compatibility wrapper for ``infer_objects`` with copy parameter.
+
+    Args:
+        df (pd.DataFrame): DataFrame to operate on.
+        copy (bool, optional): Whether to return a copy. Defaults to ``False``.
+
+    Returns:
+        pd.DataFrame: Result of ``infer_objects``.
+    """
     if _PANDAS_HAS_COPY:
         return df.infer_objects(copy=copy)
     res = df.infer_objects()
@@ -34,6 +51,12 @@ def safe_to_excel(df: pd.DataFrame, wr, *, sheet_name: str, **kwargs) -> None:
     """Write ``df`` to an Excel writer using keyword-only ``sheet_name``.
 
     Logs a warning when ``df`` is empty. Compatible with ``pandas>=3``.
+
+    Args:
+        df (pd.DataFrame): DataFrame to write.
+        wr: Excel writer object.
+        sheet_name (str): Target worksheet name.
+        **kwargs: Additional arguments forwarded to ``to_excel``.
     """
     if df.empty:
         logging.getLogger(__name__).warning(

@@ -11,19 +11,14 @@ def fill_missing_business_day(
     Rows with missing dates are shifted backward so every entry aligns with a
     valid trading day.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Input DataFrame containing a date column.
-    date_col : str, optional
-        Name of the date column, by default ``"tarih"``.
+    Args:
+        df (pd.DataFrame): Input DataFrame containing a date column.
+        date_col (str, optional): Name of the date column. Defaults to
+            ``"tarih"``.
 
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame where missing dates are backfilled with the prior business
-        day.
-
+    Returns:
+        pd.DataFrame: DataFrame where missing dates are backfilled with the
+        prior business day.
     """
     if date_col not in df.columns:
         return df

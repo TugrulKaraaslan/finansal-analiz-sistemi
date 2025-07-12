@@ -13,21 +13,13 @@ __all__ = ["ValidationError"]
 class ValidationError:
     """Structured information about a validation failure.
 
-    Attributes
-    ----------
-    hata_tipi : str
-        Short code identifying the error type.
-    eksik_ad : str
-        Name of the missing or invalid field.
-    detay : str
-        Detailed explanation of the issue.
-    cozum_onerisi : str
-        Suggested resolution for the user.
-    reason : str
-        Localized failure reason.
-    hint : str
-        Localized hint to assist recovery.
-
+    Attributes:
+        hata_tipi (str): Short code identifying the error type.
+        eksik_ad (str): Name of the missing or invalid field.
+        detay (str): Detailed explanation of the issue.
+        cozum_onerisi (str): Suggested resolution for the user.
+        reason (str): Localized failure reason.
+        hint (str): Localized hint to assist recovery.
     """
 
     hata_tipi: str
