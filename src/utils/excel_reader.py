@@ -10,9 +10,8 @@ from typing import Any, Dict
 
 import pandas as pd
 
-# Global cache mapping absolute file paths to their modification time and the
-# corresponding ``ExcelFile`` object. This ensures stale files are reloaded when
-# the underlying Excel workbook changes on disk.
+# Cache ``ExcelFile`` objects keyed by path and modification time. The cache
+# refreshes automatically when the workbook on disk changes.
 _excel_cache: Dict[str, tuple[float, pd.ExcelFile]] = {}
 
 

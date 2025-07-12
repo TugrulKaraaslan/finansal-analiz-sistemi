@@ -11,9 +11,9 @@ import gc
 import re
 import warnings
 
-# Import distribution metadata so ``pandas_ta`` can be located correctly.  The
-# version call doubles as a no-op reference for linters when the package is
-# absent.
+# Import distribution metadata so ``pandas_ta`` can be located correctly. The
+# ``version`` reference also acts as a no-op for linters when the package is
+# optional.
 from importlib import metadata as _metadata
 from pathlib import Path
 
