@@ -97,12 +97,14 @@ def test_logging_config_import(monkeypatch, tmp_path):
     for h in old_handlers:
         root.addHandler(h)
 
+
 def test_report_writer_accepts_str(tmp_path):
     """``ReportWriter`` should accept a path string as destination."""
     df = pd.DataFrame({"a": [1]})
     nested = tmp_path / "nested" / "out.xlsx"
     ReportWriter().write_report(df, str(nested))
     assert nested.exists() and nested.stat().st_size > 0
+
 
 def test_tarama_denetimi_summary(monkeypatch):
     """Summary row should be appended after scanning filters."""
@@ -125,4 +127,3 @@ def test_tarama_denetimi_summary(monkeypatch):
     result = kontrol_araci.tarama_denetimi(df_filtreler, df_ind)
     assert len(result) == 2
     assert result.iloc[-1]["kod"] == "_SUMMARY"
-
