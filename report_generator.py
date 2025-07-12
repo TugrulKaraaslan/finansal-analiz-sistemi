@@ -1,7 +1,7 @@
 """Generate Excel reports for test runs and CLI output.
 
-The module assembles performance tables into an XLSX workbook with optional
-charts and error sheets.
+Performance tables are gathered into an ``xlsxwriter`` workbook along with
+optional charts and error summaries for failed filters.
 """
 
 from __future__ import annotations

@@ -1,4 +1,9 @@
-"""Evaluate and execute stock filters defined in configuration files."""
+"""Utilities to evaluate and apply stock filter expressions.
+
+The module validates queries, resolves recursive definitions and collects
+diagnostic information during execution. Filter settings are read from
+``config.yml`` and results are stored in module-level caches.
+"""
 
 from __future__ import annotations
 

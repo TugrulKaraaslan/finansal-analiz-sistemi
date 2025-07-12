@@ -1,7 +1,7 @@
 """In-memory cache for CSV and Excel loaders.
 
-The helper stores file contents keyed by path and modification time so
-repeated calls skip disk access when the source has not changed.
+File contents are keyed by their absolute path and modification time so
+subsequent reads bypass the filesystem when the source is unchanged.
 """
 
 import os

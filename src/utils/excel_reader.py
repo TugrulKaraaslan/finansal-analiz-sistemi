@@ -1,6 +1,8 @@
 """Read Excel workbooks using a lightweight cache.
 
-The cache avoids reloading unchanged files by tracking modification time.
+Workbooks are stored in a process-level dictionary keyed by absolute path and
+modification time. Cached entries are transparently refreshed when the file
+changes on disk.
 """
 
 from __future__ import annotations
