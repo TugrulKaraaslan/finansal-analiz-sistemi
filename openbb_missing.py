@@ -15,7 +15,19 @@ except Exception:  # pragma: no cover - optional dependency
 
 
 def _call_openbb(func_name: str, **kwargs):
-    """Invoke ``obb.technical.func_name`` if available.
+    """Return ``obb.technical.func_name`` result if available.
+
+    Parameters
+    ----------
+    func_name : str
+        Name of the technical indicator function under ``obb``.
+    **kwargs : Any
+        Arguments forwarded to the OpenBB function.
+
+    Returns
+    -------
+    Any
+        Result returned by the OpenBB helper.
 
     Raises
     ------
@@ -40,7 +52,7 @@ def ichimoku(
     offset: int = 26,
     lookahead: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Return Ichimoku indicator DataFrames using OpenBB.
+    """Return Ichimoku indicator DataFrames generated via OpenBB.
 
     Parameters
     ----------
@@ -96,7 +108,7 @@ def macd(
     slow: int = 26,
     signal: int = 9,
 ) -> pd.DataFrame:
-    """Return MACD indicator columns using OpenBB.
+    """Return MACD indicator columns generated via OpenBB.
 
     Parameters
     ----------
@@ -135,7 +147,7 @@ def rsi(
     scalar: float = 100.0,
     drift: int = 1,
 ) -> pd.Series:
-    """Return the RSI series computed via OpenBB.
+    """Return the RSI series generated via OpenBB.
 
     Parameters
     ----------
