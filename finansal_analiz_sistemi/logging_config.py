@@ -26,7 +26,11 @@ from finansal_analiz_sistemi import config
 
 
 def _ensure_rich_handler(log: logging.Logger) -> None:
-    """Ensure that ``log`` has a ``RichHandler`` attached."""
+    """Attach a ``RichHandler`` to ``log`` if needed.
+
+    Args:
+        log (logging.Logger): Logger instance to update.
+    """
     if not _HAVE_RICH:
         return
 
@@ -52,7 +56,14 @@ def _want_rich() -> bool:
 
 
 def get_logger(name: str | None = None) -> logging.Logger:
-    """Return (and create) a logger with the given name."""
+    """Return (and create) a logger with the given name.
+
+    Args:
+        name (str | None, optional): Logger name.
+
+    Returns:
+        logging.Logger: Configured logger instance.
+    """
     log = logging.getLogger(name)
     if not os.getenv("LOG_SIMPLE"):
         _ensure_rich_handler(log)
@@ -61,7 +72,11 @@ def get_logger(name: str | None = None) -> logging.Logger:
 
 
 def setup_logging() -> logging.Logger:
-    """Configure root logger and return it."""
+    """Configure and return the root logger.
+
+    Returns:
+        logging.Logger: The configured root logger.
+    """
     level_str = os.getenv("LOG_LEVEL", "INFO").upper()
     level = getattr(logging, level_str, logging.INFO)
 

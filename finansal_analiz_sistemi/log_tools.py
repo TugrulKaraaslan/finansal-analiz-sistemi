@@ -24,13 +24,25 @@ class DuplicateFilter(logging.Filter):
     """Filter out repeated log messages within a time window."""
 
     def __init__(self, window: float = 2.0) -> None:
-        """Initialize filter with repeat detection window."""
+        """Initialize the filter.
+
+        Args:
+            window (float, optional): Duration in seconds to suppress
+                repeated messages.
+        """
         super().__init__("duplicate")
         self.window = window
         self._seen: Dict[Tuple[int, str], float] = {}
 
     def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
-        """Allow a log record if it has not been seen recently."""
+        """Allow a log record if it has not been seen recently.
+
+        Args:
+            record (logging.LogRecord): Log record being processed.
+
+        Returns:
+            bool: ``True`` if the record should be emitted.
+        """
         now = time.monotonic()
         key = (record.levelno, record.getMessage())
         last = self._seen.get(key)
@@ -43,7 +55,14 @@ class DuplicateFilter(logging.Filter):
 
 
 def setup_logger(level: int = logging.INFO) -> ErrorCountingFilter:
-    """Configure root logger for console and file output."""
+    """Configure the root logger for console and file output.
+
+    Args:
+        level (int, optional): Logging level.
+
+    Returns:
+        ErrorCountingFilter: Filter that tracks error and warning counts.
+    """
     root = logging.getLogger()
     log_dir = Path("loglar")
     log_dir.mkdir(exist_ok=True)
@@ -102,7 +121,15 @@ def setup_logger(level: int = logging.INFO) -> ErrorCountingFilter:
 
 
 def setup_logging(window: float = 2.0, pct_step: int = 10) -> logging.Logger:
-    """Initialize logging via :mod:`logging_config` and attach de-dup filter."""
+    """Initialize logging and attach a duplicate-message filter.
+
+    Args:
+        window (float, optional): Time window for duplicate suppression.
+        pct_step (int, optional): Progress log step percentage.
+
+    Returns:
+        logging.Logger: The configured root logger.
+    """
     global PCT_STEP
     PCT_STEP = max(1, pct_step)
     root = _cfg_setup_logging()

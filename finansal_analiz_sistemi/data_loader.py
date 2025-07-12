@@ -1,4 +1,8 @@
-"""Helpers for loading CSV, Excel and Parquet datasets."""
+"""Utilities for loading CSV, Excel and Parquet datasets.
+
+These helpers return ``pandas`` DataFrames while caching reads to
+minimize disk access.
+"""
 
 from __future__ import annotations
 
@@ -25,14 +29,30 @@ _read_excel = partial(pd.read_excel, engine="openpyxl")
 
 @lru_cache(maxsize=None)
 def _read_excel_cached(path: str) -> pd.DataFrame:
-    """Return an Excel file via openpyxl with LRU caching."""
+    """Return a cached Excel file.
+
+    Args:
+        path (str): Excel file path.
+
+    Returns:
+        pd.DataFrame: DataFrame read via ``openpyxl`` with LRU caching.
+    """
     return _read_excel(path)
 
 
 def _standardize_date_column(
     df: pd.DataFrame, file_path_for_log: str = "", logger_param=None
 ) -> pd.DataFrame:
-    """Rename the date column to ``tarih`` if a known variant exists."""
+    """Rename the date column to ``tarih`` if a known variant exists.
+
+    Args:
+        df (pd.DataFrame): DataFrame to inspect.
+        file_path_for_log (str, optional): File path used in log messages.
+        logger_param (logging.Logger, optional): Logger instance.
+
+    Returns:
+        pd.DataFrame: Updated DataFrame with a standardized date column.
+    """
     if logger_param is None:
         logger_param = logger
     log = logger_param
@@ -72,7 +92,16 @@ def _standardize_date_column(
 def _standardize_ohlcv_columns(
     df: pd.DataFrame, file_path_for_log: str = "", logger_param=None
 ) -> pd.DataFrame:
-    """Normalize OHLCV column names according to ``config.OHLCV_MAP``."""
+    """Normalize OHLCV column names using ``config.OHLCV_MAP``.
+
+    Args:
+        df (pd.DataFrame): DataFrame with potential OHLCV columns.
+        file_path_for_log (str, optional): File path used in log messages.
+        logger_param (logging.Logger, optional): Logger instance.
+
+    Returns:
+        pd.DataFrame: DataFrame with standardized OHLCV column names.
+    """
     if logger_param is None:
         logger_param = logger
     log = logger_param
@@ -151,13 +180,10 @@ def _standardize_ohlcv_columns(
 
 
 def check_and_create_dirs(*dir_paths):
-    """Create any missing directories.
+    """Create directories if they do not exist.
 
-    Parameters
-    ----------
-    *dir_paths : str or Path
-        One or more directory paths that should exist.
-
+    Args:
+        *dir_paths (str | Path): One or more directory paths to create.
     """
     for dir_path in dir_paths:
         if dir_path and not os.path.exists(dir_path):
@@ -173,14 +199,25 @@ def check_and_create_dirs(*dir_paths):
 def load_data(path: str) -> pd.DataFrame:
     """Return cached CSV contents as a DataFrame.
 
-    This helper delegates to :class:`DataLoaderCache` so repeated reads of the
-    same file avoid disk I/O.
+    Args:
+        path (str): CSV file path.
+
+    Returns:
+        pd.DataFrame: DataFrame loaded via :class:`DataLoaderCache`.
     """
     return _cache_loader.load_csv(path)
 
 
 def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
-    """Load an Excel file and cache the result, writing Parquet if needed."""
+    """Load an Excel file and optionally write a Parquet copy.
+
+    Args:
+        path (str): Excel file path.
+        logger_param (logging.Logger, optional): Logger instance.
+
+    Returns:
+        pd.DataFrame | None: DataFrame if valid data is found, otherwise ``None``.
+    """
     if logger_param is None:
         logger_param = logger
     log = logger_param
@@ -205,10 +242,16 @@ def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
 
 
 def load_filter_csv(path: str) -> pd.DataFrame:
-    """Load filter CSV ensuring the expected column layout.
+    """Load filter CSV and ensure expected columns.
 
-    Legacy files with only ``filtre_kodu`` and ``PythonQuery`` are
-    upgraded by inserting a ``tarih`` column.
+    Legacy files with only ``filtre_kodu`` and ``PythonQuery`` are upgraded
+    by inserting a ``tarih`` column.
+
+    Args:
+        path (str): CSV file path.
+
+    Returns:
+        pd.DataFrame: Loaded DataFrame with standardized columns.
     """
     # Try headerless read first (legacy files have only two columns)
     raw = pd.read_csv(path, sep=";")
@@ -236,7 +279,14 @@ def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
     """Read a price CSV using delimiter auto-detection.
 
     The first line is inspected to choose ``;`` when semicolons dominate,
-    "," when commas dominate or ``sep=None`` otherwise.
+    ```,` when commas dominate or ``sep=None`` otherwise.
+
+    Args:
+        path (str | Path): CSV file path.
+        **kwargs: Additional options passed to :func:`pandas.read_csv`.
+
+    Returns:
+        pd.DataFrame: Parsed price data.
     """
     encoding = kwargs.get("encoding", "utf-8")
     with open(path, encoding=encoding) as f:
@@ -253,10 +303,14 @@ def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
 
 
 def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.DataFrame:
-    """Load filter definitions.
+    """Load filter definitions from various formats.
 
-    Accepts CSV (`;` separated), Excel (.xlsx/.xls, first sheet) and Parquet
-    files.
+    Args:
+        filtre_dosya_yolu_cfg (str | None, optional): Custom file path.
+        logger_param (logging.Logger, optional): Logger instance.
+
+    Returns:
+        pd.DataFrame: Loaded filter definitions.
     """
     if logger_param is None:
         logger_param = logger
@@ -303,7 +357,17 @@ def yukle_hisse_verileri(
     force_excel_reload=False,
     logger_param=None,
 ) -> pd.DataFrame | None:
-    """Load raw stock data from CSV/Excel sources into a single DataFrame."""
+    """Load raw stock data from CSV or Excel sources.
+
+    Args:
+        hisse_dosya_pattern_cfg (str | None, optional): Glob pattern for CSV files.
+        parquet_ana_dosya_yolu_cfg (str | None, optional): Path to cached Parquet file.
+        force_excel_reload (bool, optional): Force re-reading Excel/CSV even if Parquet exists.
+        logger_param (logging.Logger, optional): Logger instance.
+
+    Returns:
+        pd.DataFrame | None: Combined DataFrame or ``None`` on failure.
+    """
     if logger_param is None:
         logger_param = logger
     fn_logger = logger_param
