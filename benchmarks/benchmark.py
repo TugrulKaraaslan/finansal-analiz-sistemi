@@ -1,7 +1,7 @@
-"""Utility to measure CPU-bound performance.
+"""Simple CPU benchmark utility.
 
-The :func:`run_bench` helper sums random integers and records the
-elapsed time in ``benchmark_output.txt``.
+The helper sums one million random integers and writes the
+execution time to ``benchmark_output.txt``.
 """
 
 import random
@@ -9,7 +9,7 @@ import time
 
 
 def run_bench() -> float:
-    """Return the runtime of a dummy integer summation loop.
+    """Return the runtime of a dummy integer-summing loop.
 
     Returns
     -------

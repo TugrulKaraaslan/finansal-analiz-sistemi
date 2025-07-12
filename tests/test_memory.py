@@ -9,7 +9,7 @@ from cachetools import TTLCache
 
 
 def _read_parquet(ticker: str, start: str, end: str) -> pd.DataFrame:
-    """Test _read_parquet."""
+    """Return a stub DataFrame for the given ticker and date range."""
     dates = pd.date_range(start, end, freq="D")
     return pd.DataFrame({"hisse_kodu": ticker, "tarih": dates})
 
@@ -18,7 +18,7 @@ _CACHE = TTLCache(maxsize=256, ttl=4 * 60 * 60)
 
 
 def get_df(ticker: str, start: str, end: str) -> pd.DataFrame:
-    """Test get_df."""
+    """Return cached stub data used for memory tests."""
     key = f"{ticker}_{start}_{end}"
     if key not in _CACHE:
         _CACHE[key] = _read_parquet(ticker, start, end)
@@ -26,7 +26,7 @@ def get_df(ticker: str, start: str, end: str) -> pd.DataFrame:
 
 
 def clear_cache() -> None:
-    """Test clear_cache."""
+    """Empty the cached DataFrames."""
     _CACHE.clear()
 
 
