@@ -50,7 +50,18 @@ except ImportError as e_import_main:
 
 
 def veri_yukle(force_excel_reload: bool = False):
-    """Load filter definitions and raw price data."""
+    """Load filter definitions and raw price data.
+
+    Parameters
+    ----------
+    force_excel_reload : bool, optional
+        Reload Excel or CSV files instead of using the cached Parquet data.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame]
+        Pair of filter definitions and raw price data.
+    """
     df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
     if df_filters is None or df_filters.empty:
         logger.critical("Filtre kuralları yüklenemedi veya boş.")
@@ -66,7 +77,18 @@ def veri_yukle(force_excel_reload: bool = False):
 
 
 def on_isle(df: pd.DataFrame) -> pd.DataFrame:
-    """Preprocess raw stock data."""
+    """Return preprocessed stock data.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Raw dataset loaded from disk.
+
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned DataFrame ready for indicator computation.
+    """
     processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
     if processed is None or processed.empty:
         logger.critical("Veri ön işleme başarısız.")
@@ -75,7 +97,18 @@ def on_isle(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate indicators and crossover columns."""
+    """Calculate indicators and crossover columns.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Preprocessed OHLCV dataset.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame enriched with indicator values and crossover signals.
+    """
     wanted_cols = utils.extract_columns_from_filters_cached(
         df_filtre_kurallari.to_csv(index=False),
         tuple(config.SERIES_SERIES_CROSSOVERS),
@@ -141,9 +174,17 @@ def backtest_yap(
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Return summary, detail and statistics DataFrames derived from ``rapor_df``.
+    """Prepare derived summary, detail and stats tables.
 
-    The input should be the main backtest result produced by ``backtest_yap``.
+    Parameters
+    ----------
+    rapor_df : pd.DataFrame
+        Backtest output produced by :func:`backtest_yap`.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+        ``(summary_df, detail_df, stats_df)`` trio.
     """
     if rapor_df is None or rapor_df.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
@@ -154,7 +195,15 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
 
 
 def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Save Excel report if data is available."""
+    """Save an Excel report when data is available.
+
+    Parameters
+    ----------
+    rapor_df : pd.DataFrame
+        Summary table produced by the backtest.
+    detay_df : pd.DataFrame
+        Detailed trade information.
+    """
     if rapor_df.empty:
         logger.info("Rapor verisi boş.")
         return
