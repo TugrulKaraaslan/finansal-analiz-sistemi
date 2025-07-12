@@ -1,8 +1,8 @@
-"""Initialize logging and expose lazy-loaded submodules.
+"""Package initialization for ``finansal_analiz_sistemi``.
 
-Importing :mod:`finansal_analiz_sistemi` configures the logging system and
-provides access to selected helpers such as ``cache_builder`` only when
-they are first referenced.
+Importing this package configures logging from ``logging_config.yaml`` and
+exposes helper modules lazily so that heavy imports occur only when the
+modules are first used.
 """
 
 from __future__ import annotations
@@ -29,7 +29,17 @@ __all__ = ["cache_builder", "config", "data_loader", "logging_config"]
 
 
 def __getattr__(name: str) -> types.ModuleType:
-    """Lazily import selected submodules on first access."""
+    """Return the requested submodule, importing it on first access.
+
+    Args:
+        name (str): Name of the submodule to import.
+
+    Returns:
+        types.ModuleType: The imported module.
+
+    Raises:
+        AttributeError: If ``name`` is not a known submodule.
+    """
     if name in {"cache_builder", "data_loader"}:
         module = importlib.import_module(name)
         globals()[name] = module

@@ -1,7 +1,7 @@
 """Global configuration constants for the analysis system.
 
-Values are populated from ``config.yml`` when available and provide
-defaults for dataset locations, indicator lists and runtime settings.
+These values are loaded from ``config.yml`` when present and define default
+paths, indicator lists and runtime settings used throughout the package.
 """
 
 from __future__ import annotations
@@ -15,7 +15,14 @@ import sys  # isort: skip
 
 
 def get_settings_path(custom: str | None = None) -> Path:
-    """Return absolute path to ``settings.yaml`` considering the environment."""
+    """Return the absolute path to ``settings.yaml``.
+
+    Args:
+        custom (str | None): Optional user-provided settings file path.
+
+    Returns:
+        Path: Resolved path to ``settings.yaml``.
+    """
     if custom:
         return Path(custom).expanduser().resolve()
     env_path = os.getenv("FAS_SETTINGS_FILE")
@@ -192,7 +199,15 @@ if not hasattr(sys.modules[__name__], "TA_STRATEGY"):
 if not hasattr(sys.modules[__name__], "get"):
 
     def get(key, default=None):
-        """Return configuration variable ``key`` or ``default`` if missing."""
+        """Return a configuration variable or a default value.
+
+        Args:
+            key (str): Name of the configuration variable.
+            default (Any, optional): Value to return if ``key`` is missing.
+
+        Returns:
+            Any: Configuration value or ``default`` if not set.
+        """
         return globals().get(key, default)
 
 
