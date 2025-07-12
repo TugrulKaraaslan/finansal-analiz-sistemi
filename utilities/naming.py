@@ -1,7 +1,7 @@
 """Generate unique column names for DataFrames.
 
-``unique_name`` appends an incrementing suffix to ``base`` whenever the
-name already exists in ``seen``.
+``unique_name`` appends an incrementing suffix to ``base`` whenever the name
+already exists in ``seen``.
 """
 
 __all__ = ["unique_name"]

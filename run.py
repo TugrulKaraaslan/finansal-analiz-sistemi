@@ -1,7 +1,7 @@
 """CLI entry point for the full backtest workflow.
 
-Handles argument parsing, data loading, indicator computation and
-report generation.
+This module handles argument parsing, data loading, indicator computation
+and report generation.
 """
 
 from __future__ import annotations
