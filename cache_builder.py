@@ -1,7 +1,7 @@
-"""Create a consolidated Parquet cache from raw CSV inputs.
+"""Create a consolidated Parquet cache from raw CSV files.
 
-Raw datasets under :data:`RAW_DIR` are merged and written to ``CACHE`` so the
-rest of the project can load data efficiently.
+CSV files located under :data:`RAW_DIR` are merged into a single dataset and
+written to :data:`CACHE` so the rest of the project can load data efficiently.
 """
 
 from pathlib import Path
@@ -18,7 +18,7 @@ LOCK_FILE = CACHE.with_suffix(".lock")
 
 
 def build() -> None:
-    """Create or refresh the Parquet cache from the raw CSV files."""
+    """Create or refresh ``CACHE`` from the CSV files under ``RAW_DIR``."""
     with FileLock(str(LOCK_FILE)):
         if CACHE.exists() and CACHE.stat().st_size > 0:
             logger.info("Cache hit, skipping build")

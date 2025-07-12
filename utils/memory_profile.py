@@ -1,4 +1,12 @@
-"""Context manager that logs memory usage to ``reports/memory_profile.csv``."""
+"""Context manager that logs memory usage to ``reports/memory_profile.csv``.
+
+Usage example::
+
+    with mem_profile():
+        ...  # run memory intensive task
+
+Each invocation appends ``timestamp,peak,diff`` to the CSV file.
+"""
 
 import os
 import time
