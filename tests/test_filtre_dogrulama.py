@@ -28,7 +28,7 @@ def test_empty_python_query():
 
 
 def test_missing_python_query_value():
-    """``NA`` query values should be reported as missing."""
+    """Ensure ``NA`` query values are reported as missing."""
     df = pd.DataFrame([{"flag": "VALID", "query": pd.NA}])
     result = dogrula_filtre_dataframe(df)
     assert "VALID" in result

@@ -99,7 +99,7 @@ def test_logging_config_import(monkeypatch, tmp_path):
 
 
 def test_report_writer_accepts_str(tmp_path):
-    """``ReportWriter`` should accept a path string as destination."""
+    """Ensure ``ReportWriter`` accepts a path string as destination."""
     df = pd.DataFrame({"a": [1]})
     nested = tmp_path / "nested" / "out.xlsx"
     ReportWriter().write_report(df, str(nested))
