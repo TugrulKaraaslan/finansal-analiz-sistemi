@@ -18,22 +18,16 @@ except Exception:  # pragma: no cover - optional dependency
 def _call_openbb(func_name: str, **kwargs):
     """Return ``obb.technical.func_name`` result if available.
 
-    Parameters
-    ----------
-    func_name : str
-        Name of the technical indicator function under ``obb``.
-    **kwargs : Any
-        Arguments forwarded to the OpenBB function.
+    Args:
+        func_name: Name of the technical indicator function under ``obb``.
+        **kwargs: Arguments forwarded to the OpenBB function.
 
-    Returns
-    -------
-    Any
+    Returns:
         Result returned by the OpenBB helper.
 
-    Raises
-    ------
-    NotImplementedError
-        If :mod:`openbb` or the requested function is missing.
+    Raises:
+        NotImplementedError: If :mod:`openbb` or the requested function is
+            missing.
     """
     if obb is None:
         raise NotImplementedError(f"openbb equivalent for '{func_name}' is missing")
@@ -55,30 +49,18 @@ def ichimoku(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Return Ichimoku indicator DataFrames generated via OpenBB.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High price series.
-    low : pd.Series
-        Low price series.
-    close : pd.Series
-        Close price series.
-    conversion : int, optional
-        Conversion line period.
-    base : int, optional
-        Base line period.
-    lagging : int, optional
-        Lagging span period.
-    offset : int, optional
-        Displacement for span lines.
-    lookahead : bool, optional
-        Whether to shift leading spans forward.
+    Args:
+        high: High price series.
+        low: Low price series.
+        close: Close price series.
+        conversion: Conversion line period.
+        base: Base line period.
+        lagging: Lagging span period.
+        offset: Displacement for span lines.
+        lookahead: Whether to shift leading spans forward.
 
-    Returns
-    -------
-    tuple[pd.DataFrame, pd.DataFrame]
+    Returns:
         Two DataFrames containing classic Ichimoku and span columns.
-
     """
     df = pd.DataFrame(
         {
@@ -111,22 +93,14 @@ def macd(
 ) -> pd.DataFrame:
     """Return MACD indicator columns generated via OpenBB.
 
-    Parameters
-    ----------
-    close : pd.Series
-        Close price series.
-    fast : int, optional
-        Fast EMA period.
-    slow : int, optional
-        Slow EMA period.
-    signal : int, optional
-        Signal line period.
+    Args:
+        close: Close price series.
+        fast: Fast EMA period.
+        slow: Slow EMA period.
+        signal: Signal line period.
 
-    Returns
-    -------
-    pd.DataFrame
+    Returns:
         DataFrame with MACD, signal and histogram columns.
-
     """
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
@@ -150,22 +124,14 @@ def rsi(
 ) -> pd.Series:
     """Return the RSI series generated via OpenBB.
 
-    Parameters
-    ----------
-    close : pd.Series
-        Close price series.
-    length : int, optional
-        Lookback period.
-    scalar : float, optional
-        Multiplier used in calculation.
-    drift : int, optional
-        Difference period.
+    Args:
+        close: Close price series.
+        length: Lookback period.
+        scalar: Multiplier used in calculation.
+        drift: Difference period.
 
-    Returns
-    -------
-    pd.Series
+    Returns:
         Relative strength index series.
-
     """
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
