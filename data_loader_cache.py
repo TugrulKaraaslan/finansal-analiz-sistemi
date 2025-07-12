@@ -1,4 +1,8 @@
-"""In-memory cache for CSV and Excel loaders."""
+"""In-memory cache for CSV and Excel loaders.
+
+The helper stores file contents keyed by path and modification time so
+repeated calls skip disk access when the source has not changed.
+"""
 
 import os
 
@@ -33,7 +37,10 @@ class DataLoaderCache:
         self.logger = logger
 
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
-        """Read a CSV file, caching the result by path and modification time.
+        """Return DataFrame from ``filepath`` using a lightweight cache.
+
+        The file is only read again when its modification time or size
+        differs from the cached entry so repeated calls avoid disk access.
 
         Parameters
         ----------
