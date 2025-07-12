@@ -1,8 +1,7 @@
 """Create a consolidated Parquet cache from raw CSV files.
 
-CSV files under :data:`RAW_DIR` are merged once and persisted as
-:data:`CACHE` so that subsequent runs can load the combined dataset
-without reading every CSV again.
+CSV files in :data:`RAW_DIR` are merged and written to :data:`CACHE` so that
+subsequent runs can load a single dataset without re-reading all CSV files.
 """
 
 from pathlib import Path
@@ -21,9 +20,8 @@ LOCK_FILE = CACHE.with_suffix(".lock")
 def build() -> None:
     """Build the Parquet cache from the raw CSV files.
 
-    Reads all CSV files under ``RAW_DIR`` and writes them as a single
-    Parquet file to ``CACHE``. When an existing cache is found, the
-    function returns without rebuilding.
+    Reads all CSV files under ``RAW_DIR`` and writes them as a single Parquet
+    file to ``CACHE``. If a valid cache already exists, no action is taken.
     """
     with FileLock(str(LOCK_FILE)):
         if CACHE.exists() and CACHE.stat().st_size > 0:

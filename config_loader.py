@@ -1,7 +1,7 @@
-"""Load configuration data used for indicator calculations.
+"""Utilities for loading indicator-related configuration data.
 
-This module exposes helpers for extracting crossover names from filter
-files and configuration lists.
+The helpers here extract crossover column names from filter files and other
+configuration lists.
 """
 
 from __future__ import annotations
@@ -24,12 +24,10 @@ def load_crossover_names(csv_path: str | Path | None = None) -> list[str]:
     """Return crossover column names referenced by filters and config.
 
     Args:
-        csv_path (str | Path, optional): Filter CSV file. Defaults to
-            :data:`config.FILTRE_DOSYA_YOLU`.
+        csv_path: Filter CSV file. Defaults to ``config.FILTRE_DOSYA_YOLU``.
 
     Returns:
-        list[str]: Sorted list of unique crossover column names.
-
+        Sorted list of unique crossover column names.
     """
     path = Path(csv_path or config.FILTRE_DOSYA_YOLU)
     names: set[str] = set()
@@ -52,11 +50,10 @@ def load_ema_close_crossovers(csv_path: str | Path | None = None) -> list[str]:
     """Return crossover names matching ``ema_N_keser_close_*``.
 
     Args:
-        csv_path (str | Path, optional): Optional filter CSV path forwarded to
+        csv_path: Optional filter CSV path forwarded to
             :func:`load_crossover_names`.
 
     Returns:
-        list[str]: Sorted list of EMA-close crossover column names.
-
+        Sorted list of EMA-close crossover column names.
     """
     return [n for n in load_crossover_names(csv_path) if EMA_CLOSE_RE.fullmatch(n)]

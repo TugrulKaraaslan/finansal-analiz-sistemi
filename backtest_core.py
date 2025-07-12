@@ -1,7 +1,7 @@
-"""Simplified backtesting utilities.
+"""Utility functions for simple backtesting.
 
-Functions implement a lightweight trading simulator for unit tests and
-command-line usage.
+These helpers implement a lightweight trading simulator used in tests and
+from the command line.
 """
 
 import numpy as np
@@ -19,19 +19,16 @@ def _get_fiyat(
     zaman_sutun_adi: str,
     logger_param=None,
 ) -> float:
-    """Return the price for ``tarih`` using the given column.
-
-    Falls back to the nearest available date when an exact match is missing.
+    """Return the price for ``tarih``.
 
     Args:
-        df_hisse_veri (pd.DataFrame): Stock data for a single ticker.
-        tarih (pd.Timestamp): Date of interest.
-        zaman_sutun_adi (str): Column name holding the desired price.
-        logger_param (logging.Logger, optional): Logger instance for debug
-            output.
+        df_hisse_veri: Stock data for a single ticker.
+        tarih: Date of interest.
+        zaman_sutun_adi: Column name holding the desired price.
+        logger_param: Optional logger instance for debug output.
 
     Returns:
-        float: Price as ``float`` or ``NaN`` when unavailable.
+        The price as ``float`` or ``NaN`` when unavailable.
     """
     if logger_param is None:
         logger_param = logger
@@ -108,19 +105,17 @@ def calistir_basit_backtest(
     tarama_tarihi_str: str,
     logger_param=None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Run a simple backtest using the given filter results.
+    """Run a simple backtest using the provided filter results.
 
     Args:
-        filtre_sonuc_dict (dict): Mapping of filter codes to selected stocks.
-        df_tum_veri (pd.DataFrame): Full price dataset containing all tickers.
-        satis_tarihi_str (str): Sale date in ``dd.mm.yyyy`` format.
-        tarama_tarihi_str (str): Screening date in ``dd.mm.yyyy`` format.
-        logger_param (logging.Logger, optional): Logger instance for status
-            messages.
+        filtre_sonuc_dict: Mapping of filter codes to selected stocks.
+        df_tum_veri: Full price dataset containing all tickers.
+        satis_tarihi_str: Sale date in ``dd.mm.yyyy`` format.
+        tarama_tarihi_str: Screening date in ``dd.mm.yyyy`` format.
+        logger_param: Optional logger instance for status messages.
 
     Returns:
-        tuple[pd.DataFrame, pd.DataFrame]: Tuple of summary and detail
-        DataFrames.
+        Tuple of summary and detail DataFrames.
     """
     if logger_param is None:
         logger_param = logger

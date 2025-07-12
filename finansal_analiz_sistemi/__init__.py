@@ -1,8 +1,8 @@
-"""Package initialization for ``finansal_analiz_sistemi``.
+"""Initialize the ``finansal_analiz_sistemi`` package.
 
-Importing this package configures logging from ``logging_config.yaml`` and
-exposes helper modules lazily so that heavy imports occur only when the
-modules are first used.
+Loading this package applies logging configuration from
+``logging_config.yaml`` and exposes certain submodules lazily so that heavy
+imports happen only when needed.
 """
 
 from __future__ import annotations
@@ -29,13 +29,13 @@ __all__ = ["cache_builder", "config", "data_loader", "logging_config"]
 
 
 def __getattr__(name: str) -> types.ModuleType:
-    """Return the requested submodule, importing it on first access.
+    """Import and return the requested submodule on first access.
 
     Args:
-        name (str): Name of the submodule to import.
+        name: Name of the submodule to import.
 
     Returns:
-        types.ModuleType: The imported module.
+        ModuleType: The imported module.
 
     Raises:
         AttributeError: If ``name`` is not a known submodule.

@@ -31,11 +31,14 @@ except ImportError:
 def on_isle_hisse_verileri(
     df_ham: pd.DataFrame, logger_param=None
 ) -> pd.DataFrame | None:
-    """Return cleaned stock data ready for indicator calculation.
+    """Clean raw stock data before indicator calculation.
 
-    The preprocessing pipeline fixes date formats, converts OHLCV columns
-    to numeric types, manages ``NaN`` values, sorts the dataset and
-    optionally removes BIST holidays.
+    Args:
+        df_ham: Raw price data.
+        logger_param: Optional logger instance.
+
+    Returns:
+        The processed DataFrame or ``None`` if processing fails.
     """
     if logger_param is None:
         logger_param = logger
@@ -272,10 +275,13 @@ def on_isle_hisse_verileri(
 
 
 def _temizle_sayisal_deger(deger):
-    """Parse ``deger`` and return a float or ``np.nan`` on failure.
+    """Convert a value to ``float`` when possible.
 
-    String inputs are cleaned of thousand separators and decimal commas
-    before conversion. Unsupported types yield ``np.nan``.
+    Args:
+        deger: Raw numeric string or number.
+
+    Returns:
+        The parsed ``float`` value or ``np.nan`` on failure.
     """
     if pd.isna(deger):
         return np.nan
