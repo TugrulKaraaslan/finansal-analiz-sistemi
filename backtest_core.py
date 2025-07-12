@@ -21,25 +21,17 @@ def _get_fiyat(
 ) -> float:
     """Return the price for ``tarih`` using the given column.
 
-    Falls back to the nearest available date when an exact match is
-    missing.
+    Falls back to the nearest available date when an exact match is missing.
 
-    Parameters
-    ----------
-    df_hisse_veri : pd.DataFrame
-        Stock data for a single ticker.
-    tarih : pd.Timestamp
-        Date of interest.
-    zaman_sutun_adi : str
-        Column name holding the desired price.
-    logger_param : optional
-        Logger instance for debug output.
+    Args:
+        df_hisse_veri (pd.DataFrame): Stock data for a single ticker.
+        tarih (pd.Timestamp): Date of interest.
+        zaman_sutun_adi (str): Column name holding the desired price.
+        logger_param (logging.Logger, optional): Logger instance for debug
+            output.
 
-    Returns
-    -------
-    float
-        Price as ``float`` or ``NaN`` when unavailable.
-
+    Returns:
+        float: Price as ``float`` or ``NaN`` when unavailable.
     """
     if logger_param is None:
         logger_param = logger
@@ -118,24 +110,17 @@ def calistir_basit_backtest(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Run a simple backtest using the given filter results.
 
-    Parameters
-    ----------
-    filtre_sonuc_dict : dict
-        Mapping of filter codes to selected stocks.
-    df_tum_veri : pd.DataFrame
-        Full price dataset containing all tickers.
-    satis_tarihi_str : str
-        Sale date in ``dd.mm.yyyy`` format.
-    tarama_tarihi_str : str
-        Screening date in ``dd.mm.yyyy`` format.
-    logger_param : optional
-        Logger instance for status messages.
+    Args:
+        filtre_sonuc_dict (dict): Mapping of filter codes to selected stocks.
+        df_tum_veri (pd.DataFrame): Full price dataset containing all tickers.
+        satis_tarihi_str (str): Sale date in ``dd.mm.yyyy`` format.
+        tarama_tarihi_str (str): Screening date in ``dd.mm.yyyy`` format.
+        logger_param (logging.Logger, optional): Logger instance for status
+            messages.
 
-    Returns
-    -------
-    tuple[pd.DataFrame, pd.DataFrame]
-        Tuple of summary and detail DataFrames.
-
+    Returns:
+        tuple[pd.DataFrame, pd.DataFrame]: Tuple of summary and detail
+        DataFrames.
     """
     if logger_param is None:
         logger_param = logger
