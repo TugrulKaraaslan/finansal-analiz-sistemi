@@ -49,7 +49,6 @@ except ImportError as e_import_main:
     raise ImportError(e_import_main)
 
 
-
 def veri_yukle(force_excel_reload: bool = False):
     """Load filter definitions and raw price data."""
     df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
