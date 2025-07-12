@@ -1,7 +1,4 @@
-"""Log peak memory usage to ``reports/memory_profile.csv``.
-
-Use as a context manager around a code block to record memory growth.
-"""
+"""Context manager that logs memory usage to ``reports/memory_profile.csv``."""
 
 import os
 import time

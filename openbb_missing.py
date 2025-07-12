@@ -15,25 +15,12 @@ except Exception:  # pragma: no cover - optional dependency
 
 
 def _call_openbb(func_name: str, **kwargs):
-    """Invoke ``obb.technical.func_name`` when OpenBB is installed.
-
-    Parameters
-    ----------
-    func_name : str
-        Name of the function under ``obb.technical``.
-    **kwargs : Any
-        Keyword arguments forwarded to the OpenBB call.
-
-    Returns
-    -------
-    Any
-        Value produced by the OpenBB function.
+    """Invoke ``obb.technical.func_name`` if available.
 
     Raises
     ------
     NotImplementedError
         If :mod:`openbb` or the requested function is missing.
-
     """
     if obb is None:
         raise NotImplementedError(f"openbb equivalent for '{func_name}' is missing")
