@@ -23,14 +23,10 @@ class DataLoaderCache:
     def __init__(self, logger=None, *, ttl: int = 4 * 60 * 60, maxsize: int = 64):
         """Initialize the cache and configure expiration policy.
 
-        Parameters
-        ----------
-        logger : optional
-            Logger used for debug messages.
-        ttl : int, optional
-            Time-to-live for cached entries in seconds.
-        maxsize : int, optional
-            Maximum number of cached datasets.
+        Args:
+            logger (logging.Logger, optional): Logger used for debug messages.
+            ttl (int, optional): Time-to-live for cached entries in seconds.
+            maxsize (int, optional): Maximum number of cached datasets.
 
         """
         self.loaded_data: TTLCache = TTLCache(maxsize=maxsize, ttl=ttl)
@@ -46,17 +42,12 @@ class DataLoaderCache:
         The file is only read again when its modification time or size
         differs from the cached entry so repeated calls avoid disk access.
 
-        Parameters
-        ----------
-        filepath : str
-            CSV file path.
-        **kwargs : Any
-            Options forwarded to :func:`pandas.read_csv` when reading.
+        Args:
+            filepath (str): CSV file path.
+            **kwargs: Options forwarded to :func:`pandas.read_csv` when reading.
 
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame from cache or newly read from disk.
+        Returns:
+            pd.DataFrame: DataFrame from cache or newly read from disk.
 
         """
         abs_path = os.path.abspath(filepath)
@@ -91,17 +82,12 @@ class DataLoaderCache:
         the cached version has expired. Results are stored using the absolute
         path as the cache key.
 
-        Parameters
-        ----------
-        filepath : str
-            Path to the Excel file.
-        **kwargs : Any
-            Additional options forwarded to :func:`pandas.ExcelFile`.
+        Args:
+            filepath (str): Path to the Excel file.
+            **kwargs: Additional options forwarded to :class:`pandas.ExcelFile`.
 
-        Returns
-        -------
-        pd.ExcelFile
-            Cached or freshly loaded workbook instance.
+        Returns:
+            pd.ExcelFile: Cached or freshly loaded workbook instance.
 
         """
         key = (os.path.abspath(filepath), "__excel__")

@@ -23,15 +23,12 @@ EMA_CLOSE_RE = re.compile(r"ema_(\d+)_keser_close_(yukari|asagi)")
 def load_crossover_names(csv_path: str | Path | None = None) -> list[str]:
     """Return crossover column names referenced by filters and config.
 
-    Parameters
-    ----------
-    csv_path : str or Path, optional
-        Filter CSV file. Defaults to ``config.FILTRE_DOSYA_YOLU``.
+    Args:
+        csv_path (str | Path, optional): Filter CSV file. Defaults to
+            :data:`config.FILTRE_DOSYA_YOLU`.
 
-    Returns
-    -------
-    list[str]
-        Sorted list of unique crossover column names.
+    Returns:
+        list[str]: Sorted list of unique crossover column names.
 
     """
     path = Path(csv_path or config.FILTRE_DOSYA_YOLU)
@@ -54,15 +51,12 @@ def load_crossover_names(csv_path: str | Path | None = None) -> list[str]:
 def load_ema_close_crossovers(csv_path: str | Path | None = None) -> list[str]:
     """Return crossover names matching ``ema_N_keser_close_*``.
 
-    Parameters
-    ----------
-    csv_path : str or Path, optional
-        Optional filter CSV path passed to :func:`load_crossover_names`.
+    Args:
+        csv_path (str | Path, optional): Optional filter CSV path forwarded to
+            :func:`load_crossover_names`.
 
-    Returns
-    -------
-    list[str]
-        Sorted list of EMA-close crossover column names.
+    Returns:
+        list[str]: Sorted list of EMA-close crossover column names.
 
     """
     return [n for n in load_crossover_names(csv_path) if EMA_CLOSE_RE.fullmatch(n)]
