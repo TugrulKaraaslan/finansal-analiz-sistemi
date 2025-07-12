@@ -350,6 +350,8 @@ def main(argv: list[str] | None = None) -> None:
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
         utils.purge_old_logs("loglar", days=30)
+
+
 def on_isle(df: pd.DataFrame) -> pd.DataFrame:
     """Return preprocessed stock data.
 
@@ -510,7 +512,6 @@ def veri_yukle(force_excel_reload: bool = False):
         logger.critical("Hisse verileri yüklenemedi veya boş.")
         sys.exit(1)
     return df_filters, df_raw
-
 
 
 if __name__ == "__main__":  # pragma: no cover - manual execution
