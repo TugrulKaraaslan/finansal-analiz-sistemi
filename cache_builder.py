@@ -19,7 +19,12 @@ LOCK_FILE = CACHE.with_suffix(".lock")
 
 
 def build() -> None:
-    """Create or refresh ``CACHE`` from the CSV files under ``RAW_DIR``."""
+    """Build the Parquet cache from the raw CSV files.
+
+    Reads all CSV files under ``RAW_DIR`` and writes them as a single
+    Parquet file to ``CACHE``. When an existing cache is found, the
+    function returns without rebuilding.
+    """
     with FileLock(str(LOCK_FILE)):
         if CACHE.exists() and CACHE.stat().st_size > 0:
             logger.info("Cache hit, skipping build")
