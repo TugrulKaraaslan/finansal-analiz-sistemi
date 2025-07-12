@@ -1,7 +1,7 @@
 """Fallback wrappers for optional OpenBB indicators.
 
-Calls into :mod:`openbb` when available and raises
-:class:`NotImplementedError` otherwise.
+Functions call into :mod:`openbb` when it is installed. If the package is
+missing the helpers raise :class:`NotImplementedError`.
 """
 
 from __future__ import annotations

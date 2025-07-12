@@ -1,7 +1,7 @@
-"""Helpers for generating Excel reports used by tests and the CLI.
+"""Generate Excel reports for test runs and CLI output.
 
-Utilities here assemble performance statistics into an XLSX workbook with
-optional charts and error sheets.
+The module assembles performance tables into an XLSX workbook with optional
+charts and error sheets.
 """
 
 from __future__ import annotations
