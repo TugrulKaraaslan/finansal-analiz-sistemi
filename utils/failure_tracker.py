@@ -29,16 +29,13 @@ def clear_failures() -> None:
 def get_failures(as_dict: bool = False):
     """Return collected failures.
 
-    Parameters
-    ----------
-    as_dict : bool, optional
-        When ``True`` the failures are returned as a plain dictionary
-        suitable for serialization.
+    Args:
+        as_dict (bool, optional): When ``True`` the failures are returned as a
+            plain dictionary suitable for serialization.
 
-    Returns
-    -------
-    dict[str, list[FailedFilter]] | defaultdict[str, list[FailedFilter]]
-        Recorded failures.
+    Returns:
+        dict[str, list[FailedFilter]] | defaultdict[str, list[FailedFilter]]:
+            Recorded failures.
     """
     if as_dict:
         return {c: [asdict(r) for r in rows] for c, rows in failures.items()}
@@ -48,15 +45,10 @@ def get_failures(as_dict: bool = False):
 def log_failure(category: str, item: str, reason: str, hint: str = "") -> None:
     """Record a failed item under ``category`` with an optional hint.
 
-    Parameters
-    ----------
-    category : str
-        Failure category such as ``"filters"`` or ``"indicators"``.
-    item : str
-        Name of the failed item.
-    reason : str
-        Localized failure reason.
-    hint : str, optional
-        Additional hint for resolving the failure.
+    Args:
+        category (str): Failure category such as ``"filters"`` or ``"indicators"``.
+        item (str): Name of the failed item.
+        reason (str): Localized failure reason.
+        hint (str, optional): Additional hint for resolving the failure.
     """
     failures[category].append(FailedFilter(item, reason, hint))

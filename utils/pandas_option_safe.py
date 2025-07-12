@@ -10,7 +10,12 @@ import pandas as pd
 
 
 def ensure_option(name: str, value) -> None:
-    """Attempt to set a pandas option if it exists."""
+    """Attempt to set a pandas option if it exists.
+
+    Args:
+        name (str): Option name.
+        value: Option value.
+    """
     try:
         pd.set_option(name, value)
     except (AttributeError, KeyError, pd.errors.OptionError):
@@ -20,7 +25,15 @@ def ensure_option(name: str, value) -> None:
 
 @contextmanager
 def option_context(name: str, value) -> Iterator[None]:
-    """Like ``pd.option_context`` but ignores unknown-option errors."""
+    """Like ``pd.option_context`` but ignore unknown-option errors.
+
+    Args:
+        name (str): Option name.
+        value: Option value.
+
+    Yields:
+        None
+    """
     try:
         with pd.option_context(name, value):
             yield

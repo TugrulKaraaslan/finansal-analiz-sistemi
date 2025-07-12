@@ -29,16 +29,13 @@ logger = get_logger(__name__)
 def _align(a: pd.Series, b: pd.Series) -> tuple[pd.Series, pd.Series]:
     """Return ``a`` and ``b`` aligned to their common index.
 
-    Parameters
-    ----------
-    a, b : pd.Series
-        Series to be aligned.
+    Args:
+        a (pd.Series): First series.
+        b (pd.Series): Second series.
 
-    Returns
-    -------
-    tuple[pd.Series, pd.Series]
-        ``(a, b)`` reindexed to the intersection of their indices.
-
+    Returns:
+        tuple[pd.Series, pd.Series]: ``(a, b)`` reindexed to the intersection of
+        their indices.
     """
     x, y = a.align(b, join="inner")
     return x, y
@@ -47,18 +44,13 @@ def _align(a: pd.Series, b: pd.Series) -> tuple[pd.Series, pd.Series]:
 def _crosses(a: pd.Series, b: pd.Series, above: bool) -> pd.Series:
     """Return ``True`` where ``a`` crosses ``b`` in the given direction.
 
-    Parameters
-    ----------
-    a, b : pd.Series
-        Series to compare.
-    above : bool
-        ``True`` to detect upward crossovers, ``False`` for downward.
+    Args:
+        a (pd.Series): First series.
+        b (pd.Series): Second series.
+        above (bool): ``True`` for upward crossovers, ``False`` for downward.
 
-    Returns
-    -------
-    pd.Series
-        Boolean mask indexed like the aligned input series.
-
+    Returns:
+        pd.Series: Boolean mask indexed like the aligned input series.
     """
     if a is None or b is None:
         return pd.Series(False, index=[])
@@ -85,20 +77,13 @@ def extract_columns_from_filters(
 ) -> set:
     """Return column names referenced in filters and crossovers.
 
-    Parameters
-    ----------
-    df_filters : pd.DataFrame | None
-        Loaded filter definitions.
-    series_series : list | None
-        List of series-to-series crossover tuples.
-    series_value : list | None
-        List of series-to-value crossover tuples.
+    Args:
+        df_filters (pd.DataFrame | None): Loaded filter definitions.
+        series_series (list | None): List of series-to-series crossover tuples.
+        series_value (list | None): List of series-to-value crossover tuples.
 
-    Returns
-    -------
-    set
-        Unique column names required for indicator computation.
-
+    Returns:
+        set: Unique column names required for indicator computation.
     """
     try:
         from filter_engine import _extract_query_columns
@@ -135,20 +120,13 @@ def extract_columns_from_filters_cached(
 ) -> set:
     """Return referenced columns using a CSV string for caching.
 
-    Parameters
-    ----------
-    df_filters_csv : str
-        Filter definitions serialized as CSV.
-    series_series : list | None
-        Series-to-series crossover configuration.
-    series_value : list | None
-        Series-to-value crossover configuration.
+    Args:
+        df_filters_csv (str): Filter definitions serialized as CSV.
+        series_series (list | None): Series-to-series crossover configuration.
+        series_value (list | None): Series-to-value crossover configuration.
 
-    Returns
-    -------
-    set
-        Unique column names collected from the CSV content.
-
+    Returns:
+        set: Unique column names collected from the CSV content.
     """
     df_filters = None
     if df_filters_csv:

@@ -10,6 +10,12 @@ def normalize_filtre_kodu(df: pd.DataFrame) -> pd.DataFrame:
     ``filtre_kodu`` after stripping surrounding whitespace. When multiple
     columns match, only the first is kept. Raises ``KeyError`` if no matching
     column exists.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing a ``filtre_kodu``-like column.
+
+    Returns:
+        pd.DataFrame: DataFrame with a normalized ``filtre_kodu`` column.
     """
     # Harici müdahalelerden etkilenmemek için kopya üzerinde çalış
     out = df.copy()

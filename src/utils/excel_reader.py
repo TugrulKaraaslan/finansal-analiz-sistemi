@@ -18,7 +18,7 @@ _excel_cache: Dict[str, tuple[float, pd.ExcelFile]] = {}
 
 
 def clear_cache() -> None:
-    """Clear the internal ExcelFile cache and close workbooks."""
+    """Clear the internal ``ExcelFile`` cache and close workbooks."""
     for _, xls in _excel_cache.values():
         try:
             xls.close()
@@ -28,9 +28,16 @@ def clear_cache() -> None:
 
 
 def open_excel_cached(path: str | os.PathLike[str], **kwargs: Any) -> pd.ExcelFile:
-    """Return a cached ``ExcelFile`` object for the given path.
+    """Return a cached ``ExcelFile`` instance for ``path``.
 
-    The cache automatically refreshes if the file's modification time changes.
+    The cache automatically refreshes when the underlying file changes.
+
+    Args:
+        path (str | os.PathLike[str]): Excel file path.
+        **kwargs: Additional arguments forwarded to :class:`pandas.ExcelFile`.
+
+    Returns:
+        pd.ExcelFile: Cached workbook handle.
     """
     abs_path = os.path.abspath(os.fspath(path))
     mtime = os.path.getmtime(abs_path)
@@ -48,6 +55,15 @@ def open_excel_cached(path: str | os.PathLike[str], **kwargs: Any) -> pd.ExcelFi
 def read_excel_cached(
     path: str | os.PathLike[str], sheet_name: str, **kwargs: Any
 ) -> pd.DataFrame:
-    """Parse ``sheet_name`` from a cached Excel workbook."""
+    """Parse ``sheet_name`` from a cached Excel workbook.
+
+    Args:
+        path (str | os.PathLike[str]): Excel file path.
+        sheet_name (str): Worksheet name to parse.
+        **kwargs: Additional arguments passed to :meth:`pandas.ExcelFile.parse`.
+
+    Returns:
+        pd.DataFrame: Data read from the worksheet.
+    """
     xls = open_excel_cached(path)
     return xls.parse(sheet_name=sheet_name, **kwargs)
