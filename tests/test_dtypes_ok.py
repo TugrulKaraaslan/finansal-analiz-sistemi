@@ -8,7 +8,7 @@ from finansal_analiz_sistemi import config
 
 
 def test_safe_set_casts_to_config_dtype():
-    """``safe_set`` should cast arrays to configured dtypes."""
+    """Ensure ``safe_set`` casts arrays to configured dtypes."""
     df = pd.DataFrame({"adx_14": pd.Series([1, 2], dtype="int64")})
     safe_set(df, "adx_14", np.array([1.5, 2.5]))
     assert df["adx_14"].dtype == config.DTYPES_MAP["adx_14"]
