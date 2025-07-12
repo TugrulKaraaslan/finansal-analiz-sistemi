@@ -268,7 +268,6 @@ def on_isle_hisse_verileri(
     else:
         fn_logger.warning("Ön işleme sonucu DataFrame boş.")
 
-
     return df
 
 
