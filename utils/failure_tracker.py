@@ -22,15 +22,23 @@ failures: defaultdict[str, list[FailedFilter]] = defaultdict(list)
 
 
 def clear_failures() -> None:
-    """Reset global failures dict."""
+    """Reset the global failures dictionary."""
     failures.clear()
 
 
 def get_failures(as_dict: bool = False):
     """Return collected failures.
 
-    When ``as_dict`` is ``True`` the result is returned as a plain dictionary
-    suitable for serialization.
+    Parameters
+    ----------
+    as_dict : bool, optional
+        When ``True`` the failures are returned as a plain dictionary
+        suitable for serialization.
+
+    Returns
+    -------
+    dict[str, list[FailedFilter]] | defaultdict[str, list[FailedFilter]]
+        Recorded failures.
     """
     if as_dict:
         return {c: [asdict(r) for r in rows] for c, rows in failures.items()}
@@ -38,5 +46,17 @@ def get_failures(as_dict: bool = False):
 
 
 def log_failure(category: str, item: str, reason: str, hint: str = "") -> None:
-    """Record a failed item under ``category`` with an optional hint."""
+    """Record a failed item under ``category`` with an optional hint.
+
+    Parameters
+    ----------
+    category : str
+        Failure category such as ``"filters"`` or ``"indicators"``.
+    item : str
+        Name of the failed item.
+    reason : str
+        Localized failure reason.
+    hint : str, optional
+        Additional hint for resolving the failure.
+    """
     failures[category].append(FailedFilter(item, reason, hint))
