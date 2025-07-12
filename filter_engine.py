@@ -60,20 +60,14 @@ class MissingColumnError(Exception):
 def _apply_single_filter(df, kod, query):
     """Run a filter expression on ``df`` and collect diagnostics.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame containing indicator columns.
-    kod : str
-        Identifier of the filter being executed.
-    query : str
-        Filter expression in ``pandas.query`` syntax.
+    Args:
+        df (pd.DataFrame): DataFrame containing indicator columns.
+        kod (str): Identifier of the filter being executed.
+        query (str): Filter expression in ``pandas.query`` syntax.
 
-    Returns
-    -------
-    tuple[pd.DataFrame | None, dict]
-        Resulting DataFrame (or ``None`` on error) and a dictionary describing
-        the outcome.
+    Returns:
+        tuple[pd.DataFrame | None, dict]: Resulting DataFrame (or ``None`` on
+        error) and a dictionary describing the outcome.
 
     """
     info = {
@@ -139,17 +133,13 @@ def _apply_single_filter(df, kod, query):
 def _build_solution(err_type: str, msg: str) -> str:
     """Return a user-facing suggestion based on ``err_type`` and ``msg``.
 
-    Parameters
-    ----------
-    err_type : str
-        Normalized error code such as ``GENERIC`` or ``QUERY_ERROR``.
-    msg : str
-        Raw error message to inspect for clues.
+    Args:
+        err_type (str): Normalized error code such as ``GENERIC`` or
+            ``QUERY_ERROR``.
+        msg (str): Raw error message inspected for clues.
 
-    Returns
-    -------
-    str
-        Localized hint text suitable for displaying to the user.
+    Returns:
+        str: Localized hint text suitable for displaying to the user.
 
     """
     if err_type == "GENERIC":
@@ -242,19 +232,13 @@ def kaydet_hata(
 def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
     """Execute ``expr`` on ``df`` unless the filter is marked passive.
 
-    Parameters
-    ----------
-    code : str
-        Identifier of the filter to run.
-    df : pd.DataFrame
-        DataFrame containing indicator columns.
-    expr : str
-        Filter expression in ``pandas.query`` syntax.
+    Args:
+        code (str): Identifier of the filter to run.
+        df (pd.DataFrame): DataFrame containing indicator columns.
+        expr (str): Filter expression in ``pandas.query`` syntax.
 
-    Returns
-    -------
-    pd.DataFrame
-        Resulting DataFrame or an empty frame when skipped.
+    Returns:
+        pd.DataFrame: Resulting DataFrame or an empty frame when skipped.
 
     """
     from finansal_analiz_sistemi.config import cfg
@@ -359,21 +343,15 @@ def uygula_filtreler(
 ) -> tuple[dict, dict]:
     """Apply filter rules on ``df_ana_veri`` and return results.
 
-    Parameters
-    ----------
-    df_ana_veri : pd.DataFrame
-        Dataset containing all indicator columns.
-    df_filtre_kurallari : pd.DataFrame
-        DataFrame with ``filtre_kodu``/``FilterCode`` and ``PythonQuery`` columns.
-    tarama_tarihi : pd.Timestamp
-        Date for which the screening is executed.
-    logger_param : optional
-        Logger instance to use.
+    Args:
+        df_ana_veri (pd.DataFrame): Dataset containing all indicator columns.
+        df_filtre_kurallari (pd.DataFrame): DataFrame with ``filtre_kodu``/
+            ``FilterCode`` and ``PythonQuery`` columns.
+        tarama_tarihi (pd.Timestamp): Date for which the screening is executed.
+        logger_param (logging.Logger, optional): Logger instance to use.
 
-    Returns
-    -------
-    tuple[dict, dict]
-        ``filtre_sonuclar`` and ``atlanmis_filtreler_log_dict``.
+    Returns:
+        tuple[dict, dict]: ``filtre_sonuclar`` and ``atlanmis_filtreler_log_dict``.
 
     """
     if logger_param is None:
