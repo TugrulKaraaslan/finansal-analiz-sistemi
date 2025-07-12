@@ -14,14 +14,21 @@ class ErrorCountingFilter(logging.Filter):
     """Count ERROR and WARNING logs and store encountered error messages."""
 
     def __init__(self) -> None:
-        """Initialize counters and internal error list."""
+        """Initialize counters and an internal error list."""
         super().__init__("counter")
         self.errors = 0
         self.warnings = 0
         self.error_list: list[tuple[str, str, str]] = []
 
     def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
-        """Increment counters and keep a list of error messages."""
+        """Increment counters and keep a list of error messages.
+
+        Args:
+            record (logging.LogRecord): The log record being handled.
+
+        Returns:
+            bool: Always ``True`` to allow processing to continue.
+        """
         if record.levelno >= logging.ERROR:
             ERROR_COUNTER["errors"] += 1
             self.errors += 1
