@@ -19,9 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 def parse_args() -> Namespace:
-    """Return parsed arguments for this CLI.
+    """Parse command line arguments.
 
-    Parses options controlling report generation and filter validation.
+    Returns:
+        Namespace: Parsed CLI options controlling report generation and
+        filter validation.
     """
     p = ArgumentParser(description="Rapor üret veya filtreleri doğrula")
 
@@ -57,7 +59,14 @@ def parse_args() -> Namespace:
 
 
 def run_analysis(csv_path: Path) -> Path:
-    """Read CSV and write Excel report next to it."""
+    """Generate an Excel report from the given CSV file.
+
+    Args:
+        csv_path (Path): Path to the input CSV file.
+
+    Returns:
+        Path: Location of the generated Excel report.
+    """
     df = pd.read_csv(csv_path, sep=";")
     out_path = csv_path.with_suffix(".xlsx")
     ReportWriter().write_report(df, out_path)
@@ -66,7 +75,7 @@ def run_analysis(csv_path: Path) -> Path:
 
 @atexit.register
 def _summary() -> None:
-    """Log a final summary and exit with error status if needed."""
+    """Log a summary and exit with an error code when needed."""
     logger.info(
         "[SUMMARY] run finished — errors=%d warnings=%d",
         ERROR_COUNTER["errors"],
