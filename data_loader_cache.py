@@ -36,8 +36,6 @@ class DataLoaderCache:
         """Clear the internal cache."""
         self.loaded_data.clear()
 
-
-
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
         """Read a CSV file, caching the result by path and modification time.
 
@@ -115,4 +113,3 @@ class DataLoaderCache:
             if self.logger:
                 self.logger.error(f"ExcelFile yükleme hatası: {filepath}: {e}")
             raise
-
