@@ -49,80 +49,6 @@ except ImportError as e_import_main:
     raise ImportError(e_import_main)
 
 
-def veri_yukle(force_excel_reload: bool = False):
-    """Load filter definitions and raw price data."""
-    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
-    if df_filters is None or df_filters.empty:
-        logger.critical("Filtre kuralları yüklenemedi veya boş.")
-        sys.exit(1)
-
-    df_raw = data_loader.yukle_hisse_verileri(
-        force_excel_reload=force_excel_reload, logger_param=logger
-    )
-    if df_raw is None or df_raw.empty:
-        logger.critical("Hisse verileri yüklenemedi veya boş.")
-        sys.exit(1)
-    return df_filters, df_raw
-
-
-def on_isle(df: pd.DataFrame) -> pd.DataFrame:
-    """Preprocess raw stock data."""
-    processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
-    if processed is None or processed.empty:
-        logger.critical("Veri ön işleme başarısız.")
-        sys.exit(1)
-    return processed
-
-
-def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate indicators and crossover columns."""
-    wanted_cols = utils.extract_columns_from_filters_cached(
-        df_filtre_kurallari.to_csv(index=False),
-        tuple(config.SERIES_SERIES_CROSSOVERS),
-        tuple(config.SERIES_VALUE_CROSSOVERS),
-    )
-    from utils.memory_profile import mem_profile
-
-    with mem_profile():
-        result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
-            df,
-            wanted_cols=wanted_cols,
-            df_filters=df_filtre_kurallari,
-            logger_param=logger,
-        )
-    if result is None:
-        logger.critical("İndikatör hesaplanamadı.")
-        sys.exit(1)
-    return result
-
-
-def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
-    """Apply filter rules to indicator data."""
-    return filter_engine.uygula_filtreler(
-        df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
-    )
-
-
-def backtest_yap(
-    df: pd.DataFrame,
-    filtre_sonuclari: dict,
-    tarama_tarihi: str,
-    satis_tarihi: str,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Run simple backtest on filtered results."""
-    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
-        filtre_sonuc_dict=filtre_sonuclari,
-        df_tum_veri=df,
-        satis_tarihi_str=satis_tarihi,
-        tarama_tarihi_str=tarama_tarihi,
-        logger_param=logger,
-    )
-    if rapor_df is None:
-        logger.critical("Backtest sonuç üretmedi.")
-        sys.exit(1)
-    return rapor_df, detay_df
-
-
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
     """Return summary, detail and statistics DataFrames derived from ``rapor_df``."""
     if rapor_df is None or rapor_df.empty:
@@ -131,22 +57,6 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
     detay_df = rapor_df.copy()
     istatistik_df = rapor_df.describe().reset_index()
     return ozet_df, detay_df, istatistik_df
-
-
-def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Save Excel report if data is available."""
-    if rapor_df.empty:
-        logger.info("Rapor verisi boş.")
-        return
-    ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
-    out_path = Path("raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
-    out_path.parent.mkdir(exist_ok=True)
-    from utils.memory_profile import mem_profile
-
-    with mem_profile():
-        report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
-    logger.info(f"Excel raporu oluşturuldu: {out_path}")
-
 
 def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     """Display summary or detail tables in a simple Streamlit UI."""
@@ -175,7 +85,27 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
         if "ort_getiri_%" in ozet_df:
             st.bar_chart(ozet_df.set_index("filtre_kodu")["ort_getiri_%"])
         else:
+
             st.write("Grafik için veri yok")
+
+def backtest_yap(
+    df: pd.DataFrame,
+    filtre_sonuclari: dict,
+    tarama_tarihi: str,
+    satis_tarihi: str,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Run simple backtest on filtered results."""
+    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
+        filtre_sonuc_dict=filtre_sonuclari,
+        df_tum_veri=df,
+        satis_tarihi_str=satis_tarihi,
+        tarama_tarihi_str=tarama_tarihi,
+        logger_param=logger,
+    )
+    if rapor_df is None:
+        logger.critical("Backtest sonuç üretmedi.")
+        sys.exit(1)
+    return rapor_df, detay_df
 
 
 def calistir_tum_sistemi(
@@ -264,41 +194,32 @@ def calistir_tum_sistemi(
 
     return rapor_df, detay_df, atlanmis
 
-
-def run_pipeline(
-    price_csv: str | Path, filter_def: str | Path, output: str | Path
-) -> Path:
-    """Run the pipeline on ``price_csv`` and ``filter_def``."""
-    global log_counter
-    if log_counter is None:
-        log_counter = setup_logger()
-    df = pd.read_csv(
-        price_csv,
-        comment="#",
-        header=None,
-        names=["code", "date", "open", "high", "low", "close", "volume"],
-    )
-    df = df.rename(columns={"code": "hisse_kodu", "date": "tarih"})
-    df["tarih"] = pd.to_datetime(df["tarih"])
-
-    with open(filter_def) as f:
-        filt = yaml.safe_load(f) or []
-    filt_df = pd.DataFrame(filt).rename(
-        columns={"code": "FilterCode", "clause": "PythonQuery"}
+def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
+    """Apply filter rules to indicator data."""
+    return filter_engine.uygula_filtreler(
+        df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
     )
 
-    tarama_dt = df["tarih"].min()
-    satis_dt = df["tarih"].max()
-
-    filtre_sonuclar, _ = filter_engine.uygula_filtreler(df, filt_df, tarama_dt)
-    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
-        filtre_sonuclar,
-        df,
-        satis_tarihi_str=satis_dt.strftime("%d.%m.%Y"),
-        tarama_tarihi_str=tarama_dt.strftime("%d.%m.%Y"),
+def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculate indicators and crossover columns."""
+    wanted_cols = utils.extract_columns_from_filters_cached(
+        df_filtre_kurallari.to_csv(index=False),
+        tuple(config.SERIES_SERIES_CROSSOVERS),
+        tuple(config.SERIES_VALUE_CROSSOVERS),
     )
-    return report_generator.generate_full_report(rapor_df, detay_df, [], output)
+    from utils.memory_profile import mem_profile
 
+    with mem_profile():
+        result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
+            df,
+            wanted_cols=wanted_cols,
+            df_filters=df_filtre_kurallari,
+            logger_param=logger,
+        )
+    if result is None:
+        logger.critical("İndikatör hesaplanamadı.")
+        sys.exit(1)
+    return result
 
 def main(argv: list[str] | None = None) -> None:
     """Execute the main backtest workflow for CLI usage."""
@@ -436,7 +357,83 @@ def main(argv: list[str] | None = None) -> None:
             ) as wr:
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
+
+
         utils.purge_old_logs("loglar", days=30)
+def on_isle(df: pd.DataFrame) -> pd.DataFrame:
+    """Preprocess raw stock data."""
+    processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
+    if processed is None or processed.empty:
+        logger.critical("Veri ön işleme başarısız.")
+
+        sys.exit(1)
+    return processed
+
+
+def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
+    """Save Excel report if data is available."""
+    if rapor_df.empty:
+        logger.info("Rapor verisi boş.")
+        return
+    ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
+    out_path = Path("raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
+    out_path.parent.mkdir(exist_ok=True)
+    from utils.memory_profile import mem_profile
+
+    with mem_profile():
+        report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
+    logger.info(f"Excel raporu oluşturuldu: {out_path}")
+
+
+def run_pipeline(
+    price_csv: str | Path, filter_def: str | Path, output: str | Path
+) -> Path:
+    """Run the pipeline on ``price_csv`` and ``filter_def``."""
+    global log_counter
+    if log_counter is None:
+        log_counter = setup_logger()
+    df = pd.read_csv(
+        price_csv,
+        comment="#",
+        header=None,
+        names=["code", "date", "open", "high", "low", "close", "volume"],
+    )
+    df = df.rename(columns={"code": "hisse_kodu", "date": "tarih"})
+    df["tarih"] = pd.to_datetime(df["tarih"])
+
+    with open(filter_def) as f:
+        filt = yaml.safe_load(f) or []
+    filt_df = pd.DataFrame(filt).rename(
+        columns={"code": "FilterCode", "clause": "PythonQuery"}
+    )
+
+    tarama_dt = df["tarih"].min()
+    satis_dt = df["tarih"].max()
+
+    filtre_sonuclar, _ = filter_engine.uygula_filtreler(df, filt_df, tarama_dt)
+    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
+        filtre_sonuclar,
+        df,
+        satis_tarihi_str=satis_dt.strftime("%d.%m.%Y"),
+        tarama_tarihi_str=tarama_dt.strftime("%d.%m.%Y"),
+    )
+    return report_generator.generate_full_report(rapor_df, detay_df, [], output)
+
+
+def veri_yukle(force_excel_reload: bool = False):
+    """Load filter definitions and raw price data."""
+    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
+    if df_filters is None or df_filters.empty:
+        logger.critical("Filtre kuralları yüklenemedi veya boş.")
+        sys.exit(1)
+
+    df_raw = data_loader.yukle_hisse_verileri(
+        force_excel_reload=force_excel_reload, logger_param=logger
+    )
+    if df_raw is None or df_raw.empty:
+        logger.critical("Hisse verileri yüklenemedi veya boş.")
+        sys.exit(1)
+    return df_filters, df_raw
 
 
 if __name__ == "__main__":  # pragma: no cover - manual execution
