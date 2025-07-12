@@ -36,9 +36,7 @@ def _temizle_sayisal_deger(deger):
     """
     if pd.isna(deger):
         return np.nan
-    if isinstance(
-        deger, (int, float, np.number)
-    ):
+    if isinstance(deger, (int, float, np.number)):
         return float(deger)
     if isinstance(deger, str):
         # Keep digits, commas, dots and minus signs only
@@ -229,9 +227,7 @@ def on_isle_hisse_verileri(
             return None
     else:
         nan_oncesi_satir_sayisi = len(df)
-        df.dropna(
-            subset=kritik_ohlc_sutunlar, inplace=True
-        )
+        df.dropna(subset=kritik_ohlc_sutunlar, inplace=True)
         rows_dropped_for_ohlc_nan = nan_oncesi_satir_sayisi - len(df)
         if rows_dropped_for_ohlc_nan > 0:
             fn_logger.info(
