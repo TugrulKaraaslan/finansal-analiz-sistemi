@@ -1,4 +1,4 @@
-"""Simplified backtesting utilities.
+"""Simplified backtesting utilities used by the CLI.
 
 Functions implement a lightweight trading simulator for unit tests and
 command-line usage.
