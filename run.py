@@ -451,10 +451,11 @@ def run_pipeline(
     filter_def: str | Path,
     output: str | Path,
 ) -> Path:
-    """Run the full pipeline and write the Excel report.
+    """Run the entire workflow and return the generated report path.
 
-    The helper loads ``price_csv`` and ``filter_def`` files, executes the
-    backtest workflow and saves the resulting workbook to ``output``.
+    ``price_csv`` and ``filter_def`` are loaded, the backtest is executed and
+    the resulting Excel workbook is saved to ``output``. The path to the saved
+    file is returned so callers can reference it easily.
     """
     global log_counter
     if log_counter is None:
@@ -488,7 +489,7 @@ def run_pipeline(
 
 
 def veri_yukle(force_excel_reload: bool = False):
-    """Load filter definitions and raw price data.
+    """Load filter definitions together with the raw price dataset.
 
     Parameters
     ----------
@@ -498,7 +499,7 @@ def veri_yukle(force_excel_reload: bool = False):
     Returns
     -------
     tuple[pd.DataFrame, pd.DataFrame]
-        Pair of filter definitions and raw price data.
+        ``(filters_df, prices_df)`` pair ready for further processing.
     """
     df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
     if df_filters is None or df_filters.empty:

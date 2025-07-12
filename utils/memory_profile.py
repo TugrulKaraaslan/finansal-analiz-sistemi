@@ -5,7 +5,7 @@ Usage example::
     with mem_profile():
         ...  # run memory intensive task
 
-Each invocation appends ``timestamp,peak,diff`` to the CSV file.
+Each invocation appends a ``timestamp,peak,diff`` line to the CSV file.
 """
 
 import os
