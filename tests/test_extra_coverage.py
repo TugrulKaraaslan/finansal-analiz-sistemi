@@ -8,13 +8,6 @@ from src.preprocessor import fill_missing_business_day
 from src.utils import excel_reader
 
 
-def test_fill_missing_business_day():
-    """Fill missing business days with the previous trading day."""
-    df = pd.DataFrame({"tarih": ["2025-03-07", None, "2025-03-10"]})
-    out = fill_missing_business_day(df)
-    assert out["tarih"].iloc[1] == pd.Timestamp("2025-03-07")
-
-
 def test_excel_reader_cache(tmp_path):
     """Cached ``ExcelFile`` objects should be reused across calls."""
     path = tmp_path / "t.xlsx"
@@ -44,27 +37,11 @@ def test_excel_reader_cache_refresh(tmp_path):
     excel_reader.clear_cache()
 
 
-def test_tarama_denetimi_summary(monkeypatch):
-    """Summary row should be appended after scanning filters."""
-    df_filtreler = pd.DataFrame({"kod": ["F1"], "PythonQuery": ["close > open"]})
-    df_ind = pd.DataFrame()
-
-    def fake_apply(df, kod, query):
-        """Test fake_apply."""
-        return None, {
-            "kod": kod,
-            "tip": "tarama",
-            "durum": "OK",
-            "sebep": "",
-            "eksik_sutunlar": "",
-            "nan_sutunlar": "",
-            "secim_adedi": 0,
-        }
-
-    monkeypatch.setattr(kontrol_araci, "_apply_single_filter", fake_apply)
-    result = kontrol_araci.tarama_denetimi(df_filtreler, df_ind)
-    assert len(result) == 2
-    assert result.iloc[-1]["kod"] == "_SUMMARY"
+def test_fill_missing_business_day():
+    """Fill missing business days with the previous trading day."""
+    df = pd.DataFrame({"tarih": ["2025-03-07", None, "2025-03-10"]})
+    out = fill_missing_business_day(df)
+    assert out["tarih"].iloc[1] == pd.Timestamp("2025-03-07")
 
 
 def test_logging_config_import(monkeypatch, tmp_path):
@@ -120,10 +97,32 @@ def test_logging_config_import(monkeypatch, tmp_path):
     for h in old_handlers:
         root.addHandler(h)
 
-
 def test_report_writer_accepts_str(tmp_path):
     """``ReportWriter`` should accept a path string as destination."""
     df = pd.DataFrame({"a": [1]})
     nested = tmp_path / "nested" / "out.xlsx"
     ReportWriter().write_report(df, str(nested))
     assert nested.exists() and nested.stat().st_size > 0
+
+def test_tarama_denetimi_summary(monkeypatch):
+    """Summary row should be appended after scanning filters."""
+    df_filtreler = pd.DataFrame({"kod": ["F1"], "PythonQuery": ["close > open"]})
+    df_ind = pd.DataFrame()
+
+    def fake_apply(df, kod, query):
+        """Test fake_apply."""
+        return None, {
+            "kod": kod,
+            "tip": "tarama",
+            "durum": "OK",
+            "sebep": "",
+            "eksik_sutunlar": "",
+            "nan_sutunlar": "",
+            "secim_adedi": 0,
+        }
+
+    monkeypatch.setattr(kontrol_araci, "_apply_single_filter", fake_apply)
+    result = kontrol_araci.tarama_denetimi(df_filtreler, df_ind)
+    assert len(result) == 2
+    assert result.iloc[-1]["kod"] == "_SUMMARY"
+
