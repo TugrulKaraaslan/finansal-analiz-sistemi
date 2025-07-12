@@ -1,8 +1,4 @@
-"""Evaluate stock filter expressions and manage filter definitions.
-
-The module handles parsing, dependency resolution and execution of
-filter queries used throughout the project.
-"""
+"""Evaluate and execute stock filters defined in configuration files."""
 
 from __future__ import annotations
 
@@ -20,7 +16,6 @@ from finansal_analiz_sistemi.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Read minimum stock threshold from the configuration file
 _cfg_path = os.path.join(os.path.dirname(__file__), "config.yml")
 if os.path.exists(_cfg_path):
     with open(_cfg_path) as f:
@@ -29,11 +24,9 @@ else:
     _cfg = {}
 MIN_STOCKS_PER_FILTER = _cfg.get("min_stocks_per_filter", 1)
 
-# Regular expressions for error parsing
 _missing_re = re.compile(r"Eksik sütunlar?:\s*(?P<col>[A-Za-z0-9_]+)")
 _undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)")
 
-# Global containers
 FAILED_FILTERS: list[dict] = []
 FILTER_DEFS: dict[str, dict] = {}
 
@@ -139,7 +132,7 @@ def _apply_single_filter(df, kod, query):
 
 
 def _build_solution(err_type: str, msg: str) -> str:
-    """Return a user facing suggestion for an error type.
+    """Return a user-facing suggestion based on ``err_type`` and ``msg``.
 
     Parameters
     ----------
