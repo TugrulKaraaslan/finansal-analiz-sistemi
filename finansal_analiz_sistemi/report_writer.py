@@ -8,13 +8,17 @@ import pandas as pd
 
 
 class ReportWriter:
-    """Write DataFrames to Excel creating parent directories as needed."""
+    """Write DataFrames to Excel while ensuring the destination exists."""
 
     def write_report(self, df: pd.DataFrame, output_path: Path | str) -> None:
-        """Write ``df`` to ``output_path`` in Excel format.
+        """Write ``df`` to an Excel file.
 
-        Parent directories are created automatically before invoking
+        Creates missing parent directories before calling
         :meth:`pandas.DataFrame.to_excel`.
+
+        Args:
+            df (pd.DataFrame): Data to export.
+            output_path (Path | str): Target Excel file path.
         """
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
