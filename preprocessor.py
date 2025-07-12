@@ -1,7 +1,7 @@
 """Data preprocessing helpers for stock price datasets.
 
-Utilities here clean numeric values and align dates before indicators
-are computed.
+Functions clean numeric values, align dates and drop invalid rows before
+indicator calculation.
 """
 
 from __future__ import annotations
@@ -36,9 +36,7 @@ def _temizle_sayisal_deger(deger):
     """
     if pd.isna(deger):
         return np.nan
-    if isinstance(
-        deger, (int, float, np.number)
-    ):  # ``np.number`` covers numpy numeric types as well
+    if isinstance(deger, (int, float, np.number)):
         return float(deger)
     if isinstance(deger, str):
         # Keep digits, commas, dots and minus signs only
@@ -229,9 +227,7 @@ def on_isle_hisse_verileri(
             return None
     else:
         nan_oncesi_satir_sayisi = len(df)
-        df.dropna(
-            subset=kritik_ohlc_sutunlar, inplace=True
-        )  # how='any': drop row when any critical column is NaN
+        df.dropna(subset=kritik_ohlc_sutunlar, inplace=True)
         rows_dropped_for_ohlc_nan = nan_oncesi_satir_sayisi - len(df)
         if rows_dropped_for_ohlc_nan > 0:
             fn_logger.info(

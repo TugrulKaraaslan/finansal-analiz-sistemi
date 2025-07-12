@@ -1,7 +1,7 @@
-"""Utilities to create the unified Parquet cache from raw CSV files.
+"""Create a consolidated Parquet cache from raw CSV inputs.
 
-Raw datasets located under :data:`RAW_DIR` are merged and written to
-``CACHE`` so the rest of the project can load data efficiently.
+Raw datasets under :data:`RAW_DIR` are merged and written to ``CACHE`` so the
+rest of the project can load data efficiently.
 """
 
 from pathlib import Path
