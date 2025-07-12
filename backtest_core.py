@@ -13,6 +13,93 @@ from finansal_analiz_sistemi.logging_config import get_logger
 logger = get_logger(__name__)
 
 
+def calistir_basit_backtest(
+    filtre_sonuc_dict: dict,
+    df_tum_veri: pd.DataFrame,
+    satis_tarihi_str: str,
+    tarama_tarihi_str: str,
+    logger_param=None,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Run a simple backtest using the given filter results."""
+    if logger_param is None:
+        logger_param = logger
+    fn_logger = logger_param
+    fn_logger.info(
+        f"Basit backtest çalıştırılıyor. Tarama: {tarama_tarihi_str}, Satış: {satis_tarihi_str}"
+    )
+
+    if df_tum_veri is None or df_tum_veri.empty:
+        fn_logger.error(
+            "Backtest için ana veri (df_tum_veri) boş veya None. İşlem durduruluyor."
+        )
+        return pd.DataFrame(), pd.DataFrame()
+
+    try:
+        satis_tarihi = pd.to_datetime(satis_tarihi_str, format="%d.%m.%Y")
+        tarama_tarihi = pd.to_datetime(tarama_tarihi_str, format="%d.%m.%Y")
+    except ValueError:
+        fn_logger.critical(
+            f"Satış tarihi '{satis_tarihi_str}' veya tarama tarihi '{tarama_tarihi_str}' "
+            "geçerli bir formatta (dd.mm.yyyy) değil. Backtest durduruluyor."
+        )
+        return pd.DataFrame(), pd.DataFrame()
+
+    alim_fiyat_sutunu = config.ALIM_ZAMANI
+    satis_fiyat_sutunu = config.SATIS_ZAMANI
+    komisyon_orani = config.KOMISYON_ORANI
+    if alim_fiyat_sutunu not in df_tum_veri.columns:
+        alim_fiyat_sutunu = "close"
+    if satis_fiyat_sutunu not in df_tum_veri.columns:
+        satis_fiyat_sutunu = "close"
+    config.UYGULANAN_STRATEJI = "basit_backtest"
+
+    summary_records = []
+    detail_records = []
+
+    for filtre_kodu, filtre_sonuc in filtre_sonuc_dict.items():
+        hisse_kodlari = filtre_sonuc.get("hisseler", [])
+        sebep = filtre_sonuc.get("sebep", "")
+
+        hisse_getirileri = []
+        for kod in hisse_kodlari:
+            df_hisse = df_tum_veri[df_tum_veri["hisse_kodu"] == kod]
+            alis = _get_fiyat(df_hisse, tarama_tarihi, alim_fiyat_sutunu, fn_logger)
+            satis = _get_fiyat(df_hisse, satis_tarihi, satis_fiyat_sutunu, fn_logger)
+            if pd.notna(alis) and pd.notna(satis):
+                getiri = (satis / alis - 1 - komisyon_orani) * 100
+            else:
+                getiri = np.nan
+            basari = "BAŞARILI" if pd.notna(getiri) and getiri > 0 else "BAŞARISIZ"
+            detail_records.append(
+                {
+                    "filtre_kodu": filtre_kodu,
+                    "hisse_kodu": kod,
+                    "getiri_yuzde": round(getiri, 2) if pd.notna(getiri) else np.nan,
+                    "basari": basari,
+                }
+            )
+            hisse_getirileri.append(getiri)
+
+        getiriler_seri = pd.Series(hisse_getirileri, dtype=float).dropna()
+        ortalama = getiriler_seri.mean() if not getiriler_seri.empty else np.nan
+        sebep_kodu = sebep
+        if sebep == "OK" and getiriler_seri.empty:
+            sebep_kodu = "DATA_GAP"
+
+        summary_records.append(
+            {
+                "filtre_kodu": filtre_kodu,
+                "ort_getiri_%": round(ortalama, 2) if pd.notna(ortalama) else np.nan,
+                "sebep_kodu": sebep_kodu,
+            }
+        )
+
+    rapor_df = pd.DataFrame(summary_records).sort_values("filtre_kodu")
+    detay_df = pd.DataFrame(detail_records)
+
+    return rapor_df, detay_df
+
+
 def _get_fiyat(
     df_hisse_veri: pd.DataFrame,
     tarih: pd.Timestamp,
