@@ -38,6 +38,7 @@ def _align(a: pd.Series, b: pd.Series) -> tuple[pd.Series, pd.Series]:
     -------
     tuple[pd.Series, pd.Series]
         ``(a, b)`` reindexed to the intersection of their indices.
+
     """
     x, y = a.align(b, join="inner")
     return x, y
@@ -57,6 +58,7 @@ def _crosses(a: pd.Series, b: pd.Series, above: bool) -> pd.Series:
     -------
     pd.Series
         Boolean mask indexed like the aligned input series.
+
     """
     if a is None or b is None:
         return pd.Series(False, index=[])
@@ -96,6 +98,7 @@ def extract_columns_from_filters(
     -------
     set
         Unique column names required for indicator computation.
+
     """
     try:
         from filter_engine import _extract_query_columns
@@ -145,6 +148,7 @@ def extract_columns_from_filters_cached(
     -------
     set
         Unique column names collected from the CSV content.
+
     """
     df_filters = None
     if df_filters_csv:

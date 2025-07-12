@@ -560,6 +560,7 @@ def _calculate_series_series_crossover(
     tuple[pd.Series, pd.Series] | None
         Pair of boolean Series for cross-above and cross-below or ``None`` when
         the columns are missing.
+
     """
     if logger_param is None:
         logger_param = logger
@@ -633,6 +634,7 @@ def _calculate_series_value_crossover(
     tuple[pd.Series, pd.Series] | None
         Series for cross-above and cross-below events or ``None`` when the
         source column is missing.
+
     """
     if logger_param is None:
         logger_param = logger

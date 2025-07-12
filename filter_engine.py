@@ -145,6 +145,7 @@ def _build_solution(err_type: str, msg: str) -> str:
     -------
     str
         Localized hint text suitable for displaying to the user.
+
     """
     if err_type == "GENERIC":
         m1 = _missing_re.search(msg)
