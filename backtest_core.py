@@ -202,4 +202,3 @@ def _get_fiyat(
             exc_info=False,
         )
         return np.nan
-
