@@ -1,4 +1,4 @@
-"""Unit tests for auto_columns."""
+"""Tests for automatic column handling in :mod:`preprocessor`."""
 
 import pandas as pd
 
