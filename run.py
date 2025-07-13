@@ -463,7 +463,7 @@ def run_pipeline(
     filter_def: str | Path,
     output: str | Path,
 ) -> Path:
-    """Run the entire workflow and return the generated report path.
+    """Execute the full workflow and return the Excel report path.
 
     Args:
         price_csv (str | Path): CSV file containing price data.
