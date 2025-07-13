@@ -31,12 +31,10 @@ except ImportError:
 def on_isle_hisse_verileri(
     df_ham: pd.DataFrame, logger_param=None
 ) -> pd.DataFrame | None:
-    """
-    Return cleaned stock data ready for indicator calculation.
+    """Clean raw stock data for indicator calculation.
 
-    The preprocessing pipeline fixes date formats, converts OHLCV columns
-    to numeric types, manages ``NaN`` values, sorts the dataset and
-    optionally removes BIST holidays.
+    The step converts date fields, normalizes numeric columns, drops invalid
+    rows and optionally filters out BIST holidays.
     """
     if logger_param is None:
         logger_param = logger
