@@ -10,7 +10,10 @@ import pandas as pd
 
 
 def ensure_option(name: str, value) -> None:
-    """Attempt to set a pandas option if it exists.
+    """Attempt to set a pandas option when available.
+
+    Unknown options are silently ignored so the helper works across
+    pandas versions without raising :class:`OptionError`.
 
     Args:
         name (str): Option name.
@@ -25,7 +28,7 @@ def ensure_option(name: str, value) -> None:
 
 @contextmanager
 def option_context(name: str, value) -> Iterator[None]:
-    """Like ``pd.option_context`` but ignore unknown-option errors.
+    """Temporarily set a pandas option if it exists.
 
     Args:
         name (str): Option name.
