@@ -271,12 +271,9 @@ def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
 def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     """Record aggregate statistics in the ``İstatistik`` sheet.
 
-    Parameters
-    ----------
-    wr : pd.ExcelWriter
-        Excel writer used for output.
-    df_sum : pd.DataFrame
-        Summary data from the backtest run.
+    Args:
+        wr (pd.ExcelWriter): Excel writer used for output.
+        df_sum (pd.DataFrame): Summary data from the backtest run.
 
     """
     toplam = len(df_sum)
@@ -555,23 +552,15 @@ def kaydet_raporlar(
 ) -> Path:
     """Append summary, detail and stats sheets to an existing workbook.
 
-    Parameters
-    ----------
-    ozet_df : pd.DataFrame
-        Summary sheet contents.
-    detay_df : pd.DataFrame
-        Detail records for tickers.
-    istat_df : pd.DataFrame
-        Aggregated statistics table.
-    filepath : Path
-        Excel file to update.
-    logger_param : optional
-        Logger instance for progress output.
+    Args:
+        ozet_df (pd.DataFrame): Summary sheet contents.
+        detay_df (pd.DataFrame): Detail records for tickers.
+        istat_df (pd.DataFrame): Aggregated statistics table.
+        filepath (Path): Excel file to update.
+        logger_param (optional): Logger instance for progress output.
 
-    Returns
-    -------
-    Path
-        ``filepath`` after being written.
+    Returns:
+        Path: ``filepath`` after being written.
 
     """
     if logger_param is None:
@@ -602,23 +591,15 @@ def kaydet_uc_sekmeli_excel(
 ) -> Path:
     """Save summary, detail and statistics frames into ``fname``.
 
-    Parameters
-    ----------
-    fname : str | Path
-        Destination Excel file.
-    ozet_df : pd.DataFrame
-        Summary data to write.
-    detay_df : pd.DataFrame
-        Detail table with ticker rows.
-    istatistik_df : pd.DataFrame
-        Statistics sheet contents.
-    logger_param : optional
-        Logger instance for status messages.
+    Args:
+        fname (str | Path): Destination Excel file.
+        ozet_df (pd.DataFrame): Summary data to write.
+        detay_df (pd.DataFrame): Detail table with ticker rows.
+        istatistik_df (pd.DataFrame): Statistics sheet contents.
+        logger_param (optional): Logger instance for status messages.
 
-    Returns
-    -------
-    Path
-        Path to the generated workbook.
+    Returns:
+        Path: Path to the generated workbook.
 
     """
     if logger_param is None:

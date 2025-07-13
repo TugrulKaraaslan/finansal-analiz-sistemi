@@ -723,17 +723,12 @@ def _tema20(series: pd.Series) -> pd.Series:
 def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     """Return ``df`` with extra crossover columns based on ``cross_names``.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame containing at least ``close`` prices.
-    cross_names : list[str]
-        Column names describing EMA/close crossovers.
+    Args:
+        df (pd.DataFrame): DataFrame containing at least ``close`` prices.
+        cross_names (list[str]): Column names describing EMA/close crossovers.
 
-    Returns
-    -------
-    pd.DataFrame
-        Input ``df`` with the new crossover columns appended.
+    Returns:
+        pd.DataFrame: Input ``df`` with the new crossover columns appended.
 
     """
     for name in cross_names:
@@ -781,6 +776,9 @@ def calculate_chunked(
         active_inds (list[str]): Indicator names to calculate for each chunk.
         chunk_size (int, optional): Number of tickers per chunk. Defaults to
             ``CHUNK_SIZE``.
+
+    Returns:
+        None: Results are written directly to the Parquet cache.
 
     """
     pq_path = Path("veri/gosterge.parquet")
