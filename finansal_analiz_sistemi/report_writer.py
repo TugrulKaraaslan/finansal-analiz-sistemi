@@ -1,4 +1,8 @@
-"""Lightweight helper for exporting DataFrames to Excel."""
+"""Lightweight helper for exporting DataFrames to Excel.
+
+The :class:`ReportWriter` ensures the output directory exists before the
+workbook is written.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,8 @@
-"""Execute each filter definition once and collect diagnostic metadata."""
+"""Diagnostic runner for filter definitions.
+
+Each filter is executed a single time to gather status information and
+error details for reporting.
+"""
 
 import pandas as pd
 

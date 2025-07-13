@@ -160,12 +160,27 @@ def _build_solution(err_type: str, msg: str) -> str:
 
 
 def _extract_columns_from_query(query: str) -> set:
-    """Return referenced columns using the unified naming scheme."""
+    """Return referenced columns using the unified naming scheme.
+
+    Parameters
+    ----------
+    query : str
+        Filter expression written in ``pandas.query`` syntax.
+
+    Returns
+    -------
+    set
+        Column names referenced in ``query`` after normalization.
+    """
     return _extract_query_columns(query)
 
 
 def _extract_query_columns(query: str) -> set:
-    """Return column-like identifiers referenced in a filter query."""
+    """Return column-like identifiers referenced in a filter query.
+
+    String literals are stripped before running the regular expression so
+    column names embedded in quotes are ignored.
+    """
     query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
     tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
     reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
@@ -173,7 +188,7 @@ def _extract_query_columns(query: str) -> set:
 
 
 def clear_failed() -> None:
-    """Clear global FAILED_FILTERS list."""
+    """Clear the global ``FAILED_FILTERS`` list."""
     FAILED_FILTERS.clear()
 
 
@@ -302,7 +317,11 @@ def run_single_filter(kod: str, query: str) -> dict[str, Any]:
 
 
 def safe_eval(expr, df, depth: int = 0, visited=None):
-    """Evaluate filter safely with depth and circular guards."""
+    """Evaluate filter expressions with depth and cycle guards.
+
+    Nested dictionaries are resolved recursively while tracking visited
+    filter codes to prevent circular references.
+    """
     if visited is None:
         visited = set()
     if depth > settings.MAX_FILTER_DEPTH:

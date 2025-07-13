@@ -1,4 +1,8 @@
-"""Utility filters and setup helpers for project logging."""
+"""Utility filters and setup helpers for project logging.
+
+Additional functions configure rotating log files and track warning counts
+during test runs.
+"""
 
 from __future__ import annotations
 

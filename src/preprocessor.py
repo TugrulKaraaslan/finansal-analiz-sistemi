@@ -1,4 +1,8 @@
-"""Minimal preprocessing utilities used by the CLI helpers."""
+"""Minimal preprocessing utilities used by the CLI helpers.
+
+The helpers perform small cleanup tasks such as adjusting date columns
+before indicator calculation.
+"""
 
 import pandas as pd
 
