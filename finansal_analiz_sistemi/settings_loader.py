@@ -1,4 +1,9 @@
-"""Load YAML settings file and apply options to :mod:`settings`."""
+"""Read ``settings.yaml`` and patch :mod:`settings` when present.
+
+This module locates the configuration file using :func:`get_settings_path`
+and applies recognized options (such as ``max_filter_depth``) to the runtime
+``settings`` module if available.
+"""
 
 from __future__ import annotations
 
