@@ -317,10 +317,14 @@ def run_single_filter(kod: str, query: str) -> dict[str, Any]:
 
 
 def safe_eval(expr, df, depth: int = 0, visited=None):
-    """Evaluate filter expressions with depth and cycle guards.
+    """Evaluate a filter expression and return the resulting DataFrame.
 
-    Nested dictionaries are resolved recursively while tracking visited
-    filter codes to prevent circular references.
+    Expressions may be plain query strings or nested dictionaries containing
+    ``sub_expr`` nodes. Nested expressions are resolved recursively while the
+    ``visited`` set keeps track of processed filter codes to detect circular
+    references. The function raises :class:`QueryError` when a syntax error
+    occurs or the maximum recursion depth defined in :mod:`settings` is
+    exceeded.
     """
     if visited is None:
         visited = set()

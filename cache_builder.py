@@ -1,9 +1,10 @@
-"""
-Create a consolidated Parquet cache from raw CSV files.
+"""Build and refresh the Parquet cache used by the project.
 
-CSV files under :data:`RAW_DIR` are merged once and persisted as
-:data:`CACHE` so that subsequent runs can load the combined dataset
-without reading every CSV again.
+CSV files located under :data:`RAW_DIR` are merged into a single Parquet
+file stored at :data:`CACHE`. A :class:`filelock.FileLock` guards the write
+operation so parallel processes do not corrupt the cache. Subsequent runs
+load this consolidated dataset directly without re-reading the individual
+CSV sources.
 """
 
 from pathlib import Path
