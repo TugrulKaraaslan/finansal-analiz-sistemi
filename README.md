@@ -1,7 +1,7 @@
 # Finansal Parquet Cache Sistemi
 
 [![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
- 
+
 ```bash
 # otomatik kurulum
 bash scripts/install.sh
@@ -15,9 +15,9 @@ python -m finansal.cli --help
 python run.py --help
 python -m finansal_analiz_sistemi --help
 ```
- 
+
  Örnek kullanım:
- 
+
 ```bash
 python -m finansal.cli --csv veri/prices.csv --log-level DEBUG
 python -m finansal_analiz_sistemi.cli --dosya veri/prices.csv
@@ -42,7 +42,7 @@ Bu proje artık OpenBB ile uyumludur. Eski pandas-ta desteği kaldırıldı.
 En son calisma suresi: 0.5397 saniye
 
 ## Benchmark Çalıştırma
-`benchmarks/benchmark.py` betiği bir milyon rasgele sayı toplayarak süreyi ölçer. 
+`benchmarks/benchmark.py` betiği bir milyon rasgele sayı toplayarak süreyi ölçer.
 Yerelde çalıştırmak için:
 
 ```bash
