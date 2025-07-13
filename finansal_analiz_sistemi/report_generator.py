@@ -1,4 +1,9 @@
-"""Re-export helpers from the root ``report_generator`` module."""
+"""Re-export helpers from the root ``report_generator`` module.
+
+Importing this submodule provides a stable namespace under
+``finansal_analiz_sistemi`` while delegating all functionality to the
+top-level implementation.
+"""
 
 from importlib import import_module
 
