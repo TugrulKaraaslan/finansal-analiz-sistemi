@@ -66,7 +66,7 @@ def test_legacy_columns_preserved(tmp_path):
 
 def test_error_sheet_not_empty(tmp_path):
     """Error sheet must contain rows when a list is provided."""
-    # sahte QUERY_ERROR satırı ekle
+    # add a dummy QUERY_ERROR row
     errs = [
         {
             "filtre_kodu": "T999",

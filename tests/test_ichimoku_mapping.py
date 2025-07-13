@@ -12,7 +12,7 @@ from finansal_analiz_sistemi import config as _cfg
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
-importlib.reload(_cfg)  # test ortamında doğru yolu garantile
+importlib.reload(_cfg)  # ensure correct path resolution in the test environment
 config = _cfg
 
 

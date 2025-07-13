@@ -37,10 +37,10 @@ def test_cache_memory():
     base = proc.memory_info().rss
     for _ in range(200):
         get_df("AKBNK", "2023-01-01", "2023-12-29")
-    # Küçük dalgalanmaları elimine et
+    # eliminate minor fluctuations
     gc.collect()
     after = proc.memory_info().rss
 
-    # Toleransı 15 MB'a çek (CI container'larında hafıza tahsisi burst yapabiliyor)
+    # allow up to 15 MB increase (CI containers may burst allocate memory)
     assert after - base < 15 * 1024 * 1024  # <15 MB artış
     clear_cache()

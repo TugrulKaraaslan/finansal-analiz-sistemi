@@ -7,7 +7,7 @@ import warnings
 
 import pytest
 
-# pytest sırasında açık dosya uyarısını bastır
+# suppress open file warnings during pytest runs
 warnings.filterwarnings(
     "ignore",
     message=r"Exception ignored in: <_io",

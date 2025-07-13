@@ -37,6 +37,6 @@ def test_config_has_defaults():
 
 
 def test_yaml_values_loaded():
-    """YAML'deki değerler modüle yüklenmeli."""
+    """Values from YAML should be loaded into the module."""
     assert config.get("filter_weights", {}).get("T31") == 0.0
     assert "T31" in config.get("passive_filters", [])

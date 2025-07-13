@@ -24,7 +24,7 @@ def test_purge_old_logs(tmp_path: Path, dry_run: bool):
     new.write_text("y")
     lock_old.write_text("")
 
-    # 10 gün geriye çek
+    # rewind timestamps by 10 days
     old_time = time.time() - 10 * 86400
     os.utime(old, (old_time, old_time))
 
