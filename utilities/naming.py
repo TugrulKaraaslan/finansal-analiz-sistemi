@@ -1,7 +1,7 @@
 """Generate unique column names for DataFrames.
 
 ``unique_name`` appends an incrementing suffix to ``base`` when the desired
-name already exists in ``seen``. The newly created name is inserted into
+name already exists in ``seen``. The generated name is inserted into
 ``seen`` before being returned so subsequent calls remain unique.
 """
 
@@ -12,7 +12,7 @@ def unique_name(base: str, seen: set[str]) -> str:
     """Return ``base`` or a numbered variant not present in ``seen``.
 
     The generated name is automatically added to ``seen`` so the function can
-    be called repeatedly with the same set.
+    be called repeatedly with the same set without collisions.
 
     Args:
         base (str): Desired column name.
