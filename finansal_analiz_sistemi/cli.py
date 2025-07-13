@@ -1,8 +1,4 @@
-"""Command-line helper to generate reports or validate filters.
-
-This module provides a lightweight CLI used by tests and automation
-scripts to run quick checks or produce Excel summaries.
-"""
+"""Command-line interface for report generation and filter validation."""
 
 import atexit
 import logging
