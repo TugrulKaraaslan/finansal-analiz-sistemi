@@ -17,11 +17,15 @@ import sys  # isort: skip
 def get_settings_path(custom: str | None = None) -> Path:
     """Return the absolute path to ``settings.yaml``.
 
+    The path is resolved in the following order: the ``custom`` argument,
+    the ``FAS_SETTINGS_FILE`` environment variable, the Colab default and
+    finally the file bundled with the project.
+
     Args:
         custom (str | None): Optional user-provided settings file path.
 
     Returns:
-        Path: Resolved path to ``settings.yaml``.
+        Path: Resolved settings file location.
 
     """
     if custom:

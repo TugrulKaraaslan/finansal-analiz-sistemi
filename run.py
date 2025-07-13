@@ -418,7 +418,8 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
 
     Returns:
         tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-            ``(summary_df, detail_df, stats_df)`` trio.
+            ``(summary_df, detail_df, stats_df)`` trio. Empty frames are
+            returned when ``rapor_df`` has no rows.
     """
     if rapor_df is None or rapor_df.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
