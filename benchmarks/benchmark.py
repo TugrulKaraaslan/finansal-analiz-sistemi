@@ -11,11 +11,8 @@ import time
 def run_bench() -> float:
     """Return the runtime of a dummy integer-summing loop.
 
-    Returns
-    -------
-    float
-        Execution time in seconds.
-
+    Returns:
+        float: Execution time in seconds.
     """
     start = time.perf_counter()
     _ = sum(random.randint(1, 100) for _ in range(1_000_000))
