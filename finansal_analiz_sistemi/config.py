@@ -1,7 +1,7 @@
 """Global configuration constants for the analysis system.
 
-These values are loaded from ``config.yml`` when present and define default
-paths, indicator lists and runtime settings used throughout the package.
+Values are loaded from ``config.yml`` when present and define default paths,
+indicator lists and runtime settings used throughout the package.
 """
 
 from __future__ import annotations
