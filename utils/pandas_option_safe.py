@@ -32,7 +32,7 @@ def option_context(name: str, value) -> Iterator[None]:
         value: Option value.
 
     Yields:
-        None
+        None.
     """
     try:
         with pd.option_context(name, value):
