@@ -1,7 +1,7 @@
-"""Command-line entry for the backtest workflow.
+"""Entry point for the backtest command-line workflow.
 
-Handles argument parsing, data loading, indicator computation and report
-generation.
+The module handles argument parsing, data loading, indicator computation
+and report generation.
 """
 
 from __future__ import annotations
