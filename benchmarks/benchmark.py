@@ -1,7 +1,7 @@
-"""Simple CPU benchmark utility.
+"""Minimal CPU benchmark.
 
-The helper sums one million random integers and writes the
-execution time to ``benchmark_output.txt``.
+The script sums one million random integers and records the
+elapsed time in ``benchmark_output.txt``.
 """
 
 import random
