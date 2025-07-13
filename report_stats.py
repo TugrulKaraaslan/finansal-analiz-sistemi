@@ -69,19 +69,15 @@ def build_detay_df(
 ) -> pd.DataFrame:
     """Return detail records enriched with strategy and reason codes.
 
-    Parameters
-    ----------
-    summary_df : pd.DataFrame
-        Summary data containing ``sebep_kodu`` columns.
-    detail_df : pd.DataFrame
-        Raw detail DataFrame listing tickers per filter.
-    strateji : str, optional
-        Strategy name inserted into the output.
+    Args:
+        summary_df (pd.DataFrame): Summary data containing ``sebep_kodu``
+            columns.
+        detail_df (pd.DataFrame): Raw detail DataFrame listing tickers per
+            filter.
+        strateji (str, optional): Strategy name inserted into the output.
 
-    Returns
-    -------
-    pd.DataFrame
-        Normalized detail table ready for Excel export.
+    Returns:
+        pd.DataFrame: Normalized detail table ready for Excel export.
 
     """
     strateji = strateji or getattr(config, "UYGULANAN_STRATEJI", "")

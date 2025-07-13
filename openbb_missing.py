@@ -19,22 +19,17 @@ except Exception:  # pragma: no cover - optional dependency
 def _call_openbb(func_name: str, **kwargs):
     """Return the requested OpenBB indicator result if available.
 
-    Parameters
-    ----------
-    func_name : str
-        Name of the technical indicator under ``obb.technical``.
-    **kwargs
-        Arguments forwarded to the OpenBB function.
+    Args:
+        func_name (str): Name of the technical indicator under
+            ``obb.technical``.
+        **kwargs: Arguments forwarded to the OpenBB function.
 
-    Returns
-    -------
-    Any
-        Result produced by the OpenBB helper.
+    Returns:
+        Any: Result produced by the OpenBB helper.
 
-    Raises
-    ------
-    NotImplementedError
-        If :mod:`openbb` or the requested function is missing.
+    Raises:
+        NotImplementedError: If :mod:`openbb` or the requested function is
+        missing.
     """
     if obb is None:
         raise NotImplementedError(f"openbb equivalent for '{func_name}' is missing")
