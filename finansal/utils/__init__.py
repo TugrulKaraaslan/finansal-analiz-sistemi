@@ -1,7 +1,7 @@
 """Utility helpers for the ``finansal`` package.
 
-The module provides :func:`lazy_chunk` for streaming data in chunks and
-:func:`safe_set` for dtype-safe DataFrame assignment.
+This module exposes :func:`lazy_chunk` to iterate over sequences in fixed-size
+chunks and :func:`safe_set` for dtype-safe DataFrame assignment.
 """
 
 from __future__ import annotations
