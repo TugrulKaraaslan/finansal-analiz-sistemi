@@ -1,7 +1,7 @@
-"""Backward compatible wrappers for pandas utilities.
+"""Compatibility layer around select ``pandas`` helpers.
 
-These helpers provide small shims around ``pandas`` functions so the
-codebase works consistently across supported versions.
+These shims smooth over API differences between ``pandas`` releases so
+the rest of the codebase can remain version agnostic.
 """
 
 import logging

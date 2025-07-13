@@ -20,7 +20,7 @@ class mem_profile:
         return self
 
     def __exit__(self, *exc):
-        """Write the memory delta to ``reports/memory_profile.csv``.
+        """Log the peak memory delta to ``reports/memory_profile.csv``.
 
         Returns:
             bool: Always ``False`` so that any exception is re-raised.
