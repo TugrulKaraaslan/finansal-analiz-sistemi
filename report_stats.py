@@ -8,6 +8,7 @@ when :mod:`plotly` is available.
 from __future__ import annotations
 
 import warnings
+from typing import Any
 
 import pandas as pd
 
@@ -219,7 +220,14 @@ def build_ozet_df(
 
 
 def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
-    """Compute aggregated performance statistics."""
+    """Return aggregate statistics derived from ``ozet_df``.
+
+    Args:
+        ozet_df (pd.DataFrame): Normalized summary DataFrame.
+
+    Returns:
+        pd.DataFrame: Single-row table with overall counts and averages.
+    """
     toplam = len(ozet_df)
     islemli = int((ozet_df["islemli"] == "EVET").sum())
     islemsiz = int((ozet_df["islemli"] == "HAYIR").sum())
@@ -256,12 +264,14 @@ def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def normalize_pct(series):
+def normalize_pct(series: pd.Series) -> pd.Series:
     """Return numeric percentages scaled to a fractional range.
 
-    The ``%`` sign is removed first and the remaining string is converted
-    to ``float``. Values greater than ``100`` are divided by ``100`` so the
-    result is always on a ``0-1`` scale.
+    Args:
+        series (pd.Series): Percentage values as strings or numbers.
+
+    Returns:
+        pd.Series: Normalized percentage data on a 0–1 scale.
     """
     cleaned = series.astype(str).str.replace("%", "", regex=False)
     return _normalize_pct_values(cleaned, threshold=100.0)
@@ -269,8 +279,18 @@ def normalize_pct(series):
 
 def plot_summary_stats(
     ozet_df: pd.DataFrame, detail_df: pd.DataFrame, std_threshold: float = 5.0
-):
-    """Create four-bar charts summarizing performance using plotly."""
+) -> Any:
+    """Create four-bar charts summarizing performance using plotly.
+
+    Args:
+        ozet_df (pd.DataFrame): Summary output from :func:`build_ozet_df`.
+        detail_df (pd.DataFrame): Raw detail data used for ranking.
+        std_threshold (float, optional): Outlier threshold for bar scaling.
+            Defaults to ``5.0``.
+
+    Returns:
+        Any: Plotly ``Figure`` instance with four bar charts.
+    """
     go, make_subplots = _get_plotly()
     counts = build_stats_df(ozet_df).iloc[0]
 
