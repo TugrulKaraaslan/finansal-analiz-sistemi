@@ -1,4 +1,8 @@
-"""Convenience wrapper around :mod:`run` for CLI use and imports."""
+"""Convenience wrapper around :mod:`run` for CLI use and imports.
+
+Importing this module adjusts ``sys.path`` so the project root is
+discoverable and re-exports helpers from :mod:`run`.
+"""
 
 from __future__ import annotations
 
