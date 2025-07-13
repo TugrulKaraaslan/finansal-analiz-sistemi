@@ -25,7 +25,7 @@ _counter_filter = ErrorCountingFilter()
 
 
 class DuplicateFilter(logging.Filter):
-    """Filter out repeated log messages within a time window."""
+    """Suppress duplicate log messages within a time window."""
 
     def __init__(self, window: float = 2.0) -> None:
         """Initialize the filter.
@@ -41,6 +41,9 @@ class DuplicateFilter(logging.Filter):
 
     def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
         """Allow a log record if it has not been seen recently.
+
+        Messages are tracked by their level and text. A record is only emitted
+        when no identical message was logged within the configured ``window``.
 
         Args:
             record (logging.LogRecord): Log record being processed.
