@@ -19,6 +19,6 @@ def test_purge_dry_run(tmp_path):
     import os
     import time
 
-    os.utime(old, (time.time() - 864000,) * 2)  # 10 gün
+    os.utime(old, (time.time() - 864000,) * 2)  # 10 days ago
     deleted = purge_old_logs(log_dir=tmp_path, keep_days=7, dry_run=True)
     assert deleted == 2 and old.exists() and lock_old.exists() and new.exists()

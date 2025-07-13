@@ -57,8 +57,8 @@ def test_fallback_indicators_created_when_missing():
         result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
         assert not rec
     assert not any("fragmented" in str(w.message) for w in rec)
-    # pandas_ta normalde sma_200/ema_200 üretmez.
-    # Fallback mekanizmasi kolonlarin NaN dahi olsa eklenmesini saglar.
+    # pandas_ta does not normally produce sma_200/ema_200 columns.
+    # The fallback mechanism ensures they exist even if filled with NaN.
     assert "sma_200" in result.columns
     assert "ema_200" in result.columns
     assert "momentum_10" in result.columns

@@ -14,7 +14,7 @@ if ROOT_DIR not in sys.path:
 
 def test_aciklama_filled(tmp_path):
     """Summary rows should be populated with explanation text."""
-    # 1 satır OK, 1 satır QUERY_ERROR
+    # one row OK, one QUERY_ERROR
     df_sum = pd.DataFrame(
         [
             ["T1", 1, 1.0, 1, 0, 1, "OK", "", "", ""],

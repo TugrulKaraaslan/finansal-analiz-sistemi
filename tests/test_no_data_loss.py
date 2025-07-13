@@ -7,7 +7,7 @@ from report_generator import generate_full_report
 
 def test_no_data_loss(tmp_path):
     """Report generation should preserve rows even when values are NaN."""
-    # NaN'li ama silinmemesi gereken satır
+    # Row contains NaN but should not be dropped
     df_sum = pd.DataFrame(
         [
             {
@@ -28,5 +28,5 @@ def test_no_data_loss(tmp_path):
     path = tmp_path / "rapor.xlsx"
     generate_full_report(df_sum, df_det, [], path, keep_legacy=True)
     ozet = pd.read_excel(path, "Özet")
-    # Satır silinmemiş olmalı
+    # Row should remain intact
     assert len(ozet) == 1, "Satır gereksiz silindi!"

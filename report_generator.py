@@ -170,7 +170,7 @@ def _write_error_sheet(
                 )
 
     if df_err.empty:
-        return  # liste boşsa sheet oluşturma
+        return  # skip sheet creation when no errors
 
     df_err = df_err.reindex(columns=HATALAR_COLUMNS, fill_value="-")
     safe_to_excel(
@@ -387,7 +387,7 @@ def generate_full_report(
                 .dropna()
                 .drop_duplicates(subset=["filtre_kodu"])
             )
-            # Özet
+            # Summary
             summary_df = summary_df.merge(
                 err_map.rename(columns={"detay": "sebep_aciklama_fill"}),
                 on="filtre_kodu",
@@ -397,7 +397,7 @@ def generate_full_report(
                 "sebep_aciklama_fill"
             ].combine_first(summary_df["sebep_aciklama"])
             summary_df.drop(columns="sebep_aciklama_fill", inplace=True)
-            # Detay DataFrame de güncellendi (sadece sütun varsa)
+            # Update detail DataFrame when the column exists
             if "sebep_aciklama" in detail_df.columns:
                 detail_df = detail_df.merge(
                     err_map.rename(columns={"detay": "sebep_aciklama_fill"}),
@@ -422,11 +422,11 @@ def generate_full_report(
             ws_ozet.write_row(r, 0, values)
         wr.book.set_properties({"comments": PADDING_COMMENT})
 
-        # --- Hücre formatları (opsiyonel) ---
+        # --- Optional cell formats ---
         date_fmt = wr.book.add_format({"num_format": "yyyy-mm-dd"})
         ws_ozet.set_column("I:J", None, date_fmt)
 
-        # Koşullu biçimlendirme: Özet sayfası satırlarının renklendirilmesi
+        # Conditional formatting: color rows in the summary sheet
         last_row = len(summary_df) + 1
         last_col = len(summary_df.columns)
         data_range = f"A2:{chr(64+last_col)}{last_row}"
@@ -481,7 +481,7 @@ def generate_full_report(
 
         gc.collect()
 
-        # Query recursion hatalarını ayrı sayfaya dök
+        # Write query recursion errors to a separate sheet
         from filter_engine import FAILED_FILTERS
 
         if FAILED_FILTERS:
@@ -542,7 +542,7 @@ def generate_summary(results: list[dict]) -> pd.DataFrame:
     ``EXPECTED_COLUMNS`` in the same order.
     """
     summary_df = pd.DataFrame(results)
-    # Kolonları tam ve sabit sırada tut
+    # Keep columns complete and in a fixed order
     summary_df = summary_df.reindex(columns=EXPECTED_COLUMNS, fill_value=np.nan)
 
     if summary_df.empty:

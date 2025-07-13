@@ -16,7 +16,7 @@ def test_invalid_filter_code_characters():
     df = pd.DataFrame([{"flag": "BAD#", "query": "True"}])
     result = dogrula_filtre_dataframe(df)
     assert "BAD#" in result
-    assert "Geçersiz" in result["BAD#"]  # message contains "Geçersiz karakterler"
+    assert "Geçersiz" in result["BAD#"]  # message contains "Invalid characters"
 
 
 def test_empty_python_query():
