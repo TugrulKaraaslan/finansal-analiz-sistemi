@@ -39,6 +39,7 @@ def __getattr__(name: str) -> types.ModuleType:
 
     Raises:
         AttributeError: If ``name`` is not a known submodule.
+
     """
     if name in {"cache_builder", "data_loader"}:
         module = importlib.import_module(name)
