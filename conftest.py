@@ -8,9 +8,9 @@ try:
     import hypothesis
 except Exception:  # pragma: no cover - optional dependency missing
     hypothesis = None
-import numpy as np  # mevcut test yardımcıları için gerekli
-import pandas as pd  # mevcut test yardımcıları için gerekli
-import pytest  # pytest fixture’ları için gerekli
+import numpy as np  # required for existing test helpers
+import pandas as pd  # required for existing test helpers
+import pytest  # required for pytest fixtures
 import responses
 
 # Ensure runtime patches (e.g., numpy.NaN) are applied early
@@ -59,8 +59,8 @@ if hypothesis is not None:
     )
     hypothesis.settings.load_profile("ci")
 
-# ``SimpleNamespace`` için basit bir ``__hash__`` ekleyerek Hypothesis'in
-# set oluşturma sırasında hata vermemesini sağla.
+# Provide a minimal ``__hash__`` for ``SimpleNamespace`` so Hypothesis can
+# create sets without failing.
 if not hasattr(SimpleNamespace, "__hash__"):
     SimpleNamespace.__hash__ = lambda self: id(self)
 

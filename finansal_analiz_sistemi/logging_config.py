@@ -26,7 +26,7 @@ from finansal_analiz_sistemi import config
 
 
 def _ensure_rich_handler(log: logging.Logger) -> None:
-    """Attach a ``RichHandler`` to ``log`` if needed.
+    """Attach a ``RichHandler`` to ``log`` unless one already exists.
 
     Args:
         log (logging.Logger): Logger instance to update.
@@ -75,6 +75,8 @@ def get_logger(name: str | None = None) -> logging.Logger:
 
 def setup_logging() -> logging.Logger:
     """Configure and return the root logger.
+
+    The log level is read from the ``LOG_LEVEL`` environment variable.
 
     Returns:
         logging.Logger: The configured root logger.
