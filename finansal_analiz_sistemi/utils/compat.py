@@ -8,11 +8,10 @@ import pandas as pd
 def transpose(
     df: pd.DataFrame, axis0: int = 0, axis1: int = 1, copy: bool | None = None
 ) -> pd.DataFrame:
-    """Return ``df`` transposed while preserving older behavior.
+    """Transpose ``df`` while mimicking ``DataFrame.swapaxes``.
 
-    Parameters mimic :meth:`DataFrame.swapaxes` but only ``axis0=0`` and
-    ``axis1=1`` are supported. ``copy=None`` preserves the original view when
-    possible.
+    Only ``axis0=0`` and ``axis1=1`` are supported. ``copy=None`` preserves the
+    original view when possible.
 
     Args:
         df (pd.DataFrame): Frame to transpose.
@@ -22,8 +21,7 @@ def transpose(
             replicates the legacy behavior of returning a view when possible.
 
     Returns:
-        pd.DataFrame: Transposed frame.
-
+        pd.DataFrame: Transposed DataFrame.
     """
     if axis0 == axis1:
         return df.copy(deep=bool(copy))
