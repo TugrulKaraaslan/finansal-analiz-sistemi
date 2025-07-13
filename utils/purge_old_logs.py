@@ -14,7 +14,11 @@ from pathlib import Path
 def purge_old_logs(
     *, log_dir: Path | None = None, keep_days: int = 7, dry_run: bool = False
 ) -> int:
-    """Remove log and lock files older than ``keep_days`` days.
+    """Remove old log files from ``log_dir``.
+
+    Files matching ``*.log*`` and orphan ``*.lock`` entries older than
+    ``keep_days`` days are deleted. When ``dry_run`` is ``True`` the function
+    only prints which files would be removed.
 
     Args:
         log_dir (Path | None, optional): Directory containing log files.
