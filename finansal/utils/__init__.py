@@ -17,17 +17,12 @@ T = TypeVar("T")
 def lazy_chunk(seq: Iterable[T], size: int) -> Generator[Sequence[T], None, None]:
     """Yield ``seq`` in chunks of ``size`` without loading everything.
 
-    Parameters
-    ----------
-    seq : Iterable[T]
-        Source sequence to iterate over.
-    size : int
-        Number of items per chunk; must be positive.
+    Args:
+        seq (Iterable[T]): Source sequence to iterate over.
+        size (int): Number of items per chunk; must be positive.
 
-    Yields
-    ------
-    Sequence[T]
-        Consecutive chunks from the input sequence.
+    Yields:
+        Sequence[T]: Consecutive chunks from the input sequence.
 
     """
     if size <= 0:

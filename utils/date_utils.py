@@ -19,18 +19,16 @@ def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | NaTType:
 
     The function first attempts the ISO form ``YYYY-MM-DD`` followed by the
     Turkish/European style ``DD.MM.YYYY``. If both fail, a flexible day-first
-    parse via :mod:`dateutil` is used. Invalid inputs yield ``pd.NaT`` instead of
-    raising ``ValueError``.
+    parse via :mod:`dateutil` is used. Invalid inputs yield ``pd.NaT`` instead
+    of raising ``ValueError``.
 
-    Parameters
-    ----------
-    date_str : Union[str, datetime]
-        Date string or datetime object to parse.
+    Args:
+        date_str (Union[str, datetime]): Date string or datetime object to
+            parse.
 
-    Returns
-    -------
-    pd.Timestamp | NaTType
-        Parsed timestamp or ``pd.NaT`` when parsing fails.
+    Returns:
+        pd.Timestamp | NaTType: Parsed timestamp or ``pd.NaT`` when parsing
+        fails.
     """
     if pd.isna(date_str) or str(date_str).strip() == "":
         return pd.NaT

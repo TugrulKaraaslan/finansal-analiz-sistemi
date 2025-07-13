@@ -23,20 +23,15 @@ def dogrula_filtre_dataframe(
 ) -> dict:
     """Validate a filter DataFrame and map invalid rows to a reason.
 
-    Parameters
-    ----------
-    df_filtre : pd.DataFrame
-        Filter definitions to verify.
-    zorunlu_kolonlar : list[str] | None, optional
-        Columns expected in ``df_filtre``. Defaults to ``["flag", "query"]``.
-    logger : optional
-        Logger instance for warning messages.
+    Args:
+        df_filtre (pd.DataFrame): Filter definitions to verify.
+        zorunlu_kolonlar (list[str] | None, optional): Columns expected in
+            ``df_filtre``. Defaults to ``["flag", "query"]``.
+        logger (optional): Logger instance for warning messages.
 
-    Returns
-    -------
-    dict
-        Mapping of ``filter_code`` to a short description when the row is
-        invalid.
+    Returns:
+        dict: Mapping of ``filter_code`` to a short description when the row
+        is invalid.
 
     """
     sorunlu = {}
@@ -78,19 +73,15 @@ def validate(
 ) -> list[ValidationError]:
     """Return ``ValidationError`` objects for each invalid filter row.
 
-    Parameters
-    ----------
-    df_filtre : pd.DataFrame
-        Filter definitions to validate.
-    zorunlu_kolonlar : list[str] | None, optional
-        Required column names, defaults to ``["flag", "query"]``.
-    logger : optional
-        Logger for warnings.
+    Args:
+        df_filtre (pd.DataFrame): Filter definitions to validate.
+        zorunlu_kolonlar (list[str] | None, optional): Required column names,
+            defaults to ``["flag", "query"]``.
+        logger (optional): Logger for warnings.
 
-    Returns
-    -------
-    list[ValidationError]
-        Structured error objects describing validation failures.
+    Returns:
+        list[ValidationError]: Structured error objects describing validation
+        failures.
 
     """
     zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]

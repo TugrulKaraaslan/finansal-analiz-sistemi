@@ -16,19 +16,16 @@ def purge_old_logs(
 ) -> int:
     """Remove log and lock files older than ``keep_days`` days.
 
-    Parameters
-    ----------
-    log_dir : Path | None, optional
-        Directory containing log files. ``None`` defaults to ``loglar``.
-    keep_days : int, optional
-        Files modified more than this many days ago are removed.
-    dry_run : bool, optional
-        When ``True`` only print what would be deleted.
+    Args:
+        log_dir (Path | None, optional): Directory containing log files.
+            ``None`` defaults to ``loglar``.
+        keep_days (int, optional): Files modified more than this many days ago
+            are removed.
+        dry_run (bool, optional): When ``True`` only print what would be
+            deleted.
 
-    Returns
-    -------
-    int
-        Number of files processed (also when ``dry_run`` is ``True``).
+    Returns:
+        int: Number of files processed (also when ``dry_run`` is ``True``).
 
     """
     if log_dir is None:

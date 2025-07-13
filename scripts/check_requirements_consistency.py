@@ -22,16 +22,12 @@ _pat = re.compile(r"^([A-Za-z0-9_.-]+)(?:==([^=]+))?$")
 def parse_requirements(path: Path) -> dict[str, str]:
     """Return a mapping of package names to pinned versions.
 
-    Parameters
-    ----------
-    path : Path
-        Requirements file to parse.
+    Args:
+        path (Path): Requirements file to parse.
 
-    Returns
-    -------
-    dict[str, str]
-        Package names mapped to their pinned version strings. Missing
-        versions are stored as an empty string.
+    Returns:
+        dict[str, str]: Package names mapped to their pinned version strings.
+        Missing versions are stored as an empty string.
 
     """
     pkgs = {}

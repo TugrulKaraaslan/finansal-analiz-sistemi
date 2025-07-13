@@ -13,14 +13,11 @@ from finansal_analiz_sistemi import config
 def safe_set(df: pd.DataFrame, column: str, values) -> None:
     """Assign series to DataFrame with dtype safety.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Target DataFrame to modify.
-    column : str
-        Column name to assign.
-    values : iterable
-        Values to be set. ``values`` must be index-aligned with ``df``.
+    Args:
+        df (pd.DataFrame): Target DataFrame to modify.
+        column (str): Column name to assign.
+        values (iterable): Values to be set. ``values`` must be index-aligned
+            with ``df``.
 
     """
     # Ensure the index matches the DataFrame to avoid misaligned assignment

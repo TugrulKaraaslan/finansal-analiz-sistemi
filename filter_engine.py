@@ -162,15 +162,11 @@ def _build_solution(err_type: str, msg: str) -> str:
 def _extract_columns_from_query(query: str) -> set:
     """Return referenced columns using the unified naming scheme.
 
-    Parameters
-    ----------
-    query : str
-        Filter expression written in ``pandas.query`` syntax.
+    Args:
+        query (str): Filter expression written in ``pandas.query`` syntax.
 
-    Returns
-    -------
-    set
-        Column names referenced in ``query`` after normalization.
+    Returns:
+        set: Column names referenced in ``query`` after normalization.
     """
     return _extract_query_columns(query)
 

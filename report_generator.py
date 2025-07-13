@@ -87,17 +87,15 @@ def _build_detay_df(
 ) -> pd.DataFrame:
     """Combine partial detail frames and attach trade results.
 
-    Parameters
-    ----------
-    detay_list : list[pd.DataFrame]
-        Partial detail frames generated per filter.
-    trades : pd.DataFrame
-        Trade information to merge on ``filtre_kodu`` and ``hisse_kodu``.
+    Args:
+        detay_list (list[pd.DataFrame]): Partial detail frames generated per
+            filter.
+        trades (pd.DataFrame): Trade information to merge on ``filtre_kodu`` and
+            ``hisse_kodu``.
 
-    Returns
-    -------
-    pd.DataFrame
-        Combined detail rows enriched with trade results when available.
+    Returns:
+        pd.DataFrame: Combined detail rows enriched with trade results when
+        available.
 
     """
     detay_df = pd.concat(detay_list, ignore_index=True)
@@ -118,14 +116,12 @@ def _write_error_sheet(
 ) -> None:
     """Write errors to ``Hatalar`` sheet.
 
-    Parameters
-    ----------
-    wr : pd.ExcelWriter
-        Writer object to write the sheet into.
-    error_list : Iterable
-        Explicit error entries generated during processing.
-    summary_df : pd.DataFrame, optional
-        Summary table used to ensure every non-``OK`` record is represented.
+    Args:
+        wr (pd.ExcelWriter): Writer object to write the sheet into.
+        error_list (Iterable): Explicit error entries generated during
+            processing.
+        summary_df (pd.DataFrame, optional): Summary table used to ensure every
+            non-``OK`` record is represented.
 
     """
     from dataclasses import asdict, is_dataclass
@@ -186,12 +182,10 @@ def _write_error_sheet(
 def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     """Write KPI summary and top/bottom charts to ``Sağlık Özeti`` sheet.
 
-    Parameters
-    ----------
-    wr : pd.ExcelWriter
-        Writer object created with ``xlsxwriter``.
-    df_sum : pd.DataFrame
-        Summary statistics used to calculate KPI metrics.
+    Args:
+        wr (pd.ExcelWriter): Writer object created with ``xlsxwriter``.
+        df_sum (pd.DataFrame): Summary statistics used to calculate KPI
+            metrics.
 
     """
     toplam = len(df_sum)
@@ -328,27 +322,19 @@ def generate_full_report(
 ) -> Path:
     """Create a complete Excel workbook from backtest results.
 
-    Parameters
-    ----------
-    summary_df : pd.DataFrame
-        Summary table produced by the backtest.
-    detail_df : pd.DataFrame
-        Detailed ticker information.
-    error_list : Iterable
-        Optional error entries to include in the report.
-    out_path : str | Path
-        Destination of the generated workbook.
-    keep_legacy : bool, optional
-        Normalize legacy column names when ``True``.
-    quick : bool, optional
-        Skip optional charts when ``True``.
-    logger_param : logging.Logger, optional
-        Logger used for status messages.
+    Args:
+        summary_df (pd.DataFrame): Summary table produced by the backtest.
+        detail_df (pd.DataFrame): Detailed ticker information.
+        error_list (Iterable): Optional error entries to include in the report.
+        out_path (str | Path): Destination of the generated workbook.
+        keep_legacy (bool, optional): Normalize legacy column names when
+            ``True``.
+        quick (bool, optional): Skip optional charts when ``True``.
+        logger_param (logging.Logger, optional): Logger used for status
+            messages.
 
-    Returns
-    -------
-    Path
-        Path to the written Excel file.
+    Returns:
+        Path: Path to the written Excel file.
 
     """
     if logger_param is None:

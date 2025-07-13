@@ -118,11 +118,16 @@ def _calculate_group_indicators_and_crossovers(
 ) -> pd.DataFrame:
     """Compute indicators and crossover columns for one ticker.
 
-    The input DataFrame should contain OHLCV columns and a ``tarih`` column.
-    Configured indicator functions (pandas-ta or OpenBB) are applied, indicator
-    names are remapped according to ``INDIKATOR_AD_ESLESTIRME`` and crossover
-    signals are generated. The resulting DataFrame preserves ``RangeIndex`` and
-    the ``tarih`` column for further processing.
+    Args:
+        _grp_df (pd.DataFrame): DataFrame containing OHLCV data and ``tarih``
+            column for a single ticker.
+        wanted_cols (Iterable[str] | None, optional): Specific indicator
+            columns to compute. ``None`` uses the defaults.
+        df_filters (pd.DataFrame | None, optional): Filter definitions used to
+            derive crossover names.
+
+    Returns:
+        pd.DataFrame: Processed group with indicator and crossover columns.
     """
     local_logger = logger
     hisse_kodu = (
@@ -544,22 +549,17 @@ def _calculate_series_series_crossover(
 ) -> tuple[pd.Series, pd.Series] | None:
     """Detect where ``s1_col`` crosses ``s2_col`` in ``group_df``.
 
-    Parameters
-    ----------
-    group_df : pd.DataFrame
-        Input DataFrame for a single ticker.
-    s1_col, s2_col : str
-        Column names to compare.
-    col_name_above, col_name_below : str
-        Names of the resulting crossover columns.
-    logger_param : optional
-        Logger instance for debug output.
+    Args:
+        group_df (pd.DataFrame): Input DataFrame for a single ticker.
+        s1_col (str): First column to compare.
+        s2_col (str): Second column to compare.
+        col_name_above (str): Name of the cross-above result column.
+        col_name_below (str): Name of the cross-below result column.
+        logger_param (optional): Logger instance for debug output.
 
-    Returns
-    -------
-    tuple[pd.Series, pd.Series] | None
-        Pair of boolean Series for cross-above and cross-below or ``None`` when
-        the columns are missing.
+    Returns:
+        tuple[pd.Series, pd.Series] | None: Pair of boolean Series for
+        cross-above and cross-below or ``None`` when the columns are missing.
 
     """
     if logger_param is None:
@@ -616,24 +616,16 @@ def _calculate_series_value_crossover(
 ) -> tuple[pd.Series, pd.Series] | None:
     """Return crossover signals when ``s_col`` crosses ``value``.
 
-    Parameters
-    ----------
-    group_df : pd.DataFrame
-        DataFrame for a single ticker.
-    s_col : str
-        Column to compare with the constant ``value``.
-    value : float
-        Threshold value used for the crossover.
-    suffix : str
-        Identifier used in the output column names.
-    logger_param : optional
-        Logger instance for debug output.
+    Args:
+        group_df (pd.DataFrame): DataFrame for a single ticker.
+        s_col (str): Column to compare with the constant ``value``.
+        value (float): Threshold value used for the crossover.
+        suffix (str): Identifier used in the output column names.
+        logger_param (optional): Logger instance for debug output.
 
-    Returns
-    -------
-    tuple[pd.Series, pd.Series] | None
-        Series for cross-above and cross-below events or ``None`` when the
-        source column is missing.
+    Returns:
+        tuple[pd.Series, pd.Series] | None: Series for cross-above and
+        cross-below events or ``None`` when the source column is missing.
 
     """
     if logger_param is None:
@@ -765,16 +757,12 @@ def add_series(
 ) -> None:
     """Insert ``values`` as a uniquely named column into ``df``.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Target DataFrame to modify.
-    name : str
-        Desired column name before uniqueness adjustment.
-    values : iterable
-        Values to assign aligned to ``df.index``.
-    seen_names : set[str] | None, optional
-        Existing column names used to generate a unique suffix.
+    Args:
+        df (pd.DataFrame): Target DataFrame to modify.
+        name (str): Desired column name before uniqueness adjustment.
+        values (iterable): Values to assign aligned to ``df.index``.
+        seen_names (set[str] | None, optional): Existing column names used to
+            generate a unique suffix.
 
     """
     if seen_names is None:
@@ -788,14 +776,11 @@ def calculate_chunked(
 ) -> None:
     """Process ``df`` in chunks and append indicator results to Parquet.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Full stock dataset sorted by ticker.
-    active_inds : list[str]
-        Indicator names to calculate for each chunk.
-    chunk_size : int, optional
-        Number of tickers per chunk, by default ``CHUNK_SIZE``.
+    Args:
+        df (pd.DataFrame): Full stock dataset sorted by ticker.
+        active_inds (list[str]): Indicator names to calculate for each chunk.
+        chunk_size (int, optional): Number of tickers per chunk. Defaults to
+            ``CHUNK_SIZE``.
 
     """
     pq_path = Path("veri/gosterge.parquet")
@@ -816,19 +801,14 @@ def calculate_indicators(
 ) -> pd.DataFrame:
     """Return ``df`` with calculated indicator columns appended.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Input price DataFrame containing at least ``close``.
-    indicators : list[str] | None, optional
-        Indicator names like ``ema_20`` or ``sma_50``. ``None`` returns ``df``
-        unchanged.
+    Args:
+        df (pd.DataFrame): Input price DataFrame containing at least ``close``.
+        indicators (list[str] | None, optional): Indicator names like
+            ``ema_20`` or ``sma_50``. ``None`` returns ``df`` unchanged.
 
-    Returns
-    -------
-    pd.DataFrame
-        ``df`` copy with indicator columns added. Duplicate names are skipped
-        with a warning.
+    Returns:
+        pd.DataFrame: ``df`` copy with indicator columns added. Duplicate names
+        are skipped with a warning.
 
     """
     if indicators is None:

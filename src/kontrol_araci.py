@@ -27,18 +27,14 @@ def tarama_denetimi(
 ) -> pd.DataFrame:
     """Run each filter once and collect status information.
 
-    Parameters
-    ----------
-    df_filtreler : pd.DataFrame
-        Filter definitions with ``kod`` and ``PythonQuery`` columns.
-    df_indikator : pd.DataFrame
-        Indicator dataset used by the filters.
+    Args:
+        df_filtreler (pd.DataFrame): Filter definitions with ``kod`` and
+            ``PythonQuery`` columns.
+        df_indikator (pd.DataFrame): Indicator dataset used by the filters.
 
-    Returns
-    -------
-    pd.DataFrame
-        Summary table with columns ``kod``, ``tip``, ``durum``, ``sebep``,
-        ``eksik_sutunlar``, ``nan_sutunlar`` and ``secim_adedi``.
+    Returns:
+        pd.DataFrame: Summary table with columns ``kod``, ``tip``, ``durum``,
+        ``sebep``, ``eksik_sutunlar``, ``nan_sutunlar`` and ``secim_adedi``.
 
     """
     if "kod" not in df_filtreler.columns and "FilterCode" in df_filtreler.columns:
