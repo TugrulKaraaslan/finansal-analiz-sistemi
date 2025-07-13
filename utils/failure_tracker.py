@@ -1,7 +1,7 @@
 """Track failed operations for later reporting.
 
-The helpers here collect failed indicators, filters, and other items so
-they can be summarized after a run.
+Collected failures are stored globally so they can be summarized once a
+run completes.
 """
 
 from collections import defaultdict
@@ -27,15 +27,15 @@ def clear_failures() -> None:
 
 
 def get_failures(as_dict: bool = False):
-    """Return collected failures.
+    """Return recorded failures.
 
     Args:
-        as_dict (bool, optional): When ``True`` the failures are returned as a
-            plain dictionary suitable for serialization.
+        as_dict (bool, optional): When ``True`` return a plain dictionary
+            instead of the internal ``defaultdict`` structure.
 
     Returns:
         dict[str, list[FailedFilter]] | defaultdict[str, list[FailedFilter]]:
-            Recorded failures.
+            Failures grouped by category.
     """
     if as_dict:
         return {c: [asdict(r) for r in rows] for c, rows in failures.items()}
