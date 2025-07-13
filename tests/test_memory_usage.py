@@ -1,4 +1,4 @@
-"""Unit tests for memory_usage."""
+"""Ensure CLI memory usage stays within expected limits."""
 
 import subprocess
 from pathlib import Path

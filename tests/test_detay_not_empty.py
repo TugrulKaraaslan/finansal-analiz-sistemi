@@ -1,4 +1,4 @@
-"""Unit tests for detay_not_empty."""
+"""Tests for ``_build_detay_df`` ensuring detail frames are populated."""
 
 import pandas as pd
 
