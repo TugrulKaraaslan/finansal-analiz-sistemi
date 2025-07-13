@@ -108,9 +108,7 @@ def _standardize_ohlcv_columns(
     if logger_param is None:
         logger_param = logger
     log = logger_param
-    file_name_short = os.path.basename(
-        file_path_for_log
-    )  # Short file name for logging
+    file_name_short = os.path.basename(file_path_for_log)  # Short file name for logging
     log.debug(f"--- '{file_name_short}': OHLCV Standardizasyonu Başlıyor ---")
     log.debug(f"'{file_name_short}': Orijinal Sütunlar: {df.columns.tolist()}")
 
