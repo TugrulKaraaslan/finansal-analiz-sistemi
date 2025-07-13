@@ -1,8 +1,8 @@
-"""Generate unique column names for DataFrames.
+"""Utilities for generating unique column names.
 
-``unique_name`` appends an incrementing suffix to ``base`` when the desired
-name already exists in ``seen``. The generated name is inserted into
-``seen`` before being returned so subsequent calls remain unique.
+The :func:`unique_name` helper appends an incrementing suffix to ``base`` when
+the desired name already exists in ``seen`` and records the result so repeated
+calls remain collision free.
 """
 
 __all__ = ["unique_name"]

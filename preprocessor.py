@@ -1,8 +1,7 @@
-"""
-Data preprocessing helpers for stock price datasets.
+"""Data preprocessing helpers for stock price datasets.
 
-Functions clean numeric values, align dates and drop invalid rows before
-indicator calculation.
+These functions clean numeric values, align dates and drop invalid rows
+before indicator computation.
 """
 
 from __future__ import annotations
