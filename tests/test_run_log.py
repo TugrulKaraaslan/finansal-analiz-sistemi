@@ -1,4 +1,4 @@
-"""Unit tests for run_log."""
+"""Verify that report generation writes a side log file."""
 
 from pathlib import Path
 

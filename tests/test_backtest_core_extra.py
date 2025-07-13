@@ -1,4 +1,4 @@
-"""Unit tests for backtest_core_extra."""
+"""Additional test cases for :mod:`backtest_core`."""
 
 import os
 import sys

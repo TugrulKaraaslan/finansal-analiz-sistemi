@@ -1,4 +1,4 @@
-"""Unit tests for indicator_calc_hyp."""
+"""Hypothesis tests for indicator calculations."""
 
 import pandas as pd
 import pytest

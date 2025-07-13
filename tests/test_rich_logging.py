@@ -1,4 +1,4 @@
-"""Unit tests for rich_logging."""
+"""Tests for the optional rich logging configuration."""
 
 import importlib
 import logging

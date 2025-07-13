@@ -1,4 +1,4 @@
-"""Unit tests for backtest_core_param."""
+"""Parameterized tests for :mod:`backtest_core` helpers."""
 
 import warnings
 
