@@ -1,4 +1,8 @@
-"""Convenience imports for frequently used ``finansal`` helpers."""
+"""Convenience imports for frequently used ``finansal`` helpers.
+
+Modules are imported lazily to keep startup overhead minimal while
+providing straightforward access to core utilities.
+"""
 
 from importlib import import_module
 

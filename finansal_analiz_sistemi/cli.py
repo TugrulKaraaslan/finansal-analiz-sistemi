@@ -1,4 +1,8 @@
-"""Command-line interface for report generation and filter validation."""
+"""Command-line interface for report generation and filter validation.
+
+This module parses CLI arguments, generates Excel reports from CSV files
+and optionally validates filter definitions before exiting.
+"""
 
 import atexit
 import logging

@@ -1,4 +1,8 @@
-"""Command-line interface for Parquet cache management."""
+"""Command-line interface for Parquet cache management.
+
+Click-based helpers allow refreshing or rebuilding the local Parquet
+cache and computing indicators from CSV input.
+"""
 
 from __future__ import annotations
 
