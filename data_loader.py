@@ -1,7 +1,7 @@
 """Convenience wrappers around :mod:`finansal_analiz_sistemi.data_loader`.
 
-The original helpers are re-exported so callers can simply import them from
-this module.
+The original helpers are re-exported so callers can import them directly
+from this module.
 """
 
 from pathlib import Path

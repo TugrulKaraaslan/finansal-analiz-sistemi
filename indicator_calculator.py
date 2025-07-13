@@ -1,10 +1,9 @@
 """Compute technical indicators and crossover signals.
 
-The implementation prefers ``pandas-ta-openbb`` for indicator
-calculations and transparently falls back to helpers in
-:mod:`openbb_missing` when the dependency is absent. Generated columns
-are normalized so they can be reused across the project without further
-renaming.
+The implementation uses ``pandas-ta-openbb`` when available and
+transparently falls back to :mod:`openbb_missing` helpers when the
+dependency is absent. Generated column names are normalized so other
+modules can reuse them without additional renaming.
 """
 
 from __future__ import annotations

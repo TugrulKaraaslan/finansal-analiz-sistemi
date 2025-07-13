@@ -1,6 +1,6 @@
 """Validation utilities for structured error reporting.
 
-The module exposes :class:`ValidationError` so helpers can return
+This module exposes :class:`ValidationError` so helpers can return
 consistent error objects instead of bare strings.
 """
 

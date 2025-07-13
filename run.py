@@ -1,8 +1,8 @@
 """Entry point for the backtest command-line workflow.
 
-This script ties together data loading, indicator computation, filter
-evaluation and reporting.  It can be run directly via ``python run.py``
-and is exercised heavily by the test suite.
+This script ties together data loading, indicator computation,
+filter evaluation and reporting. It can be run directly via
+``python run.py`` and is exercised heavily by the test suite.
 """
 
 from __future__ import annotations

@@ -1,8 +1,8 @@
 """Build and refresh the Parquet cache used by the project.
 
-CSV files located under :data:`RAW_DIR` are merged into a single Parquet
-file stored at :data:`CACHE`. A :class:`filelock.FileLock` guards the write
-operation so parallel processes do not corrupt the cache. Subsequent runs
+CSV files under :data:`RAW_DIR` are merged into a single Parquet file
+stored at :data:`CACHE`.  A :class:`filelock.FileLock` guards the write
+operation so parallel processes cannot corrupt the cache. Subsequent runs
 load this consolidated dataset directly without re-reading the individual
 CSV sources.
 """

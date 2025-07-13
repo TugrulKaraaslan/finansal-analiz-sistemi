@@ -1,7 +1,8 @@
-"""Utility helpers reused across the project.
+"""Utility helpers shared across the project.
 
-Provides crossover detection, filter-column extraction and log maintenance
-helpers shared by the CLI and reporting modules.
+This package exposes crossover detection routines, filter-column
+extraction helpers and log maintenance utilities used by the CLI and
+reporting modules.
 """
 
 from __future__ import annotations
