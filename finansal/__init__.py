@@ -1,8 +1,4 @@
-"""Public shortcuts for the :mod:`finansal` package.
-
-This module exposes commonly used helpers so callers can simply import
-them from ``finansal`` without referring to the submodules directly.
-"""
+"""Shortcuts for common helpers within the :mod:`finansal` package."""
 
 from importlib import import_module
 

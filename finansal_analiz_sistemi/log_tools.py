@@ -1,7 +1,6 @@
-"""Utility filters and setup helpers for project logging.
+"""Logging utilities for the project.
 
-Additional functions configure rotating log files and track warning counts
-during test runs.
+Provides rotating file handlers and warning counters used during test runs.
 """
 
 from __future__ import annotations
