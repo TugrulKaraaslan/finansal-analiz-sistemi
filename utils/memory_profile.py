@@ -1,7 +1,7 @@
 """Context manager to log peak memory usage.
 
-Wrap code blocks with ``with mem_profile():`` to append ``timestamp,peak,diff``
-entries to ``reports/memory_profile.csv``.
+Use ``with mem_profile():`` to append ``timestamp,peak,diff`` entries to
+``reports/memory_profile.csv``.
 """
 
 import os
@@ -20,7 +20,7 @@ class mem_profile:
         return self
 
     def __exit__(self, *exc):
-        """Write the memory delta in bytes and propagate exceptions.
+        """Write the memory delta to ``reports/memory_profile.csv``.
 
         Returns:
             bool: Always ``False`` so that any exception is re-raised.

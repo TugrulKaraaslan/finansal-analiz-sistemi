@@ -229,7 +229,16 @@ def kaydet_hata(
     msg: str,
     eksik: str | None = None,
 ) -> None:
-    """Append a structured error entry to ``log_dict``."""
+    """Append a structured error entry to ``log_dict``.
+
+    Args:
+        log_dict (dict[str, Any]): Mapping used to accumulate error entries.
+        kod (str): Identifier of the filter associated with the error.
+        error_type (str): Normalized error category.
+        msg (str): Human readable explanation of the issue.
+        eksik (str | None, optional): Missing column or field name when
+            applicable.
+    """
     entry = {
         "filtre_kod": kod,
         "hata_tipi": error_type,
