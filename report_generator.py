@@ -114,7 +114,7 @@ def _write_error_sheet(
     error_list: Iterable,
     summary_df: pd.DataFrame | None = None,
 ) -> None:
-    """Write errors to ``Hatalar`` sheet.
+    """Write errors to the ``Hatalar`` sheet.
 
     Args:
         wr (pd.ExcelWriter): Writer object to write the sheet into.
@@ -122,6 +122,10 @@ def _write_error_sheet(
             processing.
         summary_df (pd.DataFrame, optional): Summary table used to ensure every
             non-``OK`` record is represented.
+
+    Notes:
+        ``error_list`` may contain dataclass instances which are converted to
+        dictionaries before writing.
 
     """
     from dataclasses import asdict, is_dataclass
@@ -330,8 +334,12 @@ def generate_full_report(
         logger_param (logging.Logger, optional): Logger used for status
             messages.
 
+    Notes:
+        ``error_list`` may contain dataclass instances which are converted to
+        dictionaries before insertion.
+
     Returns:
-        Path: Path to the written Excel file.
+        Path: Location of the written Excel file.
 
     """
     if logger_param is None:
@@ -695,7 +703,7 @@ def save_hatalar_excel(df: pd.DataFrame, out_path: str | Path) -> None:
     """Write error records to an Excel file.
 
     The DataFrame columns are normalized to ``HATALAR_COLUMNS`` before writing
-    to ensure consistent output.
+    to ensure consistent output across runs.
     """
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
