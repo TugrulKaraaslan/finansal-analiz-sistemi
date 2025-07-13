@@ -1,7 +1,7 @@
 """Utility helpers shared across the project.
 
 This package exposes crossover detection routines, filter-column
-extraction helpers and log maintenance utilities used by the CLI and
+extraction helpers and log maintenance utilities for the CLI and
 reporting modules.
 """
 

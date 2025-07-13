@@ -1,6 +1,6 @@
 """Track failed operations for later reporting.
 
-Collected failures are stored globally so they can be summarized after
+Collected failures are stored globally so they can be summarized once
 execution completes.
 """
 
