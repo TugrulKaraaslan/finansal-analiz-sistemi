@@ -56,7 +56,7 @@ def on_isle_hisse_verileri(
         fn_logger.critical(
             "'tarih' sütunu DataFrame'de bulunamadı. Ön işleme devam edemez."
         )
-        return None  # Kritik eksiklik, devam etmek anlamsız.
+        return None  # Critical missing column, abort processing.
 
     if not pd.api.types.is_datetime64_any_dtype(df["tarih"]):
         fn_logger.warning(
@@ -271,8 +271,7 @@ def on_isle_hisse_verileri(
 
 
 def _temizle_sayisal_deger(deger):
-    """
-    Parse ``deger`` and return a float or ``np.nan`` on failure.
+    """Parse ``deger`` and return a float or ``np.nan`` on failure.
 
     String inputs are cleaned of thousand separators and decimal commas
     before conversion. Unsupported types yield ``np.nan``.

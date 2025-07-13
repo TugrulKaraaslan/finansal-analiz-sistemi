@@ -108,14 +108,12 @@ def _standardize_ohlcv_columns(
     if logger_param is None:
         logger_param = logger
     log = logger_param
-    file_name_short = os.path.basename(
-        file_path_for_log
-    )  # Loglarda kısa dosya adı için
+    file_name_short = os.path.basename(file_path_for_log)  # Short file name for logging
     log.debug(f"--- '{file_name_short}': OHLCV Standardizasyonu Başlıyor ---")
     log.debug(f"'{file_name_short}': Orijinal Sütunlar: {df.columns.tolist()}")
 
     rename_map = {}
-    current_columns_set = set(df.columns)  # Anlık sütunları set olarak tut
+    current_columns_set = set(df.columns)  # Keep current columns as a set
 
     # Map raw column names defined in ``config.OHLCV_MAP`` to their standardized
     # equivalents when the target name does not already exist in ``df``.
@@ -157,9 +155,9 @@ def _standardize_ohlcv_columns(
             "(ya zaten standart ya da MAP'te eşleşme yok)."
         )
 
-    # Son kontrol: Hedeflediğimiz standart sütunlar var mı?
+    # Final check: ensure required standard columns exist
     temel_hedef_sutunlar = ["open", "high", "low", "close", "volume"]
-    mevcut_sutunlar_son_hali = set(df.columns)  # rename sonrası güncel sütunlar
+    mevcut_sutunlar_son_hali = set(df.columns)  # Updated columns after renaming
     eksik_temel_sutunlar = [
         s for s in temel_hedef_sutunlar if s not in mevcut_sutunlar_son_hali
     ]
@@ -265,9 +263,9 @@ def load_filter_csv(path: str) -> pd.DataFrame:
 
     df = pd.read_csv(
         path,
-        names=COLS,  # beklenen kolon listesi
-        header=None,  # dosya başlıksız
-        skiprows=1,  # ilk dummy satırı atla
+        names=COLS,  # expected column names
+        header=None,  # file has no header
+        skiprows=1,  # skip initial dummy row
         sep=";",
     )
 
@@ -451,7 +449,7 @@ def yukle_hisse_verileri(
                 df_hisse = _standardize_date_column(df_hisse, dosya_yolu, fn_logger)
                 df_hisse = _standardize_ohlcv_columns(
                     df_hisse, dosya_yolu, fn_logger
-                )  # Dosya yolu log için eklendi
+                )  # Include file path in logs
                 df_hisse["hisse_kodu"] = hisse_kodu_excel
                 tum_hisse_datalari.append(df_hisse)
         except Exception as e:
@@ -478,10 +476,10 @@ def yukle_hisse_verileri(
             )
             df_hisse = _standardize_date_column(
                 df_hisse, dosya_yolu, fn_logger
-            )  # Dosya yolu log için eklendi
+            )  # Include file path in logs
             df_hisse = _standardize_ohlcv_columns(
                 df_hisse, dosya_yolu, fn_logger
-            )  # Dosya yolu log için eklendi
+            )  # Include file path in logs
             df_hisse["hisse_kodu"] = str(hisse_kodu_csv).upper().strip()
             tum_hisse_datalari.append(df_hisse)
         except Exception as e:
@@ -507,8 +505,7 @@ def yukle_hisse_verileri(
         )
         return None
 
-    # Birleştirilmiş DataFrame'in sütunlarını son bir kez logla (Parquet'e
-    # yazmadan önce)
+    # Log combined DataFrame columns once more before writing Parquet
     fn_logger.debug(
         f"Birleştirilmiş DataFrame (Parquet'e yazılmadan önce) sütunları: {df_birlesik.columns.tolist()}"
     )
