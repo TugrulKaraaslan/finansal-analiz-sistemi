@@ -1,7 +1,9 @@
-"""Thin wrappers around optional OpenBB indicators.
+"""Fallback implementations for a small OpenBB subset.
 
-The helpers delegate to :mod:`openbb` when it is installed and raise
-:class:`NotImplementedError` otherwise.
+The functions in this module delegate to ``openbb.technical`` when the
+package is available and raise :class:`NotImplementedError` otherwise.
+They mimic the expected return values so callers can transparently rely
+on them regardless of environment.
 """
 
 from __future__ import annotations

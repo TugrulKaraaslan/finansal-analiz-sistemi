@@ -1,7 +1,8 @@
 """Entry point for the backtest command-line workflow.
 
-The module handles argument parsing, data loading, indicator computation
-and report generation.
+This script ties together data loading, indicator computation, filter
+evaluation and reporting.  It can be run directly via ``python run.py``
+and is exercised heavily by the test suite.
 """
 
 from __future__ import annotations
