@@ -40,6 +40,8 @@ HATALAR_COLUMNS = [
     "hint",
 ]
 
+# XlsxWriter drops workbook comments when none are present. Insert a large
+# placeholder string so the generated file always retains the metadata block.
 PADDING_COMMENT = " ".join(uuid.uuid4().hex for _ in range(1200))
 
 LEGACY_SUMMARY_COLS = [
