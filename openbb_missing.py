@@ -15,7 +15,7 @@ except Exception:  # pragma: no cover - optional dependency
 
 
 def _call_openbb(func_name: str, **kwargs):
-    """Return the requested OpenBB indicator result if available.
+    """Invoke ``openbb.technical`` if available and return the result.
 
     Args:
         func_name (str): Name of the technical indicator under
