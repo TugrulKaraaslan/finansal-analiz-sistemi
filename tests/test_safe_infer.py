@@ -1,4 +1,4 @@
-"""Unit tests for safe_infer."""
+"""Tests for :func:`utils.compat.safe_infer_objects`."""
 
 import pandas as pd
 

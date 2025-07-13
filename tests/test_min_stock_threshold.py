@@ -1,4 +1,4 @@
-"""Unit tests for min_stock_threshold."""
+"""Tests for the minimum stock threshold logic in filters."""
 
 import pandas as pd
 

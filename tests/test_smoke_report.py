@@ -1,4 +1,4 @@
-"""Unit tests for smoke_report."""
+"""Smoke test for generating a minimal Excel report."""
 
 from pathlib import Path
 

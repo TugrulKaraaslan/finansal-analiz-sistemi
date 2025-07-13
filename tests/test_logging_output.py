@@ -1,4 +1,4 @@
-"""Unit tests for logging_output."""
+"""Tests that logger configuration emits expected output."""
 
 import logging
 
