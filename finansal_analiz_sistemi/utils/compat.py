@@ -23,6 +23,7 @@ def transpose(
 
     Returns:
         pd.DataFrame: Transposed frame.
+
     """
     if axis0 == axis1:
         return df.copy(deep=bool(copy))

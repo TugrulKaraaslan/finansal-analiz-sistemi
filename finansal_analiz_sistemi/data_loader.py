@@ -36,6 +36,7 @@ def _read_excel_cached(path: str) -> pd.DataFrame:
 
     Returns:
         pd.DataFrame: DataFrame read via ``openpyxl`` with LRU caching.
+
     """
     return _read_excel(path)
 
@@ -52,6 +53,7 @@ def _standardize_date_column(
 
     Returns:
         pd.DataFrame: Updated DataFrame with a standardized date column.
+
     """
     if logger_param is None:
         logger_param = logger
@@ -101,6 +103,7 @@ def _standardize_ohlcv_columns(
 
     Returns:
         pd.DataFrame: DataFrame with standardized OHLCV column names.
+
     """
     if logger_param is None:
         logger_param = logger
@@ -184,6 +187,7 @@ def check_and_create_dirs(*dir_paths):
 
     Args:
         *dir_paths (str | Path): One or more directory paths to create.
+
     """
     for dir_path in dir_paths:
         if dir_path and not os.path.exists(dir_path):
@@ -204,6 +208,7 @@ def load_data(path: str) -> pd.DataFrame:
 
     Returns:
         pd.DataFrame: DataFrame loaded via :class:`DataLoaderCache`.
+
     """
     return _cache_loader.load_csv(path)
 
@@ -217,6 +222,7 @@ def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
 
     Returns:
         pd.DataFrame | None: DataFrame if valid data is found, otherwise ``None``.
+
     """
     if logger_param is None:
         logger_param = logger
@@ -252,6 +258,7 @@ def load_filter_csv(path: str) -> pd.DataFrame:
 
     Returns:
         pd.DataFrame: Loaded DataFrame with standardized columns.
+
     """
     # Try headerless read first (legacy files have only two columns)
     raw = pd.read_csv(path, sep=";")
@@ -287,6 +294,7 @@ def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
 
     Returns:
         pd.DataFrame: Parsed price data.
+
     """
     encoding = kwargs.get("encoding", "utf-8")
     with open(path, encoding=encoding) as f:
@@ -311,6 +319,7 @@ def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.Da
 
     Returns:
         pd.DataFrame: Loaded filter definitions.
+
     """
     if logger_param is None:
         logger_param = logger
@@ -367,6 +376,7 @@ def yukle_hisse_verileri(
 
     Returns:
         pd.DataFrame | None: Combined DataFrame or ``None`` on failure.
+
     """
     if logger_param is None:
         logger_param = logger

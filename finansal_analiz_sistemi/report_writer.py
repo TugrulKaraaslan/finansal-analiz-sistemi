@@ -19,6 +19,7 @@ class ReportWriter:
         Args:
             df (pd.DataFrame): Data to export.
             output_path (Path | str): Target Excel file path.
+
         """
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
