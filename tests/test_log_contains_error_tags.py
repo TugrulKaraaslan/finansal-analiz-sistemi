@@ -1,4 +1,8 @@
-"""Unit tests for log_contains_error_tags."""
+"""Ensure error log messages include diagnostic tags.
+
+These tests confirm that helper routines attach the ``QUERY_ERROR`` tag so
+log analysis tools can easily spot issues.
+"""
 
 import logging
 import re

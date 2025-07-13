@@ -1,4 +1,8 @@
-"""Tests that logger configuration emits expected output."""
+"""Tests verifying logger configuration and output.
+
+These assertions ensure that messages propagate to configured handlers and
+that log level filtering behaves as expected.
+"""
 
 import logging
 

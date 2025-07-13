@@ -1,4 +1,8 @@
-"""Unit tests for logging_setup."""
+"""Tests for the custom logging setup utilities.
+
+These checks exercise filters and formatting helpers used by
+``setup_logger`` to ensure log files contain the expected information.
+"""
 
 import io
 import logging

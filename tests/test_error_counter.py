@@ -1,4 +1,8 @@
-"""Unit tests for error_counter."""
+"""Ensure logging utilities count errors correctly.
+
+These tests use a dummy logger with :class:`ErrorCountingFilter` attached
+to verify that both error and warning counters increase as expected.
+"""
 
 import logging
 
