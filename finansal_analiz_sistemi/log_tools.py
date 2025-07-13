@@ -1,6 +1,8 @@
-"""Logging utilities for the project.
+"""Logging helpers used across the project.
 
-Provides rotating file handlers and warning counters used during test runs.
+The module configures rotating log files, suppresses repeated messages and
+exposes an :class:`ErrorCountingFilter` instance so tests can assert on logged
+warnings or errors.
 """
 
 from __future__ import annotations
