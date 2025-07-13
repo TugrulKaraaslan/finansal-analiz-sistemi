@@ -1,4 +1,4 @@
-"""Helpers to safely set pandas options across versions.
+"""Helper functions to safely set pandas options across versions.
 
 Unknown options are ignored instead of raising ``OptionError``.
 """

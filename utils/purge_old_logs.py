@@ -1,7 +1,7 @@
 """Delete aged log files from ``log_dir``.
 
-This helper is intended for maintenance scripts and supports a dry-run
-mode to preview deletions.
+Intended for maintenance scripts, this helper supports a dry-run mode to
+preview files slated for deletion.
 """
 
 from __future__ import annotations

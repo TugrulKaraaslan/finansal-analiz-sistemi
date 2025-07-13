@@ -1,6 +1,6 @@
-"""Helpers for robust date parsing.
+"""Utilities for robust date parsing.
 
-The :func:`parse_date` utility normalizes various date strings to
+The :func:`parse_date` helper converts diverse date strings to
 ``pd.Timestamp`` objects without raising ``ValueError``.
 """
 
@@ -15,12 +15,11 @@ from pandas._libs.tslibs.nattype import NaTType
 
 
 def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | NaTType:
-    """Parse ``date_str`` into a timestamp.
+    """Return ``date_str`` parsed into a timestamp.
 
-    The function first attempts the ISO form ``YYYY-MM-DD`` followed by the
-    Turkish/European style ``DD.MM.YYYY``. If both fail, a flexible day-first
-    parse via :mod:`dateutil` is used. Invalid inputs yield ``pd.NaT`` instead
-    of raising ``ValueError``.
+    The function tries ISO ``YYYY-MM-DD`` and ``DD.MM.YYYY`` formats first,
+    then falls back to a day-first parse via :mod:`dateutil`. Invalid inputs
+    yield ``pd.NaT`` instead of raising ``ValueError``.
 
     Args:
         date_str (Union[str, datetime]): Date string or datetime object to

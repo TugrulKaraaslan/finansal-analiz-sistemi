@@ -8,6 +8,7 @@ from typing import Dict, Tuple
 
 __all__ = ["get_reason_hint"]
 
+# Mapping from exception names to localized (reason, hint) tuples.
 REASON_MAP: Dict[str, Tuple[str, str]] = {
     "ZeroDivisionError": (
         "S\u0131f\u0131ra B\u00f6lme",
