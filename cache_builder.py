@@ -1,4 +1,5 @@
-"""Create a consolidated Parquet cache from raw CSV files.
+"""
+Create a consolidated Parquet cache from raw CSV files.
 
 CSV files under :data:`RAW_DIR` are merged once and persisted as
 :data:`CACHE` so that subsequent runs can load the combined dataset
@@ -19,7 +20,8 @@ LOCK_FILE = CACHE.with_suffix(".lock")
 
 
 def build() -> None:
-    """Build the Parquet cache from the raw CSV files.
+    """
+    Build the Parquet cache from the raw CSV files.
 
     Reads all CSV files under ``RAW_DIR`` and writes them as a single
     Parquet file to ``CACHE``. When an existing cache is found, the

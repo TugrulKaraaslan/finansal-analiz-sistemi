@@ -1,4 +1,5 @@
-"""Data preprocessing helpers for stock price datasets.
+"""
+Data preprocessing helpers for stock price datasets.
 
 Functions clean numeric values, align dates and drop invalid rows before
 indicator calculation.
@@ -31,7 +32,8 @@ except ImportError:
 def on_isle_hisse_verileri(
     df_ham: pd.DataFrame, logger_param=None
 ) -> pd.DataFrame | None:
-    """Return cleaned stock data ready for indicator calculation.
+    """
+    Return cleaned stock data ready for indicator calculation.
 
     The preprocessing pipeline fixes date formats, converts OHLCV columns
     to numeric types, manages ``NaN`` values, sorts the dataset and
@@ -272,7 +274,8 @@ def on_isle_hisse_verileri(
 
 
 def _temizle_sayisal_deger(deger):
-    """Parse ``deger`` and return a float or ``np.nan`` on failure.
+    """
+    Parse ``deger`` and return a float or ``np.nan`` on failure.
 
     String inputs are cleaned of thousand separators and decimal commas
     before conversion. Unsupported types yield ``np.nan``.

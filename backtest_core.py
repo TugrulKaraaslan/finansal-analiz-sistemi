@@ -1,4 +1,5 @@
-"""Simplified backtesting utilities.
+"""
+Simplified backtesting utilities.
 
 Functions implement a lightweight trading simulator for unit tests and
 command-line usage.
@@ -20,7 +21,8 @@ def calistir_basit_backtest(
     tarama_tarihi_str: str,
     logger_param=None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Run a simple backtest using the given filter results.
+    """
+    Run a simple backtest using the given filter results.
 
     Args:
         filtre_sonuc_dict (dict): Mapping of filter codes to selected stocks.
@@ -122,7 +124,8 @@ def _get_fiyat(
     zaman_sutun_adi: str,
     logger_param=None,
 ) -> float:
-    """Return the price for ``tarih`` using the given column.
+    """
+    Return the price for ``tarih`` using the given column.
 
     Falls back to the nearest available date when an exact match is missing.
 

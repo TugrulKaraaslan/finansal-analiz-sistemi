@@ -1,4 +1,5 @@
-"""Fallback wrappers for optional OpenBB indicators.
+"""
+Fallback wrappers for optional OpenBB indicators.
 
 Functions call into :mod:`openbb` when it is installed. If the package is
 missing, the helpers raise a :class:`NotImplementedError` to signal the
@@ -16,7 +17,8 @@ except Exception:  # pragma: no cover - optional dependency
 
 
 def _call_openbb(func_name: str, **kwargs):
-    """Return ``obb.technical.func_name`` result if available.
+    """
+    Return ``obb.technical.func_name`` result if available.
 
     Args:
         func_name: Name of the technical indicator function under ``obb``.
@@ -47,7 +49,8 @@ def ichimoku(
     offset: int = 26,
     lookahead: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Return Ichimoku indicator DataFrames generated via OpenBB.
+    """
+    Return Ichimoku indicator DataFrames generated via OpenBB.
 
     Args:
         high: High price series.
@@ -91,7 +94,8 @@ def macd(
     slow: int = 26,
     signal: int = 9,
 ) -> pd.DataFrame:
-    """Return MACD indicator columns generated via OpenBB.
+    """
+    Return MACD indicator columns generated via OpenBB.
 
     Args:
         close: Close price series.
@@ -122,7 +126,8 @@ def rsi(
     scalar: float = 100.0,
     drift: int = 1,
 ) -> pd.Series:
-    """Return the RSI series generated via OpenBB.
+    """
+    Return the RSI series generated via OpenBB.
 
     Args:
         close: Close price series.
