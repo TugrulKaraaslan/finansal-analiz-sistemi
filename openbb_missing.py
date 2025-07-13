@@ -1,9 +1,9 @@
 """Lightweight wrappers around ``openbb.technical`` helpers.
 
-Each function calls the corresponding routine from ``openbb.technical``
-when the package is installed and otherwise raises
-:class:`NotImplementedError`.  The return values mirror the official
-implementation so callers can remain agnostic about the environment.
+Each function invokes the corresponding routine from ``openbb.technical`` when
+the package is available and otherwise raises :class:`NotImplementedError`.
+Return values mirror the official implementation so callers remain agnostic
+about the environment.
 """
 
 from __future__ import annotations

@@ -2,7 +2,7 @@
 
 The :func:`unique_name` function appends an incrementing suffix to ``base`` when
 the desired name already exists in ``seen`` and records the result so repeated
-calls remain collision free.
+calls remain collision-free.
 """
 
 __all__ = ["unique_name"]
@@ -12,7 +12,7 @@ def unique_name(base: str, seen: set[str]) -> str:
     """Return a unique column name based on ``base``.
 
     The generated label is added to ``seen`` so repeated calls remain
-    collision free.
+    collision-free.
 
     Args:
         base: Desired column name.

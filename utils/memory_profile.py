@@ -1,7 +1,7 @@
 """Context manager to log peak memory usage.
 
-Wrap a code block with ``with mem_profile():`` to append
-``timestamp,peak,diff`` lines to ``reports/memory_profile.csv``.
+Wrap code blocks with ``with mem_profile():`` to append ``timestamp,peak,diff``
+entries to ``reports/memory_profile.csv``.
 """
 
 import os
