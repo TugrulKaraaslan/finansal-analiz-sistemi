@@ -22,6 +22,7 @@ def get_settings_path(custom: str | None = None) -> Path:
 
     Returns:
         Path: Resolved path to ``settings.yaml``.
+
     """
     if custom:
         return Path(custom).expanduser().resolve()
@@ -207,6 +208,7 @@ if not hasattr(sys.modules[__name__], "get"):
 
         Returns:
             Any: Configuration value or ``default`` if not set.
+
         """
         return globals().get(key, default)
 

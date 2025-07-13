@@ -16,6 +16,7 @@ def normalize_filtre_kodu(df: pd.DataFrame) -> pd.DataFrame:
 
     Returns:
         pd.DataFrame: DataFrame with a normalized ``filtre_kodu`` column.
+
     """
     # Harici müdahalelerden etkilenmemek için kopya üzerinde çalış
     out = df.copy()
