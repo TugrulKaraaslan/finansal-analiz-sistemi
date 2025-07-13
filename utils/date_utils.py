@@ -15,18 +15,22 @@ from pandas._libs.tslibs.nattype import NaTType
 
 
 def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | NaTType:
-    """Return a parsed timestamp or ``pd.NaT`` on failure.
+    """Parse ``date_str`` into a timestamp.
 
-    The parser tries ``YYYY-MM-DD`` first, then ``DD.MM.YYYY`` and finally a
-    generic day-first parse before falling back to :mod:`dateutil`. Any invalid
-    input yields ``pd.NaT`` instead of raising ``ValueError``.
+    The function first attempts the ISO form ``YYYY-MM-DD`` followed by the
+    Turkish/European style ``DD.MM.YYYY``. If both fail, a flexible day-first
+    parse via :mod:`dateutil` is used. Invalid inputs yield ``pd.NaT`` instead of
+    raising ``ValueError``.
 
-    Args:
-        date_str (Union[str, datetime]): Date string or object to parse.
+    Parameters
+    ----------
+    date_str : Union[str, datetime]
+        Date string or datetime object to parse.
 
-    Returns:
-        pd.Timestamp | NaTType: Parsed timestamp or ``pd.NaT`` when parsing
-        fails.
+    Returns
+    -------
+    pd.Timestamp | NaTType
+        Parsed timestamp or ``pd.NaT`` when parsing fails.
     """
     if pd.isna(date_str) or str(date_str).strip() == "":
         return pd.NaT
