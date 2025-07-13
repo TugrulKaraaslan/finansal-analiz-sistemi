@@ -1,4 +1,8 @@
-"""Unit tests for dtypes_ok."""
+"""Tests validating configured column dtypes.
+
+``safe_set`` should always cast arrays to the dtypes specified in the
+configuration so that downstream operations remain consistent.
+"""
 
 import numpy as np
 import pandas as pd

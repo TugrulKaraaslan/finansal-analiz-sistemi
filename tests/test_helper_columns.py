@@ -1,4 +1,8 @@
-"""Unit tests for helper_columns."""
+"""Unit tests for additional helper columns.
+
+These checks verify that optional preprocessing steps create columns such
+as ``volume_tl`` when supporting data is present.
+"""
 
 import preprocessor
 

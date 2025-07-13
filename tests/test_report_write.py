@@ -1,4 +1,8 @@
-"""Unit tests for report_write."""
+"""Smoke tests for :mod:`report_generator` output routines.
+
+These checks verify that a simple DataFrame can be written to Excel using
+the high-level ``ReportWriter`` interface.
+"""
 
 import pandas as pd
 

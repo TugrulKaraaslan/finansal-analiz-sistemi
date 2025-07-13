@@ -1,4 +1,8 @@
-"""Unit tests for purge_old_logs."""
+"""Tests for the ``purge_old_logs`` maintenance helper.
+
+The module should correctly identify old log and lock files, deleting them
+when not running in dry-run mode.
+"""
 
 from utils.purge_old_logs import purge_old_logs
 

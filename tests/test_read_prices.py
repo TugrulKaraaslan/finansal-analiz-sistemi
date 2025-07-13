@@ -1,4 +1,8 @@
-"""Tests for delimiter auto-detection in ``read_prices``."""
+"""Tests for delimiter auto-detection in ``read_prices``.
+
+The helper should correctly handle semicolon- and comma-separated files
+without requiring explicit configuration.
+"""
 
 import pandas as pd
 

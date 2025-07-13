@@ -1,4 +1,8 @@
-"""Unit tests for logging_config."""
+"""Checks for the lightweight logging configuration wrapper.
+
+The module exposes :func:`get_logger` which should return a properly
+configured :class:`logging.Logger` instance.
+"""
 
 import logging
 

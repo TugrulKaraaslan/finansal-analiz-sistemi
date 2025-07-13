@@ -1,4 +1,8 @@
-"""Tests exercising the CLI report pipeline."""
+"""Integration tests for the command-line reporting pipeline.
+
+These tests run a small backtest end-to-end to ensure CSV inputs are
+processed correctly and Excel reports are generated.
+"""
 
 from pathlib import Path
 

@@ -1,4 +1,8 @@
-"""Minimal test marked as slow for CI demonstrations."""
+"""Example test using the ``slow`` marker.
+
+This file exists solely to illustrate how slow tests are handled in the
+continuous integration workflow.
+"""
 
 import pytest
 

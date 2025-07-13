@@ -1,4 +1,8 @@
-"""Unit tests for generate_full_report."""
+"""Regression tests for :func:`report_generator.generate_full_report`.
+
+These checks create a small workbook and ensure that the output file is
+written correctly without errors.
+"""
 
 import os
 import sys

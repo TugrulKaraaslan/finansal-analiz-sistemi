@@ -1,4 +1,8 @@
-"""Additional coverage tests for utility modules."""
+"""Additional coverage tests for rarely executed helper code.
+
+These tests exercise utility functions that are otherwise hard to reach
+during normal runs so that overall coverage remains high.
+"""
 
 import pandas as pd
 

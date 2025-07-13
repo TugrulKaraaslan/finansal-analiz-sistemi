@@ -1,4 +1,8 @@
-"""Unit tests for log_clean."""
+"""Verify log cleanup utilities remove outdated files.
+
+The ``purge_old_logs`` helper should delete aged log entries while leaving
+recent ones intact, supporting optional dry-run mode.
+"""
 
 import os
 import time
