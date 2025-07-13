@@ -1,6 +1,6 @@
-"""Utility helpers for the ``finansal`` package.
+"""Helpers for the ``finansal`` package.
 
-This module exposes :func:`lazy_chunk` for chunking iterables and
+The module provides :func:`lazy_chunk` for streaming data in chunks and
 :func:`safe_set` for dtype-safe DataFrame assignment.
 """
 
