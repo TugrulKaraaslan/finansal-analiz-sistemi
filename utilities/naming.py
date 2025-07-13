@@ -9,17 +9,18 @@ __all__ = ["unique_name"]
 
 
 def unique_name(base: str, seen: set[str]) -> str:
-    """Return ``base`` or a numbered variant not present in ``seen``.
+    """Return a unique column name based on ``base``.
 
-    The generated name is automatically added to ``seen`` so the function can
-    be called repeatedly with the same set without collisions.
+    The generated label is added to ``seen`` so repeated calls remain
+    collision free.
 
     Args:
-        base (str): Desired column name.
-        seen (set[str]): Set of names already in use.
+        base: Desired column name.
+        seen: Set of names already in use; updated in-place.
 
     Returns:
-        str: ``base`` itself if unused, otherwise ``base_1``, ``base_2`` and so on.
+        str: ``base`` itself if unused, otherwise a numbered variant such as
+        ``base_1``.
     """
     if base not in seen:
         seen.add(base)

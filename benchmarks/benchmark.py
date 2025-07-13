@@ -1,7 +1,7 @@
-"""Minimal CPU benchmark.
+"""Measure CPU throughput by summing random integers.
 
-The script sums one million random integers and records the
-elapsed time in ``benchmark_output.txt``.
+The benchmark generates one million numbers, sums them and writes the
+elapsed time to ``benchmark_output.txt``.
 """
 
 import random
@@ -9,7 +9,7 @@ import time
 
 
 def run_bench() -> float:
-    """Return the runtime of a dummy integer-summing loop.
+    """Run the integer-summing loop and report the runtime.
 
     Returns:
         float: Execution time in seconds.
