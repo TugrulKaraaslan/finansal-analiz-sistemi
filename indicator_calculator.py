@@ -206,7 +206,7 @@ def _calculate_group_indicators_and_crossovers(
                 )
                 group_df_dt_indexed = (
                     group_df_input.copy()
-                )  # Hata durumunda orijinaline dön
+                )  # Fall back to the original frame on error
         else:
             local_logger.warning(f"{hisse_kodu}: 'tarih' sütunundaki tüm değerler NaT.")
     else:
@@ -255,7 +255,7 @@ def _calculate_group_indicators_and_crossovers(
         local_logger.error(
             f"{hisse_kodu}: OpenBB stratejisi hatası: {e_ta}", exc_info=True
         )
-        # Hata durumunda, gösterge stratejisi indikatörleri eklenemez ama devam edilir.
+        # On error, indicator strategy columns are skipped but processing continues.
         group_df_dt_indexed = group_df_dt_indexed.copy()
 
     # Apply column name mappings on the DataFrame with DatetimeIndex
@@ -279,27 +279,25 @@ def _calculate_group_indicators_and_crossovers(
                 f"{hisse_kodu}: İndikatör adları eşleştirildi (config): {active_rename_map}"
             )
 
-    # Şimdi tüm hesaplamaların (özel ve kesişimler) yapılacağı RangeIndex'li DataFrame'i hazırlayalım.
-    # Bu DataFrame, hesaplanan indikatörleri de içermeli.
-    # group_df_input (RangeIndex, 'tarih' sütunlu, OHLCV)
-    # group_df_dt_indexed (DatetimeIndex, 'tarih' SÜTUNU YOK, OHLCV +
-    # indikatör sütunları)
+    # Prepare the RangeIndex DataFrame where all calculations (custom and
+    # crossover) will run. This frame should include the computed indicators.
+    # - ``group_df_input``: RangeIndex with ``tarih`` column and OHLCV
+    # - ``group_df_dt_indexed``: DatetimeIndex without ``tarih`` plus indicator columns
 
-    # En temiz yol: group_df_dt_indexed'in indeksini sıfırlayıp 'tarih' sütununu geri getirmek
-    # ve orijinal group_df_input ile birleştirmek (sadece yeni eklenen
-    # sütunları almak için).
+    # Reset the index of ``group_df_dt_indexed`` to restore ``tarih`` and merge
+    # with ``group_df_input`` so only newly created columns are kept.
 
     df_final_group = (
         group_df_input.copy()
-    )  # Temel olarak orijinal df'i alalım (RangeIndex, 'tarih' sütunlu)
+    )  # Start from the original DataFrame (RangeIndex with ``tarih`` column)
     seen_names = set(df_final_group.columns)
 
-    # Hesaplanan indikatör sütunlarını (DatetimeIndex'li df'ten) RangeIndex'li df_final_group'a aktar
-    # İndeksler farklı olduğu için doğrudan merge yerine, değerleri .values ile atamak daha güvenli olabilir,
-    # ancak her iki df'in de aynı sayıda satıra sahip olması ve sıralı olması gerekir.
-    # group_df_sorted_range_indexed en başta oluşturulmuştu.
+    # Transfer calculated indicator columns from the DatetimeIndex frame to the
+    # RangeIndex version. Using ``.values`` avoids merge issues but requires the
+    # DataFrames to have identical length and ordering. ``group_df_sorted_range_indexed``
+    # was prepared earlier for this purpose.
 
-    # Yeni indikatör sütunlarını alalım (OHLCV hariç)
+    # Collect newly created indicator columns (excluding OHLCV)
     new_ta_cols_list = [
         col
         for col in group_df_dt_indexed.columns
@@ -415,7 +413,7 @@ def _calculate_group_indicators_and_crossovers(
         for alias, vals in manual_cols.items():
             add_series(df_final_group, alias, vals, seen_names)
 
-    # Özel Sütunlar (df_final_group üzerinde, zaten RangeIndex'li)
+    # Custom columns computed on ``df_final_group`` (already RangeIndex based)
     for sutun_conf in ozel_sutun_conf:
         yeni_sutun_adi = sutun_conf["name"]
         fonksiyon_adi_str = sutun_conf["function"]
@@ -425,7 +423,7 @@ def _calculate_group_indicators_and_crossovers(
             if fonksiyon:
                 result_series = fonksiyon(
                     df_final_group.copy(), **parametreler
-                )  # Fonksiyona kopya ver
+                )  # Pass a copy to avoid side effects
                 if result_series is not None and len(result_series) == len(
                     df_final_group
                 ):
@@ -961,7 +959,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             group_df.reset_index(drop=True, inplace=True)
             results_list.append(
                 group_df
-            )  # group_df zaten RangeIndex'li ve 'tarih' sütunlu dönmeli
+            )  # ``group_df`` should already have a RangeIndex and ``tarih`` column
         else:
             ana_logger.warning(
                 f"{hisse_kodu} için indikatör hesaplama sonucu boş veya None döndü."
