@@ -1,4 +1,8 @@
-"""Utility exports used throughout :mod:`finansal_analiz_sistemi`."""
+"""Convenience wrappers for internal helper modules.
+
+The package exposes commonly used utilities like ``swapaxes`` and
+``normalize_filtre_kodu`` so they can be imported from a single location.
+"""
 
 from .compat import transpose as swapaxes
 from .normalize import normalize_filtre_kodu
