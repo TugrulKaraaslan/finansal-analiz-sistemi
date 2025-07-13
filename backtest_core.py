@@ -1,8 +1,7 @@
-"""
-Simplified backtesting utilities.
+"""Lightweight helpers for running simplified backtests.
 
-Functions implement a lightweight trading simulator for unit tests and
-command-line usage.
+The module exposes minimal functions used by the CLI and tests to
+simulate trades based on filter results.
 """
 
 import numpy as np
