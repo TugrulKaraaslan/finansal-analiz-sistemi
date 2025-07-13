@@ -30,6 +30,7 @@ def _ensure_rich_handler(log: logging.Logger) -> None:
 
     Args:
         log (logging.Logger): Logger instance to update.
+
     """
     if not _HAVE_RICH:
         return
@@ -63,6 +64,7 @@ def get_logger(name: str | None = None) -> logging.Logger:
 
     Returns:
         logging.Logger: Configured logger instance.
+
     """
     log = logging.getLogger(name)
     if not os.getenv("LOG_SIMPLE"):
@@ -76,6 +78,7 @@ def setup_logging() -> logging.Logger:
 
     Returns:
         logging.Logger: The configured root logger.
+
     """
     level_str = os.getenv("LOG_LEVEL", "INFO").upper()
     level = getattr(logging, level_str, logging.INFO)

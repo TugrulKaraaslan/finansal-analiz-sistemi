@@ -20,6 +20,7 @@ def load_settings(path: str | None = None) -> dict:
 
     Returns:
         dict: Parsed settings data.
+
     """
     settings_path = get_settings_path(path)
     if not Path(settings_path).exists():

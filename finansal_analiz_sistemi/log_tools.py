@@ -29,6 +29,7 @@ class DuplicateFilter(logging.Filter):
         Args:
             window (float, optional): Duration in seconds to suppress
                 repeated messages.
+
         """
         super().__init__("duplicate")
         self.window = window
@@ -42,6 +43,7 @@ class DuplicateFilter(logging.Filter):
 
         Returns:
             bool: ``True`` if the record should be emitted.
+
         """
         now = time.monotonic()
         key = (record.levelno, record.getMessage())
@@ -62,6 +64,7 @@ def setup_logger(level: int = logging.INFO) -> ErrorCountingFilter:
 
     Returns:
         ErrorCountingFilter: Filter that tracks error and warning counts.
+
     """
     root = logging.getLogger()
     log_dir = Path("loglar")
@@ -129,6 +132,7 @@ def setup_logging(window: float = 2.0, pct_step: int = 10) -> logging.Logger:
 
     Returns:
         logging.Logger: The configured root logger.
+
     """
     global PCT_STEP
     PCT_STEP = max(1, pct_step)

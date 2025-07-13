@@ -24,6 +24,7 @@ def parse_args() -> Namespace:
     Returns:
         Namespace: Parsed CLI options controlling report generation and
         filter validation.
+
     """
     p = ArgumentParser(description="Rapor üret veya filtreleri doğrula")
 
@@ -66,6 +67,7 @@ def run_analysis(csv_path: Path) -> Path:
 
     Returns:
         Path: Location of the generated Excel report.
+
     """
     df = pd.read_csv(csv_path, sep=";")
     out_path = csv_path.with_suffix(".xlsx")

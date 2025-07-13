@@ -28,6 +28,7 @@ class ErrorCountingFilter(logging.Filter):
 
         Returns:
             bool: Always ``True`` to allow processing to continue.
+
         """
         if record.levelno >= logging.ERROR:
             ERROR_COUNTER["errors"] += 1
