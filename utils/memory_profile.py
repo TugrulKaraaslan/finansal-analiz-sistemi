@@ -20,10 +20,10 @@ class mem_profile:
         return self
 
     def __exit__(self, *exc):
-        """Write memory usage delta to CSV and propagate exceptions.
+        """Write the memory delta in bytes and propagate exceptions.
 
         Returns:
-            bool: Always ``False`` so that exceptions bubble up.
+            bool: Always ``False`` so that any exception is re-raised.
         """
         peak = self.proc.memory_info().rss
         diff = peak - self.start

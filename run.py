@@ -468,15 +468,15 @@ def run_pipeline(
     filter_def: str | Path,
     output: str | Path,
 ) -> Path:
-    """Execute the full workflow and return the Excel report path.
+    """Execute the end-to-end workflow and return the report location.
 
     Args:
         price_csv (str | Path): CSV file containing price data.
         filter_def (str | Path): YAML file defining filter clauses.
-        output (str | Path): Destination path for the Excel report.
+        output (str | Path): Destination path for the Excel workbook.
 
     Returns:
-        Path: Path to the generated Excel report.
+        Path: Absolute path of the generated Excel report.
     """
     global log_counter
     if log_counter is None:

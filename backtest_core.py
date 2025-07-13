@@ -122,9 +122,10 @@ def _get_fiyat(
     zaman_sutun_adi: str,
     logger_param=None,
 ) -> float:
-    """Return the price for ``tarih`` using the given column.
+    """Return the price for ``tarih`` from ``zaman_sutun_adi``.
 
-    Falls back to the nearest available date when an exact match is missing.
+    Falls back to the nearest available date when an exact match is missing so
+    that price lookups always succeed when data exists around the target day.
 
     Args:
         df_hisse_veri (pd.DataFrame): Stock data for a single ticker.
