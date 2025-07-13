@@ -1,4 +1,9 @@
-"""Dataframe helpers for backtest result statistics and charts."""
+"""Utilities to compute summary statistics and Plotly charts.
+
+The functions in this module convert raw backtest results into
+summary/detail tables and optionally generate interactive figures
+when :mod:`plotly` is available.
+"""
 
 from __future__ import annotations
 
