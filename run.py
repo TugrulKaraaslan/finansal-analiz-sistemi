@@ -425,10 +425,10 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
 
 
 def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Display summary or detail tables in a simple Streamlit UI.
+    """Show summary or detail data via a minimal Streamlit UI.
 
-    Users can switch between summary and detail views or display a basic
-    chart when summary data includes percentage columns.
+    The page selector toggles between summary, detail and a basic chart
+    view when percentage columns are present.
     """
     import streamlit as st
 
