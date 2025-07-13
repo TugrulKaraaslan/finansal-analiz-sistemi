@@ -1,4 +1,4 @@
-"""Shortcuts for common helpers within the :mod:`finansal` package."""
+"""Convenience imports for frequently used ``finansal`` helpers."""
 
 from importlib import import_module
 

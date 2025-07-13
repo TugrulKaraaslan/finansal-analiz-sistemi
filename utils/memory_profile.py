@@ -1,7 +1,7 @@
 """Context manager to log memory usage.
 
-When used as ``with mem_profile():`` the peak RSS is appended to
-``reports/memory_profile.csv`` as ``timestamp,peak,diff``.
+Using ``with mem_profile():`` writes ``timestamp,peak,diff`` entries to
+``reports/memory_profile.csv``.
 """
 
 import os
