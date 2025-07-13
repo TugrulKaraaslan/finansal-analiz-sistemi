@@ -32,7 +32,7 @@ DF = pd.DataFrame(
 def test_get_fiyat_non_numeric():
     """Return ``NaN`` when price column contains non-numeric data."""
     df = DF.copy()
-    df.loc[0, "close"] = np.nan  # avoids object→float warning
+    df.loc[0, "close"] = np.nan  # avoids object-to-float warning
     out = bc._get_fiyat(df, df.loc[0, "tarih"], "close")
     assert np.isnan(out)
 

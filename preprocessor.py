@@ -1,7 +1,7 @@
 """Data preprocessing helpers for stock price datasets.
 
-These functions clean numeric values, align dates and drop invalid rows
-before indicator computation.
+The utilities in this module normalize numeric columns, align dates and
+drop invalid rows before indicator calculation.
 """
 
 from __future__ import annotations

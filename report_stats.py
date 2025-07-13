@@ -1,7 +1,8 @@
-"""Helpers to compute summary statistics and Plotly charts.
+"""Helpers to compute summary tables and optional Plotly charts.
 
-Functions convert raw backtest results into summary/detail tables and
-optionally create interactive figures when :mod:`plotly` is available.
+The functions in this module turn raw backtest results into summary and
+detail DataFrames and, when :mod:`plotly` is installed, generate
+interactive figures.
 """
 
 from __future__ import annotations

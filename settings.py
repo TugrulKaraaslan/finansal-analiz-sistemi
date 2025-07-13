@@ -1,6 +1,6 @@
 """Load runtime configuration from ``settings.yaml``.
 
-The file location can be overridden with the ``FAS_SETTINGS_FILE``
+The file location can be overridden via the ``FAS_SETTINGS_FILE``
 environment variable.
 """
 

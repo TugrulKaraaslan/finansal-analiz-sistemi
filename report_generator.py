@@ -1,6 +1,6 @@
 """Generate Excel reports for test runs and CLI output.
 
-Performance tables are gathered into an ``xlsxwriter`` workbook along with
+Performance tables are written to an ``xlsxwriter`` workbook along with
 optional charts and error summaries for failed filters.
 """
 

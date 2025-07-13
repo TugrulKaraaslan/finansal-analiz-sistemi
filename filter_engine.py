@@ -1,8 +1,8 @@
 """Utilities to evaluate and apply stock filter expressions.
 
-The module validates queries, resolves recursive definitions and collects
-diagnostic information during execution. Filter settings are read from
-``config.yml`` and results are stored in module-level caches.
+This module validates query strings, resolves recursive definitions and
+collects diagnostics during execution. Filter settings come from
+``config.yml`` and results are kept in module-level caches.
 """
 
 from __future__ import annotations

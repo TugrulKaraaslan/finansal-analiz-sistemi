@@ -1,9 +1,9 @@
-"""Fallback implementations for a small OpenBB subset.
+"""Lightweight wrappers around ``openbb.technical`` helpers.
 
-The functions in this module delegate to ``openbb.technical`` when the
-package is available and raise :class:`NotImplementedError` otherwise.
-They mimic the expected return values so callers can transparently rely
-on them regardless of environment.
+Each function calls the corresponding routine from ``openbb.technical``
+when the package is installed and otherwise raises
+:class:`NotImplementedError`.  The return values mirror the official
+implementation so callers can remain agnostic about the environment.
 """
 
 from __future__ import annotations
