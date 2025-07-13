@@ -21,17 +21,21 @@ SEBEP_KODLARI = {
 def dogrula_filtre_dataframe(
     df_filtre: pd.DataFrame, zorunlu_kolonlar=None, logger=None
 ) -> dict:
-    """Validate a filter DataFrame and map invalid rows to a reason.
+    """Return a mapping of problematic rows to a description.
 
-    Args:
-        df_filtre (pd.DataFrame): Filter definitions to verify.
-        zorunlu_kolonlar (list[str] | None, optional): Columns expected in
-            ``df_filtre``. Defaults to ``["flag", "query"]``.
-        logger (optional): Logger instance for warning messages.
+    Parameters
+    ----------
+    df_filtre : pd.DataFrame
+        Filter definitions to verify.
+    zorunlu_kolonlar : list[str] | None, optional
+        Required column names, defaults to ``["flag", "query"]``.
+    logger : logging.Logger | None, optional
+        Logger used for warning messages.
 
-    Returns:
-        dict: Mapping of ``filter_code`` to a short description when the row
-        is invalid.
+    Returns
+    -------
+    dict
+        Keys are filter codes and values describe why the row is invalid.
 
     """
     sorunlu = {}
@@ -71,17 +75,21 @@ def dogrula_filtre_dataframe(
 def validate(
     df_filtre: pd.DataFrame, zorunlu_kolonlar=None, logger=None
 ) -> list[ValidationError]:
-    """Return ``ValidationError`` objects for each invalid filter row.
+    """Return ``ValidationError`` objects describing invalid rows.
 
-    Args:
-        df_filtre (pd.DataFrame): Filter definitions to validate.
-        zorunlu_kolonlar (list[str] | None, optional): Required column names,
-            defaults to ``["flag", "query"]``.
-        logger (optional): Logger for warnings.
+    Parameters
+    ----------
+    df_filtre : pd.DataFrame
+        Filter definitions to validate.
+    zorunlu_kolonlar : list[str] | None, optional
+        Required column names, defaults to ``["flag", "query"]``.
+    logger : logging.Logger | None, optional
+        Logger emitting warnings for each problem.
 
-    Returns:
-        list[ValidationError]: Structured error objects describing validation
-        failures.
+    Returns
+    -------
+    list[ValidationError]
+        Structured error objects describing validation failures.
 
     """
     zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]
