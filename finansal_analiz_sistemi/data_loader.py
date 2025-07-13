@@ -117,14 +117,10 @@ def _standardize_ohlcv_columns(
     rename_map = {}
     current_columns_set = set(df.columns)  # Anlık sütunları set olarak tut
 
-    # config.OHLCV_MAP içindeki her bir (ham_ad_cfg: standart_ad_cfg) çifti için
+    # Map raw column names defined in ``config.OHLCV_MAP`` to their standardized
+    # equivalents when the target name does not already exist in ``df``.
     for raw_name_from_config, standard_name_target in config.OHLCV_MAP.items():
-        # Eğer config'deki ham_ad DataFrame'in sütunları arasında varsa
         if raw_name_from_config in current_columns_set:
-            # Ve bu ham_ad, zaten hedeflenen standart ad değilse
-            # VE hedeflenen standart ad, DataFrame'de (rename_map ile oluşacaklar dahil) henüz yoksa
-            # VEYA hedeflenen standart ad zaten rename_map'te başka bir orijinal adla
-            # eşleşmişse AMA şu anki raw_name_from_config için değilse
             if (
                 raw_name_from_config != standard_name_target
                 and (
@@ -132,7 +128,7 @@ def _standardize_ohlcv_columns(
                     or standard_name_target not in df.columns
                 )
                 and standard_name_target not in rename_map.values()
-            ):  # Bu standart ada daha önce başka bir sütun atanmamışsa
+            ):
                 rename_map[raw_name_from_config] = standard_name_target
                 log.debug(
                     f"'{file_name_short}': Eşleştirme bulundu: '{raw_name_from_config}' "
