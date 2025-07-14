@@ -33,7 +33,10 @@ class DataLoaderCache:
         self.logger = logger
 
     def clear(self) -> None:
-        """Clear the internal cache."""
+        """Clear the internal cache.
+
+        All cached datasets are removed immediately.
+        """
         self.loaded_data.clear()
 
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
