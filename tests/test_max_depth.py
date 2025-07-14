@@ -8,7 +8,7 @@ import settings
 
 
 def _nested(depth: int):
-    """Test _nested."""
+    """Return a nested filter expression ``depth`` levels deep."""
     expr = "x>0"
     for i in range(depth, 0, -1):
         expr = {"code": f"F{i}", "sub_expr": expr}

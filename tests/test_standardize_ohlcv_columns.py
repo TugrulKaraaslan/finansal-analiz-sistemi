@@ -32,7 +32,7 @@ from finansal_analiz_sistemi.data_loader import _standardize_ohlcv_columns
     ],
 )
 def test_standardize_ohlcv_columns(raw_columns, expected_columns):
-    """Test test_standardize_ohlcv_columns."""
+    """Helper should add missing OHLCV columns when possible."""
     df = pd.DataFrame(raw_columns)
     standardized_df = _standardize_ohlcv_columns(df, "dummy")
     assert expected_columns.issubset(set(standardized_df.columns))

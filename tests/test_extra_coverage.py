@@ -116,7 +116,7 @@ def test_tarama_denetimi_summary(monkeypatch):
     df_ind = pd.DataFrame()
 
     def fake_apply(df, kod, query):
-        """Test fake_apply."""
+        """Return a dummy success entry for the given filter."""
         return None, {
             "kod": kod,
             "tip": "tarama",
