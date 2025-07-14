@@ -1,4 +1,8 @@
-"""Helpers for normalizing filter CSV column names."""
+"""Normalize column names used in filter CSV files.
+
+Utilities here ensure variants like ``FilterCode`` or ``filtercode`` are
+mapped to the canonical ``filtre_kodu`` label before processing.
+"""
 
 import pandas as pd
 
