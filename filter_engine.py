@@ -131,7 +131,7 @@ def _apply_single_filter(df, kod, query):
 
 
 def _build_solution(err_type: str, msg: str) -> str:
-    """Returns a user-facing suggestion based on ``err_type`` and ``msg``.
+    """Return a user-facing suggestion based on ``err_type`` and ``msg``.
 
     Args:
         err_type (str): Normalized error code such as ``GENERIC`` or
@@ -160,7 +160,7 @@ def _build_solution(err_type: str, msg: str) -> str:
 
 
 def _extract_columns_from_query(query: str) -> set:
-    """Returns referenced columns using the unified naming scheme.
+    """Return referenced columns using the unified naming scheme.
 
     Args:
         query (str): Filter expression written in ``pandas.query`` syntax.
@@ -172,7 +172,7 @@ def _extract_columns_from_query(query: str) -> set:
 
 
 def _extract_query_columns(query: str) -> set:
-    """Returns column-like identifiers referenced in a filter query.
+    """Return column-like identifiers referenced in a filter query.
 
     String literals are stripped before running the regular expression so
     column names embedded in quotes are ignored.

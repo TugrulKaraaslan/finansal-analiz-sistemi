@@ -54,7 +54,7 @@ def ichimoku(
     offset: int = 26,
     lookahead: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Returns Ichimoku indicator frames produced via OpenBB.
+    """Return Ichimoku indicator frames produced via OpenBB.
 
     Args:
         high: High price series.
