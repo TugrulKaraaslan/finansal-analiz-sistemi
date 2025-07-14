@@ -28,6 +28,39 @@ except ImportError:
     )
 
 
+def _temizle_sayisal_deger(deger):
+    """Parse ``deger`` into a float value.
+
+    Thousands separators are removed and decimal commas replaced with dots.
+    Values that cannot be converted return ``np.nan``.
+    """
+    if pd.isna(deger):
+        return np.nan
+    if isinstance(deger, (int, float, np.number)):
+        return float(deger)
+    if isinstance(deger, str):
+        # Keep digits, commas, dots and minus signs only
+        temizlenmis_deger = re.sub(r"[^\d,.-]+", "", deger.strip())
+        # When using the Turkish number format (dot thousands, comma decimals):
+        # Remove thousand separators first
+        temizlenmis_deger_noktasiz = temizlenmis_deger.replace(".", "")
+        # Then replace the decimal comma with a dot
+        temizlenmis_deger_standart = temizlenmis_deger_noktasiz.replace(",", ".")
+
+        # First try parsing after cleaning the value
+        try:
+            return float(temizlenmis_deger_standart)
+        except ValueError:
+            # If that fails, parse the raw cleaned value
+            try:
+                return float(
+                    temizlenmis_deger
+                )  # Original string stripped of non-numeric characters
+            except ValueError:
+                return np.nan
+    return np.nan  # Fallback for all other unexpected types
+
+
 def on_isle_hisse_verileri(
     df_ham: pd.DataFrame, logger_param=None
 ) -> pd.DataFrame | None:
@@ -262,36 +295,3 @@ def on_isle_hisse_verileri(
         fn_logger.warning("Ön işleme sonucu DataFrame boş.")
 
     return df
-
-
-def _temizle_sayisal_deger(deger):
-    """Parse ``deger`` into a float value.
-
-    Thousands separators are removed and decimal commas replaced with dots.
-    Values that cannot be converted return ``np.nan``.
-    """
-    if pd.isna(deger):
-        return np.nan
-    if isinstance(deger, (int, float, np.number)):
-        return float(deger)
-    if isinstance(deger, str):
-        # Keep digits, commas, dots and minus signs only
-        temizlenmis_deger = re.sub(r"[^\d,.-]+", "", deger.strip())
-        # When using the Turkish number format (dot thousands, comma decimals):
-        # Remove thousand separators first
-        temizlenmis_deger_noktasiz = temizlenmis_deger.replace(".", "")
-        # Then replace the decimal comma with a dot
-        temizlenmis_deger_standart = temizlenmis_deger_noktasiz.replace(",", ".")
-
-        # First try parsing after cleaning the value
-        try:
-            return float(temizlenmis_deger_standart)
-        except ValueError:
-            # If that fails, parse the raw cleaned value
-            try:
-                return float(
-                    temizlenmis_deger
-                )  # Original string stripped of non-numeric characters
-            except ValueError:
-                return np.nan
-    return np.nan  # Fallback for all other unexpected types
