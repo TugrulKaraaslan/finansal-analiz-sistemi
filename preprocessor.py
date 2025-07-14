@@ -1,7 +1,7 @@
-"""Utilities for lightweight data preprocessing.
+"""Lightweight data preprocessing helpers.
 
-Functions here normalize numeric columns, align dates and drop invalid
-rows before indicator calculation.
+These functions normalize numeric columns, adjust date fields and drop
+invalid rows before indicator calculation.
 """
 
 from __future__ import annotations

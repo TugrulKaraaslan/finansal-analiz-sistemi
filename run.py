@@ -1,8 +1,8 @@
-"""Entry point for the backtest command-line workflow.
+"""Command-line interface for the demo backtest.
 
-The module orchestrates data loading, indicator computation, filter evaluation
-and reporting. Run directly via ``python run.py`` or through
-``python -m finansal_analiz_sistemi`` for integration with the test suite.
+This module ties together data loading, indicator calculation, filter
+evaluation and Excel reporting. Call :func:`main` with CLI arguments or
+run ``python -m finansal_analiz_sistemi``.
 """
 
 from __future__ import annotations

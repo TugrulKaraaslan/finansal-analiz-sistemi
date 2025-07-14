@@ -1,7 +1,7 @@
-"""Generate Excel reports for CLI runs and tests.
+"""Excel report generation utilities.
 
-Performance tables are written to an ``xlsxwriter`` workbook. Optional
-charts and structured error summaries are included when available.
+The module writes performance tables to ``xlsxwriter`` workbooks and
+optionally adds charts and structured error summaries.
 """
 
 from __future__ import annotations
