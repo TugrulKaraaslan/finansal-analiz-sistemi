@@ -1,7 +1,7 @@
-"""Excel report generation utilities.
+"""Helpers to build Excel reports from backtest data.
 
-The module writes performance tables to ``xlsxwriter`` workbooks and
-optionally adds charts and structured error summaries.
+Performance tables are written using ``xlsxwriter`` and optional charts
+or structured error sheets can be included as needed.
 """
 
 from __future__ import annotations

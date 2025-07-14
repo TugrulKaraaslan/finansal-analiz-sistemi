@@ -1,6 +1,6 @@
 """Helper exports for the :mod:`utilities` package.
 
-Only a minimal set of functions is re-exported here for convenience.
+Only a minimal set of functions is re-exported for convenience.
 """
 
 from .naming import unique_name
