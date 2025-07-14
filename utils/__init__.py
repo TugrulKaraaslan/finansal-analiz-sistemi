@@ -1,8 +1,7 @@
-"""Common helper routines.
+"""Common helper routines for filters and logging.
 
-The package exposes crossover detection utilities, filter-column
-extraction helpers and log maintenance functions used by the CLI and
-reporting modules.
+This package exposes crossover detection utilities, filter-column
+extraction helpers and log maintenance helpers used across the project.
 """
 
 from __future__ import annotations

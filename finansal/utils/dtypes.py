@@ -1,6 +1,7 @@
-"""Dtype helpers for safe column assignment.
+"""Helpers for dtype-aware column assignment.
 
-Provides :func:`safe_set` for assigning series with proper dtypes.
+The :func:`safe_set` function assigns a sequence to a DataFrame column
+and casts values to a suitable dtype whenever possible.
 """
 
 from __future__ import annotations
