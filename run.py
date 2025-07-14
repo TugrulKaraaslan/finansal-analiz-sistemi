@@ -410,16 +410,9 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Prepare derived summary, detail and stats tables.
+    """Derive summary, detail and stats tables from ``rapor_df``.
 
-    Args:
-        rapor_df (pd.DataFrame): Backtest output produced by
-            :func:`backtest_yap`.
-
-    Returns:
-        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-            ``(summary_df, detail_df, stats_df)`` trio. Empty frames are
-            returned when ``rapor_df`` has no rows.
+    Returns three empty frames when ``rapor_df`` is empty.
     """
     if rapor_df is None or rapor_df.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()

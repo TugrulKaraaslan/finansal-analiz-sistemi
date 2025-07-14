@@ -1,7 +1,7 @@
-"""Wrappers around :mod:`finansal_analiz_sistemi.data_loader`.
+"""Convenience wrappers around :mod:`finansal_analiz_sistemi.data_loader`.
 
-Selected helpers are re-exported so they can be imported directly from
-this module.
+Common helpers are re-exported for direct import and a helper is provided
+to load the cached Parquet dataset.
 """
 
 from pathlib import Path
