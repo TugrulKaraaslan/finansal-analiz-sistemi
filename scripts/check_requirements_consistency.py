@@ -1,9 +1,8 @@
-"""Ensure dependency versions match across requirement files and ``pyproject``.
+"""Verify requirement files against ``pyproject.toml``.
 
-The script compares ``requirements.txt`` and ``requirements-colab.txt`` with
-the ``[tool.poetry.dependencies]`` section of ``pyproject.toml``.  Any
-discrepancies between these sources cause a non-zero exit status so that CI
-jobs can detect version drift early.
+The helper compares ``requirements.txt`` and ``requirements-colab.txt``
+with the ``[tool.poetry.dependencies]`` section. Any mismatch triggers a
+non-zero exit status so CI jobs can detect version drift.
 """
 
 import re
