@@ -267,10 +267,17 @@ def on_isle_hisse_verileri(
 
 
 def _temizle_sayisal_deger(deger):
-    """Convert ``deger`` to ``float`` after normalizing separators.
+    """Normalize ``deger`` and return its numeric value.
 
-    String values have thousand separators stripped and decimal commas
-    replaced with dots. Invalid inputs yield ``np.nan``.
+    String inputs have thousand separators removed and decimal commas
+    replaced with dots before conversion. Anything that cannot be parsed
+    is returned as ``np.nan``.
+
+    Args:
+        deger: Value to sanitize. May be ``str`` or numeric.
+
+    Returns:
+        float: Parsed float value or ``np.nan`` when conversion fails.
     """
     if pd.isna(deger):
         return np.nan
