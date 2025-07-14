@@ -303,7 +303,10 @@ def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
 
 
 def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None:
-    """Append ``error_list`` to a ``Hatalar`` sheet when not empty."""
+    """Write ``error_list`` entries to the ``Hatalar`` worksheet.
+
+    The sheet is created only when ``error_list`` contains records.
+    """
     if error_list:
         safe_to_excel(
             pd.DataFrame(error_list, columns=["timestamp", "level", "message"]),

@@ -10,10 +10,10 @@ import pandas as pd
 def fill_missing_business_day(
     df: pd.DataFrame, date_col: str = "tarih"
 ) -> pd.DataFrame:
-    """Fill ``NaT`` dates with the preceding business day.
+    """Fill ``NaT`` entries using the previous business day.
 
-    Missing date rows are shifted backward so every entry aligns with a valid
-    trading day.
+    Rows with missing dates are moved backward so each record aligns with
+    a valid trading day according to :class:`pandas.offsets.BDay`.
 
     Args:
         df (pd.DataFrame): Input DataFrame containing a date column.
