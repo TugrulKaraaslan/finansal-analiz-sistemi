@@ -20,14 +20,15 @@ def _call_openbb(func_name: str, **kwargs) -> object:
     """Call the requested helper under ``openbb.technical``.
 
     The function invokes the matching OpenBB indicator when the
-    :mod:`openbb` package is available.  If the dependency or the
+    :mod:`openbb` package is available. If the dependency or the
     requested helper is missing, a :class:`NotImplementedError` is
     raised.
 
     Args:
         func_name (str): Name of the technical indicator under
             ``obb.technical``.
-        **kwargs: Arguments forwarded to the OpenBB function.
+        **kwargs: Additional keyword arguments passed directly to the
+            OpenBB function.
 
     Returns:
         object: Result produced by the OpenBB helper.
@@ -37,10 +38,10 @@ def _call_openbb(func_name: str, **kwargs) -> object:
         missing.
     """
     if obb is None:
-        raise NotImplementedError(f"openbb equivalent for '{func_name}' is missing")
+        raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
     func = getattr(obb.technical, func_name, None)
     if func is None:
-        raise NotImplementedError(f"openbb equivalent for '{func_name}' is missing")
+        raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
     return func(**kwargs)
 
 
