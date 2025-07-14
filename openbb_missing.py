@@ -1,7 +1,7 @@
-"""Thin wrappers around ``openbb.technical`` functions.
+"""Thin wrappers for missing ``openbb.technical`` indicators.
 
-When :mod:`openbb` is installed each helper delegates to the official
-implementation. Otherwise a :class:`NotImplementedError` is raised so callers
+When :mod:`openbb` is installed these helpers delegate to the official
+implementation; otherwise they raise :class:`NotImplementedError` so callers
 can gracefully skip unsupported indicators.
 """
 

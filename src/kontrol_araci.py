@@ -1,7 +1,7 @@
 """Diagnostic runner for filter definitions.
 
-This helper executes each filter once to collect status information and
-error details for reporting.
+Each filter is executed once to collect status flags and error details
+used in reporting.
 """
 
 import pandas as pd
