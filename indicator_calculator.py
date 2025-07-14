@@ -80,9 +80,20 @@ EMA_CLOSE_PATTERN = re.compile(r"ema_(\d+)_keser_close_(yukari|asagi)")
 
 
 def _calc_ema(df: pd.DataFrame, n: int) -> pd.Series:
-    """Return the ``n``-period EMA of ``close`` or a ``NaN`` series.
+    """Return the ``n``-period EMA of ``df['close']``.
 
-    A ``NaN`` series is returned when ``close`` is absent from ``df``.
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Input frame expected to contain a ``close`` column.
+    n : int
+        EMA calculation period.
+
+    Returns
+    -------
+    pandas.Series
+        EMA values aligned to ``df.index``. When ``close`` is missing a
+        ``NaN`` series of matching length is returned.
     """
     if "close" not in df.columns:
         return pd.Series(np.nan, index=df.index)
@@ -680,7 +691,14 @@ def _calculate_series_value_crossover(
 
 
 def _ekle_psar(df: pd.DataFrame) -> None:
-    """Calculate Parabolic SAR columns and append them to ``df``."""
+    """Calculate Parabolic SAR columns and append them to ``df``.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing ``high``, ``low`` and ``close`` columns. The
+        PSAR values are inserted in place when possible.
+    """
     gerekli = ["high", "low", "close"]
     if any(c not in df.columns for c in gerekli):
         logger.debug("PSAR hesaplamak için gerekli sütunlar eksik")
