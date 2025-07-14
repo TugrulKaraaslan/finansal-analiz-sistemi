@@ -1,7 +1,8 @@
 """Context manager that logs peak memory usage.
 
-Using ``with mem_profile():`` appends ``timestamp,peak,diff`` rows to
-``reports/memory_profile.csv`` for later analysis.
+When used as ``with mem_profile():`` the peak RSS value is appended as a
+``timestamp,peak,diff`` row to ``reports/memory_profile.csv``. This
+provides a lightweight record of memory consumption for later review.
 """
 
 import os
