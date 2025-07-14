@@ -16,7 +16,12 @@ except Exception:  # pragma: no cover - optional dependency
 
 
 def _call_openbb(func_name: str, **kwargs):
-    """Invoke ``openbb.technical`` if available and return the result.
+    """Delegate to ``openbb.technical`` and return the result.
+
+    This internal helper calls the matching OpenBB indicator when the
+    :mod:`openbb` package is installed.  Callers receive a
+    :class:`NotImplementedError` when the dependency or the requested
+    function is unavailable.
 
     Args:
         func_name (str): Name of the technical indicator under

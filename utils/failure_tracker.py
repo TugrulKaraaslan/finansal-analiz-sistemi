@@ -1,7 +1,7 @@
 """Track failed operations for later reporting.
 
-Collected failures are stored globally so they can be summarized once
-execution completes.
+Failures are kept in a global dictionary so helpers can append entries
+during execution and emit a summarized list after completion.
 """
 
 from collections import defaultdict
