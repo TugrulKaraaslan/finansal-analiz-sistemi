@@ -1,6 +1,6 @@
 """Delete aged log files from ``log_dir``.
 
-The helper supports a dry-run mode to preview deletions. When ``log_dir`` is
+The helper accepts a dry-run mode to preview deletions. When ``log_dir`` is
 ``None`` the ``loglar`` directory under the project root is used.
 """
 

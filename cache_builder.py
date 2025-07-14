@@ -1,9 +1,9 @@
-"""Build and refresh the project's Parquet cache.
+"""Create and update the project's Parquet cache.
 
-CSV files found in :data:`RAW_DIR` are consolidated into one Parquet file at
-:data:`CACHE`. A :class:`filelock.FileLock` protects the write operation so
-parallel runs do not corrupt the cache. Subsequent executions reuse this
-compiled dataset without touching the raw sources again.
+CSV files under ``veri/ham`` are combined into a single Parquet file written to
+``config.PARQUET_CACHE_PATH``.  A :class:`filelock.FileLock` guards the write
+operation so concurrent runs do not corrupt the cache. Subsequent executions
+simply reuse the compiled dataset.
 """
 
 from pathlib import Path
