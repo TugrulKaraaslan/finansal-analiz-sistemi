@@ -57,7 +57,7 @@ def calistir_basit_backtest(
         )
         return pd.DataFrame(), pd.DataFrame()
 
-    # Retrieve buy/sell timing configuration and commission
+    # Read buy/sell timing settings and commission
     alim_fiyat_sutunu = config.ALIM_ZAMANI  # e.g. "open"
     satis_fiyat_sutunu = config.SATIS_ZAMANI  # e.g. "open" or "close"
     komisyon_orani = config.KOMISYON_ORANI
@@ -66,7 +66,7 @@ def calistir_basit_backtest(
         alim_fiyat_sutunu = "close"
     if satis_fiyat_sutunu not in df_tum_veri.columns:
         satis_fiyat_sutunu = "close"
-    # Record the strategy type for downstream reporting
+    # Store the strategy name for later reporting
     config.UYGULANAN_STRATEJI = "basit_backtest"
 
     summary_records = []

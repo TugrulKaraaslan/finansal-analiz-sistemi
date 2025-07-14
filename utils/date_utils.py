@@ -15,7 +15,7 @@ from pandas._libs.tslibs.nattype import NaTType
 
 
 def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | NaTType:
-    """Return ``date_str`` parsed into a timestamp.
+    """Parse ``date_str`` into a :class:`pandas.Timestamp` or ``pd.NaT``.
 
     The function tries ISO ``YYYY-MM-DD`` and ``DD.MM.YYYY`` formats first,
     then falls back to a day-first parse via :mod:`dateutil`. Invalid inputs
