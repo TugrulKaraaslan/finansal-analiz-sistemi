@@ -1,9 +1,8 @@
-"""Create and update the project's Parquet cache.
+"""Create or refresh the project's Parquet cache.
 
-CSV files under ``veri/ham`` are concatenated into one Parquet file at
-``config.PARQUET_CACHE_PATH``.  A :class:`filelock.FileLock` guards the write
-operation so concurrent runs remain safe. Existing caches are reused on
-subsequent runs.
+CSV files located under ``veri/ham`` are concatenated into a single Parquet
+file at ``config.PARQUET_CACHE_PATH``. A :class:`filelock.FileLock` guards the
+write operation so concurrent runs remain safe.
 """
 
 from pathlib import Path
