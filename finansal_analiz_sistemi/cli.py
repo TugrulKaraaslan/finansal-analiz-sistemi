@@ -10,8 +10,7 @@ import sys
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
-# allow running this file directly
-if __package__ is None:  # pragma: no cover - safe guard for manual execution
+if __package__ is None:  # pragma: no cover - manual execution
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
