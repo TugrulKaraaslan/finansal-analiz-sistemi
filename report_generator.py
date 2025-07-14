@@ -120,7 +120,7 @@ def _write_error_sheet(
 
     Entries missing from ``error_list`` can be supplemented using
     ``summary_df`` so that every failed filter is represented.
-    
+
     Args:
         wr (pd.ExcelWriter): Writer object to write the sheet into.
         error_list (Iterable): Explicit error entries generated during
