@@ -1,7 +1,7 @@
-"""Initialize the ``finansal_analiz_sistemi`` package.
+"""Initialize :mod:`finansal_analiz_sistemi`.
 
-Loading this package configures logging from ``logging_config.yaml`` and lazily
-exposes helper modules so heavy imports occur only on first use.
+Importing this package configures logging from ``logging_config.yaml``.
+Heavy dependencies are loaded lazily so modules only import when needed.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from pathlib import Path
 
 import yaml
 
-# Import solely for side effects so YAML-based log filters are registered.
+# Import for its side effect of registering YAML-based log filters.
 from .logging_utils import ErrorCountingFilter  # noqa: F401
 
 # Configure logging via YAML at package import time
