@@ -1,4 +1,5 @@
-"""Compatibility layer around select ``pandas`` helpers.
+"""
+Compatibility layer around select ``pandas`` helpers.
 
 These shims smooth over API differences between ``pandas`` releases so
 the rest of the codebase can remain version agnostic.

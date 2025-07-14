@@ -1,4 +1,5 @@
-"""In-memory cache for CSV and Excel files.
+"""
+In-memory cache for CSV and Excel files.
 
 Entries are keyed by absolute path and file metadata so repeated reads
 avoid disk access. Each cached dataset expires after ``ttl`` seconds.

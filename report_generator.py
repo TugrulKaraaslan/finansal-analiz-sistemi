@@ -1,4 +1,5 @@
-"""Helpers to build Excel reports from backtest data.
+"""
+Helpers to build Excel reports from backtest data.
 
 Performance tables are written using ``xlsxwriter`` and optional charts
 or structured error sheets can be included as needed.

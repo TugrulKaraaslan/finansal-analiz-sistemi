@@ -1,4 +1,5 @@
-"""Utilities for loading CSV, Excel and Parquet datasets.
+"""
+Utilities for loading CSV, Excel and Parquet datasets.
 
 These helpers return ``pandas`` DataFrames while caching reads to
 minimize disk access.

@@ -1,4 +1,5 @@
-"""Fallback stubs for ``openbb.technical`` indicators.
+"""
+Fallback stubs for ``openbb.technical`` indicators.
 
 These thin wrappers forward calls to the real OpenBB functions when
 available and otherwise raise :class:`NotImplementedError`.
