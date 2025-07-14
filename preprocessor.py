@@ -50,8 +50,7 @@ def on_isle_hisse_verileri(
     df = df_ham.copy()
     fn_logger.debug(f"Ön işleme başlangıç satır sayısı: {len(df)}")
 
-    # 1. Date column validation and conversion
-    # Ensure the date column is in datetime format and drop any NaT rows.
+    # Validate and convert the date column
     if "tarih" not in df.columns:
         fn_logger.critical(
             "'tarih' sütunu DataFrame'de bulunamadı. Ön işleme devam edemez."
@@ -63,11 +62,8 @@ def on_isle_hisse_verileri(
             "'tarih' sütunu henüz datetime formatında değil, dönüştürülüyor (preprocessor)..."
         )
         try:
-            # Try common date formats even though ``pd.to_datetime`` usually
-            # handles them automatically
+            # Use common formats; invalid dates become NaT
             df["tarih"] = pd.to_datetime(df["tarih"], errors="coerce", dayfirst=True)
-            # ``errors='coerce'`` converts invalid dates to NaT (Not a Time)
-            # ``dayfirst=True`` prioritizes ``dd.mm.yyyy`` format
             fn_logger.info(
                 "'tarih' sütunu preprocessor'da başarıyla datetime formatına dönüştürüldü."
             )
@@ -77,7 +73,7 @@ def on_isle_hisse_verileri(
                 "Hatalı değerler NaT olacak.",
                 exc_info=True,
             )
-            # Continue even on error; NaT values will be dropped below
+            # NaT rows are removed later
 
     nat_count_initial = df["tarih"].isnull().sum()
     if nat_count_initial > 0:
@@ -97,7 +93,7 @@ def on_isle_hisse_verileri(
         return None
 
     # 2. Convert OHLCV and volume columns to numeric types
-    # Numeric OHLCV columns are expected after data_loader normalization
+    # Expected numeric after data loader
     sayisal_hedef_sutunlar = ["open", "high", "low", "close", "volume"]
     if (
         "adj_close" in df.columns and "adj_close" not in sayisal_hedef_sutunlar
@@ -271,10 +267,10 @@ def on_isle_hisse_verileri(
 
 
 def _temizle_sayisal_deger(deger):
-    """Parse ``deger`` and return a float or ``np.nan`` on failure.
+    """Return ``deger`` converted to ``float`` or ``np.nan``.
 
-    String inputs are cleaned of thousand separators and decimal commas
-    before conversion. Unsupported types yield ``np.nan``.
+    String inputs are normalized by removing thousand separators and
+    replacing decimal commas.
     """
     if pd.isna(deger):
         return np.nan
