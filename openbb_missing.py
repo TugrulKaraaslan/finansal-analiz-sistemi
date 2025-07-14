@@ -15,8 +15,8 @@ except Exception:  # pragma: no cover - optional dependency
     obb = None
 
 
-def _call_openbb(func_name: str, **kwargs):
-    """Delegate to ``openbb.technical`` and return the result.
+def _call_openbb(func_name: str, **kwargs) -> object:
+    """Delegate to ``openbb.technical`` and return the raw result.
 
     This internal helper calls the matching OpenBB indicator when the
     :mod:`openbb` package is installed.  Callers receive a
@@ -29,7 +29,7 @@ def _call_openbb(func_name: str, **kwargs):
         **kwargs: Arguments forwarded to the OpenBB function.
 
     Returns:
-        Any: Result produced by the OpenBB helper.
+        object: Result produced by the OpenBB helper.
 
     Raises:
         NotImplementedError: If :mod:`openbb` or the requested function is

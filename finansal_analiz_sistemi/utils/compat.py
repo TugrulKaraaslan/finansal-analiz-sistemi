@@ -1,4 +1,8 @@
-"""Compatibility helpers for finansal_analiz_sistemi package."""
+"""Compatibility helpers for ``finansal_analiz_sistemi``.
+
+This module provides a thin :func:`transpose` wrapper replicating the
+legacy :meth:`pandas.DataFrame.swapaxes` behavior.
+"""
 
 from __future__ import annotations
 
