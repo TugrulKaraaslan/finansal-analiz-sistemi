@@ -711,7 +711,18 @@ def _ekle_psar(df: pd.DataFrame) -> None:
 
 
 def _tema20(series: pd.Series) -> pd.Series:
-    """Compute the 20-period TEMA, falling back to manual calculation."""
+    """Return the 20-period TEMA for ``series``.
+
+    When :mod:`pandas_ta` provides ``tema`` the calculation is delegated
+    to that implementation. Otherwise the value is computed manually via
+    chained exponential moving averages.
+
+    Args:
+        series (pd.Series): Price series to process.
+
+    Returns:
+        pd.Series: Calculated 20-period TEMA values.
+    """
     if hasattr(ta, "tema"):
         try:
             return ta.tema(series, length=20)
