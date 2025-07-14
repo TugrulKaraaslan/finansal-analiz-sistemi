@@ -110,9 +110,7 @@ def on_isle_hisse_verileri(
             if df[col].dtype == "object" or isinstance(df[col].dtype, CategoricalDtype):
                 nan_before = df[col].isnull().sum()
                 original_type = df[col].dtype
-                df[col] = (
-                    df[col].apply(_temizle_sayisal_deger).astype(float)
-                )  # ``_temizle_sayisal_deger`` returns NaN or float
+                df[col] = df[col].apply(_temizle_sayisal_deger).astype(float)
                 nan_after = df[col].isnull().sum()
                 if nan_after > nan_before:
                     fn_logger.warning(
@@ -267,10 +265,10 @@ def on_isle_hisse_verileri(
 
 
 def _temizle_sayisal_deger(deger):
-    """Return the numeric value of ``deger``.
+    """Parse ``deger`` into a float value.
 
-    Thousands separators are stripped and decimal commas converted to dots.
-    Unparseable values yield ``np.nan``.
+    Thousands separators are removed and decimal commas replaced with dots.
+    Values that cannot be converted return ``np.nan``.
     """
     if pd.isna(deger):
         return np.nan
