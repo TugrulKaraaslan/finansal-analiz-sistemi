@@ -1,4 +1,5 @@
-"""Entry point for the example backtest CLI.
+"""
+Entry point for the example backtest CLI.
 
 This module orchestrates data loading, indicator calculation, filter
 evaluation and Excel reporting. Invoke :func:`main` with arguments or

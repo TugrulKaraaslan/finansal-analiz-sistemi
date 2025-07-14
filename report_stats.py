@@ -1,4 +1,5 @@
-"""Helpers to compute summary tables and optional Plotly charts.
+"""
+Helpers to compute summary tables and optional Plotly charts.
 
 Functions here convert raw backtest output into summary and detail
 DataFrames. When :mod:`plotly` is available, interactive figures are

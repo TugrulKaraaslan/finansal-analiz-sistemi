@@ -1,4 +1,5 @@
-"""Utilities to evaluate and apply stock filter expressions.
+"""
+Utilities to evaluate and apply stock filter expressions.
 
 The helper functions validate query strings, resolve recursive
 definitions and collect diagnostics during execution. Configuration

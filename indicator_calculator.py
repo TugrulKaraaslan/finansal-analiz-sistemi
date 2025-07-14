@@ -1,4 +1,5 @@
-"""Compute technical indicators and crossover signals.
+"""
+Compute technical indicators and crossover signals.
 
 The implementation uses ``pandas-ta-openbb`` when available and
 transparently falls back to :mod:`openbb_missing` helpers when the

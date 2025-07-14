@@ -1,4 +1,5 @@
-"""Common helper routines for filters and logging.
+"""
+Common helper routines for filters and logging.
 
 The package exposes crossover utilities, filter-column extraction
 helpers and log maintenance tools shared across the project.
