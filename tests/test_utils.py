@@ -1,4 +1,4 @@
-"""Unit tests for utils."""
+"""Unit tests for crossover utilities in :mod:`utils`."""
 
 import os
 import sys

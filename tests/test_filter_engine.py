@@ -1,4 +1,4 @@
-"""Unit tests for filter_engine."""
+"""Unit tests for :mod:`filter_engine`."""
 
 import os
 import sys

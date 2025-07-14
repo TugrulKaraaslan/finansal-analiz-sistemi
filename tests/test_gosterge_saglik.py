@@ -1,4 +1,7 @@
-"""Tests for the indicator health-check utility."""
+"""Tests for the indicator health-check utility.
+
+Verifies that mandatory columns appear in the output.
+"""
 
 import os
 import sys

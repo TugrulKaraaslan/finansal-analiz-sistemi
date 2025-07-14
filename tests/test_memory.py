@@ -1,4 +1,7 @@
-"""Stress-test cache growth; ensure <=5 MB additional RAM after repeated loads."""
+"""Stress-test cache growth.
+
+Ensure memory usage increases by less than 5 MB after repeated loads.
+"""
 
 import gc
 

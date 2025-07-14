@@ -1,4 +1,4 @@
-"""Unit tests for pandas_compat."""
+"""Unit tests for :mod:`utils.compat` wrappers."""
 
 import pandas as pd
 
