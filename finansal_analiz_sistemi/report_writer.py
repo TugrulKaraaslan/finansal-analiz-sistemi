@@ -12,7 +12,11 @@ import pandas as pd
 
 
 class ReportWriter:
-    """Write DataFrames to Excel while ensuring the destination exists."""
+    """Write DataFrames to Excel while ensuring the destination exists.
+
+    Parent directories are created automatically before calling
+    :meth:`pandas.DataFrame.to_excel`.
+    """
 
     def write_report(self, df: pd.DataFrame, output_path: Path | str) -> None:
         """Write ``df`` to an Excel file.

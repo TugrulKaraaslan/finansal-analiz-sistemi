@@ -1,7 +1,8 @@
 """In-memory cache for CSV and Excel loaders.
 
-Entries are indexed by absolute path and modification time so that
-repeated reads bypass disk access when the source has not changed.
+Entries are keyed by absolute path and file metadata so repeated reads bypass
+disk access when the source has not changed. Cached items expire based on the
+configured ``ttl`` parameter.
 """
 
 import os
