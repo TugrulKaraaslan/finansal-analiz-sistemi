@@ -1,4 +1,7 @@
-"""Unit tests for preprocessor."""
+"""Unit tests for :mod:`preprocessor`.
+
+These tests verify numeric parsing and date handling.
+"""
 
 import os
 import sys
