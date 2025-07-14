@@ -15,7 +15,7 @@ if ROOT_DIR not in sys.path:
 
 @pytest.fixture
 def report_path(tmp_path):
-    """Test report_path."""
+    """Return path to a temporary Excel report containing errors."""
     df_sum = pd.DataFrame(
         [
             ["T1", 1, 2.0, 2, -1, 1, "OK", "", "", ""],

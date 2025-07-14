@@ -15,7 +15,7 @@ from finansal_analiz_sistemi import logging_config  # noqa: E402
 
 
 def _capture(msg: str) -> str:
-    """Test _capture."""
+    """Return log output captured from a temporary handler."""
     import io
 
     buf = io.StringIO()

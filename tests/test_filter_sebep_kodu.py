@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def _base_df():
-    """Test _base_df."""
+    """Return a minimal DataFrame used by the filter tests."""
     return pd.DataFrame(
         {
             "hisse_kodu": ["AAA"],
@@ -23,7 +23,7 @@ def _base_df():
 
 
 def _apply(query: str) -> str:
-    """Test _apply."""
+    """Execute ``query`` on the base DataFrame and return the reason code."""
     filt = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": [query]})
     result, _ = filter_engine.uygula_filtreler(
         _base_df(), filt, pd.Timestamp("2025-03-01")

@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def sample_data():
-    """Test sample_data."""
+    """Return minimal summary and detail DataFrames for stats tests."""
     summary = pd.DataFrame(
         {
             "filtre_kodu": ["F1", "F2"],
@@ -31,7 +31,7 @@ def sample_data():
 
 
 def test_build_ozet_df_columns():
-    """Test test_build_ozet_df_columns."""
+    """Generated summary DataFrame should have the expected columns."""
     summary, detail = sample_data()
     df = report_stats.build_ozet_df(summary, detail, "01.01.2025", "02.01.2025")
     expected = [
@@ -51,7 +51,7 @@ def test_build_ozet_df_columns():
 
 
 def test_build_detay_df_merges_sebep():
-    """Test test_build_detay_df_merges_sebep."""
+    """Detail DataFrame must merge ``sebep_kodu`` from the summary."""
     summary, detail = sample_data()
     det = report_stats.build_detay_df(summary, detail, strateji="S")
     assert "sebep_kodu" in det.columns
@@ -59,7 +59,7 @@ def test_build_detay_df_merges_sebep():
 
 
 def test_build_stats_df_basic():
-    """Test test_build_stats_df_basic."""
+    """Summary statistics should count totals and trades correctly."""
     summary, detail = sample_data()
     ozet = report_stats.build_ozet_df(summary, detail)
     stats = report_stats.build_stats_df(ozet)
@@ -68,7 +68,7 @@ def test_build_stats_df_basic():
 
 
 def test_plot_summary_stats_returns_fig():
-    """Test test_plot_summary_stats_returns_fig."""
+    """Plot function should produce a ``Figure`` object."""
     summary, detail = sample_data()
     ozet = report_stats.build_ozet_df(summary, detail)
     fig = report_stats.plot_summary_stats(ozet, detail, std_threshold=10)
@@ -76,7 +76,7 @@ def test_plot_summary_stats_returns_fig():
 
 
 def test_plot_summary_stats_with_processed_detail():
-    """Test test_plot_summary_stats_with_processed_detail."""
+    """Plotting with preprocessed detail data should still work."""
     summary, detail = sample_data()
     ozet = report_stats.build_ozet_df(summary, detail)
     processed = report_stats.build_detay_df(summary, detail)

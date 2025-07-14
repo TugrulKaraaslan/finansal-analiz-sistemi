@@ -19,7 +19,7 @@ def test_log_rotation(tmp_path, monkeypatch):
         """Rotate log files aggressively for testing."""
 
         def __init__(self, filename, *args, **kwargs):
-            """Test __init__."""
+            """Initialize the tiny handler with a very small size limit."""
             super().__init__(filename, maxBytes=200, backupCount=1, encoding="utf-8")
 
     monkeypatch.setattr(logging_setup, "RotatingFileHandler", TinyHandler)
