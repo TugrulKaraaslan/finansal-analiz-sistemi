@@ -131,16 +131,19 @@ def _apply_single_filter(df, kod, query):
 
 
 def _build_solution(err_type: str, msg: str) -> str:
-    """Return a user-facing suggestion based on ``err_type`` and ``msg``.
+    """Return a user-facing hint derived from the error context.
 
-    Args:
-        err_type (str): Normalized error code such as ``GENERIC`` or
-            ``QUERY_ERROR``.
-        msg (str): Raw error message inspected for clues.
+    Parameters
+    ----------
+    err_type : str
+        Normalized error code such as ``GENERIC`` or ``QUERY_ERROR``.
+    msg : str
+        Raw error message inspected for additional clues.
 
-    Returns:
-        str: Localized hint text suitable for displaying to the user.
-
+    Returns
+    -------
+    str
+        Localized suggestion text suitable for displaying to the user.
     """
     if err_type == "GENERIC":
         m1 = _missing_re.search(msg)
