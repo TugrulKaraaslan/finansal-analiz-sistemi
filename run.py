@@ -1,8 +1,8 @@
-"""Command-line interface for the demo backtest.
+"""Entry point for the example backtest CLI.
 
-This module ties together data loading, indicator calculation, filter
-evaluation and Excel reporting. Call :func:`main` with CLI arguments or
-run ``python -m finansal_analiz_sistemi``.
+This module orchestrates data loading, indicator calculation, filter
+evaluation and Excel reporting. Invoke :func:`main` with arguments or
+run ``python -m finansal_analiz_sistemi`` directly.
 """
 
 from __future__ import annotations

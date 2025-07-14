@@ -1,8 +1,8 @@
 """Create or refresh the project's Parquet cache.
 
-CSV files located under ``veri/ham`` are concatenated into a single Parquet
-file at ``config.PARQUET_CACHE_PATH``. A :class:`filelock.FileLock` guards the
-write operation so concurrent runs remain safe.
+CSV files from ``veri/ham`` are combined into one dataset written to
+``config.PARQUET_CACHE_PATH``. A :class:`filelock.FileLock` prevents
+concurrent write corruption.
 """
 
 from pathlib import Path

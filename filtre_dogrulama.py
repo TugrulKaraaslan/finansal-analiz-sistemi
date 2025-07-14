@@ -1,7 +1,7 @@
-"""Validate filter CSV files and flag malformed queries.
+"""Validate filter CSV files and detect malformed queries.
 
-The helpers return reason codes so callers can surface meaningful error
-messages when filters cannot be executed.
+Helper functions return reason codes so that callers can display
+meaningful error messages when filter expressions fail to run.
 """
 
 import re
