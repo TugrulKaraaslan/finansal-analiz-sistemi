@@ -1,4 +1,8 @@
-"""Unit tests for risk_manager_hyp."""
+"""Unit tests for the hypothetical risk manager module.
+
+These tests ensure risk metrics behave consistently across different
+input scenarios.
+"""
 
 import pandas as pd
 import pytest

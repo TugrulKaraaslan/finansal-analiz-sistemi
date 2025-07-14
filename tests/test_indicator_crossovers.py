@@ -1,4 +1,8 @@
-"""Unit tests for indicator_crossovers."""
+"""Unit tests for indicator crossover helpers.
+
+These tests verify that crossover detection functions correctly identify
+upward and downward movements between series.
+"""
 
 from pathlib import Path
 

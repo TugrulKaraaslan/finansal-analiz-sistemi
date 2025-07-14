@@ -1,4 +1,8 @@
-"""Hypothesis tests for indicator calculations."""
+"""Hypothesis tests for indicator calculations.
+
+Randomised inputs validate indicator robustness over a wide range of
+series values and lengths.
+"""
 
 import pandas as pd
 import pytest
