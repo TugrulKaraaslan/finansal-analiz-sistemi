@@ -8,6 +8,7 @@ import pandas as pd
 import filter_engine
 from filtre_dogrulama import SEBEP_KODLARI
 
+# Add the project root to ``sys.path`` for standalone execution
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 

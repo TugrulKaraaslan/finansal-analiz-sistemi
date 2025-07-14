@@ -17,7 +17,7 @@ if not hasattr(ta, "psar"):
     pytest.skip("psar not available", allow_module_level=True)
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-sys.modules.pop("pandas_ta", None)  # Ensure real pandas_ta is used in this test
+sys.modules.pop("pandas_ta", None)  # ensure the actual library is imported
 
 import indicator_calculator as ic  # noqa: E402
 from finansal_analiz_sistemi import config  # noqa: E402

@@ -10,6 +10,7 @@ import report_generator
 from utils.compat import safe_to_excel
 
 after_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# Add the project root to ``sys.path`` for standalone execution
 sys.path.insert(0, after_path)
 
 
