@@ -59,6 +59,8 @@ def _temizle_sayisal_deger(deger):
             except ValueError:
                 return np.nan
     return np.nan  # Fallback for all other unexpected types
+
+
 def on_isle_hisse_verileri(
     df_ham: pd.DataFrame, logger_param=None
 ) -> pd.DataFrame | None:
@@ -293,5 +295,3 @@ def on_isle_hisse_verileri(
         fn_logger.warning("Ön işleme sonucu DataFrame boş.")
 
     return df
-
-
