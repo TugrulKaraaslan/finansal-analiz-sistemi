@@ -116,7 +116,10 @@ def _write_error_sheet(
     error_list: Iterable,
     summary_df: pd.DataFrame | None = None,
 ) -> None:
-    """Write errors to the ``Hatalar`` sheet.
+    """Write structured errors to the ``Hatalar`` sheet.
+
+    Entries missing from ``error_list`` can be supplemented using
+    ``summary_df`` so that every failed filter is represented.
 
     Args:
         wr (pd.ExcelWriter): Writer object to write the sheet into.
@@ -302,10 +305,14 @@ def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
     safe_to_excel(pd.DataFrame(stats), wr, sheet_name="İstatistik", index=False)
 
 
-def add_error_sheet(writer: pd.ExcelWriter, error_list: Iterable[tuple]) -> None:
-    """Write ``error_list`` entries to the ``Hatalar`` worksheet.
+def add_error_sheet(
+    writer: pd.ExcelWriter,
+    error_list: Iterable[tuple[str, str, str]],
+) -> None:
+    """Append log entries to the ``Hatalar`` worksheet.
 
-    The sheet is created only when ``error_list`` contains records.
+    Each tuple in ``error_list`` should contain ``(timestamp, level, message)``.
+    The sheet is only added when the iterable yields at least one record.
     """
     if error_list:
         safe_to_excel(
@@ -326,7 +333,7 @@ def generate_full_report(
     quick: bool = True,
     logger_param=None,
 ) -> Path:
-    """Create a complete Excel workbook from backtest results.
+    """Generate a workbook containing summary, detail and error sheets.
 
     Args:
         summary_df (pd.DataFrame): Summary table produced by the backtest.
@@ -541,10 +548,14 @@ def generate_full_report(
 
 
 def generate_summary(results: list[dict]) -> pd.DataFrame:
-    """Build a summary DataFrame from backtest result records.
+    """Return a normalized summary table for reporting.
 
-    The returned frame always contains the columns defined in
-    ``EXPECTED_COLUMNS`` in the same order.
+    Args:
+        results (list[dict]): Raw records produced by the backtest run.
+
+    Returns:
+        pd.DataFrame: DataFrame containing the ``EXPECTED_COLUMNS`` in
+        a fixed order.
     """
     summary_df = pd.DataFrame(results)
     # Keep columns complete and in a fixed order
