@@ -1,8 +1,7 @@
 """Utility for generating unique column names.
 
 The :func:`unique_name` helper appends an incrementing suffix when ``base``
-already exists in ``seen`` and stores the new name so subsequent calls avoid
-collisions.
+already exists in ``seen`` so later calls avoid collisions.
 """
 
 __all__ = ["unique_name"]
