@@ -430,11 +430,11 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
 
 
 def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Display results interactively using Streamlit.
+    """Display summary or detail tables in a Streamlit interface.
 
-    This helper is triggered by the ``--gui`` command-line flag and
-    presents either the summary, detail or a simple chart view based on
-    user selection. Percentage columns are plotted when available.
+    Triggered by the ``--gui`` flag, this helper lets the user switch
+    between summary, detail and basic chart views. Percentage columns are
+    plotted when available.
     """
     import streamlit as st
 

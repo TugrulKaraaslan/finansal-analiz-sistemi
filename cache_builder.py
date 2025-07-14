@@ -26,8 +26,11 @@ def build() -> None:
     Parquet file to ``CACHE``. When an existing cache is found, the
     function returns without rebuilding.
 
-    This helper uses a :class:`filelock.FileLock` to guard writes so
-    concurrent runs do not corrupt the cache.
+    A :class:`filelock.FileLock` guards the write operation so concurrent
+    runs do not corrupt the cache.
+
+    Returns:
+        None
     """
     with FileLock(str(LOCK_FILE)):
         if CACHE.exists() and CACHE.stat().st_size > 0:
