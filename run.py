@@ -1,9 +1,9 @@
 """
-Entry point for the example backtest CLI.
+Entry point for the backtest command-line interface.
 
 This module orchestrates data loading, indicator calculation, filter
-evaluation and Excel reporting. Invoke :func:`main` with arguments or
-run ``python -m finansal_analiz_sistemi`` directly.
+evaluation and Excel reporting. Invoke :func:`main` directly or run
+``python -m finansal_analiz_sistemi``.
 """
 
 from __future__ import annotations

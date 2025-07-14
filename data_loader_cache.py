@@ -22,20 +22,16 @@ class DataLoaderCache:
     """
 
     def __init__(self, logger=None, *, ttl: int = 4 * 60 * 60, maxsize: int = 64):
-        """Initialize the cache and configure expiration policy.
+        """Initialize the cache and set expiration policy.
 
         Parameters
         ----------
         logger : logging.Logger, optional
             Logger used for debug messages.
         ttl : int, optional
-            Time-to-live for cached entries in seconds.
+            Entry lifetime in seconds.
         maxsize : int, optional
             Maximum number of cached datasets.
-
-        Returns
-        -------
-        None
         """
         self.loaded_data: TTLCache = TTLCache(maxsize=maxsize, ttl=ttl)
         self.logger = logger
@@ -48,21 +44,22 @@ class DataLoaderCache:
         self.loaded_data.clear()
 
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
-        """Return ``filepath`` as a DataFrame using the in-memory cache.
+        """Load ``filepath`` through the in-memory cache.
 
-        The file is reloaded only when its modification time or size changes.
+        The CSV file is read only when its modification time or size differs
+        from the cached version.
 
         Parameters
         ----------
         filepath : str
             CSV file path.
-        **kwargs
-            Options forwarded to :func:`pandas.read_csv`.
+        **kwargs : Any
+            Arguments forwarded to :func:`pandas.read_csv`.
 
         Returns
         -------
         pd.DataFrame
-            Data read from disk or returned from the cache.
+            Cached or newly loaded data.
         """
         abs_path = os.path.abspath(filepath)
         key = (abs_path, "__csv__")
@@ -90,23 +87,22 @@ class DataLoaderCache:
             raise
 
     def load_excel(self, filepath: str, **kwargs) -> pd.ExcelFile:
-        """Return an ``ExcelFile`` object loaded through the cache.
+        """Load an Excel workbook via the cache.
 
-        The workbook is read from disk only when no cached entry exists or the
-        stored version has expired. The absolute path forms the cache key so
-        repeated calls with the same file avoid I/O when possible.
+        The file on disk is read only when the cached entry is missing or
+        expired. Absolute paths are used as keys so repeated calls avoid I/O.
 
         Parameters
         ----------
         filepath : str
             Path to the Excel file.
-        **kwargs
-            Additional options forwarded to :class:`pandas.ExcelFile`.
+        **kwargs : Any
+            Options forwarded to :class:`pandas.ExcelFile`.
 
         Returns
         -------
         pd.ExcelFile
-            Cached or freshly loaded workbook instance.
+            Cached or newly loaded workbook instance.
         """
         key = (os.path.abspath(filepath), "__excel__")
         if key in self.loaded_data:
