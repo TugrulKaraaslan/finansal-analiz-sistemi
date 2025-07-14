@@ -1,7 +1,7 @@
-"""Generate Excel reports for test runs and CLI output.
+"""Generate Excel reports for CLI runs and tests.
 
-Performance tables are written to an ``xlsxwriter`` workbook along with
-optional charts and error summaries for failed filters.
+Performance tables are written to an ``xlsxwriter`` workbook. Optional
+charts and structured error summaries are included when available.
 """
 
 from __future__ import annotations

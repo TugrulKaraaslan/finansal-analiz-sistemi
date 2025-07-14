@@ -1,7 +1,7 @@
 """Benchmark CPU throughput by summing random integers.
 
-This script generates one million integers, computes their sum and writes
-the elapsed time to ``benchmark_output.txt``.
+The script generates one million random numbers, sums them and writes the
+elapsed time to ``benchmark_output.txt``.
 """
 
 import random

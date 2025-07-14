@@ -13,7 +13,7 @@ from types import SimpleNamespace
 
 import numpy as np
 
-# Ensure ``SimpleNamespace`` instances can be used in sets.
+# Ensure ``SimpleNamespace`` instances remain hashable for set operations.
 if SimpleNamespace.__hash__ is None:
 
     class _SimpleNamespaceHashable(SimpleNamespace):
@@ -21,16 +21,16 @@ if SimpleNamespace.__hash__ is None:
 
         __hash__ = object.__hash__
 
-    # ``SimpleNamespace`` is typed as ``Final`` in ``types`` stubs so direct
-    # assignment triggers ``Cannot assign to final name``. Use ``setattr``
-    # instead to satisfy ``mypy`` while keeping runtime behaviour the same.
+    # ``SimpleNamespace`` is typed as ``Final`` in ``types`` stubs. ``setattr``
+    # avoids ``Cannot assign to final name`` errors while preserving runtime
+    # behaviour.
     types.SimpleNamespace = _SimpleNamespaceHashable
 
 # numpy>=2 removed the ``NaN`` alias. Some optional dependencies still import it.
 if not hasattr(np, "NaN"):
     np.NaN = np.nan
 
-# Ensure ``importlib.metadata`` registers itself on the ``importlib`` module so
-# packages relying on ``importlib.metadata`` as an attribute work consistently.
+# Ensure ``importlib.metadata`` registers on ``importlib`` for packages that
+# expect it as an attribute.
 import importlib  # noqa: E402
 import importlib.metadata  # noqa: E402,F401

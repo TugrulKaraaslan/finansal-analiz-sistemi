@@ -1,7 +1,7 @@
 """Utilities to configure application logging.
 
-This module exposes helpers that attach rich handlers when available and
-falls back to standard stream logging otherwise.
+Helpers attach rich handlers when available and otherwise fall back to the
+standard stream handler.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ try:
     from rich.logging import RichHandler
 
     _HAVE_RICH: Final[bool] = True
-except ImportError:  # pragma: no cover – rich is optional
+except ImportError:  # pragma: no cover - rich is optional
     Console = None  # type: ignore
     RichHandler = None  # type: ignore
     _HAVE_RICH = False

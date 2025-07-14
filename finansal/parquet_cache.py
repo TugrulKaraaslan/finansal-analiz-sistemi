@@ -1,9 +1,9 @@
 """Utilities for reading, writing and refreshing the Parquet cache.
 
-The module exposes :class:`ParquetCacheManager` which abstracts file
-operations behind simple ``load`` and ``refresh`` helpers. Cached data is
-stored as Parquet and protected with a file lock during updates. The
-default cache location is defined by ``config.PARQUET_CACHE_PATH``.
+The :class:`ParquetCacheManager` abstracts file operations behind ``load``
+and ``refresh`` helpers. Cached data is stored as Parquet and protected by
+a file lock during updates. The default location is
+``config.PARQUET_CACHE_PATH``.
 """
 
 from __future__ import annotations
