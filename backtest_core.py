@@ -122,7 +122,7 @@ def _get_fiyat(
     zaman_sutun_adi: str,
     logger_param=None,
 ) -> float:
-    """Return the price for ``tarih`` from ``zaman_sutun_adi``.
+    """Returns the price for ``tarih`` from ``zaman_sutun_adi``.
 
     Falls back to the nearest available date when an exact match is missing so
     that price lookups always succeed when data exists around the target day.

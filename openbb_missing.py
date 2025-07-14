@@ -55,7 +55,7 @@ def ichimoku(
     offset: int = 26,
     lookahead: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Return Ichimoku indicator frames produced via OpenBB.
+    """Returns Ichimoku indicator frames produced via OpenBB.
 
     Args:
         high: High price series.
@@ -102,7 +102,7 @@ def macd(
     slow: int = 26,
     signal: int = 9,
 ) -> pd.DataFrame:
-    """Return MACD indicator columns generated via OpenBB.
+    """Returns MACD indicator columns generated via OpenBB.
 
     Args:
         close: Close price series.
@@ -136,7 +136,7 @@ def rsi(
     scalar: float = 100.0,
     drift: int = 1,
 ) -> pd.Series:
-    """Return the RSI series generated via OpenBB.
+    """Returns the RSI series generated via OpenBB.
 
     Args:
         close: Close price series.

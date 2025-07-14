@@ -21,7 +21,7 @@ EMA_CLOSE_RE = re.compile(r"ema_(\d+)_keser_close_(yukari|asagi)")
 
 @lru_cache(maxsize=1)
 def load_crossover_names(csv_path: str | Path | None = None) -> list[str]:
-    """Return crossover column names referenced by filters and config.
+    """Returns crossover column names referenced by filters and config.
 
     Args:
         csv_path (str | Path, optional): Filter CSV file. Defaults to
@@ -49,7 +49,7 @@ def load_crossover_names(csv_path: str | Path | None = None) -> list[str]:
 
 
 def load_ema_close_crossovers(csv_path: str | Path | None = None) -> list[str]:
-    """Return crossover names matching ``ema_N_keser_close_*``.
+    """Returns crossover names matching ``ema_N_keser_close_*``.
 
     Args:
         csv_path (str | Path, optional): Optional filter CSV path forwarded to
