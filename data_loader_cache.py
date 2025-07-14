@@ -41,10 +41,11 @@ class DataLoaderCache:
         self.loaded_data.clear()
 
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
-        """Return DataFrame from ``filepath`` using a lightweight cache.
+        """Return the CSV data from ``filepath`` using the in-memory cache.
 
-        The file is only read again when its modification time or size
-        differs from the cached entry so repeated calls avoid disk access.
+        The file is reloaded only when its modification time or size differs
+        from the cached entry.  Cached rows expire once the configured ``ttl``
+        period elapses.
 
         Args:
             filepath (str): CSV file path.
@@ -80,11 +81,11 @@ class DataLoaderCache:
             raise
 
     def load_excel(self, filepath: str, **kwargs) -> pd.ExcelFile:
-        """Return a cached ``ExcelFile`` object for ``filepath``.
+        """Return an ``ExcelFile`` object loaded through the cache.
 
-        The workbook is read from disk when no cached entry exists or when
-        the cached version has expired. Results are stored using the absolute
-        path as the cache key.
+        The workbook is read from disk only when no cached entry exists or the
+        stored version has expired. The absolute path forms the cache key so
+        repeated calls with the same file avoid I/O when possible.
 
         Args:
             filepath (str): Path to the Excel file.

@@ -9,6 +9,7 @@ import pandas as pd
 import utils
 from finansal_analiz_sistemi import config as _cfg
 
+# Add the project root to ``sys.path`` for standalone execution
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 

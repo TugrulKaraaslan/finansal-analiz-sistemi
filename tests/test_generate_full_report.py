@@ -12,6 +12,7 @@ import pandas as pd
 
 import report_generator
 
+# Add the project root to ``sys.path`` for standalone execution
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 

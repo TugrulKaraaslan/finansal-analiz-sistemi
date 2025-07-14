@@ -10,6 +10,7 @@ import types
 import numpy as np
 import pandas as pd
 
+# Add the project root to ``sys.path`` for standalone execution
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 )  # isort: off

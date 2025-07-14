@@ -720,14 +720,21 @@ def _tema20(series: pd.Series) -> pd.Series:
 
 
 def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
-    """Return ``df`` with extra crossover columns based on ``cross_names``.
+    """Append EMA/close crossover columns described by ``cross_names``.
+
+    Each name must follow the ``EMA_CLOSE_PATTERN`` convention such as
+    ``ema_20_keser_close_yukari``.  Unknown patterns raise ``ValueError``.
 
     Args:
         df (pd.DataFrame): DataFrame containing at least ``close`` prices.
-        cross_names (list[str]): Column names describing EMA/close crossovers.
+        cross_names (list[str]): List of crossover descriptors.
 
     Returns:
         pd.DataFrame: Input ``df`` with the new crossover columns appended.
+
+    Raises:
+        ValueError: If an entry in ``cross_names`` does not match the expected
+            pattern.
 
     """
     for name in cross_names:
@@ -1007,7 +1014,19 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
 
 
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
-    """Add the given SMA/EMA column when missing."""
+    """Add a moving-average column if absent.
+
+    The function computes either a simple or exponential moving average based
+    on ``kind`` and attaches the result as ``"{kind}_{n}"``. Existing and fully
+    populated columns are left untouched.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing at least ``close`` prices.
+        n (int): Rolling window period.
+        kind (str, optional): ``"sma"`` for simple or ``"ema"`` for exponential.
+        logger_param (logging.Logger, optional): Logger used for status output.
+
+    """
     if logger_param is None:
         logger_param = logger
     local_logger = logger_param

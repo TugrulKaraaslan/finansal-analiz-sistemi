@@ -9,7 +9,7 @@ import pytest
 
 from utils import crosses_above, crosses_below
 
-# Adjust path so that utils module is importable when running tests directly
+# Add the project root to ``sys.path`` for standalone execution
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
