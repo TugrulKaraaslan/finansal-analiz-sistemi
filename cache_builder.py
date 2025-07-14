@@ -1,9 +1,9 @@
 """Create and update the project's Parquet cache.
 
-CSV files under ``veri/ham`` are combined into a single Parquet file written to
+CSV files under ``veri/ham`` are concatenated into one Parquet file at
 ``config.PARQUET_CACHE_PATH``.  A :class:`filelock.FileLock` guards the write
-operation so concurrent runs do not corrupt the cache. Subsequent executions
-simply reuse the compiled dataset.
+operation so concurrent runs remain safe. Existing caches are reused on
+subsequent runs.
 """
 
 from pathlib import Path
@@ -20,17 +20,11 @@ LOCK_FILE = CACHE.with_suffix(".lock")
 
 
 def build() -> None:
-    """Build the Parquet cache from the raw CSV files.
+    """Compile CSV files under ``RAW_DIR`` into the Parquet cache.
 
-    Reads all CSV files under ``RAW_DIR`` and writes them as a single
-    Parquet file to ``CACHE``. When an existing cache is found, the
-    function returns without rebuilding.
-
-    A :class:`filelock.FileLock` guards the write operation so concurrent
-    runs do not corrupt the cache.
-
-    Returns:
-        None
+    All CSV files are concatenated into a single dataset and written to
+    ``CACHE``.  A :class:`filelock.FileLock` ensures concurrent runs do not
+    corrupt the file. Existing caches are left untouched.
     """
     with FileLock(str(LOCK_FILE)):
         if CACHE.exists() and CACHE.stat().st_size > 0:

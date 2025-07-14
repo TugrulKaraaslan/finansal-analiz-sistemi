@@ -37,14 +37,13 @@ __all__ = [
 
 
 def load_dataset(rebuild: bool = False) -> pd.DataFrame:
-    """Return cached stock data, building the cache when necessary.
+    """Return cached stock data, rebuilding the cache when needed.
 
     Args:
-        rebuild (bool, optional): When ``True`` force regeneration of the
-            Parquet cache.
+        rebuild (bool, optional): Force regeneration of the Parquet cache.
 
     Returns:
-        pd.DataFrame: Combined stock dataset read from the Parquet cache.
+        pd.DataFrame: Combined dataset read from ``config.PARQUET_CACHE_PATH``.
 
     """
     parquet_path = Path(config.PARQUET_CACHE_PATH)
