@@ -37,7 +37,7 @@ __all__ = [
 
 
 def load_dataset(rebuild: bool = False) -> pd.DataFrame:
-    """Returns cached stock data, rebuilding the cache when needed.
+    """Return cached stock data, rebuilding the cache when needed.
 
     Args:
         rebuild (bool, optional): Force regeneration of the Parquet cache.
