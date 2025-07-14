@@ -11,7 +11,7 @@ import psutil
 
 
 class mem_profile:
-    """Track peak memory usage within a ``with`` block."""
+    """Context manager that records peak memory usage to disk."""
 
     def __enter__(self):
         """Start tracking process memory usage and return ``self``."""
@@ -20,10 +20,11 @@ class mem_profile:
         return self
 
     def __exit__(self, *exc):
-        """Log peak memory delta in bytes to ``reports/memory_profile.csv``.
+        """Log peak memory usage and allow exception propagation.
 
-        Returns:
-            bool: Always ``False`` so that any exception is re-raised.
+        A ``timestamp,peak,diff`` entry is appended to
+        ``reports/memory_profile.csv``. ``False`` is returned so any
+        exception raised inside the ``with`` block is re-raised.
         """
         peak = self.proc.memory_info().rss
         diff = peak - self.start
