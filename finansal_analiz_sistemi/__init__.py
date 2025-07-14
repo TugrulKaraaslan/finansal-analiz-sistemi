@@ -1,8 +1,7 @@
-"""Package initialization for ``finansal_analiz_sistemi``.
+"""Initialize the ``finansal_analiz_sistemi`` package.
 
-Importing this package configures logging from ``logging_config.yaml`` and
-exposes helper modules lazily so that heavy imports occur only when the
-modules are first used.
+Loading this package configures logging from ``logging_config.yaml`` and lazily
+exposes helper modules so heavy imports occur only on first use.
 """
 
 from __future__ import annotations
