@@ -1,7 +1,7 @@
-"""Lightweight helpers for running simplified backtests.
+"""Helpers for running quick backtests.
 
-The module exposes minimal functions used by the CLI and tests to
-simulate trades based on filter results.
+These functions simulate simple buy/sell scenarios based on filter
+results and provide summary statistics for reporting.
 """
 
 import numpy as np
