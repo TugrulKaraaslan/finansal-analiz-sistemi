@@ -22,11 +22,13 @@ logger = logging.getLogger(__name__)
 
 
 def parse_args() -> Namespace:
-    """Parse command line arguments.
+    """Return parsed CLI arguments for report generation.
+
+    The resulting :class:`argparse.Namespace` includes options for
+    filter validation and logging verbosity.
 
     Returns:
-        Namespace: Parsed CLI options controlling report generation and
-        filter validation.
+        Namespace: Parsed command-line options.
 
     """
     p = ArgumentParser(description="Rapor üret veya filtreleri doğrula")
