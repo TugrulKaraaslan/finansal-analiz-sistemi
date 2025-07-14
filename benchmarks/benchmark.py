@@ -1,7 +1,8 @@
-"""Benchmark CPU throughput by summing random integers.
+"""Measure CPU throughput by summing random integers.
 
-Generates one million random numbers, sums them and writes the elapsed
-time to ``benchmark_output.txt``.
+This script generates one million random numbers, sums them and saves
+the elapsed time to ``benchmark_output.txt``.  The function
+:func:`run_bench` returns the runtime in seconds.
 """
 
 import random

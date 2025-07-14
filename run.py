@@ -410,9 +410,10 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
 
 
 def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Derive summary, detail and stats tables from ``rapor_df``.
+    """Return summary, detail and stats tables derived from ``rapor_df``.
 
-    Returns three empty frames when ``rapor_df`` is empty.
+    An empty ``rapor_df`` yields three empty ``DataFrame`` objects. The
+    returned tuple follows the order ``(summary_df, detail_df, stats_df)``.
     """
     if rapor_df is None or rapor_df.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
