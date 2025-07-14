@@ -1,8 +1,8 @@
 """Entry point for the backtest command-line workflow.
 
-This script orchestrates data loading, indicator computation, filter evaluation
-and reporting. It can be run directly via ``python run.py`` and is exercised
-extensively by the test suite.
+The module orchestrates data loading, indicator computation, filter evaluation
+and reporting. Run directly via ``python run.py`` or through
+``python -m finansal_analiz_sistemi`` for integration with the test suite.
 """
 
 from __future__ import annotations

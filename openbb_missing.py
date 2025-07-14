@@ -1,8 +1,8 @@
-"""Helper stubs for ``openbb.technical`` indicators.
+"""Fallback stubs for ``openbb.technical`` indicators.
 
-The wrappers invoke the OpenBB implementation when available. If the
-package is missing they raise :class:`NotImplementedError` so callers
-can gracefully skip unsupported features.
+These wrappers call the real OpenBB implementation when installed. If
+the package is missing they raise :class:`NotImplementedError` so
+callers can gracefully skip unsupported features.
 """
 
 from __future__ import annotations
@@ -101,7 +101,7 @@ def macd(
     slow: int = 26,
     signal: int = 9,
 ) -> pd.DataFrame:
-    """Returns MACD indicator columns generated via OpenBB.
+    """Return MACD indicator columns computed via OpenBB.
 
     Args:
         close: Close price series.
@@ -135,7 +135,7 @@ def rsi(
     scalar: float = 100.0,
     drift: int = 1,
 ) -> pd.Series:
-    """Returns the RSI series generated via OpenBB.
+    """Return the RSI series computed via OpenBB.
 
     Args:
         close: Close price series.
