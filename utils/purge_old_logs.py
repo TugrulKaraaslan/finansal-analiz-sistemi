@@ -1,7 +1,8 @@
-"""Delete aged log files from ``log_dir``.
+"""Delete aged log files from a directory.
 
-The helper accepts a dry-run mode to preview deletions. When ``log_dir`` is
-``None`` the ``loglar`` directory under the project root is used.
+Files older than ``keep_days`` are removed. By default the ``loglar``
+folder under the project root is targeted. When ``dry_run`` is ``True``
+the function only prints which files would be deleted.
 """
 
 from __future__ import annotations
