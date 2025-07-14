@@ -17,23 +17,27 @@ except Exception:  # pragma: no cover - optional dependency
 def _call_openbb(func_name: str, **kwargs) -> object:
     """Call the requested helper under ``openbb.technical``.
 
-    The function invokes the matching OpenBB indicator when the
-    :mod:`openbb` package is available. If the dependency or the
-    requested helper is missing, a :class:`NotImplementedError` is
-    raised.
+    The matching OpenBB indicator is invoked when the :mod:`openbb`
+    package is available. When either the dependency or the requested
+    function is missing, :class:`NotImplementedError` is raised.
 
-    Args:
-        func_name (str): Name of the technical indicator under
-            ``obb.technical``.
-        **kwargs: Additional keyword arguments passed directly to the
-            OpenBB function.
+    Parameters
+    ----------
+    func_name : str
+        Name of the technical indicator under ``obb.technical``.
+    **kwargs
+        Additional keyword arguments passed directly to the OpenBB
+        function.
 
-    Returns:
-        object: Result produced by the OpenBB helper.
+    Returns
+    -------
+    object
+        Result produced by the OpenBB helper.
 
-    Raises:
-        NotImplementedError: If :mod:`openbb` or the requested function is
-        missing.
+    Raises
+    ------
+    NotImplementedError
+        If :mod:`openbb` or the requested function is unavailable.
     """
     if obb is None:
         raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
@@ -55,21 +59,34 @@ def ichimoku(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Return Ichimoku indicator frames produced via OpenBB.
 
-    Args:
-        high: High price series.
-        low: Low price series.
-        close: Close price series.
-        conversion: Conversion line period.
-        base: Base line period.
-        lagging: Lagging span period.
-        offset: Displacement for span lines.
-        lookahead: Whether to shift leading spans forward.
+    Parameters
+    ----------
+    high : pandas.Series
+        High price series.
+    low : pandas.Series
+        Low price series.
+    close : pandas.Series
+        Close price series.
+    conversion : int, optional
+        Conversion line period.
+    base : int, optional
+        Base line period.
+    lagging : int, optional
+        Lagging span period.
+    offset : int, optional
+        Displacement for span lines.
+    lookahead : bool, optional
+        Whether to shift leading spans forward.
 
-    Returns:
-        Two DataFrames containing classic Ichimoku and span columns.
+    Returns
+    -------
+    tuple[pandas.DataFrame, pandas.DataFrame]
+        DataFrames containing classic Ichimoku and span columns.
 
-    Raises:
-        NotImplementedError: If :mod:`openbb` is not available.
+    Raises
+    ------
+    NotImplementedError
+        If :mod:`openbb` is not available.
     """
     df = pd.DataFrame(
         {
@@ -102,17 +119,26 @@ def macd(
 ) -> pd.DataFrame:
     """Return MACD indicator columns computed via OpenBB.
 
-    Args:
-        close: Close price series.
-        fast: Fast EMA period.
-        slow: Slow EMA period.
-        signal: Signal line period.
+    Parameters
+    ----------
+    close : pandas.Series
+        Close price series.
+    fast : int, optional
+        Fast EMA period.
+    slow : int, optional
+        Slow EMA period.
+    signal : int, optional
+        Signal line period.
 
-    Returns:
+    Returns
+    -------
+    pandas.DataFrame
         DataFrame with MACD, signal and histogram columns.
 
-    Raises:
-        NotImplementedError: If :mod:`openbb` is not available.
+    Raises
+    ------
+    NotImplementedError
+        If :mod:`openbb` is not available.
     """
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
@@ -136,17 +162,26 @@ def rsi(
 ) -> pd.Series:
     """Return the RSI series computed via OpenBB.
 
-    Args:
-        close: Close price series.
-        length: Lookback period.
-        scalar: Multiplier used in calculation.
-        drift: Difference period.
+    Parameters
+    ----------
+    close : pandas.Series
+        Close price series.
+    length : int, optional
+        Lookback period.
+    scalar : float, optional
+        Multiplier used in calculation.
+    drift : int, optional
+        Difference period.
 
-    Returns:
+    Returns
+    -------
+    pandas.Series
         Relative strength index series.
 
-    Raises:
-        NotImplementedError: If :mod:`openbb` is not available.
+    Raises
+    ------
+    NotImplementedError
+        If :mod:`openbb` is not available.
     """
     df = pd.DataFrame({"date": close.index, "close": close.values})
     obb_obj = _call_openbb(
