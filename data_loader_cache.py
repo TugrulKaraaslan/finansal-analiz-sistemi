@@ -14,20 +14,27 @@ from src.utils.excel_reader import open_excel_cached
 
 
 class DataLoaderCache:
-    """In-memory caching wrapper for CSV and Excel loaders.
+    """Cache CSV and Excel files in memory to avoid redundant disk reads.
 
-    The cache tracks file modification time and size to avoid redundant
-    disk reads across repeated data-loading operations.
+    File modification time and size are tracked so cached entries are
+    transparently refreshed whenever the source file changes.
     """
 
     def __init__(self, logger=None, *, ttl: int = 4 * 60 * 60, maxsize: int = 64):
         """Initialize the cache and configure expiration policy.
 
-        Args:
-            logger (logging.Logger, optional): Logger used for debug messages.
-            ttl (int, optional): Time-to-live for cached entries in seconds.
-            maxsize (int, optional): Maximum number of cached datasets.
+        Parameters
+        ----------
+        logger : logging.Logger, optional
+            Logger used for debug messages.
+        ttl : int, optional
+            Time-to-live for cached entries in seconds.
+        maxsize : int, optional
+            Maximum number of cached datasets.
 
+        Returns
+        -------
+        None
         """
         self.loaded_data: TTLCache = TTLCache(maxsize=maxsize, ttl=ttl)
         self.logger = logger
@@ -40,19 +47,21 @@ class DataLoaderCache:
         self.loaded_data.clear()
 
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
-        """Return the CSV data from ``filepath`` using the in-memory cache.
+        """Return ``filepath`` as a DataFrame using the in-memory cache.
 
-        The file is reloaded only when its modification time or size differs
-        from the cached entry.  Cached rows expire once the configured ``ttl``
-        period elapses.
+        The file is reloaded only when its modification time or size changes.
 
-        Args:
-            filepath (str): CSV file path.
-            **kwargs: Options forwarded to :func:`pandas.read_csv` when reading.
+        Parameters
+        ----------
+        filepath : str
+            CSV file path.
+        **kwargs
+            Options forwarded to :func:`pandas.read_csv`.
 
-        Returns:
-            pd.DataFrame: DataFrame from cache or newly read from disk.
-
+        Returns
+        -------
+        pd.DataFrame
+            Data read from disk or returned from the cache.
         """
         abs_path = os.path.abspath(filepath)
         key = (abs_path, "__csv__")
@@ -86,13 +95,17 @@ class DataLoaderCache:
         stored version has expired. The absolute path forms the cache key so
         repeated calls with the same file avoid I/O when possible.
 
-        Args:
-            filepath (str): Path to the Excel file.
-            **kwargs: Additional options forwarded to :class:`pandas.ExcelFile`.
+        Parameters
+        ----------
+        filepath : str
+            Path to the Excel file.
+        **kwargs
+            Additional options forwarded to :class:`pandas.ExcelFile`.
 
-        Returns:
-            pd.ExcelFile: Cached or freshly loaded workbook instance.
-
+        Returns
+        -------
+        pd.ExcelFile
+            Cached or freshly loaded workbook instance.
         """
         key = (os.path.abspath(filepath), "__excel__")
         if key in self.loaded_data:

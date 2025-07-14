@@ -89,16 +89,17 @@ def _build_detay_df(
 ) -> pd.DataFrame:
     """Combine partial detail frames and attach trade results.
 
-    Args:
-        detay_list (list[pd.DataFrame]): Partial detail frames generated per
-            filter.
-        trades (pd.DataFrame): Trade information to merge on ``filtre_kodu`` and
-            ``hisse_kodu``.
+    Parameters
+    ----------
+    detay_list : list[pandas.DataFrame]
+        Partial detail frames generated per filter.
+    trades : pandas.DataFrame
+        Trade information to merge on ``filtre_kodu`` and ``hisse_kodu``.
 
-    Returns:
-        pd.DataFrame: Combined detail rows enriched with trade results when
-        available.
-
+    Returns
+    -------
+    pandas.DataFrame
+        Combined detail rows enriched with trade results when available.
     """
     detay_df = pd.concat(detay_list, ignore_index=True)
     if trades is not None and not trades.empty:
