@@ -1,7 +1,7 @@
-"""Logging helpers used across the project.
+"""Logging helpers with duplicate suppression and rotating files.
 
-This module configures rotating log files, suppresses repeated messages
-and exposes an :class:`ErrorCountingFilter` so tests can assert on logged
+This module configures rotating log files, suppresses repeated messages and
+provides an :class:`ErrorCountingFilter` so tests can assert on logged
 warnings or errors.
 """
 

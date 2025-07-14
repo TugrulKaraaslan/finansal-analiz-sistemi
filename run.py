@@ -2,7 +2,7 @@
 
 This script orchestrates data loading, indicator computation, filter evaluation
 and reporting. It can be run directly via ``python run.py`` and is exercised
-heavily by the test suite.
+extensively by the test suite.
 """
 
 from __future__ import annotations

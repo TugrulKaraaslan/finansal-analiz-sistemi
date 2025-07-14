@@ -1,8 +1,7 @@
 """Delete aged log files from ``log_dir``.
 
-Intended for maintenance scripts, this helper supports a dry-run mode to
-preview files slated for deletion. When ``log_dir`` is ``None`` the
-``loglar`` directory under the project root is used.
+The helper supports a dry-run mode to preview deletions. When ``log_dir`` is
+``None`` the ``loglar`` directory under the project root is used.
 """
 
 from __future__ import annotations
