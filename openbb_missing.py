@@ -1,8 +1,9 @@
-"""Thin wrappers for missing ``openbb.technical`` indicators.
+"""Fallback wrappers for optional ``openbb.technical`` indicators.
 
-When :mod:`openbb` is installed these helpers delegate to the official
-implementation; otherwise they raise :class:`NotImplementedError` so callers
-can gracefully skip unsupported indicators.
+The helpers transparently call the matching implementation from
+``openbb.technical`` when the package is available. If the dependency
+is missing they raise :class:`NotImplementedError` so callers can
+gracefully skip unsupported indicators.
 """
 
 from __future__ import annotations
