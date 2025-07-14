@@ -1,7 +1,7 @@
-"""Minimal preprocessing utilities used by the CLI helpers.
+"""Utility functions for lightweight data preprocessing.
 
-The helpers perform small cleanup tasks such as adjusting date columns
-before indicator calculation.
+These helpers adjust date columns and remove invalid rows before
+indicator calculation.
 """
 
 import pandas as pd
@@ -10,10 +10,10 @@ import pandas as pd
 def fill_missing_business_day(
     df: pd.DataFrame, date_col: str = "tarih"
 ) -> pd.DataFrame:
-    """Fill ``NaT`` entries using the previous business day.
+    """Backfill ``NaT`` rows with the preceding business day.
 
-    Rows with missing dates are moved backward so each record aligns with
-    a valid trading day according to :class:`pandas.offsets.BDay`.
+    Missing dates are shifted backward so each record aligns with a valid
+    trading day according to :class:`pandas.offsets.BDay`.
 
     Args:
         df (pd.DataFrame): Input DataFrame containing a date column.
@@ -21,7 +21,7 @@ def fill_missing_business_day(
             ``"tarih"``.
 
     Returns:
-        pd.DataFrame: DataFrame where missing dates are backfilled with the
+        pd.DataFrame: Frame where missing dates are replaced with the
         prior business day.
     """
     if date_col not in df.columns:
