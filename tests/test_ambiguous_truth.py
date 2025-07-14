@@ -1,4 +1,9 @@
-"""Regression test to ensure DataFrame truth evaluation is not ambiguous."""
+"""Ensure DataFrame truth evaluation remains unambiguous.
+
+The :func:`filter_engine._extract_query_columns` helper must not rely on the
+truth value of a ``DataFrame`` to avoid ``ValueError`` in newer pandas
+versions.
+"""
 
 import pandas as pd
 

@@ -1,4 +1,8 @@
-"""Ensure summary rows include descriptive explanations."""
+"""Ensure summary rows include descriptive explanations.
+
+Reports should carry forward the ``sebep_aciklama`` text so users can
+understand why each filter produced its result.
+"""
 
 import os
 import sys

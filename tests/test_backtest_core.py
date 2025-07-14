@@ -1,4 +1,8 @@
-"""Unit tests for backtest_core."""
+"""Unit tests for :mod:`backtest_core`.
+
+These tests verify the helper functions used in the simplified backtest
+workflow.
+"""
 
 import os
 import sys

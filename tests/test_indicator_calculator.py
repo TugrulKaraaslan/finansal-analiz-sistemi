@@ -1,4 +1,8 @@
-"""Tests for the technical indicator calculation module."""
+"""Tests for the technical indicator calculation module.
+
+These checks validate that computed columns match expected properties and
+that optional dependencies do not alter core behaviour.
+"""
 
 import os
 import sys

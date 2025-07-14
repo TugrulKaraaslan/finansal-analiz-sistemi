@@ -1,4 +1,7 @@
-"""Additional test cases for :mod:`backtest_core`."""
+"""Additional test cases for :mod:`backtest_core`.
+
+Cover edge conditions not exercised by the primary test suite.
+"""
 
 import os
 import sys

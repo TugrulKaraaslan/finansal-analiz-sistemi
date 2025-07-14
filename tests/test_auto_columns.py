@@ -1,4 +1,8 @@
-"""Tests for automatic column handling in :mod:`preprocessor`."""
+"""Validate automatic column handling in :mod:`preprocessor`.
+
+Column normalization helpers should correctly rename OHLCV fields when
+loading mixed-format datasets.
+"""
 
 import pandas as pd
 

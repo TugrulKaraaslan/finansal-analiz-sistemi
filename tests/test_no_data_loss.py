@@ -1,4 +1,8 @@
-"""Unit tests for no_data_loss."""
+"""Tests ensuring report generation retains rows with ``NaN`` values.
+
+The ``generate_full_report`` helper should not drop records when some
+columns contain missing data.
+"""
 
 import pandas as pd
 

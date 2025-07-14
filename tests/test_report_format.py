@@ -1,4 +1,8 @@
-"""Unit tests for report_format."""
+"""Unit tests covering Excel report layout and legacy column support.
+
+These checks guard against accidental format regressions in generated
+workbooks.
+"""
 
 import os
 import sys

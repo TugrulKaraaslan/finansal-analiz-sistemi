@@ -1,4 +1,8 @@
-"""Parameterized tests for :mod:`backtest_core` helpers."""
+"""Parameterized tests for :mod:`backtest_core` helpers.
+
+These scenarios exercise multiple parameter combinations to ensure
+stable behaviour across edge cases.
+"""
 
 import warnings
 
