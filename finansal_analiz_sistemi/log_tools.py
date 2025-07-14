@@ -1,8 +1,7 @@
 """Logging helpers with duplicate suppression and rotating files.
 
-This module configures rotating log files, suppresses repeated messages and
-provides an :class:`ErrorCountingFilter` so tests can assert on logged
-warnings or errors.
+Rotating handlers are configured automatically and an
+:class:`ErrorCountingFilter` tracks warnings and errors during execution.
 """
 
 from __future__ import annotations

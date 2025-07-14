@@ -1,7 +1,9 @@
-"""Runtime patches applied during test execution.
+"""Apply runtime patches for optional dependencies and tests.
 
-Adds hashability to :class:`types.SimpleNamespace` and restores ``np.NaN``
-for compatibility with optional packages.
+The module ensures :class:`types.SimpleNamespace` objects remain hashable,
+restores the ``np.NaN`` alias for backward compatibility and registers
+``importlib.metadata`` for packages that expect it on the ``importlib``
+module.
 """
 
 from __future__ import annotations
