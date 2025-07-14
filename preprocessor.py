@@ -267,10 +267,10 @@ def on_isle_hisse_verileri(
 
 
 def _temizle_sayisal_deger(deger):
-    """Return ``deger`` converted to ``float`` or ``np.nan``.
+    """Convert ``deger`` to ``float`` after normalizing separators.
 
-    String inputs are normalized by removing thousand separators and
-    replacing decimal commas.
+    String values have thousand separators stripped and decimal commas
+    replaced with dots. Invalid inputs yield ``np.nan``.
     """
     if pd.isna(deger):
         return np.nan

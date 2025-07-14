@@ -80,17 +80,21 @@ EMA_CLOSE_PATTERN = re.compile(r"ema_(\d+)_keser_close_(yukari|asagi)")
 
 
 def _calc_ema(df: pd.DataFrame, n: int) -> pd.Series:
-    """Return the ``n`` period EMA of ``close`` or ``NaN`` if missing."""
+    """Return the ``n``-period EMA of ``close`` or a ``NaN`` series.
+
+    A ``NaN`` series is returned when ``close`` is absent from ``df``.
+    """
     if "close" not in df.columns:
         return pd.Series(np.nan, index=df.index)
     return df["close"].ewm(span=n, adjust=False).mean()
 
 
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
-    """Compute the 1H classic pivot point for a ticker group.
+    """Return the hourly classic pivot for ``group_df``.
 
-    The pivot is the mean of ``high``, ``low`` and ``close`` for each row
-    and is rounded to two decimals.
+    The pivot equals the mean of ``high``, ``low`` and ``close`` and is
+    rounded to two decimals. The resulting series is named
+    ``classicpivots_1h_p``.
     """
     hisse_str = (
         group_df["hisse_kodu"].iloc[0]
