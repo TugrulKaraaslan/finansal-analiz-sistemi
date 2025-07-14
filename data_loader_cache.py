@@ -1,7 +1,7 @@
 """In-memory cache for CSV and Excel loaders.
 
-Cached entries are keyed by absolute path and modification time so
-repeated reads skip the filesystem when the source is unchanged.
+Entries are indexed by absolute path and modification time so that
+repeated reads bypass disk access when the source has not changed.
 """
 
 import os

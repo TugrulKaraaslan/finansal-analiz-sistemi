@@ -1,4 +1,9 @@
-"""Pytest configuration and helper utilities."""
+"""Test fixtures and configuration.
+
+This module provides environment patches and helpers used across the
+test suite.  It sanitizes ``sys.modules`` for Hypothesis and prevents
+accidental HTTP requests during runs.
+"""
 
 import logging
 import sys
