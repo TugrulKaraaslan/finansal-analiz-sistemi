@@ -1,18 +1,18 @@
-"""Helpers for generating unique column names.
+"""Utility for generating unique column names.
 
-The :func:`unique_name` function appends an incrementing suffix to ``base`` when
-the desired name already exists in ``seen`` and records the result so repeated
-calls remain collision-free.
+The :func:`unique_name` helper appends an incrementing suffix when ``base``
+already exists in ``seen`` and stores the new name so subsequent calls avoid
+collisions.
 """
 
 __all__ = ["unique_name"]
 
 
 def unique_name(base: str, seen: set[str]) -> str:
-    """Return a unique column name based on ``base``.
+    """Return a unique column name derived from ``base``.
 
-    The generated label is added to ``seen`` so repeated calls remain
-    collision-free.
+    The chosen label is added to ``seen`` so subsequent calls with the same
+    base avoid duplicates.
 
     Args:
         base: Desired column name.

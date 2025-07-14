@@ -1,8 +1,7 @@
-"""Read Excel workbooks using a lightweight cache.
+"""Read Excel workbooks with a simple in-memory cache.
 
-Opened workbooks are stored in a process-level dictionary keyed by their
-absolute path and modification time. Entries automatically refresh when the
-file changes on disk so repeated reads remain efficient.
+Workbooks are indexed by absolute path and modification time. Cached
+entries refresh automatically whenever the underlying file changes.
 """
 
 from __future__ import annotations
@@ -18,7 +17,7 @@ _excel_cache: Dict[str, tuple[float, pd.ExcelFile]] = {}
 
 
 def clear_cache() -> None:
-    """Clear the internal ``ExcelFile`` cache and close workbooks."""
+    """Clear the in-memory ``ExcelFile`` cache and close open workbooks."""
     for _, xls in _excel_cache.values():
         try:
             xls.close()
@@ -30,7 +29,7 @@ def clear_cache() -> None:
 def open_excel_cached(path: str | os.PathLike[str], **kwargs: Any) -> pd.ExcelFile:
     """Return a cached ``ExcelFile`` instance for ``path``.
 
-    The cache automatically refreshes when the underlying file changes.
+    The cache automatically refreshes whenever the file on disk changes.
 
     Args:
         path (str | os.PathLike[str]): Excel file path.
@@ -56,6 +55,8 @@ def read_excel_cached(
     path: str | os.PathLike[str], sheet_name: str, **kwargs: Any
 ) -> pd.DataFrame:
     """Parse ``sheet_name`` from a cached Excel workbook.
+
+    This is a thin wrapper around :func:`open_excel_cached`.
 
     Args:
         path (str | os.PathLike[str]): Excel file path.
