@@ -100,135 +100,24 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
             st.write("Grafik için veri yok")
 
 
-def backtest_yap(
-    df: pd.DataFrame,
-    filtre_sonuclari: dict,
-    tarama_tarihi: str,
-    satis_tarihi: str,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Run a minimal backtest.
+def veri_yukle(force_excel_reload: bool = False):
+    """Load filter definitions together with the raw price dataset."""
 
-    Args:
-        df (pd.DataFrame): Full OHLCV dataset to operate on.
-        filtre_sonuclari (dict): Mapping of filter codes to selected stocks.
-        tarama_tarihi (str): Screening date in ``dd.mm.yyyy`` format.
-        satis_tarihi (str): Sale date in ``dd.mm.yyyy`` format.
-
-    Returns:
-        tuple[pd.DataFrame, pd.DataFrame]: Summary and detail DataFrames
-            produced by :func:`backtest_core.calistir_basit_backtest`.
-    """
-    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
-        filtre_sonuc_dict=filtre_sonuclari,
-        df_tum_veri=df,
-        satis_tarihi_str=satis_tarihi,
-        tarama_tarihi_str=tarama_tarihi,
-        logger_param=logger,
-    )
-    if rapor_df is None:
-        logger.critical("Backtest sonuç üretmedi.")
+    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
+    if df_filters is None or df_filters.empty:
+        logger.critical("Filtre kuralları yüklenemedi veya boş.")
         sys.exit(1)
-    return rapor_df, detay_df
+
+    df_raw = data_loader.yukle_hisse_verileri(
+        force_excel_reload=force_excel_reload, logger_param=logger
+    )
+    if df_raw is None or df_raw.empty:
+        logger.critical("Hisse verileri yüklenemedi veya boş.")
+        sys.exit(1)
+    return df_filters, df_raw
 
 
-def calistir_tum_sistemi(
-    tarama_tarihi_str: str,
-    satis_tarihi_str: str,
-    force_excel_reload_param: bool = False,
-    logger_param=None,
-    output_path: str | Path | None = None,
-) -> tuple[pd.DataFrame, pd.DataFrame, dict | None]:
-    """Run all analysis steps sequentially.
 
-    Args:
-        tarama_tarihi_str (str): Screening date in ``dd.mm.yyyy`` format.
-        satis_tarihi_str (str): Sale date in ``dd.mm.yyyy`` format.
-        force_excel_reload_param (bool, optional): Reload raw files instead of
-            cached Parquet.
-        logger_param (logging.Logger, optional): Logger for status messages.
-        output_path (str | Path | None, optional): Output Excel file path.
-
-    Returns:
-        tuple[pd.DataFrame, pd.DataFrame, dict | None]:
-            Summary data, detail data and skipped filter information.
-    """
-    import gc
-
-    import filter_engine
-    import utils.failure_tracker as ft
-
-    steps_report = []
-
-    filter_engine.clear_failed()
-    ft.clear_failures()
-
-    rapor_df = detay_df = None
-    atlanmis: dict | None = None
-
-    global df_filtre_kurallari
-    logger.info("*" * 30 + " TÜM BACKTEST SİSTEMİ ÇALIŞTIRILIYOR " + "*" * 30)
-
-    try:
-        logger.info("veri_yukle BAŞLIYOR")
-        steps_report.append("veri_yukle: BAŞLADI")
-        df_filtre_kurallari, df_raw = veri_yukle(force_excel_reload_param)
-        steps_report.append("veri_yukle: BAŞARILI")
-
-        logger.info("on_isle BAŞLIYOR")
-        steps_report.append("on_isle: BAŞLADI")
-        df_processed = on_isle(df_raw)
-        steps_report.append("on_isle: BAŞARILI")
-
-        logger.info("indikator_hesapla BAŞLIYOR")
-        steps_report.append("indikator_hesapla: BAŞLADI")
-        df_indicator = indikator_hesapla(df_processed)
-        steps_report.append("indikator_hesapla: BAŞARILI")
-
-        tarama_dt = parse_date(tarama_tarihi_str)
-
-        logger.info("filtre_uygula BAŞLIYOR")
-        steps_report.append("filtre_uygula: BAŞLADI")
-        filtre_sonuclar, atlanmis = filtre_uygula(df_indicator, tarama_dt)
-        steps_report.append("filtre_uygula: BAŞARILI")
-
-        logger.info("backtest_yap BAŞLIYOR")
-        steps_report.append("backtest_yap: BAŞLADI")
-        rapor_df, detay_df = backtest_yap(
-            df_indicator,
-            filtre_sonuclar,
-            tarama_tarihi_str,
-            satis_tarihi_str,
-        )
-        steps_report.append("backtest_yap: BAŞARILI")
-
-        if output_path:
-            from report_generator import generate_full_report
-            from utils.memory_profile import mem_profile
-
-            output_path = Path(output_path)
-            with mem_profile():
-                generate_full_report(rapor_df.copy(), detay_df.copy(), [], output_path)
-            if logger_param:
-                logger_param.info("Saved report to %s", output_path)
-        else:
-            raporla(rapor_df, detay_df)
-
-        steps_report.append("TÜM ADIMLAR TAMAMLANDI")
-        logger.info("TÜM ADIMLAR BAŞARIYLA TAMAMLANDI")
-
-    except Exception as e:
-        traceback.print_exc()
-        steps_report.append(f"HATA: {type(e).__name__}: {str(e)}")
-        raise
-
-    finally:
-        logger.info("\n=== ADIM RAPORU ===")
-        for adim in steps_report:
-            logger.info(adim)
-        logger.info("=== RAPOR SONU ===\n")
-        gc.collect()
-
-    return rapor_df, detay_df, atlanmis
 
 
 def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
@@ -244,6 +133,27 @@ def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
     return filter_engine.uygula_filtreler(
         df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
     )
+
+
+def backtest_yap(
+    df: pd.DataFrame,
+    filtre_sonuclari: dict,
+    tarama_tarihi: str,
+    satis_tarihi: str,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Run a minimal backtest."""
+
+    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
+        filtre_sonuc_dict=filtre_sonuclari,
+        df_tum_veri=df,
+        satis_tarihi_str=satis_tarihi,
+        tarama_tarihi_str=tarama_tarihi,
+        logger_param=logger,
+    )
+    if rapor_df is None:
+        logger.critical("Backtest sonuç üretmedi.")
+        sys.exit(1)
+    return rapor_df, detay_df
 
 
 def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
@@ -276,151 +186,6 @@ def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-def main(argv: list[str] | None = None) -> None:
-    """Execute the main backtest workflow for CLI usage.
-
-    Args:
-        argv (list[str] | None): Optional list of CLI arguments. When ``None``
-            ``sys.argv`` is used.
-
-    This function parses CLI options, initializes logging and runs the
-    pipeline defined in :func:`calistir_tum_sistemi`.
-    """
-    parser = argparse.ArgumentParser(description="Finansal analiz ve backtest")
-    parser.add_argument(
-        "--tarama",
-        default=getattr(config, "TARAMA_TARIHI_DEFAULT", "2020-01-01"),
-        help="dd.mm.yyyy formatında tarama tarihi",
-    )
-    parser.add_argument(
-        "--satis",
-        default=getattr(config, "SATIS_TARIHI_DEFAULT", "2020-12-31"),
-        help="dd.mm.yyyy formatında satış tarihi",
-    )
-    parser.add_argument(
-        "--gui",
-        action="store_true",
-        help="Show a simple Streamlit UI",
-    )
-    parser.add_argument(
-        "--force-excel-reload",
-        action="store_true",
-        help="Reload Excel/CSV files instead of the Parquet cache",
-    )
-    parser.add_argument(
-        "--settings-file",
-        dest="settings_file",
-        help="Manually specify the settings.yaml path",
-    )
-    parser.add_argument(
-        "--output",
-        required=True,
-        help="Destination Excel .xlsx path",
-    )
-    parser.add_argument("--ind-set", choices=["core", "full"], default="core")
-    parser.add_argument("--chunk-size", type=int, default=config.CHUNK_SIZE)
-    parser.add_argument(
-        "--log-level",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-        default="INFO",
-        help="Log seviyesi",
-    )
-    args = parser.parse_args(argv)
-
-    # Ensure settings file can be located early
-    try:
-        from finansal_analiz_sistemi import settings_loader
-
-        loaded_cfg = settings_loader.load_settings(args.settings_file)
-        if loaded_cfg:
-            logger.info("Yüklü ayarlar: %s", loaded_cfg)
-    except Exception as exc:  # pragma: no cover - CLI safeguard
-        print(exc)
-        sys.exit(1)
-
-    global log_counter
-    log_counter = setup_logger(level=getattr(logging, args.log_level))
-
-    logger.info("=" * 80)
-    logger.info(
-        f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT BAŞLIYOR ======="
-    )
-
-    out_file = Path(args.output)
-    out_file.parent.mkdir(parents=True, exist_ok=True)
-
-    tarama_t = args.tarama
-    satis_t = args.satis
-
-    full_inds = (
-        config.CORE_INDICATORS
-        + [f"ema_{n}" for n in (50, 100, 200)]
-        + [f"sma_{n}" for n in (50, 100, 200)]
-    )
-    active_inds = config.CORE_INDICATORS if args.ind_set == "core" else full_inds
-    logger.info("Aktif gosterge listesi: %s", ", ".join(active_inds))
-
-    logger.info(f"  Tarama Tarihi    : {tarama_t}")
-    logger.info(f"  Satış Tarihi     : {satis_t}")
-    logger.info("=" * 80 + "\n")
-
-    atlanmis = {}
-    try:
-        rapor_df, detay_df, atlanmis = calistir_tum_sistemi(
-            tarama_tarihi_str=tarama_t,
-            satis_tarihi_str=satis_t,
-            force_excel_reload_param=args.force_excel_reload,
-            logger_param=logger,
-            output_path=args.output,
-        )
-
-        if rapor_df.empty:
-            empty_msg = (
-                "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
-            )
-            logger.warning(empty_msg)
-            print(empty_msg)
-
-        summary_df = rapor_df.copy()
-        detail_df = detay_df.copy()
-        error_list = atlanmis.get("hatalar", [])
-        if not error_list:
-            logging.warning("Uyarı: error_list boş—'Hatalar' sheet'i yazılmayacak!")
-
-        rapor_path = report_generator.generate_full_report(
-            summary_df,
-            detail_df,
-            error_list,
-            out_file,
-            keep_legacy=True,
-        )
-        print(f"Rapor oluşturuldu → {rapor_path}")
-
-        if args.gui:
-            _run_gui(rapor_df, detay_df)
-
-    except Exception:
-        traceback.print_exc()
-        sys.exit(1)
-    finally:
-        logger.info(
-            f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT TAMAMLANDI ======="
-        )
-        summary_keys = [str(k) for k in atlanmis.keys() if k]
-        summary_line = (
-            f"LOG_SUMMARY | errors={log_counter.errors} | warnings={log_counter.warnings} | "
-            f"atlanan_filtre={','.join(summary_keys)}"
-        )
-        logger.info(summary_line)
-        if log_counter.errors > 0 and "rapor_path" in locals():
-            from report_generator import add_error_sheet
-
-            with pd.ExcelWriter(
-                rapor_path, mode="a", if_sheet_exists="replace", engine="openpyxl"
-            ) as wr:
-                add_error_sheet(wr, log_counter.error_list)
-        logging.shutdown()
-        utils.purge_old_logs("loglar", days=30)
 
 
 def on_isle(df: pd.DataFrame) -> pd.DataFrame:
@@ -505,32 +270,215 @@ def run_pipeline(
     return report_generator.generate_full_report(rapor_df, detay_df, [], output)
 
 
-def veri_yukle(force_excel_reload: bool = False):
-    """Load filter definitions together with the raw price dataset.
+def calistir_tum_sistemi(
+    tarama_tarihi_str: str,
+    satis_tarihi_str: str,
+    force_excel_reload_param: bool = False,
+    logger_param=None,
+    output_path: str | Path | None = None,
+) -> tuple[pd.DataFrame, pd.DataFrame, dict | None]:
+    """Run all analysis steps sequentially."""
 
-    Args:
-        force_excel_reload (bool, optional): Reload Excel or CSV files instead
-            of using the cached Parquet data.
+    import gc
+    import filter_engine
+    import utils.failure_tracker as ft
 
-    Returns:
-        tuple[pd.DataFrame, pd.DataFrame]: ``(filters_df, prices_df)`` pair
-        ready for further processing.
+    steps_report = []
+    filter_engine.clear_failed()
+    ft.clear_failures()
 
-    Notes:
-        The process exits with ``sys.exit`` when required files are missing.
-    """
-    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
-    if df_filters is None or df_filters.empty:
-        logger.critical("Filtre kuralları yüklenemedi veya boş.")
-        sys.exit(1)
+    rapor_df = detay_df = None
+    atlanmis: dict | None = None
 
-    df_raw = data_loader.yukle_hisse_verileri(
-        force_excel_reload=force_excel_reload, logger_param=logger
+    global df_filtre_kurallari
+    logger.info("*" * 30 + " TÜM BACKTEST SİSTEMİ ÇALIŞTIRILIYOR " + "*" * 30)
+
+    try:
+        logger.info("veri_yukle BAŞLIYOR")
+        steps_report.append("veri_yukle: BAŞLADI")
+        df_filtre_kurallari, df_raw = veri_yukle(force_excel_reload_param)
+        steps_report.append("veri_yukle: BAŞARILI")
+
+        logger.info("on_isle BAŞLIYOR")
+        steps_report.append("on_isle: BAŞLADI")
+        df_processed = on_isle(df_raw)
+        steps_report.append("on_isle: BAŞARILI")
+
+        logger.info("indikator_hesapla BAŞLIYOR")
+        steps_report.append("indikator_hesapla: BAŞLADI")
+        df_indicator = indikator_hesapla(df_processed)
+        steps_report.append("indikator_hesapla: BAŞARILI")
+
+        tarama_dt = parse_date(tarama_tarihi_str)
+
+        logger.info("filtre_uygula BAŞLIYOR")
+        steps_report.append("filtre_uygula: BAŞLADI")
+        filtre_sonuclar, atlanmis = filtre_uygula(df_indicator, tarama_dt)
+        steps_report.append("filtre_uygula: BAŞARILI")
+
+        logger.info("backtest_yap BAŞLIYOR")
+        steps_report.append("backtest_yap: BAŞLADI")
+        rapor_df, detay_df = backtest_yap(
+            df_indicator,
+            filtre_sonuclar,
+            tarama_tarihi_str,
+            satis_tarihi_str,
+        )
+        steps_report.append("backtest_yap: BAŞARILI")
+
+        if output_path:
+            from report_generator import generate_full_report
+            from utils.memory_profile import mem_profile
+
+            output_path = Path(output_path)
+            with mem_profile():
+                generate_full_report(rapor_df.copy(), detay_df.copy(), [], output_path)
+            if logger_param:
+                logger_param.info("Saved report to %s", output_path)
+        else:
+            raporla(rapor_df, detay_df)
+
+        steps_report.append("TÜM ADIMLAR TAMAMLANDI")
+        logger.info("TÜM ADIMLAR BAŞARIYLA TAMAMLANDI")
+
+    except Exception as e:
+        traceback.print_exc()
+        steps_report.append(f"HATA: {type(e).__name__}: {str(e)}")
+        raise
+
+    finally:
+        logger.info("\n=== ADIM RAPORU ===")
+        for adim in steps_report:
+            logger.info(adim)
+        logger.info("=== RAPOR SONU ===\n")
+        gc.collect()
+
+    return rapor_df, detay_df, atlanmis
+
+
+def main(argv: list[str] | None = None) -> None:
+    """Execute the main backtest workflow for CLI usage."""
+
+    parser = argparse.ArgumentParser(description="Finansal analiz ve backtest")
+    parser.add_argument(
+        "--tarama",
+        default=getattr(config, "TARAMA_TARIHI_DEFAULT", "2020-01-01"),
+        help="dd.mm.yyyy formatında tarama tarihi",
     )
-    if df_raw is None or df_raw.empty:
-        logger.critical("Hisse verileri yüklenemedi veya boş.")
+    parser.add_argument(
+        "--satis",
+        default=getattr(config, "SATIS_TARIHI_DEFAULT", "2020-12-31"),
+        help="dd.mm.yyyy formatında satış tarihi",
+    )
+    parser.add_argument("--gui", action="store_true", help="Show a simple Streamlit UI")
+    parser.add_argument(
+        "--force-excel-reload",
+        action="store_true",
+        help="Reload Excel/CSV files instead of the Parquet cache",
+    )
+    parser.add_argument("--settings-file", dest="settings_file", help="Manually specify the settings.yaml path")
+    parser.add_argument("--output", required=True, help="Destination Excel .xlsx path")
+    parser.add_argument("--ind-set", choices=["core", "full"], default="core")
+    parser.add_argument("--chunk-size", type=int, default=config.CHUNK_SIZE)
+    parser.add_argument(
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+        help="Log seviyesi",
+    )
+    args = parser.parse_args(argv)
+
+    try:
+        from finansal_analiz_sistemi import settings_loader
+
+        loaded_cfg = settings_loader.load_settings(args.settings_file)
+        if loaded_cfg:
+            logger.info("Yüklü ayarlar: %s", loaded_cfg)
+    except Exception as exc:  # pragma: no cover - CLI safeguard
+        print(exc)
         sys.exit(1)
-    return df_filters, df_raw
+
+    global log_counter
+    log_counter = setup_logger(level=getattr(logging, args.log_level))
+
+    logger.info("=" * 80)
+    logger.info(
+        f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT BAŞLIYOR ======="
+    )
+
+    out_file = Path(args.output)
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+
+    tarama_t = args.tarama
+    satis_t = args.satis
+
+    full_inds = (
+        config.CORE_INDICATORS
+        + [f"ema_{n}" for n in (50, 100, 200)]
+        + [f"sma_{n}" for n in (50, 100, 200)]
+    )
+    active_inds = config.CORE_INDICATORS if args.ind_set == "core" else full_inds
+    logger.info("Aktif gosterge listesi: %s", ", ".join(active_inds))
+
+    logger.info(f"  Tarama Tarihi    : {tarama_t}")
+    logger.info(f"  Satış Tarihi     : {satis_t}")
+    logger.info("=" * 80 + "\n")
+
+    atlanmis: dict | None = {}
+    try:
+        rapor_df, detay_df, atlanmis = calistir_tum_sistemi(
+            tarama_tarihi_str=tarama_t,
+            satis_tarihi_str=satis_t,
+            force_excel_reload_param=args.force_excel_reload,
+            logger_param=logger,
+            output_path=args.output,
+        )
+
+        if rapor_df.empty:
+            empty_msg = "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
+            logger.warning(empty_msg)
+            print(empty_msg)
+
+        summary_df = rapor_df.copy()
+        detail_df = detay_df.copy()
+        error_list = atlanmis.get("hatalar", [])
+        if not error_list:
+            logging.warning("Uyarı: error_list boş—'Hatalar' sheet'i yazılmayacak!")
+
+        rapor_path = report_generator.generate_full_report(
+            summary_df,
+            detail_df,
+            error_list,
+            out_file,
+            keep_legacy=True,
+        )
+        print(f"Rapor oluşturuldu → {rapor_path}")
+
+        if args.gui:
+            _run_gui(rapor_df, detay_df)
+
+    except Exception:
+        traceback.print_exc()
+        sys.exit(1)
+    finally:
+        logger.info(
+            f"======= {os.path.basename(__file__).upper()} ANA BACKTEST SCRIPT TAMAMLANDI ======="
+        )
+        summary_keys = [str(k) for k in atlanmis.keys() if k]
+        summary_line = (
+            f"LOG_SUMMARY | errors={log_counter.errors} | warnings={log_counter.warnings} | "
+            f"atlanan_filtre={','.join(summary_keys)}"
+        )
+        logger.info(summary_line)
+        if log_counter.errors > 0 and "rapor_path" in locals():
+            from report_generator import add_error_sheet
+
+            with pd.ExcelWriter(
+                rapor_path, mode="a", if_sheet_exists="replace", engine="openpyxl"
+            ) as wr:
+                add_error_sheet(wr, log_counter.error_list)
+        logging.shutdown()
+        utils.purge_old_logs("loglar", days=30)
 
 
 if __name__ == "__main__":  # pragma: no cover - manual execution
