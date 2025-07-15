@@ -15,39 +15,6 @@ except Exception:  # pragma: no cover - optional dependency
     obb = None
 
 
-def _call_openbb(func_name: str, **kwargs) -> object:
-    """Call the requested helper under ``openbb.technical``.
-
-    The matching OpenBB indicator is invoked when the :mod:`openbb`
-    package is available. When either the dependency or the requested
-    function is missing, :class:`NotImplementedError` is raised.
-
-    Parameters
-    ----------
-    func_name : str
-        Name of the technical indicator under ``obb.technical``.
-    **kwargs
-        Additional keyword arguments passed directly to the OpenBB
-        function.
-
-    Returns
-    -------
-    object
-        Result produced by the OpenBB helper.
-
-    Raises
-    ------
-    NotImplementedError
-        If :mod:`openbb` or the requested function is unavailable.
-    """
-    if obb is None:
-        raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
-    func = getattr(obb.technical, func_name, None)
-    if func is None:
-        raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
-    return func(**kwargs)
-
-
 def ichimoku(
     high: pd.Series,
     low: pd.Series,
@@ -197,3 +164,36 @@ def rsi(
     rsi_col = [c for c in res_df.columns if c.lower().startswith("close_rsi")]
     col = rsi_col[0] if rsi_col else res_df.columns[-1]
     return res_df[col].rename(close.name)
+
+
+def _call_openbb(func_name: str, **kwargs) -> object:
+    """Call the requested helper under ``openbb.technical``.
+
+    The matching OpenBB indicator is invoked when the :mod:`openbb`
+    package is available. When either the dependency or the requested
+    function is missing, :class:`NotImplementedError` is raised.
+
+    Parameters
+    ----------
+    func_name : str
+        Name of the technical indicator under ``obb.technical``.
+    **kwargs
+        Additional keyword arguments passed directly to the OpenBB
+        function.
+
+    Returns
+    -------
+    object
+        Result produced by the OpenBB helper.
+
+    Raises
+    ------
+    NotImplementedError
+        If :mod:`openbb` or the requested function is unavailable.
+    """
+    if obb is None:
+        raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
+    func = getattr(obb.technical, func_name, None)
+    if func is None:
+        raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
+    return func(**kwargs)
