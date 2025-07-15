@@ -16,6 +16,14 @@ DEFAULT_MAX_FILTER_DEPTH = 15
 FALLBACK_MAX_FILTER_DEPTH = 7
 
 
+def _as_int(value: Any, default: int) -> int:
+    """Return ``value`` cast to ``int`` or ``default`` on failure."""
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def _load_cfg() -> dict[str, Any]:
     """Load YAML configuration if available."""
     cfg_file = Path(
@@ -31,14 +39,6 @@ def _load_cfg() -> dict[str, Any]:
 
 
 _cfg = _load_cfg()
-
-
-def _as_int(value: Any, default: int) -> int:
-    """Return ``value`` cast to ``int`` or ``default`` on failure."""
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return default
 
 
 value = _cfg.get("max_filter_depth")
