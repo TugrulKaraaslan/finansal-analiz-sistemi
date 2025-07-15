@@ -117,9 +117,6 @@ def veri_yukle(force_excel_reload: bool = False):
     return df_filters, df_raw
 
 
-
-
-
 def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
     """Apply filter rules to indicator data.
 
@@ -184,8 +181,6 @@ def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
         logger.critical("İndikatör hesaplanamadı.")
         sys.exit(1)
     return result
-
-
 
 
 def on_isle(df: pd.DataFrame) -> pd.DataFrame:
@@ -280,6 +275,7 @@ def calistir_tum_sistemi(
     """Run all analysis steps sequentially."""
 
     import gc
+
     import filter_engine
     import utils.failure_tracker as ft
 
@@ -376,7 +372,11 @@ def main(argv: list[str] | None = None) -> None:
         action="store_true",
         help="Reload Excel/CSV files instead of the Parquet cache",
     )
-    parser.add_argument("--settings-file", dest="settings_file", help="Manually specify the settings.yaml path")
+    parser.add_argument(
+        "--settings-file",
+        dest="settings_file",
+        help="Manually specify the settings.yaml path",
+    )
     parser.add_argument("--output", required=True, help="Destination Excel .xlsx path")
     parser.add_argument("--ind-set", choices=["core", "full"], default="core")
     parser.add_argument("--chunk-size", type=int, default=config.CHUNK_SIZE)
@@ -435,7 +435,9 @@ def main(argv: list[str] | None = None) -> None:
         )
 
         if rapor_df.empty:
-            empty_msg = "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
+            empty_msg = (
+                "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
+            )
             logger.warning(empty_msg)
             print(empty_msg)
 
