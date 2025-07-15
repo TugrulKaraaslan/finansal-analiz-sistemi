@@ -15,6 +15,7 @@ import yaml
 DEFAULT_MAX_FILTER_DEPTH = 15
 FALLBACK_MAX_FILTER_DEPTH = 7
 
+
 def _as_int(value: Any, default: int) -> int:
     """Return ``value`` cast to ``int`` or ``default`` on failure."""
     try:
