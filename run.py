@@ -120,6 +120,7 @@ def backtest_yap(
         sys.exit(1)
     return rapor_df, detay_df
 
+
 def calistir_tum_sistemi(
     tarama_tarihi_str: str,
     satis_tarihi_str: str,
@@ -205,6 +206,8 @@ def calistir_tum_sistemi(
         gc.collect()
 
     return rapor_df, detay_df, atlanmis
+
+
 def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
     """Apply filter rules to indicator data.
 
@@ -248,7 +251,6 @@ def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
         logger.critical("İndikatör hesaplanamadı.")
         sys.exit(1)
     return result
-
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -463,6 +465,7 @@ def run_pipeline(
     )
     return report_generator.generate_full_report(rapor_df, detay_df, [], output)
 
+
 def veri_yukle(force_excel_reload: bool = False):
     """Load filter definitions together with the raw price dataset."""
 
@@ -478,6 +481,8 @@ def veri_yukle(force_excel_reload: bool = False):
         logger.critical("Hisse verileri yüklenemedi veya boş.")
         sys.exit(1)
     return df_filters, df_raw
+
+
 if __name__ == "__main__":  # pragma: no cover - manual execution
     print("RUN.PY CLI BAŞLATILDI")
     main()
