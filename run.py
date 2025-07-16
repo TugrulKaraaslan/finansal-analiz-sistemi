@@ -64,7 +64,6 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
     istatistik_df = rapor_df.describe().reset_index()
     return ozet_df, detay_df, istatistik_df
 
-
 def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     """Display summary or detail tables in a Streamlit interface.
 
@@ -100,84 +99,6 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
             st.write("Grafik için veri yok")
 
 
-def veri_yukle(force_excel_reload: bool = False):
-    """Load filter definitions together with the raw price dataset."""
-
-    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
-    if df_filters is None or df_filters.empty:
-        logger.critical("Filtre kuralları yüklenemedi veya boş.")
-        sys.exit(1)
-
-    df_raw = data_loader.yukle_hisse_verileri(
-        force_excel_reload=force_excel_reload, logger_param=logger
-    )
-    if df_raw is None or df_raw.empty:
-        logger.critical("Hisse verileri yüklenemedi veya boş.")
-        sys.exit(1)
-    return df_filters, df_raw
-
-
-def on_isle(df: pd.DataFrame) -> pd.DataFrame:
-    """Return preprocessed stock data.
-
-    Args:
-        df (pd.DataFrame): Raw dataset loaded from disk.
-
-    Returns:
-        pd.DataFrame: Cleaned DataFrame ready for indicator computation.
-    """
-    processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
-    if processed is None or processed.empty:
-        logger.critical("Veri ön işleme başarısız.")
-        sys.exit(1)
-    return processed
-
-
-def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate indicators and crossover columns.
-
-    Args:
-        df (pd.DataFrame): Preprocessed OHLCV dataset.
-
-    Returns:
-        pd.DataFrame: DataFrame enriched with indicator values and crossover
-        signals.
-    """
-    wanted_cols = utils.extract_columns_from_filters_cached(
-        df_filtre_kurallari.to_csv(index=False),
-        tuple(config.SERIES_SERIES_CROSSOVERS),
-        tuple(config.SERIES_VALUE_CROSSOVERS),
-    )
-    from utils.memory_profile import mem_profile
-
-    with mem_profile():
-        result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
-            df,
-            wanted_cols=wanted_cols,
-            df_filters=df_filtre_kurallari,
-            logger_param=logger,
-        )
-    if result is None:
-        logger.critical("İndikatör hesaplanamadı.")
-        sys.exit(1)
-    return result
-
-
-def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
-    """Apply filter rules to indicator data.
-
-    Args:
-        df (pd.DataFrame): Indicator dataset.
-        tarama_tarihi (datetime.datetime | pd.Timestamp): Screening date.
-
-    Returns:
-        tuple[dict, dict]: Filter results and skipped information.
-    """
-    return filter_engine.uygula_filtreler(
-        df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
-    )
-
-
 def backtest_yap(
     df: pd.DataFrame,
     filtre_sonuclari: dict,
@@ -197,73 +118,6 @@ def backtest_yap(
         logger.critical("Backtest sonuç üretmedi.")
         sys.exit(1)
     return rapor_df, detay_df
-
-
-def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
-    """Save an Excel report when data is available.
-
-    Args:
-        rapor_df (pd.DataFrame): Summary table produced by the backtest.
-        detay_df (pd.DataFrame): Detailed trade information.
-    """
-    if rapor_df.empty:
-        logger.info("Rapor verisi boş.")
-        return
-    ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
-    out_path = Path("raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
-    out_path.parent.mkdir(exist_ok=True)
-    from utils.memory_profile import mem_profile
-
-    with mem_profile():
-        report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
-    logger.info(f"Excel raporu oluşturuldu: {out_path}")
-
-
-def run_pipeline(
-    price_csv: str | Path,
-    filter_def: str | Path,
-    output: str | Path,
-) -> Path:
-    """Execute the end-to-end workflow and return the report location.
-
-    Args:
-        price_csv (str | Path): CSV file containing price data.
-        filter_def (str | Path): YAML file defining filter clauses.
-        output (str | Path): Destination path for the Excel workbook.
-
-    Returns:
-        Path: Absolute path of the generated Excel report.
-    """
-    global log_counter
-    if log_counter is None:
-        log_counter = setup_logger()
-    df = pd.read_csv(
-        price_csv,
-        comment="#",
-        header=None,
-        names=["code", "date", "open", "high", "low", "close", "volume"],
-    )
-    df = df.rename(columns={"code": "hisse_kodu", "date": "tarih"})
-    df["tarih"] = pd.to_datetime(df["tarih"])
-
-    with open(filter_def) as f:
-        filt = yaml.safe_load(f) or []
-    filt_df = pd.DataFrame(filt).rename(
-        columns={"code": "FilterCode", "clause": "PythonQuery"}
-    )
-
-    tarama_dt = df["tarih"].min()
-    satis_dt = df["tarih"].max()
-
-    filtre_sonuclar, _ = filter_engine.uygula_filtreler(df, filt_df, tarama_dt)
-    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
-        filtre_sonuclar,
-        df,
-        satis_tarihi_str=satis_dt.strftime("%d.%m.%Y"),
-        tarama_tarihi_str=tarama_dt.strftime("%d.%m.%Y"),
-    )
-    return report_generator.generate_full_report(rapor_df, detay_df, [], output)
-
 
 def calistir_tum_sistemi(
     tarama_tarihi_str: str,
@@ -351,6 +205,48 @@ def calistir_tum_sistemi(
 
     return rapor_df, detay_df, atlanmis
 
+def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
+    """Apply filter rules to indicator data.
+
+    Args:
+        df (pd.DataFrame): Indicator dataset.
+        tarama_tarihi (datetime.datetime | pd.Timestamp): Screening date.
+
+    Returns:
+        tuple[dict, dict]: Filter results and skipped information.
+    """
+    return filter_engine.uygula_filtreler(
+        df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
+    )
+
+def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculate indicators and crossover columns.
+
+    Args:
+        df (pd.DataFrame): Preprocessed OHLCV dataset.
+
+    Returns:
+        pd.DataFrame: DataFrame enriched with indicator values and crossover
+        signals.
+    """
+    wanted_cols = utils.extract_columns_from_filters_cached(
+        df_filtre_kurallari.to_csv(index=False),
+        tuple(config.SERIES_SERIES_CROSSOVERS),
+        tuple(config.SERIES_VALUE_CROSSOVERS),
+    )
+    from utils.memory_profile import mem_profile
+
+    with mem_profile():
+        result = indicator_calculator.hesapla_teknik_indikatorler_ve_kesisimler(
+            df,
+            wanted_cols=wanted_cols,
+            df_filters=df_filtre_kurallari,
+            logger_param=logger,
+        )
+    if result is None:
+        logger.critical("İndikatör hesaplanamadı.")
+        sys.exit(1)
+    return result
 
 def main(argv: list[str] | None = None) -> None:
     """Execute the main backtest workflow for CLI usage."""
@@ -482,6 +378,101 @@ def main(argv: list[str] | None = None) -> None:
         logging.shutdown()
         utils.purge_old_logs("loglar", days=30)
 
+
+def on_isle(df: pd.DataFrame) -> pd.DataFrame:
+    """Return preprocessed stock data.
+
+    Args:
+        df (pd.DataFrame): Raw dataset loaded from disk.
+
+    Returns:
+        pd.DataFrame: Cleaned DataFrame ready for indicator computation.
+    """
+    processed = preprocessor.on_isle_hisse_verileri(df, logger_param=logger)
+    if processed is None or processed.empty:
+        logger.critical("Veri ön işleme başarısız.")
+        sys.exit(1)
+    return processed
+
+def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
+    """Save an Excel report when data is available.
+
+    Args:
+        rapor_df (pd.DataFrame): Summary table produced by the backtest.
+        detay_df (pd.DataFrame): Detailed trade information.
+    """
+    if rapor_df.empty:
+        logger.info("Rapor verisi boş.")
+        return
+    ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
+    out_path = Path("raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
+    out_path.parent.mkdir(exist_ok=True)
+    from utils.memory_profile import mem_profile
+
+    with mem_profile():
+        report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
+    logger.info(f"Excel raporu oluşturuldu: {out_path}")
+
+def run_pipeline(
+    price_csv: str | Path,
+    filter_def: str | Path,
+    output: str | Path,
+) -> Path:
+    """Execute the end-to-end workflow and return the report location.
+
+    Args:
+        price_csv (str | Path): CSV file containing price data.
+        filter_def (str | Path): YAML file defining filter clauses.
+        output (str | Path): Destination path for the Excel workbook.
+
+    Returns:
+        Path: Absolute path of the generated Excel report.
+    """
+    global log_counter
+    if log_counter is None:
+        log_counter = setup_logger()
+    df = pd.read_csv(
+        price_csv,
+        comment="#",
+        header=None,
+        names=["code", "date", "open", "high", "low", "close", "volume"],
+    )
+    df = df.rename(columns={"code": "hisse_kodu", "date": "tarih"})
+    df["tarih"] = pd.to_datetime(df["tarih"])
+
+    with open(filter_def) as f:
+        filt = yaml.safe_load(f) or []
+    filt_df = pd.DataFrame(filt).rename(
+        columns={"code": "FilterCode", "clause": "PythonQuery"}
+    )
+
+    tarama_dt = df["tarih"].min()
+    satis_dt = df["tarih"].max()
+
+    filtre_sonuclar, _ = filter_engine.uygula_filtreler(df, filt_df, tarama_dt)
+    rapor_df, detay_df = backtest_core.calistir_basit_backtest(
+        filtre_sonuclar,
+        df,
+        satis_tarihi_str=satis_dt.strftime("%d.%m.%Y"),
+        tarama_tarihi_str=tarama_dt.strftime("%d.%m.%Y"),
+    )
+    return report_generator.generate_full_report(rapor_df, detay_df, [], output)
+
+def veri_yukle(force_excel_reload: bool = False):
+    """Load filter definitions together with the raw price dataset."""
+
+    df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
+    if df_filters is None or df_filters.empty:
+        logger.critical("Filtre kuralları yüklenemedi veya boş.")
+        sys.exit(1)
+
+    df_raw = data_loader.yukle_hisse_verileri(
+        force_excel_reload=force_excel_reload, logger_param=logger
+    )
+    if df_raw is None or df_raw.empty:
+        logger.critical("Hisse verileri yüklenemedi veya boş.")
+        sys.exit(1)
+    return df_filters, df_raw
 
 if __name__ == "__main__":  # pragma: no cover - manual execution
     print("RUN.PY CLI BAŞLATILDI")
