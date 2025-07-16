@@ -1045,6 +1045,8 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             f"Hesaplanan indikatörler birleştirilirken KRİTİK HATA: {e_concat}",
             exc_info=True,
         )
+
+
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
     """Add a moving-average column if absent.
 
@@ -1088,4 +1090,3 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
             log_failure("indicators", col, str(e))
         except Exception:
             pass
-
