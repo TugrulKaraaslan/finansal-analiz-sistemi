@@ -60,24 +60,17 @@ warnings.filterwarnings(
 )
 
 
+def _normalize_pct(s: pd.Series) -> pd.Series:
+    """Convert whole-number percentages to fractional scale (÷100 once)."""
+    return _normalize_pct_values(s, threshold=1.5)
+
+
 def _normalize_pct_values(series: pd.Series, *, threshold: float) -> pd.Series:
     """Return numeric percentages scaled when above ``threshold``."""
     s = pd.to_numeric(series, errors="coerce").copy()
     mask = s.abs() > threshold
     s.loc[mask] = s.loc[mask] / 100
     return s.round(2)
-
-
-def _normalize_pct(s: pd.Series) -> pd.Series:
-    """Convert whole-number percentages to fractional scale (÷100 once)."""
-    return _normalize_pct_values(s, threshold=1.5)
-
-
-def normalize_pct(series: pd.Series) -> pd.Series:
-    """Return numeric percentages scaled to a fractional range."""
-
-    cleaned = series.astype(str).str.replace("%", "", regex=False)
-    return _normalize_pct_values(cleaned, threshold=100.0)
 
 
 def build_detay_df(
@@ -276,6 +269,13 @@ def build_stats_df(ozet_df: pd.DataFrame) -> pd.DataFrame:
             }
         ]
     )
+
+
+def normalize_pct(series: pd.Series) -> pd.Series:
+    """Return numeric percentages scaled to a fractional range."""
+
+    cleaned = series.astype(str).str.replace("%", "", regex=False)
+    return _normalize_pct_values(cleaned, threshold=100.0)
 
 
 def plot_summary_stats(
