@@ -128,250 +128,6 @@ def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
 
 
-def _calculate_series_series_crossover(
-    group_df: pd.DataFrame,
-    s1_col: str,
-    s2_col: str,
-    col_name_above: str,
-    col_name_below: str,
-    logger_param=None,
-) -> tuple[pd.Series, pd.Series] | None:
-    """Detect where ``s1_col`` crosses ``s2_col`` in ``group_df``.
-
-    Args:
-        group_df (pd.DataFrame): Input DataFrame for a single ticker.
-        s1_col (str): First column to compare.
-        s2_col (str): Second column to compare.
-        col_name_above (str): Name of the cross-above result column.
-        col_name_below (str): Name of the cross-below result column.
-        logger_param (optional): Logger instance for debug output.
-
-    Returns:
-        tuple[pd.Series, pd.Series] | None: Pair of boolean Series for
-        cross-above and cross-below or ``None`` when the columns are missing.
-
-    """
-    if logger_param is None:
-        logger_param = logger
-    local_logger = logger_param
-
-    if s1_col not in group_df or s2_col not in group_df:
-        local_logger.debug(f"Crossover atlandı – {s1_col} / {s2_col} yok")
-        return
-
-    s1, s2 = group_df[s1_col].align(group_df[s2_col], join="inner")
-    if s1.empty or not isinstance(s1, pd.Series) or not isinstance(s2, pd.Series):
-        local_logger.debug(f"Crossover atlandı – {s1_col} / {s2_col} tip uygun değil")
-        return
-
-    hisse_str = (
-        group_df["hisse_kodu"].iloc[0]
-        if not group_df.empty and "hisse_kodu" in group_df.columns
-        else "Bilinmeyen Hisse"
-    )
-    empty_above = pd.Series(False, index=s1.index, name=col_name_above, dtype=bool)
-    empty_below = pd.Series(False, index=s1.index, name=col_name_below, dtype=bool)
-    try:
-        s1 = pd.to_numeric(s1, errors="coerce")
-        s2 = pd.to_numeric(s2, errors="coerce")
-        if s1.isnull().all() or s2.isnull().all():
-            local_logger.debug(
-                f"{hisse_str}: Kesişim ({s1_col} vs {s2_col}) için serilerden biri tamamen NaN."
-            )
-            return empty_above, empty_below
-        kesisim_yukari = utils.crosses_above(s1, s2).rename(col_name_above)
-        kesisim_asagi = utils.crosses_below(s1, s2).rename(col_name_below)
-        return kesisim_yukari, kesisim_asagi
-    except Exception as e:
-        local_logger.error(
-            f"{hisse_str}: _calculate_series_series_crossover ({s1_col} vs {s2_col}) hatası: {e}",
-            exc_info=False,
-        )
-        try:
-            from utils.failure_tracker import log_failure
-
-            log_failure("crossovers", f"{s1_col} vs {s2_col}", str(e))
-        except Exception:
-            pass
-        return empty_above, empty_below
-
-
-def _calculate_series_value_crossover(
-    group_df: pd.DataFrame,
-    s_col: str,
-    value: float,
-    suffix: str,
-    logger_param=None,
-) -> tuple[pd.Series, pd.Series] | None:
-    """Return crossover signals when ``s_col`` crosses ``value``.
-
-    Args:
-        group_df (pd.DataFrame): DataFrame for a single ticker.
-        s_col (str): Column to compare with the constant ``value``.
-        value (float): Threshold value used for the crossover.
-        suffix (str): Identifier used in the output column names.
-        logger_param (optional): Logger instance for debug output.
-
-    Returns:
-        tuple[pd.Series, pd.Series] | None: Series for cross-above and
-        cross-below events or ``None`` when the source column is missing.
-
-    """
-    if logger_param is None:
-        logger_param = logger
-    local_logger = logger_param
-
-    if s_col not in group_df.columns:
-        local_logger.debug(f"Skipped crossover {s_col} vs {value} – missing col")
-        return
-
-    hisse_str = (
-        group_df["hisse_kodu"].iloc[0]
-        if not group_df.empty and "hisse_kodu" in group_df.columns
-        else "Bilinmeyen Hisse"
-    )
-    col_name_above = f"{s_col}_keser_{str(suffix).replace('.', 'p')}_yukari"
-    col_name_below = f"{s_col}_keser_{str(suffix).replace('.', 'p')}_asagi"
-    empty_above = pd.Series(
-        False, index=group_df.index, name=col_name_above, dtype=bool
-    )
-    empty_below = pd.Series(
-        False, index=group_df.index, name=col_name_below, dtype=bool
-    )
-    value_series = pd.Series(
-        value, index=group_df.index, name=f"sabit_deger_{str(suffix).replace('.', 'p')}"
-    )
-    try:
-        s1 = pd.to_numeric(group_df[s_col], errors="coerce")
-        if s1.isnull().all():
-            local_logger.debug(
-                f"{hisse_str}: Kesişim ({s_col} vs {value}) için seri tamamen NaN."
-            )
-            return empty_above, empty_below
-        kesisim_yukari = utils.crosses_above(s1, value_series).rename(col_name_above)
-        kesisim_asagi = utils.crosses_below(s1, value_series).rename(col_name_below)
-        return kesisim_yukari, kesisim_asagi
-    except Exception as e:
-        local_logger.error(
-            f"{hisse_str}: _calculate_series_value_crossover ({s_col} vs {value}) hatası: {e}",
-            exc_info=False,
-        )
-        try:
-            from utils.failure_tracker import log_failure
-
-            log_failure("crossovers", f"{s_col} vs {value}", str(e))
-        except Exception:
-            pass
-        return empty_above, empty_below
-
-
-def _ekle_psar(df: pd.DataFrame) -> None:
-    """Calculate Parabolic SAR columns and append them to ``df``.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        DataFrame containing ``high``, ``low`` and ``close`` columns. The
-        PSAR values are inserted in place when possible.
-    """
-    gerekli = ["high", "low", "close"]
-    if any(c not in df.columns for c in gerekli):
-        logger.debug("PSAR hesaplamak için gerekli sütunlar eksik")
-        return
-    if ta_psar is None:
-        logger.debug("pandas_ta.psar bulunamadı, PSAR hesaplanamadı")
-        return
-    try:
-        psar_raw = ta_psar(high=df["high"], low=df["low"], close=df["close"])
-        if isinstance(psar_raw, pd.DataFrame):
-            psar_df = psar_raw.iloc[:, :2].copy()
-            psar_df.columns = ["psar_long", "psar_short"]
-        else:
-            psar_long, psar_short = psar_raw
-            psar_df = safe_concat([psar_long, psar_short], axis=1)
-            psar_df.columns = ["psar_long", "psar_short"]
-        safe_set(df, "psar_long", psar_df["psar_long"].values)
-        safe_set(df, "psar_short", psar_df["psar_short"].values)
-        safe_set(df, "psar", df["psar_long"].fillna(df["psar_short"]).values)
-    except Exception as e:
-        logger.error(f"PSAR hesaplanırken hata: {e}")
-        try:
-            from utils.failure_tracker import log_failure
-
-            log_failure("indicators", "psar", str(e))
-        except Exception:
-            pass
-
-
-def _tema20(series: pd.Series) -> pd.Series:
-    """Return the 20-period TEMA for ``series``.
-
-    When :mod:`pandas_ta` provides ``tema`` the calculation is delegated
-    to that implementation. Otherwise the value is computed manually via
-    chained exponential moving averages.
-
-    Args:
-        series (pd.Series): Price series to process.
-
-    Returns:
-        pd.Series: Calculated 20-period TEMA values.
-    """
-    if hasattr(ta, "tema"):
-        try:
-            return ta.tema(series, length=20)
-        except Exception:  # pragma: no cover - manual fallback
-            pass
-    ema1 = series.ewm(span=20, adjust=False).mean()
-    ema2 = ema1.ewm(span=20, adjust=False).mean()
-    ema3 = ema2.ewm(span=20, adjust=False).mean()
-    return (3 * ema1) - (3 * ema2) + ema3
-
-
-def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
-    """Add a moving-average column if absent.
-
-    The function computes either a simple or exponential moving average based
-    on ``kind`` and attaches the result as ``"{kind}_{n}"``. Existing and fully
-    populated columns are left untouched.
-
-    Args:
-        df (pd.DataFrame): DataFrame containing at least ``close`` prices.
-        n (int): Rolling window period.
-        kind (str, optional): ``"sma"`` for simple or ``"ema"`` for exponential.
-        logger_param (logging.Logger, optional): Logger used for status output.
-
-    """
-    if logger_param is None:
-        logger_param = logger
-    local_logger = logger_param
-    col = f"{kind}_{n}"
-    if col in df.columns and df[col].notna().all() or "close" not in df.columns:
-        return
-    try:
-        if kind == "sma":
-            safe_set(
-                df,
-                col,
-                df["close"].rolling(window=n, min_periods=1).mean().values,
-            )
-        else:
-            safe_set(
-                df,
-                col,
-                df["close"].ewm(span=n, adjust=False, min_periods=1).mean().values,
-            )
-        df[col] = df[col].bfill()
-        local_logger.debug(f"'{col}' sütunu safe_ma ile eklendi.")
-    except Exception as e:
-        local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)
-        try:
-            from utils.failure_tracker import log_failure
-
-            log_failure("indicators", col, str(e))
-        except Exception:
-            pass
-
-
 def _calculate_group_indicators_and_crossovers(
     _grp_df: pd.DataFrame,
     wanted_cols=None,
@@ -798,6 +554,205 @@ def _calculate_group_indicators_and_crossovers(
     return df_final_group
 
 
+def _calculate_series_series_crossover(
+    group_df: pd.DataFrame,
+    s1_col: str,
+    s2_col: str,
+    col_name_above: str,
+    col_name_below: str,
+    logger_param=None,
+) -> tuple[pd.Series, pd.Series] | None:
+    """Detect where ``s1_col`` crosses ``s2_col`` in ``group_df``.
+
+    Args:
+        group_df (pd.DataFrame): Input DataFrame for a single ticker.
+        s1_col (str): First column to compare.
+        s2_col (str): Second column to compare.
+        col_name_above (str): Name of the cross-above result column.
+        col_name_below (str): Name of the cross-below result column.
+        logger_param (optional): Logger instance for debug output.
+
+    Returns:
+        tuple[pd.Series, pd.Series] | None: Pair of boolean Series for
+        cross-above and cross-below or ``None`` when the columns are missing.
+
+    """
+    if logger_param is None:
+        logger_param = logger
+    local_logger = logger_param
+
+    if s1_col not in group_df or s2_col not in group_df:
+        local_logger.debug(f"Crossover atlandı – {s1_col} / {s2_col} yok")
+        return
+
+    s1, s2 = group_df[s1_col].align(group_df[s2_col], join="inner")
+    if s1.empty or not isinstance(s1, pd.Series) or not isinstance(s2, pd.Series):
+        local_logger.debug(f"Crossover atlandı – {s1_col} / {s2_col} tip uygun değil")
+        return
+
+    hisse_str = (
+        group_df["hisse_kodu"].iloc[0]
+        if not group_df.empty and "hisse_kodu" in group_df.columns
+        else "Bilinmeyen Hisse"
+    )
+    empty_above = pd.Series(False, index=s1.index, name=col_name_above, dtype=bool)
+    empty_below = pd.Series(False, index=s1.index, name=col_name_below, dtype=bool)
+    try:
+        s1 = pd.to_numeric(s1, errors="coerce")
+        s2 = pd.to_numeric(s2, errors="coerce")
+        if s1.isnull().all() or s2.isnull().all():
+            local_logger.debug(
+                f"{hisse_str}: Kesişim ({s1_col} vs {s2_col}) için serilerden biri tamamen NaN."
+            )
+            return empty_above, empty_below
+        kesisim_yukari = utils.crosses_above(s1, s2).rename(col_name_above)
+        kesisim_asagi = utils.crosses_below(s1, s2).rename(col_name_below)
+        return kesisim_yukari, kesisim_asagi
+    except Exception as e:
+        local_logger.error(
+            f"{hisse_str}: _calculate_series_series_crossover ({s1_col} vs {s2_col}) hatası: {e}",
+            exc_info=False,
+        )
+        try:
+            from utils.failure_tracker import log_failure
+
+            log_failure("crossovers", f"{s1_col} vs {s2_col}", str(e))
+        except Exception:
+            pass
+        return empty_above, empty_below
+
+
+def _calculate_series_value_crossover(
+    group_df: pd.DataFrame,
+    s_col: str,
+    value: float,
+    suffix: str,
+    logger_param=None,
+) -> tuple[pd.Series, pd.Series] | None:
+    """Return crossover signals when ``s_col`` crosses ``value``.
+
+    Args:
+        group_df (pd.DataFrame): DataFrame for a single ticker.
+        s_col (str): Column to compare with the constant ``value``.
+        value (float): Threshold value used for the crossover.
+        suffix (str): Identifier used in the output column names.
+        logger_param (optional): Logger instance for debug output.
+
+    Returns:
+        tuple[pd.Series, pd.Series] | None: Series for cross-above and
+        cross-below events or ``None`` when the source column is missing.
+
+    """
+    if logger_param is None:
+        logger_param = logger
+    local_logger = logger_param
+
+    if s_col not in group_df.columns:
+        local_logger.debug(f"Skipped crossover {s_col} vs {value} – missing col")
+        return
+
+    hisse_str = (
+        group_df["hisse_kodu"].iloc[0]
+        if not group_df.empty and "hisse_kodu" in group_df.columns
+        else "Bilinmeyen Hisse"
+    )
+    col_name_above = f"{s_col}_keser_{str(suffix).replace('.', 'p')}_yukari"
+    col_name_below = f"{s_col}_keser_{str(suffix).replace('.', 'p')}_asagi"
+    empty_above = pd.Series(
+        False, index=group_df.index, name=col_name_above, dtype=bool
+    )
+    empty_below = pd.Series(
+        False, index=group_df.index, name=col_name_below, dtype=bool
+    )
+    value_series = pd.Series(
+        value, index=group_df.index, name=f"sabit_deger_{str(suffix).replace('.', 'p')}"
+    )
+    try:
+        s1 = pd.to_numeric(group_df[s_col], errors="coerce")
+        if s1.isnull().all():
+            local_logger.debug(
+                f"{hisse_str}: Kesişim ({s_col} vs {value}) için seri tamamen NaN."
+            )
+            return empty_above, empty_below
+        kesisim_yukari = utils.crosses_above(s1, value_series).rename(col_name_above)
+        kesisim_asagi = utils.crosses_below(s1, value_series).rename(col_name_below)
+        return kesisim_yukari, kesisim_asagi
+    except Exception as e:
+        local_logger.error(
+            f"{hisse_str}: _calculate_series_value_crossover ({s_col} vs {value}) hatası: {e}",
+            exc_info=False,
+        )
+        try:
+            from utils.failure_tracker import log_failure
+
+            log_failure("crossovers", f"{s_col} vs {value}", str(e))
+        except Exception:
+            pass
+        return empty_above, empty_below
+
+
+def _ekle_psar(df: pd.DataFrame) -> None:
+    """Calculate Parabolic SAR columns and append them to ``df``.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing ``high``, ``low`` and ``close`` columns. The
+        PSAR values are inserted in place when possible.
+    """
+    gerekli = ["high", "low", "close"]
+    if any(c not in df.columns for c in gerekli):
+        logger.debug("PSAR hesaplamak için gerekli sütunlar eksik")
+        return
+    if ta_psar is None:
+        logger.debug("pandas_ta.psar bulunamadı, PSAR hesaplanamadı")
+        return
+    try:
+        psar_raw = ta_psar(high=df["high"], low=df["low"], close=df["close"])
+        if isinstance(psar_raw, pd.DataFrame):
+            psar_df = psar_raw.iloc[:, :2].copy()
+            psar_df.columns = ["psar_long", "psar_short"]
+        else:
+            psar_long, psar_short = psar_raw
+            psar_df = safe_concat([psar_long, psar_short], axis=1)
+            psar_df.columns = ["psar_long", "psar_short"]
+        safe_set(df, "psar_long", psar_df["psar_long"].values)
+        safe_set(df, "psar_short", psar_df["psar_short"].values)
+        safe_set(df, "psar", df["psar_long"].fillna(df["psar_short"]).values)
+    except Exception as e:
+        logger.error(f"PSAR hesaplanırken hata: {e}")
+        try:
+            from utils.failure_tracker import log_failure
+
+            log_failure("indicators", "psar", str(e))
+        except Exception:
+            pass
+
+
+def _tema20(series: pd.Series) -> pd.Series:
+    """Return the 20-period TEMA for ``series``.
+
+    When :mod:`pandas_ta` provides ``tema`` the calculation is delegated
+    to that implementation. Otherwise the value is computed manually via
+    chained exponential moving averages.
+
+    Args:
+        series (pd.Series): Price series to process.
+
+    Returns:
+        pd.Series: Calculated 20-period TEMA values.
+    """
+    if hasattr(ta, "tema"):
+        try:
+            return ta.tema(series, length=20)
+        except Exception:  # pragma: no cover - manual fallback
+            pass
+    ema1 = series.ewm(span=20, adjust=False).mean()
+    ema2 = ema1.ewm(span=20, adjust=False).mean()
+    ema3 = ema2.ewm(span=20, adjust=False).mean()
+    return (3 * ema1) - (3 * ema2) + ema3
+
+
 def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     """Append EMA/close crossover columns described by ``cross_names``.
 
@@ -849,6 +804,34 @@ def add_series(
         seen_names = set(df.columns)
     safe = unique_name(name, seen_names)
     safe_set(df, safe, values)
+
+
+def calculate_chunked(
+    df: pd.DataFrame, active_inds: list[str], chunk_size: int = CHUNK_SIZE
+) -> None:
+    """Process ``df`` in chunks and append indicator results to Parquet.
+
+    Args:
+        df (pd.DataFrame): Full stock dataset sorted by ticker.
+        active_inds (list[str]): Indicator names to calculate for each chunk.
+        chunk_size (int, optional): Number of tickers per chunk. Defaults to
+            ``CHUNK_SIZE``.
+
+    Returns:
+        None: Results are written directly to the Parquet cache.
+
+    """
+    pq_path = Path("veri/gosterge.parquet")
+    for kods in lazy_chunk(df.groupby("ticker", sort=False), chunk_size):
+        for _, group in kods:
+            mini = group.sort_values("date").copy()
+            mini = calculate_indicators(mini, active_inds)
+            try:
+                mini.to_parquet(pq_path, partition_cols=["ticker"], append=True)
+            except TypeError:
+                mini.to_parquet(pq_path, partition_cols=["ticker"])
+            del mini
+        gc.collect()
 
 
 def calculate_indicators(
@@ -904,34 +887,6 @@ def calculate_indicators(
 
     out = out.loc[:, ~out.columns.duplicated()]
     return out
-
-
-def calculate_chunked(
-    df: pd.DataFrame, active_inds: list[str], chunk_size: int = CHUNK_SIZE
-) -> None:
-    """Process ``df`` in chunks and append indicator results to Parquet.
-
-    Args:
-        df (pd.DataFrame): Full stock dataset sorted by ticker.
-        active_inds (list[str]): Indicator names to calculate for each chunk.
-        chunk_size (int, optional): Number of tickers per chunk. Defaults to
-            ``CHUNK_SIZE``.
-
-    Returns:
-        None: Results are written directly to the Parquet cache.
-
-    """
-    pq_path = Path("veri/gosterge.parquet")
-    for kods in lazy_chunk(df.groupby("ticker", sort=False), chunk_size):
-        for _, group in kods:
-            mini = group.sort_values("date").copy()
-            mini = calculate_indicators(mini, active_inds)
-            try:
-                mini.to_parquet(pq_path, partition_cols=["ticker"], append=True)
-            except TypeError:
-                mini.to_parquet(pq_path, partition_cols=["ticker"])
-            del mini
-        gc.collect()
 
 
 def hesapla_teknik_indikatorler_ve_kesisimler(
@@ -1090,3 +1045,47 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             f"Hesaplanan indikatörler birleştirilirken KRİTİK HATA: {e_concat}",
             exc_info=True,
         )
+def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
+    """Add a moving-average column if absent.
+
+    The function computes either a simple or exponential moving average based
+    on ``kind`` and attaches the result as ``"{kind}_{n}"``. Existing and fully
+    populated columns are left untouched.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing at least ``close`` prices.
+        n (int): Rolling window period.
+        kind (str, optional): ``"sma"`` for simple or ``"ema"`` for exponential.
+        logger_param (logging.Logger, optional): Logger used for status output.
+
+    """
+    if logger_param is None:
+        logger_param = logger
+    local_logger = logger_param
+    col = f"{kind}_{n}"
+    if col in df.columns and df[col].notna().all() or "close" not in df.columns:
+        return
+    try:
+        if kind == "sma":
+            safe_set(
+                df,
+                col,
+                df["close"].rolling(window=n, min_periods=1).mean().values,
+            )
+        else:
+            safe_set(
+                df,
+                col,
+                df["close"].ewm(span=n, adjust=False, min_periods=1).mean().values,
+            )
+        df[col] = df[col].bfill()
+        local_logger.debug(f"'{col}' sütunu safe_ma ile eklendi.")
+    except Exception as e:
+        local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)
+        try:
+            from utils.failure_tracker import log_failure
+
+            log_failure("indicators", col, str(e))
+        except Exception:
+            pass
+
