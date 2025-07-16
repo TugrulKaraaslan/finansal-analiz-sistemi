@@ -58,8 +58,6 @@ class MissingColumnError(Exception):
         self.missing = missing
 
 
-
-
 def _build_solution(err_type: str, msg: str) -> str:
     """Return a user-facing hint derived from the error context.
 
@@ -159,9 +157,7 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
     if visited is None:
         visited = set()
     if depth > settings.MAX_FILTER_DEPTH:
-        raise QueryError(
-            f"Max recursion depth ({settings.MAX_FILTER_DEPTH}) exceeded"
-        )
+        raise QueryError(f"Max recursion depth ({settings.MAX_FILTER_DEPTH}) exceeded")
 
     if isinstance(expr, str):
         return df.query(expr)
@@ -350,8 +346,6 @@ def run_single_filter(kod: str, query: str) -> dict[str, Any]:
         except Exception:
             pass
     return atlanmis
-
-
 
 
 def uygula_filtreler(
