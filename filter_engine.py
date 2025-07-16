@@ -58,7 +58,6 @@ class MissingColumnError(Exception):
         self.missing = missing
 
 
-
 def _apply_single_filter(df, kod, query):
     """Run a filter expression on ``df`` and collect diagnostics."""
 
@@ -122,7 +121,6 @@ def _apply_single_filter(df, kod, query):
         return None, info
 
 
-
 def _build_solution(err_type: str, msg: str) -> str:
     """Return a user-facing hint derived from the error context.
 
@@ -155,11 +153,9 @@ def _build_solution(err_type: str, msg: str) -> str:
     return ""
 
 
-
 def clear_failed() -> None:
     """Clear the global ``FAILED_FILTERS`` list."""
     FAILED_FILTERS.clear()
-
 
 
 def evaluate_filter(
@@ -196,12 +192,10 @@ def evaluate_filter(
     return key
 
 
-
 def _extract_columns_from_query(query: str) -> set:
     """Return referenced columns using the unified naming scheme."""
 
     return _extract_query_columns(query)
-
 
 
 def _extract_query_columns(query: str) -> set:
@@ -211,7 +205,6 @@ def _extract_query_columns(query: str) -> set:
     tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
     reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
     return tokens - reserved
-
 
 
 def kaydet_hata(
@@ -241,7 +234,6 @@ def kaydet_hata(
     log_dict.setdefault("hatalar", []).append(entry)
 
 
-
 def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
     """Execute ``expr`` on ``df`` unless the filter is marked passive.
 
@@ -260,7 +252,6 @@ def run_filter(code: str, df: pd.DataFrame, expr: str) -> pd.DataFrame:
         logger.info("Filter %s marked passive, skipped.", code)
         return pd.DataFrame()
     return safe_eval(expr, df)
-
 
 
 def run_single_filter(kod: str, query: str) -> dict[str, Any]:
@@ -315,7 +306,6 @@ def run_single_filter(kod: str, query: str) -> dict[str, Any]:
     return atlanmis
 
 
-
 def safe_eval(expr, df, depth: int = 0, visited=None):
     """Evaluate a filter expression and return the resulting DataFrame.
 
@@ -356,7 +346,6 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
             raise
 
     raise QueryError("Invalid expression")
-
 
 
 def uygula_filtreler(
