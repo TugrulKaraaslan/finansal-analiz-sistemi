@@ -13,6 +13,8 @@ from packaging import version as _v
 
 __all__ = ["safe_concat", "safe_infer_objects", "safe_to_excel"]
 
+_PANDAS_HAS_COPY = _v.parse(pd.__version__) >= _v.parse("2.0.0")
+
 
 def safe_concat(frames: List[pd.DataFrame], **kwargs) -> pd.DataFrame:
     """Concatenate non-empty frames or return an empty ``DataFrame``.
@@ -27,9 +29,6 @@ def safe_concat(frames: List[pd.DataFrame], **kwargs) -> pd.DataFrame:
     """
     frames = [f for f in frames if not f.empty]
     return pd.concat(frames, **kwargs) if frames else pd.DataFrame()
-
-
-_PANDAS_HAS_COPY = _v.parse(pd.__version__) >= _v.parse("2.0.0")
 
 
 def safe_infer_objects(df: pd.DataFrame, *, copy: bool = False) -> pd.DataFrame:
