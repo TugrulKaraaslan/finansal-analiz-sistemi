@@ -58,53 +58,6 @@ class MissingColumnError(Exception):
         self.missing = missing
 
 
-def _extract_query_columns(query: str) -> set:
-    """Return column-like identifiers referenced in a filter query."""
-
-    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
-    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
-    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
-    return tokens - reserved
-
-
-def _extract_columns_from_query(query: str) -> set:
-    """Return referenced columns using the unified naming scheme."""
-
-    return _extract_query_columns(query)
-
-
-def _build_solution(err_type: str, msg: str) -> str:
-    """Return a user-facing hint derived from the error context.
-
-    Parameters
-    ----------
-    err_type : str
-        Normalized error code such as ``GENERIC`` or ``QUERY_ERROR``.
-    msg : str
-        Raw error message inspected for additional clues.
-
-    Returns
-    -------
-    str
-        Localized suggestion text suitable for displaying to the user.
-    """
-    if err_type == "GENERIC":
-        m1 = _missing_re.search(msg)
-        if m1:
-            col = m1.group("col")
-            return f'"{col}" indikatörünü hesaplama listesine ekleyin.'
-        m2 = _undefined_re.search(msg)
-        if m2:
-            col = m2.group("col")
-            return f'Sorguda geçen "{col}" sütununu veri setine ekleyin veya sorgudan çıkarın.'
-        return "Eksik veriyi veya sorgu değişkenini düzeltin."
-    if err_type == "QUERY_ERROR":
-        return "Query ifadesini pandas.query() sözdizimine göre düzeltin."
-    if err_type == "NO_STOCK":
-        return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
-    return ""
-
-
 def _apply_single_filter(df, kod, query):
     """Run a filter expression on ``df`` and collect diagnostics."""
 
@@ -166,6 +119,57 @@ def _apply_single_filter(df, kod, query):
         except Exception:
             pass
         return None, info
+
+
+def _build_solution(err_type: str, msg: str) -> str:
+    """Return a user-facing hint derived from the error context.
+
+    Parameters
+    ----------
+    err_type : str
+        Normalized error code such as ``GENERIC`` or ``QUERY_ERROR``.
+    msg : str
+        Raw error message inspected for additional clues.
+
+    Returns
+    -------
+    str
+        Localized suggestion text suitable for displaying to the user.
+    """
+
+    if err_type == "GENERIC":
+        m1 = _missing_re.search(msg)
+        if m1:
+            col = m1.group("col")
+            return f'"{col}" indikatörünü hesaplama listesine ekleyin.'
+        m2 = _undefined_re.search(msg)
+        if m2:
+            col = m2.group("col")
+            return (
+                f'Sorguda geçen "{col}" sütununu veri setine ekleyin veya sorgudan '
+                "çıkarın."
+            )
+        return "Eksik veriyi veya sorgu değişkenini düzeltin."
+    if err_type == "QUERY_ERROR":
+        return "Query ifadesini pandas.query() sözdizimine göre düzeltin."
+    if err_type == "NO_STOCK":
+        return "Filtre koşullarını gevşetin veya tarih aralığını genişletin."
+    return ""
+
+
+def _extract_columns_from_query(query: str) -> set:
+    """Return referenced columns using the unified naming scheme."""
+
+    return _extract_query_columns(query)
+
+
+def _extract_query_columns(query: str) -> set:
+    """Return column-like identifiers referenced in a filter query."""
+
+    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
+    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
+    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
+    return tokens - reserved
 
 
 def clear_failed() -> None:
