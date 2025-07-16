@@ -126,6 +126,8 @@ def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
             f"{hisse_str}: {sutun_adi} hesaplanırken hata: {e}", exc_info=False
         )
         return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
+
+
 def _calculate_series_series_crossover(
     group_df: pd.DataFrame,
     s1_col: str,
@@ -368,6 +370,8 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
             log_failure("indicators", col, str(e))
         except Exception:
             pass
+
+
 def _calculate_group_indicators_and_crossovers(
     _grp_df: pd.DataFrame,
     wanted_cols=None,
@@ -826,6 +830,8 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
             continue
         raise ValueError(f"Bilinmeyen crossover format\u0131: {name}")
     return df
+
+
 def add_series(
     df: pd.DataFrame, name: str, values, seen_names: set[str] | None = None
 ) -> None:
@@ -843,6 +849,7 @@ def add_series(
         seen_names = set(df.columns)
     safe = unique_name(name, seen_names)
     safe_set(df, safe, values)
+
 
 def calculate_indicators(
     df: pd.DataFrame, indicators: list[str] | None = None
@@ -897,6 +904,8 @@ def calculate_indicators(
 
     out = out.loc[:, ~out.columns.duplicated()]
     return out
+
+
 def calculate_chunked(
     df: pd.DataFrame, active_inds: list[str], chunk_size: int = CHUNK_SIZE
 ) -> None:
@@ -1081,5 +1090,3 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             f"Hesaplanan indikatörler birleştirilirken KRİTİK HATA: {e_concat}",
             exc_info=True,
         )
-
-
