@@ -63,6 +63,8 @@ def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
     detay_df = rapor_df.copy()
     istatistik_df = rapor_df.describe().reset_index()
     return ozet_df, detay_df, istatistik_df
+
+
 def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     """Display summary or detail tables in a Streamlit interface.
 
@@ -96,6 +98,8 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
             st.bar_chart(ozet_df.set_index("filtre_kodu")["ort_getiri_%"])
         else:
             st.write("Grafik için veri yok")
+
+
 def veri_yukle(force_excel_reload: bool = False):
     """Load filter definitions together with the raw price dataset."""
 
@@ -111,6 +115,8 @@ def veri_yukle(force_excel_reload: bool = False):
         logger.critical("Hisse verileri yüklenemedi veya boş.")
         sys.exit(1)
     return df_filters, df_raw
+
+
 def on_isle(df: pd.DataFrame) -> pd.DataFrame:
     """Return preprocessed stock data.
 
@@ -125,6 +131,8 @@ def on_isle(df: pd.DataFrame) -> pd.DataFrame:
         logger.critical("Veri ön işleme başarısız.")
         sys.exit(1)
     return processed
+
+
 def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate indicators and crossover columns.
 
@@ -153,6 +161,8 @@ def indikator_hesapla(df: pd.DataFrame) -> pd.DataFrame:
         logger.critical("İndikatör hesaplanamadı.")
         sys.exit(1)
     return result
+
+
 def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
     """Apply filter rules to indicator data.
 
@@ -166,6 +176,8 @@ def filtre_uygula(df: pd.DataFrame, tarama_tarihi) -> tuple[dict, dict]:
     return filter_engine.uygula_filtreler(
         df, df_filtre_kurallari, tarama_tarihi, logger_param=logger
     )
+
+
 def backtest_yap(
     df: pd.DataFrame,
     filtre_sonuclari: dict,
@@ -185,6 +197,8 @@ def backtest_yap(
         logger.critical("Backtest sonuç üretmedi.")
         sys.exit(1)
     return rapor_df, detay_df
+
+
 def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     """Save an Excel report when data is available.
 
@@ -203,6 +217,7 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     with mem_profile():
         report_generator.kaydet_uc_sekmeli_excel(out_path, ozet, detay, istat)
     logger.info(f"Excel raporu oluşturuldu: {out_path}")
+
 
 def run_pipeline(
     price_csv: str | Path,
@@ -248,6 +263,8 @@ def run_pipeline(
         tarama_tarihi_str=tarama_dt.strftime("%d.%m.%Y"),
     )
     return report_generator.generate_full_report(rapor_df, detay_df, [], output)
+
+
 def calistir_tum_sistemi(
     tarama_tarihi_str: str,
     satis_tarihi_str: str,
@@ -333,6 +350,8 @@ def calistir_tum_sistemi(
         gc.collect()
 
     return rapor_df, detay_df, atlanmis
+
+
 def main(argv: list[str] | None = None) -> None:
     """Execute the main backtest workflow for CLI usage."""
 
@@ -462,8 +481,6 @@ def main(argv: list[str] | None = None) -> None:
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
         utils.purge_old_logs("loglar", days=30)
-
-
 
 
 if __name__ == "__main__":  # pragma: no cover - manual execution
