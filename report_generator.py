@@ -85,228 +85,6 @@ EXPECTED_COLUMNS = [
 ]
 
 
-def _build_detay_df(
-    detay_list: list[pd.DataFrame], trades: pd.DataFrame
-) -> pd.DataFrame:
-    """Combine partial detail frames and attach trade results.
-
-    Parameters
-    ----------
-    detay_list : list[pandas.DataFrame]
-        Partial detail frames generated per filter.
-    trades : pandas.DataFrame
-        Trade information to merge on ``filtre_kodu`` and ``hisse_kodu``.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Combined detail rows enriched with trade results when available.
-    """
-    detay_df = pd.concat(detay_list, ignore_index=True)
-    if trades is not None and not trades.empty:
-        detay_df = detay_df.merge(
-            trades,
-            on=["filtre_kodu", "hisse_kodu"],
-            how="left",
-            validate="one_to_one",
-        )
-    return detay_df
-
-
-def _write_error_sheet(
-    wr: pd.ExcelWriter,
-    error_list: Iterable,
-    summary_df: pd.DataFrame | None = None,
-) -> None:
-    """Write structured errors to the ``Hatalar`` sheet.
-
-    Entries missing from ``error_list`` can be supplemented using
-    ``summary_df`` so that every failed filter is represented.
-
-    Args:
-        wr (pd.ExcelWriter): Writer object to write the sheet into.
-        error_list (Iterable): Explicit error entries generated during
-            processing.
-        summary_df (pd.DataFrame, optional): Summary table used to ensure every
-            non-``OK`` record is represented.
-
-    Notes:
-        ``error_list`` may contain dataclass instances which are converted to
-        dictionaries before writing.
-
-    """
-    from dataclasses import asdict, is_dataclass
-
-    df_err = pd.DataFrame([asdict(e) if is_dataclass(e) else e for e in error_list])
-    if "filtre_kod" not in df_err.columns and "filtre_kodu" in df_err.columns:
-        df_err = df_err.rename(columns={"filtre_kodu": "filtre_kod"})
-    for col in [
-        "filtre_kod",
-        "hata_tipi",
-        "eksik_ad",
-        "detay",
-        "cozum_onerisi",
-        "reason",
-        "hint",
-    ]:
-        if col not in df_err.columns:
-            df_err[col] = "-"
-
-    if summary_df is not None and not summary_df.empty:
-        non_ok = summary_df[summary_df["sebep_kodu"] != "OK"]
-        if not non_ok.empty:
-            base_records = []
-            existing = set(df_err.get("filtre_kod", []))
-            for _, row in non_ok.iterrows():
-                if row["filtre_kodu"] in existing:
-                    continue
-                base_records.append(
-                    {
-                        "filtre_kod": row["filtre_kodu"],
-                        "hata_tipi": row["sebep_kodu"],
-                        "detay": row.get("sebep_aciklama", "-") or "-",
-                        "cozum_onerisi": "-",
-                        "eksik_ad": "-",
-                        "reason": "-",
-                        "hint": "-",
-                    }
-                )
-            if base_records:
-                df_err = safe_concat(
-                    [df_err, pd.DataFrame(base_records)], ignore_index=True
-                )
-
-    if df_err.empty:
-        return  # skip sheet creation when no errors
-
-    df_err = df_err.reindex(columns=HATALAR_COLUMNS, fill_value="-")
-    safe_to_excel(
-        df_err,
-        wr,
-        sheet_name="Hatalar",
-        index=False,
-        columns=HATALAR_COLUMNS,
-        engine="openpyxl",
-    )
-
-
-def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
-    """Write KPI summary and top/bottom charts to ``Sağlık Özeti`` sheet.
-
-    Args:
-        wr (pd.ExcelWriter): Writer object created with ``xlsxwriter``.
-        df_sum (pd.DataFrame): Summary statistics used to calculate KPI
-            metrics.
-
-    """
-    toplam = len(df_sum)
-    ok = int((df_sum["sebep_kodu"] == "OK").sum())
-    nostock = int((df_sum["sebep_kodu"] == "NO_STOCK").sum())
-    hatali = toplam - ok - nostock
-    gen_bas = round(ok / toplam * 100, 2) if toplam else 0
-    gen_avg = round(df_sum["ort_getiri_%"].mean(skipna=True), 2)
-
-    kpi_df = pd.DataFrame(
-        [
-            {
-                "TOPLAM FİLTRE": toplam,
-                "OK": ok,
-                "NO_STOCK": nostock,
-                "HATALI": hatali,
-                "GENEL BAŞARI %": gen_bas,
-                "GENEL ORT. %": gen_avg,
-            }
-        ]
-    )
-
-    safe_to_excel(kpi_df, wr, sheet_name="Sağlık Özeti", index=False, startrow=1)
-
-    workbook = wr.book
-    ws = wr.sheets["Sağlık Özeti"]
-
-    fmt_grey = workbook.add_format(
-        {"bold": True, "align": "center", "bg_color": "#D9D9D9"}
-    )
-    fmt_green = workbook.add_format(
-        {"bold": True, "align": "center", "bg_color": "#92D050"}
-    )
-    fmt_orange = workbook.add_format(
-        {"bold": True, "align": "center", "bg_color": "#FFC000"}
-    )
-    fmt_red = workbook.add_format(
-        {"bold": True, "align": "center", "bg_color": "#FF0000", "font_color": "white"}
-    )
-
-    ws.write("A1", "KPI", workbook.add_format({"bold": True}))
-
-    ws.set_column("A:G", 18)
-    ws.conditional_format("B2:B2", {"type": "no_blanks", "format": fmt_grey})
-    ws.conditional_format("C2:C2", {"type": "no_blanks", "format": fmt_green})
-    ws.conditional_format("D2:D2", {"type": "no_blanks", "format": fmt_orange})
-    ws.conditional_format("E2:E2", {"type": "no_blanks", "format": fmt_red})
-    ws.conditional_format("F2:G2", {"type": "no_blanks", "format": fmt_green})
-
-    top5 = (
-        df_sum.sort_values("ort_getiri_%", ascending=False)
-        .dropna(subset=["ort_getiri_%"])
-        .head(5)
-    )
-    worst5 = df_sum.sort_values("ort_getiri_%").dropna(subset=["ort_getiri_%"]).head(5)
-
-    if not top5.empty and not worst5.empty:
-        ws.write_column(1, 8, top5["filtre_kodu"])
-        ws.write_column(1, 9, worst5["filtre_kodu"])
-        ws.write_column(1, 10, top5["ort_getiri_%"])
-        ws.write_column(1, 11, worst5["ort_getiri_%"])
-
-        chart = workbook.add_chart({"type": "column"})
-        chart.add_series(
-            {
-                "name": "En İyi 5",
-                "categories": ["Sağlık Özeti", 1, 8, 1 + len(top5) - 1, 8],
-                "values": ["Sağlık Özeti", 1, 10, 1 + len(top5) - 1, 10],
-            }
-        )
-        chart.add_series(
-            {
-                "name": "En Kötü 5",
-                "categories": ["Sağlık Özeti", 1, 9, 1 + len(worst5) - 1, 9],
-                "values": ["Sağlık Özeti", 1, 11, 1 + len(worst5) - 1, 11],
-                "invert_if_negative": True,
-            }
-        )
-        chart.set_title({"name": "En İyi / En Kötü 5 Filtre (Getiri %)"})
-        ws.insert_chart("A5", chart, {"x_scale": 1.2, "y_scale": 1.2})
-
-
-def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
-    """Record aggregate statistics in the ``İstatistik`` sheet.
-
-    Args:
-        wr (pd.ExcelWriter): Excel writer used for output.
-        df_sum (pd.DataFrame): Summary data from the backtest run.
-
-    """
-    toplam = len(df_sum)
-    islemli = (df_sum["hisse_sayisi"] > 0).sum()
-    islemsiz = (df_sum["sebep_kodu"] == "NO_STOCK").sum()
-    hatali = toplam - islemli - islemsiz
-    gen_bas = round(islemli / toplam * 100, 2) if toplam else 0
-    gen_avg = round(df_sum["ort_getiri_%"].mean(skipna=True), 2)
-
-    stats = [
-        {
-            "toplam_filtre": toplam,
-            "islemli": islemli,
-            "işlemsiz": islemsiz,
-            "hatalı": hatali,
-            "genel_başarı_%": gen_bas,
-            "genel_ortalama_%": gen_avg,
-        }
-    ]
-    safe_to_excel(pd.DataFrame(stats), wr, sheet_name="İstatistik", index=False)
-
-
 def add_error_sheet(
     writer: pd.ExcelWriter,
     error_list: Iterable[tuple[str, str, str]],
@@ -733,6 +511,228 @@ def save_hatalar_excel(df: pd.DataFrame, out_path: str | Path) -> None:
             index=False,
             columns=HATALAR_COLUMNS,
         )
+
+
+def _build_detay_df(
+    detay_list: list[pd.DataFrame], trades: pd.DataFrame
+) -> pd.DataFrame:
+    """Combine partial detail frames and attach trade results.
+
+    Parameters
+    ----------
+    detay_list : list[pandas.DataFrame]
+        Partial detail frames generated per filter.
+    trades : pandas.DataFrame
+        Trade information to merge on ``filtre_kodu`` and ``hisse_kodu``.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Combined detail rows enriched with trade results when available.
+    """
+    detay_df = pd.concat(detay_list, ignore_index=True)
+    if trades is not None and not trades.empty:
+        detay_df = detay_df.merge(
+            trades,
+            on=["filtre_kodu", "hisse_kodu"],
+            how="left",
+            validate="one_to_one",
+        )
+    return detay_df
+
+
+def _write_error_sheet(
+    wr: pd.ExcelWriter,
+    error_list: Iterable,
+    summary_df: pd.DataFrame | None = None,
+) -> None:
+    """Write structured errors to the ``Hatalar`` sheet.
+
+    Entries missing from ``error_list`` can be supplemented using
+    ``summary_df`` so that every failed filter is represented.
+
+    Args:
+        wr (pd.ExcelWriter): Writer object to write the sheet into.
+        error_list (Iterable): Explicit error entries generated during
+            processing.
+        summary_df (pd.DataFrame, optional): Summary table used to ensure every
+            non-``OK`` record is represented.
+
+    Notes:
+        ``error_list`` may contain dataclass instances which are converted to
+        dictionaries before writing.
+
+    """
+    from dataclasses import asdict, is_dataclass
+
+    df_err = pd.DataFrame([asdict(e) if is_dataclass(e) else e for e in error_list])
+    if "filtre_kod" not in df_err.columns and "filtre_kodu" in df_err.columns:
+        df_err = df_err.rename(columns={"filtre_kodu": "filtre_kod"})
+    for col in [
+        "filtre_kod",
+        "hata_tipi",
+        "eksik_ad",
+        "detay",
+        "cozum_onerisi",
+        "reason",
+        "hint",
+    ]:
+        if col not in df_err.columns:
+            df_err[col] = "-"
+
+    if summary_df is not None and not summary_df.empty:
+        non_ok = summary_df[summary_df["sebep_kodu"] != "OK"]
+        if not non_ok.empty:
+            base_records = []
+            existing = set(df_err.get("filtre_kod", []))
+            for _, row in non_ok.iterrows():
+                if row["filtre_kodu"] in existing:
+                    continue
+                base_records.append(
+                    {
+                        "filtre_kod": row["filtre_kodu"],
+                        "hata_tipi": row["sebep_kodu"],
+                        "detay": row.get("sebep_aciklama", "-") or "-",
+                        "cozum_onerisi": "-",
+                        "eksik_ad": "-",
+                        "reason": "-",
+                        "hint": "-",
+                    }
+                )
+            if base_records:
+                df_err = safe_concat(
+                    [df_err, pd.DataFrame(base_records)], ignore_index=True
+                )
+
+    if df_err.empty:
+        return  # skip sheet creation when no errors
+
+    df_err = df_err.reindex(columns=HATALAR_COLUMNS, fill_value="-")
+    safe_to_excel(
+        df_err,
+        wr,
+        sheet_name="Hatalar",
+        index=False,
+        columns=HATALAR_COLUMNS,
+        engine="openpyxl",
+    )
+
+
+def _write_health_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
+    """Write KPI summary and top/bottom charts to ``Sağlık Özeti`` sheet.
+
+    Args:
+        wr (pd.ExcelWriter): Writer object created with ``xlsxwriter``.
+        df_sum (pd.DataFrame): Summary statistics used to calculate KPI
+            metrics.
+
+    """
+    toplam = len(df_sum)
+    ok = int((df_sum["sebep_kodu"] == "OK").sum())
+    nostock = int((df_sum["sebep_kodu"] == "NO_STOCK").sum())
+    hatali = toplam - ok - nostock
+    gen_bas = round(ok / toplam * 100, 2) if toplam else 0
+    gen_avg = round(df_sum["ort_getiri_%"].mean(skipna=True), 2)
+
+    kpi_df = pd.DataFrame(
+        [
+            {
+                "TOPLAM FİLTRE": toplam,
+                "OK": ok,
+                "NO_STOCK": nostock,
+                "HATALI": hatali,
+                "GENEL BAŞARI %": gen_bas,
+                "GENEL ORT. %": gen_avg,
+            }
+        ]
+    )
+
+    safe_to_excel(kpi_df, wr, sheet_name="Sağlık Özeti", index=False, startrow=1)
+
+    workbook = wr.book
+    ws = wr.sheets["Sağlık Özeti"]
+
+    fmt_grey = workbook.add_format(
+        {"bold": True, "align": "center", "bg_color": "#D9D9D9"}
+    )
+    fmt_green = workbook.add_format(
+        {"bold": True, "align": "center", "bg_color": "#92D050"}
+    )
+    fmt_orange = workbook.add_format(
+        {"bold": True, "align": "center", "bg_color": "#FFC000"}
+    )
+    fmt_red = workbook.add_format(
+        {"bold": True, "align": "center", "bg_color": "#FF0000", "font_color": "white"}
+    )
+
+    ws.write("A1", "KPI", workbook.add_format({"bold": True}))
+
+    ws.set_column("A:G", 18)
+    ws.conditional_format("B2:B2", {"type": "no_blanks", "format": fmt_grey})
+    ws.conditional_format("C2:C2", {"type": "no_blanks", "format": fmt_green})
+    ws.conditional_format("D2:D2", {"type": "no_blanks", "format": fmt_orange})
+    ws.conditional_format("E2:E2", {"type": "no_blanks", "format": fmt_red})
+    ws.conditional_format("F2:G2", {"type": "no_blanks", "format": fmt_green})
+
+    top5 = (
+        df_sum.sort_values("ort_getiri_%", ascending=False)
+        .dropna(subset=["ort_getiri_%"])
+        .head(5)
+    )
+    worst5 = df_sum.sort_values("ort_getiri_%").dropna(subset=["ort_getiri_%"]).head(5)
+
+    if not top5.empty and not worst5.empty:
+        ws.write_column(1, 8, top5["filtre_kodu"])
+        ws.write_column(1, 9, worst5["filtre_kodu"])
+        ws.write_column(1, 10, top5["ort_getiri_%"])
+        ws.write_column(1, 11, worst5["ort_getiri_%"])
+
+        chart = workbook.add_chart({"type": "column"})
+        chart.add_series(
+            {
+                "name": "En İyi 5",
+                "categories": ["Sağlık Özeti", 1, 8, 1 + len(top5) - 1, 8],
+                "values": ["Sağlık Özeti", 1, 10, 1 + len(top5) - 1, 10],
+            }
+        )
+        chart.add_series(
+            {
+                "name": "En Kötü 5",
+                "categories": ["Sağlık Özeti", 1, 9, 1 + len(worst5) - 1, 9],
+                "values": ["Sağlık Özeti", 1, 11, 1 + len(worst5) - 1, 11],
+                "invert_if_negative": True,
+            }
+        )
+        chart.set_title({"name": "En İyi / En Kötü 5 Filtre (Getiri %)"})
+        ws.insert_chart("A5", chart, {"x_scale": 1.2, "y_scale": 1.2})
+
+
+def _write_stats_sheet(wr: pd.ExcelWriter, df_sum: pd.DataFrame) -> None:
+    """Record aggregate statistics in the ``İstatistik`` sheet.
+
+    Args:
+        wr (pd.ExcelWriter): Excel writer used for output.
+        df_sum (pd.DataFrame): Summary data from the backtest run.
+
+    """
+    toplam = len(df_sum)
+    islemli = (df_sum["hisse_sayisi"] > 0).sum()
+    islemsiz = (df_sum["sebep_kodu"] == "NO_STOCK").sum()
+    hatali = toplam - islemli - islemsiz
+    gen_bas = round(islemli / toplam * 100, 2) if toplam else 0
+    gen_avg = round(df_sum["ort_getiri_%"].mean(skipna=True), 2)
+
+    stats = [
+        {
+            "toplam_filtre": toplam,
+            "islemli": islemli,
+            "işlemsiz": islemsiz,
+            "hatalı": hatali,
+            "genel_başarı_%": gen_bas,
+            "genel_ortalama_%": gen_avg,
+        }
+    ]
+    safe_to_excel(pd.DataFrame(stats), wr, sheet_name="İstatistik", index=False)
 
 
 __all__ = [
