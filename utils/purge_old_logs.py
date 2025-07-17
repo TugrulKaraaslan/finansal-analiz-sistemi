@@ -39,31 +39,32 @@ def purge_old_logs(
         log_dir = Path(log_dir)
 
     cutoff = datetime.now() - timedelta(days=keep_days)
+    cutoff_ts = cutoff.timestamp()
     count = 0
-    for f in log_dir.glob("*.log*"):
-        if datetime.fromtimestamp(f.stat().st_mtime) < cutoff:
-            if dry_run:
-                print(f"[DRY-RUN] Would delete {f}")
-            else:
-                f.unlink()
+
+    def remove(path: Path) -> None:
+        if dry_run:
+            print(f"[DRY-RUN] Would delete {path}")
+        else:
+            path.unlink()
+
+    def is_expired(p: Path) -> bool:
+        return p.stat().st_mtime < cutoff_ts
+
+    for log_file in log_dir.glob("*.log*"):
+        if is_expired(log_file):
+            remove(log_file)
             count += 1
-            lock = f.with_suffix(".lock")
+            lock = log_file.with_suffix(".lock")
             if lock.exists():
-                if dry_run:
-                    print(f"[DRY-RUN] Would delete {lock}")
-                else:
-                    lock.unlink()
+                remove(lock)
                 count += 1
-    for f in log_dir.glob("*.lock"):
-        if (
-            not f.with_suffix(".log").exists()
-            and datetime.fromtimestamp(f.stat().st_mtime) < cutoff
-        ):
-            if dry_run:
-                print(f"[DRY-RUN] Would delete {f}")
-            else:
-                f.unlink()
+
+    for lock_file in log_dir.glob("*.lock"):
+        if not lock_file.with_suffix(".log").exists() and is_expired(lock_file):
+            remove(lock_file)
             count += 1
+
     return count
 
 
