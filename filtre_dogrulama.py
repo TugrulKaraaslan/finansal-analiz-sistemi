@@ -4,6 +4,8 @@ Helper functions return reason codes so that callers can display
 meaningful error messages when filter expressions fail to run.
 """
 
+from __future__ import annotations
+
 import logging
 import re
 from typing import Mapping, Sequence
