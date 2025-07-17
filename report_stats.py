@@ -11,6 +11,7 @@ from __future__ import annotations
 import warnings
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from filtre_dogrulama import SEBEP_KODLARI
@@ -174,9 +175,7 @@ def build_ozet_df(
                 "islemli",
             ]
         )
-    stats["islemli"] = stats["hisse_sayisi"].apply(
-        lambda x: "EVET" if x > 0 else "HAYIR"
-    )
+    stats["islemli"] = np.where(stats["hisse_sayisi"] > 0, "EVET", "HAYIR")
 
     if not stats.empty:
         summary_df = summary_df.drop(
