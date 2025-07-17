@@ -4,6 +4,7 @@ These helpers adjust date columns and remove invalid rows before
 indicator calculation.
 """
 
+import numpy as np
 import pandas as pd
 
 
@@ -43,10 +44,11 @@ def fill_missing_business_day(
     pos = mask.groupby(group).cumcount()
     offsets = (size - pos).where(mask, 0)
 
-    adjusted = next_valid.copy()
-    for idx, off in offsets[mask].items():
-        if off:
-            adjusted.loc[idx] = adjusted.loc[idx] - pd.offsets.BDay(int(off))
-
-    df[date_col] = adjusted
+    norm = next_valid.dt.normalize()
+    adjusted = np.busday_offset(
+        norm.values.astype("datetime64[D]"),
+        -offsets.values.astype(int),
+        roll="backward",
+    )
+    df[date_col] = pd.to_datetime(adjusted) + (next_valid - norm)
     return df
