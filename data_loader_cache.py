@@ -13,6 +13,7 @@ import pandas as pd
 from cachetools import TTLCache
 
 from finansal_analiz_sistemi import config
+from src.utils.excel_reader import clear_cache as clear_excel_cache
 from src.utils.excel_reader import open_excel_cached
 
 
@@ -66,11 +67,9 @@ class DataLoaderCache:
         return (abs_path, kind), stat.st_mtime_ns, stat.st_size
 
     def clear(self) -> None:
-        """Clear the internal cache.
-
-        All cached datasets are removed immediately.
-        """
+        """Clear all cached datasets and Excel workbooks."""
         self.loaded_data.clear()
+        clear_excel_cache()
 
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
         """Load ``filepath`` through the in-memory cache.
