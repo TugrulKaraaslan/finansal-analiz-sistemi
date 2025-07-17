@@ -175,18 +175,32 @@ def evaluate_filter(
     return key
 
 
-def safe_eval(expr, df, depth: int = 0, visited=None):
-    """Evaluate a filter expression and return the resulting DataFrame.
+def safe_eval(
+    expr: str | dict,
+    df: pd.DataFrame,
+    depth: int = 0,
+    visited: set[str] | None = None,
+) -> pd.DataFrame:
+    """Return ``df`` filtered by ``expr`` while guarding recursion depth.
 
-    Expressions may be plain query strings or nested dictionaries containing
-    ``sub_expr`` nodes. Nested expressions are resolved recursively while the
-    ``visited`` set keeps track of processed filter codes to detect circular
-    references. The function raises :class:`QueryError` when a syntax error
-    occurs or the maximum recursion depth defined in :mod:`settings` is
-    exceeded.
+    Parameters
+    ----------
+    expr : str | dict
+        Filter expression either as a ``pandas.query`` string or a nested
+        dictionary with ``sub_expr`` nodes.
+    df : pandas.DataFrame
+        DataFrame to evaluate the expression against.
+    depth : int, optional
+        Current recursion depth used for nested expressions.
+    visited : set[str] | None, optional
+        Set of already processed filter codes to detect circular references.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Filtered DataFrame produced by evaluating ``expr``.
     """
-    if visited is None:
-        visited = set()
+    visited_codes = set() if visited is None else set(visited)
     if depth > settings.MAX_FILTER_DEPTH:
         raise QueryError(f"Max recursion depth ({settings.MAX_FILTER_DEPTH}) exceeded")
 
@@ -196,11 +210,11 @@ def safe_eval(expr, df, depth: int = 0, visited=None):
     if isinstance(expr, dict) and "sub_expr" in expr:
         current = expr.get("code")
         if current is not None:
-            if current in visited:
+            if current in visited_codes:
                 raise CircularError(f"Circular reference: {current}")
-            visited.add(current)
+            visited_codes.add(current)
         try:
-            return safe_eval(expr["sub_expr"], df, depth + 1, visited)
+            return safe_eval(expr["sub_expr"], df, depth + 1, visited_codes)
         except QueryError as e:
             FAILED_FILTERS.append({"filtre_kodu": expr.get("code"), "hata": str(e)})
             logger.warning("QUERY_ERROR %s", e)
