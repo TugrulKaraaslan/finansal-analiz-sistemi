@@ -26,7 +26,19 @@ __all__ = [
 def _align_common_index(
     series_a: pd.Series, series_b: pd.Series
 ) -> tuple[pd.Series, pd.Series]:
-    """Return ``series_a`` and ``series_b`` aligned to their shared index."""
+    """Return ``series_a`` and ``series_b`` aligned to their shared index.
+
+    Parameters
+    ----------
+    series_a, series_b : pandas.Series
+        Input series which may have differing indexes.
+
+    Returns
+    -------
+    tuple[pandas.Series, pandas.Series]
+        ``series_a`` and ``series_b`` restricted to the intersection of their
+        indexes so element-wise comparisons operate safely.
+    """
 
     aligned_a, aligned_b = series_a.align(series_b, join="inner")
     return aligned_a, aligned_b
@@ -93,23 +105,20 @@ def extract_columns_from_filters(
         # Return an empty set when ``filter_engine`` is unavailable
         return set()
 
-    wanted = set()
+    wanted: set[str] = set()
     if (
         df_filters is not None
         and not df_filters.empty
         and "PythonQuery" in df_filters.columns
     ):
         for q in df_filters["PythonQuery"].dropna().astype(str):
-            wanted |= _extract_query_columns(q)
+            wanted.update(_extract_query_columns(q))
 
-    for entry in series_series or []:
-        if len(entry) >= 2:
-            wanted.add(entry[0])
-            wanted.add(entry[1])
+    wanted.update(
+        part for entry in (series_series or []) if len(entry) >= 2 for part in entry[:2]
+    )
 
-    for entry in series_value or []:
-        if len(entry) >= 1:
-            wanted.add(entry[0])
+    wanted.update(entry[0] for entry in (series_value or []) if entry)
 
     return wanted
 
@@ -131,7 +140,7 @@ def extract_columns_from_filters_cached(
         set[str]: Unique column names collected from the CSV content.
     """
     df_filters = None
-    if df_filters_csv:
+    if df_filters_csv and df_filters_csv.strip():
         try:
             first = df_filters_csv.splitlines()[0]
             sep = ";" if first.count(";") >= first.count(",") else ","
