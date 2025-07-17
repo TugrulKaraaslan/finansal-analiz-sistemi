@@ -36,15 +36,11 @@ def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | NaTType:
     if isinstance(date_str, datetime):
         return pd.Timestamp(date_str)
 
-    # Try explicit ISO first
-    ts = pd.to_datetime(date_str, format="%Y-%m-%d", errors="coerce")
-    if ts is not pd.NaT:
-        return ts
-
-    # Try Turkish/European day.month.year
-    ts = pd.to_datetime(date_str, format="%d.%m.%Y", errors="coerce")
-    if ts is not pd.NaT:
-        return ts
+    # Try explicit formats before falling back to dateutil
+    for fmt in ("%Y-%m-%d", "%d.%m.%Y"):
+        ts = pd.to_datetime(date_str, format=fmt, errors="coerce")
+        if ts is not pd.NaT:
+            return ts
 
     # Generic day-first parsing with coercion (handles 07/03/25 etc.)
     ts = pd.to_datetime(date_str, dayfirst=True, errors="coerce")
