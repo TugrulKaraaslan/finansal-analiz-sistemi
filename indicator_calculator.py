@@ -10,6 +10,7 @@ modules can reuse them without additional renaming.
 from __future__ import annotations
 
 import gc
+import logging
 import re
 import warnings
 
@@ -286,36 +287,48 @@ def _tema20(series: pd.Series) -> pd.Series:
     return (3 * ema1) - (3 * ema2) + ema3
 
 
-def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
-    """Add a moving-average column if absent."""
+def safe_ma(
+    df: pd.DataFrame,
+    n: int,
+    kind: str = "sma",
+    logger_param: logging.Logger | None = None,
+) -> None:
+    """Append the requested moving-average column when missing."""
 
     if logger_param is None:
         logger_param = logger
-    local_logger = logger_param
-    col = f"{kind}_{n}"
-    if col in df.columns and df[col].notna().all() or "close" not in df.columns:
+    log = logger_param
+    col_name = f"{kind}_{n}"
+
+    if "close" not in df.columns:
+        log.debug("safe_ma: 'close' sütunu yok, işlem atlandı.")
         return
+    if col_name in df.columns and df[col_name].notna().all():
+        return
+
     try:
         if kind == "sma":
-            safe_set(
-                df,
-                col,
-                df["close"].rolling(window=n, min_periods=1).mean().values,
-            )
+            values = df["close"].rolling(window=n, min_periods=1).mean().values
         else:
-            safe_set(
-                df,
-                col,
-                df["close"].ewm(span=n, adjust=False, min_periods=1).mean().values,
+            values = (
+                df["close"]
+                .ewm(
+                    span=n,
+                    adjust=False,
+                    min_periods=1,
+                )
+                .mean()
+                .values
             )
-        df[col] = df[col].bfill()
-        local_logger.debug(f"'{col}' sütunu safe_ma ile eklendi.")
+        safe_set(df, col_name, values)
+        df[col_name] = df[col_name].bfill()
+        log.debug("'%s' sütunu safe_ma ile eklendi.", col_name)
     except Exception as e:
-        local_logger.error(f"'{col}' hesaplanırken hata: {e}", exc_info=False)
+        log.error("'%s' hesaplanırken hata: %s", col_name, e, exc_info=False)
         try:
             from utils.failure_tracker import log_failure
 
-            log_failure("indicators", col, str(e))
+            log_failure("indicators", col_name, str(e))
         except Exception:
             pass
 
