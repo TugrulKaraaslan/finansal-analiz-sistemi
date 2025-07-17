@@ -13,13 +13,17 @@ from pathlib import Path
 
 
 def purge_old_logs(
-    *, log_dir: Path | None = None, keep_days: int = 7, dry_run: bool = False
+    *,
+    log_dir: Path | None = None,
+    keep_days: int = 7,
+    dry_run: bool = False,
+    patterns: tuple[str, ...] | None = None,
 ) -> int:
     """Remove old log files from ``log_dir``.
 
-    Files matching ``*.log*`` and orphan ``*.lock`` entries older than
-    ``keep_days`` days are deleted. When ``dry_run`` is ``True`` the function
-    only prints which files would be removed.
+    Files matching ``patterns`` (``*.log*`` by default) and orphan ``*.lock``
+    entries older than ``keep_days`` days are deleted. When ``dry_run`` is
+    ``True`` the function only prints which files would be removed.
 
     Args:
         log_dir (Path | None, optional): Directory containing log files.
@@ -28,6 +32,8 @@ def purge_old_logs(
             are removed.
         dry_run (bool, optional): When ``True`` only print what would be
             deleted.
+        patterns (tuple[str, ...] | None, optional): Glob patterns for log
+            files. Defaults to ``("*.log*",)``.
 
     Returns:
         int: Number of files processed (also when ``dry_run`` is ``True``).
@@ -37,6 +43,8 @@ def purge_old_logs(
         log_dir = Path("loglar")
     else:
         log_dir = Path(log_dir)
+
+    patterns = ("*.log*",) if patterns is None else tuple(patterns)
 
     cutoff = datetime.now() - timedelta(days=keep_days)
     cutoff_ts = cutoff.timestamp()
@@ -51,14 +59,15 @@ def purge_old_logs(
     def is_expired(p: Path) -> bool:
         return p.stat().st_mtime < cutoff_ts
 
-    for log_file in log_dir.glob("*.log*"):
-        if is_expired(log_file):
-            remove(log_file)
-            count += 1
-            lock = log_file.with_suffix(".lock")
-            if lock.exists():
-                remove(lock)
+    for pat in patterns:
+        for log_file in log_dir.glob(pat):
+            if is_expired(log_file):
+                remove(log_file)
                 count += 1
+                lock = log_file.with_suffix(".lock")
+                if lock.exists():
+                    remove(lock)
+                    count += 1
 
     for lock_file in log_dir.glob("*.lock"):
         if not lock_file.with_suffix(".log").exists() and is_expired(lock_file):

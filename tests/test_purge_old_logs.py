@@ -22,3 +22,16 @@ def test_purge_dry_run(tmp_path):
     os.utime(old, (time.time() - 864000,) * 2)  # 10 days ago
     deleted = purge_old_logs(log_dir=tmp_path, keep_days=7, dry_run=True)
     assert deleted == 2 and old.exists() and lock_old.exists() and new.exists()
+
+
+def test_custom_patterns(tmp_path):
+    """Files matching custom patterns should be removed."""
+    old_txt = tmp_path / "old.txt"
+    old_txt.write_text("x")
+    import os
+    import time
+
+    os.utime(old_txt, (time.time() - 864000,) * 2)
+    removed = purge_old_logs(log_dir=tmp_path, keep_days=7, patterns=("*.txt",))
+    assert removed == 1
+    assert not old_txt.exists()
