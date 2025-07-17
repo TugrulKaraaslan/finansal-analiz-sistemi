@@ -42,8 +42,10 @@ def tarama_denetimi(
             columns={"FilterCode": "kod"}
         )  # pragma: no cover
     kayıtlar = []
-    for _, sat in df_filtreler.iterrows():
-        _, info = _apply_single_filter(df_indikator, sat["kod"], sat["PythonQuery"])
+    for sat in df_filtreler.itertuples(index=False):
+        _, info = _apply_single_filter(
+            df_indikator, getattr(sat, "kod"), getattr(sat, "PythonQuery")
+        )
         kayıtlar.append(info)
     df = pd.DataFrame(kayıtlar)
     if df.empty:
