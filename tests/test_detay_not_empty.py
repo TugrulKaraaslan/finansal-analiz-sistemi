@@ -25,3 +25,20 @@ def test_detay_not_empty():
     critical = ["hisse_kodu", "getiri_%", "basari", "strateji", "sebep_kodu"]
     # ensure none of the critical columns contain missing values
     assert detay_df[critical].notna().all().all()
+
+
+def test_detay_empty_list():
+    """Empty input should yield an empty DataFrame with expected columns."""
+    trades = pd.DataFrame(
+        {
+            "filtre_kodu": ["F1"],
+            "hisse_kodu": ["AAA"],
+            "getiri_%": [5.0],
+            "basari": ["BAŞARILI"],
+            "strateji": ["S"],
+            "sebep_kodu": ["OK"],
+        }
+    )
+    df = _build_detay_df([], trades)
+    assert df.empty
+    assert list(df.columns) == list(trades.columns)

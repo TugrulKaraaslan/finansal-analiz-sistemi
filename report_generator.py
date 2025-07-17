@@ -101,7 +101,13 @@ def _build_detay_df(
     -------
     pandas.DataFrame
         Combined detail rows enriched with trade results when available.
+        When ``detay_list`` is empty an empty frame with ``trades`` columns
+        is returned.
     """
+    if not detay_list:
+        cols = trades.columns if trades is not None else None
+        return pd.DataFrame(columns=cols)
+
     detay_df = pd.concat(detay_list, ignore_index=True)
     if trades is not None and not trades.empty:
         detay_df = detay_df.merge(
