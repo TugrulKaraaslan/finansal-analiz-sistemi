@@ -28,6 +28,11 @@ except ImportError:
     )
 
 
+# Regex and translation table used to normalize numeric strings
+_NUMERIC_RE = re.compile(r"[^\d,.-]+")
+_TRANSLATE = str.maketrans({".": "", ",": "."})
+
+
 def _temizle_sayisal_deger(deger: object) -> float:
     """Return ``deger`` converted to ``float`` when possible.
 
@@ -43,8 +48,8 @@ def _temizle_sayisal_deger(deger: object) -> float:
         return float(deger)
 
     if isinstance(deger, str):
-        cleaned = re.sub(r"[^\d,.-]+", "", deger.strip())
-        cleaned = cleaned.replace(".", "").replace(",", ".")
+        cleaned = _NUMERIC_RE.sub("", deger.strip())
+        cleaned = cleaned.translate(_TRANSLATE)
         try:
             return float(cleaned)
         except ValueError:
@@ -57,9 +62,8 @@ def _temizle_sayisal_seri(s: pd.Series) -> pd.Series:
     """Vectorized variant of :func:`_temizle_sayisal_deger`."""
     if pd.api.types.is_numeric_dtype(s):
         return s.astype(float)
-    cleaned = s.astype(str).str.replace(r"[^\d,.-]+", "", regex=True)
-    cleaned = cleaned.str.replace(".", "", regex=False)
-    cleaned = cleaned.str.replace(",", ".", regex=False)
+    cleaned = s.astype(str).str.replace(_NUMERIC_RE, "", regex=True)
+    cleaned = cleaned.str.translate(_TRANSLATE)
     return pd.to_numeric(cleaned, errors="coerce").astype(float)
 
 
