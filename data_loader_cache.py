@@ -89,8 +89,8 @@ class DataLoaderCache:
     def load_excel(self, filepath: str, **kwargs) -> pd.ExcelFile:
         """Load an Excel workbook via the cache.
 
-        The file on disk is read only when the cached entry is missing or
-        expired. Absolute paths are used as keys so repeated calls avoid I/O.
+        The workbook is reloaded whenever its modification time or size
+        changes so that updates on disk are reflected immediately.
 
         Parameters
         ----------
@@ -104,15 +104,22 @@ class DataLoaderCache:
         pd.ExcelFile
             Cached or newly loaded workbook instance.
         """
-        key = (os.path.abspath(filepath), "__excel__")
-        if key in self.loaded_data:
-            if self.logger:
-                self.logger.debug(f"Cache hit: {key}")
-            return self.loaded_data[key]
+        abs_path = os.path.abspath(filepath)
+        key = (abs_path, "__excel__")
+        stat = os.stat(abs_path)
+        mtime = stat.st_mtime_ns
+        size = stat.st_size
+        cached = self.loaded_data.get(key)
+        if cached:
+            cached_mtime, cached_size, xls_cached = cached
+            if cached_mtime == mtime and cached_size == size:
+                if self.logger:
+                    self.logger.debug(f"Cache hit: {key}")
+                return xls_cached
 
         try:
-            xls = open_excel_cached(filepath, **kwargs)
-            self.loaded_data[key] = xls
+            xls = open_excel_cached(abs_path, **kwargs)
+            self.loaded_data[key] = (mtime, size, xls)
             if self.logger:
                 self.logger.info(f"ExcelFile yüklendi: {filepath}")
             return xls
