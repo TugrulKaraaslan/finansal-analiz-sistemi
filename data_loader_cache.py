@@ -7,7 +7,7 @@ avoid disk access. Each cached dataset expires after ``ttl`` seconds.
 
 import os
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Callable, Tuple, TypeVar
 
 import pandas as pd
 from cachetools import TTLCache
@@ -15,6 +15,8 @@ from cachetools import TTLCache
 from finansal_analiz_sistemi import config
 from src.utils.excel_reader import clear_cache as clear_excel_cache
 from src.utils.excel_reader import open_excel_cached
+
+T = TypeVar("T")
 
 
 @dataclass
@@ -71,6 +73,51 @@ class DataLoaderCache:
         self.loaded_data.clear()
         clear_excel_cache()
 
+    def _load_file(
+        self,
+        filepath: str,
+        *,
+        kind: str,
+        loader: Callable[[str], T],
+    ) -> T:
+        """Return cached data loaded via ``loader``.
+
+        Parameters
+        ----------
+        filepath : str
+            File path to load and monitor.
+        kind : str
+            Cache namespace such as ``"__csv__"``.
+        loader : Callable[[str], T]
+            Function invoked with the absolute path when a refresh is needed.
+
+        Returns
+        -------
+        T
+            Loaded object either retrieved from the cache or freshly read.
+        """
+
+        key, mtime, size = self._get_cache_key(filepath, kind)
+        abs_path = key[0]
+        cached = self.loaded_data.get(key)
+        if cached and cached.mtime == mtime and cached.size == size:
+            if self.logger:
+                self.logger.debug(f"Cache hit: {key}")
+            return cached.data  # type: ignore[return-value]
+
+        try:
+            data = loader(abs_path)
+            self.loaded_data[key] = CachedItem(mtime, size, data)
+            if self.logger:
+                label = kind.strip("_").upper()
+                self.logger.info(f"{label} yüklendi: {filepath}")
+            return data
+        except Exception as e:
+            if self.logger:
+                label = kind.strip("_").upper()
+                self.logger.error(f"{label} yükleme hatası: {filepath}: {e}")
+            raise
+
     def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
         """Load ``filepath`` through the in-memory cache.
 
@@ -89,26 +136,13 @@ class DataLoaderCache:
         pd.DataFrame
             Cached or newly loaded data.
         """
-        key, mtime, size = self._get_cache_key(filepath, "__csv__")
-        abs_path = key[0]
-        cached = self.loaded_data.get(key)
-        if cached:
-            if cached.mtime == mtime and cached.size == size:
-                if self.logger:
-                    self.logger.debug(f"Cache hit: {key}")
-                return cached.data
+        kwargs.setdefault("dtype", config.DTYPES)
 
-        try:
-            kwargs.setdefault("dtype", config.DTYPES)
-            df = pd.read_csv(abs_path, **kwargs)
-            self.loaded_data[key] = CachedItem(mtime, size, df)
-            if self.logger:
-                self.logger.info(f"CSV yüklendi: {filepath}")
-            return df
-        except Exception as e:
-            if self.logger:
-                self.logger.error(f"CSV yükleme hatası: {filepath}: {e}")
-            raise
+        return self._load_file(
+            filepath,
+            kind="__csv__",
+            loader=lambda p: pd.read_csv(p, **kwargs),
+        )
 
     def load_excel(self, filepath: str, **kwargs) -> pd.ExcelFile:
         """Load an Excel workbook via the cache.
@@ -128,25 +162,11 @@ class DataLoaderCache:
         pd.ExcelFile
             Cached or newly loaded workbook instance.
         """
-        key, mtime, size = self._get_cache_key(filepath, "__excel__")
-        abs_path = key[0]
-        cached = self.loaded_data.get(key)
-        if cached:
-            if cached.mtime == mtime and cached.size == size:
-                if self.logger:
-                    self.logger.debug(f"Cache hit: {key}")
-                return cached.data
-
-        try:
-            xls = open_excel_cached(abs_path, **kwargs)
-            self.loaded_data[key] = CachedItem(mtime, size, xls)
-            if self.logger:
-                self.logger.info(f"ExcelFile yüklendi: {filepath}")
-            return xls
-        except Exception as e:
-            if self.logger:
-                self.logger.error(f"ExcelFile yükleme hatası: {filepath}: {e}")
-            raise
+        return self._load_file(
+            filepath,
+            kind="__excel__",
+            loader=lambda p: open_excel_cached(p, **kwargs),
+        )
 
     def load_parquet(self, filepath: str, **kwargs) -> pd.DataFrame:
         """Load a Parquet file through the cache.
@@ -163,21 +183,8 @@ class DataLoaderCache:
         pandas.DataFrame
             Cached or newly loaded DataFrame.
         """
-        key, mtime, size = self._get_cache_key(filepath, "__parquet__")
-        abs_path = key[0]
-        cached = self.loaded_data.get(key)
-        if cached and cached.mtime == mtime and cached.size == size:
-            if self.logger:
-                self.logger.debug(f"Cache hit: {key}")
-            return cached.data
-
-        try:
-            df = pd.read_parquet(abs_path, **kwargs)
-            self.loaded_data[key] = CachedItem(mtime, size, df)
-            if self.logger:
-                self.logger.info(f"Parquet yüklendi: {filepath}")
-            return df
-        except Exception as e:
-            if self.logger:
-                self.logger.error(f"Parquet yükleme hatası: {filepath}: {e}")
-            raise
+        return self._load_file(
+            filepath,
+            kind="__parquet__",
+            loader=lambda p: pd.read_parquet(p, **kwargs),
+        )
