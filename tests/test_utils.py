@@ -76,11 +76,11 @@ def test_crosses_below_misaligned_index_length_matches_intersection():
 
 
 @pytest.mark.parametrize("func", [crosses_above, crosses_below])
-def test_cross_functions_with_none_returns_empty_false_series(func):
-    """Passing ``None`` yields an empty ``False`` series."""
+def test_cross_functions_with_none_returns_empty_series(func):
+    """Passing ``None`` yields an empty boolean series."""
     s = pd.Series([1, 2, 3])
     result = func(None, s)
-    expected = pd.Series(False, index=[])
+    expected = pd.Series(dtype=bool)
     pd.testing.assert_series_equal(result, expected)
 
 
