@@ -18,3 +18,10 @@ def test_safe_concat_empty():
     """Ensure :func:`safe_concat` returns an empty DataFrame for empty input."""
     out = safe_concat([])
     assert out.empty and isinstance(out, pd.DataFrame)
+
+
+def test_safe_concat_iterable():
+    """safe_concat should accept any iterable of DataFrames."""
+    frames = (pd.DataFrame({"a": [i]}) for i in range(3))
+    result = safe_concat(frames, ignore_index=True)
+    assert result.equals(pd.DataFrame({"a": [0, 1, 2]}))

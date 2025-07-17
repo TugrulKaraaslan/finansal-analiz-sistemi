@@ -6,7 +6,7 @@ the rest of the codebase can remain version agnostic.
 """
 
 import logging
-from typing import List
+from typing import Iterable
 
 import pandas as pd
 from packaging import version as _v
@@ -16,16 +16,20 @@ __all__ = ["safe_concat", "safe_infer_objects", "safe_to_excel"]
 _PANDAS_HAS_COPY = _v.parse(pd.__version__) >= _v.parse("2.0.0")
 
 
-def safe_concat(frames: List[pd.DataFrame], **kwargs) -> pd.DataFrame:
+def safe_concat(frames: Iterable[pd.DataFrame], **kwargs) -> pd.DataFrame:
     """Concatenate non-empty frames or return an empty ``DataFrame``.
 
-    Args:
-        frames (List[pd.DataFrame]): DataFrames to concatenate.
-        **kwargs: Additional arguments forwarded to :func:`pandas.concat`.
+    Parameters
+    ----------
+    frames : Iterable[pandas.DataFrame]
+        Sequence of DataFrames to concatenate.
+    **kwargs : Any
+        Additional arguments forwarded to :func:`pandas.concat`.
 
-    Returns:
-        pd.DataFrame: Concatenated frame or an empty frame when ``frames`` is
-        empty.
+    Returns
+    -------
+    pandas.DataFrame
+        Concatenated frame or an empty frame when ``frames`` is empty.
     """
     frames = [f for f in frames if not f.empty]
     return pd.concat(frames, **kwargs) if frames else pd.DataFrame()
