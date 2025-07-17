@@ -37,10 +37,13 @@ def _align_common_index(
     -------
     tuple[pandas.Series, pandas.Series]
         ``series_a`` and ``series_b`` restricted to the intersection of their
-        indexes so element-wise comparisons operate safely.
+        indexes so element-wise comparisons operate safely. The helper avoids
+        :meth:`Series.align` for better performance on large datasets.
     """
 
-    aligned_a, aligned_b = series_a.align(series_b, join="inner")
+    common_idx = series_a.index.intersection(series_b.index)
+    aligned_a = series_a.reindex(common_idx)
+    aligned_b = series_b.reindex(common_idx)
     return aligned_a, aligned_b
 
 
@@ -70,8 +73,10 @@ def _crosses(
     prev_y = y.shift(1)
 
     if above:
-        return (prev_x < prev_y) & (x >= y)
-    return (prev_x > prev_y) & (x <= y)
+        res = (prev_x < prev_y) & (x >= y)
+    else:
+        res = (prev_x > prev_y) & (x <= y)
+    return res.astype(bool)
 
 
 def crosses_above(a: pd.Series | None, b: pd.Series | None) -> pd.Series:
