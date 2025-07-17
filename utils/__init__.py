@@ -12,8 +12,6 @@ from io import StringIO
 
 import pandas as pd
 
-from finansal_analiz_sistemi.logging_config import get_logger
-
 from .purge_old_logs import purge_old_logs
 
 __all__ = [
@@ -23,8 +21,6 @@ __all__ = [
     "extract_columns_from_filters_cached",
     "purge_old_logs",
 ]
-
-logger = get_logger(__name__)
 
 
 def _align(a: pd.Series, b: pd.Series) -> tuple[pd.Series, pd.Series]:
