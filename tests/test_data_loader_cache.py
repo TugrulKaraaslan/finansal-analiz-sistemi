@@ -30,3 +30,14 @@ def test_parquet_caching(tmp_path):
     first = cache.load_parquet(str(path))
     second = cache.load_parquet(str(path))
     assert first is second
+
+
+def test_csv_caching(tmp_path):
+    """CSV dosyaları yinelenen okumalarda yeniden yüklenmemeli."""
+    path = tmp_path / "c.csv"
+    pd.DataFrame({"z": [1, 2]}).to_csv(path, index=False)
+
+    cache = DataLoaderCache()
+    first = cache.load_csv(str(path))
+    second = cache.load_csv(str(path))
+    assert first is second
