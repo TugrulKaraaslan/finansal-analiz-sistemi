@@ -51,17 +51,18 @@ except ImportError as e_import_main:
     raise ImportError(e_import_main)
 
 
-def _hazirla_rapor_alt_df(rapor_df: pd.DataFrame):
-    """Return summary, detail and stats tables derived from ``rapor_df``.
+def hazirla_rapor_tablolari(
+    rapor_df: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """``rapor_df``'ten rapor tablolarını oluştur."""
 
-    An empty ``rapor_df`` yields three empty ``DataFrame`` objects. The
-    returned tuple follows the order ``(summary_df, detail_df, stats_df)``.
-    """
     if rapor_df is None or rapor_df.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
     ozet_df = rapor_df.copy()
     detay_df = rapor_df.copy()
-    istatistik_df = rapor_df.describe().reset_index()
+    sayisal = rapor_df.select_dtypes(include="number")
+    istatistik_df = sayisal.describe().reset_index()
     return ozet_df, detay_df, istatistik_df
 
 
@@ -209,7 +210,7 @@ def raporla(rapor_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     if rapor_df.empty:
         logger.info("Rapor verisi boş.")
         return
-    ozet, detay, istat = _hazirla_rapor_alt_df(rapor_df)
+    ozet, detay, istat = hazirla_rapor_tablolari(rapor_df)
     out_path = Path("raporlar") / f"rapor_{pd.Timestamp.now():%Y%m%d_%H%M%S}.xlsx"
     out_path.parent.mkdir(exist_ok=True)
     from utils.memory_profile import mem_profile
