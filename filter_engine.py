@@ -449,11 +449,11 @@ def uygula_filtreler(
     atlanmis_filtreler_log_dict: dict[str, Any] = {}
     kontrol_log: list[dict] = []
 
-    for _, row in df_filtre_kurallari.iterrows():
-        filtre_kodu = row.get("FilterCode")
+    for row in df_filtre_kurallari.itertuples(index=False):
+        filtre_kodu = getattr(row, "FilterCode", None)
         if filtre_kodu is None:
-            filtre_kodu = row.get("filtre_kodu")
-        python_sorgusu_raw = row.get("PythonQuery")
+            filtre_kodu = getattr(row, "filtre_kodu", None)
+        python_sorgusu_raw = getattr(row, "PythonQuery", None)
 
         if pd.isna(python_sorgusu_raw) or not str(python_sorgusu_raw).strip():
             fn_logger.warning(

@@ -36,21 +36,12 @@ def fill_missing_business_day(
         return df
 
     # propagate next valid dates downward so NaT values have a reference point
-    next_valid = dates.bfill()
-    if next_valid.isna().any():
-        next_valid = next_valid.fillna(dates.ffill())
+    next_valid = dates.bfill().ffill()
 
-    # determine how far each NaT is from the next valid date
-    offsets = []
-    counter = 0
-    for is_na in reversed(mask.to_list()):
-        if is_na:
-            counter += 1
-            offsets.append(counter)
-        else:
-            offsets.append(0)
-            counter = 0
-    offsets = list(reversed(offsets))
+    rev_mask = mask.iloc[::-1]
+    groups = rev_mask.ne(rev_mask.shift()).cumsum()
+    offset_rev = rev_mask.groupby(groups).cumcount().add(1).where(rev_mask, 0)
+    offsets = offset_rev.iloc[::-1]
 
     adjusted = next_valid.copy()
     for idx, off in enumerate(offsets):
