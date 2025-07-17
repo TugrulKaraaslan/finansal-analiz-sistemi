@@ -32,6 +32,10 @@ def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | NaTType:
     if pd.isna(date_str) or str(date_str).strip() == "":
         return pd.NaT
 
+    # Short-circuit for already parsed dates
+    if isinstance(date_str, datetime):
+        return pd.Timestamp(date_str)
+
     # Try explicit ISO first
     ts = pd.to_datetime(date_str, format="%Y-%m-%d", errors="coerce")
     if ts is not pd.NaT:
