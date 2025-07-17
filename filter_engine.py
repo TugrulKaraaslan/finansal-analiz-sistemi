@@ -157,6 +157,12 @@ def _build_solution(err_type: str, msg: str) -> str:
     return ""
 
 
+def _extract_columns_from_query(query: str) -> set:
+    """Return referenced columns using the unified naming scheme."""
+
+    return _extract_query_columns(query)
+
+
 def _extract_query_columns(query: str) -> set:
     """Return column-like identifiers referenced in a filter query."""
 
@@ -164,12 +170,6 @@ def _extract_query_columns(query: str) -> set:
     tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
     reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
     return tokens - reserved
-
-
-def _extract_columns_from_query(query: str) -> set:
-    """Return referenced columns using the unified naming scheme."""
-
-    return _extract_query_columns(query)
 
 
 def clear_failed() -> None:
