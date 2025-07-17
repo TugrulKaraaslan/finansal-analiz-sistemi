@@ -44,7 +44,7 @@ def fill_missing_business_day(
     offsets = offset_rev.iloc[::-1]
 
     adjusted = next_valid.copy()
-    for idx, off in enumerate(offsets):
+    for idx, off in offsets[mask].items():
         if off:
             adjusted.iloc[idx] = adjusted.iloc[idx] - pd.offsets.BDay(off)
 
