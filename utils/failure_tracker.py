@@ -26,7 +26,9 @@ def clear_failures() -> None:
     failures.clear()
 
 
-def get_failures(as_dict: bool = False):
+def get_failures(
+    as_dict: bool = False,
+) -> dict[str, list[FailedFilter]] | defaultdict[str, list[FailedFilter]]:
     """Return recorded failures.
 
     Args:
