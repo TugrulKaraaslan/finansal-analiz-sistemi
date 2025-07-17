@@ -1,6 +1,7 @@
 """Unit tests for normalize."""
 
 import pandas as pd
+import pytest
 
 from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
 
@@ -19,3 +20,10 @@ def test_normalize_removes_duplicate_aliases():
     out = normalize_filtre_kodu(df)
     assert list(out.columns) == ["filtre_kodu"]
     assert out["filtre_kodu"].tolist() == ["F1"]
+
+
+def test_normalize_missing_column():
+    """Invalid DataFrames should raise ``KeyError``."""
+    df = pd.DataFrame({"other": ["X"]})
+    with pytest.raises(KeyError):
+        normalize_filtre_kodu(df)
