@@ -58,19 +58,22 @@ class MissingColumnError(Exception):
         self.missing = missing
 
 
-def _extract_query_columns(query: str) -> set:
-    """Return column-like identifiers referenced in a filter query."""
+_STRING_RE = re.compile(r"(?:'[^']*'|\"[^\"]*\")")
+_IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
-    query = re.sub(r"(?:'[^']*'|\"[^\"]*\")", " ", query)
-    tokens = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query))
+
+def _extract_query_columns(query: str) -> set[str]:
+    """Return column-like identifiers referenced in ``query``.
+
+    String literals are stripped before searching for valid Python
+    identifiers. Reserved keywords and boolean literals are excluded
+    from the result.
+    """
+
+    query = _STRING_RE.sub(" ", query)
+    tokens = set(_IDENT_RE.findall(query))
     reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
     return tokens - reserved
-
-
-def _extract_columns_from_query(query: str) -> set:
-    """Return referenced columns using the unified naming scheme."""
-
-    return _extract_query_columns(query)
 
 
 def _build_solution(err_type: str, msg: str) -> str:
@@ -334,7 +337,7 @@ def _apply_single_filter(
         "secim_adedi": 0,
     }
 
-    req_cols = _extract_columns_from_query(query)
+    req_cols = _extract_query_columns(query)
     missing_cols = sorted(req_cols - set(df.columns))
     if missing_cols:
         info.update(
@@ -525,7 +528,7 @@ def uygula_filtreler(
                 atlanmis_filtreler_log_dict, filtre_kodu, "QUERY_ERROR", hata_mesaji
             )
             continue
-        kullanilan_sutunlar = _extract_columns_from_query(python_sorgusu)
+        kullanilan_sutunlar = _extract_query_columns(python_sorgusu)
         if "volume_tl" in kullanilan_sutunlar and {"volume", "close"} <= set(
             df_tarama_gunu.columns
         ):
