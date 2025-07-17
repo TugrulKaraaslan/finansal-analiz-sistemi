@@ -147,3 +147,37 @@ class DataLoaderCache:
             if self.logger:
                 self.logger.error(f"ExcelFile yükleme hatası: {filepath}: {e}")
             raise
+
+    def load_parquet(self, filepath: str, **kwargs) -> pd.DataFrame:
+        """Load a Parquet file through the cache.
+
+        Parameters
+        ----------
+        filepath : str
+            Parquet file path.
+        **kwargs : Any
+            Arguments forwarded to :func:`pandas.read_parquet`.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Cached or newly loaded DataFrame.
+        """
+        key, mtime, size = self._get_cache_key(filepath, "__parquet__")
+        abs_path = key[0]
+        cached = self.loaded_data.get(key)
+        if cached and cached.mtime == mtime and cached.size == size:
+            if self.logger:
+                self.logger.debug(f"Cache hit: {key}")
+            return cached.data
+
+        try:
+            df = pd.read_parquet(abs_path, **kwargs)
+            self.loaded_data[key] = CachedItem(mtime, size, df)
+            if self.logger:
+                self.logger.info(f"Parquet yüklendi: {filepath}")
+            return df
+        except Exception as e:
+            if self.logger:
+                self.logger.error(f"Parquet yükleme hatası: {filepath}: {e}")
+            raise
