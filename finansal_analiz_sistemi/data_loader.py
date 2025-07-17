@@ -29,17 +29,20 @@ _read_excel = partial(pd.read_excel, engine="openpyxl")
 
 
 @lru_cache(maxsize=None)
-def _read_excel_cached(path: str) -> pd.DataFrame:
-    """Return a cached Excel file.
+def _read_excel_cached(path: str | Path) -> pd.DataFrame:
+    """Return an Excel file read via ``openpyxl`` with caching.
 
-    Args:
-        path (str): Excel file path.
+    Parameters
+    ----------
+    path : str | pathlib.Path
+        Dosya yolu.
 
-    Returns:
-        pd.DataFrame: DataFrame read via ``openpyxl`` with LRU caching.
-
+    Returns
+    -------
+    pandas.DataFrame
+        Okunan Excel içeriği.
     """
-    return _read_excel(path)
+    return _read_excel(str(path))
 
 
 def _standardize_date_column(
@@ -177,21 +180,20 @@ def _standardize_ohlcv_columns(
     return df
 
 
-def check_and_create_dirs(*dir_paths):
-    """Create directories if they do not exist.
+def check_and_create_dirs(*dir_paths: str | Path) -> None:
+    """Ensure each path in ``dir_paths`` exists as a directory."""
 
-    Args:
-        *dir_paths (str | Path): One or more directory paths to create.
-
-    """
-    for dir_path in dir_paths:
-        if dir_path and not os.path.exists(dir_path):
+    for path in dir_paths:
+        if not path:
+            continue
+        p = Path(path)
+        if not p.exists():
             try:
-                os.makedirs(dir_path, exist_ok=True)
-                logger.info(f"Dizin oluşturuldu: {dir_path}")
-            except Exception as e:
+                p.mkdir(parents=True, exist_ok=True)
+                logger.info("Dizin oluşturuldu: %s", p)
+            except Exception as exc:  # pragma: no cover - I/O errors
                 logger.error(
-                    f"Dizin oluşturulamadı: {dir_path}. Hata: {e}", exc_info=True
+                    "Dizin oluşturulamadı: %s. Hata: %s", p, exc, exc_info=True
                 )
 
 
