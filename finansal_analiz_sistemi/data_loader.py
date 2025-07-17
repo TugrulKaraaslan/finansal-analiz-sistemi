@@ -116,28 +116,20 @@ def _standardize_ohlcv_columns(
     log.debug(f"--- '{file_name_short}': OHLCV Standardizasyonu Başlıyor ---")
     log.debug(f"'{file_name_short}': Orijinal Sütunlar: {df.columns.tolist()}")
 
-    rename_map = {}
-    current_columns_set = set(df.columns)  # Keep current columns as a set
+    rename_map: dict[str, str] = {}
+    existing = set(df.columns)
 
-    # Map raw column names defined in ``config.OHLCV_MAP`` to their standardized
-    # equivalents when the target name does not already exist in ``df``.
-    for raw_name_from_config, standard_name_target in config.OHLCV_MAP.items():
-        if raw_name_from_config in current_columns_set:
-            if (
-                raw_name_from_config != standard_name_target
-                and (
-                    standard_name_target not in current_columns_set
-                    or standard_name_target not in df.columns
-                )
-                and standard_name_target not in rename_map.values()
-            ):
-                rename_map[raw_name_from_config] = standard_name_target
-                log.debug(
-                    f"'{file_name_short}': Eşleştirme bulundu: '{raw_name_from_config}' "
-                    f"-> '{standard_name_target}' (rename_map'e eklendi)"
-                )
-            # Otherwise the column already exists under the target name or has
-            # been mapped previously. No action required in these cases.
+    for raw_name, standard_name in config.OHLCV_MAP.items():
+        if (
+            raw_name in existing
+            and raw_name != standard_name
+            and standard_name not in existing
+            and standard_name not in rename_map.values()
+        ):
+            rename_map[raw_name] = standard_name
+            log.debug(
+                f"'{file_name_short}': Eşleştirme bulundu: '{raw_name}' -> '{standard_name}'"
+            )
 
     if rename_map:
         log.info(
@@ -159,22 +151,16 @@ def _standardize_ohlcv_columns(
             "(ya zaten standart ya da MAP'te eşleşme yok)."
         )
 
-    # Final check: ensure required standard columns exist
-    temel_hedef_sutunlar = ["open", "high", "low", "close", "volume"]
-    mevcut_sutunlar_son_hali = set(df.columns)  # Updated columns after renaming
-    eksik_temel_sutunlar = [
-        s for s in temel_hedef_sutunlar if s not in mevcut_sutunlar_son_hali
-    ]
+    required = {"open", "high", "low", "close", "volume"}
+    missing = required.difference(df.columns)
 
-    if eksik_temel_sutunlar:
+    if missing:
         log.warning(
-            f"'{file_name_short}': Standartlaştırma sonrası TEMEL HEDEF OHLCV sütunlarından bazıları hala eksik: "
-            f"{eksik_temel_sutunlar}."
+            f"'{file_name_short}': Standartlaştırma sonrası bazı OHLCV sütunları eksik: {sorted(missing)}"
         )
     else:
         log.info(
-            f"'{file_name_short}': Tüm temel hedef OHLCV sütunları ('open', 'high', 'low', 'close', 'volume') "
-            "başarıyla oluşturuldu/bulundu."
+            f"'{file_name_short}': Tüm temel OHLCV sütunları başarıyla oluşturuldu/bulundu."
         )
     log.debug(f"--- '{file_name_short}': OHLCV Standardizasyonu Tamamlandı ---")
     return df
