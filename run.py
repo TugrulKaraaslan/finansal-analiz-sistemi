@@ -480,7 +480,7 @@ def main(argv: list[str] | None = None) -> None:
             ) as wr:
                 add_error_sheet(wr, log_counter.error_list)
         logging.shutdown()
-        utils.purge_old_logs("loglar", days=30)
+        utils.purge_old_logs(log_dir="loglar", keep_days=30)
 
 
 if __name__ == "__main__":  # pragma: no cover - manual execution
