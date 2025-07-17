@@ -28,11 +28,12 @@ except ImportError:
     )
 
 
-def _temizle_sayisal_deger(deger):
-    """Parse ``deger`` into a float value.
+def _temizle_sayisal_deger(deger: object) -> float:
+    """Return ``deger`` parsed as ``float`` when possible.
 
-    Thousands separators are removed and decimal commas replaced with dots.
-    Values that cannot be converted return ``np.nan``.
+    The helper accepts strings using the Turkish number format and plain
+    numeric types. Thousands separators are stripped and decimal commas are
+    normalized to dots. Invalid inputs yield ``np.nan``.
     """
     if pd.isna(deger):
         return np.nan
@@ -59,6 +60,16 @@ def _temizle_sayisal_deger(deger):
             except ValueError:
                 return np.nan
     return np.nan  # Fallback for all other unexpected types
+
+
+def _temizle_sayisal_seri(s: pd.Series) -> pd.Series:
+    """Vectorized variant of :func:`_temizle_sayisal_deger`."""
+    if pd.api.types.is_numeric_dtype(s):
+        return s.astype(float)
+    cleaned = s.astype(str).str.replace(r"[^\d,.-]+", "", regex=True)
+    cleaned = cleaned.str.replace(".", "", regex=False)
+    cleaned = cleaned.str.replace(",", ".", regex=False)
+    return pd.to_numeric(cleaned, errors="coerce").astype(float)
 
 
 def on_isle_hisse_verileri(
@@ -143,7 +154,7 @@ def on_isle_hisse_verileri(
             if df[col].dtype == "object" or isinstance(df[col].dtype, CategoricalDtype):
                 nan_before = df[col].isnull().sum()
                 original_type = df[col].dtype
-                df[col] = df[col].apply(_temizle_sayisal_deger).astype(float)
+                df[col] = _temizle_sayisal_seri(df[col])
                 nan_after = df[col].isnull().sum()
                 if nan_after > nan_before:
                     fn_logger.warning(
