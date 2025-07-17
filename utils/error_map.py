@@ -5,12 +5,12 @@ localized ``(reason, hint)`` tuples so callers can present concise
 error messages.
 """
 
-from typing import Dict, Tuple
+from typing import Tuple
 
 __all__ = ["get_reason_hint"]
 
 # Mapping from exception names to localized (reason, hint) tuples.
-REASON_MAP: Dict[str, Tuple[str, str]] = {
+REASON_MAP: dict[str, Tuple[str, str]] = {
     "ZeroDivisionError": (
         "S\u0131f\u0131ra B\u00f6lme",
         "B\u00f6l\u00fcnen de\u011feri s\u0131f\u0131rdan farkl\u0131 yap",
@@ -18,6 +18,10 @@ REASON_MAP: Dict[str, Tuple[str, str]] = {
     "KeyError": (
         "Veri Alan\u0131 Yok",
         "hisse_kodu / tarih s\u00fctunu eksik olabilir",
+    ),
+    "ValueError": (
+        "Ge\u00e7ersiz De\u011fer",
+        "Parametreleri kontrol edin",
     ),
 }
 
