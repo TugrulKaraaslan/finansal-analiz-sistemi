@@ -1,3 +1,5 @@
+"""Test conversion of failure logs to a DataFrame."""
+
 import utils.failure_tracker as ft
 
 
