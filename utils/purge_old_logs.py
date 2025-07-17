@@ -8,6 +8,7 @@ the function only prints which files would be deleted.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Iterable
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -17,7 +18,7 @@ def purge_old_logs(
     log_dir: Path | None = None,
     keep_days: int = 7,
     dry_run: bool = False,
-    patterns: tuple[str, ...] | None = None,
+    patterns: Iterable[str] | None = None,
 ) -> int:
     """Remove old log files from ``log_dir``.
 
@@ -32,29 +33,30 @@ def purge_old_logs(
             are removed.
         dry_run (bool, optional): When ``True`` only print what would be
             deleted.
-        patterns (tuple[str, ...] | None, optional): Glob patterns for log
+        patterns (Iterable[str] | None, optional): Glob patterns for log
             files. Defaults to ``("*.log*",)``.
+
+    Raises:
+        ValueError: If ``keep_days`` is negative.
 
     Returns:
         int: Number of files processed (also when ``dry_run`` is ``True``).
 
     """
-    if log_dir is None:
-        log_dir = Path("loglar")
-    else:
-        log_dir = Path(log_dir)
+    if keep_days < 0:
+        raise ValueError("keep_days must be non-negative")
 
+    log_dir = Path("loglar") if log_dir is None else Path(log_dir)
     patterns = ("*.log*",) if patterns is None else tuple(patterns)
 
-    cutoff = datetime.now() - timedelta(days=keep_days)
-    cutoff_ts = cutoff.timestamp()
+    cutoff_ts = (datetime.now() - timedelta(days=keep_days)).timestamp()
     count = 0
 
     def remove(path: Path) -> None:
         if dry_run:
             print(f"[DRY-RUN] Would delete {path}")
         else:
-            path.unlink()
+            path.unlink(missing_ok=True)
 
     def is_expired(p: Path) -> bool:
         return p.stat().st_mtime < cutoff_ts
