@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 import pytest
 
@@ -41,3 +43,14 @@ def test_csv_caching(tmp_path):
     first = cache.load_csv(str(path))
     second = cache.load_csv(str(path))
     assert first is second
+
+
+def test_cache_entry_expires(tmp_path):
+    path = tmp_path / "d.csv"
+    pd.DataFrame({"x": [1]}).to_csv(path, index=False)
+
+    cache = DataLoaderCache(ttl=1)
+    first = cache.load_csv(str(path))
+    time.sleep(1.1)
+    second = cache.load_csv(str(path))
+    assert first is not second
