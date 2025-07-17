@@ -6,6 +6,7 @@ avoid disk access. Each cached dataset expires after ``ttl`` seconds.
 """
 
 import os
+from dataclasses import dataclass
 from typing import Tuple
 
 import pandas as pd
@@ -13,6 +14,15 @@ from cachetools import TTLCache
 
 from finansal_analiz_sistemi import config
 from src.utils.excel_reader import open_excel_cached
+
+
+@dataclass
+class CachedItem:
+    """Metadata and payload for a cached file."""
+
+    mtime: int
+    size: int
+    data: object
 
 
 class DataLoaderCache:
@@ -34,7 +44,9 @@ class DataLoaderCache:
         maxsize : int, optional
             Maximum number of cached datasets.
         """
-        self.loaded_data: TTLCache = TTLCache(maxsize=maxsize, ttl=ttl)
+        self.loaded_data: TTLCache[tuple[str, str], CachedItem] = TTLCache(
+            maxsize=maxsize, ttl=ttl
+        )
         self.logger = logger
 
     def _get_cache_key(
@@ -82,16 +94,15 @@ class DataLoaderCache:
         abs_path = key[0]
         cached = self.loaded_data.get(key)
         if cached:
-            cached_mtime, cached_size, df_cached = cached
-            if cached_mtime == mtime and cached_size == size:
+            if cached.mtime == mtime and cached.size == size:
                 if self.logger:
                     self.logger.debug(f"Cache hit: {key}")
-                return df_cached
+                return cached.data
 
         try:
             kwargs.setdefault("dtype", config.DTYPES)
             df = pd.read_csv(abs_path, **kwargs)
-            self.loaded_data[key] = (mtime, size, df)
+            self.loaded_data[key] = CachedItem(mtime, size, df)
             if self.logger:
                 self.logger.info(f"CSV yüklendi: {filepath}")
             return df
@@ -122,15 +133,14 @@ class DataLoaderCache:
         abs_path = key[0]
         cached = self.loaded_data.get(key)
         if cached:
-            cached_mtime, cached_size, xls_cached = cached
-            if cached_mtime == mtime and cached_size == size:
+            if cached.mtime == mtime and cached.size == size:
                 if self.logger:
                     self.logger.debug(f"Cache hit: {key}")
-                return xls_cached
+                return cached.data
 
         try:
             xls = open_excel_cached(abs_path, **kwargs)
-            self.loaded_data[key] = (mtime, size, xls)
+            self.loaded_data[key] = CachedItem(mtime, size, xls)
             if self.logger:
                 self.logger.info(f"ExcelFile yüklendi: {filepath}")
             return xls
