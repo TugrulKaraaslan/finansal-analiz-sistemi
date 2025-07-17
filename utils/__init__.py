@@ -50,7 +50,7 @@ def _crosses(a: pd.Series | None, b: pd.Series | None, above: bool) -> pd.Series
         pd.Series: Boolean mask indexed like the aligned input series.
     """
     if a is None or b is None:
-        return pd.Series(False, index=[])
+        return pd.Series(dtype=bool)
     x, y = _align(a, b)
     if above:
         return (x.shift(1) < y.shift(1)) & (x >= y)
