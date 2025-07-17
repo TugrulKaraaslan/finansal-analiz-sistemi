@@ -45,49 +45,52 @@ def _read_excel_cached(path: str | Path) -> pd.DataFrame:
     return _read_excel(str(path))
 
 
+DATE_COLUMN_CANDIDATES = (
+    "Tarih",
+    "tarih",
+    "TARİH",
+    "Date",
+    "date",
+    "Zaman",
+    "zaman",
+)
+
+
 def _standardize_date_column(
     df: pd.DataFrame, file_path_for_log: str = "", logger_param=None
 ) -> pd.DataFrame:
-    """Rename the date column to ``tarih`` if a known variant exists.
+    """Rename the first matching date column to ``tarih``.
 
-    Args:
-        df (pd.DataFrame): DataFrame to inspect.
-        file_path_for_log (str, optional): File path used in log messages.
-        logger_param (logging.Logger, optional): Logger instance.
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame to inspect for a date column.
+    file_path_for_log : str, optional
+        File path used in log messages.
+    logger_param : logging.Logger, optional
+        Logger instance used for debug messages.
 
-    Returns:
-        pd.DataFrame: Updated DataFrame with a standardized date column.
-
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with a standardized date column.
     """
     if logger_param is None:
         logger_param = logger
     log = logger_param
-    olasi_tarih_sutunlari = [
-        "Tarih",
-        "tarih",
-        "TARİH",
-        "Date",
-        "date",
-        "Zaman",
-        "zaman",
-    ]
+
+    candidates = list(DATE_COLUMN_CANDIDATES)
     if not df.empty and df.columns[0].startswith("Unnamed:"):
-        olasi_tarih_sutunlari.append(df.columns[0])
+        candidates.append(df.columns[0])
 
-    bulunan_tarih_sutunu = None
-    for col_name in olasi_tarih_sutunlari:
-        if col_name in df.columns:
-            bulunan_tarih_sutunu = col_name
-            break
+    bulunan_tarih_sutunu = next((c for c in candidates if c in df.columns), None)
 
-    if bulunan_tarih_sutunu:
-        if bulunan_tarih_sutunu != "tarih":
-            df.rename(columns={bulunan_tarih_sutunu: "tarih"}, inplace=True)
-            log.debug(
-                f"'{os.path.basename(file_path_for_log)}': Tarih sütunu '{bulunan_tarih_sutunu}' "
-                "-> 'tarih' olarak adlandırıldı."
-            )
-    else:
+    if bulunan_tarih_sutunu and bulunan_tarih_sutunu != "tarih":
+        df.rename(columns={bulunan_tarih_sutunu: "tarih"}, inplace=True)
+        log.debug(
+            f"'{os.path.basename(file_path_for_log)}': Tarih sütunu '{bulunan_tarih_sutunu}' -> 'tarih'"
+        )
+    elif not bulunan_tarih_sutunu:
         log.warning(
             f"'{os.path.basename(file_path_for_log)}': Standart tarih sütunu ('Tarih' vb.) bulunamadı. "
             f"Mevcut sütunlar: {df.columns.tolist()}"
