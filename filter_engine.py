@@ -303,8 +303,26 @@ def run_single_filter(kod: str, query: str) -> dict[str, Any]:
     return atlanmis
 
 
-def _apply_single_filter(df, kod, query):
-    """Run a filter expression on ``df`` and collect diagnostics."""
+def _apply_single_filter(
+    df: pd.DataFrame, kod: str, query: str
+) -> tuple[pd.DataFrame | None, dict[str, Any]]:
+    """Execute ``query`` on ``df`` and gather diagnostic info.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Frame containing indicator data.
+    kod : str
+        Identifier of the filter being evaluated.
+    query : str
+        Expression in ``pandas.query`` syntax.
+
+    Returns
+    -------
+    tuple[pandas.DataFrame | None, dict[str, Any]]
+        Selected rows or ``None`` when evaluation fails and a dictionary
+        with execution metadata.
+    """
 
     info = {
         "kod": kod,
@@ -335,24 +353,24 @@ def _apply_single_filter(df, kod, query):
         )
 
     try:
-        seç = df.query(query)
-        if len(seç) < MIN_STOCKS_PER_FILTER:
+        selection = df.query(query)
+        row_count = len(selection)
+        if row_count < MIN_STOCKS_PER_FILTER:
             logger.debug(
                 "Filter %s skipped (len=%s < %s)",
                 kod,
-                len(seç),
+                row_count,
                 MIN_STOCKS_PER_FILTER,
             )
             info.update(durum="BOS", sebep="SIFIR_HISSE")
             return pd.DataFrame(), info
 
-        info["secim_adedi"] = len(seç)
-        if len(seç):
+        info["secim_adedi"] = row_count
+        if row_count:
             info.update(durum="OK", sebep="HISSE_BULUNDU")
-        else:
-            if info["durum"] is None:
-                info.update(durum="BOS", sebep="SIFIR_HISSE")
-        return seç, info
+        elif info["durum"] is None:
+            info.update(durum="BOS", sebep="SIFIR_HISSE")
+        return selection, info
     except Exception as e:
         info.update(durum="HATA", sebep=str(e)[:120])
         try:
