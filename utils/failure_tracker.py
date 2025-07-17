@@ -10,6 +10,13 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Union
 
+__all__ = [
+    "clear_failures",
+    "get_failures",
+    "log_failure",
+    "failures_to_df",
+]
+
 if TYPE_CHECKING:  # pragma: no cover - only for type hints
     import pandas as pd
 
