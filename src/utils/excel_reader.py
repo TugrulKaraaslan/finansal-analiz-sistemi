@@ -6,6 +6,7 @@ entries refresh automatically whenever the underlying file changes.
 
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass
 from typing import Any, Dict
@@ -24,6 +25,8 @@ class ExcelCacheEntry:
     book: pd.ExcelFile
 
 
+logger = logging.getLogger(__name__)
+
 _excel_cache: Dict[str, ExcelCacheEntry] = {}
 
 
@@ -32,8 +35,8 @@ def clear_cache() -> None:
     for entry in _excel_cache.values():
         try:
             entry.book.close()
-        except Exception:
-            pass
+        except Exception as exc:  # pragma: no cover - best effort cleanup
+            logger.warning("Çalışma kitabı kapatılamadı: %s", exc)
     _excel_cache.clear()
 
 
@@ -56,8 +59,8 @@ def open_excel_cached(path: str | os.PathLike[str], **kwargs: Any) -> pd.ExcelFi
         if cached is not None:
             try:
                 cached.book.close()
-            except Exception:
-                pass
+            except Exception as exc:  # pragma: no cover - best effort cleanup
+                logger.warning("Önceki çalışma kitabı kapatılamadı: %s", exc)
         _excel_cache[abs_path] = ExcelCacheEntry(
             mtime, pd.ExcelFile(abs_path, **kwargs)
         )
