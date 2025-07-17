@@ -38,15 +38,15 @@ def fill_missing_business_day(
     # propagate next valid dates downward so NaT values have a reference point
     next_valid = dates.bfill().ffill()
 
-    rev_mask = mask.iloc[::-1]
-    groups = rev_mask.ne(rev_mask.shift()).cumsum()
-    offset_rev = rev_mask.groupby(groups).cumcount().add(1).where(rev_mask, 0)
-    offsets = offset_rev.iloc[::-1]
+    group = mask.ne(mask.shift()).cumsum()
+    size = mask.groupby(group).transform("size")
+    pos = mask.groupby(group).cumcount()
+    offsets = (size - pos).where(mask, 0)
 
     adjusted = next_valid.copy()
     for idx, off in offsets[mask].items():
         if off:
-            adjusted.iloc[idx] = adjusted.iloc[idx] - pd.offsets.BDay(off)
+            adjusted.loc[idx] = adjusted.loc[idx] - pd.offsets.BDay(int(off))
 
-    df.loc[mask, date_col] = adjusted[mask]
+    df[date_col] = adjusted
     return df
