@@ -7,20 +7,31 @@ entries refresh automatically whenever the underlying file changes.
 from __future__ import annotations
 
 import os
+from dataclasses import dataclass
 from typing import Any, Dict
 
 import pandas as pd
 
 # Cache ``ExcelFile`` objects keyed by path and modification time. The cache
 # refreshes automatically when the workbook on disk changes.
-_excel_cache: Dict[str, tuple[float, pd.ExcelFile]] = {}
+
+
+@dataclass
+class ExcelCacheEntry:
+    """Metadata for a cached workbook."""
+
+    mtime: float
+    book: pd.ExcelFile
+
+
+_excel_cache: Dict[str, ExcelCacheEntry] = {}
 
 
 def clear_cache() -> None:
     """Clear the in-memory ``ExcelFile`` cache and close open workbooks."""
-    for _, xls in _excel_cache.values():
+    for entry in _excel_cache.values():
         try:
-            xls.close()
+            entry.book.close()
         except Exception:
             pass
     _excel_cache.clear()
@@ -41,14 +52,16 @@ def open_excel_cached(path: str | os.PathLike[str], **kwargs: Any) -> pd.ExcelFi
     abs_path = os.path.abspath(os.fspath(path))
     mtime = os.path.getmtime(abs_path)
     cached = _excel_cache.get(abs_path)
-    if cached is None or cached[0] != mtime:
+    if cached is None or cached.mtime != mtime:
         if cached is not None:
             try:
-                cached[1].close()
+                cached.book.close()
             except Exception:
                 pass
-        _excel_cache[abs_path] = (mtime, pd.ExcelFile(abs_path, **kwargs))
-    return _excel_cache[abs_path][1]
+        _excel_cache[abs_path] = ExcelCacheEntry(
+            mtime, pd.ExcelFile(abs_path, **kwargs)
+        )
+    return _excel_cache[abs_path].book
 
 
 def read_excel_cached(
