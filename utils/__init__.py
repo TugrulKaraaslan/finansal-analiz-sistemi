@@ -38,12 +38,12 @@ def _align(a: pd.Series, b: pd.Series) -> tuple[pd.Series, pd.Series]:
     return x, y
 
 
-def _crosses(a: pd.Series, b: pd.Series, above: bool) -> pd.Series:
+def _crosses(a: pd.Series | None, b: pd.Series | None, above: bool) -> pd.Series:
     """Return ``True`` where ``a`` crosses ``b`` in the given direction.
 
     Args:
-        a (pd.Series): First series.
-        b (pd.Series): Second series.
+        a (pd.Series | None): First series or `None`.
+        b (pd.Series | None): Second series or `None`.
         above (bool): ``True`` for upward crossovers, ``False`` for downward.
 
     Returns:
@@ -57,12 +57,12 @@ def _crosses(a: pd.Series, b: pd.Series, above: bool) -> pd.Series:
     return (x.shift(1) > y.shift(1)) & (x <= y)
 
 
-def crosses_above(a: pd.Series, b: pd.Series) -> pd.Series:
+def crosses_above(a: pd.Series | None, b: pd.Series | None) -> pd.Series:
     """Return ``True`` where ``a`` crosses above ``b``."""
     return _crosses(a, b, True)
 
 
-def crosses_below(a: pd.Series, b: pd.Series) -> pd.Series:
+def crosses_below(a: pd.Series | None, b: pd.Series | None) -> pd.Series:
     """Return ``True`` where ``a`` crosses below ``b``."""
     return _crosses(a, b, False)
 
