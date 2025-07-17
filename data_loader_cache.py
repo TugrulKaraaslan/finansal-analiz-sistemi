@@ -5,6 +5,8 @@ Entries are keyed by absolute path and file metadata so repeated reads
 avoid disk access. Each cached dataset expires after ``ttl`` seconds.
 """
 
+from __future__ import annotations
+
 import os
 from dataclasses import dataclass
 from typing import Callable, Tuple, TypeVar
