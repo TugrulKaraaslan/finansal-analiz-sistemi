@@ -6,6 +6,7 @@ avoid disk access. Each cached dataset expires after ``ttl`` seconds.
 """
 
 import os
+from typing import Tuple
 
 import pandas as pd
 from cachetools import TTLCache
@@ -36,6 +37,22 @@ class DataLoaderCache:
         self.loaded_data: TTLCache = TTLCache(maxsize=maxsize, ttl=ttl)
         self.logger = logger
 
+    def _get_cache_key(
+        self, filepath: str, kind: str
+    ) -> Tuple[Tuple[str, str], int, int]:
+        """Return cache key and file metadata.
+
+        Args:
+            filepath (str): File path to inspect.
+            kind (str): Cache namespace such as ``"__csv__"``.
+
+        Returns:
+            tuple: ``((abs_path, kind), mtime_ns, size)``
+        """
+        abs_path = os.path.abspath(filepath)
+        stat = os.stat(abs_path)
+        return (abs_path, kind), stat.st_mtime_ns, stat.st_size
+
     def clear(self) -> None:
         """Clear the internal cache.
 
@@ -61,11 +78,8 @@ class DataLoaderCache:
         pd.DataFrame
             Cached or newly loaded data.
         """
-        abs_path = os.path.abspath(filepath)
-        key = (abs_path, "__csv__")
-        stat = os.stat(abs_path)
-        mtime = stat.st_mtime_ns
-        size = stat.st_size
+        key, mtime, size = self._get_cache_key(filepath, "__csv__")
+        abs_path = key[0]
         cached = self.loaded_data.get(key)
         if cached:
             cached_mtime, cached_size, df_cached = cached
@@ -104,11 +118,8 @@ class DataLoaderCache:
         pd.ExcelFile
             Cached or newly loaded workbook instance.
         """
-        abs_path = os.path.abspath(filepath)
-        key = (abs_path, "__excel__")
-        stat = os.stat(abs_path)
-        mtime = stat.st_mtime_ns
-        size = stat.st_size
+        key, mtime, size = self._get_cache_key(filepath, "__excel__")
+        abs_path = key[0]
         cached = self.loaded_data.get(key)
         if cached:
             cached_mtime, cached_size, xls_cached = cached
