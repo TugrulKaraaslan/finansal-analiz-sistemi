@@ -23,38 +23,43 @@ __all__ = [
 ]
 
 
-def _align(a: pd.Series, b: pd.Series) -> tuple[pd.Series, pd.Series]:
-    """Return ``a`` and ``b`` aligned to their common index.
+def _align_common_index(
+    series_a: pd.Series, series_b: pd.Series
+) -> tuple[pd.Series, pd.Series]:
+    """Return ``series_a`` and ``series_b`` aligned to their shared index."""
 
-    Args:
-        a (pd.Series): First series.
-        b (pd.Series): Second series.
+    aligned_a, aligned_b = series_a.align(series_b, join="inner")
+    return aligned_a, aligned_b
 
-    Returns:
-        tuple[pd.Series, pd.Series]: ``(a, b)`` reindexed to the intersection of
-        their indices.
+
+def _crosses(
+    series_a: pd.Series | None, series_b: pd.Series | None, above: bool
+) -> pd.Series:
+    """Return ``True`` where ``series_a`` crosses ``series_b``.
+
+    Parameters
+    ----------
+    series_a, series_b : pandas.Series | None
+        Series to compare. ``None`` yields an empty ``Series``.
+    above : bool
+        ``True`` to detect upward crossovers, ``False`` for downward.
+
+    Returns
+    -------
+    pandas.Series
+        Boolean mask indexed like the aligned input series.
     """
-    x, y = a.align(b, join="inner")
-    return x, y
 
-
-def _crosses(a: pd.Series | None, b: pd.Series | None, above: bool) -> pd.Series:
-    """Return ``True`` where ``a`` crosses ``b`` in the given direction.
-
-    Args:
-        a (pd.Series | None): First series or `None`.
-        b (pd.Series | None): Second series or `None`.
-        above (bool): ``True`` for upward crossovers, ``False`` for downward.
-
-    Returns:
-        pd.Series: Boolean mask indexed like the aligned input series.
-    """
-    if a is None or b is None:
+    if series_a is None or series_b is None:
         return pd.Series(dtype=bool)
-    x, y = _align(a, b)
+
+    x, y = _align_common_index(series_a, series_b)
+    prev_x = x.shift(1)
+    prev_y = y.shift(1)
+
     if above:
-        return (x.shift(1) < y.shift(1)) & (x >= y)
-    return (x.shift(1) > y.shift(1)) & (x <= y)
+        return (prev_x < prev_y) & (x >= y)
+    return (prev_x > prev_y) & (x <= y)
 
 
 def crosses_above(a: pd.Series | None, b: pd.Series | None) -> pd.Series:
