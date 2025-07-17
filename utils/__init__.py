@@ -75,7 +75,7 @@ def extract_columns_from_filters(
     df_filters: pd.DataFrame | None,
     series_series: list | None,
     series_value: list | None,
-) -> set:
+) -> set[str]:
     """Return column names referenced in filters and crossovers.
 
     Args:
@@ -84,7 +84,7 @@ def extract_columns_from_filters(
         series_value (list | None): List of series-to-value crossover tuples.
 
     Returns:
-        set: Unique column names required for indicator computation.
+        set[str]: Unique column names required for indicator computation.
     """
     try:
         from filter_engine import _extract_query_columns
@@ -118,7 +118,7 @@ def extract_columns_from_filters_cached(
     df_filters_csv: str,
     series_series: list | None,
     series_value: list | None,
-) -> set:
+) -> set[str]:
     """Return referenced columns using a CSV string for caching.
 
     Args:
@@ -127,7 +127,7 @@ def extract_columns_from_filters_cached(
         series_value (list | None): Series-to-value crossover configuration.
 
     Returns:
-        set: Unique column names collected from the CSV content.
+        set[str]: Unique column names collected from the CSV content.
     """
     df_filters = None
     if df_filters_csv:
