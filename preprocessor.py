@@ -67,6 +67,60 @@ def _temizle_sayisal_seri(s: pd.Series) -> pd.Series:
     return pd.to_numeric(cleaned, errors="coerce").astype(float)
 
 
+def _convert_numeric_columns(
+    df: pd.DataFrame, columns: list[str], logger_param=None
+) -> None:
+    """Ensure ``columns`` in ``df`` are numeric.
+
+    Non-numeric values are coerced to ``float`` and missing required columns
+    emit a warning via the provided logger.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Frame to modify in place.
+    columns : list[str]
+        Column names expected to hold numeric values.
+    logger_param : logging.Logger | None, optional
+        Logger used for warnings. Defaults to module logger.
+    """
+    if logger_param is None:
+        logger_param = logger
+
+    for col in columns:
+        if col not in df.columns:
+            if col in ["open", "high", "low", "close", "volume"]:
+                logger_param.warning(
+                    "Ön işleme için beklenen temel sütun '%s' DataFrame'de bulunamadı.",
+                    col,
+                )
+            continue
+
+        series = df[col]
+        if series.dtype == "object" or isinstance(series.dtype, CategoricalDtype):
+            nan_before = series.isnull().sum()
+            original_type = series.dtype
+            df[col] = _temizle_sayisal_seri(series)
+            nan_after = df[col].isnull().sum()
+            if nan_after > nan_before:
+                logger_param.warning(
+                    "'%s' (orijinal tip: %s) sütununda sayısal dönüşüm sonrası NaN sayısı arttı (%s -> %s).",
+                    col,
+                    original_type,
+                    nan_before,
+                    nan_after,
+                )
+        elif not pd.api.types.is_numeric_dtype(series):
+            logger_param.warning(
+                "Column '%s' has unexpected type (%s); attempting float conversion.",
+                col,
+                series.dtype,
+            )
+            df[col] = pd.to_numeric(series, errors="coerce")
+        elif series.dtype != float:
+            df[col] = series.astype(float, errors="ignore")
+
+
 def on_isle_hisse_verileri(
     df_ham: pd.DataFrame, logger_param=None
 ) -> pd.DataFrame | None:
@@ -143,38 +197,7 @@ def on_isle_hisse_verileri(
     ):  # Include volume_tl when available (should be numeric)
         sayisal_hedef_sutunlar.append("volume_tl")
 
-    for col in sayisal_hedef_sutunlar:
-        if col in df.columns:
-            # Convert object or categorical columns to float when needed
-            if df[col].dtype == "object" or isinstance(df[col].dtype, CategoricalDtype):
-                nan_before = df[col].isnull().sum()
-                original_type = df[col].dtype
-                df[col] = _temizle_sayisal_seri(df[col])
-                nan_after = df[col].isnull().sum()
-                if nan_after > nan_before:
-                    fn_logger.warning(
-                        f"'{col}' (orijinal tip: {original_type}) sütununda sayısal dönüşüm sonrası NaN sayısı arttı "
-                        f"({nan_before} -> {nan_after})."
-                    )
-            elif not pd.api.types.is_numeric_dtype(
-                df[col]
-            ):  # Not numeric and not object (e.g., boolean)
-                fn_logger.warning(
-                    f"Column '{col}' has unexpected type ({df[col].dtype}); attempting float conversion."
-                )
-                df[col] = pd.to_numeric(
-                    df[col], errors="coerce"
-                )  # Convert errors to NaT/NaN
-            # Cast numeric columns to float when not already
-            elif df[col].dtype != float:
-                # ``errors='ignore'`` preserves the original value on rare conversion issues
-                df[col] = df[col].astype(float, errors="ignore")
-        else:
-            # Skip verbose warning, final check for missing core OHLCV columns.
-            if col in ["open", "high", "low", "close", "volume"]:
-                fn_logger.warning(
-                    f"Ön işleme için beklenen temel sütun '{col}' DataFrame'de bulunamadı."
-                )
+    _convert_numeric_columns(df, sayisal_hedef_sutunlar, fn_logger)
     fn_logger.info(
         "OHLCV ve volume sütunları sayısal tipe dönüştürüldü/kontrol edildi."
     )
