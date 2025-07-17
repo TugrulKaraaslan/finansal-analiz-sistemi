@@ -8,11 +8,10 @@ from __future__ import annotations
 
 import logging
 import sys
-import time
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Tuple
 
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.logging_config import setup_logging as _cfg_setup_logging
@@ -25,42 +24,35 @@ _counter_filter = ErrorCountingFilter()
 
 
 class DuplicateFilter(logging.Filter):
-    """Suppress duplicate log messages within a time window."""
+    """Filter out log records repeating within a given time window."""
 
-    def __init__(self, window: float = 2.0) -> None:
-        """Initialize the filter.
+    def __init__(self, window: float = 2.0, maxsize: int = 128) -> None:
+        """Create the filter.
 
-        Args:
-            window (float, optional): Duration in seconds to suppress
-                repeated messages.
-
+        Parameters
+        ----------
+        window : float, optional
+            Duration in seconds that a message should be suppressed once
+            emitted. Defaults to ``2.0``.
+        maxsize : int, optional
+            Maximum number of unique messages to track. Defaults to ``128``.
         """
+
         super().__init__("duplicate")
-        self.window = window
-        self._seen: Dict[Tuple[int, str], float] = {}
+        from cachetools import TTLCache
+
+        self.cache: TTLCache[Tuple[int, str], bool] = TTLCache(
+            maxsize=maxsize, ttl=window
+        )
 
     def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
-        """Allow a log record if it has not been seen recently.
+        """Return ``True`` if ``record`` has not been seen recently."""
 
-        Messages are tracked by their level and text. A record is only emitted
-        when no identical message was logged within the configured ``window``.
-
-        Args:
-            record (logging.LogRecord): Log record being processed.
-
-        Returns:
-            bool: ``True`` if the record should be emitted.
-
-        """
-        now = time.monotonic()
         key = (record.levelno, record.getMessage())
-        last = self._seen.get(key)
-        self._seen[key] = now
-        # purge old entries
-        for k, ts in list(self._seen.items()):
-            if now - ts > self.window:
-                del self._seen[k]
-        return last is None or (now - last) > self.window
+        if key in self.cache:
+            return False
+        self.cache[key] = True
+        return True
 
 
 def setup_logger(level: int = logging.INFO) -> ErrorCountingFilter:
