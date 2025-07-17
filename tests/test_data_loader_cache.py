@@ -17,3 +17,13 @@ def test_clear_also_empties_excel_cache(tmp_path):
     cache.clear()
     new = cache.load_excel(str(path))
     assert new is not first
+
+
+def test_parquet_caching(tmp_path):
+    path = tmp_path / "b.parquet"
+    pd.DataFrame({"y": [1, 2]}).to_parquet(path)
+
+    cache = DataLoaderCache()
+    first = cache.load_parquet(str(path))
+    second = cache.load_parquet(str(path))
+    assert first is second
