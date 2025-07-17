@@ -99,6 +99,8 @@ def _calc_ema(df: pd.DataFrame, n: int) -> pd.Series:
     if "close" not in df.columns:
         return pd.Series(np.nan, index=df.index)
     return df["close"].ewm(span=n, adjust=False).mean()
+
+
 def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
     """Return the hourly classic pivot for ``group_df``.
 
@@ -124,6 +126,8 @@ def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
             f"{hisse_str}: {sutun_adi} hesaplanırken hata: {e}", exc_info=False
         )
     return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
+
+
 def _calculate_group_indicators_and_crossovers(
     _grp_df: pd.DataFrame,
     wanted_cols=None,
@@ -548,6 +552,8 @@ def _calculate_group_indicators_and_crossovers(
 
     df_final_group = df_final_group.loc[:, ~df_final_group.columns.duplicated()]
     return df_final_group
+
+
 def _calculate_series_series_crossover(
     group_df: pd.DataFrame,
     s1_col: str,
@@ -601,6 +607,8 @@ def _calculate_series_series_crossover(
         except Exception:
             pass
         return empty_above, empty_below
+
+
 def _calculate_series_value_crossover(
     group_df: pd.DataFrame,
     s_col: str,
@@ -656,6 +664,8 @@ def _calculate_series_value_crossover(
         except Exception:
             pass
         return empty_above, empty_below
+
+
 def _ekle_psar(df: pd.DataFrame) -> None:
     """Calculate Parabolic SAR columns and append them to ``df``."""
 
@@ -700,6 +710,8 @@ def _tema20(series: pd.Series) -> pd.Series:
     ema2 = ema1.ewm(span=20, adjust=False).mean()
     ema3 = ema2.ewm(span=20, adjust=False).mean()
     return (3 * ema1) - (3 * ema2) + ema3
+
+
 def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     """Append EMA/close crossover columns described by ``cross_names``.
 
@@ -733,6 +745,7 @@ def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
         raise ValueError(f"Bilinmeyen crossover format\u0131: {name}")
     return df
 
+
 def add_series(
     df: pd.DataFrame, name: str, values, seen_names: set[str] | None = None
 ) -> None:
@@ -750,6 +763,7 @@ def add_series(
         seen_names = set(df.columns)
     safe = unique_name(name, seen_names)
     safe_set(df, safe, values)
+
 
 def calculate_chunked(
     df: pd.DataFrame, active_inds: list[str], chunk_size: int = CHUNK_SIZE
@@ -777,6 +791,8 @@ def calculate_chunked(
                 mini.to_parquet(pq_path, partition_cols=["ticker"])
             del mini
         gc.collect()
+
+
 def calculate_indicators(
     df: pd.DataFrame, indicators: list[str] | None = None
 ) -> pd.DataFrame:
@@ -830,6 +846,7 @@ def calculate_indicators(
 
     out = out.loc[:, ~out.columns.duplicated()]
     return out
+
 
 def hesapla_teknik_indikatorler_ve_kesisimler(
     df_islenmis_veri: pd.DataFrame,
@@ -987,6 +1004,8 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             f"Hesaplanan indikatörler birleştirilirken KRİTİK HATA: {e_concat}",
             exc_info=True,
         )
+
+
 def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> None:
     """Add a moving-average column if absent."""
 
@@ -1019,5 +1038,3 @@ def safe_ma(df: pd.DataFrame, n: int, kind: str = "sma", logger_param=None) -> N
             log_failure("indicators", col, str(e))
         except Exception:
             pass
-
-
