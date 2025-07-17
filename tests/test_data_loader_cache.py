@@ -1,7 +1,10 @@
 import pandas as pd
+import pytest
 
 from data_loader_cache import DataLoaderCache
 from src.utils.excel_reader import open_excel_cached
+
+pytest.importorskip("pyarrow")
 
 
 def test_clear_also_empties_excel_cache(tmp_path):
