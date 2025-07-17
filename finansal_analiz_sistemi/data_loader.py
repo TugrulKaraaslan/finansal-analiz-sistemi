@@ -8,6 +8,7 @@ minimize disk access.
 from __future__ import annotations
 
 import glob
+import logging
 import os
 from functools import lru_cache, partial
 from pathlib import Path
@@ -66,7 +67,9 @@ def _find_date_column(df: pd.DataFrame) -> str | None:
 
 
 def _standardize_date_column(
-    df: pd.DataFrame, file_path_for_log: str = "", logger_param=None
+    df: pd.DataFrame,
+    file_path_for_log: str = "",
+    logger_param: logging.Logger | None = None,
 ) -> pd.DataFrame:
     """Rename the first matching date column to ``tarih``.
 
@@ -104,7 +107,9 @@ def _standardize_date_column(
 
 
 def _standardize_ohlcv_columns(
-    df: pd.DataFrame, file_path_for_log: str = "", logger_param=None
+    df: pd.DataFrame,
+    file_path_for_log: str = "",
+    logger_param: logging.Logger | None = None,
 ) -> pd.DataFrame:
     """Normalize OHLCV column names using ``config.OHLCV_MAP``.
 
@@ -204,7 +209,9 @@ def load_data(path: str) -> pd.DataFrame:
     return _cache_loader.load_csv(path)
 
 
-def load_excel_katalogu(path: str, logger_param=None) -> pd.DataFrame | None:
+def load_excel_katalogu(
+    path: str, logger_param: logging.Logger | None = None
+) -> pd.DataFrame | None:
     """Load an Excel file and optionally write a Parquet copy.
 
     Args:
@@ -301,7 +308,9 @@ def read_prices(path: str | Path, **kwargs) -> pd.DataFrame:
     return pd.read_csv(path, sep=delimiter, **kwargs)
 
 
-def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.DataFrame:
+def yukle_filtre_dosyasi(
+    filtre_dosya_yolu_cfg: str | None = None, logger_param: logging.Logger | None = None
+) -> pd.DataFrame:
     """Load filter definitions from various formats.
 
     Args:
@@ -352,10 +361,10 @@ def yukle_filtre_dosyasi(filtre_dosya_yolu_cfg=None, logger_param=None) -> pd.Da
 
 
 def yukle_hisse_verileri(
-    hisse_dosya_pattern_cfg=None,
-    parquet_ana_dosya_yolu_cfg=None,
-    force_excel_reload=False,
-    logger_param=None,
+    hisse_dosya_pattern_cfg: str | None = None,
+    parquet_ana_dosya_yolu_cfg: str | None = None,
+    force_excel_reload: bool = False,
+    logger_param: logging.Logger | None = None,
 ) -> pd.DataFrame | None:
     """Load raw stock data from CSV or Excel sources.
 
