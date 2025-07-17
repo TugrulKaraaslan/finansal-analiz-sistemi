@@ -37,17 +37,34 @@ def tarama_denetimi(
         ``sebep``, ``eksik_sutunlar``, ``nan_sutunlar`` and ``secim_adedi``.
 
     """
-    if "kod" not in df_filtreler.columns and "FilterCode" in df_filtreler.columns:
+    if "kod" not in df_filtreler.columns:
         df_filtreler = df_filtreler.rename(
-            columns={"FilterCode": "kod"}
-        )  # pragma: no cover
-    kayıtlar = []
-    for sat in df_filtreler.itertuples(index=False):
-        _, info = _apply_single_filter(
-            df_indikator, getattr(sat, "kod"), getattr(sat, "PythonQuery")
+            columns={"FilterCode": "kod"}, errors="ignore"
         )
-        kayıtlar.append(info)
-    df = pd.DataFrame(kayıtlar)
+
+    if df_filtreler.empty:
+        return pd.DataFrame(
+            [
+                {
+                    "kod": "_SUMMARY",
+                    "tip": "tarama",
+                    "durum": "NO_ISSUE",
+                    "sebep": "",
+                    "eksik_sutunlar": "",
+                    "nan_sutunlar": "",
+                    "secim_adedi": 0,
+                }
+            ],
+            columns=EXPECTED_COLUMNS,
+        )
+
+    records: list[dict] = []
+    for row in df_filtreler.itertuples(index=False):
+        _, info = _apply_single_filter(
+            df_indikator, getattr(row, "kod"), getattr(row, "PythonQuery")
+        )
+        records.append(info)
+    df = pd.DataFrame(records)
     if df.empty:
         df = pd.DataFrame(columns=EXPECTED_COLUMNS)  # pragma: no cover
     if not (df["durum"] != "OK").any():
