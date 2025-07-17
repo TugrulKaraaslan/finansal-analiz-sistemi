@@ -335,21 +335,26 @@ def _apply_single_filter(
     }
 
     req_cols = _extract_columns_from_query(query)
-    missing = [c for c in req_cols if c not in df.columns]
-    if missing:
+    missing_cols = sorted(req_cols - set(df.columns))
+    if missing_cols:
         info.update(
             durum="CALISTIRILAMADI",
             sebep="EXIST_FALSE",
-            eksik_sutunlar=",".join(missing),
+            eksik_sutunlar=",".join(missing_cols),
         )
         return None, info
 
-    nan_cols = [c for c in req_cols if df[c].isna().mean() > 0.9]
-    if nan_cols:
+    if req_cols:
+        nan_ratios = df[list(req_cols)].isna().mean()
+        mostly_nan = nan_ratios[nan_ratios > 0.9].index.tolist()
+    else:
+        mostly_nan = []
+
+    if mostly_nan:
         info.update(
             durum="DATASIZ",
             sebep="NAN_GT90",
-            nan_sutunlar=",".join(nan_cols),
+            nan_sutunlar=",".join(mostly_nan),
         )
 
     try:
