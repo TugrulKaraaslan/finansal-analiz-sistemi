@@ -4,7 +4,11 @@ Helper functions return reason codes so that callers can display
 meaningful error messages when filter expressions fail to run.
 """
 
+from __future__ import annotations
+
+import logging
 import re
+from typing import Mapping, Sequence
 
 import pandas as pd
 
@@ -19,8 +23,10 @@ SEBEP_KODLARI = {
 
 
 def dogrula_filtre_dataframe(
-    df_filtre: pd.DataFrame, zorunlu_kolonlar=None, logger=None
-) -> dict:
+    df_filtre: pd.DataFrame,
+    zorunlu_kolonlar: Sequence[str] | None = None,
+    logger: logging.Logger | None = None,
+) -> Mapping[str, str]:
     """Return problematic rows as a ``dict`` keyed by filter code.
 
     Args:
@@ -32,42 +38,52 @@ def dogrula_filtre_dataframe(
     Returns:
         dict: Mapping of filter codes to descriptions of the issue.
     """
-    sorunlu = {}
-    zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]
+    issues: dict[str, str] = {}
+    zorunlu_kolonlar = list(zorunlu_kolonlar or ["flag", "query"])
 
     eksik_kolonlar = [c for c in zorunlu_kolonlar if c not in df_filtre.columns]
     if eksik_kolonlar:
         raise KeyError("Eksik zorunlu kolonlar: " + ", ".join(eksik_kolonlar))
 
-    for idx, row in df_filtre.iterrows():
-        kod_degeri = row.get("flag")
-        kod_raw = "" if pd.isna(kod_degeri) else str(kod_degeri).strip()
-        kod = kod_raw or f"satir_{idx}"
-        query_degeri = row.get("query", "")
-        query = "" if pd.isna(query_degeri) else str(query_degeri).strip()
+    flags = (
+        df_filtre.get("flag", pd.Series(dtype=object))
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+    queries = (
+        df_filtre.get("query", pd.Series(dtype=object))
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
 
-        if not kod_raw:
-            sorunlu[kod] = "Boş veya eksik flag (kod) değeri."
-        elif not re.match(r"^[A-Z0-9_\-]+$", kod_raw):
-            sorunlu[kod] = (
+    for idx, (flag_raw, query) in enumerate(zip(flags, queries)):
+        code = flag_raw or f"satir_{idx}"
+        if not flag_raw:
+            issues[code] = "Boş veya eksik flag (kod) değeri."
+        elif not re.match(r"^[A-Z0-9_\-]+$", flag_raw):
+            issues[code] = (
                 "Geçersiz karakterler içeren flag. Sadece A-Z, 0-9, _ ve - izinli."
             )
 
-        if "query" not in row or not query:
-            prefix = sorunlu.get(kod, "")
+        if not query:
+            prefix = issues.get(code, "")
             if prefix:
                 prefix = prefix.rstrip(". ") + ". "
-            sorunlu[kod] = prefix + "Query sütunu boş veya eksik."
+            issues[code] = prefix + "Query sütunu boş veya eksik."
 
     if logger:
-        for kod, mesaj in sorunlu.items():
-            logger.warning(f"Filtre doğrulama uyarısı ({kod}): {mesaj}")
+        for kod, mesaj in issues.items():
+            logger.warning("Filtre doğrulama uyarısı (%s): %s", kod, mesaj)
 
-    return sorunlu
+    return issues
 
 
 def validate(
-    df_filtre: pd.DataFrame, zorunlu_kolonlar=None, logger=None
+    df_filtre: pd.DataFrame,
+    zorunlu_kolonlar: Sequence[str] | None = None,
+    logger: logging.Logger | None = None,
 ) -> list[ValidationError]:
     """Return ``ValidationError`` objects describing invalid rows.
 
@@ -82,7 +98,7 @@ def validate(
         list[ValidationError]: Structured error objects describing validation
         failures.
     """
-    zorunlu_kolonlar = zorunlu_kolonlar or ["flag", "query"]
+    zorunlu_kolonlar = list(zorunlu_kolonlar or ["flag", "query"])
     errors: list[ValidationError] = []
 
     eksik = [c for c in zorunlu_kolonlar if c not in df_filtre.columns]
@@ -99,14 +115,23 @@ def validate(
         )
         return errors
 
-    for idx, row in df_filtre.iterrows():
-        kod_degeri = row.get("flag")
-        kod_raw = "" if pd.isna(kod_degeri) else str(kod_degeri).strip()
-        kod = kod_raw or f"satir_{idx}"
-        query_degeri = row.get("query", "")
-        query = "" if pd.isna(query_degeri) else str(query_degeri).strip()
+    flags = (
+        df_filtre.get("flag", pd.Series(dtype=object))
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+    queries = (
+        df_filtre.get("query", pd.Series(dtype=object))
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
 
-        if not kod_raw:
+    for idx, (flag_raw, query) in enumerate(zip(flags, queries)):
+        kod = flag_raw or f"satir_{idx}"
+
+        if not flag_raw:
             errors.append(
                 ValidationError(
                     hata_tipi="MISSING_FLAG",
@@ -117,7 +142,7 @@ def validate(
                     hint="Her filtre için bir kod girilmeli",
                 )
             )
-        elif not re.match(r"^[A-Z0-9_\-]+$", kod_raw):
+        elif not re.match(r"^[A-Z0-9_\-]+$", flag_raw):
             errors.append(
                 ValidationError(
                     hata_tipi="INVALID_FLAG",
@@ -143,5 +168,5 @@ def validate(
 
     if logger:
         for err in errors:
-            logger.warning(f"Filtre doğrulama uyarısı ({err.eksik_ad}): {err.detay}")
+            logger.warning("Filtre doğrulama uyarısı (%s): %s", err.eksik_ad, err.detay)
     return errors
