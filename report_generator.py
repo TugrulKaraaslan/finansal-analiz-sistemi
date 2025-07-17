@@ -155,26 +155,21 @@ def _write_error_sheet(
     if summary_df is not None and not summary_df.empty:
         non_ok = summary_df[summary_df["sebep_kodu"] != "OK"]
         if not non_ok.empty:
-            base_records = []
             existing = set(df_err.get("filtre_kod", []))
-            for _, row in non_ok.iterrows():
-                if row["filtre_kodu"] in existing:
-                    continue
-                base_records.append(
+            missing = non_ok.loc[~non_ok["filtre_kodu"].isin(existing)]
+            if not missing.empty:
+                ek_df = pd.DataFrame(
                     {
-                        "filtre_kod": row["filtre_kodu"],
-                        "hata_tipi": row["sebep_kodu"],
-                        "detay": row.get("sebep_aciklama", "-") or "-",
+                        "filtre_kod": missing["filtre_kodu"],
+                        "hata_tipi": missing["sebep_kodu"],
+                        "detay": missing.get("sebep_aciklama", "-").fillna("-"),
                         "cozum_onerisi": "-",
                         "eksik_ad": "-",
                         "reason": "-",
                         "hint": "-",
                     }
                 )
-            if base_records:
-                df_err = safe_concat(
-                    [df_err, pd.DataFrame(base_records)], ignore_index=True
-                )
+                df_err = safe_concat([df_err, ek_df], ignore_index=True)
 
     if df_err.empty:
         return  # skip sheet creation when no errors
