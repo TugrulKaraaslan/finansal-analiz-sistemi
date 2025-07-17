@@ -6,6 +6,7 @@ during execution and emit a summarized list after completion.
 
 from collections import defaultdict
 from dataclasses import asdict, dataclass
+from typing import Union
 
 
 @dataclass
@@ -28,7 +29,7 @@ def clear_failures() -> None:
 
 def get_failures(
     as_dict: bool = False,
-) -> dict[str, list[FailedFilter]] | defaultdict[str, list[FailedFilter]]:
+) -> Union[dict[str, list[FailedFilter]], defaultdict[str, list[FailedFilter]]]:
     """Return recorded failures.
 
     Args:
