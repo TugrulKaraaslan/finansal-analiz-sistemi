@@ -49,6 +49,6 @@ def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | NaTType:
 
     # Fallback to dateutil for other variants
     try:
-        return parser.parse(str(date_str), dayfirst=True)
+        return pd.Timestamp(parser.parse(str(date_str), dayfirst=True))
     except Exception:
         return pd.NaT
