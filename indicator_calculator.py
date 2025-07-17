@@ -207,8 +207,12 @@ def _calculate_series_value_crossover(
     )
     col_name_above = f"{s_col}_keser_{str(suffix).replace('.', 'p')}_yukari"
     col_name_below = f"{s_col}_keser_{str(suffix).replace('.', 'p')}_asagi"
-    empty_above = pd.Series(False, index=group_df.index, name=col_name_above, dtype=bool)
-    empty_below = pd.Series(False, index=group_df.index, name=col_name_below, dtype=bool)
+    empty_above = pd.Series(
+        False, index=group_df.index, name=col_name_above, dtype=bool
+    )
+    empty_below = pd.Series(
+        False, index=group_df.index, name=col_name_below, dtype=bool
+    )
     value_series = pd.Series(
         value, index=group_df.index, name=f"sabit_deger_{str(suffix).replace('.', 'p')}"
     )
@@ -742,8 +746,6 @@ def _calculate_group_indicators_and_crossovers(
     return df_final_group
 
 
-
-
 def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     """Append EMA/close crossover columns described by ``cross_names``.
 
@@ -1036,5 +1038,3 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             f"Hesaplanan indikatörler birleştirilirken KRİTİK HATA: {e_concat}",
             exc_info=True,
         )
-
-
