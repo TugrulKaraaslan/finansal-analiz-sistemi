@@ -749,34 +749,45 @@ def _calculate_group_indicators_and_crossovers(
 def add_crossovers(df: pd.DataFrame, cross_names: list[str]) -> pd.DataFrame:
     """Append EMA/close crossover columns described by ``cross_names``.
 
-    Each name must follow the ``EMA_CLOSE_PATTERN`` convention such as
-    ``ema_20_keser_close_yukari``.  Unknown patterns raise ``ValueError``.
+    Each entry must follow the ``EMA_CLOSE_PATTERN`` convention, e.g. ``ema_20_keser_close_yukari``.
+    Duplicate EMA spans are calculated only once for efficiency. Unknown patterns raise ``ValueError``.
 
-    Args:
-        df (pd.DataFrame): DataFrame containing at least ``close`` prices.
-        cross_names (list[str]): List of crossover descriptors.
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing at least ``close`` prices.
+    cross_names : list[str]
+        List of crossover descriptors to compute.
 
-    Returns:
-        pd.DataFrame: Input ``df`` with the new crossover columns appended.
+    Returns
+    -------
+    pandas.DataFrame
+        ``df`` with new crossover columns appended.
 
-    Raises:
-        ValueError: If an entry in ``cross_names`` does not match the expected
-            pattern.
-
+    Raises
+    ------
+    ValueError
+        If an entry in ``cross_names`` does not match ``EMA_CLOSE_PATTERN``.
     """
+
+    ema_cache: dict[int, pd.Series] = {}
     for name in cross_names:
         m = EMA_CLOSE_PATTERN.fullmatch(name)
-        if m:
-            span = int(m.group(1))
-            direction = m.group(2)
-            ema = _calc_ema(df, span)
-            if direction == "yukari":
-                cross = utils.crosses_above(ema, df["close"]).astype(int)
-            else:
-                cross = utils.crosses_below(ema, df["close"]).astype(int)
-            df[name] = cross
-            continue
-        raise ValueError(f"Bilinmeyen crossover format\u0131: {name}")
+        if not m:
+            raise ValueError(f"Bilinmeyen crossover format\u0131: {name}")
+
+        span = int(m.group(1))
+        direction = m.group(2)
+        if span not in ema_cache:
+            ema_cache[span] = _calc_ema(df, span)
+        ema = ema_cache[span]
+
+        if direction == "yukari":
+            cross = utils.crosses_above(ema, df["close"]).astype(int)
+        else:
+            cross = utils.crosses_below(ema, df["close"]).astype(int)
+        df[name] = cross
+
     return df
 
 
