@@ -29,37 +29,28 @@ except ImportError:
 
 
 def _temizle_sayisal_deger(deger: object) -> float:
-    """Return ``deger`` parsed as ``float`` when possible.
+    """Return ``deger`` converted to ``float`` when possible.
 
-    The helper accepts strings using the Turkish number format and plain
-    numeric types. Thousands separators are stripped and decimal commas are
-    normalized to dots. Invalid inputs yield ``np.nan``.
+    Strings may use Turkish number formatting. Thousands separators are
+    removed and decimal commas are replaced with dots. Unsupported values
+    produce ``np.nan``.
     """
+
     if pd.isna(deger):
         return np.nan
+
     if isinstance(deger, (int, float, np.number)):
         return float(deger)
-    if isinstance(deger, str):
-        # Keep digits, commas, dots and minus signs only
-        temizlenmis_deger = re.sub(r"[^\d,.-]+", "", deger.strip())
-        # When using the Turkish number format (dot thousands, comma decimals):
-        # Remove thousand separators first
-        temizlenmis_deger_noktasiz = temizlenmis_deger.replace(".", "")
-        # Then replace the decimal comma with a dot
-        temizlenmis_deger_standart = temizlenmis_deger_noktasiz.replace(",", ".")
 
-        # First try parsing after cleaning the value
+    if isinstance(deger, str):
+        cleaned = re.sub(r"[^\d,.-]+", "", deger.strip())
+        cleaned = cleaned.replace(".", "").replace(",", ".")
         try:
-            return float(temizlenmis_deger_standart)
+            return float(cleaned)
         except ValueError:
-            # If that fails, parse the raw cleaned value
-            try:
-                return float(
-                    temizlenmis_deger
-                )  # Original string stripped of non-numeric characters
-            except ValueError:
-                return np.nan
-    return np.nan  # Fallback for all other unexpected types
+            return np.nan
+
+    return np.nan
 
 
 def _temizle_sayisal_seri(s: pd.Series) -> pd.Series:
