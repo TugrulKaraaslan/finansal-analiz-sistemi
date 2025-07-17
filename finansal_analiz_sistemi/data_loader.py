@@ -56,6 +56,15 @@ DATE_COLUMN_CANDIDATES = (
 )
 
 
+def _find_date_column(df: pd.DataFrame) -> str | None:
+    """Return the first matching date column name or ``None``."""
+
+    candidates = list(DATE_COLUMN_CANDIDATES)
+    if not df.empty and df.columns[0].startswith("Unnamed:"):
+        candidates.append(df.columns[0])
+    return next((c for c in candidates if c in df.columns), None)
+
+
 def _standardize_date_column(
     df: pd.DataFrame, file_path_for_log: str = "", logger_param=None
 ) -> pd.DataFrame:
@@ -79,21 +88,17 @@ def _standardize_date_column(
         logger_param = logger
     log = logger_param
 
-    candidates = list(DATE_COLUMN_CANDIDATES)
-    if not df.empty and df.columns[0].startswith("Unnamed:"):
-        candidates.append(df.columns[0])
+    found_col = _find_date_column(df)
+    file_name = os.path.basename(file_path_for_log)
 
-    bulunan_tarih_sutunu = next((c for c in candidates if c in df.columns), None)
-
-    if bulunan_tarih_sutunu and bulunan_tarih_sutunu != "tarih":
-        df.rename(columns={bulunan_tarih_sutunu: "tarih"}, inplace=True)
-        log.debug(
-            f"'{os.path.basename(file_path_for_log)}': Tarih sütunu '{bulunan_tarih_sutunu}' -> 'tarih'"
-        )
-    elif not bulunan_tarih_sutunu:
+    if found_col and found_col != "tarih":
+        df.rename(columns={found_col: "tarih"}, inplace=True)
+        log.debug("'%s': Tarih sütunu '%s' -> 'tarih'", file_name, found_col)
+    elif not found_col:
         log.warning(
-            f"'{os.path.basename(file_path_for_log)}': Standart tarih sütunu ('Tarih' vb.) bulunamadı. "
-            f"Mevcut sütunlar: {df.columns.tolist()}"
+            "'%s': Standart tarih sütunu ('Tarih' vb.) bulunamadı. Mevcut sütunlar: %s",
+            file_name,
+            df.columns.tolist(),
         )
     return df
 
