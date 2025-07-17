@@ -53,18 +53,25 @@ class DataLoaderCache:
         self.logger = logger
 
     def _get_cache_key(
-        self, filepath: str, kind: str
+        self, filepath: str | os.PathLike[str], kind: str
     ) -> Tuple[Tuple[str, str], int, int]:
-        """Return cache key and file metadata.
+        """Return cache key and file metadata for ``filepath``.
 
-        Args:
-            filepath (str): File path to inspect.
-            kind (str): Cache namespace such as ``"__csv__"``.
+        Parameters
+        ----------
+        filepath : str | os.PathLike[str]
+            File path to inspect.
+        kind : str
+            Cache namespace such as ``"__csv__"``.
 
-        Returns:
-            tuple: ``((abs_path, kind), mtime_ns, size)``
+        Returns
+        -------
+        tuple
+            ``((abs_path, kind), mtime_ns, size)`` describing the file.
         """
-        abs_path = os.path.abspath(filepath)
+        abs_path = os.path.abspath(os.fspath(filepath))
+        if not os.path.exists(abs_path):
+            raise FileNotFoundError(abs_path)
         stat = os.stat(abs_path)
         return (abs_path, kind), stat.st_mtime_ns, stat.st_size
 
@@ -75,7 +82,7 @@ class DataLoaderCache:
 
     def _load_file(
         self,
-        filepath: str,
+        filepath: str | os.PathLike[str],
         *,
         kind: str,
         loader: Callable[[str], T],
@@ -84,7 +91,7 @@ class DataLoaderCache:
 
         Parameters
         ----------
-        filepath : str
+        filepath : str | os.PathLike[str]
             File path to load and monitor.
         kind : str
             Cache namespace such as ``"__csv__"``.
@@ -118,7 +125,7 @@ class DataLoaderCache:
                 self.logger.error(f"{label} yükleme hatası: {filepath}: {e}")
             raise
 
-    def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
+    def load_csv(self, filepath: str | os.PathLike[str], **kwargs) -> pd.DataFrame:
         """Load ``filepath`` through the in-memory cache.
 
         The CSV file is read only when its modification time or size differs
@@ -126,7 +133,7 @@ class DataLoaderCache:
 
         Parameters
         ----------
-        filepath : str
+        filepath : str | os.PathLike[str]
             CSV file path.
         **kwargs : Any
             Arguments forwarded to :func:`pandas.read_csv`.
@@ -144,7 +151,7 @@ class DataLoaderCache:
             loader=lambda p: pd.read_csv(p, **kwargs),
         )
 
-    def load_excel(self, filepath: str, **kwargs) -> pd.ExcelFile:
+    def load_excel(self, filepath: str | os.PathLike[str], **kwargs) -> pd.ExcelFile:
         """Load an Excel workbook via the cache.
 
         The workbook is reloaded whenever its modification time or size
@@ -152,7 +159,7 @@ class DataLoaderCache:
 
         Parameters
         ----------
-        filepath : str
+        filepath : str | os.PathLike[str]
             Path to the Excel file.
         **kwargs : Any
             Options forwarded to :class:`pandas.ExcelFile`.
@@ -168,12 +175,12 @@ class DataLoaderCache:
             loader=lambda p: open_excel_cached(p, **kwargs),
         )
 
-    def load_parquet(self, filepath: str, **kwargs) -> pd.DataFrame:
+    def load_parquet(self, filepath: str | os.PathLike[str], **kwargs) -> pd.DataFrame:
         """Load a Parquet file through the cache.
 
         Parameters
         ----------
-        filepath : str
+        filepath : str | os.PathLike[str]
             Parquet file path.
         **kwargs : Any
             Arguments forwarded to :func:`pandas.read_parquet`.
