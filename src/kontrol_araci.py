@@ -1,12 +1,12 @@
-"""Diagnostic runner for filter definitions.
+"""Sağlık taraması için yardımcı fonksiyonlar.
 
-Each filter is executed once to collect status flags and error details
-used in reporting.
+Tanımlanan her filtre bir kez çalıştırılarak durum bilgileri ve olası
+hatalar toplanır. Sonuçlar raporlama aşamasında kullanılır.
 """
 
 import pandas as pd
 
-EXPECTED_COLUMNS = [
+EXPECTED_COLUMNS: list[str] = [
     "kod",
     "tip",
     "durum",
@@ -25,7 +25,7 @@ except ImportError:  # pragma: no cover - fallback when run as script
 def tarama_denetimi(
     df_filtreler: pd.DataFrame, df_indikator: pd.DataFrame
 ) -> pd.DataFrame:
-    """Run each filter once and collect status information.
+    """Filtreleri çalıştırıp özet bilgi döndür.
 
     Args:
         df_filtreler (pd.DataFrame): Filter definitions with ``kod`` and
@@ -58,19 +58,17 @@ def tarama_denetimi(
             columns=EXPECTED_COLUMNS,
         )
 
-    records: list[dict] = []
-    for row in df_filtreler.itertuples(index=False):
-        _, info = _apply_single_filter(
-            df_indikator, getattr(row, "kod"), getattr(row, "PythonQuery")
-        )
-        records.append(info)
-    df = pd.DataFrame(records)
-    if df.empty:
-        df = pd.DataFrame(columns=EXPECTED_COLUMNS)  # pragma: no cover
-    if not (df["durum"] != "OK").any():
-        df = pd.concat(
+    records = [
+        _apply_single_filter(df_indikator, r["kod"], r["PythonQuery"])[1]
+        for r in df_filtreler.to_dict("records")
+    ]
+    summary_df = pd.DataFrame(records)
+    if summary_df.empty:
+        summary_df = pd.DataFrame(columns=EXPECTED_COLUMNS)  # pragma: no cover
+    if not (summary_df["durum"] != "OK").any():
+        summary_df = pd.concat(
             [
-                df,
+                summary_df,
                 pd.DataFrame(
                     [
                         {
@@ -87,4 +85,4 @@ def tarama_denetimi(
             ],
             ignore_index=True,
         )
-    return df
+    return summary_df
