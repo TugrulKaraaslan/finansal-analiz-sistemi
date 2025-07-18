@@ -19,6 +19,7 @@ from pandas.errors import UndefinedVariableError as QueryError
 
 import settings
 from finansal_analiz_sistemi.logging_config import get_logger
+from utils.failure_tracker import log_failure_exc
 
 logger = get_logger(__name__)
 
@@ -222,11 +223,7 @@ def safe_eval(
             FAILED_FILTERS.append({"filtre_kodu": expr.get("code"), "hata": str(e)})
             logger.warning("QUERY_ERROR %s", e)
             try:
-                from utils.error_map import get_reason_hint
-                from utils.failure_tracker import log_failure
-
-                reason, hint = get_reason_hint(e)
-                log_failure("filters", expr.get("code", "unknown"), reason, hint)
+                log_failure_exc("filters", expr.get("code", "unknown"), e)
             except Exception:
                 pass
             raise
@@ -276,11 +273,7 @@ def run_single_filter(kod: str, query: str) -> dict[str, Any]:
         )
         logger.warning(f"QUERY_ERROR: {kod} – {msg}")
         try:
-            from utils.error_map import get_reason_hint
-            from utils.failure_tracker import log_failure
-
-            reason, hint = get_reason_hint(qe)
-            log_failure("filters", kod, reason, hint)
+            log_failure_exc("filters", kod, qe)
         except Exception:
             pass
     except MissingColumnError as me:
@@ -296,11 +289,7 @@ def run_single_filter(kod: str, query: str) -> dict[str, Any]:
         )
         logger.warning(f"GENERIC: {kod} – {msg}")
         try:
-            from utils.error_map import get_reason_hint
-            from utils.failure_tracker import log_failure
-
-            reason, hint = get_reason_hint(me)
-            log_failure("filters", kod, reason, hint)
+            log_failure_exc("filters", kod, me)
         except Exception:
             pass
     return atlanmis
@@ -382,11 +371,7 @@ def _apply_single_filter(
     except Exception as e:
         info.update(durum="HATA", sebep=str(e)[:120])
         try:
-            from utils.error_map import get_reason_hint
-            from utils.failure_tracker import log_failure
-
-            reason, hint = get_reason_hint(e)
-            log_failure("filters", kod, reason, hint)
+            log_failure_exc("filters", kod, e)
         except Exception:
             pass
         return None, info
@@ -559,11 +544,7 @@ def uygula_filtreler(
             )
             fn_logger.warning(f"QUERY_ERROR: {filtre_kodu} – {msg}")
             try:
-                from utils.error_map import get_reason_hint
-                from utils.failure_tracker import log_failure
-
-                reason, hint = get_reason_hint(qe)
-                log_failure("filters", filtre_kodu, reason, hint)
+                log_failure_exc("filters", filtre_kodu, qe)
             except Exception:
                 pass
             continue
@@ -580,11 +561,7 @@ def uygula_filtreler(
             )
             fn_logger.warning(f"GENERIC: {filtre_kodu} – {msg}")
             try:
-                from utils.error_map import get_reason_hint
-                from utils.failure_tracker import log_failure
-
-                reason, hint = get_reason_hint(me)
-                log_failure("filters", filtre_kodu, reason, hint)
+                log_failure_exc("filters", filtre_kodu, me)
             except Exception:
                 pass
             continue

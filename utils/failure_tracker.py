@@ -14,6 +14,7 @@ __all__ = [
     "clear_failures",
     "get_failures",
     "log_failure",
+    "log_failure_exc",
     "failures_to_df",
 ]
 
@@ -67,6 +68,18 @@ def log_failure(category: str, item: str, reason: str, hint: str = "") -> None:
         hint (str, optional): Additional hint for resolving the failure.
     """
     failures[category].append(FailedFilter(item, reason, hint))
+
+
+def log_failure_exc(category: str, item: str, exc: Exception) -> None:
+    """Record ``exc`` under ``category`` using mapped reason and hint."""
+
+    try:
+        from utils.error_map import get_reason_hint
+
+        reason, hint = get_reason_hint(exc)
+    except Exception:
+        reason, hint = type(exc).__name__, ""
+    log_failure(category, item, reason, hint)
 
 
 def failures_to_df() -> pd.DataFrame:
