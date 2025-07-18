@@ -54,7 +54,8 @@ def purge_old_logs(
     cutoff_ts = (datetime.now() - timedelta(days=keep_days)).timestamp()
     count = 0
 
-    def remove(path: Path) -> None:
+    def remove_file(path: Path) -> None:
+        """Delete ``path`` unless ``dry_run`` is enabled."""
         if dry_run:
             print(f"[DRY-RUN] Would delete {path}")
         else:
@@ -70,16 +71,16 @@ def purge_old_logs(
     for pat in patterns:
         for log_file in log_dir.glob(pat):
             if is_expired(log_file):
-                remove(log_file)
+                remove_file(log_file)
                 count += 1
                 lock = log_file.with_suffix(".lock")
                 if lock.exists():
-                    remove(lock)
+                    remove_file(lock)
                     count += 1
 
     for lock_file in log_dir.glob("*.lock"):
         if not lock_file.with_suffix(".log").exists() and is_expired(lock_file):
-            remove(lock_file)
+            remove_file(lock_file)
             count += 1
 
     return count

@@ -4,6 +4,8 @@ The module should correctly identify old log and lock files, deleting them
 when not running in dry-run mode.
 """
 
+import pytest
+
 from utils.purge_old_logs import purge_old_logs
 
 
@@ -35,3 +37,9 @@ def test_custom_patterns(tmp_path):
     removed = purge_old_logs(log_dir=tmp_path, keep_days=7, patterns=("*.txt",))
     assert removed == 1
     assert not old_txt.exists()
+
+
+def test_negative_keep_days_raises(tmp_path):
+    """Negative ``keep_days`` should trigger ``ValueError``."""
+    with pytest.raises(ValueError):
+        purge_old_logs(log_dir=tmp_path, keep_days=-1)
