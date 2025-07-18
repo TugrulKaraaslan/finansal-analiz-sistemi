@@ -4,6 +4,9 @@ These functions simulate simple buy/sell scenarios based on filter
 results and provide summary statistics for reporting.
 """
 
+import logging
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 
@@ -17,7 +20,7 @@ def _get_fiyat(
     df_hisse_veri: pd.DataFrame,
     tarih: pd.Timestamp,
     zaman_sutun_adi: str,
-    logger_param=None,
+    logger_param: Optional[logging.Logger] = None,
 ) -> float:
     """Return the price for ``tarih`` from ``zaman_sutun_adi``.
 
@@ -107,7 +110,7 @@ def calistir_basit_backtest(
     df_tum_veri: pd.DataFrame,
     satis_tarihi_str: str,
     tarama_tarihi_str: str,
-    logger_param=None,
+    logger_param: Optional[logging.Logger] = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Run a simple backtest using the given filter results.
 

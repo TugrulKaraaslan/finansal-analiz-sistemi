@@ -19,7 +19,7 @@ if (
 import logging
 import uuid
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Optional
 
 import numpy as np
 import pandas as pd
@@ -334,7 +334,7 @@ def generate_full_report(
     *,
     keep_legacy: bool = True,
     quick: bool = True,
-    logger_param=None,
+    logger_param: Optional[logging.Logger] = None,
 ) -> Path:
     """Generate a workbook containing summary, detail and error sheets.
 
@@ -575,7 +575,7 @@ def kaydet_raporlar(
     detay_df: pd.DataFrame,
     istat_df: pd.DataFrame,
     filepath: Path,
-    logger_param=None,
+    logger_param: Optional[logging.Logger] = None,
 ) -> Path:
     """Append summary, detail and stats sheets to an existing workbook.
 
@@ -614,7 +614,7 @@ def kaydet_uc_sekmeli_excel(
     ozet_df: pd.DataFrame,
     detay_df: pd.DataFrame,
     istatistik_df: pd.DataFrame,
-    logger_param=None,
+    logger_param: Optional[logging.Logger] = None,
 ) -> Path:
     """Save summary, detail and statistics frames into ``fname``.
 
@@ -662,7 +662,7 @@ def kaydet_uc_sekmeli_excel(
 def olustur_excel_raporu(
     kayitlar: list[dict],
     fname: str | Path,
-    logger_param=None,
+    logger_param: Optional[logging.Logger] = None,
 ) -> Path | None:
     """Create a three-sheet Excel report from provided records."""
     if logger_param is None:

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Mapping, Sequence
+from typing import Mapping, Optional, Sequence
 
 import pandas as pd
 
@@ -25,7 +25,7 @@ SEBEP_KODLARI = {
 def dogrula_filtre_dataframe(
     df_filtre: pd.DataFrame,
     zorunlu_kolonlar: Sequence[str] | None = None,
-    logger: logging.Logger | None = None,
+    logger: Optional[logging.Logger] = None,
 ) -> Mapping[str, str]:
     """Return problematic rows as a ``dict`` keyed by filter code.
 
@@ -33,7 +33,7 @@ def dogrula_filtre_dataframe(
         df_filtre (pd.DataFrame): Filter definitions to verify.
         zorunlu_kolonlar (list[str] | None, optional): Required column names.
             Defaults to ``["flag", "query"]``.
-        logger (logging.Logger | None, optional): Logger used for warnings.
+        logger (Optional[logging.Logger], optional): Logger used for warnings.
 
     Returns:
         dict: Mapping of filter codes to descriptions of the issue.
@@ -83,7 +83,7 @@ def dogrula_filtre_dataframe(
 def validate(
     df_filtre: pd.DataFrame,
     zorunlu_kolonlar: Sequence[str] | None = None,
-    logger: logging.Logger | None = None,
+    logger: Optional[logging.Logger] = None,
 ) -> list[ValidationError]:
     """Return ``ValidationError`` objects describing invalid rows.
 
@@ -91,7 +91,7 @@ def validate(
         df_filtre (pd.DataFrame): Filter definitions to validate.
         zorunlu_kolonlar (list[str] | None, optional): Required column names.
             Defaults to ``["flag", "query"]``.
-        logger (logging.Logger | None, optional): Logger emitting warnings for
+        logger (Optional[logging.Logger], optional): Logger emitting warnings for
             each problem.
 
     Returns:

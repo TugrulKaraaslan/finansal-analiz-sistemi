@@ -14,6 +14,7 @@ import os
 import sys
 import traceback
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 import yaml
@@ -270,7 +271,7 @@ def calistir_tum_sistemi(
     tarama_tarihi_str: str,
     satis_tarihi_str: str,
     force_excel_reload_param: bool = False,
-    logger_param=None,
+    logger_param: Optional[logging.Logger] = None,
     output_path: str | Path | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict | None]:
     """Run all analysis steps sequentially."""
