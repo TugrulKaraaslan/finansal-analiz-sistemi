@@ -180,12 +180,20 @@ def _standardize_ohlcv_columns(
 
 
 def check_and_create_dirs(*dir_paths: str | Path) -> None:
-    """Ensure each path in ``dir_paths`` exists as a directory."""
+    """Create missing directories from ``dir_paths``.
+
+    Paths are expanded with ``~`` and resolved relative to the current
+    working directory. Existing directories are left untouched while
+    name clashes with files trigger an error log entry.
+    """
 
     for path in dir_paths:
         if not path:
             continue
-        p = Path(path)
+        p = Path(path).expanduser().resolve(strict=False)
+        if p.exists() and not p.is_dir():
+            logger.error("Beklenen dizin aslında dosya: %s", p)
+            continue
         if not p.exists():
             try:
                 p.mkdir(parents=True, exist_ok=True)
