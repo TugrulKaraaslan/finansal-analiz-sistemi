@@ -7,6 +7,7 @@ avoid disk access. Each cached dataset expires after ``ttl`` seconds.
 
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -38,22 +39,30 @@ class DataLoaderCache:
     transparently refreshed whenever the source file changes.
     """
 
-    def __init__(self, logger=None, *, ttl: int = 4 * 60 * 60, maxsize: int = 64):
+    def __init__(
+        self,
+        logger: logging.Logger | None = None,
+        *,
+        ttl: int = 4 * 60 * 60,
+        maxsize: int = 64,
+    ) -> None:
         """Initialize the cache and set expiration policy.
 
         Parameters
         ----------
         logger : logging.Logger, optional
-            Logger used for debug messages.
+            Logger used for debug messages. When omitted, a module-level
+            logger is created automatically.
         ttl : int, optional
             Entry lifetime in seconds.
         maxsize : int, optional
             Maximum number of cached datasets.
         """
         self.loaded_data: TTLCache[tuple[str, str], CachedItem] = TTLCache(
-            maxsize=maxsize, ttl=ttl
+            maxsize=maxsize,
+            ttl=ttl,
         )
-        self.logger = logger
+        self.logger = logger or logging.getLogger(__name__)
 
     def _get_cache_key(
         self, filepath: str | os.PathLike[str], kind: str
