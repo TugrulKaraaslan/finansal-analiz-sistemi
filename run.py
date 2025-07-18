@@ -270,7 +270,7 @@ def calistir_tum_sistemi(
     tarama_tarihi_str: str,
     satis_tarihi_str: str,
     force_excel_reload_param: bool = False,
-    logger_param=None,
+    logger_param: logging.Logger | None = None,
     output_path: str | Path | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict | None]:
     """Run all analysis steps sequentially."""

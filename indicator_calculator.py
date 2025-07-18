@@ -135,7 +135,7 @@ def _calculate_series_series_crossover(
     s2_col: str,
     col_name_above: str,
     col_name_below: str,
-    logger_param=None,
+    logger_param: logging.Logger | None = None,
 ) -> tuple[pd.Series, pd.Series] | None:
     """Detect where ``s1_col`` crosses ``s2_col`` in ``group_df``."""
 
@@ -189,7 +189,7 @@ def _calculate_series_value_crossover(
     s_col: str,
     value: float,
     suffix: str,
-    logger_param=None,
+    logger_param: logging.Logger | None = None,
 ) -> tuple[pd.Series, pd.Series] | None:
     """Return crossover signals when ``s_col`` crosses ``value``."""
 
@@ -910,7 +910,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
     df_islenmis_veri: pd.DataFrame,
     wanted_cols=None,
     df_filters: pd.DataFrame | None = None,
-    logger_param=None,
+    logger_param: logging.Logger | None = None,
 ) -> pd.DataFrame | None:
     """Compute indicators and crossover signals."""
     if logger_param is None:

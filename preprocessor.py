@@ -6,6 +6,7 @@ invalid rows before indicator calculation.
 
 from __future__ import annotations
 
+import logging
 import re
 
 import numpy as np
@@ -68,7 +69,7 @@ def _temizle_sayisal_seri(s: pd.Series) -> pd.Series:
 
 
 def _convert_numeric_columns(
-    df: pd.DataFrame, columns: list[str], logger_param=None
+    df: pd.DataFrame, columns: list[str], logger_param: logging.Logger | None = None
 ) -> None:
     """Ensure ``columns`` in ``df`` are numeric.
 
@@ -122,7 +123,7 @@ def _convert_numeric_columns(
 
 
 def on_isle_hisse_verileri(
-    df_ham: pd.DataFrame, logger_param=None
+    df_ham: pd.DataFrame, logger_param: logging.Logger | None = None
 ) -> pd.DataFrame | None:
     """Clean raw stock data for indicator calculation.
 

@@ -9,6 +9,7 @@ options come from ``config.yml`` and results are cached globally.
 from __future__ import annotations
 
 import keyword
+import logging
 import os
 import re
 from typing import Any
@@ -381,7 +382,7 @@ def uygula_filtreler(
     df_ana_veri: pd.DataFrame,
     df_filtre_kurallari: pd.DataFrame,
     tarama_tarihi: pd.Timestamp,
-    logger_param=None,
+    logger_param: logging.Logger | None = None,
 ) -> tuple[dict, dict]:
     """Apply filter rules on ``df_ana_veri`` and return results.
 
