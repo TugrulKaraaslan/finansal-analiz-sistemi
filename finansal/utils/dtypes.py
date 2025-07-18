@@ -32,7 +32,13 @@ def safe_set(df: pd.DataFrame, column: str, values) -> None:
         try:
             series = series.astype(target_dtype)
         except (ValueError, TypeError):
-            # fall back to float if incompatible (e.g., float into int column)
-            series = series.astype("float32")
+            if str(target_dtype).startswith("int"):
+                try:
+                    nullable = "Int32" if "32" in str(target_dtype) else "Int64"
+                    series = series.astype(nullable)
+                except Exception:
+                    series = series.astype("float32")
+            else:
+                series = series.astype("float32")
 
     df[column] = series

@@ -30,4 +30,4 @@ def test_safe_set_fallback_dtype():
     """Fallback to float dtype when ``NaN`` values are present."""
     df = pd.DataFrame({"volume": pd.Series([1, 2], dtype="int32")})
     safe_set(df, "volume", [1, np.nan])
-    assert df["volume"].dtype == "float32"
+    assert str(df["volume"].dtype) == "Int32"
