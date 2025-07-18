@@ -7,6 +7,8 @@ available and otherwise raise :class:`NotImplementedError`.
 
 from __future__ import annotations
 
+from typing import Any, Callable
+
 import pandas as pd
 
 __all__ = ["ichimoku", "macd", "rsi"]
@@ -15,6 +17,9 @@ try:  # pragma: no cover - optional dependency
     from openbb import obb  # type: ignore
 except Exception:  # pragma: no cover - optional dependency
     obb = None
+
+# Cache for resolved OpenBB functions
+_FUNC_CACHE: dict[str, Callable[..., Any]] = {}
 
 
 def _call_openbb(func_name: str, **kwargs) -> object:
@@ -44,9 +49,14 @@ def _call_openbb(func_name: str, **kwargs) -> object:
     """
     if obb is None:
         raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
-    func = getattr(obb.technical, func_name, None)
+
+    func = _FUNC_CACHE.get(func_name)
     if func is None:
-        raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
+        func = getattr(obb.technical, func_name, None)
+        if func is None:
+            raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
+        _FUNC_CACHE[func_name] = func
+
     return func(**kwargs)
 
 
