@@ -19,6 +19,10 @@ REASON_MAP: dict[str, Tuple[str, str]] = {
         "Veri Alan\u0131 Yok",
         "hisse_kodu / tarih s\u00fctunu eksik olabilir",
     ),
+    "FileNotFoundError": (
+        "Dosya Bulunamad\u0131",
+        "Ge\u00e7erli bir dosya yolu belirtin",
+    ),
     "ValueError": (
         "Ge\u00e7ersiz De\u011fer",
         "Parametreleri kontrol edin",
