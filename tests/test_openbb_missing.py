@@ -1,3 +1,5 @@
+import pytest
+
 import openbb_missing as om
 
 
@@ -32,3 +34,28 @@ def test_call_openbb_populates_cache(monkeypatch):
     assert calls == [1, 2]
     assert "foo" in om._FUNC_CACHE
     assert len(om._FUNC_CACHE) == 1
+
+
+def test_call_openbb_package_missing(monkeypatch):
+    """NotImplementedError should be raised when OpenBB is absent."""
+
+    monkeypatch.setattr(om, "obb", None)
+    monkeypatch.setattr(om, "_FUNC_CACHE", om.LRUCache(maxsize=4))
+
+    with pytest.raises(NotImplementedError, match="package"):
+        om._call_openbb("foo")
+
+
+def test_call_openbb_function_missing(monkeypatch):
+    """NotImplementedError should be raised for unknown functions."""
+
+    class DummyTech:
+        pass
+
+    dummy = type("DummyOBB", (), {"technical": DummyTech()})()
+
+    monkeypatch.setattr(om, "obb", dummy)
+    monkeypatch.setattr(om, "_FUNC_CACHE", om.LRUCache(maxsize=4))
+
+    with pytest.raises(NotImplementedError, match="bar"):
+        om._call_openbb("bar")
