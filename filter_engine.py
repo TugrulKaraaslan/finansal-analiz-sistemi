@@ -62,6 +62,7 @@ class MissingColumnError(Exception):
 
 _STRING_RE = re.compile(r"(?:'[^']*'|\"[^\"]*\")")
 _IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+_RESERVED_TOKENS = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
 
 
 def _extract_query_columns(query: str) -> set[str]:
@@ -74,8 +75,7 @@ def _extract_query_columns(query: str) -> set[str]:
 
     query = _STRING_RE.sub(" ", query)
     tokens = set(_IDENT_RE.findall(query))
-    reserved = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
-    return tokens - reserved
+    return tokens - _RESERVED_TOKENS
 
 
 def _build_solution(err_type: str, msg: str) -> str:
