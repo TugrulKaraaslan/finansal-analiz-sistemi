@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Callable, Tuple, TypeVar
 
 import pandas as pd
@@ -71,11 +72,11 @@ class DataLoaderCache:
         tuple
             ``((abs_path, kind), mtime_ns, size)`` describing the file.
         """
-        abs_path = os.path.abspath(os.fspath(filepath))
-        if not os.path.exists(abs_path):
-            raise FileNotFoundError(abs_path)
-        stat = os.stat(abs_path)
-        return (abs_path, kind), stat.st_mtime_ns, stat.st_size
+        abs_path = Path(os.fspath(filepath)).expanduser().resolve()
+        if not abs_path.exists():
+            raise FileNotFoundError(str(abs_path))
+        stat = abs_path.stat()
+        return (str(abs_path), kind), stat.st_mtime_ns, stat.st_size
 
     def clear(self) -> None:
         """Clear all cached datasets and Excel workbooks."""
