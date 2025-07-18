@@ -12,7 +12,7 @@ import keyword
 import logging
 import os
 import re
-from typing import Any
+from typing import Any, Optional
 
 import pandas as pd
 import yaml
@@ -382,7 +382,7 @@ def uygula_filtreler(
     df_ana_veri: pd.DataFrame,
     df_filtre_kurallari: pd.DataFrame,
     tarama_tarihi: pd.Timestamp,
-    logger_param: logging.Logger | None = None,
+    logger_param: Optional[logging.Logger] = None,
 ) -> tuple[dict, dict]:
     """Apply filter rules on ``df_ana_veri`` and return results.
 
