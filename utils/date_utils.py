@@ -42,6 +42,11 @@ def parse_date(date_str: Union[str, datetime]) -> pd.Timestamp | NaTType:
         if ts is not pd.NaT:
             return ts
 
+    if str(date_str).isdigit() and len(str(date_str)) == 8:
+        ts = pd.to_datetime(date_str, format="%Y%m%d", errors="coerce")
+        if ts is not pd.NaT:
+            return ts
+
     # Generic day-first parsing with coercion (handles 07/03/25 etc.)
     ts = pd.to_datetime(date_str, dayfirst=True, errors="coerce")
     if ts is not pd.NaT:
