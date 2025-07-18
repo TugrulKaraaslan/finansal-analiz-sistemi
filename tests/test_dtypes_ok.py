@@ -31,3 +31,12 @@ def test_safe_set_fallback_dtype():
     df = pd.DataFrame({"volume": pd.Series([1, 2], dtype="int32")})
     safe_set(df, "volume", [1, np.nan])
     assert str(df["volume"].dtype) == "Int32"
+
+
+def test_safe_set_handles_length_mismatch():
+    """Input shorter than DataFrame length should be reindexed with NaN."""
+    df = pd.DataFrame({"close": [10, 20, 30]})
+    # Provide only two values for three rows
+    safe_set(df, "ema_5", [1, 2])
+    assert list(df["ema_5"][:2]) == [1, 2]
+    assert pd.isna(df["ema_5"].iloc[2])
