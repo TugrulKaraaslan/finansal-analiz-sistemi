@@ -16,8 +16,8 @@ __all__ = ["safe_concat", "safe_infer_objects", "safe_to_excel"]
 _PANDAS_HAS_COPY = _v.parse(pd.__version__) >= _v.parse("2.0.0")
 
 
-def safe_concat(frames: Iterable[pd.DataFrame], **kwargs) -> pd.DataFrame:
-    """Concatenate non-empty frames or return an empty ``DataFrame``.
+def safe_concat(frames: Iterable[pd.DataFrame | None], **kwargs) -> pd.DataFrame:
+    """Concatenate non-empty frames and ignore ``None`` entries.
 
     Parameters
     ----------
@@ -31,7 +31,7 @@ def safe_concat(frames: Iterable[pd.DataFrame], **kwargs) -> pd.DataFrame:
     pandas.DataFrame
         Concatenated frame or an empty frame when ``frames`` is empty.
     """
-    frames = [f for f in frames if not f.empty]
+    frames = [f for f in frames if isinstance(f, pd.DataFrame) and not f.empty]
     return pd.concat(frames, **kwargs) if frames else pd.DataFrame()
 
 

@@ -25,3 +25,10 @@ def test_safe_concat_iterable():
     frames = (pd.DataFrame({"a": [i]}) for i in range(3))
     result = safe_concat(frames, ignore_index=True)
     assert result.equals(pd.DataFrame({"a": [0, 1, 2]}))
+
+
+def test_safe_concat_ignores_none():
+    """``None`` values in the iterable should be skipped."""
+    frames = [pd.DataFrame({"a": [1]}), None, pd.DataFrame({"a": [2]})]
+    result = safe_concat(frames, ignore_index=True)
+    assert result.equals(pd.DataFrame({"a": [1, 2]}))
