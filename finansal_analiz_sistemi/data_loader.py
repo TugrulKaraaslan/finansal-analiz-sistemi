@@ -59,11 +59,17 @@ DATE_COLUMN_CANDIDATES = (
 
 
 def _find_date_column(df: pd.DataFrame) -> str | None:
-    """Return the first matching date column name or ``None``."""
+    """Return the first matching date column name or ``None``.
+
+    The search includes standard column names and any column starting with
+    ``"Unnamed:"``. This accommodates exported Excel files that preserve an
+    index column.
+    """
 
     candidates = list(DATE_COLUMN_CANDIDATES)
-    if not df.empty and df.columns[0].startswith("Unnamed:"):
-        candidates.append(df.columns[0])
+    extra = next((col for col in df.columns if str(col).startswith("Unnamed:")), None)
+    if extra:
+        candidates.append(extra)
     return next((c for c in candidates if c in df.columns), None)
 
 

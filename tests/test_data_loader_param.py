@@ -66,13 +66,22 @@ def test_load_excel_katalogu_short(tmp_path: Path):
     assert data_loader.load_excel_katalogu(str(p)) is None
 
 
-@pytest.mark.parametrize("colname", ["Date", "Tarih", "tarih", "TARİH", "Unnamed: 0"])
+@pytest.mark.parametrize(
+    "colname", ["Date", "Tarih", "tarih", "TARİH", "Unnamed: 0", "Unnamed: 1"]
+)
 def test_standardize_date_column(colname):
     """Rename various date column names to ``tarih`` consistently."""
     df = pd.DataFrame({colname: ["2025-03-07"]})
     out = data_loader._standardize_date_column(df, "dummy")
     assert "tarih" in out.columns
     assert out.columns.tolist().count("tarih") == 1
+
+
+def test_standardize_date_column_unnamed_any_position():
+    """Unnamed columns should be detected even when not first."""
+    df = pd.DataFrame({"a": [1], "Unnamed: 3": ["2025-03-07"]})
+    out = data_loader._standardize_date_column(df, "dummy")
+    assert "tarih" in out.columns
 
 
 def test_standardize_date_column_no_match():
