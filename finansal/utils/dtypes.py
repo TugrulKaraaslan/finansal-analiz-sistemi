@@ -19,17 +19,19 @@ def safe_set(df: pd.DataFrame, column: str, values: Iterable[Any]) -> None:
     Args:
         df (pd.DataFrame): Target DataFrame to modify.
         column (str): Column name to assign.
-        values (Iterable[Any]): Values to be set. ``values`` must be index-aligned
-            with ``df``. When the length differs, values are reindexed to ``df``
-            and missing entries become ``NaN``.
+        values (Iterable[Any] | pd.Series): Values assigned to ``df``. When the
+            provided series has a different index or length, it is reindexed to
+            ``df`` and missing entries become ``NaN``.
 
     """
     # Ensure the index matches the DataFrame to avoid misaligned assignment
-    try:
-        series = pd.Series(values, index=df.index)
-    except ValueError:
-        series = pd.Series(values)
-        series = series.reindex(df.index)
+    if isinstance(values, pd.Series):
+        series = values.reindex(df.index)
+    else:
+        try:
+            series = pd.Series(values, index=df.index)
+        except ValueError:
+            series = pd.Series(values).reindex(df.index)
 
     target_dtype = config.DTYPES_MAP.get(column)
     if target_dtype is None and column in df.columns:
