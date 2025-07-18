@@ -50,11 +50,10 @@ def _call_openbb(func_name: str, **kwargs) -> object:
         If :mod:`openbb` or the requested function is unavailable.
     """
     if obb is None:
-        raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
+        raise NotImplementedError("OpenBB package is not installed")
 
-    try:
-        func = _FUNC_CACHE[func_name]
-    except KeyError:
+    func = _FUNC_CACHE.get(func_name)
+    if func is None:
         func = getattr(obb.technical, func_name, None)
         if func is None:
             raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
