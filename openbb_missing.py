@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Any, Callable
 
 import pandas as pd
+from cachetools import LRUCache
 
 __all__ = ["ichimoku", "macd", "rsi"]
 
@@ -19,7 +20,8 @@ except Exception:  # pragma: no cover - optional dependency
     obb = None
 
 # Cache for resolved OpenBB functions
-_FUNC_CACHE: dict[str, Callable[..., Any]] = {}
+# Limit size to avoid unbounded growth when called with many names
+_FUNC_CACHE: LRUCache[str, Callable[..., Any]] = LRUCache(maxsize=16)
 
 
 def _call_openbb(func_name: str, **kwargs) -> object:
@@ -50,8 +52,9 @@ def _call_openbb(func_name: str, **kwargs) -> object:
     if obb is None:
         raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
 
-    func = _FUNC_CACHE.get(func_name)
-    if func is None:
+    try:
+        func = _FUNC_CACHE[func_name]
+    except KeyError:
         func = getattr(obb.technical, func_name, None)
         if func is None:
             raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
