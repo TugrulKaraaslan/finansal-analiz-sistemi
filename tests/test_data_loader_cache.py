@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from data_loader_cache import DataLoaderCache
+from finansal_analiz_sistemi import config
 from src.utils.excel_reader import open_excel_cached
 
 pytest.importorskip("pyarrow")
@@ -54,3 +55,31 @@ def test_cache_entry_expires(tmp_path):
     time.sleep(1.1)
     second = cache.load_csv(str(path))
     assert first is not second
+
+
+def test_missing_file_raises(tmp_path):
+    cache = DataLoaderCache()
+    with pytest.raises(FileNotFoundError):
+        cache.load_csv(tmp_path / "missing.csv")
+    with pytest.raises(FileNotFoundError):
+        cache.load_excel(tmp_path / "missing.xlsx")
+    with pytest.raises(FileNotFoundError):
+        cache.load_parquet(tmp_path / "missing.parquet")
+
+
+def test_load_csv_respects_dtypes(tmp_path):
+    path = tmp_path / "e.csv"
+    df_in = pd.DataFrame(
+        {
+            "open": [1.1, 2.2],
+            "close": [3.3, 4.4],
+            "volume": [5, 6],
+        }
+    )
+    df_in.to_csv(path, index=False)
+
+    cache = DataLoaderCache()
+    df_out = cache.load_csv(path)
+    assert str(df_out["open"].dtype) == config.DTYPES["open"]
+    assert str(df_out["close"].dtype) == config.DTYPES["close"]
+    assert str(df_out["volume"].dtype) == config.DTYPES["volume"]
