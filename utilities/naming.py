@@ -27,8 +27,16 @@ def unique_name(base: str, seen: set[str]) -> str:
         seen.add(base)
         return base
 
+    # Collect existing numeric suffixes to avoid linear probing on
+    # large ``seen`` sets. Non-numeric endings are ignored so custom
+    # names like ``foo_bar`` do not interfere with the counter.
+    suffixes = {
+        int(name.rsplit("_", 1)[1])
+        for name in seen
+        if name.startswith(f"{base}_") and name.rsplit("_", 1)[-1].isdigit()
+    }
     index = 1
-    while f"{base}_{index}" in seen:
+    while index in suffixes:
         index += 1
     new = f"{base}_{index}"
     seen.add(new)
