@@ -27,15 +27,9 @@ def unique_name(base: str, seen: set[str]) -> str:
         seen.add(base)
         return base
 
-    import re
-
-    pattern = re.compile(re.escape(base) + r"_(\d+)$")
-    max_idx = 0
-    for name in seen:
-        match = pattern.fullmatch(name)
-        if match:
-            max_idx = max(max_idx, int(match.group(1)))
-
-    new = f"{base}_{max_idx + 1}"
+    index = 1
+    while f"{base}_{index}" in seen:
+        index += 1
+    new = f"{base}_{index}"
     seen.add(new)
     return new
