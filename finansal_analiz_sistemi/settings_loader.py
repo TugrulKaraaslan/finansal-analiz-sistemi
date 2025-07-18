@@ -44,3 +44,6 @@ def load_settings(path: str | None = None) -> dict:
         logger.debug("Settings module not available for patching")
 
     return data
+
+
+__all__ = ["load_settings"]

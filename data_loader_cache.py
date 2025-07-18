@@ -197,3 +197,6 @@ class DataLoaderCache:
             kind="__parquet__",
             loader=lambda p: pd.read_parquet(p, **kwargs),
         )
+
+
+__all__ = ["DataLoaderCache"]
