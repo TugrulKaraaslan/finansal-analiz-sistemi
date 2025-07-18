@@ -40,3 +40,11 @@ def test_safe_set_handles_length_mismatch():
     safe_set(df, "ema_5", [1, 2])
     assert list(df["ema_5"][:2]) == [1, 2]
     assert pd.isna(df["ema_5"].iloc[2])
+
+
+def test_safe_set_series_input_reindexes():
+    """Series input should be reindexed to match the DataFrame index."""
+    df = pd.DataFrame({"close": [10, 20]}, index=[5, 6])
+    series = pd.Series([1, 2], index=[6, 5])
+    safe_set(df, "ema_10", series)
+    assert list(df["ema_10"]) == [2, 1]
