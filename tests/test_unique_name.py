@@ -15,3 +15,10 @@ def test_unique_name_large_set():
     seen = {"ema_10"} | {f"ema_10_{i}" for i in range(1, 11)}
     assert unique_name("ema_10", seen) == "ema_10_11"
     assert "ema_10_11" in seen
+
+
+def test_unique_name_fills_gap():
+    """Smallest unused suffix should be selected."""
+    seen = {"ema_10", "ema_10_1", "ema_10_3"}
+    assert unique_name("ema_10", seen) == "ema_10_2"
+    assert "ema_10_2" in seen
