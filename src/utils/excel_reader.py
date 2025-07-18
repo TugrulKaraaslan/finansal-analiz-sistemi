@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict
 
 import pandas as pd
@@ -52,19 +53,22 @@ def open_excel_cached(path: str | os.PathLike[str], **kwargs: Any) -> pd.ExcelFi
     Returns:
         pd.ExcelFile: Cached workbook handle.
     """
-    abs_path = os.path.abspath(os.fspath(path))
-    mtime = os.path.getmtime(abs_path)
-    cached = _excel_cache.get(abs_path)
+    abs_path = Path(os.fspath(path)).expanduser().resolve()
+    if not abs_path.exists():
+        raise FileNotFoundError(str(abs_path))
+    mtime = abs_path.stat().st_mtime
+    key = str(abs_path)
+    cached = _excel_cache.get(key)
     if cached is None or cached.mtime != mtime:
         if cached is not None:
             try:
                 cached.book.close()
             except Exception as exc:  # pragma: no cover - best effort cleanup
                 logger.warning("Önceki çalışma kitabı kapatılamadı: %s", exc)
-        _excel_cache[abs_path] = ExcelCacheEntry(
-            mtime, pd.ExcelFile(abs_path, **kwargs)
+        _excel_cache[key] = ExcelCacheEntry(
+            mtime, pd.ExcelFile(str(abs_path), **kwargs)
         )
-    return _excel_cache[abs_path].book
+    return _excel_cache[key].book
 
 
 def read_excel_cached(
