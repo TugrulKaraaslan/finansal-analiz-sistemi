@@ -2,7 +2,9 @@
 
 Files older than ``keep_days`` are removed. By default the ``loglar``
 folder under the project root is targeted. When ``dry_run`` is ``True``
-the function only prints which files would be deleted.
+the function only prints which files would be deleted. The helper is
+resilient against concurrent deletions and silently ignores missing
+files encountered during scanning.
 """
 
 from __future__ import annotations
@@ -59,7 +61,11 @@ def purge_old_logs(
             path.unlink(missing_ok=True)
 
     def is_expired(p: Path) -> bool:
-        return p.stat().st_mtime < cutoff_ts
+        """Return ``True`` when ``p`` is older than the cutoff timestamp."""
+        try:
+            return p.stat().st_mtime < cutoff_ts
+        except FileNotFoundError:  # pragma: no cover - race condition
+            return False
 
     for pat in patterns:
         for log_file in log_dir.glob(pat):
