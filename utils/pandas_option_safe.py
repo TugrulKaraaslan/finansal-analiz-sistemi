@@ -5,11 +5,12 @@ Unknown options are ignored instead of raising ``OptionError``.
 
 from collections.abc import Iterator
 from contextlib import contextmanager
+from typing import Any
 
 import pandas as pd
 
 
-def ensure_option(name: str, value) -> None:
+def ensure_option(name: str, value: Any) -> None:
     """Attempt to set a pandas option when available.
 
     Unknown options are silently ignored so the helper works across
@@ -17,7 +18,7 @@ def ensure_option(name: str, value) -> None:
 
     Args:
         name (str): Option name.
-        value: Option value.
+        value (Any): Option value.
     """
     try:
         pd.set_option(name, value)
@@ -27,12 +28,12 @@ def ensure_option(name: str, value) -> None:
 
 
 @contextmanager
-def option_context(name: str, value) -> Iterator[None]:
+def option_context(name: str, value: Any) -> Iterator[None]:
     """Temporarily set a pandas option if it exists.
 
     Args:
         name (str): Option name.
-        value: Option value.
+        value (Any): Option value.
 
     Yields:
         None.
