@@ -28,3 +28,18 @@ class ValidationError:
     cozum_onerisi: str
     reason: str
     hint: str
+
+    def __str__(self) -> str:
+        """Return a concise description for user-facing messages."""
+        return f"{self.hata_tipi}: {self.detay}"
+
+    def __repr__(self) -> str:
+        return (
+            "ValidationError("
+            f"hata_tipi={self.hata_tipi!r}, "
+            f"eksik_ad={self.eksik_ad!r}, "
+            f"detay={self.detay!r}, "
+            f"cozum_onerisi={self.cozum_onerisi!r}, "
+            f"reason={self.reason!r}, "
+            f"hint={self.hint!r})"
+        )
