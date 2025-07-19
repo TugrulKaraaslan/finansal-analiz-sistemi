@@ -6,7 +6,7 @@ the rest of the codebase can remain version agnostic.
 """
 
 import logging
-from typing import Iterable
+from typing import Iterable, Optional
 
 import pandas as pd
 from packaging import version as _v
@@ -16,12 +16,12 @@ __all__ = ["safe_concat", "safe_infer_objects", "safe_to_excel"]
 _PANDAS_HAS_COPY = _v.parse(pd.__version__) >= _v.parse("2.0.0")
 
 
-def safe_concat(frames: Iterable[pd.DataFrame | None], **kwargs) -> pd.DataFrame:
+def safe_concat(frames: Iterable[Optional[pd.DataFrame]], **kwargs) -> pd.DataFrame:
     """Concatenate ``frames`` while skipping ``None`` and empty inputs.
 
     Parameters
     ----------
-    frames : Iterable[pandas.DataFrame | None]
+    frames : Iterable[Optional[pandas.DataFrame]]
         Sequence of DataFrames to concatenate. ``None`` values are ignored.
     **kwargs : Any
         Additional arguments forwarded to :func:`pandas.concat`.
