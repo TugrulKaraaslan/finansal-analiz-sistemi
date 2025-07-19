@@ -10,9 +10,10 @@ import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pandas as pd
+from cachetools import LRUCache
 
 # Cache ``ExcelFile`` objects keyed by path and modification time. The cache
 # refreshes automatically when the workbook on disk changes.
@@ -28,7 +29,20 @@ class ExcelCacheEntry:
 
 logger = logging.getLogger(__name__)
 
-_excel_cache: Dict[str, ExcelCacheEntry] = {}
+
+class _WorkbookCache(LRUCache[str, ExcelCacheEntry]):
+    """LRU cache that closes workbooks when evicted."""
+
+    def popitem(self):  # type: ignore[override]
+        key, entry = super().popitem()
+        try:
+            entry.book.close()
+        except Exception as exc:  # pragma: no cover - best effort cleanup
+            logger.warning("Önbellekten atılan çalışma kitabı kapatılamadı: %s", exc)
+        return key, entry
+
+
+_excel_cache: _WorkbookCache = _WorkbookCache(maxsize=8)
 
 
 def clear_cache() -> None:
