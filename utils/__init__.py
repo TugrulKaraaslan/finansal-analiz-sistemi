@@ -41,7 +41,9 @@ def _align_common_index(
         :meth:`Series.align` for better performance on large datasets.
     """
 
-    common_idx = series_a.index.intersection(series_b.index)
+    # ``sort=False`` preserves the order of ``series_a`` to keep comparisons
+    # stable when indexes are not monotonically increasing.
+    common_idx = series_a.index.intersection(series_b.index, sort=False)
     aligned_a = series_a.reindex(common_idx)
     aligned_b = series_b.reindex(common_idx)
     return aligned_a, aligned_b
@@ -76,7 +78,7 @@ def _crosses(
         res = (prev_x < prev_y) & (x >= y)
     else:
         res = (prev_x > prev_y) & (x <= y)
-    return res.astype(bool)
+    return res.fillna(False).astype(bool)
 
 
 def crosses_above(a: pd.Series | None, b: pd.Series | None) -> pd.Series:
