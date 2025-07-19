@@ -33,7 +33,8 @@ logger = logging.getLogger(__name__)
 class _WorkbookCache(LRUCache[str, ExcelCacheEntry]):
     """LRU cache that closes workbooks when evicted."""
 
-    def popitem(self):  # type: ignore[override]
+    def popitem(self) -> tuple[str, ExcelCacheEntry]:
+        """Remove and return the least recently used workbook entry."""
         key, entry = super().popitem()
         try:
             entry.book.close()
