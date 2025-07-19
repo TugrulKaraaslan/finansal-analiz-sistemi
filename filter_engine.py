@@ -12,6 +12,7 @@ import keyword
 import logging
 import os
 import re
+from functools import lru_cache
 from typing import Any, Optional
 
 import pandas as pd
@@ -65,6 +66,7 @@ _IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 _RESERVED_TOKENS = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
 
 
+@lru_cache(maxsize=256)
 def _extract_query_columns(query: str) -> set[str]:
     """Return column-like identifiers referenced in ``query``.
 
