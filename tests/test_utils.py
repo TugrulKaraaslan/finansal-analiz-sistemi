@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from utils import crosses_above, crosses_below
+from utils import _align_common_index, crosses_above, crosses_below
 
 # Add the project root to ``sys.path`` for standalone execution
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -92,3 +92,11 @@ def test_cross_functions_all_nan_do_not_fail():
     result_below = crosses_below(s_nan, s_nan)
     pd.testing.assert_series_equal(result_above, expected)
     pd.testing.assert_series_equal(result_below, expected)
+
+
+def test_align_common_index_preserves_identity_when_indexes_equal():
+    """_align_common_index should return the original series when indexes match."""
+    s1 = pd.Series([1, 2, 3], index=["a", "b", "c"])
+    s2 = pd.Series([4, 5, 6], index=["a", "b", "c"])
+    out_a, out_b = _align_common_index(s1, s2)
+    assert out_a is s1 and out_b is s2
