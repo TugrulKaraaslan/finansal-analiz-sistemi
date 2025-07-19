@@ -100,3 +100,14 @@ def test_align_common_index_preserves_identity_when_indexes_equal():
     s2 = pd.Series([4, 5, 6], index=["a", "b", "c"])
     out_a, out_b = _align_common_index(s1, s2)
     assert out_a is s1 and out_b is s2
+
+
+def test_align_common_index_new_objects_on_mismatch():
+    """Returned series should be new objects when indexes differ."""
+    s1 = pd.Series([1, 2], index=[0, 1])
+    s2 = pd.Series([3, 4], index=[1, 2])
+    out_a, out_b = _align_common_index(s1, s2)
+    assert out_a is not s1 and out_b is not s2
+    expected_idx = s1.index.intersection(s2.index)
+    pd.testing.assert_series_equal(out_a, s1.reindex(expected_idx))
+    pd.testing.assert_series_equal(out_b, s2.reindex(expected_idx))
