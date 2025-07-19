@@ -26,7 +26,7 @@ logger = get_logger(__name__)
 
 _cfg_path = os.path.join(os.path.dirname(__file__), "config.yml")
 if os.path.exists(_cfg_path):
-    with open(_cfg_path) as f:
+    with open(_cfg_path, encoding="utf-8") as f:
         _cfg = yaml.safe_load(f) or {}
 else:
     _cfg = {}

@@ -19,7 +19,7 @@ def run_bench() -> float:
     _ = sum(random.randint(1, 100) for _ in range(1_000_000))
     duration = time.perf_counter() - start
     print(f"Benchmark Sonucu: {duration:.4f} saniye")
-    with open("benchmarks/benchmark_output.txt", "w") as f:
+    with open("benchmarks/benchmark_output.txt", "w", encoding="utf-8") as f:
         f.write(f"{duration:.4f}\n")
     return duration
 

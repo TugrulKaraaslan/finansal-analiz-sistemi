@@ -31,7 +31,7 @@ def _load_cfg() -> dict[str, Any]:
     )
     if cfg_file.is_file():
         try:
-            with cfg_file.open() as f:
+            with cfg_file.open(encoding="utf-8") as f:
                 return yaml.safe_load(f) or {}
         except yaml.YAMLError:
             return {"max_filter_depth": FALLBACK_MAX_FILTER_DEPTH}

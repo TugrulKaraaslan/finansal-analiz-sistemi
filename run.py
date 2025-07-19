@@ -248,7 +248,7 @@ def run_pipeline(
     df = df.rename(columns={"code": "hisse_kodu", "date": "tarih"})
     df["tarih"] = pd.to_datetime(df["tarih"])
 
-    with open(filter_def) as f:
+    with open(filter_def, encoding="utf-8") as f:
         filt = yaml.safe_load(f) or []
     filt_df = pd.DataFrame(filt).rename(
         columns={"code": "FilterCode", "clause": "PythonQuery"}
