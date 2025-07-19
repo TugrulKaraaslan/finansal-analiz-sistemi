@@ -50,3 +50,20 @@ def test_on_isle_hisse_verileri_invalid_dates_dropped_and_numeric():
     assert len(result) == 2
     for col in ["open", "high", "low", "close", "volume"]:
         assert result[col].dtype == float
+
+
+def test_convert_numeric_columns_converts_object_dtype(caplog):
+    """Object tipindeki kolonlar floats olarak dönüştürülmeli."""
+    df = pd.DataFrame({"open": ["1,00"], "foo": ["2,50"]})
+    with caplog.at_level("WARNING"):
+        preprocessor._convert_numeric_columns(df, ["open", "foo"])
+    assert df["open"].dtype == float
+    assert df["foo"].dtype == float
+
+
+def test_convert_numeric_columns_warns_missing_base_col(caplog):
+    """Temel kolon eksikse uyarı loglanmalı."""
+    df = pd.DataFrame({"open": [1.0]})
+    with caplog.at_level("WARNING"):
+        preprocessor._convert_numeric_columns(df, ["open", "close"])
+    assert "DataFrame'de bulunamadı" in caplog.text
