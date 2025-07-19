@@ -12,7 +12,7 @@ from typing import Any, Callable
 import pandas as pd
 from cachetools import LRUCache
 
-__all__ = ["ichimoku", "macd", "rsi"]
+__all__ = ["ichimoku", "macd", "rsi", "clear_cache"]
 
 try:  # pragma: no cover - optional dependency
     from openbb import obb  # type: ignore
@@ -22,6 +22,11 @@ except Exception:  # pragma: no cover - optional dependency
 # Cache for resolved OpenBB functions
 # Limit size to avoid unbounded growth when called with many names
 _FUNC_CACHE: LRUCache[str, Callable[..., Any]] = LRUCache(maxsize=16)
+
+
+def clear_cache() -> None:
+    """Empty the internal OpenBB function cache."""
+    _FUNC_CACHE.clear()
 
 
 def _call_openbb(func_name: str, **kwargs) -> object:

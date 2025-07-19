@@ -4,7 +4,7 @@ import openbb_missing as om
 
 
 def test_public_exports():
-    assert sorted(om.__all__) == ["ichimoku", "macd", "rsi"]
+    assert sorted(om.__all__) == ["clear_cache", "ichimoku", "macd", "rsi"]
 
 
 def test_wrappers_exist():
@@ -59,3 +59,21 @@ def test_call_openbb_function_missing(monkeypatch):
 
     with pytest.raises(NotImplementedError, match="bar"):
         om._call_openbb("bar")
+
+
+def test_clear_cache(monkeypatch):
+    """clear_cache should drop cached functions."""
+
+    class DummyTech:
+        def foo(self, x: int) -> int:
+            return x
+
+    dummy = type("DummyOBB", (), {"technical": DummyTech()})()
+
+    monkeypatch.setattr(om, "obb", dummy)
+    monkeypatch.setattr(om, "_FUNC_CACHE", om.LRUCache(maxsize=4))
+
+    om._call_openbb("foo", x=1)
+    assert len(om._FUNC_CACHE) == 1
+    om.clear_cache()
+    assert len(om._FUNC_CACHE) == 0
