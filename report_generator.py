@@ -467,6 +467,7 @@ def generate_full_report(
             },
         )
         MAX_ROWS = 200_000
+        detail_empty = detail_df.empty
         n_chunks = max(1, (len(detail_df) - 1) // MAX_ROWS + 1)
         normalized_detail = (
             normalize_filtre_kodu(detail_df)
@@ -490,7 +491,6 @@ def generate_full_report(
                 startrow=startrow,
             )
             startrow += len(chunk) + (1 if i == 0 else 0)
-        detail_empty = detail_df.empty
         del detail_df
         import gc
 
