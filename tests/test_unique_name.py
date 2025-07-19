@@ -1,5 +1,7 @@
 """Unit tests for unique_name."""
 
+import pytest
+
 from utilities.naming import unique_name
 
 
@@ -29,3 +31,9 @@ def test_unique_name_trailing_underscore():
     seen = {"foo_", "foo_1"}
     assert unique_name("foo_", seen) == "foo_2"
     assert "foo_2" in seen
+
+
+def test_unique_name_empty_base_raises():
+    """Empty ``base`` should trigger ``ValueError``."""
+    with pytest.raises(ValueError):
+        unique_name("", set())
