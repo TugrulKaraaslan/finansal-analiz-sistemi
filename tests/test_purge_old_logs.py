@@ -43,3 +43,16 @@ def test_negative_keep_days_raises(tmp_path):
     """Negative ``keep_days`` should trigger ``ValueError``."""
     with pytest.raises(ValueError):
         purge_old_logs(log_dir=tmp_path, keep_days=-1)
+
+
+def test_patterns_as_string(tmp_path):
+    """A single pattern string should be accepted."""
+    log = tmp_path / "foo.log"
+    log.write_text("x")
+    import os
+    import time
+
+    os.utime(log, (time.time() - 864000,) * 2)
+    removed = purge_old_logs(log_dir=tmp_path, keep_days=7, patterns="*.log")
+    assert removed == 1
+    assert not log.exists()

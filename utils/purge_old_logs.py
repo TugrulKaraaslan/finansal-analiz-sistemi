@@ -20,13 +20,14 @@ def purge_old_logs(
     log_dir: Path | None = None,
     keep_days: int = 7,
     dry_run: bool = False,
-    patterns: Iterable[str] | None = None,
+    patterns: Iterable[str] | str | None = None,
 ) -> int:
     """Remove old log files from ``log_dir``.
 
     Files matching ``patterns`` (``*.log*`` by default) and orphan ``*.lock``
-    entries older than ``keep_days`` days are deleted. When ``dry_run`` is
-    ``True`` the function only prints which files would be removed.
+    entries older than ``keep_days`` days are deleted. ``patterns`` may be a
+    single glob string or an iterable of patterns. When ``dry_run`` is ``True``
+    the function only prints which files would be removed.
 
     Args:
         log_dir (Path | None, optional): Directory containing log files.
@@ -35,7 +36,7 @@ def purge_old_logs(
             are removed.
         dry_run (bool, optional): When ``True`` only print what would be
             deleted.
-        patterns (Iterable[str] | None, optional): Glob patterns for log
+        patterns (Iterable[str] | str | None, optional): Glob pattern(s) for log
             files. Defaults to ``("*.log*",)``.
 
     Raises:
@@ -49,7 +50,12 @@ def purge_old_logs(
         raise ValueError("keep_days must be non-negative")
 
     log_dir = Path("loglar") if log_dir is None else Path(log_dir)
-    patterns = ("*.log*",) if patterns is None else tuple(patterns)
+    if patterns is None:
+        patterns = ("*.log*",)
+    elif isinstance(patterns, str):
+        patterns = (patterns,)
+    else:
+        patterns = tuple(patterns)
 
     cutoff_ts = (datetime.now() - timedelta(days=keep_days)).timestamp()
     count = 0
