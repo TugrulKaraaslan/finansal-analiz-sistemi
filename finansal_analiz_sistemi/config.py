@@ -62,7 +62,7 @@ FILTRE_DOSYA_YOLU: Path = BASE_DIR / "veri" / "15.csv"
 # Load optional configuration overrides from 'config.yml'
 _CFG_FILE = BASE_DIR / "config.yml"
 if _CFG_FILE.exists():
-    with _CFG_FILE.open() as f:
+    with _CFG_FILE.open(encoding="utf-8") as f:
         _CFG = yaml.safe_load(f) or {}
         globals().update(_CFG)
 else:

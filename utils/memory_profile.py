@@ -36,7 +36,7 @@ class MemoryProfile:
         peak = self.proc.memory_info().rss
         diff = peak - self.start
         self.path.parent.mkdir(exist_ok=True)
-        with self.path.open("a") as f:
+        with self.path.open("a", encoding="utf-8") as f:
             f.write(f"{time.time()},{peak},{diff}\n")
         return False
 

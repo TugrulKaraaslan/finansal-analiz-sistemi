@@ -31,7 +31,7 @@ def load_settings(path: str | None = None) -> dict:
     if not Path(settings_path).exists():
         raise RuntimeError(f"settings.yaml not found at {settings_path}")
 
-    with open(settings_path) as fh:
+    with open(settings_path, encoding="utf-8") as fh:
         data = yaml.safe_load(fh) or {}
 
     try:  # pragma: no cover - best effort
