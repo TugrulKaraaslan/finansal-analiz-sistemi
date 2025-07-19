@@ -6,7 +6,7 @@ the rest of the codebase can remain version agnostic.
 """
 
 import logging
-from typing import Iterable
+from typing import Iterable, Optional
 
 import pandas as pd
 from packaging import version as _v
@@ -16,13 +16,13 @@ __all__ = ["safe_concat", "safe_infer_objects", "safe_to_excel"]
 _PANDAS_HAS_COPY = _v.parse(pd.__version__) >= _v.parse("2.0.0")
 
 
-def safe_concat(frames: Iterable[pd.DataFrame], **kwargs) -> pd.DataFrame:
-    """Concatenate non-empty frames or return an empty ``DataFrame``.
+def safe_concat(frames: Iterable[Optional[pd.DataFrame]], **kwargs) -> pd.DataFrame:
+    """Concatenate ``frames`` while skipping ``None`` and empty inputs.
 
     Parameters
     ----------
-    frames : Iterable[pandas.DataFrame]
-        Sequence of DataFrames to concatenate.
+    frames : Iterable[Optional[pandas.DataFrame]]
+        Sequence of DataFrames to concatenate. ``None`` values are ignored.
     **kwargs : Any
         Additional arguments forwarded to :func:`pandas.concat`.
 
@@ -31,8 +31,8 @@ def safe_concat(frames: Iterable[pd.DataFrame], **kwargs) -> pd.DataFrame:
     pandas.DataFrame
         Concatenated frame or an empty frame when ``frames`` is empty.
     """
-    frames = [f for f in frames if not f.empty]
-    return pd.concat(frames, **kwargs) if frames else pd.DataFrame()
+    valid_frames = [f for f in frames if isinstance(f, pd.DataFrame) and not f.empty]
+    return pd.concat(valid_frames, **kwargs) if valid_frames else pd.DataFrame()
 
 
 def safe_infer_objects(df: pd.DataFrame, *, copy: bool = False) -> pd.DataFrame:
