@@ -7,6 +7,7 @@ helpers and log maintenance tools shared across the project.
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from functools import lru_cache
 from io import StringIO
 
@@ -93,15 +94,17 @@ def crosses_below(a: pd.Series | None, b: pd.Series | None) -> pd.Series:
 
 def extract_columns_from_filters(
     df_filters: pd.DataFrame | None,
-    series_series: list | None,
-    series_value: list | None,
+    series_series: Iterable[Sequence[str]] | None,
+    series_value: Iterable[Sequence[str]] | None,
 ) -> set[str]:
     """Return column names referenced in filters and crossovers.
 
     Args:
         df_filters (pd.DataFrame | None): Loaded filter definitions.
-        series_series (list | None): List of series-to-series crossover tuples.
-        series_value (list | None): List of series-to-value crossover tuples.
+        series_series (Iterable[Sequence[str]] | None):
+            Series-to-series crossover configuration.
+        series_value (Iterable[Sequence[str]] | None):
+            Series-to-value crossover configuration.
 
     Returns:
         set[str]: Unique column names required for indicator computation.
@@ -133,15 +136,17 @@ def extract_columns_from_filters(
 @lru_cache(maxsize=1)
 def extract_columns_from_filters_cached(
     df_filters_csv: str,
-    series_series: list | None,
-    series_value: list | None,
+    series_series: Iterable[Sequence[str]] | None,
+    series_value: Iterable[Sequence[str]] | None,
 ) -> set[str]:
     """Return referenced columns using a CSV string for caching.
 
     Args:
         df_filters_csv (str): Filter definitions serialized as CSV.
-        series_series (list | None): Series-to-series crossover configuration.
-        series_value (list | None): Series-to-value crossover configuration.
+        series_series (Iterable[Sequence[str]] | None):
+            Series-to-series crossover configuration.
+        series_value (Iterable[Sequence[str]] | None):
+            Series-to-value crossover configuration.
 
     Returns:
         set[str]: Unique column names collected from the CSV content.
