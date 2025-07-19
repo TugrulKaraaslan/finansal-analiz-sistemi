@@ -5,6 +5,8 @@ name already exists in ``seen`` so subsequent calls never clash with prior
 results.
 """
 
+from __future__ import annotations
+
 from itertools import count
 
 
