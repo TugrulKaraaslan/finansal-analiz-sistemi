@@ -230,8 +230,8 @@ def safe_eval(
             logger.warning("QUERY_ERROR %s", e)
             try:
                 log_failure_exc("filters", expr.get("code", "unknown"), e)
-            except Exception:
-                pass
+            except Exception as exc:  # pragma: no cover - best effort
+                logger.debug("log_failure_exc failed: %s", exc)
             raise
 
     raise QueryError("Invalid expression")
@@ -280,8 +280,8 @@ def run_single_filter(kod: str, query: str) -> dict[str, Any]:
         logger.warning(f"QUERY_ERROR: {kod} – {msg}")
         try:
             log_failure_exc("filters", kod, qe)
-        except Exception:
-            pass
+        except Exception as exc:  # pragma: no cover - best effort
+            logger.debug("log_failure_exc failed: %s", exc)
     except MissingColumnError as me:
         msg = str(me)
         atlanmis.setdefault("hatalar", []).append(
@@ -296,8 +296,8 @@ def run_single_filter(kod: str, query: str) -> dict[str, Any]:
         logger.warning(f"GENERIC: {kod} – {msg}")
         try:
             log_failure_exc("filters", kod, me)
-        except Exception:
-            pass
+        except Exception as exc:  # pragma: no cover - best effort
+            logger.debug("log_failure_exc failed: %s", exc)
     return atlanmis
 
 
@@ -378,8 +378,8 @@ def _apply_single_filter(
         info.update(durum="HATA", sebep=str(e)[:120])
         try:
             log_failure_exc("filters", kod, e)
-        except Exception:
-            pass
+        except Exception as exc:  # pragma: no cover - best effort
+            logger.debug("log_failure_exc failed: %s", exc)
         return None, info
 
 
@@ -551,8 +551,8 @@ def uygula_filtreler(
             fn_logger.warning(f"QUERY_ERROR: {filtre_kodu} – {msg}")
             try:
                 log_failure_exc("filters", filtre_kodu, qe)
-            except Exception:
-                pass
+            except Exception as exc:  # pragma: no cover - best effort
+                fn_logger.debug("log_failure_exc failed: %s", exc)
             continue
         except MissingColumnError as me:
             msg = str(me)
@@ -568,8 +568,8 @@ def uygula_filtreler(
             fn_logger.warning(f"GENERIC: {filtre_kodu} – {msg}")
             try:
                 log_failure_exc("filters", filtre_kodu, me)
-            except Exception:
-                pass
+            except Exception as exc:  # pragma: no cover - best effort
+                fn_logger.debug("log_failure_exc failed: %s", exc)
             continue
 
         kontrol_log.append(info)
