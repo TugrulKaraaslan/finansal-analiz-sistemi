@@ -15,6 +15,8 @@ from typing import Any
 import pandas as pd
 from cachetools import LRUCache
 
+__all__ = ["open_excel_cached", "read_excel_cached", "clear_cache"]
+
 # Cache ``ExcelFile`` objects keyed by path and modification time. The cache
 # refreshes automatically when the workbook on disk changes.
 
@@ -22,6 +24,8 @@ from cachetools import LRUCache
 @dataclass
 class ExcelCacheEntry:
     """Metadata for a cached workbook."""
+
+    __slots__ = ("mtime", "book")
 
     mtime: float
     book: pd.ExcelFile
