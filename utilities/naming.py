@@ -5,7 +5,19 @@ name already exists in ``seen`` so subsequent calls never clash with prior
 results.
 """
 
-import re
+from __future__ import annotations
+
+from itertools import count
+
+
+def _extract_suffix(name: str, prefix: str, delimiter: str) -> int | None:
+    """Return the numeric suffix from ``name`` when present."""
+
+    if not name.startswith(prefix + delimiter):
+        return None
+    tail = name[len(prefix) + len(delimiter) :]
+    return int(tail) if tail.isdigit() else None
+
 
 __all__ = ["unique_name"]
 
@@ -47,11 +59,13 @@ def unique_name(base: str, seen: set[str], *, delimiter: str = "_") -> str:
         return base
 
     prefix = base.rstrip(delimiter)
-    pattern = rf"^{re.escape(prefix)}{re.escape(delimiter)}(\d+)$"
-    suffixes = {int(m.group(1)) for name in seen if (m := re.match(pattern, name))}
-    index = 1
-    while index in suffixes:
-        index += 1
-    new = f"{prefix}{delimiter}{index}"
-    seen.add(new)
-    return new
+    suffixes = {
+        suf
+        for name in seen
+        if (suf := _extract_suffix(name, prefix, delimiter)) is not None
+    }
+    for idx in count(1):
+        if idx not in suffixes:
+            new = f"{prefix}{delimiter}{idx}"
+            seen.add(new)
+            return new
