@@ -26,7 +26,7 @@ def safe_set(df: pd.DataFrame, column: str, values: Iterable[Any]) -> None:
     """
     # Ensure the index matches the DataFrame to avoid misaligned assignment
     if isinstance(values, pd.Series):
-        series = values.reindex(df.index)
+        series = values if values.index.equals(df.index) else values.reindex(df.index)
     else:
         try:
             series = pd.Series(values, index=df.index)
