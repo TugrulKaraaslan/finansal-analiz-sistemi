@@ -21,9 +21,11 @@ __all__ = ["open_excel_cached", "read_excel_cached", "clear_cache"]
 # refreshes automatically when the workbook on disk changes.
 
 
-@dataclass(slots=True)
+@dataclass
 class ExcelCacheEntry:
     """Metadata for a cached workbook."""
+
+    __slots__ = ("mtime", "book")
 
     mtime: float
     book: pd.ExcelFile
