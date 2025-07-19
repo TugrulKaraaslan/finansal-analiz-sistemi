@@ -6,6 +6,7 @@ files and configuration lists.
 
 from __future__ import annotations
 
+import logging
 import re
 from functools import lru_cache
 from pathlib import Path
@@ -35,7 +36,8 @@ def load_crossover_names(csv_path: str | Path | None = None) -> list[str]:
     names: set[str] = set()
     try:
         df = pd.read_csv(path, sep=";", engine="python")
-    except Exception:
+    except Exception as exc:
+        logging.getLogger(__name__).warning("Filter CSV '%s' okunamadı: %s", path, exc)
         df = pd.DataFrame()
     if "PythonQuery" in df.columns:
         for expr in df["PythonQuery"].dropna().astype(str):
