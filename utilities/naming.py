@@ -32,7 +32,15 @@ def unique_name(base: str, seen: set[str], *, delimiter: str = "_") -> str:
     str
         ``base`` itself if unused, otherwise a numbered variant such as
         ``base_1``.
+
+    Raises
+    ------
+    ValueError
+        If ``base`` is an empty string.
     """
+
+    if not base:
+        raise ValueError("base must be a non-empty string")
 
     if base not in seen:
         seen.add(base)
