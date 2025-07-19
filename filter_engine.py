@@ -63,6 +63,7 @@ class MissingColumnError(Exception):
 
 _STRING_RE = re.compile(r"(?:'[^']*'|\"[^\"]*\")")
 _IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+_BRACKET_RE = re.compile(r"df\[\s*(['\"])(?P<col>[^'\"]+)\1\s*\]")
 _RESERVED_TOKENS = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
 
 
@@ -71,13 +72,15 @@ def _extract_query_columns(query: str) -> set[str]:
     """Return column-like identifiers referenced in ``query``.
 
     String literals are stripped before searching for valid Python
-    identifiers. Reserved keywords and boolean literals are excluded
+    identifiers. Column names referenced using ``df['col']`` syntax are
+    also detected. Reserved keywords and boolean literals are excluded
     from the result.
     """
 
+    bracket_cols = {m.group("col") for m in _BRACKET_RE.finditer(query)}
     query = _STRING_RE.sub(" ", query)
     tokens = set(_IDENT_RE.findall(query))
-    return tokens - _RESERVED_TOKENS
+    return (tokens | bracket_cols) - _RESERVED_TOKENS
 
 
 def _build_solution(err_type: str, msg: str) -> str:
