@@ -3,6 +3,7 @@
 import os
 import sys
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -84,3 +85,18 @@ def test_recursive_filter_detection():
 
     with pytest.raises(filter_engine.CyclicFilterError):
         filter_engine.evaluate_filter(f1, df)
+
+
+def test_apply_single_filter_reports_mostly_nan():
+    """Columns with >90% ``NaN`` values should be reported."""
+    rows = 20
+    df = pd.DataFrame(
+        {
+            "hisse_kodu": ["AAA"] * rows,
+            "tarih": [pd.Timestamp("2025-03-01")] * rows,
+            "foo": [np.nan] * (rows - 1) + [1],
+        }
+    )
+    _, info = filter_engine._apply_single_filter(df, "T_nan", "foo > 0")
+    assert info["durum"] == "OK"
+    assert info["nan_sutunlar"] == "foo"

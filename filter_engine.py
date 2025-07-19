@@ -33,6 +33,9 @@ else:
     _cfg = {}
 MIN_STOCKS_PER_FILTER = _cfg.get("min_stocks_per_filter", 1)
 
+# Ratio of ``NaN`` values in a column that triggers the DATASIZ warning
+NAN_RATIO_THRESHOLD = 0.9
+
 _missing_re = re.compile(r"Eksik sütunlar?:\s*(?P<col>[A-Za-z0-9_]+)")
 _undefined_re = re.compile(r"Tanımsız sütun/değişken:\s*'(?P<col>[^']+)")
 
@@ -344,7 +347,7 @@ def _apply_single_filter(
 
     if req_cols:
         nan_ratios = df[list(req_cols)].isna().mean()
-        mostly_nan = nan_ratios[nan_ratios > 0.9].index.tolist()
+        mostly_nan = nan_ratios[nan_ratios > NAN_RATIO_THRESHOLD].index.tolist()
     else:
         mostly_nan = []
 
