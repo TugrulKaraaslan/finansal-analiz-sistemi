@@ -38,9 +38,13 @@ def _align_common_index(
     -------
     tuple[pandas.Series, pandas.Series]
         ``series_a`` and ``series_b`` restricted to the intersection of their
-        indexes so element-wise comparisons operate safely. The helper avoids
-        :meth:`Series.align` for better performance on large datasets.
+        indexes so element-wise comparisons operate safely. When both series
+        already share the same index they are returned unchanged. The helper
+        avoids :meth:`Series.align` for better performance on large datasets.
     """
+
+    if series_a.index.equals(series_b.index):
+        return series_a, series_b
 
     # ``sort=False`` preserves the order of ``series_a`` to keep comparisons
     # stable when indexes are not monotonically increasing.
