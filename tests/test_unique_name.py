@@ -22,3 +22,10 @@ def test_unique_name_fills_gap():
     seen = {"ema_10", "ema_10_1", "ema_10_3"}
     assert unique_name("ema_10", seen) == "ema_10_2"
     assert "ema_10_2" in seen
+
+
+def test_unique_name_trailing_underscore():
+    """Trailing delimiter should not yield double underscores."""
+    seen = {"foo_", "foo_1"}
+    assert unique_name("foo_", seen) == "foo_2"
+    assert "foo_2" in seen

@@ -5,39 +5,45 @@ name already exists in ``seen`` so subsequent calls never clash with prior
 results.
 """
 
+import re
+
 __all__ = ["unique_name"]
 
 
-def unique_name(base: str, seen: set[str]) -> str:
+def unique_name(base: str, seen: set[str], *, delimiter: str = "_") -> str:
     """Return a unique column name derived from ``base``.
 
     The chosen label is added to ``seen`` so subsequent calls with the same
     base avoid duplicates. When ``base`` already exists, the lowest unused
-    integer suffix is appended.
+    integer suffix is appended. Trailing delimiters are handled so callers
+    can supply names like ``"foo_"`` without producing ``"foo__1"``.
 
-    Args:
-        base: Desired column name.
-        seen: Set of names already in use; updated in-place.
+    Parameters
+    ----------
+    base : str
+        Desired column name.
+    seen : set[str]
+        Set of names already in use; updated in-place.
+    delimiter : str, optional
+        Character used between ``base`` and the numeric suffix.
 
-    Returns:
-        str: ``base`` itself if unused, otherwise a numbered variant such as
+    Returns
+    -------
+    str
+        ``base`` itself if unused, otherwise a numbered variant such as
         ``base_1``.
     """
+
     if base not in seen:
         seen.add(base)
         return base
 
-    # Collect existing numeric suffixes to avoid linear probing on
-    # large ``seen`` sets. Non-numeric endings are ignored so custom
-    # names like ``foo_bar`` do not interfere with the counter.
-    suffixes = {
-        int(name.rsplit("_", 1)[1])
-        for name in seen
-        if name.startswith(f"{base}_") and name.rsplit("_", 1)[-1].isdigit()
-    }
+    prefix = base.rstrip(delimiter)
+    pattern = rf"^{re.escape(prefix)}{re.escape(delimiter)}(\d+)$"
+    suffixes = {int(m.group(1)) for name in seen if (m := re.match(pattern, name))}
     index = 1
     while index in suffixes:
         index += 1
-    new = f"{base}_{index}"
+    new = f"{prefix}{delimiter}{index}"
     seen.add(new)
     return new
