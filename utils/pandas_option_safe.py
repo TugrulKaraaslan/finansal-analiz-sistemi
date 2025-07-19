@@ -4,7 +4,7 @@ Unknown options are ignored instead of raising ``OptionError``.
 """
 
 from collections.abc import Iterator
-from contextlib import contextmanager, nullcontext
+from contextlib import contextmanager
 
 import pandas as pd
 
@@ -38,11 +38,7 @@ def option_context(name: str, value) -> Iterator[None]:
         None.
     """
     try:
-        ctx = pd.option_context(name, value)
-    except (AttributeError, KeyError, pd.errors.OptionError):
-        ctx = nullcontext()
-    try:
-        with ctx:
+        with pd.option_context(name, value):
             yield
     except (AttributeError, KeyError, pd.errors.OptionError):
         yield
