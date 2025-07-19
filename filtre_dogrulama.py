@@ -14,12 +14,17 @@ import pandas as pd
 
 from validators import ValidationError
 
-SEBEP_KODLARI = {
+# Acceptable characters for filter identifiers
+FLAG_PATTERN: re.Pattern[str] = re.compile(r"^[A-Z0-9_\-]+$")
+
+SEBEP_KODLARI: dict[str, str] = {
     "OK": "Filtre çalıştı ve hisse bulundu.",
     "NO_STOCK": "Sorgu sonucunda hisse bulunamadı.",
     "MISSING_COL": "Sorguda eksik sütun veya değişken.",
     "QUERY_ERROR": "Sorgu çalıştırılırken hata oluştu.",
 }
+
+__all__ = ["dogrula_filtre_dataframe", "validate", "SEBEP_KODLARI"]
 
 
 def dogrula_filtre_dataframe(
@@ -62,7 +67,7 @@ def dogrula_filtre_dataframe(
         code = flag_raw or f"satir_{idx}"
         if not flag_raw:
             issues[code] = "Boş veya eksik flag (kod) değeri."
-        elif not re.match(r"^[A-Z0-9_\-]+$", flag_raw):
+        elif not FLAG_PATTERN.match(flag_raw):
             issues[code] = (
                 "Geçersiz karakterler içeren flag. Sadece A-Z, 0-9, _ ve - izinli."
             )
@@ -142,7 +147,7 @@ def validate(
                     hint="Her filtre için bir kod girilmeli",
                 )
             )
-        elif not re.match(r"^[A-Z0-9_\-]+$", flag_raw):
+        elif not FLAG_PATTERN.match(flag_raw):
             errors.append(
                 ValidationError(
                     hata_tipi="INVALID_FLAG",
