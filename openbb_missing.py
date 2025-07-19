@@ -24,6 +24,11 @@ except Exception:  # pragma: no cover - optional dependency
 _FUNC_CACHE: LRUCache[str, Callable[..., Any]] = LRUCache(maxsize=16)
 
 
+def is_available() -> bool:
+    """Return ``True`` when the OpenBB package is importable."""
+    return obb is not None
+
+
 def clear_cache() -> None:
     """Empty the internal OpenBB function cache."""
     _FUNC_CACHE.clear()
