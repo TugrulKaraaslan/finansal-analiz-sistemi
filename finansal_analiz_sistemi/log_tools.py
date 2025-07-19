@@ -55,18 +55,25 @@ class DuplicateFilter(logging.Filter):
         return True
 
 
-def setup_logger(level: int = logging.INFO) -> ErrorCountingFilter:
+def setup_logger(
+    level: int = logging.INFO, *, log_dir: str | Path = "loglar"
+) -> ErrorCountingFilter:
     """Configure the root logger for console and file output.
 
-    Args:
-        level (int, optional): Logging level.
+    Parameters
+    ----------
+    level : int, optional
+        Logging level for the root logger.
+    log_dir : str | Path, optional
+        Destination directory for log files. Defaults to ``"loglar"``.
 
-    Returns:
-        ErrorCountingFilter: Filter that tracks error and warning counts.
-
+    Returns
+    -------
+    ErrorCountingFilter
+        Filter that tracks error and warning counts.
     """
     root = logging.getLogger()
-    log_dir = Path("loglar")
+    log_dir = Path(log_dir)
     log_dir.mkdir(exist_ok=True)
 
     if root.handlers:
