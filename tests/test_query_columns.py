@@ -30,3 +30,10 @@ def test_extract_bracket_notation():
     expr = "close > df['BBM_20_2.0']"
     cols = filter_engine._extract_query_columns(expr)
     assert cols == {"close", "BBM_20_2.0"}
+
+
+def test_extract_ignores_method_calls():
+    """Method names after a dot should not be treated as columns."""
+    expr = "close > open.shift(1)"
+    cols = filter_engine._extract_query_columns(expr)
+    assert cols == {"close", "open"}
