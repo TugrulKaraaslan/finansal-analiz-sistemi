@@ -4,6 +4,8 @@ These functions simulate simple buy/sell scenarios based on filter
 results and provide summary statistics for reporting.
 """
 
+from __future__ import annotations
+
 import logging
 from typing import Optional
 
@@ -18,7 +20,7 @@ logger = get_logger(__name__)
 
 def _get_fiyat(
     df_hisse_veri: pd.DataFrame,
-    tarih: pd.Timestamp,
+    tarih: pd.Timestamp | str,
     zaman_sutun_adi: str,
     logger_param: Optional[logging.Logger] = None,
 ) -> float:
@@ -29,7 +31,7 @@ def _get_fiyat(
 
     Args:
         df_hisse_veri (pd.DataFrame): Stock data for a single ticker.
-        tarih (pd.Timestamp): Date of interest.
+        tarih (pd.Timestamp | str): Date of interest.
         zaman_sutun_adi (str): Column name holding the desired price.
         logger_param (logging.Logger, optional): Logger instance for debug
             output.
@@ -40,6 +42,15 @@ def _get_fiyat(
     if logger_param is None:
         logger_param = logger
     log = logger_param
+    tarih_ts = (
+        tarih
+        if isinstance(tarih, pd.Timestamp)
+        else pd.to_datetime(tarih, dayfirst=True, errors="coerce")
+    )
+    if pd.isna(tarih_ts):
+        log.warning("Geçersiz tarih değeri: %s", tarih)
+        return np.nan
+    tarih = tarih_ts
     hisse_kodu_log = (
         df_hisse_veri["hisse_kodu"].iloc[0]
         if not df_hisse_veri.empty and "hisse_kodu" in df_hisse_veri.columns
