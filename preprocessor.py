@@ -99,28 +99,35 @@ def _convert_numeric_columns(
             continue
 
         series = df[col]
-        if series.dtype == "object" or isinstance(series.dtype, CategoricalDtype):
+        col_dtype = series.dtype
+
+        if pd.api.types.is_numeric_dtype(col_dtype):
+            if col_dtype != float:
+                df[col] = series.astype(float, errors="ignore")
+            continue
+
+        if pd.api.types.is_object_dtype(col_dtype) or isinstance(
+            col_dtype, CategoricalDtype
+        ):
             nan_before = series.isnull().sum()
-            original_type = series.dtype
             df[col] = _temizle_sayisal_seri(series)
             nan_after = df[col].isnull().sum()
             if nan_after > nan_before:
                 logger_param.warning(
                     "'%s' (orijinal tip: %s) sütununda sayısal dönüşüm sonrası NaN sayısı arttı (%s -> %s).",
                     col,
-                    original_type,
+                    col_dtype,
                     nan_before,
                     nan_after,
                 )
-        elif not pd.api.types.is_numeric_dtype(series):
-            logger_param.warning(
-                "Column '%s' has unexpected type (%s); attempting float conversion.",
-                col,
-                series.dtype,
-            )
-            df[col] = pd.to_numeric(series, errors="coerce")
-        elif series.dtype != float:
-            df[col] = series.astype(float, errors="ignore")
+            continue
+
+        logger_param.warning(
+            "Column '%s' has unexpected type (%s); attempting float conversion.",
+            col,
+            col_dtype,
+        )
+        df[col] = pd.to_numeric(series, errors="coerce")
 
 
 def on_isle_hisse_verileri(
