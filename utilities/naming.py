@@ -7,19 +7,6 @@ results.
 
 from __future__ import annotations
 
-from itertools import count
-
-
-def _extract_suffix(name: str, prefix: str, delimiter: str) -> int | None:
-    """Return the integer suffix from ``name`` if it matches ``prefix``."""
-
-    token = f"{prefix}{delimiter}"
-    if name.startswith(token):
-        tail = name.removeprefix(token)
-        return int(tail) if tail.isdigit() else None
-    return None
-
-
 __all__ = ["unique_name"]
 
 
@@ -60,13 +47,10 @@ def unique_name(base: str, seen: set[str], *, delimiter: str = "_") -> str:
         return base
 
     prefix = base.rstrip(delimiter)
-    suffixes = {
-        suf
-        for name in seen
-        if (suf := _extract_suffix(name, prefix, delimiter)) is not None
-    }
-    for idx in count(1):
-        if idx not in suffixes:
-            new = f"{prefix}{delimiter}{idx}"
-            seen.add(new)
-            return new
+    idx = 1
+    while True:
+        candidate = f"{prefix}{delimiter}{idx}"
+        if candidate not in seen:
+            seen.add(candidate)
+            return candidate
+        idx += 1
