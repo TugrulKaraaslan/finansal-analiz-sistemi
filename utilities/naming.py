@@ -11,12 +11,13 @@ from itertools import count
 
 
 def _extract_suffix(name: str, prefix: str, delimiter: str) -> int | None:
-    """Return the numeric suffix from ``name`` when present."""
+    """Return the integer suffix from ``name`` if it matches ``prefix``."""
 
-    if not name.startswith(prefix + delimiter):
-        return None
-    tail = name[len(prefix) + len(delimiter) :]
-    return int(tail) if tail.isdigit() else None
+    token = f"{prefix}{delimiter}"
+    if name.startswith(token):
+        tail = name.removeprefix(token)
+        return int(tail) if tail.isdigit() else None
+    return None
 
 
 __all__ = ["unique_name"]
