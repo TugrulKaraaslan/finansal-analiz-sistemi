@@ -70,3 +70,16 @@ def test_get_fiyat_string_dates():
     )
     out = bc._get_fiyat(df, pd.to_datetime("10.03.2025", dayfirst=True), "close")
     assert out == 11.0
+
+
+def test_get_fiyat_accepts_string_date():
+    """The ``tarih`` argument may be a string."""
+    df = pd.DataFrame(
+        {
+            "hisse_kodu": ["AAA"],
+            "tarih": [pd.to_datetime("07.03.2025", dayfirst=True)],
+            "close": [10.0],
+        }
+    )
+    out = bc._get_fiyat(df, "07.03.2025", "close")
+    assert out == 10.0
