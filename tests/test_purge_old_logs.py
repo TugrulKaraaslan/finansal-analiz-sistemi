@@ -62,3 +62,11 @@ def test_missing_directory_returns_zero(tmp_path):
     """Nonexistent ``log_dir`` should be handled gracefully."""
     missing = tmp_path / "missing"
     assert purge_old_logs(log_dir=missing, keep_days=7) == 0
+
+
+def test_log_dir_must_be_directory(tmp_path):
+    """``log_dir`` pointing to a file should raise ``NotADirectoryError``."""
+    file_path = tmp_path / "some.log"
+    file_path.write_text("x")
+    with pytest.raises(NotADirectoryError):
+        purge_old_logs(log_dir=file_path, keep_days=7)
