@@ -1,20 +1,23 @@
 """Utilities for robust date parsing.
 
-The :func:`parse_date` helper converts diverse date strings to
-``pd.Timestamp`` objects without raising ``ValueError``.
+The :func:`parse_date` helper converts diverse date values into
+``pandas.Timestamp`` objects without raising ``ValueError``. Supported
+inputs include strings, ``datetime`` objects, numeric representations and
+``numpy.datetime64`` instances.
 """
 
 from __future__ import annotations
 
 from datetime import date, datetime
 
+import numpy as np
 import pandas as pd
 from dateutil import parser
 from pandas._libs.tslibs.nattype import NaTType
 
 
 def parse_date(
-    date_str: str | datetime | date | int | float | None,
+    date_str: str | datetime | date | int | float | np.datetime64 | None,
 ) -> pd.Timestamp | NaTType:
     """Parse ``date_str`` into a :class:`pandas.Timestamp` or ``pd.NaT``.
 
@@ -24,7 +27,8 @@ def parse_date(
     yield ``pd.NaT`` instead of raising ``ValueError``.
 
     Args:
-        date_str (str | datetime | date | int | float | None): Date value to parse.
+        date_str (str | datetime | date | int | float | np.datetime64 | None):
+            Date value to parse.
 
     Returns:
         pd.Timestamp | NaTType: Parsed timestamp or ``pd.NaT`` when parsing
@@ -32,6 +36,9 @@ def parse_date(
     """
     if isinstance(date_str, (datetime, date)):
         return pd.Timestamp(date_str)
+
+    if isinstance(date_str, np.datetime64):
+        return pd.to_datetime(date_str)
 
     # Normalize value to a stripped string for further checks
     if pd.isna(date_str):
