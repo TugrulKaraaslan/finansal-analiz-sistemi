@@ -18,7 +18,8 @@ def parse_date(
 ) -> pd.Timestamp | NaTType:
     """Parse ``date_str`` into a :class:`pandas.Timestamp` or ``pd.NaT``.
 
-    The function tries ISO ``YYYY-MM-DD`` and ``DD.MM.YYYY`` formats first,
+    The function tries common ISO and day-first patterns first
+    (``YYYY-MM-DD``, ``DD.MM.YYYY``, ``YYYY/MM/DD`` and ``DD/MM/YYYY``)
     then falls back to a day-first parse via :mod:`dateutil`. Invalid inputs
     yield ``pd.NaT`` instead of raising ``ValueError``.
 
@@ -44,7 +45,7 @@ def parse_date(
         return pd.NaT
 
     # Try explicit formats before falling back to dateutil
-    for fmt in ("%Y-%m-%d", "%d.%m.%Y"):
+    for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%Y/%m/%d", "%d/%m/%Y"):
         ts = pd.to_datetime(value, format=fmt, errors="coerce")
         if pd.notna(ts):
             return ts
