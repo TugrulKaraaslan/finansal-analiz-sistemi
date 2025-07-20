@@ -70,3 +70,18 @@ def test_log_dir_must_be_directory(tmp_path):
     file_path.write_text("x")
     with pytest.raises(NotADirectoryError):
         purge_old_logs(log_dir=file_path, keep_days=7)
+
+
+def test_duplicate_patterns_count_once(tmp_path):
+    """Files matched by multiple patterns should be processed once."""
+    old = tmp_path / "dup.log"
+    old.write_text("x")
+    import os
+    import time
+
+    os.utime(old, (time.time() - 864000,) * 2)
+    removed = purge_old_logs(
+        log_dir=tmp_path, keep_days=7, patterns=("*.log", "*.log*")
+    )
+    assert removed == 1
+    assert not old.exists()

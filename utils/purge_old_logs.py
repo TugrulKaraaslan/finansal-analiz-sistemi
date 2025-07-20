@@ -80,8 +80,12 @@ def purge_old_logs(
         except FileNotFoundError:  # pragma: no cover - race condition
             return False
 
+    seen: set[Path] = set()
     for pat in patterns:
         for log_file in log_dir.glob(pat):
+            if log_file in seen:
+                continue
+            seen.add(log_file)
             if is_expired(log_file):
                 remove_file(log_file)
                 count += 1
