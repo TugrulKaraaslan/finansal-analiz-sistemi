@@ -26,6 +26,10 @@ class ParquetCacheManager:
         self.cache_path = cache_path
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
 
+    def exists(self) -> bool:
+        """Return ``True`` when the cache file is present."""
+        return self.cache_path.is_file()
+
     def load(self) -> DataFrame:
         """Return the cached Parquet file as a DataFrame."""
         import pandas as pd

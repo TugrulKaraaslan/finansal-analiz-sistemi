@@ -32,3 +32,12 @@ def test_load_missing(tmp_path: Path) -> None:
     mngr = ParquetCacheManager(tmp_path / "missing.parquet")
     with pytest.raises(FileNotFoundError):
         _ = mngr.load()
+
+
+def test_exists(tmp_path: Path) -> None:
+    """exists should reflect the file system state."""
+    cache_path = tmp_path / "cache.parquet"
+    mngr = ParquetCacheManager(cache_path)
+    assert mngr.exists() is False
+    pd.DataFrame({"x": [1]}).to_parquet(cache_path)
+    assert mngr.exists() is True
