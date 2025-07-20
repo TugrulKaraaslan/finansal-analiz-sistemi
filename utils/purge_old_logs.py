@@ -27,7 +27,8 @@ def purge_old_logs(
     Files matching ``patterns`` (``*.log*`` by default) and orphan ``*.lock``
     entries older than ``keep_days`` days are deleted. ``patterns`` may be a
     single glob string or an iterable of patterns. When ``dry_run`` is ``True``
-    the function only prints which files would be removed.
+    the function only prints which files would be removed. If ``log_dir`` does
+    not exist the function returns ``0`` without raising an error.
 
     Args:
         log_dir (Path | None, optional): Directory containing log files.
@@ -50,6 +51,8 @@ def purge_old_logs(
         raise ValueError("keep_days must be non-negative")
 
     log_dir = Path("loglar") if log_dir is None else Path(log_dir)
+    if not log_dir.exists():  # short-circuit when directory is absent
+        return 0
     if patterns is None:
         patterns = ("*.log*",)
     elif isinstance(patterns, str):
