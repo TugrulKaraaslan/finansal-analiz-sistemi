@@ -14,7 +14,7 @@ from pandas._libs.tslibs.nattype import NaTType
 
 
 def parse_date(
-    date_str: str | datetime | int | float | None,
+    date_str: str | datetime | date | int | float | None,
 ) -> pd.Timestamp | NaTType:
     """Parse ``date_str`` into a :class:`pandas.Timestamp` or ``pd.NaT``.
 
