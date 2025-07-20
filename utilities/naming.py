@@ -10,7 +10,13 @@ from __future__ import annotations
 __all__ = ["unique_name"]
 
 
-def unique_name(base: str, seen: set[str], *, delimiter: str = "_") -> str:
+def unique_name(
+    base: str,
+    seen: set[str],
+    *,
+    delimiter: str = "_",
+    start: int = 1,
+) -> str:
     """Return a unique column name derived from ``base``.
 
     The chosen label is added to ``seen`` so subsequent calls with the same
@@ -26,6 +32,8 @@ def unique_name(base: str, seen: set[str], *, delimiter: str = "_") -> str:
         Set of names already in use; updated in-place.
     delimiter : str, optional
         Character used between ``base`` and the numeric suffix.
+    start : int, optional
+        Initial numeric suffix when ``base`` already exists. ``1`` by default.
 
     Returns
     -------
@@ -36,11 +44,13 @@ def unique_name(base: str, seen: set[str], *, delimiter: str = "_") -> str:
     Raises
     ------
     ValueError
-        If ``base`` is an empty string.
+        If ``base`` is an empty string or ``start`` is less than ``1``.
     """
 
     if not base:
         raise ValueError("base must be a non-empty string")
+    if start < 1:
+        raise ValueError("start must be >= 1")
 
     if base not in seen:
         seen.add(base)
@@ -50,7 +60,7 @@ def unique_name(base: str, seen: set[str], *, delimiter: str = "_") -> str:
         prefix = base[: -len(delimiter)]
     else:
         prefix = base
-    idx = 1
+    idx = start
     while True:
         candidate = f"{prefix}{delimiter}{idx}"
         if candidate not in seen:

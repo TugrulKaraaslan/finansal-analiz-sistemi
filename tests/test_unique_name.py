@@ -44,3 +44,16 @@ def test_unique_name_empty_base_raises():
     """Empty ``base`` should trigger ``ValueError``."""
     with pytest.raises(ValueError):
         unique_name("", set())
+
+
+def test_unique_name_custom_start():
+    """Custom starting index should be honored."""
+    seen = {"x", "x_1", "x_2"}
+    assert unique_name("x", seen, start=3) == "x_3"
+    assert "x_3" in seen
+
+
+def test_unique_name_invalid_start_raises():
+    """Start value below 1 should raise ``ValueError``."""
+    with pytest.raises(ValueError):
+        unique_name("y", set(), start=0)
