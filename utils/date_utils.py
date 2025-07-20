@@ -54,7 +54,7 @@ def parse_date(
         return pd.NaT
 
     # Try explicit formats before falling back to dateutil
-    for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%Y/%m/%d", "%d/%m/%Y"):
+    for fmt in ("%Y-%m-%d", "%Y.%m.%d", "%d.%m.%Y", "%Y/%m/%d", "%d/%m/%Y"):
         ts = pd.to_datetime(value, format=fmt, errors="coerce")
         if pd.notna(ts):
             return ts
