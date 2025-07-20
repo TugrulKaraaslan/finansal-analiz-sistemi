@@ -23,16 +23,18 @@ def parse_date(
 
     The function tries common ISO and day-first patterns first
     (``YYYY-MM-DD``, ``DD.MM.YYYY``, ``YYYY/MM/DD`` and ``DD/MM/YYYY``)
-    then falls back to a day-first parse via :mod:`dateutil`. Invalid inputs
-    yield ``pd.NaT`` instead of raising ``ValueError``.
+    and also understands pure digit forms like ``YYYYMMDD`` or ``DDMMYYYY``.
+    If those attempts fail it falls back to a day-first parse via
+    :mod:`dateutil`. Invalid inputs yield ``pd.NaT`` instead of raising
+    ``ValueError``.
 
-    Args:
-        date_str (str | datetime | date | int | float | np.datetime64 | None):
-            Date value to parse.
+        Args:
+            date_str (str | datetime | date | int | float | np.datetime64 | None):
+                Date value to parse.
 
-    Returns:
-        pd.Timestamp | NaTType: Parsed timestamp or ``pd.NaT`` when parsing
-        fails.
+        Returns:
+            pd.Timestamp | NaTType: Parsed timestamp or ``pd.NaT`` when parsing
+            fails.
     """
     if isinstance(date_str, (datetime, date)):
         return pd.Timestamp(date_str)
@@ -58,7 +60,11 @@ def parse_date(
             return ts
 
     if value.isdigit() and len(value) == 8:
-        ts = pd.to_datetime(value, format="%Y%m%d", errors="coerce")
+        year = int(value[:4])
+        if 1900 <= year <= 2100:
+            ts = pd.to_datetime(value, format="%Y%m%d", errors="coerce")
+        else:
+            ts = pd.to_datetime(value, format="%d%m%Y", errors="coerce")
         if pd.notna(ts):
             return ts
 
