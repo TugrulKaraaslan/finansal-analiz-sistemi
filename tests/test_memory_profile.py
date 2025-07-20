@@ -16,3 +16,11 @@ def test_memory_profile_writes_row(tmp_path):
 
 def test_mem_profile_alias():
     assert mem_profile is MemoryProfile
+
+
+def test_memory_profile_accepts_string_path(tmp_path):
+    """Path argument may be given as a string."""
+    fname = tmp_path / "mp.csv"
+    with MemoryProfile(path=str(fname)):
+        pass
+    assert fname.exists()
