@@ -15,6 +15,12 @@ import pandas as pd
 
 from finansal_analiz_sistemi import config
 
+__all__ = [
+    "load_crossover_names",
+    "load_ema_close_crossovers",
+    "clear_cache",
+]
+
 # Regex to capture any crossover column name
 CROSSOVER_NAME_RE = re.compile(r"([A-Za-z0-9_]+_keser_[A-Za-z0-9_]+_(?:yukari|asagi))")
 EMA_CLOSE_RE = re.compile(r"ema_(\d+)_keser_close_(yukari|asagi)")
@@ -62,3 +68,8 @@ def load_ema_close_crossovers(csv_path: str | Path | None = None) -> list[str]:
 
     """
     return [n for n in load_crossover_names(csv_path) if EMA_CLOSE_RE.fullmatch(n)]
+
+
+def clear_cache() -> None:
+    """Clear cached results of :func:`load_crossover_names`."""
+    load_crossover_names.cache_clear()
