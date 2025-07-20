@@ -10,6 +10,7 @@ files encountered during scanning.
 from __future__ import annotations
 
 import argparse
+import logging
 from collections.abc import Iterable
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -21,6 +22,7 @@ def purge_old_logs(
     keep_days: int = 7,
     dry_run: bool = False,
     patterns: Iterable[str] | str | None = None,
+    logger: logging.Logger | None = None,
 ) -> int:
     """Remove old log files from ``log_dir``.
 
@@ -39,6 +41,9 @@ def purge_old_logs(
             deleted.
         patterns (Iterable[str] | str | None, optional): Glob pattern(s) for log
             files. Defaults to ``("*.log*",)``.
+        logger (logging.Logger | None, optional): Logger used for informational
+            messages. ``None`` falls back to ``print`` when ``dry_run`` is
+            enabled.
 
     Raises:
         ValueError: If ``keep_days`` is negative.
@@ -69,9 +74,15 @@ def purge_old_logs(
     def remove_file(path: Path) -> None:
         """Delete ``path`` unless ``dry_run`` is enabled."""
         if dry_run:
-            print(f"[DRY-RUN] Would delete {path}")
+            msg = f"[DRY-RUN] Would delete {path}"
+            if logger:
+                logger.info(msg)
+            else:
+                print(msg)
         else:
             path.unlink(missing_ok=True)
+            if logger:
+                logger.debug("Deleted %s", path)
 
     def is_expired(p: Path) -> bool:
         """Return ``True`` when ``p`` is older than the cutoff timestamp."""

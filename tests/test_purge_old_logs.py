@@ -4,6 +4,8 @@ The module should correctly identify old log and lock files, deleting them
 when not running in dry-run mode.
 """
 
+import logging
+
 import pytest
 
 from utils.purge_old_logs import purge_old_logs
@@ -85,3 +87,23 @@ def test_duplicate_patterns_count_once(tmp_path):
     )
     assert removed == 1
     assert not old.exists()
+
+
+def test_logging_with_logger(tmp_path, caplog):
+    """Dry-run output should be logged when a logger is provided."""
+    old = tmp_path / "x.log"
+    old.write_text("x")
+    import os
+    import time
+
+    os.utime(old, (time.time() - 864000,) * 2)
+    logger = logging.getLogger("purge.test")
+    with caplog.at_level(logging.INFO, logger="purge.test"):
+        removed = purge_old_logs(
+            log_dir=tmp_path,
+            keep_days=7,
+            dry_run=True,
+            logger=logger,
+        )
+    assert removed == 1
+    assert "Would delete" in caplog.text
