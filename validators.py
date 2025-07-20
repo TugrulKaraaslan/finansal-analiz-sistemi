@@ -9,7 +9,7 @@ from dataclasses import dataclass
 __all__ = ["ValidationError"]
 
 
-@dataclass(frozen=True)
+@dataclass(slots=True, frozen=True)
 class ValidationError:
     """Structured information about a validation failure.
 
