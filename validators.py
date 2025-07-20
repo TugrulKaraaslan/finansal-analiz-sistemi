@@ -9,7 +9,7 @@ from dataclasses import dataclass
 __all__ = ["ValidationError"]
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class ValidationError:
     """Structured information about a validation failure.
 
@@ -28,6 +28,15 @@ class ValidationError:
     cozum_onerisi: str
     reason: str
     hint: str
+
+    __slots__ = (
+        "hata_tipi",
+        "eksik_ad",
+        "detay",
+        "cozum_onerisi",
+        "reason",
+        "hint",
+    )
 
     def __str__(self) -> str:
         """Return a concise description for user-facing messages."""
