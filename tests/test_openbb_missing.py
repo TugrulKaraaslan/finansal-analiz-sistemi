@@ -4,7 +4,14 @@ import openbb_missing as om
 
 
 def test_public_exports():
-    assert sorted(om.__all__) == ["clear_cache", "ichimoku", "macd", "rsi"]
+    expected = [
+        "clear_cache",
+        "ichimoku",
+        "is_available",
+        "macd",
+        "rsi",
+    ]
+    assert sorted(om.__all__) == expected
 
 
 def test_wrappers_exist():
@@ -77,3 +84,11 @@ def test_clear_cache(monkeypatch):
     assert len(om._FUNC_CACHE) == 1
     om.clear_cache()
     assert len(om._FUNC_CACHE) == 0
+
+
+def test_is_available_reflects_import(monkeypatch):
+    """is_available should detect the presence of the OpenBB package."""
+    monkeypatch.setattr(om, "obb", object())
+    assert om.is_available() is True
+    monkeypatch.setattr(om, "obb", None)
+    assert om.is_available() is False

@@ -12,7 +12,7 @@ from typing import Any, Callable
 import pandas as pd
 from cachetools import LRUCache
 
-__all__ = ["ichimoku", "macd", "rsi", "clear_cache"]
+__all__ = ["ichimoku", "macd", "rsi", "clear_cache", "is_available"]
 
 try:  # pragma: no cover - optional dependency
     from openbb import obb  # type: ignore
