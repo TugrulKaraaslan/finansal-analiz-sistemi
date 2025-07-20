@@ -56,3 +56,9 @@ def test_patterns_as_string(tmp_path):
     removed = purge_old_logs(log_dir=tmp_path, keep_days=7, patterns="*.log")
     assert removed == 1
     assert not log.exists()
+
+
+def test_missing_directory_returns_zero(tmp_path):
+    """Nonexistent ``log_dir`` should be handled gracefully."""
+    missing = tmp_path / "missing"
+    assert purge_old_logs(log_dir=missing, keep_days=7) == 0
