@@ -12,6 +12,7 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import TracebackType
+from typing import Optional, Type
 
 import psutil
 
@@ -38,19 +39,19 @@ class MemoryProfile:
 
     def __exit__(
         self,
-        exc_type: type[BaseException] | None,
-        exc: BaseException | None,
-        tb: TracebackType | None,
+        exc_type: Optional[Type[BaseException]],
+        exc: Optional[BaseException],
+        tb: Optional[TracebackType],
     ) -> bool:
         """Log peak memory usage and allow exception propagation.
 
         Parameters
         ----------
-        exc_type : type[BaseException] | None
+        exc_type : Optional[Type[BaseException]]
             Exception class if an error occurred.
-        exc : BaseException | None
+        exc : Optional[BaseException]
             Raised exception instance, if any.
-        tb : TracebackType | None
+        tb : Optional[TracebackType]
             Traceback object associated with ``exc``.
 
         Returns
