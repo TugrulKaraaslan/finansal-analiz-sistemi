@@ -6,7 +6,7 @@ The :func:`parse_date` helper converts diverse date strings to
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
 import pandas as pd
 from dateutil import parser
@@ -23,13 +23,13 @@ def parse_date(
     yield ``pd.NaT`` instead of raising ``ValueError``.
 
     Args:
-        date_str (str | datetime | int | float | None): Date value to parse.
+        date_str (str | datetime | date | int | float | None): Date value to parse.
 
     Returns:
         pd.Timestamp | NaTType: Parsed timestamp or ``pd.NaT`` when parsing
         fails.
     """
-    if isinstance(date_str, datetime):
+    if isinstance(date_str, (datetime, date)):
         return pd.Timestamp(date_str)
 
     # Normalize value to a stripped string for further checks
