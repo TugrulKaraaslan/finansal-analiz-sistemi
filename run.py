@@ -102,8 +102,22 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
             st.write("Grafik için veri yok")
 
 
-def veri_yukle(force_excel_reload: bool = False):
-    """Load filter definitions together with the raw price dataset."""
+def veri_yukle(
+    force_excel_reload: bool = False,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Load filter definitions together with the raw price dataset.
+
+    Parameters
+    ----------
+    force_excel_reload : bool, optional
+        When ``True`` ignore cached Parquet data and reload the Excel files.
+
+    Returns
+    -------
+    tuple[pandas.DataFrame, pandas.DataFrame]
+        ``(df_filters, df_raw)`` tuple containing filter rules and raw price
+        data. The function exits the program when either dataset is missing.
+    """
 
     df_filters = data_loader.yukle_filtre_dosyasi(logger_param=logger)
     if df_filters is None or df_filters.empty:
