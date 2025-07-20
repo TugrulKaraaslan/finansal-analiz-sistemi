@@ -186,13 +186,26 @@ def _standardize_ohlcv_columns(
     return df
 
 
-def check_and_create_dirs(*dir_paths: str | Path) -> None:
-    """Create missing directories from ``dir_paths``.
+def check_and_create_dirs(*dir_paths: str | Path) -> list[Path]:
+    """Ensure each path in ``dir_paths`` exists as a directory.
 
-    Paths are expanded with ``~`` and resolved relative to the current
-    working directory. Existing directories are left untouched while
-    name clashes with files trigger an error log entry.
+    Paths are expanded and resolved to absolute :class:`~pathlib.Path`
+    instances. Missing directories are created as needed. Any path that
+    already exists as a file triggers an error log entry and is skipped.
+
+    Parameters
+    ----------
+    *dir_paths : str | pathlib.Path
+        One or more directory paths to verify or create.
+
+    Returns
+    -------
+    list[pathlib.Path]
+        A list of directories that were created during the call. Existing
+        directories are not included.
     """
+
+    created: list[Path] = []
 
     for path in dir_paths:
         if not path:
@@ -204,11 +217,14 @@ def check_and_create_dirs(*dir_paths: str | Path) -> None:
         if not p.exists():
             try:
                 p.mkdir(parents=True, exist_ok=True)
+                created.append(p)
                 logger.info("Dizin oluşturuldu: %s", p)
             except Exception as exc:  # pragma: no cover - I/O errors
                 logger.error(
                     "Dizin oluşturulamadı: %s. Hata: %s", p, exc, exc_info=True
                 )
+
+    return created
 
 
 def load_data(path: str) -> pd.DataFrame:

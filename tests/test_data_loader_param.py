@@ -13,8 +13,9 @@ CSV_CONTENT = "col\n1\n2\n3"
 def test_check_and_create_dirs(tmp_path: Path):
     """Created directories should exist after invocation."""
     new_dir = tmp_path / "nested"
-    data_loader.check_and_create_dirs(new_dir)
+    created = data_loader.check_and_create_dirs(new_dir)
     assert new_dir.exists()
+    assert created == [new_dir]
 
 
 def test_load_data_cache_refresh(tmp_path: Path):
