@@ -11,7 +11,7 @@ import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Tuple, TypeVar
+from typing import Callable, TypeVar
 
 import pandas as pd
 from cachetools import TTLCache
@@ -72,7 +72,7 @@ class DataLoaderCache:
 
     def _get_cache_key(
         self, filepath: str | os.PathLike[str], kind: str
-    ) -> Tuple[Tuple[str, str], int, int]:
+    ) -> tuple[tuple[str, str], int, int]:
         """Return cache key and file metadata for ``filepath``.
 
         Parameters
