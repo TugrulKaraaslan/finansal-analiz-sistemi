@@ -42,6 +42,7 @@ def purge_old_logs(
 
     Raises:
         ValueError: If ``keep_days`` is negative.
+        NotADirectoryError: If ``log_dir`` exists but is not a directory.
 
     Returns:
         int: Number of files processed (also when ``dry_run`` is ``True``).
@@ -53,6 +54,8 @@ def purge_old_logs(
     log_dir = Path("loglar") if log_dir is None else Path(log_dir)
     if not log_dir.exists():  # short-circuit when directory is absent
         return 0
+    if not log_dir.is_dir():
+        raise NotADirectoryError(str(log_dir))
     if patterns is None:
         patterns = ("*.log*",)
     elif isinstance(patterns, str):
