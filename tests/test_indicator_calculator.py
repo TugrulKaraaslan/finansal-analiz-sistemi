@@ -44,6 +44,24 @@ def test_classicpivots_crossover_column_exists():
     assert "close_keser_classicpivots_1h_p_yukari" in result.columns
 
 
+def test_classicpivots_value_calculation():
+    """Pivot values should equal the mean of high, low and close."""
+    df = pd.DataFrame(
+        {
+            "hisse_kodu": ["AAA"] * 3,
+            "tarih": pd.date_range("2024-01-01", periods=3, freq="D"),
+            "open": [1, 2, 3],
+            "high": [2, 4, 6],
+            "low": [0, 1, 2],
+            "close": [1, 3, 5],
+            "volume": [10, 20, 30],
+        }
+    )
+    result = ic.hesapla_teknik_indikatorler_ve_kesisimler(df)
+    expected = df[["high", "low", "close"]].mean(axis=1).round(2)
+    assert result["classicpivots_1h_p"].equals(expected)
+
+
 def test_fallback_indicators_created_when_missing():
     """Fallback indicators should be generated if absent in input data."""
     data = {

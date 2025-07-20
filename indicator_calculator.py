@@ -118,10 +118,10 @@ def _calculate_classicpivots_1h_p(group_df: pd.DataFrame) -> pd.Series:
     sutun_adi = "classicpivots_1h_p"
     try:
         gerekli = ["high", "low", "close"]
-        if any(col not in group_df.columns for col in gerekli):
+        if not all(c in group_df.columns for c in gerekli):
             logger.debug(f"{hisse_str}: {sutun_adi} için gerekli sütunlar eksik.")
             return pd.Series(np.nan, index=group_df.index, name=sutun_adi)
-        pivot = (group_df["high"] + group_df["low"] + group_df["close"]) / 3
+        pivot = group_df[gerekli].mean(axis=1)
         return pivot.round(2).rename(sutun_adi)
     except Exception as e:
         logger.error(
