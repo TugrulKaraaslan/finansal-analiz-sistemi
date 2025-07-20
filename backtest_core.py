@@ -4,6 +4,8 @@ These functions simulate simple buy/sell scenarios based on filter
 results and provide summary statistics for reporting.
 """
 
+from __future__ import annotations
+
 import logging
 from typing import Optional
 
