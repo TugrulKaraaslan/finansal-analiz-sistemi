@@ -46,17 +46,17 @@ def parse_date(
     # Try explicit formats before falling back to dateutil
     for fmt in ("%Y-%m-%d", "%d.%m.%Y"):
         ts = pd.to_datetime(value, format=fmt, errors="coerce")
-        if ts is not pd.NaT:
+        if pd.notna(ts):
             return ts
 
     if value.isdigit() and len(value) == 8:
         ts = pd.to_datetime(value, format="%Y%m%d", errors="coerce")
-        if ts is not pd.NaT:
+        if pd.notna(ts):
             return ts
 
     # Generic day-first parsing with coercion (handles 07/03/25 etc.)
     ts = pd.to_datetime(value, dayfirst=True, errors="coerce")
-    if ts is not pd.NaT:
+    if pd.notna(ts):
         return ts
 
     # Fallback to dateutil for other variants
