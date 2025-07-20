@@ -159,12 +159,17 @@ def evaluate_filter(
     df: Any | None = None,
     depth: int = 0,
     seen: set[str] | None = None,
-) -> Any:
+) -> str:
     """Recursively evaluate filter trees referenced by ``fid`` or definition dict.
 
     Supports both legacy dict-based expressions and string identifiers stored in
     ``FILTER_DEFS``. Raises ``CyclicFilterError`` for cycles and
     ``MaxDepthError`` when ``settings.MAX_FILTER_DEPTH`` is exceeded.
+
+    Returns
+    -------
+    str
+        The ``fid`` identifier of the evaluated filter.
     """
     seen = set(seen or ())
 
@@ -185,6 +190,7 @@ def evaluate_filter(
 
     for child in children:
         evaluate_filter(child, df=df, depth=depth + 1, seen=seen | {key})
+
     return key
 
 
