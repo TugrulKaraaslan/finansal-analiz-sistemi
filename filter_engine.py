@@ -67,6 +67,7 @@ class MissingColumnError(Exception):
 _STRING_RE = re.compile(r"(?:'[^']*'|\"[^\"]*\")")
 _IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 _BRACKET_RE = re.compile(r"df\[\s*(['\"])(?P<col>[^'\"]+)\1\s*\]")
+_ATTR_ACCESS_RE = re.compile(r"(?<!\d)\.[A-Za-z_][A-Za-z0-9_]*")
 _RESERVED_TOKENS = set(keyword.kwlist) | {"and", "or", "not", "True", "False", "df"}
 
 
@@ -82,6 +83,7 @@ def _extract_query_columns(query: str) -> set[str]:
 
     bracket_cols = {m.group("col") for m in _BRACKET_RE.finditer(query)}
     query = _STRING_RE.sub(" ", query)
+    query = _ATTR_ACCESS_RE.sub(" ", query)
     tokens = set(_IDENT_RE.findall(query))
     return (tokens | bracket_cols) - _RESERVED_TOKENS
 
