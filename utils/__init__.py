@@ -160,7 +160,12 @@ def extract_columns_from_filters_cached(
         try:
             first = df_filters_csv.splitlines()[0]
             sep = ";" if first.count(";") >= first.count(",") else ","
-            df_filters = pd.read_csv(StringIO(df_filters_csv), sep=sep)
+            df_filters = pd.read_csv(
+                StringIO(df_filters_csv),
+                sep=sep,
+                comment="#",
+                dtype=str,
+            )
         except Exception:
             df_filters = None
 
