@@ -12,6 +12,9 @@ from typing import Any, Callable
 import pandas as pd
 from cachetools import LRUCache
 
+# Default size for the OpenBB function cache
+FUNC_CACHE_SIZE = 16
+
 __all__ = ["ichimoku", "macd", "rsi", "clear_cache", "is_available"]
 
 try:  # pragma: no cover - optional dependency
@@ -21,7 +24,7 @@ except Exception:  # pragma: no cover - optional dependency
 
 # Cache for resolved OpenBB functions
 # Limit size to avoid unbounded growth when called with many names
-_FUNC_CACHE: LRUCache[str, Callable[..., Any]] = LRUCache(maxsize=16)
+_FUNC_CACHE: LRUCache[str, Callable[..., Any]] = LRUCache(maxsize=FUNC_CACHE_SIZE)
 
 
 def is_available() -> bool:
