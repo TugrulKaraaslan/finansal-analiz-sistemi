@@ -33,6 +33,13 @@ def test_unique_name_trailing_underscore():
     assert "foo_2" in seen
 
 
+def test_unique_name_multiple_trailing_delimiters():
+    """Only one delimiter should be trimmed when ``base`` has repeats."""
+    seen = {"bar__", "bar__1"}
+    assert unique_name("bar__", seen) == "bar__2"
+    assert "bar__2" in seen
+
+
 def test_unique_name_empty_base_raises():
     """Empty ``base`` should trigger ``ValueError``."""
     with pytest.raises(ValueError):

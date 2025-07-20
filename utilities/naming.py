@@ -46,7 +46,10 @@ def unique_name(base: str, seen: set[str], *, delimiter: str = "_") -> str:
         seen.add(base)
         return base
 
-    prefix = base.rstrip(delimiter)
+    if base.endswith(delimiter):
+        prefix = base[: -len(delimiter)]
+    else:
+        prefix = base
     idx = 1
     while True:
         candidate = f"{prefix}{delimiter}{idx}"
