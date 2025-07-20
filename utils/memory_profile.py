@@ -11,6 +11,8 @@ import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import TracebackType
+from typing import Optional, Type
 
 import psutil
 
@@ -25,14 +27,38 @@ class MemoryProfile:
     proc: psutil.Process = field(init=False)
     start: int = field(init=False)
 
+    def __post_init__(self) -> None:
+        """Normalize the ``path`` attribute to a :class:`~pathlib.Path`."""
+        self.path = Path(self.path)
+
     def __enter__(self) -> "MemoryProfile":
         """Start tracking process memory usage and return ``self``."""
         self.proc = psutil.Process(os.getpid())
         self.start = self.proc.memory_info().rss
         return self
 
-    def __exit__(self, exc_type, exc, tb) -> bool:
-        """Log peak memory usage and allow exception propagation."""
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc: Optional[BaseException],
+        tb: Optional[TracebackType],
+    ) -> bool:
+        """Log peak memory usage and allow exception propagation.
+
+        Parameters
+        ----------
+        exc_type : Optional[Type[BaseException]]
+            Exception class if an error occurred.
+        exc : Optional[BaseException]
+            Raised exception instance, if any.
+        tb : Optional[TracebackType]
+            Traceback object associated with ``exc``.
+
+        Returns
+        -------
+        bool
+            ``False`` so any exception is re-raised by the context manager.
+        """
         peak = self.proc.memory_info().rss
         diff = peak - self.start
         self.path.parent.mkdir(exist_ok=True)
