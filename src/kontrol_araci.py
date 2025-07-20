@@ -6,7 +6,8 @@ hatalar toplanır. Sonuçlar raporlama aşamasında kullanılır.
 
 import pandas as pd
 
-EXPECTED_COLUMNS: list[str] = [
+# Column order used by ``tarama_denetimi`` outputs.
+EXPECTED_COLUMNS: tuple[str, ...] = (
     "kod",
     "tip",
     "durum",
@@ -14,7 +15,7 @@ EXPECTED_COLUMNS: list[str] = [
     "eksik_sutunlar",
     "nan_sutunlar",
     "secim_adedi",
-]
+)
 
 try:
     from .filter_engine import _apply_single_filter
