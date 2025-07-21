@@ -4,6 +4,8 @@ These helpers adjust date columns and remove invalid rows before
 indicator calculation.
 """
 
+from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 

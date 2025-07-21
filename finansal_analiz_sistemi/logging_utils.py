@@ -4,6 +4,8 @@ The module exposes :class:`ErrorCountingFilter` which counts ERROR and
 WARNING records so tests and scripts can assert on logged output.
 """
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 

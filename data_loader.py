@@ -4,6 +4,8 @@ Common helpers are re-exported for direct import and a helper is provided
 to load the cached Parquet dataset.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import pandas as pd

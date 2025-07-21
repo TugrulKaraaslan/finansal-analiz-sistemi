@@ -4,6 +4,8 @@ This module exposes :class:`ValidationError` so helpers can return
 consistent error objects instead of bare strings.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 __all__ = ["ValidationError"]
