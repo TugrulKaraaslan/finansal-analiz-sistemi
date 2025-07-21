@@ -86,7 +86,7 @@ EXPECTED_COLUMNS = [
 
 
 def _build_detay_df(
-    detay_list: list[pd.DataFrame], trades: pd.DataFrame
+    detay_list: list[pd.DataFrame], trades: pd.DataFrame | None = None
 ) -> pd.DataFrame:
     """Combine partial detail frames and attach trade results.
 
@@ -94,8 +94,9 @@ def _build_detay_df(
     ----------
     detay_list : list[pandas.DataFrame]
         Partial detail frames generated per filter.
-    trades : pandas.DataFrame
+    trades : pandas.DataFrame | None, optional
         Trade information to merge on ``filtre_kodu`` and ``hisse_kodu``.
+        ``None`` results in a plain concatenation without merging.
 
     Returns
     -------
