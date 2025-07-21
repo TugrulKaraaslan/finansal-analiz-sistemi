@@ -260,7 +260,7 @@ def run_pipeline(
         names=["code", "date", "open", "high", "low", "close", "volume"],
     )
     df = df.rename(columns={"code": "hisse_kodu", "date": "tarih"})
-    df["tarih"] = pd.to_datetime(df["tarih"])
+    df["tarih"] = df["tarih"].apply(parse_date)
 
     with open(filter_def, encoding="utf-8") as f:
         filt = yaml.safe_load(f) or []
