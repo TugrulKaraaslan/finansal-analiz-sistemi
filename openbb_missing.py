@@ -14,13 +14,16 @@ import pandas as pd
 from cachetools import LRUCache
 
 # Default size for the OpenBB function cache. The value can be overridden via
-# the ``OPENBB_FUNC_CACHE_SIZE`` environment variable. Invalid values fall back
-# to the default of ``16``.
+# the ``OPENBB_FUNC_CACHE_SIZE`` environment variable. Invalid or non-positive
+# values fall back to this default of ``16``.
+DEFAULT_CACHE_SIZE = 16
 _env_val = os.getenv("OPENBB_FUNC_CACHE_SIZE")
 try:
-    FUNC_CACHE_SIZE = int(_env_val) if _env_val else 16
+    size = int(_env_val) if _env_val else DEFAULT_CACHE_SIZE
 except ValueError:  # pragma: no cover - environment error
-    FUNC_CACHE_SIZE = 16
+    size = DEFAULT_CACHE_SIZE
+
+FUNC_CACHE_SIZE = size if size > 0 else DEFAULT_CACHE_SIZE
 
 __all__ = ["ichimoku", "macd", "rsi", "clear_cache", "is_available"]
 
