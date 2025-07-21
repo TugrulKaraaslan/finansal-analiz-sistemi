@@ -19,8 +19,15 @@ from .logging_utils import ErrorCountingFilter  # noqa: F401
 # Configure logging via YAML at package import time
 base = Path(__file__).resolve().parent.parent
 (base / "loglar").mkdir(exist_ok=True)
-with open(base / "logging_config.yaml", "r", encoding="utf-8") as fh:
-    logging.config.dictConfig(yaml.safe_load(fh))
+yaml_cfg = base / "logging_config.yaml"
+if yaml_cfg.exists():
+    with yaml_cfg.open("r", encoding="utf-8") as fh:
+        logging.config.dictConfig(yaml.safe_load(fh))
+else:  # pragma: no cover - fallback when YAML missing
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
 
 from . import config, logging_config  # noqa: E402
 
