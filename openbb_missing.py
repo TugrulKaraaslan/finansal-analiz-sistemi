@@ -237,4 +237,4 @@ def rsi(
     res_df = pd.DataFrame(obb_obj.results).set_index("date")
     rsi_col = [c for c in res_df.columns if c.lower().startswith("close_rsi")]
     col = rsi_col[0] if rsi_col else res_df.columns[-1]
-    return res_df[col].rename(close.name)
+    return res_df[col].rename(close.name or "rsi")
