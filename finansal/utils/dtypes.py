@@ -6,7 +6,8 @@ and casts values to a suitable dtype whenever possible.
 
 from __future__ import annotations
 
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 import pandas as pd
 
@@ -28,10 +29,11 @@ def safe_set(df: pd.DataFrame, column: str, values: Iterable[Any]) -> None:
     if isinstance(values, pd.Series):
         series = values if values.index.equals(df.index) else values.reindex(df.index)
     else:
+        items = list(values)
         try:
-            series = pd.Series(values, index=df.index)
+            series = pd.Series(items, index=df.index)
         except ValueError:
-            series = pd.Series(values).reindex(df.index)
+            series = pd.Series(items).reindex(df.index)
 
     target_dtype = config.DTYPES_MAP.get(column)
     if target_dtype is None and column in df.columns:
