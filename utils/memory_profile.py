@@ -19,7 +19,7 @@ import psutil
 __all__ = ["MemoryProfile", "mem_profile"]
 
 
-@dataclass(slots=True)
+@dataclass
 class MemoryProfile:
     """Context manager that records peak memory usage to disk."""
 
