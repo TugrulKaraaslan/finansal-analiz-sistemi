@@ -57,6 +57,9 @@ def _get_fiyat(
         else "Bilinmeyen Hisse"
     )
 
+    # Avoid mutating the caller's DataFrame when ensuring datetime dtype
+    df_hisse_veri = df_hisse_veri.copy()
+
     try:
         # Ensure the date column is of datetime type. The preprocessor should
         # normally handle this conversion.
