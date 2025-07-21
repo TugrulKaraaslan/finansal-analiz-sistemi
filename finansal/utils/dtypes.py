@@ -10,6 +10,7 @@ from collections.abc import Iterable
 from typing import Any
 
 import pandas as pd
+from pandas.api.types import is_integer_dtype
 
 from finansal_analiz_sistemi import config
 
@@ -43,7 +44,7 @@ def safe_set(df: pd.DataFrame, column: str, values: Iterable[Any]) -> None:
         try:
             series = series.astype(target_dtype)
         except (ValueError, TypeError):
-            if str(target_dtype).startswith("int"):
+            if is_integer_dtype(target_dtype):
                 try:
                     nullable = "Int32" if "32" in str(target_dtype) else "Int64"
                     series = series.astype(nullable)
