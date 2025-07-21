@@ -192,7 +192,7 @@ def macd(
         signal=signal,
     )
     res_df = pd.DataFrame(obb_obj.results).set_index("date")
-    macd_cols = [c for c in res_df.columns if c.lower().startswith("close_macd")]
+    macd_cols = [c for c in res_df.columns if "macd" in c.lower()]
     return res_df[macd_cols]
 
 

@@ -279,7 +279,11 @@ def _tema20(series: pd.Series) -> pd.Series:
 
     if hasattr(ta, "tema"):
         try:
-            return ta.tema(series, length=20)
+            out = ta.tema(series, length=20)
+            if isinstance(out, pd.Series):
+                return out
+            if isinstance(out, pd.DataFrame) and not out.empty:
+                return out.iloc[:, 0]
         except Exception:  # pragma: no cover - manual fallback
             pass
     ema1 = series.ewm(span=20, adjust=False).mean()
