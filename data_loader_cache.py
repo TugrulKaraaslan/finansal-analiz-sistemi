@@ -23,7 +23,7 @@ from src.utils.excel_reader import open_excel_cached
 T = TypeVar("T")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class CachedItem:
     """Metadata and payload for a cached file."""
 
