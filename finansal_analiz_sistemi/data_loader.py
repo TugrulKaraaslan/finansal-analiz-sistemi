@@ -31,8 +31,17 @@ _read_excel = partial(pd.read_excel, engine="openpyxl")
 
 
 @lru_cache(maxsize=None)
+def _read_excel_cached_normalized(path: str) -> pd.DataFrame:
+    """Read ``path`` with ``openpyxl`` and cache the result."""
+
+    return _read_excel(path)
+
+
 def _read_excel_cached(path: str | Path) -> pd.DataFrame:
     """Return an Excel file read via ``openpyxl`` with caching.
+
+    ``path`` values are normalized to strings so ``Path`` objects and
+    string arguments share the same cache entry.
 
     Parameters
     ----------
@@ -44,7 +53,8 @@ def _read_excel_cached(path: str | Path) -> pd.DataFrame:
     pandas.DataFrame
         Okunan Excel içeriği.
     """
-    return _read_excel(str(path))
+
+    return _read_excel_cached_normalized(str(path))
 
 
 DATE_COLUMN_CANDIDATES = (
