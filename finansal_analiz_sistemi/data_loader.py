@@ -59,18 +59,28 @@ DATE_COLUMN_CANDIDATES = (
 
 
 def _find_date_column(df: pd.DataFrame) -> str | None:
-    """Return the first matching date column name or ``None``.
+    """Return the first column containing date-like values.
 
-    The search includes standard column names and any column starting with
-    ``"Unnamed:"``. This accommodates exported Excel files that preserve an
-    index column.
+    Standard column names defined in :data:`DATE_COLUMN_CANDIDATES` are
+    considered first. Any column that starts with ``"Unnamed:"`` is also
+    inspected so exported index columns can be detected. The helper only
+    returns a candidate when at least one value can be parsed as a date.
     """
 
     candidates = list(DATE_COLUMN_CANDIDATES)
-    extra = next((col for col in df.columns if str(col).startswith("Unnamed:")), None)
-    if extra:
-        candidates.append(extra)
-    return next((c for c in candidates if c in df.columns), None)
+    candidates.extend(c for c in df.columns if str(c).startswith("Unnamed:"))
+
+    for col in candidates:
+        if col not in df.columns:
+            continue
+        series = df[col]
+        if pd.api.types.is_numeric_dtype(series):
+            continue
+        if pd.api.types.is_datetime64_any_dtype(series):
+            return col
+        if pd.to_datetime(series, errors="coerce", dayfirst=True).notna().any():
+            return col
+    return None
 
 
 def _standardize_date_column(
