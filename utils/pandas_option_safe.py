@@ -38,8 +38,11 @@ def option_context(name: str, value: Any) -> Iterator[None]:
     Yields:
         None.
     """
+    # ``pd.option_context`` may raise ``OptionError`` when ``name`` is unknown
+    # which is why the entire ``with`` block is wrapped in ``try``.
     try:
         with pd.option_context(name, value):
             yield
     except (AttributeError, KeyError, pd.errors.OptionError):
+        # Silently ignore missing options so callers can remain version agnostic
         yield
