@@ -5,6 +5,8 @@ Importing this submodule provides a stable namespace under
 top-level implementation.
 """
 
+from __future__ import annotations
+
 from importlib import import_module
 
 _rg = import_module("report_generator")

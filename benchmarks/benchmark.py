@@ -5,6 +5,8 @@ the elapsed time to ``benchmark_output.txt``.  The function
 :func:`run_bench` returns the runtime in seconds.
 """
 
+from __future__ import annotations
+
 import random
 import time
 

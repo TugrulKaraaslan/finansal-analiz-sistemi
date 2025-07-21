@@ -5,6 +5,8 @@ CSV files from ``veri/ham`` are combined into one dataset written to
 concurrent write corruption.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import pandas as pd

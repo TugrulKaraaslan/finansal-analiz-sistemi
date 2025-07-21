@@ -4,6 +4,8 @@ This module parses CLI arguments, generates Excel reports from CSV files
 and optionally validates filter definitions before exiting.
 """
 
+from __future__ import annotations
+
 import atexit
 import logging
 import sys

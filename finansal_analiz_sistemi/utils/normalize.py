@@ -4,6 +4,8 @@ Utilities here ensure variants like ``FilterCode`` or ``filtercode`` are
 mapped to the canonical ``filtre_kodu`` label before processing.
 """
 
+from __future__ import annotations
+
 import pandas as pd
 
 
