@@ -7,13 +7,20 @@ available and otherwise raise :class:`NotImplementedError`.
 
 from __future__ import annotations
 
+import os
 from typing import Any, Callable
 
 import pandas as pd
 from cachetools import LRUCache
 
-# Default size for the OpenBB function cache
-FUNC_CACHE_SIZE = 16
+# Default size for the OpenBB function cache. The value can be overridden via
+# the ``OPENBB_FUNC_CACHE_SIZE`` environment variable. Invalid values fall back
+# to the default of ``16``.
+_env_val = os.getenv("OPENBB_FUNC_CACHE_SIZE")
+try:
+    FUNC_CACHE_SIZE = int(_env_val) if _env_val else 16
+except ValueError:  # pragma: no cover - environment error
+    FUNC_CACHE_SIZE = 16
 
 __all__ = ["ichimoku", "macd", "rsi", "clear_cache", "is_available"]
 
