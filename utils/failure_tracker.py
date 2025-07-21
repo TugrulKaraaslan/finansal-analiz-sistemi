@@ -22,7 +22,7 @@ if TYPE_CHECKING:  # pragma: no cover - only for type hints
     import pandas as pd
 
 
-@dataclass
+@dataclass(slots=True)
 class FailedFilter:
     """Record a failed operation and the associated reason."""
 
