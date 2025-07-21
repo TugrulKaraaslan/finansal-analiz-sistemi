@@ -445,7 +445,8 @@ def generate_full_report(
         # Conditional formatting: color rows in the summary sheet
         last_row = len(summary_df) + 1
         last_col = len(summary_df.columns)
-        data_range = f"A2:{chr(64+last_col)}{last_row}"
+        column_letter = get_column_letter(last_col)
+        data_range = f"A2:{column_letter}{last_row}"
 
         fmt_nostock = wr.book.add_format({"bg_color": "#FFF2CC"})
         fmt_error = wr.book.add_format({"bg_color": "#F8CBAD"})
