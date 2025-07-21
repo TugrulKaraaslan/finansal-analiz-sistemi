@@ -42,3 +42,9 @@ def test_detay_empty_list():
     df = _build_detay_df([], trades)
     assert df.empty
     assert list(df.columns) == list(trades.columns)
+
+
+def test_detay_none_trades():
+    """Passing ``None`` as trades should not raise and return empty frame."""
+    out = _build_detay_df([], None)
+    assert out.empty and list(out.columns) == []
