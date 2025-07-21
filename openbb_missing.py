@@ -75,9 +75,13 @@ def _call_openbb(func_name: str, **kwargs) -> object:
     if obb is None:
         raise NotImplementedError("OpenBB package is not installed")
 
+    technical = getattr(obb, "technical", None)
+    if technical is None:
+        raise NotImplementedError("OpenBB technical module is unavailable")
+
     func = _FUNC_CACHE.get(func_name)
     if func is None:
-        func = getattr(obb.technical, func_name, None)
+        func = getattr(technical, func_name, None)
         if func is None:
             raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
         _FUNC_CACHE[func_name] = func
