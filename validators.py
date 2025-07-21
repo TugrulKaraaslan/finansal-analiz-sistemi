@@ -29,15 +29,6 @@ class ValidationError:
     reason: str
     hint: str
 
-    __slots__ = (
-        "hata_tipi",
-        "eksik_ad",
-        "detay",
-        "cozum_onerisi",
-        "reason",
-        "hint",
-    )
-
     def __str__(self) -> str:
         """Return a concise description for user-facing messages."""
         return f"{self.hata_tipi}: {self.detay}"

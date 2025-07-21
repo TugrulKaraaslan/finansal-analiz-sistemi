@@ -31,12 +31,6 @@ class CachedItem:
     size: int
     data: object
 
-    __slots__ = (
-        "mtime",
-        "size",
-        "data",
-    )
-
 
 class DataLoaderCache:
     """Cache CSV and Excel files in memory to avoid redundant disk reads.

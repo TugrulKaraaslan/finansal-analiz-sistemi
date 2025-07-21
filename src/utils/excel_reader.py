@@ -25,8 +25,6 @@ __all__ = ["open_excel_cached", "read_excel_cached", "clear_cache"]
 class ExcelCacheEntry:
     """Metadata for a cached workbook."""
 
-    __slots__ = ("mtime", "book")
-
     mtime: float
     book: pd.ExcelFile
 
