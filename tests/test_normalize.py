@@ -22,6 +22,14 @@ def test_normalize_removes_duplicate_aliases():
     assert out["filtre_kodu"].tolist() == ["F1"]
 
 
+def test_normalize_accepts_spaced_alias():
+    """Aliases with spaces should also normalize correctly."""
+    df = pd.DataFrame({"Filter Code": ["F2"]})
+    out = normalize_filtre_kodu(df)
+    assert list(out.columns) == ["filtre_kodu"]
+    assert out["filtre_kodu"].tolist() == ["F2"]
+
+
 def test_normalize_missing_column():
     """Invalid DataFrames should raise ``KeyError``."""
     df = pd.DataFrame({"other": ["X"]})

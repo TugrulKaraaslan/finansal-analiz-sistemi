@@ -11,7 +11,8 @@ def normalize_filtre_kodu(df: pd.DataFrame) -> pd.DataFrame:
     """Normalize the ``filtre_kodu`` column name.
 
     Possible variants like ``FilterCode`` or ``filtercode`` are converted to
-    ``filtre_kodu`` after stripping surrounding whitespace. When multiple
+    ``filtre_kodu`` after stripping surrounding whitespace. Aliases containing
+    spaces or underscores are also recognized. When multiple
     columns match, only the first is kept. Raises ``KeyError`` if no matching
     column exists.
 
@@ -29,11 +30,11 @@ def normalize_filtre_kodu(df: pd.DataFrame) -> pd.DataFrame:
     normalized = {c: c.strip().lower() for c in out.columns}
 
     # Aliases to be mapped to 'filtre_kodu'
-    alias_map = {
-        col: "filtre_kodu"
-        for col, norm in normalized.items()
-        if norm in {"filtercode", "filtre_kodu"}
-    }
+    alias_map = {}
+    for col, norm in normalized.items():
+        key = norm.replace(" ", "").replace("_", "")
+        if key in {"filtercode", "filtrekodu"}:
+            alias_map[col] = "filtre_kodu"
 
     out = out.rename(columns=alias_map)
 
