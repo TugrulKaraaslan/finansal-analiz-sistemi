@@ -29,3 +29,12 @@ def test_safe_ma_adds_column(xs):
     assert "sma_5" in df.columns
     assert len(df["sma_5"]) == len(xs)
     assert df["sma_5"].notna().all()
+
+
+def test_safe_ma_invalid_period():
+    """Periods below one should be ignored without errors."""
+    df = pd.DataFrame({"close": [1, 2, 3]})
+    ic.safe_ma(df, 0)
+    assert "sma_0" not in df.columns
+    ic.safe_ma(df, -2)
+    assert "sma_-2" not in df.columns

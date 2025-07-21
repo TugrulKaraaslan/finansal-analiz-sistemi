@@ -294,12 +294,29 @@ def safe_ma(
     kind: str = "sma",
     logger_param: Optional[logging.Logger] = None,
 ) -> None:
-    """Append the requested moving-average column when missing."""
+    """Append the requested moving-average column when missing.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Frame to modify in-place.
+    n : int
+        Moving average period. Values less than ``1`` are ignored.
+    kind : str, optional
+        ``"sma"`` for simple moving average or ``"ema"`` for exponential,
+        by default ``"sma"``.
+    logger_param : Optional[logging.Logger], optional
+        Logger instance used for debug messages.
+    """
 
     if logger_param is None:
         logger_param = logger
     log = logger_param
     col_name = f"{kind}_{n}"
+
+    if n < 1:
+        log.warning("safe_ma: geçersiz periyot (%s) – atlandı", n)
+        return
 
     if "close" not in df.columns:
         log.debug("safe_ma: 'close' sütunu yok, işlem atlandı.")
