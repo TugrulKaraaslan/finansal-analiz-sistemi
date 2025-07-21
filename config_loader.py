@@ -27,12 +27,18 @@ EMA_CLOSE_RE = re.compile(r"ema_(\d+)_keser_close_(yukari|asagi)")
 
 
 @lru_cache(maxsize=1)
-def load_crossover_names(csv_path: str | Path | None = None) -> list[str]:
+def load_crossover_names(
+    csv_path: str | Path | None = None,
+    *,
+    encoding: str = "utf-8",
+) -> list[str]:
     """Return crossover column names referenced by filters and config.
 
     Args:
         csv_path (str | Path, optional): Filter CSV file. Defaults to
             :data:`config.FILTRE_DOSYA_YOLU`.
+        encoding (str, optional): Character set used when reading the CSV
+            file. ``"utf-8"`` by default.
 
     Returns:
         list[str]: Sorted list of unique crossover column names.
@@ -41,7 +47,7 @@ def load_crossover_names(csv_path: str | Path | None = None) -> list[str]:
     path = Path(csv_path or config.FILTRE_DOSYA_YOLU)
     names: set[str] = set()
     try:
-        df = pd.read_csv(path, sep=";", engine="python")
+        df = pd.read_csv(path, sep=";", engine="python", encoding=encoding)
     except Exception as exc:
         logging.getLogger(__name__).warning("Filter CSV '%s' okunamadı: %s", path, exc)
         df = pd.DataFrame()
@@ -56,18 +62,28 @@ def load_crossover_names(csv_path: str | Path | None = None) -> list[str]:
     return sorted(names)
 
 
-def load_ema_close_crossovers(csv_path: str | Path | None = None) -> list[str]:
+def load_ema_close_crossovers(
+    csv_path: str | Path | None = None,
+    *,
+    encoding: str = "utf-8",
+) -> list[str]:
     """Return crossover names matching ``ema_N_keser_close_*``.
 
     Args:
         csv_path (str | Path, optional): Optional filter CSV path forwarded to
             :func:`load_crossover_names`.
+        encoding (str, optional): Character set used when reading the CSV
+            file. ``"utf-8"`` by default.
 
     Returns:
         list[str]: Sorted list of EMA-close crossover column names.
 
     """
-    return [n for n in load_crossover_names(csv_path) if EMA_CLOSE_RE.fullmatch(n)]
+    return [
+        n
+        for n in load_crossover_names(csv_path, encoding=encoding)
+        if EMA_CLOSE_RE.fullmatch(n)
+    ]
 
 
 def clear_cache() -> None:
