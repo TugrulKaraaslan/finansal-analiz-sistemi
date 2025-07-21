@@ -651,13 +651,18 @@ def kaydet_uc_sekmeli_excel(
             "%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S"
         )
     )
-    logging.getLogger().addHandler(fh)
+    root = logging.getLogger()
+    root.addHandler(fh)
 
     log_fn = logger_param.info
     if ozet_df.empty and detay_df.empty and istatistik_df.empty:
         log_fn = logger_param.warning
-    log_fn("Saved report to %s", fname)
-    logger_param.info("Per-run log file: %s", run_log)
+    try:
+        log_fn("Saved report to %s", fname)
+        logger_param.info("Per-run log file: %s", run_log)
+    finally:
+        root.removeHandler(fh)
+        fh.close()
     return fname
 
 
