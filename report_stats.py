@@ -9,6 +9,7 @@ generated as well.
 from __future__ import annotations
 
 import warnings
+from functools import lru_cache
 from typing import Any
 
 import numpy as np
@@ -19,12 +20,14 @@ from finansal_analiz_sistemi import config
 from utils.pandas_option_safe import option_context
 
 
+@lru_cache(maxsize=1)
 def _get_plotly():
     """Return the Plotly graphing modules if available.
 
     Lazily imports :mod:`plotly.graph_objects` and
     :func:`plotly.subplots.make_subplots` so that optional
-    plotting dependencies are only required when needed.
+    plotting dependencies are only required when needed. The result is
+    cached so repeated calls avoid the import overhead.
 
     Returns:
         tuple[module, Callable]: Graph objects module and ``make_subplots``.
