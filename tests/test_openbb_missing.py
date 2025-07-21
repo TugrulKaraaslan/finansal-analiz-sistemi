@@ -103,3 +103,17 @@ def test_env_override_cache_size(monkeypatch):
     assert mod._FUNC_CACHE.maxsize == 7
     monkeypatch.delenv("OPENBB_FUNC_CACHE_SIZE", raising=False)
     importlib.reload(om)
+
+
+def test_env_invalid_cache_size(monkeypatch):
+    """Invalid or non-positive values should revert to the default."""
+    import importlib
+
+    monkeypatch.setenv("OPENBB_FUNC_CACHE_SIZE", "0")
+    mod = importlib.reload(om)
+    assert mod._FUNC_CACHE.maxsize == 16
+    monkeypatch.setenv("OPENBB_FUNC_CACHE_SIZE", "-5")
+    mod = importlib.reload(om)
+    assert mod._FUNC_CACHE.maxsize == 16
+    monkeypatch.delenv("OPENBB_FUNC_CACHE_SIZE", raising=False)
+    importlib.reload(om)
