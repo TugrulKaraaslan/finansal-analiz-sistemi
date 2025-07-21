@@ -102,7 +102,7 @@ def _convert_numeric_columns(
         col_dtype = series.dtype
 
         if pd.api.types.is_numeric_dtype(col_dtype):
-            if col_dtype != float:
+            if not pd.api.types.is_float_dtype(col_dtype):
                 df[col] = series.astype(float, errors="ignore")
             continue
 
