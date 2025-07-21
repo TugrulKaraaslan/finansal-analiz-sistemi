@@ -9,6 +9,7 @@ def test_parse_date_variants():
     """Ensure ``parse_date`` handles multiple common formats."""
     cases = {
         "07.03.2025": "2025-03-07",
+        "07-03-2025": "2025-03-07",
         "2025-03-07": "2025-03-07",
         "07/03/25": "2025-03-07",
         "2025/03/07": "2025-03-07",
