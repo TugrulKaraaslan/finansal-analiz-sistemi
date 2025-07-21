@@ -68,6 +68,18 @@ def test_call_openbb_function_missing(monkeypatch):
         om._call_openbb("bar")
 
 
+def test_call_openbb_without_technical(monkeypatch):
+    """Missing ``technical`` attribute should raise ``NotImplementedError``."""
+
+    dummy = object()
+
+    monkeypatch.setattr(om, "obb", dummy)
+    monkeypatch.setattr(om, "_FUNC_CACHE", om.LRUCache(maxsize=4))
+
+    with pytest.raises(NotImplementedError, match="technical module"):
+        om._call_openbb("foo")
+
+
 def test_clear_cache(monkeypatch):
     """clear_cache should drop cached functions."""
 
