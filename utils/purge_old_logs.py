@@ -1,7 +1,7 @@
 """Delete aged log files from a directory.
 
 Files older than ``keep_days`` are removed. By default the ``loglar``
-folder under the project root is targeted. When ``dry_run`` is ``True``
+folder located next to this module is targeted. When ``dry_run`` is ``True``
 the function only prints which files would be deleted. The helper is
 resilient against concurrent deletions and silently ignores missing
 files encountered during scanning.
@@ -56,7 +56,10 @@ def purge_old_logs(
     if keep_days < 0:
         raise ValueError("keep_days must be non-negative")
 
-    log_dir = Path("loglar") if log_dir is None else Path(log_dir)
+    if log_dir is None:
+        log_dir = Path(__file__).resolve().parent.parent / "loglar"
+    else:
+        log_dir = Path(log_dir)
     if not log_dir.exists():  # short-circuit when directory is absent
         return 0
     if not log_dir.is_dir():
