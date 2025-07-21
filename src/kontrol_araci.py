@@ -4,6 +4,8 @@ Tanımlanan her filtre bir kez çalıştırılarak durum bilgileri ve olası
 hatalar toplanır. Sonuçlar raporlama aşamasında kullanılır.
 """
 
+from __future__ import annotations
+
 import pandas as pd
 
 # Column order used by ``tarama_denetimi`` outputs.

@@ -4,6 +4,8 @@ This package exposes commonly used preprocessing helpers under a single
 namespace for convenience.
 """
 
+from __future__ import annotations
+
 from .kontrol_araci import tarama_denetimi
 from .preprocessor import fill_missing_business_day
 from .utils import excel_reader
