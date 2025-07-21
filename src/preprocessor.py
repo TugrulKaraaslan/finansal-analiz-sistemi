@@ -54,3 +54,6 @@ def fill_missing_business_day(
     )
     df[date_col] = pd.to_datetime(adjusted) + (next_valid - norm)
     return df
+
+
+__all__ = ["fill_missing_business_day"]
