@@ -42,9 +42,22 @@ def is_available() -> bool:
     return getattr(obb, "technical", None) is not None
 
 
-def clear_cache() -> None:
-    """Empty the internal OpenBB function cache."""
-    _FUNC_CACHE.clear()
+def clear_cache(size: int | None = None) -> None:
+    """Empty the internal OpenBB function cache.
+
+    Parameters
+    ----------
+    size : int, optional
+        When provided and positive, the cache is recreated with the given
+        ``maxsize`` instead of simply being cleared. This allows adjusting
+        memory usage without reloading the module.
+    """
+
+    global _FUNC_CACHE
+    if size is not None and size > 0:
+        _FUNC_CACHE = LRUCache(maxsize=size)
+    else:
+        _FUNC_CACHE.clear()
 
 
 def _call_openbb(func_name: str, **kwargs) -> object:
