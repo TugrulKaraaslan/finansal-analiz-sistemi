@@ -7,6 +7,7 @@ chunks and :func:`safe_set` for dtype-safe DataFrame assignment.
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
+from itertools import islice
 from typing import Sequence, TypeVar
 
 from .dtypes import safe_set
@@ -28,14 +29,12 @@ def lazy_chunk(seq: Iterable[T], size: int) -> Iterator[Sequence[T]]:
     if size <= 0:
         raise ValueError("size must be positive")
 
-    chunk: list[T] = []
-    for item in seq:
-        chunk.append(item)
-        if len(chunk) >= size:
-            yield tuple(chunk)
-            chunk = []
-    if chunk:
-        yield tuple(chunk)
+    iterator = iter(seq)
+    while True:
+        chunk = tuple(islice(iterator, size))
+        if not chunk:
+            break
+        yield chunk
 
 
 __all__ = ["lazy_chunk", "safe_set"]
