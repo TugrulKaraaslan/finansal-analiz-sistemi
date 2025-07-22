@@ -2,6 +2,8 @@
 
 Workbooks are indexed by absolute path and modification time. Cached
 entries refresh automatically whenever the underlying file changes.
+The cache size defaults to eight workbooks and can be overridden via
+the ``EXCEL_CACHE_SIZE`` environment variable.
 """
 
 from __future__ import annotations
@@ -14,6 +16,18 @@ from typing import Any
 
 import pandas as pd
 from cachetools import LRUCache
+
+# Default size for the workbook cache. Can be overridden with the
+# ``EXCEL_CACHE_SIZE`` environment variable. Invalid or non-positive
+# values fall back to this default of ``8``.
+DEFAULT_CACHE_SIZE = 8
+_env_val = os.getenv("EXCEL_CACHE_SIZE")
+try:
+    _size = int(_env_val) if _env_val else DEFAULT_CACHE_SIZE
+except ValueError:  # pragma: no cover - environment error
+    _size = DEFAULT_CACHE_SIZE
+
+WORKBOOK_CACHE_SIZE = _size if _size > 0 else DEFAULT_CACHE_SIZE
 
 __all__ = ["open_excel_cached", "read_excel_cached", "clear_cache"]
 
@@ -45,7 +59,7 @@ class _WorkbookCache(LRUCache[str, ExcelCacheEntry]):
         return key, entry
 
 
-_excel_cache: _WorkbookCache = _WorkbookCache(maxsize=8)
+_excel_cache: _WorkbookCache = _WorkbookCache(maxsize=WORKBOOK_CACHE_SIZE)
 
 
 def clear_cache() -> None:
