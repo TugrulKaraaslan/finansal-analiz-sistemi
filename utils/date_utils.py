@@ -3,7 +3,8 @@
 The :func:`parse_date` helper converts diverse date values into
 ``pandas.Timestamp`` objects without raising ``ValueError``. Supported
 inputs include strings, ``datetime`` objects, numeric representations and
-``numpy.datetime64`` instances.
+``numpy.datetime64`` instances. Common invalid strings such as ``"NaN"``
+or ``"None"`` are treated as missing and converted to ``pd.NaT``.
 """
 
 from __future__ import annotations
@@ -53,6 +54,8 @@ def parse_date(
         value = str(int(date_str))
     else:
         value = str(date_str).strip()
+        if value.lower() in {"nan", "none", "null"}:
+            return pd.NaT
     if not value:
         return pd.NaT
 

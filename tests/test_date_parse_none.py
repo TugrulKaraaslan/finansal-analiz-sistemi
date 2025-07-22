@@ -16,3 +16,9 @@ def test_parse_date_handles_none_and_datetime():
 def test_parse_date_handles_date_object():
     d = date(2025, 3, 7)
     assert parse_date(d) == pd.Timestamp("2025-03-07")
+
+
+def test_parse_date_handles_invalid_strings():
+    """Common placeholders should return ``pd.NaT``."""
+    for raw in ["NaN", "none", "NULL"]:
+        assert parse_date(raw) is pd.NaT
