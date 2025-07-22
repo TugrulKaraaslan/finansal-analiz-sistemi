@@ -78,8 +78,7 @@ def run_analysis(csv_path: Path) -> Path:
     """
     df = pd.read_csv(csv_path, sep=";")
     out_path = csv_path.with_suffix(".xlsx")
-    ReportWriter().write_report(df, out_path)
-    return out_path
+    return ReportWriter().write_report(df, out_path)
 
 
 @atexit.register

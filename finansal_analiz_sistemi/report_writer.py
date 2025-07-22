@@ -18,17 +18,10 @@ class ReportWriter:
     :meth:`pandas.DataFrame.to_excel`.
     """
 
-    def write_report(self, df: pd.DataFrame, output_path: Path | str) -> None:
-        """Write ``df`` to an Excel file.
+    def write_report(self, df: pd.DataFrame, output_path: Path | str) -> Path:
+        """Write ``df`` to ``output_path`` and return the destination."""
 
-        Creates missing parent directories before calling
-        :meth:`pandas.DataFrame.to_excel`.
-
-        Args:
-            df (pd.DataFrame): Data to export.
-            output_path (Path | str): Target Excel file path.
-
-        """
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         df.to_excel(output_path, index=False)
+        return output_path
