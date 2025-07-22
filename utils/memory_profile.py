@@ -29,8 +29,8 @@ class MemoryProfile:
     start: int = field(init=False)
 
     def __post_init__(self) -> None:
-        """Normalize the ``path`` attribute to a :class:`~pathlib.Path`."""
-        self.path = Path(self.path)
+        """Expand and resolve ``path`` to an absolute :class:`~pathlib.Path`."""
+        self.path = Path(self.path).expanduser().resolve()
 
     def __enter__(self) -> "MemoryProfile":
         """Start tracking process memory usage and return ``self``."""
