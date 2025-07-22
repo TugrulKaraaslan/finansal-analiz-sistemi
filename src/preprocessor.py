@@ -47,10 +47,14 @@ def fill_missing_business_day(
     offsets = (size - pos).where(mask, 0)
 
     norm = next_valid.dt.normalize()
+    # ``np.busday_offset`` rolls invalid (weekend/holiday) days before applying
+    # the offset. Using ``roll='forward'`` ensures weekend dates are first
+    # advanced to Monday and then shifted backwards, yielding the preceding
+    # business day regardless of the starting day.
     adjusted = np.busday_offset(
         norm.values.astype("datetime64[D]"),
         -offsets.values.astype(int),
-        roll="backward",
+        roll="forward",
     )
     df[date_col] = pd.to_datetime(adjusted) + (next_valid - norm)
     return df
