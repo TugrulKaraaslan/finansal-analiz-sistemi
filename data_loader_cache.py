@@ -80,11 +80,17 @@ class DataLoaderCache:
         -------
         tuple
             ``((abs_path, kind), mtime_ns, size)`` describing the file.
+
+        Raises
+        ------
+        FileNotFoundError
+            If ``filepath`` does not exist.
         """
         abs_path = Path(os.fspath(filepath)).expanduser().resolve()
-        if not abs_path.exists():
+        try:
+            stat = abs_path.stat()
+        except FileNotFoundError:
             raise FileNotFoundError(str(abs_path))
-        stat = abs_path.stat()
         return (str(abs_path), kind), stat.st_mtime_ns, stat.st_size
 
     def clear(self) -> None:
