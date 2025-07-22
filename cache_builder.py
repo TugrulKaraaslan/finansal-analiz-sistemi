@@ -7,16 +7,15 @@ concurrent write corruption.
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pandas as pd
 from filelock import FileLock
 from loguru import logger
 
 from finansal_analiz_sistemi import config
 
-RAW_DIR = Path("veri/ham")
-CACHE = Path(config.PARQUET_CACHE_PATH)
+# Use absolute paths so the script works from any current directory
+RAW_DIR = config.BASE_DIR / "veri" / "ham"
+CACHE = config.CACHE_PATH
 LOCK_FILE = CACHE.with_suffix(".lock")
 
 
