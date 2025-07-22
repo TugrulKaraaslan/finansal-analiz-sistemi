@@ -993,6 +993,7 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
     groupby_obj = df_islenmis_veri.groupby("hisse_kodu", group_keys=False)
 
     total_stocks = len(df_islenmis_veri["hisse_kodu"].unique())
+    step = max(1, int(total_stocks * PCT_STEP / 100))
     current_processed_count_main = 0
 
     for (
@@ -1009,7 +1010,6 @@ def hesapla_teknik_indikatorler_ve_kesisimler(
             drop=True
         )  # Reset index defensively
 
-        step = max(1, int(total_stocks * PCT_STEP / 100))
         msg = f"({current_processed_count_main}/{total_stocks}) {hisse_kodu} için indikatör hesaplama..."
         if (
             current_processed_count_main % step == 0
