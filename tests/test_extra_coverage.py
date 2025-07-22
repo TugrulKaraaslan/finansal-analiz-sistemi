@@ -106,7 +106,8 @@ def test_report_writer_accepts_str(tmp_path):
     """Ensure ``ReportWriter`` accepts a path string as destination."""
     df = pd.DataFrame({"a": [1]})
     nested = tmp_path / "nested" / "out.xlsx"
-    ReportWriter().write_report(df, str(nested))
+    out_path = ReportWriter().write_report(df, str(nested))
+    assert out_path == nested
     assert nested.exists() and nested.stat().st_size > 0
 
 
