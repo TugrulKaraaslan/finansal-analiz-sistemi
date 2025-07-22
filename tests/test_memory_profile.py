@@ -32,3 +32,15 @@ def test_memory_profile_creates_parent_dir(tmp_path):
     with MemoryProfile(path=nested):
         pass
     assert nested.exists()
+
+
+def test_memory_profile_resolves_relative_path(tmp_path, monkeypatch):
+    """Relative paths should be expanded to absolute ones."""
+    monkeypatch.chdir(tmp_path)
+    mp = MemoryProfile(path="rel/foo.csv")
+    assert mp.path.is_absolute()
+    expected = (tmp_path / "rel/foo.csv").resolve()
+    assert mp.path == expected
+    with mp:
+        pass
+    assert expected.exists()
