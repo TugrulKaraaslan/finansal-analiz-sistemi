@@ -165,11 +165,16 @@ def _write_error_sheet(
             existing = set(df_err.get("filtre_kod", []))
             missing = non_ok.loc[~non_ok["filtre_kodu"].isin(existing)]
             if not missing.empty:
+                detay_col = (
+                    missing["sebep_aciklama"].fillna("-")
+                    if "sebep_aciklama" in missing.columns
+                    else pd.Series("-", index=missing.index)
+                )
                 ek_df = pd.DataFrame(
                     {
                         "filtre_kod": missing["filtre_kodu"],
                         "hata_tipi": missing["sebep_kodu"],
-                        "detay": missing.get("sebep_aciklama", "-").fillna("-"),
+                        "detay": detay_col,
                         "cozum_onerisi": "-",
                         "eksik_ad": "-",
                         "reason": "-",
