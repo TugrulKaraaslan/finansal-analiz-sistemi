@@ -39,7 +39,7 @@ __all__ = ["open_excel_cached", "read_excel_cached", "clear_cache"]
 class ExcelCacheEntry:
     """Metadata for a cached workbook."""
 
-    mtime: float
+    mtime: int
     book: pd.ExcelFile
 
 
@@ -87,7 +87,7 @@ def open_excel_cached(path: str | os.PathLike[str], **kwargs: Any) -> pd.ExcelFi
     abs_path = Path(os.fspath(path)).expanduser().resolve()
     if not abs_path.exists():
         raise FileNotFoundError(str(abs_path))
-    mtime = abs_path.stat().st_mtime
+    mtime = abs_path.stat().st_mtime_ns
     key = str(abs_path)
     cached = _excel_cache.get(key)
     if cached is None or cached.mtime != mtime:
