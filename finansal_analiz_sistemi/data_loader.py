@@ -206,7 +206,9 @@ def _standardize_ohlcv_columns(
     return df
 
 
-def check_and_create_dirs(*dir_paths: str | Path) -> list[Path]:
+def check_and_create_dirs(
+    *dir_paths: str | Path, logger_param: Optional[logging.Logger] = None
+) -> list[Path]:
     """Ensure each path in ``dir_paths`` exists as a directory.
 
     Paths are expanded and resolved to absolute :class:`~pathlib.Path`
@@ -218,12 +220,17 @@ def check_and_create_dirs(*dir_paths: str | Path) -> list[Path]:
     *dir_paths : str | pathlib.Path
         One or more directory paths to verify or create.
 
+    logger_param : logging.Logger, optional
+        Logger instance used for diagnostics. Defaults to the module logger.
+
     Returns
     -------
     list[pathlib.Path]
         A list of directories that were created during the call. Existing
         directories are not included.
     """
+    if logger_param is None:
+        logger_param = logger
 
     created: list[Path] = []
 
@@ -232,15 +239,15 @@ def check_and_create_dirs(*dir_paths: str | Path) -> list[Path]:
             continue
         p = Path(path).expanduser().resolve(strict=False)
         if p.exists() and not p.is_dir():
-            logger.error("Beklenen dizin aslında dosya: %s", p)
+            logger_param.error("Beklenen dizin aslında dosya: %s", p)
             continue
         if not p.exists():
             try:
                 p.mkdir(parents=True, exist_ok=True)
                 created.append(p)
-                logger.info("Dizin oluşturuldu: %s", p)
+                logger_param.info("Dizin oluşturuldu: %s", p)
             except Exception as exc:  # pragma: no cover - I/O errors
-                logger.error(
+                logger_param.error(
                     "Dizin oluşturulamadı: %s. Hata: %s", p, exc, exc_info=True
                 )
 
