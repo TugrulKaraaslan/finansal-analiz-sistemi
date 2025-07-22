@@ -8,6 +8,8 @@ inputs include strings, ``datetime`` objects, numeric representations and
 
 from __future__ import annotations
 
+__all__ = ["parse_date"]
+
 from datetime import date, datetime
 
 import numpy as np

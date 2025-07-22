@@ -9,6 +9,8 @@ files encountered during scanning.
 
 from __future__ import annotations
 
+__all__ = ["purge_old_logs"]
+
 import argparse
 import logging
 from collections.abc import Iterable
