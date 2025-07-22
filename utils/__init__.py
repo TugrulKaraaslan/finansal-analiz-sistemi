@@ -137,11 +137,30 @@ def extract_columns_from_filters(
     return wanted
 
 
-@lru_cache(maxsize=1)
 def extract_columns_from_filters_cached(
     df_filters_csv: str,
     series_series: Iterable[Sequence[str]] | None,
     series_value: Iterable[Sequence[str]] | None,
+) -> set[str]:
+    """Return referenced columns using a CSV string for caching."""
+
+    series_series_t = (
+        tuple(tuple(entry) for entry in series_series) if series_series else None
+    )
+    series_value_t = (
+        tuple(tuple(entry) for entry in series_value) if series_value else None
+    )
+
+    return _extract_columns_from_filters_cached(
+        df_filters_csv, series_series_t, series_value_t
+    )
+
+
+@lru_cache(maxsize=1)
+def _extract_columns_from_filters_cached(
+    df_filters_csv: str,
+    series_series: tuple[tuple[str, ...], ...] | None,
+    series_value: tuple[tuple[str, ...], ...] | None,
 ) -> set[str]:
     """Return referenced columns using a CSV string for caching.
 
@@ -170,3 +189,12 @@ def extract_columns_from_filters_cached(
             df_filters = None
 
     return extract_columns_from_filters(df_filters, series_series, series_value)
+
+
+# expose cache helpers on the public function
+extract_columns_from_filters_cached.cache_clear = (
+    _extract_columns_from_filters_cached.cache_clear
+)
+extract_columns_from_filters_cached.cache_info = (
+    _extract_columns_from_filters_cached.cache_info
+)
