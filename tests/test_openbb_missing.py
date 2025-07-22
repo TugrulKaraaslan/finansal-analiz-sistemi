@@ -113,6 +113,14 @@ def test_clear_cache(monkeypatch):
     assert len(om._FUNC_CACHE) == 0
 
 
+def test_clear_cache_resize(monkeypatch):
+    """clear_cache should recreate the cache when ``size`` is given."""
+    monkeypatch.setattr(om, "_FUNC_CACHE", om.LRUCache(maxsize=4))
+    om.clear_cache(size=2)
+    assert isinstance(om._FUNC_CACHE, om.LRUCache)
+    assert om._FUNC_CACHE.maxsize == 2
+
+
 def test_is_available_reflects_import(monkeypatch):
     """is_available should detect the presence of the OpenBB package."""
 
