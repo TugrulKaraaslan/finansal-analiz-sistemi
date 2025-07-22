@@ -57,3 +57,9 @@ def test_unique_name_invalid_start_raises():
     """Start value below 1 should raise ``ValueError``."""
     with pytest.raises(ValueError):
         unique_name("y", set(), start=0)
+
+
+def test_unique_name_empty_delimiter_raises():
+    """Empty delimiter should trigger ``ValueError``."""
+    with pytest.raises(ValueError):
+        unique_name("z", set(), delimiter="")

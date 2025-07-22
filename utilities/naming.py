@@ -44,13 +44,16 @@ def unique_name(
     Raises
     ------
     ValueError
-        If ``base`` is an empty string or ``start`` is less than ``1``.
+        If ``base`` is an empty string, ``start`` is less than ``1`` or
+        ``delimiter`` is empty.
     """
 
     if not base:
         raise ValueError("base must be a non-empty string")
     if start < 1:
         raise ValueError("start must be >= 1")
+    if not delimiter:
+        raise ValueError("delimiter must be a non-empty string")
 
     if base not in seen:
         seen.add(base)
