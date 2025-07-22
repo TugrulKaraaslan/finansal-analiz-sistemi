@@ -257,9 +257,11 @@ def run_pipeline(
         comment="#",
         header=None,
         names=["code", "date", "open", "high", "low", "close", "volume"],
+        parse_dates=["date"],
     )
     df = df.rename(columns={"code": "hisse_kodu", "date": "tarih"})
-    df["tarih"] = df["tarih"].apply(parse_date)
+    if not pd.api.types.is_datetime64_any_dtype(df["tarih"]):
+        df["tarih"] = df["tarih"].apply(parse_date)
 
     with open(filter_def, encoding="utf-8") as f:
         filt = yaml.safe_load(f) or []
