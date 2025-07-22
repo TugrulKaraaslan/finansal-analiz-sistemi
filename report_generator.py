@@ -342,7 +342,7 @@ def generate_full_report(
     quick: bool = True,
     logger_param: Optional[logging.Logger] = None,
 ) -> Path:
-    """Generate a workbook containing summary, detail and error sheets.
+    """Generate a workbook with summary, detail and optional health sheets.
 
     Args:
         summary_df (pd.DataFrame): Summary table produced by the backtest.
@@ -351,7 +351,8 @@ def generate_full_report(
         out_path (str | Path): Destination of the generated workbook.
         keep_legacy (bool, optional): Normalize legacy column names when
             ``True``.
-        quick (bool, optional): Skip optional charts when ``True``.
+        quick (bool, optional): Include the "Sağlık Özeti" sheet when ``True``.
+            Set to ``False`` to omit the optional chart.
         logger_param (logging.Logger, optional): Logger used for status
             messages.
 
