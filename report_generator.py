@@ -122,7 +122,7 @@ def _build_detay_df(
 
 def _write_error_sheet(
     wr: pd.ExcelWriter,
-    error_list: Iterable,
+    error_list: Iterable[dict | tuple[str, str, str]],
     summary_df: pd.DataFrame | None = None,
 ) -> None:
     """Write structured errors to the ``Hatalar`` sheet.
@@ -132,8 +132,8 @@ def _write_error_sheet(
 
     Args:
         wr (pd.ExcelWriter): Writer object to write the sheet into.
-        error_list (Iterable): Explicit error entries generated during
-            processing.
+        error_list (Iterable[dict | tuple[str, str, str]]): Explicit error
+            entries generated during processing.
         summary_df (pd.DataFrame, optional): Summary table used to ensure every
             non-``OK`` record is represented.
 
@@ -335,7 +335,7 @@ def add_error_sheet(
 def generate_full_report(
     summary_df: pd.DataFrame,
     detail_df: pd.DataFrame,
-    error_list: Iterable,
+    error_list: Iterable[dict | tuple[str, str, str]],
     out_path: str | Path,
     *,
     keep_legacy: bool = True,
@@ -347,7 +347,8 @@ def generate_full_report(
     Args:
         summary_df (pd.DataFrame): Summary table produced by the backtest.
         detail_df (pd.DataFrame): Detailed ticker information.
-        error_list (Iterable): Optional error entries to include in the report.
+        error_list (Iterable[dict | tuple[str, str, str]]): Optional error
+            entries to include in the report.
         out_path (str | Path): Destination of the generated workbook.
         keep_legacy (bool, optional): Normalize legacy column names when
             ``True``.
