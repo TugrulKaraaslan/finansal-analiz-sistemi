@@ -38,8 +38,8 @@ _FUNC_CACHE: LRUCache[str, Callable[..., Any]] = LRUCache(maxsize=FUNC_CACHE_SIZ
 
 
 def is_available() -> bool:
-    """Return ``True`` when the OpenBB package is importable."""
-    return obb is not None
+    """Return ``True`` when ``openbb.technical`` is available."""
+    return getattr(obb, "technical", None) is not None
 
 
 def clear_cache() -> None:

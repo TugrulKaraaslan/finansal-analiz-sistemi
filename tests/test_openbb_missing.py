@@ -100,8 +100,14 @@ def test_clear_cache(monkeypatch):
 
 def test_is_available_reflects_import(monkeypatch):
     """is_available should detect the presence of the OpenBB package."""
-    monkeypatch.setattr(om, "obb", object())
+
+    class Dummy:
+        technical = object()
+
+    monkeypatch.setattr(om, "obb", Dummy())
     assert om.is_available() is True
+    monkeypatch.setattr(om, "obb", object())
+    assert om.is_available() is False
     monkeypatch.setattr(om, "obb", None)
     assert om.is_available() is False
 
