@@ -27,6 +27,10 @@ REASON_MAP: dict[str, tuple[str, str]] = {
         "Ge\u00e7ersiz De\u011fer",
         "Parametreleri kontrol edin",
     ),
+    "NotImplementedError": (
+        "Desteklenmiyor",
+        "İlgili paketi kurun veya güncelleyin",
+    ),
 }
 
 DEFAULT_REASON: tuple[str, str] = ("Bilinmeyen Hata", "Detay i\u00e7in loglara bak")

@@ -11,3 +11,9 @@ def test_get_reason_hint_file_not_found():
     reason, hint = em.get_reason_hint(FileNotFoundError("missing"))
     assert reason == "Dosya Bulunamadı"
     assert hint == "Geçerli bir dosya yolu belirtin"
+
+
+def test_get_reason_hint_not_implemented():
+    reason, hint = em.get_reason_hint(NotImplementedError())
+    assert reason == "Desteklenmiyor"
+    assert hint == "İlgili paketi kurun veya güncelleyin"
