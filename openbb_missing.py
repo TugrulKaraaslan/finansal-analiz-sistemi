@@ -81,10 +81,11 @@ def _call_openbb(func_name: str, **kwargs) -> object:
 
     func = _FUNC_CACHE.get(func_name)
     if func is None:
-        func = getattr(technical, func_name, None)
-        if func is None:
+        attr = getattr(technical, func_name, None)
+        if not callable(attr):
             raise NotImplementedError(f"OpenBB indicator '{func_name}' is unavailable")
-        _FUNC_CACHE[func_name] = func
+        _FUNC_CACHE[func_name] = attr
+        func = attr
 
     return func(**kwargs)
 

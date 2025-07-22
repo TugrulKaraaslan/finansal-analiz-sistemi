@@ -68,6 +68,21 @@ def test_call_openbb_function_missing(monkeypatch):
         om._call_openbb("bar")
 
 
+def test_call_openbb_non_callable(monkeypatch):
+    """Non-callable attributes should raise ``NotImplementedError``."""
+
+    class DummyTech:
+        foo = 42
+
+    dummy = type("DummyOBB", (), {"technical": DummyTech()})()
+
+    monkeypatch.setattr(om, "obb", dummy)
+    monkeypatch.setattr(om, "_FUNC_CACHE", om.LRUCache(maxsize=4))
+
+    with pytest.raises(NotImplementedError, match="foo"):
+        om._call_openbb("foo")
+
+
 def test_call_openbb_without_technical(monkeypatch):
     """Missing ``technical`` attribute should raise ``NotImplementedError``."""
 
