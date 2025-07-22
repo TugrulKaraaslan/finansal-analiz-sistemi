@@ -24,3 +24,11 @@ def test_memory_profile_accepts_string_path(tmp_path):
     with MemoryProfile(path=str(fname)):
         pass
     assert fname.exists()
+
+
+def test_memory_profile_creates_parent_dir(tmp_path):
+    """Parent directories should be created when missing."""
+    nested = tmp_path / "nested/dir/mp.csv"
+    with MemoryProfile(path=nested):
+        pass
+    assert nested.exists()

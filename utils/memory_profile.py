@@ -62,7 +62,7 @@ class MemoryProfile:
         """
         end_rss = self.proc.memory_info().rss
         diff = end_rss - self.start
-        self.path.parent.mkdir(exist_ok=True)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a", encoding="utf-8") as f:
             f.write(f"{time.time()},{end_rss},{diff}\n")
         return False
