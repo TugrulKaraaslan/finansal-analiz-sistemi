@@ -156,6 +156,12 @@ def clear_failed() -> None:
     FAILED_FILTERS.clear()
 
 
+def clear_query_cache() -> None:
+    """Reset the cached results of :func:`_extract_query_columns`."""
+
+    _extract_query_columns.cache_clear()
+
+
 def evaluate_filter(
     fid: str | dict,
     df: Any | None = None,
