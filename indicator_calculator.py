@@ -19,7 +19,7 @@ import warnings
 # optional.
 from importlib import metadata as _metadata
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
 
 import numpy as np
 import pandas as pd
@@ -361,7 +361,7 @@ def safe_ma(
 
 def _calculate_group_indicators_and_crossovers(
     _grp_df: pd.DataFrame,
-    wanted_cols=None,
+    wanted_cols: Iterable[str] | None = None,
     df_filters: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Compute indicators and crossover columns for one ticker.
@@ -934,7 +934,7 @@ def calculate_indicators(
 
 def hesapla_teknik_indikatorler_ve_kesisimler(
     df_islenmis_veri: pd.DataFrame,
-    wanted_cols=None,
+    wanted_cols: Iterable[str] | None = None,
     df_filters: pd.DataFrame | None = None,
     logger_param: Optional[logging.Logger] = None,
 ) -> pd.DataFrame | None:
