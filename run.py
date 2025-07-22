@@ -79,9 +79,8 @@ def _run_gui(ozet_df: pd.DataFrame, detay_df: pd.DataFrame) -> None:
     st.sidebar.title("Menü")
     sayfa = st.sidebar.radio("Sayfa", ("Özet", "Detay", "Grafik"))
 
-    df_to_show = (
-        ozet_df if sayfa == "Özet" else detay_df if sayfa == "Detay" else ozet_df
-    )
+    df_map = {"Özet": ozet_df, "Detay": detay_df}
+    df_to_show = df_map.get(sayfa, ozet_df)
 
     if df_to_show.empty:
         msg = "Filtreniz hiçbir sonuç döndürmedi. Koşulları gevşetmeyi deneyin."
