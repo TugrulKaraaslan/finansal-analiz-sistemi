@@ -18,6 +18,16 @@ import pandas as pd
 from dateutil import parser
 from pandas._libs.tslibs.nattype import NaTType
 
+# Common explicit date formats tried before falling back to ``dateutil``.
+_EXPLICIT_FORMATS: tuple[str, ...] = (
+    "%Y-%m-%d",
+    "%Y.%m.%d",
+    "%d.%m.%Y",
+    "%d-%m-%Y",
+    "%Y/%m/%d",
+    "%d/%m/%Y",
+)
+
 
 def parse_date(
     date_str: str | datetime | date | int | float | np.datetime64 | None,
@@ -60,14 +70,7 @@ def parse_date(
         return pd.NaT
 
     # Try explicit formats before falling back to dateutil
-    for fmt in (
-        "%Y-%m-%d",
-        "%Y.%m.%d",
-        "%d.%m.%Y",
-        "%d-%m-%Y",
-        "%Y/%m/%d",
-        "%d/%m/%Y",
-    ):
+    for fmt in _EXPLICIT_FORMATS:
         ts = pd.to_datetime(value, format=fmt, errors="coerce")
         if pd.notna(ts):
             return ts
