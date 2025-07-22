@@ -161,12 +161,12 @@ class DataLoaderCache:
         pd.DataFrame
             Cached or newly loaded data.
         """
-        kwargs.setdefault("dtype", config.DTYPES)
+        params = {"dtype": config.DTYPES, **kwargs}
 
         return self._load_file(
             filepath,
             kind="__csv__",
-            loader=lambda p: pd.read_csv(p, **kwargs),
+            loader=lambda p: pd.read_csv(p, **params),
         )
 
     def load_excel(self, filepath: str | os.PathLike[str], **kwargs) -> pd.ExcelFile:
