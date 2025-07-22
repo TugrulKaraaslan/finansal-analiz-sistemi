@@ -307,8 +307,8 @@ def safe_ma(
     n : int
         Moving average period. Values less than ``1`` are ignored.
     kind : str, optional
-        ``"sma"`` for simple moving average or ``"ema"`` for exponential,
-        by default ``"sma"``.
+        Moving average type. Supported values are ``"sma"`` for simple and
+        ``"ema"`` for exponential averages. Defaults to ``"sma"``.
     logger_param : Optional[logging.Logger], optional
         Logger instance used for debug messages.
     """
@@ -317,6 +317,10 @@ def safe_ma(
         logger_param = logger
     log = logger_param
     col_name = f"{kind}_{n}"
+
+    if kind not in {"sma", "ema"}:
+        log.error("safe_ma: bilinmeyen hareketli ortalama türü '%s'", kind)
+        return
 
     if n < 1:
         log.warning("safe_ma: geçersiz periyot (%s) – atlandı", n)
