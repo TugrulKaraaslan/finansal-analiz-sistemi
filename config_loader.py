@@ -62,6 +62,7 @@ def load_crossover_names(
     return sorted(names)
 
 
+@lru_cache(maxsize=1)
 def load_ema_close_crossovers(
     csv_path: str | Path | None = None,
     *,
@@ -87,5 +88,7 @@ def load_ema_close_crossovers(
 
 
 def clear_cache() -> None:
-    """Clear cached results of :func:`load_crossover_names`."""
+    """Clear cached results of :func:`load_crossover_names` and
+    :func:`load_ema_close_crossovers`."""
     load_crossover_names.cache_clear()
+    load_ema_close_crossovers.cache_clear()
