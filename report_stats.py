@@ -203,7 +203,8 @@ def build_ozet_df(
     df["satis_tarihi"] = satis_tarihi
     df.rename(
         columns={
-            "ort_getiri_%": "ort_getiri_%",
+            # Backwards compatibility with old summary column names
+            "ort_getiri": "ort_getiri_%",
             "en_yuksek": "en_yuksek_%",
             "en_dusuk": "en_dusuk_%",
         },
