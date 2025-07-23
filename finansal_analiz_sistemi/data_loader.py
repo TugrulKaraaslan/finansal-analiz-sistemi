@@ -294,8 +294,8 @@ def load_excel_katalogu(
         log.debug(f"{path} kısa veri – atlandı")
         return None
 
-    parquet_p = path.replace(".xlsx", ".parquet")
-    if not os.path.exists(parquet_p):
+    parquet_p = Path(path).with_suffix(".parquet")
+    if not parquet_p.exists():
         try:
             df.to_parquet(parquet_p)
         except Exception as e:

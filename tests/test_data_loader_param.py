@@ -59,6 +59,18 @@ def test_load_excel_katalogu_long(tmp_path: Path):
     assert Path(str(p).replace(".xlsx", ".parquet")).exists()
 
 
+def test_load_excel_katalogu_xls(tmp_path: Path):
+    """``.xls`` files should also be cached as Parquet."""
+    pytest.importorskip("pyarrow")
+    df = pd.DataFrame({"a": range(252)})
+    p = tmp_path / "s.xls"
+    df.to_excel(p, index=False)
+    out = data_loader.load_excel_katalogu(str(p))
+    assert out is not None
+    assert len(out) == 252
+    assert p.with_suffix(".parquet").exists()
+
+
 def test_load_excel_katalogu_short(tmp_path: Path):
     """Excel files under 252 rows should return ``None``."""
     df = pd.DataFrame({"a": range(10)})
