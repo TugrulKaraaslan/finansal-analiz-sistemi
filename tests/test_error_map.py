@@ -17,3 +17,9 @@ def test_get_reason_hint_not_implemented():
     reason, hint = em.get_reason_hint(NotImplementedError())
     assert reason == "Desteklenmiyor"
     assert hint == "İlgili paketi kurun veya güncelleyin"
+
+
+def test_get_reason_hint_type_error():
+    reason, hint = em.get_reason_hint(TypeError("bad type"))
+    assert reason == "Tip Hatası"
+    assert hint == "Parametre tiplerini kontrol edin"

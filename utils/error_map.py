@@ -27,6 +27,10 @@ REASON_MAP: dict[str, tuple[str, str]] = {
         "Ge\u00e7ersiz De\u011fer",
         "Parametreleri kontrol edin",
     ),
+    "TypeError": (
+        "Tip Hatası",
+        "Parametre tiplerini kontrol edin",
+    ),
     "NotImplementedError": (
         "Desteklenmiyor",
         "İlgili paketi kurun veya güncelleyin",
