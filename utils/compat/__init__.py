@@ -6,6 +6,7 @@ the rest of the codebase can remain version agnostic.
 """
 
 import logging
+from itertools import chain
 from typing import Iterable, Optional
 
 import pandas as pd
@@ -23,16 +24,20 @@ def safe_concat(frames: Iterable[Optional[pd.DataFrame]], **kwargs) -> pd.DataFr
     ----------
     frames : Iterable[Optional[pandas.DataFrame]]
         Sequence of DataFrames to concatenate. ``None`` values are ignored.
+        Empty frames are skipped unless all inputs are empty.
     **kwargs : Any
         Additional arguments forwarded to :func:`pandas.concat`.
 
     Returns
     -------
     pandas.DataFrame
-        Concatenated frame or an empty frame when ``frames`` is empty.
+        Concatenated frame or an empty frame when ``frames`` yields no rows.
     """
-    valid_frames = [f for f in frames if isinstance(f, pd.DataFrame) and not f.empty]
-    return pd.concat(valid_frames, **kwargs) if valid_frames else pd.DataFrame()
+    valid_iter = (f for f in frames if isinstance(f, pd.DataFrame) and not f.empty)
+    first = next(valid_iter, None)
+    if first is None:
+        return pd.DataFrame()
+    return pd.concat(chain([first], valid_iter), **kwargs)
 
 
 def safe_infer_objects(df: pd.DataFrame, *, copy: bool = False) -> pd.DataFrame:
