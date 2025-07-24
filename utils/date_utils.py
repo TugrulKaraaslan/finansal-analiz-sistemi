@@ -75,23 +75,25 @@ def parse_date(
         if pd.notna(ts):
             return ts
 
-    if value.isdigit() and len(value) == 8:
-        year = int(value[:4])
-        if 1900 <= year <= 2100:
-            ts = pd.to_datetime(value, format="%Y%m%d", errors="coerce")
+    if value.isdigit():
+        if len(value) == 8:
+            year = int(value[:4])
+            if 1900 <= year <= 2100:
+                ts = pd.to_datetime(value, format="%Y%m%d", errors="coerce")
+            else:
+                ts = pd.to_datetime(value, format="%d%m%Y", errors="coerce")
+            if pd.notna(ts):
+                return ts
+        elif len(value) == 6:
+            first = int(value[:2])
+            if first > 12:
+                ts = pd.to_datetime(value, format="%y%m%d", errors="coerce")
+            else:
+                ts = pd.to_datetime(value, format="%d%m%y", errors="coerce")
+            if pd.notna(ts):
+                return ts
         else:
-            ts = pd.to_datetime(value, format="%d%m%Y", errors="coerce")
-        if pd.notna(ts):
-            return ts
-
-    if value.isdigit() and len(value) == 6:
-        first = int(value[:2])
-        if first > 12:
-            ts = pd.to_datetime(value, format="%y%m%d", errors="coerce")
-        else:
-            ts = pd.to_datetime(value, format="%d%m%y", errors="coerce")
-        if pd.notna(ts):
-            return ts
+            return pd.NaT
 
     # Generic day-first parsing with coercion (handles 07/03/25 etc.)
     ts = pd.to_datetime(value, dayfirst=True, errors="coerce")
