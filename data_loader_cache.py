@@ -11,7 +11,7 @@ import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, TypeVar
+from typing import Callable, TypeVar, cast
 
 import pandas as pd
 from cachetools import TTLCache
@@ -128,7 +128,7 @@ class DataLoaderCache:
         if cached and cached.mtime == mtime and cached.size == size:
             if self.logger:
                 self.logger.debug(f"Cache hit: {key}")
-            return cached.data  # type: ignore[return-value]
+            return cast(T, cached.data)
 
         try:
             data = loader(abs_path)
