@@ -14,7 +14,10 @@ from pathlib import Path
 import yaml
 
 # Import for its side effect of registering YAML-based log filters.
-from .logging_utils import ErrorCountingFilter  # noqa: F401
+from .logging_utils import ErrorCountingFilter as _ErrorCountingFilter  # noqa: F401
+
+# Touch the alias so static analyzers register the import as used.
+_unused_filter = _ErrorCountingFilter
 
 # Configure logging via YAML at package import time
 base = Path(__file__).resolve().parent.parent

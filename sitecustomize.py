@@ -32,5 +32,9 @@ if not hasattr(np, "NaN"):
 
 # Ensure ``importlib.metadata`` registers on ``importlib`` for packages that
 # expect it as an attribute.
-import importlib  # noqa: E402
-import importlib.metadata  # noqa: E402,F401
+import importlib as _importlib  # noqa: E402
+import importlib.metadata as _importlib_metadata  # noqa: E402
+
+# Reference the imported module so static analyzers treat it as used.
+_unused_importlib = _importlib
+_unused_metadata = _importlib_metadata
