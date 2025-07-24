@@ -17,17 +17,13 @@ from typing import Any
 import pandas as pd
 from cachetools import LRUCache
 
+from utils.env_utils import positive_int_env
+
 # Default size for the workbook cache. Can be overridden with the
 # ``EXCEL_CACHE_SIZE`` environment variable. Invalid or non-positive
 # values fall back to this default of ``8``.
 DEFAULT_CACHE_SIZE = 8
-_env_val = os.getenv("EXCEL_CACHE_SIZE")
-try:
-    _size = int(_env_val) if _env_val else DEFAULT_CACHE_SIZE
-except ValueError:  # pragma: no cover - environment error
-    _size = DEFAULT_CACHE_SIZE
-
-WORKBOOK_CACHE_SIZE = _size if _size > 0 else DEFAULT_CACHE_SIZE
+WORKBOOK_CACHE_SIZE = positive_int_env("EXCEL_CACHE_SIZE", DEFAULT_CACHE_SIZE)
 
 __all__ = ["open_excel_cached", "read_excel_cached", "clear_cache"]
 
