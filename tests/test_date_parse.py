@@ -19,6 +19,7 @@ def test_parse_date_variants():
         20250307.0: "2025-03-07",
         "250307": "2025-03-07",
         "070325": "2025-03-07",
+        0: pd.NaT,
         "\u00e7\u00f6p": pd.NaT,
     }
     for raw, expected in cases.items():
