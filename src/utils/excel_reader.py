@@ -58,14 +58,29 @@ class _WorkbookCache(LRUCache[str, ExcelCacheEntry]):
 _excel_cache: _WorkbookCache = _WorkbookCache(maxsize=WORKBOOK_CACHE_SIZE)
 
 
-def clear_cache() -> None:
-    """Clear the in-memory ``ExcelFile`` cache and close open workbooks."""
+def clear_cache(size: int | None = None) -> None:
+    """Empty the workbook cache and optionally resize it.
+
+    Parameters
+    ----------
+    size : int, optional
+        When provided and positive, a new cache with ``maxsize`` set to ``size``
+        is created instead of simply clearing the existing entries. This allows
+        adjusting memory usage at runtime without reloading the module.
+    """
+
+    global _excel_cache
+
     for entry in _excel_cache.values():
         try:
             entry.book.close()
         except Exception as exc:  # pragma: no cover - best effort cleanup
             logger.warning("Çalışma kitabı kapatılamadı: %s", exc)
-    _excel_cache.clear()
+
+    if size is not None and size > 0:
+        _excel_cache = _WorkbookCache(maxsize=size)
+    else:
+        _excel_cache.clear()
 
 
 def open_excel_cached(path: str | os.PathLike[str], **kwargs: Any) -> pd.ExcelFile:
