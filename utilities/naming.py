@@ -7,12 +7,14 @@ results.
 
 from __future__ import annotations
 
+from typing import MutableSet
+
 __all__ = ["unique_name"]
 
 
 def unique_name(
     base: str,
-    seen: set[str],
+    seen: MutableSet[str],
     *,
     delimiter: str = "_",
     start: int = 1,
@@ -28,8 +30,8 @@ def unique_name(
     ----------
     base : str
         Desired column name.
-    seen : set[str]
-        Set of names already in use; updated in-place.
+    seen : MutableSet[str]
+        Set of names already in use. The collection is updated in-place.
     delimiter : str, optional
         Character used between ``base`` and the numeric suffix.
     start : int, optional
