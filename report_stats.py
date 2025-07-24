@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import warnings
 from functools import lru_cache
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
@@ -21,7 +21,7 @@ from utils.pandas_option_safe import option_context
 
 
 @lru_cache(maxsize=1)
-def _get_plotly():
+def _get_plotly() -> tuple[Any, Callable[..., Any]]:
     """Return the Plotly graphing modules if available.
 
     Lazily imports :mod:`plotly.graph_objects` and
