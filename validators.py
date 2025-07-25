@@ -11,7 +11,7 @@ from dataclasses import dataclass
 __all__ = ["ValidationError"]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ValidationError:
     """Structured information about a validation failure.
 
