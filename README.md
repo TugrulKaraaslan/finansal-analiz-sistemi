@@ -8,6 +8,8 @@ bash scripts/install.sh
 
 # veya manuel kurulum
 pip install -r requirements.txt                  # temel paketler
+# OpenBB için:
+pip install openbb pandas-ta-openbb
 # Colab kullanıyorsanız: pip install -r requirements-colab.txt
 pip install -r requirements-dev.txt             # test ve geliştirme araçları
 pre-commit install                              # sürüm tutarlılığını kontrol eder
@@ -29,7 +31,7 @@ Bu proje artık OpenBB ile uyumludur. Eski pandas-ta desteği kaldırıldı.
 
 ### Önemli Değişiklikler
 - pandas-ta fonksiyonlarının yerine `openbb_missing.py` aracılığıyla OpenBB çağrıları kullanılır.
-- `requirements.txt` dosyasında `pandas-ta-openbb` paketi yer alır.
+- `requirements.txt` dosyasında `openbb` ve `pandas-ta-openbb` paketleri yer alır.
 - Eski pandas-ta tabanlı testler güncellendi veya kaldırıldı.
 - Teknik analiz fonksiyonlarının tamamı OpenBB arayüzüne geçirilmiştir.
 

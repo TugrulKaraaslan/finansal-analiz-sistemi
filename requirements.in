@@ -3,6 +3,7 @@ numpy
 packaging
 PyYAML
 pandas-ta-openbb
+openbb
 holidays
 openpyxl
 xlsxwriter

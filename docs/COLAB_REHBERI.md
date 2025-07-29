@@ -11,7 +11,7 @@ verilmiştir.
 
 ## 0. OpenBB Kurulumu
 ```bash
-!pip install -q pandas-ta-openbb
+!pip install -q openbb pandas-ta-openbb
 ```
 
 ## 1. (İsteğe bağlı) Google Drive Bağlama
