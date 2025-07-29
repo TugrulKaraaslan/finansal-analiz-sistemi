@@ -24,7 +24,7 @@ et-xmlfile==2.0.0
     # via
     #   -r requirements.txt
     #   openpyxl
-filelock==3.13.1
+filelock==3.18.0
     # via -r requirements.txt
 idna==3.10
     # via requests
