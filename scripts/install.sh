@@ -26,6 +26,6 @@ $PYTHON -m pip install --upgrade pip
 $PYTHON -m pip install -r "$BASE"
 $PYTHON -m pip install -r requirements-dev.txt
 # openbb wrapper for technical analysis
-$PYTHON -m pip install pandas-ta-openbb
+$PYTHON -m pip install openbb pandas-ta-openbb
 
 echo "Dependencies installed."

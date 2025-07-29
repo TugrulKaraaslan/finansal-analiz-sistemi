@@ -8,3 +8,5 @@ updates:
     ignore:
       - dependency-name: "pandas-ta-openbb"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "openbb"
+        update-types: ["version-update:semver-major"]

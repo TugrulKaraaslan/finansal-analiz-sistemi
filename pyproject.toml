@@ -10,6 +10,7 @@ authors = []
 [tool.poetry.dependencies]
 python = "^3.11"
 pandas-ta-openbb = "0.4.22"
+openbb = "*"
 cachetools = "5.5.2"
 numpy = "2.0.2"
 pandas = "2.2.2"
