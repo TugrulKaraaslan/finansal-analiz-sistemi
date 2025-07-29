@@ -9,6 +9,7 @@ loguru==0.7.3
 plotly==6.2.0
 portalocker==3.2.0
 filelock==3.18.0
+requests==2.32.4
 psutil==7.0.0
 PyYAML==6.0.2
 xlsxwriter==3.2.5
