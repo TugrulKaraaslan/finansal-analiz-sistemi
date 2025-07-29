@@ -95,6 +95,15 @@ class DataLoaderCache:
 
     def clear(self) -> None:
         """Clear all cached datasets and Excel workbooks."""
+        for item in self.loaded_data.values():
+            data = item.data
+            if isinstance(data, pd.ExcelFile):
+                try:
+                    data.close()
+                except Exception as exc:  # pragma: no cover - best effort cleanup
+                    if self.logger:
+                        self.logger.warning("Excel dosyası kapatılamadı: %s", exc)
+
         self.loaded_data.clear()
         clear_excel_cache()
 
@@ -129,6 +138,13 @@ class DataLoaderCache:
             if self.logger:
                 self.logger.debug(f"Cache hit: {key}")
             return cast(T, cached.data)
+
+        if cached and isinstance(cached.data, pd.ExcelFile):
+            try:
+                cached.data.close()
+            except Exception as exc:  # pragma: no cover - best effort cleanup
+                if self.logger:
+                    self.logger.warning("Önceki Excel dosyası kapatılamadı: %s", exc)
 
         try:
             data = loader(abs_path)
@@ -213,6 +229,13 @@ class DataLoaderCache:
             kind="__parquet__",
             loader=lambda p: pd.read_parquet(p, **kwargs),
         )
+
+    def __del__(self) -> None:  # pragma: no cover - cleanup safeguard
+        """Ensure cached workbooks are closed on garbage collection."""
+        try:
+            self.clear()
+        except Exception:
+            pass
 
 
 __all__ = ["DataLoaderCache"]
