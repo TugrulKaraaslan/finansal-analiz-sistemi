@@ -11,6 +11,8 @@ pip install -r requirements.txt                  # temel paketler
 # OpenBB için:
 pip install openbb pandas-ta-openbb
 # Colab kullanıyorsanız: pip install -r requirements-colab.txt
+# Bazı paketler için uyumsuzluk uyarıları çıkabilir. Kurulum sonunda bu uyarılar
+# çalışmayı etkilemez.
 pip install -r requirements-dev.txt             # test ve geliştirme araçları
 pre-commit install                              # sürüm tutarlılığını kontrol eder
 python -m finansal.cli --help
