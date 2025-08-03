@@ -17,10 +17,10 @@ from typing import Any, Optional
 
 import pandas as pd
 import yaml
+from finansal_analiz_sistemi.logging_config import get_logger
 from pandas.errors import UndefinedVariableError as QueryError
 
 import settings
-from finansal_analiz_sistemi.logging_config import get_logger
 from utils.failure_tracker import log_failure_exc
 
 logger = get_logger(__name__)

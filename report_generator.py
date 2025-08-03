@@ -23,10 +23,10 @@ from typing import Iterable, Optional
 
 import numpy as np
 import pandas as pd
+from finansal_analiz_sistemi.logging_config import get_logger
 from openpyxl.utils import get_column_letter
 
 import report_stats
-from finansal_analiz_sistemi.logging_config import get_logger
 from utils.compat import safe_concat, safe_to_excel
 
 logger = get_logger(__name__)
