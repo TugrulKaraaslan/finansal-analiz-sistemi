@@ -15,7 +15,6 @@ from typing import Callable, TypeVar, cast
 
 import pandas as pd
 from cachetools import TTLCache
-
 from finansal_analiz_sistemi import config
 from src.utils.excel_reader import clear_cache as clear_excel_cache
 from src.utils.excel_reader import open_excel_cached

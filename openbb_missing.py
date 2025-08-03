@@ -11,7 +11,6 @@ from typing import Any, Callable
 
 import pandas as pd
 from cachetools import LRUCache
-
 from utils.env_utils import positive_int_env
 
 # Default size for the OpenBB function cache. The value can be overridden via

@@ -23,20 +23,20 @@ from typing import Iterable, Optional
 
 import numpy as np
 import pandas as pd
-
 import utils
-from config_loader import load_ema_close_crossovers
 from finansal.utils import lazy_chunk, safe_set
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.config import CHUNK_SIZE
 from finansal_analiz_sistemi.log_tools import PCT_STEP
 from finansal_analiz_sistemi.logging_config import get_logger
 from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
+from utilities.naming import unique_name
+from utils.compat import safe_concat
+
+from config_loader import load_ema_close_crossovers
 from openbb_missing import ichimoku as obb_ichimoku
 from openbb_missing import macd as obb_macd
 from openbb_missing import rsi as obb_rsi
-from utilities.naming import unique_name
-from utils.compat import safe_concat
 
 try:  # pragma: no cover - optional dependency may be absent
     _metadata.version("pandas_ta")

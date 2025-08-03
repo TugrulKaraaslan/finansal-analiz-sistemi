@@ -14,10 +14,10 @@ from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
-
-from filtre_dogrulama import SEBEP_KODLARI
 from finansal_analiz_sistemi import config
 from utils.pandas_option_safe import option_context
+
+from filtre_dogrulama import SEBEP_KODLARI
 
 
 @lru_cache(maxsize=1)

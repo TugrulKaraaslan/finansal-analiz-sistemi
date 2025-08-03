@@ -17,9 +17,8 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-import yaml
-
 import utils
+import yaml
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.log_tools import ErrorCountingFilter, setup_logger
 from finansal_analiz_sistemi.logging_config import get_logger
@@ -293,8 +292,9 @@ def calistir_tum_sistemi(
 
     import gc
 
-    import filter_engine
     import utils.failure_tracker as ft
+
+    import filter_engine
 
     steps_report = []
     filter_engine.clear_failed()
@@ -340,8 +340,9 @@ def calistir_tum_sistemi(
         steps_report.append("backtest_yap: BAŞARILI")
 
         if output_path:
-            from report_generator import generate_full_report
             from utils.memory_profile import mem_profile
+
+            from report_generator import generate_full_report
 
             output_path = Path(output_path)
             with mem_profile():

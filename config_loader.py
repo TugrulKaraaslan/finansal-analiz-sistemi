@@ -12,7 +12,6 @@ from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
-
 from finansal_analiz_sistemi import config
 
 __all__ = [
