@@ -29,10 +29,10 @@ from config_loader import load_ema_close_crossovers
 from finansal.utils import lazy_chunk, safe_set
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.config import CHUNK_SIZE
+from finansal_analiz_sistemi.indicators import provider
 from finansal_analiz_sistemi.log_tools import PCT_STEP
 from finansal_analiz_sistemi.logging_config import get_logger
 from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
-from finansal_analiz_sistemi.indicators import provider
 from utilities.naming import unique_name
 from utils.compat import safe_concat
 

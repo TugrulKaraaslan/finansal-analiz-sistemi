@@ -1,4 +1,5 @@
 """Select technical indicator backend with graceful fallback."""
+
 from __future__ import annotations
 
 import logging
@@ -8,12 +9,10 @@ from typing import Tuple
 
 import pandas as pd
 
-from openbb_missing import (
-    ichimoku as _obb_ichimoku,
-    macd as _obb_macd,
-    rsi as _obb_rsi,
-    is_available as _obb_available,
-)
+from openbb_missing import ichimoku as _obb_ichimoku
+from openbb_missing import is_available as _obb_available
+from openbb_missing import macd as _obb_macd
+from openbb_missing import rsi as _obb_rsi
 
 try:
     _metadata.version("pandas_ta")
@@ -66,7 +65,9 @@ def rsi(close: pd.Series, length: int = 14) -> pd.Series:
     return rsi_series.rename(close.name or f"rsi_{length}")
 
 
-def macd(close: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9) -> pd.DataFrame:
+def macd(
+    close: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9
+) -> pd.DataFrame:
     if backend == "openbb":
         try:
             return _obb_macd(close, fast=fast, slow=slow, signal=signal)
@@ -109,15 +110,23 @@ def ichimoku(
             )
         except Exception as exc:  # pragma: no cover
             logger.warning("OpenBB ichimoku failed: %s", exc)
-    if backend in {"openbb", "pandas_ta"} and ta is not None and hasattr(ta, "ichimoku"):
+    if (
+        backend in {"openbb", "pandas_ta"}
+        and ta is not None
+        and hasattr(ta, "ichimoku")
+    ):
         df = ta.ichimoku(high, low, close, conversion, base, lagging, offset)
         if isinstance(df, tuple):
             df = df[0]
         ich_df = df[["ITS_9", "IKS_26"]].copy()
-        span_df = pd.DataFrame({
-            "span_a": ((ich_df["ITS_9"] + ich_df["IKS_26"]) / 2).shift(offset),
-            "span_b": ((high.rolling(lagging).max() + low.rolling(lagging).min()) / 2).shift(offset),
-        })
+        span_df = pd.DataFrame(
+            {
+                "span_a": ((ich_df["ITS_9"] + ich_df["IKS_26"]) / 2).shift(offset),
+                "span_b": (
+                    (high.rolling(lagging).max() + low.rolling(lagging).min()) / 2
+                ).shift(offset),
+            }
+        )
         return ich_df, span_df
     # local fallback
     conv_high = high.rolling(conversion).max()
@@ -127,7 +136,9 @@ def ichimoku(
     base_low = low.rolling(base).min()
     iks = (base_high + base_low) / 2
     span_a = ((its + iks) / 2).shift(offset)
-    span_b = ((high.rolling(lagging).max() + low.rolling(lagging).min()) / 2).shift(offset)
+    span_b = ((high.rolling(lagging).max() + low.rolling(lagging).min()) / 2).shift(
+        offset
+    )
     ich_df = pd.DataFrame({"ITS_9": its, "IKS_26": iks})
     span_df = pd.DataFrame({"span_a": span_a, "span_b": span_b})
     return ich_df, span_df

@@ -1,12 +1,15 @@
-import pandas as pd
-import numpy as np
 import types
+
+import numpy as np
+import pandas as pd
 
 import finansal_analiz_sistemi.indicators.provider as provider
 
 
 def _simple_series():
-    return pd.Series(np.linspace(1, 50, 50), index=pd.date_range("2024-01-01", periods=50))
+    return pd.Series(
+        np.linspace(1, 50, 50), index=pd.date_range("2024-01-01", periods=50)
+    )
 
 
 def test_rsi_macd_ichimoku_smoke(monkeypatch):
