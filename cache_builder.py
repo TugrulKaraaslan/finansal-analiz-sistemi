@@ -9,9 +9,8 @@ from __future__ import annotations
 
 import pandas as pd
 from filelock import FileLock
-from loguru import logger
-
 from finansal_analiz_sistemi import config
+from loguru import logger
 
 # Use absolute paths so the script works from any current directory
 RAW_DIR = config.BASE_DIR / "veri" / "ham"
