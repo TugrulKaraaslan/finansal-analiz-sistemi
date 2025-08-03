@@ -11,7 +11,6 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.logging_config import get_logger
 

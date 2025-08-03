@@ -18,11 +18,11 @@ from typing import Optional
 
 import pandas as pd
 import yaml
-
-import utils
 from finansal_analiz_sistemi import config
 from finansal_analiz_sistemi.log_tools import ErrorCountingFilter, setup_logger
 from finansal_analiz_sistemi.logging_config import get_logger
+
+import utils
 from utils.date_utils import parse_date
 
 # Ensure mandatory indicators list is defined
