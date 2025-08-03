@@ -11,7 +11,6 @@ import re
 from typing import Mapping, Optional, Sequence
 
 import pandas as pd
-
 from validators import ValidationError
 
 # Acceptable characters for filter identifiers
