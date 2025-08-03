@@ -29,7 +29,9 @@ python -m finansal_analiz_sistemi.cli --dosya veri/prices.csv
 
 ## OpenBB Uyumluluğu
 
-Bu proje artık OpenBB ile uyumludur. Eski pandas-ta desteği kaldırıldı.
+Bu proje varsayılan olarak OpenBB ile çalışır ancak paket bulunamazsa
+`finansal_analiz_sistemi.indicators.provider` modülü pandas-ta ya da basit
+yerel hesaplamalara otomatik geçiş yapar.
 
 ### Önemli Değişiklikler
 - pandas-ta fonksiyonlarının yerine `openbb_missing.py` aracılığıyla OpenBB çağrıları kullanılır.

@@ -32,9 +32,7 @@ from finansal_analiz_sistemi.config import CHUNK_SIZE
 from finansal_analiz_sistemi.log_tools import PCT_STEP
 from finansal_analiz_sistemi.logging_config import get_logger
 from finansal_analiz_sistemi.utils.normalize import normalize_filtre_kodu
-from openbb_missing import ichimoku as obb_ichimoku
-from openbb_missing import macd as obb_macd
-from openbb_missing import rsi as obb_rsi
+from finansal_analiz_sistemi.indicators import provider
 from utilities.naming import unique_name
 from utils.compat import safe_concat
 
@@ -570,7 +568,7 @@ def _calculate_group_indicators_and_crossovers(
         and {"high", "low", "close"}.issubset(df_final_group.columns)
     ):
         try:
-            ich_df, _ = obb_ichimoku(
+            ich_df, _ = provider.ichimoku(
                 df_final_group["high"],
                 df_final_group["low"],
                 df_final_group["close"],
@@ -611,7 +609,7 @@ def _calculate_group_indicators_and_crossovers(
 
     if "rsi_14" not in df_final_group.columns and "close" in df_final_group.columns:
         try:
-            manual_cols["rsi_14"] = obb_rsi(df_final_group["close"], length=14)
+            manual_cols["rsi_14"] = provider.rsi(df_final_group["close"], length=14)
             local_logger.debug(
                 f"{hisse_kodu}: 'rsi_14' sütunu manuel olarak hesaplandı."
             )
@@ -624,7 +622,7 @@ def _calculate_group_indicators_and_crossovers(
         {"macd_line", "macd_signal"} - set(df_final_group.columns)
     ) and "close" in df_final_group.columns:
         try:
-            macd_df = obb_macd(df_final_group["close"], fast=12, slow=26, signal=9)
+            macd_df = provider.macd(df_final_group["close"], fast=12, slow=26, signal=9)
             if isinstance(macd_df, pd.DataFrame):
                 if "macd_line" not in df_final_group.columns:
                     manual_cols["macd_line"] = macd_df.iloc[:, 0]
