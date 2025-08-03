@@ -4,7 +4,7 @@ isort==6.0.1
 mypy==1.16.1
 mypy_extensions==1.1.0
 packaging>=25,<26
-pytest==8.4.0
+pytest==8.4.1
 responses==0.25.7
 ruff==0.12.2
 flake8==7.3.0
