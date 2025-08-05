@@ -1,0 +1,25 @@
+
+import pandas as pd
+from backtest.screener import run_screener
+from backtest.backtester import run_1g_returns
+
+def test_pipeline_smoke():
+    df = pd.DataFrame({
+        "symbol":["AAA","AAA"],
+        "date":pd.to_datetime(["2024-01-05","2024-01-08"]).date,
+        "close":[10.0, 11.0],
+        "next_close":[11.0, None],
+        "open":[10.0,11.0],
+        "high":[10.0,11.0],
+        "low":[10.0,11.0],
+        "volume":[100,120],
+        "rsi_14":[70,65],
+        "relative_volume":[1.2,0.9],
+    })
+    filters = pd.DataFrame({
+        "FilterCode":["T1"],
+        "PythonQuery":["(rsi_14 > 65) and (relative_volume > 1.0)"]
+    })
+    sigs = run_screener(df, filters, "2024-01-05")
+    out = run_1g_returns(df, sigs)
+    assert not out.empty

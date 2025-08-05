@@ -1,0 +1,43 @@
+
+project:
+  out_dir: "raporlar"
+  run_mode: "range"
+  start_date: "2024-01-01"
+  end_date: "2024-12-31"
+  single_date: null
+
+data:
+  excel_dir: "Veri"
+  filters_csv: "filters.csv"
+  enable_cache: false
+  cache_parquet_path: "cache/prices.parquet"
+  price_schema:
+    date: ["Tarih","Date","tarih"]
+    open: ["Açılış","Open"]
+    high: ["Yüksek","High"]
+    low:  ["Düşük","Low"]
+    close:["Kapanış","Close"]
+    volume:["Hacim","Volume","Adet"]
+
+calendar:
+  tplus1_mode: "price"   # price: sembol-bazlı bir sonraki bar; calendar: takvim bazlı T+1
+  holidays_source: "none"   # none | csv
+  holidays_csv_path: ""      # ör: examples/holidays_tr.csv
+
+indicators:
+  engine: "pandas_ta"
+  params:
+    rsi: [14]
+    ema: [10,20,50]
+    macd: [12,26,9]
+
+benchmark:
+  xu100_source: "none"
+  xu100_csv_path: ""
+
+report:
+  excel: true
+  csv: true
+  percent_format: "0.00%"
+  daily_sheet_prefix: "SCAN_"
+  summary_sheet_name: "SUMMARY"
