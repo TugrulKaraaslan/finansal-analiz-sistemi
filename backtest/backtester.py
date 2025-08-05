@@ -1,5 +1,5 @@
-
 from __future__ import annotations
+
 import pandas as pd
 
 def run_1g_returns(df_with_next: pd.DataFrame, signals: pd.DataFrame) -> pd.DataFrame:

@@ -1,5 +1,5 @@
-
 from __future__ import annotations
+
 import click, os, pandas as pd
 from .config import load_config
 from .data_loader import read_excels_long

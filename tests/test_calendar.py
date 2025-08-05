@@ -1,3 +1,4 @@
+from __future__ import annotations
 
 import pandas as pd
 from backtest.calendars import add_next_close
