@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+import warnings
 
 import pandas as pd
 
@@ -129,12 +130,14 @@ def read_excels_long(
     else:
         excel_dir = _guess_excel_dir_from_cfg(cfg_or_path)
     if not excel_dir or not Path(excel_dir).exists():
-        raise FileNotFoundError(f"Excel klasörü bulunamadı: {excel_dir}")
+        warnings.warn(f"Excel klasörü bulunamadı: {excel_dir}")  # PATH DÜZENLENDİ
+        return pd.DataFrame()
 
     records: List[pd.DataFrame] = []
-    excel_files = sorted(str(p) for p in Path(excel_dir).glob("*.xlsx"))
+    excel_files = sorted(p for p in Path(excel_dir).glob("*.xlsx"))  # PATH DÜZENLENDİ
     if not excel_files:
-        raise FileNotFoundError(f"'{excel_dir}' altında .xlsx bulunamadı.")
+        warnings.warn(f"'{excel_dir}' altında .xlsx bulunamadı.")  # PATH DÜZENLENDİ
+        return pd.DataFrame()
 
     for fpath in excel_files:
         try:
@@ -179,7 +182,8 @@ def read_excels_long(
                 continue
 
     if not records:
-        raise RuntimeError("Hiçbir sheet/çalışma sayfasından veri toplanamadı.")
+        warnings.warn("Hiçbir sheet/çalışma sayfasından veri toplanamadı.")
+        return pd.DataFrame()
 
     full = pd.concat(records, ignore_index=True)
     full = full.sort_values(["symbol", "date"], kind="mergesort").reset_index(drop=True)

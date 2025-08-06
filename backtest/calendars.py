@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Iterable, Optional, Set
+import warnings
 
 import pandas as pd
 
@@ -28,7 +29,11 @@ def load_holidays_csv(path: str | Path) -> Set[pd.Timestamp]:
     return set of Timestamps (date only)."""
     if not isinstance(path, (str, bytes, Path)):
         raise TypeError("path must be a string or Path")  # TİP DÜZELTİLDİ
-    h = pd.read_csv(path)
+    p = Path(path)
+    if not p.exists():  # PATH DÜZENLENDİ
+        warnings.warn(f"Tatil CSV bulunamadı: {p}")
+        return set()
+    h = pd.read_csv(p)
     if h.empty:
         return set()
     cols = {c.lower(): c for c in h.columns}

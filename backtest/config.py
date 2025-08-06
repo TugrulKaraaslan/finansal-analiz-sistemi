@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 from pathlib import Path  # TİP DÜZELTİLDİ
+import warnings
 
 from pydantic import BaseModel, Field
 import yaml
@@ -69,7 +70,14 @@ class RootCfg(BaseModel):
 
 
 def load_config(path: str | Path) -> RootCfg:
-    with open(path, "r", encoding="utf-8") as f:
+    p = Path(path)
+    if not p.exists():  # PATH DÜZENLENDİ
+        warnings.warn(f"Config bulunamadı: {p}")
+        return RootCfg(
+            project=ProjectCfg(),
+            data=DataCfg(excel_dir="", filters_csv=""),
+        )
+    with open(p, "r", encoding="utf-8") as f:  # PATH DÜZENLENDİ
         cfg = yaml.safe_load(f)
     if not isinstance(cfg, dict):
         raise TypeError("Config içeriği sözlük olmalı")  # TİP DÜZELTİLDİ

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 import click
 import pandas as pd
@@ -53,7 +54,11 @@ def scan_range(config_path, start_date, end_date):
     info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(df, cfg.indicators.params)
     info("Filtre CSV okunuyor...")
-    filters_df = pd.read_csv(cfg.data.filters_csv)
+    try:
+        filters_df = pd.read_csv(cfg.data.filters_csv)
+    except FileNotFoundError:
+        info(f"Filters CSV bulunamadı: {cfg.data.filters_csv}")  # PATH DÜZENLENDİ
+        filters_df = pd.DataFrame()
     req = {"FilterCode", "PythonQuery"}
     if not req.issubset(set(filters_df.columns)):
         raise RuntimeError(
@@ -114,10 +119,10 @@ def scan_range(config_path, start_date, end_date):
         xu100_pct = {
             d: float(s.get(d, float("nan"))) for d in pivot.columns if d != "Ortalama"
         }
-    out_dir = cfg.project.out_dir
-    os.makedirs(out_dir, exist_ok=True)
-    out_xlsx = os.path.join(out_dir, f"{start}_{end}_1G_BIST100.xlsx")
-    out_csv_dir = os.path.join(out_dir, "csv")
+    out_dir = Path(cfg.project.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)  # PATH DÜZENLENDİ
+    out_xlsx = out_dir / f"{start}_{end}_1G_BIST100.xlsx"  # PATH DÜZENLENDİ
+    out_csv_dir = out_dir / "csv"  # PATH DÜZENLENDİ
     info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
     val_iss = quality_warnings(df)
@@ -159,7 +164,11 @@ def scan_day(config_path, date_str):
     info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(df, cfg.indicators.params)
     info("Filtre CSV okunuyor...")
-    filters_df = pd.read_csv(cfg.data.filters_csv)
+    try:
+        filters_df = pd.read_csv(cfg.data.filters_csv)
+    except FileNotFoundError:
+        info(f"Filters CSV bulunamadı: {cfg.data.filters_csv}")  # PATH DÜZENLENDİ
+        filters_df = pd.DataFrame()
     req = {"FilterCode", "PythonQuery"}
     if not req.issubset(set(filters_df.columns)):
         raise RuntimeError(
@@ -188,9 +197,9 @@ def scan_day(config_path, date_str):
     else:
         pivot = pd.DataFrame(columns=[day, "Ortalama"])
         winrate = pd.DataFrame()  # TİP DÜZELTİLDİ
-    out_dir = cfg.project.out_dir
-    os.makedirs(out_dir, exist_ok=True)
-    out_xlsx = os.path.join(out_dir, f"SCAN_{day}.xlsx")
+    out_dir = Path(cfg.project.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)  # PATH DÜZENLENDİ
+    out_xlsx = out_dir / f"SCAN_{day}.xlsx"  # PATH DÜZENLENDİ
     info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
     val_iss = quality_warnings(df)
