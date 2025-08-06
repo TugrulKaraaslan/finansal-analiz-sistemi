@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import List, Optional, Mapping
+from typing import Iterable, List, Optional, Mapping  # TİP DÜZELTİLDİ
 
 import pandas as pd
 
@@ -18,7 +18,7 @@ def _ensure_dir(path: Optional[str]):
 
 def write_reports(
     trades_all: pd.DataFrame,
-    dates: Optional[List] = None,
+    dates: Optional[Iterable] = None,  # TİP DÜZELTİLDİ
     summary_wide: Optional[pd.DataFrame] = None,
     xu100_pct: Optional[Mapping] = None,
     out_xlsx: Optional[str] = None,
@@ -38,6 +38,8 @@ def write_reports(
     """
     if dates is None:
         dates = []  # TİP DÜZELTİLDİ
+    elif not isinstance(dates, list):
+        dates = list(dates)  # TİP DÜZELTİLDİ
     if summary_wide is None:
         summary_wide = pd.DataFrame()  # TİP DÜZELTİLDİ
     if out_xlsx:

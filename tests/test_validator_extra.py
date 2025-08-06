@@ -1,8 +1,9 @@
 import pandas as pd
-import pandas as pd
 import pytest
+from types import SimpleNamespace
 
 from backtest.validator import dataset_summary, quality_warnings
+from backtest.reporter import write_reports
 
 
 def test_dataset_summary_invalid_type():
@@ -20,8 +21,6 @@ def test_quality_warnings_missing_columns():
     df = pd.DataFrame({"symbol": ["AAA"], "close": [1.0]})
     with pytest.raises(ValueError):
         quality_warnings(df)
-from types import SimpleNamespace
-from backtest.reporter import write_reports
 
 
 class _DummyWriter:

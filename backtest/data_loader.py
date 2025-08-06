@@ -31,7 +31,7 @@ def re_sub(pat: str, repl: str, s: str) -> str:
     return re.sub(pat, repl, s)
 
 
-def normalize_key(s: str) -> str:
+def normalize_key(s: Optional[str]) -> str:  # TİP DÜZELTİLDİ
     if s is None:
         return ""
     s = str(s).strip()
