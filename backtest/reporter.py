@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Mapping
 
 import pandas as pd
 
@@ -16,7 +16,7 @@ def write_reports(
     trades_all: pd.DataFrame,
     dates: List,
     summary_wide: pd.DataFrame,
-    xu100_pct: Dict = None,
+    xu100_pct: Optional[Mapping] = None,
     out_xlsx: str = None,
     out_csv_dir: str = None,
     daily_sheet_prefix: str = "SCAN_",
@@ -48,25 +48,23 @@ def write_reports(
                     writer, sheet_name=f"{summary_sheet_name}_WINRATE"
                 )
 
-            if xu100_pct:
+            if xu100_pct is not None:
+                xu100_series = pd.Series(xu100_pct, dtype=float)  # TİP DÜZELTİLDİ
                 cols = [c for c in summary_wide.columns if c != "Ortalama"]
-                if set(cols).issubset(set(xu100_pct.keys())):
+                if set(cols).issubset(set(xu100_series.index)):
                     diff = summary_wide.copy()
                     for c in cols:
-                        diff[c] = diff[c] - float(xu100_pct[c])
+                        diff[c] = diff[c] - float(xu100_series.get(c, float("nan")))
                     diff["Ortalama"] = diff[cols].mean(axis=1)
                     diff.to_excel(writer, sheet_name=f"{summary_sheet_name}_DIFF")
                 avg = (
-                    sum(xu100_pct.values()) / len(xu100_pct)
-                    if xu100_pct
+                    float(xu100_series.mean())
+                    if not xu100_series.empty
                     else float("nan")
-                )  # TİP DÜZELTİLDİ
+                )
                 bist = (
                     pd.DataFrame(
-                        [
-                            [xu100_pct.get(c, float("nan")) for c in cols]
-                            + [avg]
-                        ],
+                        [[xu100_series.get(c, float("nan")) for c in cols] + [avg]],
                         index=["BIST"],
                         columns=cols + ["Ortalama"],
                     )

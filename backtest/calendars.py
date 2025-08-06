@@ -39,7 +39,10 @@ def build_trading_days(
     end = pd.to_datetime(df["date"]).max()
     all_days = pd.date_range(start=start, end=end, freq="D")
     if holidays is not None:
-        hol_iter = holidays if isinstance(holidays, Iterable) else [holidays]
+        if isinstance(holidays, (str, bytes)):
+            hol_iter = [holidays]
+        else:
+            hol_iter = holidays if isinstance(holidays, Iterable) else [holidays]
         hol = set(pd.to_datetime(list(hol_iter)))  # TİP DÜZELTİLDİ
     else:
         hol = set()
