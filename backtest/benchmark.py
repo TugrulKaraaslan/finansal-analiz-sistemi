@@ -1,6 +1,7 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
+from pathlib import Path
 import pandas as pd
 
 
@@ -16,13 +17,15 @@ def _read_csv_any(path: str) -> pd.DataFrame:
         return pd.read_csv(path, sep=sep, decimal=dec)
 
 
-def load_xu100_pct(csv_path: str) -> pd.Series:
-    df = _read_csv_any(csv_path)
+def load_xu100_pct(csv_path: str | Path) -> pd.Series:
+    if not isinstance(csv_path, (str, Path)):
+        raise TypeError("csv_path must be str or Path")  # TİP DÜZELTİLDİ
+    df = _read_csv_any(str(csv_path))
     cols = {c.lower().strip(): c for c in df.columns}
     # date column
     c_date = cols.get("date") or cols.get("tarih") or list(df.columns)[0]
     # close-like column
-    cand = [
+    cand = (
         "close",
         "kapanış",
         "kapanis",
@@ -30,7 +33,7 @@ def load_xu100_pct(csv_path: str) -> pd.Series:
         "adj_close",
         "kapanis_tl",
         "fiyat",
-    ]
+    )  # TİP DÜZELTİLDİ
     close_col = None
     for k in cand:
         if k in cols:

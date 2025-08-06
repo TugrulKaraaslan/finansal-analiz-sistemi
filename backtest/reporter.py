@@ -36,6 +36,31 @@ def write_reports(
     - SUMMARY_DIFF: Filtre − BIST
     - VALIDATION_SUMMARY / VALIDATION_ISSUES: veri kalite raporu
     """
+    if not isinstance(trades_all, pd.DataFrame):
+        raise TypeError("trades_all must be a DataFrame")  # TİP DÜZELTİLDİ
+    req_cols = {
+        "FilterCode",
+        "Symbol",
+        "Date",
+        "EntryClose",
+        "ExitClose",
+        "ReturnPct",
+        "Win",
+    }
+    missing = req_cols.difference(trades_all.columns)
+    if missing:
+        raise ValueError(
+            f"trades_all missing columns: {', '.join(sorted(missing))}"  # TİP DÜZELTİLDİ
+        )
+    if summary_wide is not None and not isinstance(summary_wide, pd.DataFrame):
+        raise TypeError("summary_wide must be a DataFrame or None")  # TİP DÜZELTİLDİ
+    if summary_winrate is not None and not isinstance(summary_winrate, pd.DataFrame):
+        raise TypeError("summary_winrate must be a DataFrame or None")  # TİP DÜZELTİLDİ
+    if validation_summary is not None and not isinstance(validation_summary, pd.DataFrame):
+        raise TypeError("validation_summary must be a DataFrame or None")  # TİP DÜZELTİLDİ
+    if validation_issues is not None and not isinstance(validation_issues, pd.DataFrame):
+        raise TypeError("validation_issues must be a DataFrame or None")  # TİP DÜZELTİLDİ
+
     if dates is None:
         dates = tuple()  # TİP DÜZELTİLDİ
     elif isinstance(dates, (str, bytes, pd.Timestamp)):
