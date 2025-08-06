@@ -13,13 +13,13 @@ def _read_csv_any(path: str | Path) -> pd.DataFrame:
         warnings.warn(f"CSV bulunamadı: {p}")
         return pd.DataFrame()
     try:
-        return pd.read_csv(p)
+        return pd.read_csv(p, encoding="utf-8")  # PATH DÜZENLENDİ
     except Exception:
         with open(p, "r", encoding="utf-8") as f:  # PATH DÜZENLENDİ
             sample = f.read(2048)
         sep = ";" if sample.count(";") > sample.count(",") else ","
         dec = "," if sample.count(",") > sample.count(".") and sep == ";" else "."
-        return pd.read_csv(p, sep=sep, decimal=dec)
+        return pd.read_csv(p, sep=sep, decimal=dec, encoding="utf-8")  # PATH DÜZENLENDİ
 
 
 def load_xu100_pct(csv_path: str | Path) -> pd.Series:
