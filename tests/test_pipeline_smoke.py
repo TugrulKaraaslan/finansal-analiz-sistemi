@@ -10,6 +10,7 @@ def test_pipeline_smoke():
         "date":pd.to_datetime(["2024-01-05","2024-01-08"]).date,
         "close":[10.0, 11.0],
         "next_close":[11.0, None],
+        "next_date":pd.to_datetime(["2024-01-08","2024-01-09"]).date,
         "open":[10.0,11.0],
         "high":[10.0,11.0],
         "low":[10.0,11.0],
