@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from datetime import date  # TİP DÜZELTİLDİ
 from typing import Iterable, Optional, Mapping  # TİP DÜZELTİLDİ
 
 import pandas as pd
@@ -63,10 +64,12 @@ def write_reports(
 
     if dates is None:
         dates = tuple()  # TİP DÜZELTİLDİ
-    elif isinstance(dates, (str, bytes, pd.Timestamp)):
+    elif isinstance(dates, (str, bytes, pd.Timestamp, date)):
         dates = (dates,)  # TİP DÜZELTİLDİ
-    else:
+    elif isinstance(dates, Iterable):
         dates = tuple(dates)  # TİP DÜZELTİLDİ
+    else:
+        raise TypeError("dates must be iterable or date-like")  # TİP DÜZELTİLDİ
     if summary_wide is None:
         summary_wide = pd.DataFrame()  # TİP DÜZELTİLDİ
     if out_xlsx:
