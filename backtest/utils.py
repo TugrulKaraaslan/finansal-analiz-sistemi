@@ -2,21 +2,24 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Optional  # TİP DÜZELTİLDİ
 import re
 import unicodedata
 
 from loguru import logger
 
 
-def ensure_dir(path: str):
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
+def ensure_dir(path: str | Path):
+    p = Path(path)
+    target = p if not p.suffix else p.parent
+    target.mkdir(parents=True, exist_ok=True)  # TİP DÜZELTİLDİ
 
 
 def info(msg: str):
     logger.info(msg)
 
 
-def normalize_key(s: str) -> str:
+def normalize_key(s: Optional[str]) -> str:  # TİP DÜZELTİLDİ
     if s is None:
         return ""
     s = str(s).strip()
