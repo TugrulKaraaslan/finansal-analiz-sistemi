@@ -74,6 +74,9 @@ def scan_range(config_path, start_date, end_date):
             "filters CSV: 'FilterCode' ve 'PythonQuery' kolonlarını içermeli"
         )
     all_days = sorted(pd.to_datetime(df_ind["date"]).dt.date.unique())
+    if not all_days:
+        info("Taranacak tarih bulunamadı, veri seti boş.")  # LOJİK HATASI DÜZELTİLDİ
+        return  # Liste boşsa başlangıç/bitiş alınamaz
     start = (
         pd.to_datetime(cfg.project.start_date).date()
         if cfg.project.start_date
@@ -82,8 +85,8 @@ def scan_range(config_path, start_date, end_date):
     end = (
         pd.to_datetime(cfg.project.end_date).date()
         if cfg.project.end_date
-        else all_days[-1]
-    )
+        else all_days[len(all_days) - 1]  # Negatif indeks yerine açık indeks
+    )  # LOJİK HATASI DÜZELTİLDİ
     days = [d for d in all_days if start <= d <= end]
     all_trades = []
     info(f"{len(days)} gün taranacak...")

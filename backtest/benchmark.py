@@ -34,9 +34,9 @@ def load_xu100_pct(csv_path: str | Path) -> pd.Series:
     if not isinstance(csv_path, (str, Path)):
         raise TypeError("csv_path must be str or Path")  # TİP DÜZELTİLDİ
     df = _read_csv_any(csv_path)  # PATH DÜZENLENDİ
-    if df.empty:
+    if df.empty or df.shape[1] == 0:  # Kolon yoksa list indeksleme taşar
         warnings.warn(f"Boş CSV: {csv_path}")  # PATH DÜZENLENDİ
-        return pd.Series(dtype=float)
+        return pd.Series(dtype=float)  # LOJİK HATASI DÜZELTİLDİ
     cols = {c.lower().strip(): c for c in df.columns}
     # date column
     c_date = cols.get("date") or cols.get("tarih") or list(df.columns)[0]
