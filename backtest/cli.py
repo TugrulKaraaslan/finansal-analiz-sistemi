@@ -5,20 +5,21 @@ import os
 
 import click
 import pandas as pd
-from .config import load_config
-from .data_loader import read_excels_long
-from .normalizer import normalize
+
+from .backtester import run_1g_returns
+from .benchmark import load_xu100_pct
 from .calendars import (
     add_next_close,
     add_next_close_calendar,
     build_trading_days,
     load_holidays_csv,
 )
+from .config import load_config
+from .data_loader import read_excels_long
 from .indicators import compute_indicators
-from .screener import run_screener
-from .backtester import run_1g_returns
-from .benchmark import load_xu100_pct
+from .normalizer import normalize
 from .reporter import write_reports
+from .screener import run_screener
 from .utils import info
 from .validator import dataset_summary, quality_warnings
 

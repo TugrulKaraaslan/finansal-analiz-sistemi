@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 import pandas as pd
-from backtest.screener import run_screener
+
 from backtest.backtester import run_1g_returns
+from backtest.screener import run_screener
 
 
 def test_pipeline_smoke():
