@@ -12,6 +12,8 @@ def compute_indicators(
 ) -> pd.DataFrame:
     if params is None:
         params = {}  # TİP DÜZELTİLDİ
+    if df.empty:
+        return df.copy()  # TİP DÜZELTİLDİ
     df = df.copy()
     df = df.sort_values(["symbol", "date"])
     out_frames = []
@@ -23,7 +25,7 @@ def compute_indicators(
         for p in params.get("rsi", [14]):
             col = f"RSI_{p}"
             g[col] = ta.rsi(g["close"], length=int(p))
-        macd_params = params.get("macd", [12, 26, 9])
+        macd_params = params.get("macd") or [12, 26, 9]  # TİP DÜZELTİLDİ
         if len(macd_params) >= 3:
             fast, slow, sig = map(int, macd_params[:3])
             macd = ta.macd(g["close"], fast=fast, slow=slow, signal=sig)
