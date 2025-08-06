@@ -167,15 +167,31 @@ def write_reports(
     if out_csv_dir:
         out_csv_path = Path(out_csv_dir)
         out_csv_path.mkdir(parents=True, exist_ok=True)  # PATH DÜZENLENDİ
-        trades_all.to_csv(out_csv_path / "daily_trades.csv", index=False)
-        summary_wide.to_csv(out_csv_path / "summary.csv")
-        if summary_winrate is not None and not summary_winrate.empty:
-            summary_winrate.to_csv(out_csv_path / "summary_winrate.csv")
-        if validation_summary is not None and not validation_summary.empty:
-            validation_summary.to_csv(
-                out_csv_path / "validation_summary.csv", index=False
-            )
-        if validation_issues is not None and not validation_issues.empty:
-            validation_issues.to_csv(
-                out_csv_path / "validation_issues.csv", index=False
-            )
+        try:
+            trades_all.to_csv(
+                out_csv_path / "daily_trades.csv",
+                index=False,
+                encoding="utf-8",
+            )  # PATH DÜZENLENDİ
+            summary_wide.to_csv(
+                out_csv_path / "summary.csv", encoding="utf-8"
+            )  # PATH DÜZENLENDİ
+            if summary_winrate is not None and not summary_winrate.empty:
+                summary_winrate.to_csv(
+                    out_csv_path / "summary_winrate.csv",
+                    encoding="utf-8",
+                )  # PATH DÜZENLENDİ
+            if validation_summary is not None and not validation_summary.empty:
+                validation_summary.to_csv(
+                    out_csv_path / "validation_summary.csv",
+                    index=False,
+                    encoding="utf-8",
+                )  # PATH DÜZENLENDİ
+            if validation_issues is not None and not validation_issues.empty:
+                validation_issues.to_csv(
+                    out_csv_path / "validation_issues.csv",
+                    index=False,
+                    encoding="utf-8",
+                )  # PATH DÜZENLENDİ
+        except Exception:
+            warnings.warn(f"CSV yazılamadı: {out_csv_path}")  # PATH DÜZENLENDİ
