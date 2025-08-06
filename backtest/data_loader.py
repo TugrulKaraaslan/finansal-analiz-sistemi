@@ -1,22 +1,35 @@
+# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
-import re
-import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
-_TR_MAP = str.maketrans({
-    "İ": "I", "I": "I",
-    "ı": "i", "Ş": "S", "ş": "s",
-    "Ğ": "G", "ğ": "g", "Ü": "U", "ü": "u",
-    "Ö": "O", "ö": "o", "Ç": "C", "ç": "c",
-})
+_TR_MAP = str.maketrans(
+    {
+        "İ": "I",
+        "I": "I",
+        "ı": "i",
+        "Ş": "S",
+        "ş": "s",
+        "Ğ": "G",
+        "ğ": "g",
+        "Ü": "U",
+        "ü": "u",
+        "Ö": "O",
+        "ö": "o",
+        "Ç": "C",
+        "ç": "c",
+    }
+)
+
 
 def re_sub(pat: str, repl: str, s: str) -> str:
     import re
+
     return re.sub(pat, repl, s)
+
 
 def normalize_key(s: str) -> str:
     if s is None:
@@ -28,6 +41,7 @@ def normalize_key(s: str) -> str:
     s = re_sub(r"_{2,}", "_", s).strip("_")
     return s
 
+
 def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
     for p in paths:
         if not p:
@@ -37,13 +51,14 @@ def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
             return p
     return None
 
+
 def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
     if cfg is None:
         return None
     try:
         cand = _first_existing(
             getattr(getattr(cfg, "data", None), "excel_dir", None),
-            getattr(getattr(cfg, "data", None), "path",       None),
+            getattr(getattr(cfg, "data", None), "path", None),
             getattr(cfg, "data_path", None),
         )
         if cand:
@@ -59,16 +74,38 @@ def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
         pass
     return None
 
+
 COL_ALIASES: Dict[str, str] = {
-    "date": "date", "tarih": "date", "tarihi": "date",
-    "open": "open", "acilis": "open", "açilis": "open", "açilis_fiyati": "open", "açilis_fiyati_": "open",
-    "high": "high", "yuksek": "high", "yüksek": "high",
-    "low" : "low" , "dusuk" : "low" , "düşük" : "low" ,
-    "close":"close","kapanis":"close","kapanış":"close","son":"close","son_fiyat":"close","adj_close":"close",
-    "volume":"volume","hacim":"volume","islem_hacmi":"volume","işlem_hacmi":"volume",
-    "adet":"volume", "lot":"volume",
-    "kapanis_fiyati":"close","kapanis_fiyat":"close",
+    "date": "date",
+    "tarih": "date",
+    "tarihi": "date",
+    "open": "open",
+    "acilis": "open",
+    "açilis": "open",
+    "açilis_fiyati": "open",
+    "açilis_fiyati_": "open",
+    "high": "high",
+    "yuksek": "high",
+    "yüksek": "high",
+    "low": "low",
+    "dusuk": "low",
+    "düşük": "low",
+    "close": "close",
+    "kapanis": "close",
+    "kapanış": "close",
+    "son": "close",
+    "son_fiyat": "close",
+    "adj_close": "close",
+    "volume": "volume",
+    "hacim": "volume",
+    "islem_hacmi": "volume",
+    "işlem_hacmi": "volume",
+    "adet": "volume",
+    "lot": "volume",
+    "kapanis_fiyati": "close",
+    "kapanis_fiyat": "close",
 }
+
 
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     rename_map = {}
@@ -78,10 +115,13 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
         rename_map[c] = std
     return df.rename(columns=rename_map)
 
-def read_excels_long(cfg_or_path: Union[str, Path, Any],
-                     dayfirst: bool = True,
-                     engine: str = "openpyxl",
-                     verbose: bool = False) -> pd.DataFrame:
+
+def read_excels_long(
+    cfg_or_path: Union[str, Path, Any],
+    dayfirst: bool = True,
+    engine: str = "openpyxl",
+    verbose: bool = False,
+) -> pd.DataFrame:
     if isinstance(cfg_or_path, (str, Path)):
         excel_dir = Path(cfg_or_path)
     else:
@@ -115,10 +155,16 @@ def read_excels_long(cfg_or_path: Union[str, Path, Any],
                         print(f"[SKIP] {fpath}:{sheet} 'date' bulunamadı.")
                     continue
 
-                df["date"] = pd.to_datetime(df["date"], errors="coerce", dayfirst=dayfirst)
+                df["date"] = pd.to_datetime(
+                    df["date"], errors="coerce", dayfirst=dayfirst
+                )
                 df = df.dropna(subset=["date"])
 
-                keep = [c for c in ["open","high","low","close","volume"] if c in df.columns]
+                keep = [
+                    c
+                    for c in ["open", "high", "low", "close", "volume"]
+                    if c in df.columns
+                ]
                 df = df[["date", *keep]].copy()
                 for c in keep:
                     df[c] = pd.to_numeric(df[c], errors="coerce")
@@ -138,5 +184,6 @@ def read_excels_long(cfg_or_path: Union[str, Path, Any],
     if "close" in full.columns:
         full = full.dropna(subset=["close"])
     return full
+
 
 __all__ = ["read_excels_long", "normalize_key", "normalize_columns"]

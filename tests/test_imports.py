@@ -1,3 +1,4 @@
+# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 import ast
@@ -16,7 +17,9 @@ def _module_info(module_name: str) -> tuple[bool, bool]:
     source = Path(spec.origin).read_text(encoding="utf-8")
     tree = ast.parse(source)
     body = tree.body
-    has_docstring = bool(body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Str))
+    has_docstring = bool(
+        body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Str)
+    )
     idx = 1 if has_docstring else 0
     has_future_annotations = (
         len(body) > idx
@@ -51,5 +54,9 @@ def test_import_all_backtest_modules():
             else:
                 seen_without_doc = True
 
-    assert seen_with_doc, "Expected a module with docstring and from __future__ import annotations"
-    assert seen_without_doc, "Expected a module without docstring but with from __future__ import annotations"
+    assert (
+        seen_with_doc
+    ), "Expected a module with docstring and from __future__ import annotations"
+    assert (
+        seen_without_doc
+    ), "Expected a module without docstring but with from __future__ import annotations"
