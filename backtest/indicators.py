@@ -19,21 +19,31 @@ def compute_indicators(
     out_frames = []
     for sym, g in df.groupby("symbol", group_keys=False):
         g = g.copy()
-        for p in params.get("ema", [10, 20, 50]):
+        ema_params = params.get("ema", [10, 20, 50])
+        if isinstance(ema_params, (int, float)):
+            ema_params = [ema_params]  # TİP DÜZELTİLDİ
+        for p in ema_params:
             col = f"EMA_{p}"
             g[col] = ta.ema(g["close"], length=int(p))
-        for p in params.get("rsi", [14]):
+        rsi_params = params.get("rsi", [14])
+        if isinstance(rsi_params, (int, float)):
+            rsi_params = [rsi_params]  # TİP DÜZELTİLDİ
+        for p in rsi_params:
             col = f"RSI_{p}"
             g[col] = ta.rsi(g["close"], length=int(p))
         macd_params = params.get("macd") or [12, 26, 9]  # TİP DÜZELTİLDİ
-        if len(macd_params) >= 3:
-            fast, slow, sig = map(int, macd_params[:3])
-            macd = ta.macd(g["close"], fast=fast, slow=slow, signal=sig)
-            if macd is not None and not macd.empty:
-                macd_cols = macd.columns.tolist()
-                g[f"MACD_{fast}_{slow}_{sig}"] = macd[macd_cols[0]]
-                g[f"MACD_{fast}_{slow}_{sig}_SIGNAL"] = macd[macd_cols[1]]
-                g[f"MACD_{fast}_{slow}_{sig}_HIST"] = macd[macd_cols[2]]
+        if isinstance(macd_params, (int, float)):
+            macd_params = [macd_params]  # TİP DÜZELTİLDİ
+        macd_params = list(macd_params)
+        if len(macd_params) < 3:
+            raise ValueError("macd params must have at least three values")  # TİP DÜZELTİLDİ
+        fast, slow, sig = map(int, macd_params[:3])
+        macd = ta.macd(g["close"], fast=fast, slow=slow, signal=sig)
+        if macd is not None and not macd.empty:
+            macd_cols = macd.columns.tolist()
+            g[f"MACD_{fast}_{slow}_{sig}"] = macd[macd_cols[0]]
+            g[f"MACD_{fast}_{slow}_{sig}_SIGNAL"] = macd[macd_cols[1]]
+            g[f"MACD_{fast}_{slow}_{sig}_HIST"] = macd[macd_cols[2]]
         g["CHANGE_1D_PERCENT"] = g["close"].pct_change(1) * 100.0
         g["CHANGE_5D_PERCENT"] = g["close"].pct_change(5) * 100.0
         g["RELATIVE_VOLUME"] = g["volume"] / g["volume"].rolling(20).mean()

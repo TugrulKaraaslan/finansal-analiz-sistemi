@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Iterable, List, Optional, Mapping  # TİP DÜZELTİLDİ
+from typing import Iterable, Optional, Mapping  # TİP DÜZELTİLDİ
 
 import pandas as pd
 
@@ -37,9 +37,9 @@ def write_reports(
     - VALIDATION_SUMMARY / VALIDATION_ISSUES: veri kalite raporu
     """
     if dates is None:
-        dates = []  # TİP DÜZELTİLDİ
-    elif not isinstance(dates, list):
-        dates = list(dates)  # TİP DÜZELTİLDİ
+        dates = tuple()  # TİP DÜZELTİLDİ
+    else:
+        dates = tuple(dates)  # TİP DÜZELTİLDİ
     if summary_wide is None:
         summary_wide = pd.DataFrame()  # TİP DÜZELTİLDİ
     if out_xlsx:
@@ -59,11 +59,14 @@ def write_reports(
                 )
 
             if xu100_pct is not None:
-                if not isinstance(xu100_pct, Mapping):
+                if isinstance(xu100_pct, pd.Series):
+                    xu100_series = xu100_pct.astype(float)  # TİP DÜZELTİLDİ
+                elif isinstance(xu100_pct, Mapping):
+                    xu100_series = pd.Series(dict(xu100_pct), dtype=float)  # TİP DÜZELTİLDİ
+                else:
                     raise TypeError(
-                        "xu100_pct must be a mapping of dates to returns"
+                        "xu100_pct must be a mapping or Series"
                     )  # TİP DÜZELTİLDİ
-                xu100_series = pd.Series(dict(xu100_pct), dtype=float)  # TİP DÜZELTİLDİ
                 cols = [c for c in summary_wide.columns if c != "Ortalama"]
                 if set(cols).issubset(set(xu100_series.index)):
                     diff = summary_wide.copy()
