@@ -4,11 +4,14 @@ import pytest
 
 from backtest.config import load_config, RootCfg
 
+
 def _write_cfg(text: str) -> Path:
-    tmp = tempfile.NamedTemporaryFile('w+', delete=False)
-    tmp.write(text)
-    tmp.flush()
-    return Path(tmp.name)
+    with tempfile.NamedTemporaryFile(
+        "w", delete=False, encoding="utf-8"
+    ) as tmp:  # PATH DÜZENLENDİ
+        tmp.write(text)
+        tmp.flush()
+        return Path(tmp.name)
 
 def test_load_config_independent_defaults():
     cfg_text = textwrap.dedent(
