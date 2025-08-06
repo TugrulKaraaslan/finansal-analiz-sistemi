@@ -2,25 +2,33 @@
 from __future__ import annotations
 
 from pathlib import Path
+import warnings
 import pandas as pd
 
 
-def _read_csv_any(path: str) -> pd.DataFrame:
-    # Try default, then ; separator, decimal comma
+def _read_csv_any(path: str | Path) -> pd.DataFrame:
+    """Read CSV with fallback separator/decimal handling."""
+    p = Path(path)
+    if not p.exists():  # PATH DÜZENLENDİ
+        warnings.warn(f"CSV bulunamadı: {p}")
+        return pd.DataFrame()
     try:
-        return pd.read_csv(path)
+        return pd.read_csv(p)
     except Exception:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(p, "r", encoding="utf-8") as f:  # PATH DÜZENLENDİ
             sample = f.read(2048)
         sep = ";" if sample.count(";") > sample.count(",") else ","
         dec = "," if sample.count(",") > sample.count(".") and sep == ";" else "."
-        return pd.read_csv(path, sep=sep, decimal=dec)
+        return pd.read_csv(p, sep=sep, decimal=dec)
 
 
 def load_xu100_pct(csv_path: str | Path) -> pd.Series:
     if not isinstance(csv_path, (str, Path)):
         raise TypeError("csv_path must be str or Path")  # TİP DÜZELTİLDİ
-    df = _read_csv_any(str(csv_path))
+    df = _read_csv_any(csv_path)  # PATH DÜZENLENDİ
+    if df.empty:
+        warnings.warn(f"Boş CSV: {csv_path}")  # PATH DÜZENLENDİ
+        return pd.Series(dtype=float)
     cols = {c.lower().strip(): c for c in df.columns}
     # date column
     c_date = cols.get("date") or cols.get("tarih") or list(df.columns)[0]
