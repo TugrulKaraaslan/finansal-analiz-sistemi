@@ -81,4 +81,26 @@ def load_config(path: str | Path) -> RootCfg:
         cfg = yaml.safe_load(f)
     if not isinstance(cfg, dict):
         raise TypeError("Config içeriği sözlük olmalı")  # TİP DÜZELTİLDİ
+    base = p.parent
+    def _join(v: Optional[str]) -> Optional[str]:
+        if not v:
+            return v
+        vp = Path(v)
+        return str(base / vp) if not vp.is_absolute() else str(vp)
+
+    proj = cfg.get("project", {}) if isinstance(cfg, dict) else {}
+    if isinstance(proj, dict) and proj.get("out_dir"):
+        proj["out_dir"] = _join(proj.get("out_dir"))  # PATH DÜZENLENDİ
+    data = cfg.get("data", {}) if isinstance(cfg, dict) else {}
+    for k in ["excel_dir", "filters_csv", "cache_parquet_path"]:
+        v = data.get(k)
+        if v:
+            data[k] = _join(v)  # PATH DÜZENLENDİ
+    cal = cfg.get("calendar", {}) if isinstance(cfg, dict) else {}
+    if isinstance(cal, dict) and cal.get("holidays_csv_path"):
+        cal["holidays_csv_path"] = _join(cal.get("holidays_csv_path"))  # PATH DÜZENLENDİ
+    bench = cfg.get("benchmark", {}) if isinstance(cfg, dict) else {}
+    if isinstance(bench, dict) and bench.get("xu100_csv_path"):
+        bench["xu100_csv_path"] = _join(bench.get("xu100_csv_path"))  # PATH DÜZENLENDİ
+    cfg["project"], cfg["data"], cfg["calendar"], cfg["benchmark"] = proj, data, cal, bench
     return RootCfg(**cfg)
