@@ -148,7 +148,9 @@ def write_reports(
                     ws.set_column(3, 4, 12)
                     ws.set_column(5, 5, 10, num_fmt)
                     ws.set_column(6, 6, 8)
-                    ws.autofilter(0, 0, len(trades_all[trades_all["Date"] == d]), 6)
+                    rows = len(trades_all[trades_all["Date"] == d])
+                    last_row = rows if rows > 0 else 0  # LOJİK HATASI DÜZELTİLDİ
+                    ws.autofilter(0, 0, last_row, 6)
     
                 if summary_sheet_name in writer.sheets:
                     ws = writer.sheets[summary_sheet_name]
