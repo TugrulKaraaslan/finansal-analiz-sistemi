@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from typing import Dict, List, Optional
+from pathlib import Path  # TİP DÜZELTİLDİ
 
 from pydantic import BaseModel, Field
 import yaml
@@ -61,13 +62,15 @@ class ReportCfg(BaseModel):
 class RootCfg(BaseModel):
     project: ProjectCfg
     data: DataCfg
-    calendar: CalendarCfg = CalendarCfg()
-    indicators: IndicatorsCfg = IndicatorsCfg()
-    benchmark: BenchmarkCfg = BenchmarkCfg()
-    report: ReportCfg = ReportCfg()
+    calendar: CalendarCfg = Field(default_factory=CalendarCfg)  # TİP DÜZELTİLDİ
+    indicators: IndicatorsCfg = Field(default_factory=IndicatorsCfg)  # TİP DÜZELTİLDİ
+    benchmark: BenchmarkCfg = Field(default_factory=BenchmarkCfg)  # TİP DÜZELTİLDİ
+    report: ReportCfg = Field(default_factory=ReportCfg)  # TİP DÜZELTİLDİ
 
 
-def load_config(path: str) -> RootCfg:
+def load_config(path: str | Path) -> RootCfg:
     with open(path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
+    if not isinstance(cfg, dict):
+        raise TypeError("Config içeriği sözlük olmalı")  # TİP DÜZELTİLDİ
     return RootCfg(**cfg)
