@@ -14,6 +14,18 @@ def _to_pandas_ops(expr: str) -> str:
 
 
 def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.DataFrame:
+    if not isinstance(df_ind, pd.DataFrame):
+        raise TypeError("df_ind must be a DataFrame")  # TİP DÜZELTİLDİ
+    if not isinstance(filters_df, pd.DataFrame):
+        raise TypeError("filters_df must be a DataFrame")  # TİP DÜZELTİLDİ
+    req_df = {"symbol", "date", "open", "high", "low", "close", "volume"}
+    missing_df = req_df.difference(df_ind.columns)
+    if missing_df:
+        raise ValueError(
+            f"df_ind missing columns: {', '.join(sorted(missing_df))}"
+        )  # TİP DÜZELTİLDİ
+    if not {"FilterCode", "PythonQuery"}.issubset(filters_df.columns):
+        raise ValueError("filters_df missing required columns")  # TİP DÜZELTİLDİ
     day = pd.to_datetime(date).date()
     d = df_ind[df_ind["date"] == day].copy()
     if d.empty:
