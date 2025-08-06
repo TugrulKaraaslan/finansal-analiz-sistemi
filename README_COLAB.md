@@ -17,8 +17,11 @@ tqdm
 click
 pydantic
 """.strip()
-open('/content/requirements_colab.txt','w').write(req)
-!pip install -q --force-reinstall -r /content/requirements_colab.txt
+from pathlib import Path
+p = Path("requirements_colab.txt")  # PATH DÜZENLENDİ
+with p.open("w", encoding="utf-8") as f:  # PATH DÜZENLENDİ
+    f.write(req)
+!pip install -q --force-reinstall -r requirements_colab.txt
 ```
 
 ## 2) Runtime'ı yeniden başlat
