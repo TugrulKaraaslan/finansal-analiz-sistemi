@@ -24,6 +24,18 @@ from .utils import info
 from .validator import dataset_summary, quality_warnings
 
 
+def _read_filters_csv(path: str | Path) -> pd.DataFrame:
+    """Read filters CSV safely."""
+    p = Path(path)
+    if not p.exists():  # PATH DÜZENLENDİ
+        info(f"Filters CSV bulunamadı: {p}")  # PATH DÜZENLENDİ
+        return pd.DataFrame()
+    try:
+        with p.open("r", encoding="utf-8") as f:  # PATH DÜZENLENDİ
+            return pd.read_csv(f)
+    except Exception:
+        info(f"Filters CSV okunamadı: {p}")  # PATH DÜZENLENDİ
+        return pd.DataFrame()
 @click.group()
 def cli():
     pass
@@ -53,16 +65,7 @@ def scan_range(config_path, start_date, end_date):
     info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(df, cfg.indicators.params)
     info("Filtre CSV okunuyor...")
-    p_filters = Path(cfg.data.filters_csv)
-    if p_filters.exists():
-        try:
-            filters_df = pd.read_csv(p_filters, encoding="utf-8")  # PATH DÜZENLENDİ
-        except Exception:
-            info(f"Filters CSV okunamadı: {p_filters}")  # PATH DÜZENLENDİ
-            filters_df = pd.DataFrame()
-    else:
-        info(f"Filters CSV bulunamadı: {p_filters}")  # PATH DÜZENLENDİ
-        filters_df = pd.DataFrame()
+    filters_df = _read_filters_csv(cfg.data.filters_csv)  # PATH DÜZENLENDİ
     req = {"FilterCode", "PythonQuery"}
     if filters_df.empty:
         filters_df = pd.DataFrame(columns=list(req))
@@ -170,16 +173,7 @@ def scan_day(config_path, date_str):
     info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(df, cfg.indicators.params)
     info("Filtre CSV okunuyor...")
-    p_filters = Path(cfg.data.filters_csv)
-    if p_filters.exists():
-        try:
-            filters_df = pd.read_csv(p_filters, encoding="utf-8")  # PATH DÜZENLENDİ
-        except Exception:
-            info(f"Filters CSV okunamadı: {p_filters}")  # PATH DÜZENLENDİ
-            filters_df = pd.DataFrame()
-    else:
-        info(f"Filters CSV bulunamadı: {p_filters}")  # PATH DÜZENLENDİ
-        filters_df = pd.DataFrame()
+    filters_df = _read_filters_csv(cfg.data.filters_csv)  # PATH DÜZENLENDİ
     req = {"FilterCode", "PythonQuery"}
     if filters_df.empty:
         filters_df = pd.DataFrame(columns=list(req))
