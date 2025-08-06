@@ -7,6 +7,12 @@ import pandas as pd
 def dataset_summary(df: pd.DataFrame) -> pd.DataFrame:
     """Return simple stats per symbol: first/last date, rows, NA close
     count, dup count."""
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
+    req = {"symbol", "date", "close"}
+    missing = req.difference(df.columns)
+    if missing:
+        raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")  # TİP DÜZELTİLDİ
     if df.empty:
         return pd.DataFrame(
             columns=[
@@ -32,6 +38,12 @@ def dataset_summary(df: pd.DataFrame) -> pd.DataFrame:
 def quality_warnings(df: pd.DataFrame) -> pd.DataFrame:
     """Return row-level issues for quick inspection (date order, negative
     prices, etc.)."""
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
+    req = {"symbol", "date", "close"}
+    missing = req.difference(df.columns)
+    if missing:
+        raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")  # TİP DÜZELTİLDİ
     issues = []
     if df.empty:
         return pd.DataFrame(columns=["symbol", "date", "issue", "value"])
