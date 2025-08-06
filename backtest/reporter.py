@@ -56,11 +56,16 @@ def write_reports(
                         diff[c] = diff[c] - float(xu100_pct[c])
                     diff["Ortalama"] = diff[cols].mean(axis=1)
                     diff.to_excel(writer, sheet_name=f"{summary_sheet_name}_DIFF")
+                avg = (
+                    sum(xu100_pct.values()) / len(xu100_pct)
+                    if xu100_pct
+                    else float("nan")
+                )  # TİP DÜZELTİLDİ
                 bist = (
                     pd.DataFrame(
                         [
                             [xu100_pct.get(c, float("nan")) for c in cols]
-                            + [pd.Series(list(xu100_pct.values())).mean()]
+                            + [avg]
                         ],
                         index=["BIST"],
                         columns=cols + ["Ortalama"],
