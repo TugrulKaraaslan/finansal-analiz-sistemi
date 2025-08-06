@@ -108,7 +108,9 @@ COL_ALIASES: Dict[str, str] = {
 
 
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    rename_map = {}
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
+    rename_map: Dict[str, str] = {}
     for c in df.columns:
         key = normalize_key(c).strip("_")
         std = COL_ALIASES.get(key, key)

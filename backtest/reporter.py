@@ -38,6 +38,8 @@ def write_reports(
     """
     if dates is None:
         dates = tuple()  # TİP DÜZELTİLDİ
+    elif isinstance(dates, (str, bytes, pd.Timestamp)):
+        dates = (dates,)  # TİP DÜZELTİLDİ
     else:
         dates = tuple(dates)  # TİP DÜZELTİLDİ
     if summary_wide is None:
