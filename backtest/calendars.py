@@ -38,7 +38,11 @@ def build_trading_days(
     start = pd.to_datetime(df["date"]).min()
     end = pd.to_datetime(df["date"]).max()
     all_days = pd.date_range(start=start, end=end, freq="D")
-    hol = set(pd.to_datetime(list(holidays))) if holidays is not None else set()
+    if holidays is not None:
+        hol_iter = holidays if isinstance(holidays, Iterable) else [holidays]
+        hol = set(pd.to_datetime(list(hol_iter)))  # TİP DÜZELTİLDİ
+    else:
+        hol = set()
     trade = [d for d in all_days if (not is_weekend(d)) and (d.normalize() not in hol)]
     return pd.DatetimeIndex(trade)
 
@@ -52,7 +56,7 @@ def add_next_close_calendar(
     """
     df = df.copy().sort_values(["symbol", "date"])
     # map current date -> next trading day
-    td = pd.Series(trading_days[1:].values, index=trading_days[:-1]).to_dict()
+    td = dict(zip(trading_days[:-1], trading_days[1:]))  # TİP DÜZELTİLDİ
     dates = pd.to_datetime(df["date"])
     next_dates = dates.apply(lambda d: td.get(pd.Timestamp(d).normalize(), pd.NaT))
     df["next_date"] = next_dates.dt.date

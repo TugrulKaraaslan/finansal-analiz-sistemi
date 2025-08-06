@@ -107,6 +107,7 @@ def scan_range(config_path, start_date, end_date):
         winrate["Ortalama"] = winrate.mean(axis=1)
     else:
         pivot = pd.DataFrame()
+        winrate = pd.DataFrame()  # TİP DÜZELTİLDİ
     xu100_pct = None
     if cfg.benchmark.xu100_source == "csv" and cfg.benchmark.xu100_csv_path:
         s = load_xu100_pct(cfg.benchmark.xu100_csv_path)
@@ -186,6 +187,7 @@ def scan_day(config_path, date_str):
         winrate["Ortalama"] = winrate.mean(axis=1)
     else:
         pivot = pd.DataFrame(columns=[day, "Ortalama"])
+        winrate = pd.DataFrame()  # TİP DÜZELTİLDİ
     out_dir = cfg.project.out_dir
     os.makedirs(out_dir, exist_ok=True)
     out_xlsx = os.path.join(out_dir, f"SCAN_{day}.xlsx")

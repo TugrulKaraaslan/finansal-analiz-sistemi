@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import pandas as pd
 
 
 def _ensure_dir(path: str):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    Path(path).parent.mkdir(parents=True, exist_ok=True)  # TİP DÜZELTİLDİ
 
 
 def write_reports(

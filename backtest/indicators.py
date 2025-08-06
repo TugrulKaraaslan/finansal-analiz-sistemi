@@ -1,13 +1,17 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pandas as pd
 import pandas_ta as ta
 
 
-def compute_indicators(df: pd.DataFrame, params: Dict[str, List[int]]) -> pd.DataFrame:
+def compute_indicators(
+    df: pd.DataFrame, params: Optional[Dict[str, List[int]]] = None
+) -> pd.DataFrame:
+    if params is None:
+        params = {}  # TİP DÜZELTİLDİ
     df = df.copy()
     df = df.sort_values(["symbol", "date"])
     out_frames = []
