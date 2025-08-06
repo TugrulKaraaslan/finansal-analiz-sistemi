@@ -1,8 +1,9 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
-import pandas as pd
 import re
+
+import pandas as pd
 
 
 def _to_pandas_ops(expr: str) -> str:

@@ -1,8 +1,9 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
+from typing import Iterable, Optional, Set
+
 import pandas as pd
-from typing import Optional, Set, Iterable
 
 
 def add_next_close(df: pd.DataFrame) -> pd.DataFrame:

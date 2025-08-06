@@ -4,8 +4,8 @@ from __future__ import annotations
 import ast
 import importlib
 import importlib.util
-import pkgutil
 from pathlib import Path
+import pkgutil
 
 import backtest
 

@@ -1,8 +1,8 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
-import sys
 from pathlib import Path
+import sys
 
 # Ensure the project root is on sys.path for imports
 ROOT = Path(__file__).resolve().parents[1]
