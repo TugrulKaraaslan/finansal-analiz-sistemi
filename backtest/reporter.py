@@ -5,6 +5,7 @@ from pathlib import Path
 from datetime import date  # TİP DÜZELTİLDİ
 from typing import Iterable, Optional, Mapping  # TİP DÜZELTİLDİ
 
+import warnings
 import pandas as pd
 
 
@@ -72,91 +73,97 @@ def write_reports(
     if summary_wide is None:
         summary_wide = pd.DataFrame()  # TİP DÜZELTİLDİ
     if out_xlsx:
-        _ensure_dir(out_xlsx)
-        with pd.ExcelWriter(out_xlsx, engine="xlsxwriter") as writer:
-            for d in dates:
-                day_df = trades_all[trades_all["Date"] == d].copy()
-                day_df = day_df.sort_values(["FilterCode", "Symbol"])
-                sheet = f"{daily_sheet_prefix}{d}"
-                day_df.to_excel(writer, sheet_name=sheet, index=False)
-
-            summary_wide.to_excel(writer, sheet_name=summary_sheet_name)
-
-            if summary_winrate is not None and not summary_winrate.empty:
-                summary_winrate.to_excel(
-                    writer, sheet_name=f"{summary_sheet_name}_WINRATE"
-                )
-
-            if xu100_pct is not None:
-                if isinstance(xu100_pct, pd.Series):
-                    xu100_series = xu100_pct.astype(float)  # TİP DÜZELTİLDİ
-                elif isinstance(xu100_pct, Mapping):
-                    xu100_series = pd.Series(dict(xu100_pct), dtype=float)  # TİP DÜZELTİLDİ
-                else:
-                    raise TypeError(
-                        "xu100_pct must be a mapping or Series"
-                    )  # TİP DÜZELTİLDİ
-                cols = [c for c in summary_wide.columns if c != "Ortalama"]
-                if set(cols).issubset(set(xu100_series.index)):
-                    diff = summary_wide.copy()
-                    for c in cols:
-                        diff[c] = diff[c] - float(xu100_series.get(c, float("nan")))
-                    diff["Ortalama"] = diff[cols].mean(axis=1)
-                    diff.to_excel(writer, sheet_name=f"{summary_sheet_name}_DIFF")
-                avg = (
-                    float(xu100_series.mean())
-                    if not xu100_series.empty
-                    else float("nan")
-                )
-                bist = (
-                    pd.DataFrame(
-                        [[xu100_series.get(c, float("nan")) for c in cols] + [avg]],
-                        index=["BIST"],
-                        columns=cols + ["Ortalama"],
+        out_xlsx_path = Path(out_xlsx)
+        _ensure_dir(out_xlsx_path)
+        try:
+            writer = pd.ExcelWriter(out_xlsx_path, engine="xlsxwriter")  # PATH DÜZENLENDİ
+        except Exception:
+            warnings.warn(f"Excel yazılamadı: {out_xlsx_path}")  # PATH DÜZENLENDİ
+        else:
+            with writer:
+                for d in dates:
+                    day_df = trades_all[trades_all["Date"] == d].copy()
+                    day_df = day_df.sort_values(["FilterCode", "Symbol"])
+                    sheet = f"{daily_sheet_prefix}{d}"
+                    day_df.to_excel(writer, sheet_name=sheet, index=False)
+    
+                summary_wide.to_excel(writer, sheet_name=summary_sheet_name)
+    
+                if summary_winrate is not None and not summary_winrate.empty:
+                    summary_winrate.to_excel(
+                        writer, sheet_name=f"{summary_sheet_name}_WINRATE"
                     )
-                    if cols
-                    else pd.DataFrame()
-                )
-                if not bist.empty:
-                    bist.to_excel(writer, sheet_name="BIST")
-
-            # Optional validation
-            if validation_summary is not None and not validation_summary.empty:
-                validation_summary.to_excel(
-                    writer, sheet_name="VALIDATION_SUMMARY", index=False
-                )
-            if validation_issues is not None and not validation_issues.empty:
-                validation_issues.to_excel(
-                    writer, sheet_name="VALIDATION_ISSUES", index=False
-                )
-
-            wb = writer.book
-            num_fmt = wb.add_format({"num_format": "0.00"})
-            pct_fmt = wb.add_format({"num_format": percent_fmt})
-
-            for d in dates:
-                sheet = f"{daily_sheet_prefix}{d}"
-                ws = writer.sheets[sheet]
-                ws.set_column(0, 2, 12)
-                ws.set_column(3, 4, 12)
-                ws.set_column(5, 5, 10, num_fmt)
-                ws.set_column(6, 6, 8)
-                ws.autofilter(0, 0, len(trades_all[trades_all["Date"] == d]), 6)
-
-            if summary_sheet_name in writer.sheets:
-                ws = writer.sheets[summary_sheet_name]
-                ws.set_column(1, 100, 12, num_fmt)
-
-            wr_sheet = f"{summary_sheet_name}_WINRATE"
-            if wr_sheet in writer.sheets:
-                ws = writer.sheets[wr_sheet]
-                ws.set_column(1, 100, 12, pct_fmt)
-
-            diff_sheet = f"{summary_sheet_name}_DIFF"
-            if diff_sheet in writer.sheets:
-                ws = writer.sheets[diff_sheet]
-                ws.set_column(1, 100, 12, num_fmt)
-
+    
+                if xu100_pct is not None:
+                    if isinstance(xu100_pct, pd.Series):
+                        xu100_series = xu100_pct.astype(float)  # TİP DÜZELTİLDİ
+                    elif isinstance(xu100_pct, Mapping):
+                        xu100_series = pd.Series(dict(xu100_pct), dtype=float)  # TİP DÜZELTİLDİ
+                    else:
+                        raise TypeError(
+                            "xu100_pct must be a mapping or Series"
+                        )  # TİP DÜZELTİLDİ
+                    cols = [c for c in summary_wide.columns if c != "Ortalama"]
+                    if set(cols).issubset(set(xu100_series.index)):
+                        diff = summary_wide.copy()
+                        for c in cols:
+                            diff[c] = diff[c] - float(xu100_series.get(c, float("nan")))
+                        diff["Ortalama"] = diff[cols].mean(axis=1)
+                        diff.to_excel(writer, sheet_name=f"{summary_sheet_name}_DIFF")
+                    avg = (
+                        float(xu100_series.mean())
+                        if not xu100_series.empty
+                        else float("nan")
+                    )
+                    bist = (
+                        pd.DataFrame(
+                            [[xu100_series.get(c, float("nan")) for c in cols] + [avg]],
+                            index=["BIST"],
+                            columns=cols + ["Ortalama"],
+                        )
+                        if cols
+                        else pd.DataFrame()
+                    )
+                    if not bist.empty:
+                        bist.to_excel(writer, sheet_name="BIST")
+    
+                # Optional validation
+                if validation_summary is not None and not validation_summary.empty:
+                    validation_summary.to_excel(
+                        writer, sheet_name="VALIDATION_SUMMARY", index=False
+                    )
+                if validation_issues is not None and not validation_issues.empty:
+                    validation_issues.to_excel(
+                        writer, sheet_name="VALIDATION_ISSUES", index=False
+                    )
+    
+                wb = writer.book
+                num_fmt = wb.add_format({"num_format": "0.00"})
+                pct_fmt = wb.add_format({"num_format": percent_fmt})
+    
+                for d in dates:
+                    sheet = f"{daily_sheet_prefix}{d}"
+                    ws = writer.sheets[sheet]
+                    ws.set_column(0, 2, 12)
+                    ws.set_column(3, 4, 12)
+                    ws.set_column(5, 5, 10, num_fmt)
+                    ws.set_column(6, 6, 8)
+                    ws.autofilter(0, 0, len(trades_all[trades_all["Date"] == d]), 6)
+    
+                if summary_sheet_name in writer.sheets:
+                    ws = writer.sheets[summary_sheet_name]
+                    ws.set_column(1, 100, 12, num_fmt)
+    
+                wr_sheet = f"{summary_sheet_name}_WINRATE"
+                if wr_sheet in writer.sheets:
+                    ws = writer.sheets[wr_sheet]
+                    ws.set_column(1, 100, 12, pct_fmt)
+    
+                diff_sheet = f"{summary_sheet_name}_DIFF"
+                if diff_sheet in writer.sheets:
+                    ws = writer.sheets[diff_sheet]
+                    ws.set_column(1, 100, 12, num_fmt)
+    
     if out_csv_dir:
         out_csv_path = Path(out_csv_dir)
         out_csv_path.mkdir(parents=True, exist_ok=True)  # PATH DÜZENLENDİ
