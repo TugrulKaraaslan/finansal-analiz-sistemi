@@ -10,6 +10,10 @@ import pandas_ta as ta
 def compute_indicators(
     df: pd.DataFrame, params: Optional[Dict[str, List[int]]] = None
 ) -> pd.DataFrame:
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
+    if params is not None and not isinstance(params, dict):
+        raise TypeError("params must be a dict or None")  # TİP DÜZELTİLDİ
     if params is None:
         params = {}  # TİP DÜZELTİLDİ
     if df.empty:
