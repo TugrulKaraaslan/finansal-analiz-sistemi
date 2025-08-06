@@ -55,7 +55,11 @@ def scan_range(config_path, start_date, end_date):
     info("Filtre CSV okunuyor...")
     p_filters = Path(cfg.data.filters_csv)
     if p_filters.exists():
-        filters_df = pd.read_csv(p_filters, encoding="utf-8")  # PATH DÜZENLENDİ
+        try:
+            filters_df = pd.read_csv(p_filters, encoding="utf-8")  # PATH DÜZENLENDİ
+        except Exception:
+            info(f"Filters CSV okunamadı: {p_filters}")  # PATH DÜZENLENDİ
+            filters_df = pd.DataFrame()
     else:
         info(f"Filters CSV bulunamadı: {p_filters}")  # PATH DÜZENLENDİ
         filters_df = pd.DataFrame()
@@ -168,7 +172,11 @@ def scan_day(config_path, date_str):
     info("Filtre CSV okunuyor...")
     p_filters = Path(cfg.data.filters_csv)
     if p_filters.exists():
-        filters_df = pd.read_csv(p_filters, encoding="utf-8")  # PATH DÜZENLENDİ
+        try:
+            filters_df = pd.read_csv(p_filters, encoding="utf-8")  # PATH DÜZENLENDİ
+        except Exception:
+            info(f"Filters CSV okunamadı: {p_filters}")  # PATH DÜZENLENDİ
+            filters_df = pd.DataFrame()
     else:
         info(f"Filters CSV bulunamadı: {p_filters}")  # PATH DÜZENLENDİ
         filters_df = pd.DataFrame()
