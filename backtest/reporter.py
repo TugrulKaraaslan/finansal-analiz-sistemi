@@ -3,22 +3,26 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Mapping
+from typing import List, Optional, Mapping
 
 import pandas as pd
 
 
-def _ensure_dir(path: str):
-    Path(path).parent.mkdir(parents=True, exist_ok=True)  # TİP DÜZELTİLDİ
+def _ensure_dir(path: Optional[str]):
+    if not path:
+        return
+    p = Path(path)
+    target = p if not p.suffix else p.parent
+    target.mkdir(parents=True, exist_ok=True)  # TİP DÜZELTİLDİ
 
 
 def write_reports(
     trades_all: pd.DataFrame,
-    dates: List,
-    summary_wide: pd.DataFrame,
+    dates: Optional[List] = None,
+    summary_wide: Optional[pd.DataFrame] = None,
     xu100_pct: Optional[Mapping] = None,
-    out_xlsx: str = None,
-    out_csv_dir: str = None,
+    out_xlsx: Optional[str] = None,
+    out_csv_dir: Optional[str] = None,
     daily_sheet_prefix: str = "SCAN_",
     summary_sheet_name: str = "SUMMARY",
     percent_fmt: str = "0.00%",
@@ -32,6 +36,10 @@ def write_reports(
     - SUMMARY_DIFF: Filtre − BIST
     - VALIDATION_SUMMARY / VALIDATION_ISSUES: veri kalite raporu
     """
+    if dates is None:
+        dates = []  # TİP DÜZELTİLDİ
+    if summary_wide is None:
+        summary_wide = pd.DataFrame()  # TİP DÜZELTİLDİ
     if out_xlsx:
         _ensure_dir(out_xlsx)
         with pd.ExcelWriter(out_xlsx, engine="xlsxwriter") as writer:
