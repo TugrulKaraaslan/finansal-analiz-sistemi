@@ -57,7 +57,11 @@ def write_reports(
                 )
 
             if xu100_pct is not None:
-                xu100_series = pd.Series(xu100_pct, dtype=float)  # TİP DÜZELTİLDİ
+                if not isinstance(xu100_pct, Mapping):
+                    raise TypeError(
+                        "xu100_pct must be a mapping of dates to returns"
+                    )  # TİP DÜZELTİLDİ
+                xu100_series = pd.Series(dict(xu100_pct), dtype=float)  # TİP DÜZELTİLDİ
                 cols = [c for c in summary_wide.columns if c != "Ortalama"]
                 if set(cols).issubset(set(xu100_series.index)):
                     diff = summary_wide.copy()
