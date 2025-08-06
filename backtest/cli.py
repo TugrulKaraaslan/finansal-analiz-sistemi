@@ -87,6 +87,8 @@ def scan_range(config_path, start_date, end_date):
         if cfg.project.end_date
         else all_days[len(all_days) - 1]  # Negatif indeks yerine açık indeks
     )  # LOJİK HATASI DÜZELTİLDİ
+    if start > end:
+        start, end = end, start  # LOJİK HATASI DÜZELTİLDİ
     days = [d for d in all_days if start <= d <= end]
     all_trades = []
     info(f"{len(days)} gün taranacak...")
