@@ -1,7 +1,6 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import click
@@ -54,13 +53,16 @@ def scan_range(config_path, start_date, end_date):
     info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(df, cfg.indicators.params)
     info("Filtre CSV okunuyor...")
-    try:
-        filters_df = pd.read_csv(cfg.data.filters_csv)
-    except FileNotFoundError:
-        info(f"Filters CSV bulunamadı: {cfg.data.filters_csv}")  # PATH DÜZENLENDİ
+    p_filters = Path(cfg.data.filters_csv)
+    if p_filters.exists():
+        filters_df = pd.read_csv(p_filters, encoding="utf-8")  # PATH DÜZENLENDİ
+    else:
+        info(f"Filters CSV bulunamadı: {p_filters}")  # PATH DÜZENLENDİ
         filters_df = pd.DataFrame()
     req = {"FilterCode", "PythonQuery"}
-    if not req.issubset(set(filters_df.columns)):
+    if filters_df.empty:
+        filters_df = pd.DataFrame(columns=list(req))
+    elif not req.issubset(set(filters_df.columns)):
         raise RuntimeError(
             "filters CSV: 'FilterCode' ve 'PythonQuery' kolonlarını içermeli"
         )
@@ -164,13 +166,16 @@ def scan_day(config_path, date_str):
     info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(df, cfg.indicators.params)
     info("Filtre CSV okunuyor...")
-    try:
-        filters_df = pd.read_csv(cfg.data.filters_csv)
-    except FileNotFoundError:
-        info(f"Filters CSV bulunamadı: {cfg.data.filters_csv}")  # PATH DÜZENLENDİ
+    p_filters = Path(cfg.data.filters_csv)
+    if p_filters.exists():
+        filters_df = pd.read_csv(p_filters, encoding="utf-8")  # PATH DÜZENLENDİ
+    else:
+        info(f"Filters CSV bulunamadı: {p_filters}")  # PATH DÜZENLENDİ
         filters_df = pd.DataFrame()
     req = {"FilterCode", "PythonQuery"}
-    if not req.issubset(set(filters_df.columns)):
+    if filters_df.empty:
+        filters_df = pd.DataFrame(columns=list(req))
+    elif not req.issubset(set(filters_df.columns)):
         raise RuntimeError(
             "filters CSV: 'FilterCode' ve 'PythonQuery' kolonlarını içermeli"
         )

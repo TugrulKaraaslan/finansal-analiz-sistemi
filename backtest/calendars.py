@@ -33,7 +33,7 @@ def load_holidays_csv(path: str | Path) -> Set[pd.Timestamp]:
     if not p.exists():  # PATH DÜZENLENDİ
         warnings.warn(f"Tatil CSV bulunamadı: {p}")
         return set()
-    h = pd.read_csv(p)
+    h = pd.read_csv(p, encoding="utf-8")  # PATH DÜZENLENDİ
     if h.empty:
         return set()
     cols = {c.lower(): c for c in h.columns}
