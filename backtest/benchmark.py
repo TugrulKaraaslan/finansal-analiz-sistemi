@@ -1,7 +1,8 @@
+# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 import pandas as pd
-import io, csv
+
 
 def _read_csv_any(path: str) -> pd.DataFrame:
     # Try default, then ; separator, decimal comma
@@ -14,17 +15,27 @@ def _read_csv_any(path: str) -> pd.DataFrame:
         dec = "," if sample.count(",") > sample.count(".") and sep == ";" else "."
         return pd.read_csv(path, sep=sep, decimal=dec)
 
+
 def load_xu100_pct(csv_path: str) -> pd.Series:
     df = _read_csv_any(csv_path)
     cols = {c.lower().strip(): c for c in df.columns}
     # date column
     c_date = cols.get("date") or cols.get("tarih") or list(df.columns)[0]
     # close-like column
-    cand = ["close","kapanış","kapanis","adjclose","adj_close","kapanis_tl","fiyat"]
+    cand = [
+        "close",
+        "kapanış",
+        "kapanis",
+        "adjclose",
+        "adj_close",
+        "kapanis_tl",
+        "fiyat",
+    ]
     close_col = None
     for k in cand:
         if k in cols:
-            close_col = cols[k]; break
+            close_col = cols[k]
+            break
     if close_col is None:
         # fallback: second column
         close_col = list(df.columns)[1]

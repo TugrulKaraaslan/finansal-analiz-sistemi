@@ -1,22 +1,24 @@
+# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 import pandas as pd
 from typing import Dict, List
 import pandas_ta as ta
 
-def compute_indicators(df: pd.DataFrame, params: Dict[str,List[int]]) -> pd.DataFrame:
+
+def compute_indicators(df: pd.DataFrame, params: Dict[str, List[int]]) -> pd.DataFrame:
     df = df.copy()
-    df = df.sort_values(["symbol","date"])
+    df = df.sort_values(["symbol", "date"])
     out_frames = []
     for sym, g in df.groupby("symbol", group_keys=False):
         g = g.copy()
-        for p in params.get("ema", [10,20,50]):
+        for p in params.get("ema", [10, 20, 50]):
             col = f"EMA_{p}"
             g[col] = ta.ema(g["close"], length=int(p))
         for p in params.get("rsi", [14]):
             col = f"RSI_{p}"
             g[col] = ta.rsi(g["close"], length=int(p))
-        macd_params = params.get("macd", [12,26,9])
+        macd_params = params.get("macd", [12, 26, 9])
         if len(macd_params) >= 3:
             fast, slow, sig = map(int, macd_params[:3])
             macd = ta.macd(g["close"], fast=fast, slow=slow, signal=sig)
@@ -35,19 +37,19 @@ def compute_indicators(df: pd.DataFrame, params: Dict[str,List[int]]) -> pd.Data
         if low not in df2.columns:
             df2[low] = df2[c]
     alias_map = {
-        "rsi_14":"RSI_14",
-        "ema_10":"EMA_10",
-        "ema_20":"EMA_20",
-        "ema_50":"EMA_50",
-        "macd_12_26_9_hist":"MACD_12_26_9_HIST",
-        "change_1d_percent":"CHANGE_1D_PERCENT",
-        "change_1w_percent":"CHANGE_5D_PERCENT",
-        "relative_volume":"RELATIVE_VOLUME",
+        "rsi_14": "RSI_14",
+        "ema_10": "EMA_10",
+        "ema_20": "EMA_20",
+        "ema_50": "EMA_50",
+        "macd_12_26_9_hist": "MACD_12_26_9_HIST",
+        "change_1d_percent": "CHANGE_1D_PERCENT",
+        "change_1w_percent": "CHANGE_5D_PERCENT",
+        "relative_volume": "RELATIVE_VOLUME",
     }
     alias_map_extra = {
-        "degisim_1g_yuzde":"CHANGE_1D_PERCENT",
-        "degisim_5g_yuzde":"CHANGE_5D_PERCENT",
-        "hacim_goreli":"RELATIVE_VOLUME",
+        "degisim_1g_yuzde": "CHANGE_1D_PERCENT",
+        "degisim_5g_yuzde": "CHANGE_5D_PERCENT",
+        "hacim_goreli": "RELATIVE_VOLUME",
     }
     alias_map.update(alias_map_extra)
     for low, up in alias_map.items():
