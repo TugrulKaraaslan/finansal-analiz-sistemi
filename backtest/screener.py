@@ -47,4 +47,8 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
                     )
         except Exception:
             continue
-    return pd.DataFrame(out_rows)
+    if not out_rows:
+        return pd.DataFrame(
+            columns=["FilterCode", "Symbol", "Date", "mask"]
+        )  # TİP DÜZELTİLDİ
+    return pd.DataFrame(out_rows)  # TİP DÜZELTİLDİ

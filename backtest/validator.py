@@ -70,4 +70,8 @@ def quality_warnings(df: pd.DataFrame) -> pd.DataFrame:
                     "value": r["close"],
                 }
             )
-    return pd.DataFrame(issues)
+    if not issues:
+        return pd.DataFrame(
+            columns=["symbol", "date", "issue", "value"]
+        )  # TİP DÜZELTİLDİ
+    return pd.DataFrame(issues, columns=["symbol", "date", "issue", "value"])  # TİP DÜZELTİLDİ
