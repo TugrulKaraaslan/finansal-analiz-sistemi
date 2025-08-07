@@ -1,6 +1,3 @@
-from pathlib import Path
-
-import pandas as pd
 import pytest
 
 from backtest.benchmark import load_xu100_pct
