@@ -132,8 +132,31 @@ def read_excels_long(
 ) -> pd.DataFrame:
     if isinstance(cfg_or_path, (str, Path)):
         excel_dir = resolve_path(cfg_or_path)
+        enable_cache = False
+        cache_path = None
     else:
         excel_dir = _guess_excel_dir_from_cfg(cfg_or_path)
+        enable_cache = False
+        cache_path = None
+        try:
+            enable_cache = bool(getattr(getattr(cfg_or_path, "data", None), "enable_cache", False))
+            cache_path = getattr(getattr(cfg_or_path, "data", None), "cache_parquet_path", None)
+        except Exception:
+            pass
+        if not enable_cache and isinstance(cfg_or_path, dict):
+            d = cfg_or_path.get("data", {})
+            enable_cache = bool(d.get("enable_cache", False))
+            cache_path = d.get("cache_parquet_path", cache_path)
+
+    if enable_cache and cache_path:
+        try:
+            cache_file = resolve_path(cache_path)
+            if cache_file.exists():
+                return pd.read_parquet(cache_file)
+        except Exception as e:
+            if verbose:
+                print(f"[WARN] Önbellek okunamadı: {cache_path} -> {e}")
+
     if not excel_dir or not excel_dir.exists():
         warnings.warn(f"Excel klasörü bulunamadı: {excel_dir}")
         return pd.DataFrame()
@@ -194,6 +217,16 @@ def read_excels_long(
     full = full.sort_values(["symbol", "date"], kind="mergesort").reset_index(drop=True)
     if "close" in full.columns:
         full = full.dropna(subset=["close"])
+
+    if enable_cache and cache_path:
+        try:
+            cache_file = resolve_path(cache_path)
+            cache_file.parent.mkdir(parents=True, exist_ok=True)
+            full.to_parquet(cache_file, index=False)
+        except Exception as e:
+            if verbose:
+                print(f"[WARN] Önbelleğe yazılamadı: {cache_path} -> {e}")
+
     return full
 
 
