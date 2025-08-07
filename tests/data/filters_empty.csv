@@ -1,2 +1,2 @@
-filter_name,query,group
+FilterCode,PythonQuery,Group
 f1,,A

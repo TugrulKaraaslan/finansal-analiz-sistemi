@@ -16,12 +16,13 @@
 
 ## Filtre CSV Açıklaması
 - Satırlar `;` ile ayrılır.
-- Zorunlu kolonlar:
+- Kolonlar:
 
 | Kolon | Açıklama |
 | ----- | ----- |
 | FilterCode | Filtrenin raporda görünecek kısa adı |
 | PythonQuery | `pandas` ifadesi, örn: `(rsi_14 > 65) and (relative_volume > 1)` |
+| Group *(opsiyonel)* | Filtreleri kategorize etmek için kullanılabilir |
 
 - Örnek satır:
 ```csv

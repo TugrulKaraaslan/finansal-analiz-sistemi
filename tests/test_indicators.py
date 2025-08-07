@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 import indicator_calculator as ic
 
@@ -31,3 +32,9 @@ def test_indicator_calculator_outputs():
 
     assert rsi.isna().all()
     assert adx.isna().all()
+
+
+def test_adx_raises_without_pandas_ta(monkeypatch):
+    monkeypatch.setattr(ic, "ta", None)
+    with pytest.raises(NotImplementedError):
+        ic.adx_14(pd.Series([1, 2]), pd.Series([1, 2]), pd.Series([1, 2]))

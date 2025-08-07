@@ -1,5 +1,13 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
-"""CSV validation helpers."""
+"""CSV validation helpers for filter definitions.
+
+The expected structure for filter definition files is::
+
+    FilterCode;PythonQuery;Group
+
+Where ``Group`` is optional and may be omitted. ``FilterCode`` and
+``PythonQuery`` must be non-empty strings.
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,18 +18,26 @@ import pandera as pa
 
 _SCHEMA = pa.DataFrameSchema(
     {
-        "filter_name": pa.Column(pa.String, nullable=False, checks=pa.Check.str_length(min_value=1)),
-        "query": pa.Column(pa.String, nullable=False, checks=pa.Check.str_length(min_value=1)),
-        "group": pa.Column(pa.String, nullable=True),
+        "FilterCode": pa.Column(
+            pa.String, nullable=False, checks=pa.Check.str_length(min_value=1)
+        ),
+        "PythonQuery": pa.Column(
+            pa.String, nullable=False, checks=pa.Check.str_length(min_value=1)
+        ),
+        "Group": pa.Column(pa.String, nullable=True, required=False),
     },
     coerce=True,
 )
 
 
 def validate_filters(path: str | Path) -> pd.DataFrame:
-    """Validate filter definitions CSV against the schema."""
+    """Validate filter definitions CSV against the schema.
+
+    The file must contain ``FilterCode`` and ``PythonQuery`` columns and may
+    include an optional ``Group`` column.
+    """
     p = Path(path)
-    df = pd.read_csv(p)
+    df = pd.read_csv(p, sep=None, engine="python")
     try:
         _SCHEMA.validate(df, lazy=True)
     except pa.errors.SchemaErrors as err:

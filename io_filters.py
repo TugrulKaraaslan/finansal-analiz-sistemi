@@ -1,5 +1,9 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
-"""Helpers for reading filter CSV files."""
+"""Helpers for reading filter CSV files.
+
+Filter definition files are expected to contain ``FilterCode`` and
+``PythonQuery`` columns and may include an optional ``Group`` column.
+"""
 
 from __future__ import annotations
 
@@ -14,6 +18,9 @@ REQUIRED_COLUMNS = {"FilterCode", "PythonQuery"}
 
 def load_filters_csv(path: str | Path) -> pd.DataFrame:
     """Load filters from CSV with validation and basic normalization.
+
+    The CSV must define ``FilterCode`` and ``PythonQuery`` columns. ``Group`` is
+    optional and ignored if absent.
 
     Parameters
     ----------

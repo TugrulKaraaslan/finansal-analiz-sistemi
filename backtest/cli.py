@@ -26,22 +26,12 @@ def cli():
     pass
 
 
-@cli.command("scan-range")
-@click.option("--config", "config_path", required=True, help="YAML config yolu")
-@click.option("--start", "start_date", required=False, default=None, help="YYYY-MM-DD")
-@click.option("--end", "end_date", required=False, default=None, help="YYYY-MM-DD")
-@click.option("--holding-period", default=None, type=int)
-@click.option("--transaction-cost", default=None, type=float)
-def scan_range(config_path, start_date, end_date, holding_period, transaction_cost):
-    cfg = load_config(config_path)
-    if start_date:
-        cfg.project.start_date = start_date
-    if end_date:
-        cfg.project.end_date = end_date
-    if holding_period is not None:
-        cfg.project.holding_period = holding_period
-    if transaction_cost is not None:
-        cfg.project.transaction_cost = transaction_cost
+def _run_scan(cfg) -> None:
+    """Common execution for scan commands.
+
+    The filters CSV must provide ``FilterCode`` and ``PythonQuery`` columns and
+    may include an optional ``Group`` column.
+    """
     info("Excelleri okuyor...")
     try:
         df = read_excels_long(cfg)
@@ -64,29 +54,35 @@ def scan_range(config_path, start_date, end_date, holding_period, transaction_co
         filters_df = load_filters_csv(cfg.data.filters_csv)
     except FileNotFoundError as exc:
         info(str(exc))
-        filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
+        filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery", "Group"])
     if filters_df.empty:
         info("Filtre CSV boş veya bulunamadı, işlem yapılmadı.")
         return
+
     all_days = sorted(pd.to_datetime(df_ind["date"]).dt.normalize().unique())
-    if not all_days:
-        info("Taranacak tarih bulunamadı, veri seti boş.")  # LOJİK HATASI DÜZELTİLDİ
-        return  # Liste boşsa başlangıç/bitiş alınamaz
-    start = (
-        pd.to_datetime(cfg.project.start_date).normalize()
-        if cfg.project.start_date
-        else all_days[0]
-    )
-    end = (
-        pd.to_datetime(cfg.project.end_date).normalize()
-        if cfg.project.end_date
-        else all_days[len(all_days) - 1]  # Negatif indeks yerine açık indeks
-    )  # LOJİK HATASI DÜZELTİLDİ
-    if start > end:
-        start, end = end, start  # LOJİK HATASI DÜZELTİLDİ
-    days = [d for d in all_days if start <= d <= end]
+    if cfg.project.run_mode == "single" and cfg.project.single_date:
+        day = pd.to_datetime(cfg.project.single_date).normalize()
+        days = [day]
+    else:
+        if not all_days:
+            info("Taranacak tarih bulunamadı, veri seti boş.")
+            return
+        start = (
+            pd.to_datetime(cfg.project.start_date).normalize()
+            if cfg.project.start_date
+            else all_days[0]
+        )
+        end = (
+            pd.to_datetime(cfg.project.end_date).normalize()
+            if cfg.project.end_date
+            else all_days[-1]
+        )
+        if start > end:
+            start, end = end, start
+        days = [d for d in all_days if start <= d <= end]
     all_trades = []
-    info(f"{len(days)} gün taranacak...")
+    if len(days) > 1:
+        info(f"{len(days)} gün taranacak...")
     for d in days:
         sigs = run_screener(df_ind, filters_df, d)
         trades = run_1g_returns(
@@ -110,20 +106,20 @@ def scan_range(config_path, start_date, end_date, holding_period, transaction_co
     )
     if not trades_all.empty:
         pivot = (
-            trades_all.groupby(["FilterCode", "Date"])["ReturnPct"]
-            .mean()
-            .unstack(fill_value=float("nan"))
+            trades_all.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack(
+                fill_value=float("nan")
+            )
         )
         pivot["Ortalama"] = pivot.mean(axis=1)
         winrate = (
-            trades_all.groupby(["FilterCode", "Date"])["Win"]
-            .mean()
-            .unstack(fill_value=float("nan"))
+            trades_all.groupby(["FilterCode", "Date"])["Win"].mean().unstack(
+                fill_value=float("nan")
+            )
         )
         winrate["Ortalama"] = winrate.mean(axis=1)
     else:
-        pivot = pd.DataFrame()
-        winrate = pd.DataFrame()  # TİP DÜZELTİLDİ
+        pivot = pd.DataFrame(columns=[*days, "Ortalama"])
+        winrate = pd.DataFrame()
     xu100_pct = None
     if cfg.benchmark.xu100_source == "csv" and cfg.benchmark.xu100_csv_path:
         s = load_xu100_pct(cfg.benchmark.xu100_csv_path)
@@ -132,8 +128,12 @@ def scan_range(config_path, start_date, end_date, holding_period, transaction_co
         }
     out_dir = resolve_path(cfg.project.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_xlsx = out_dir / f"{start.date()}_{end.date()}_1G_BIST100.xlsx"
-    out_csv_dir = out_dir / "csv"
+    if len(days) == 1:
+        out_xlsx = out_dir / f"SCAN_{days[0].date()}.xlsx"
+        out_csv_dir = None
+    else:
+        out_xlsx = out_dir / f"{days[0].date()}_{days[-1].date()}_1G_BIST100.xlsx"
+        out_csv_dir = out_dir / "csv"
     info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
     val_iss = quality_warnings(df)
@@ -155,6 +155,25 @@ def scan_range(config_path, start_date, end_date, holding_period, transaction_co
     if outputs.get("csv"):
         info(f"CSV klasörü: {outputs['csv'][0].parent}")
 
+@cli.command("scan-range")
+@click.option("--config", "config_path", required=True, help="YAML config yolu")
+@click.option("--start", "start_date", required=False, default=None, help="YYYY-MM-DD")
+@click.option("--end", "end_date", required=False, default=None, help="YYYY-MM-DD")
+@click.option("--holding-period", default=None, type=int)
+@click.option("--transaction-cost", default=None, type=float)
+def scan_range(config_path, start_date, end_date, holding_period, transaction_cost):
+    cfg = load_config(config_path)
+    if start_date:
+        cfg.project.start_date = start_date
+    if end_date:
+        cfg.project.end_date = end_date
+    if holding_period is not None:
+        cfg.project.holding_period = holding_period
+    if transaction_cost is not None:
+        cfg.project.transaction_cost = transaction_cost
+    cfg.project.run_mode = "range"
+    _run_scan(cfg)
+
 
 @cli.command("scan-day")
 @click.option("--config", "config_path", required=True)
@@ -169,78 +188,7 @@ def scan_day(config_path, date_str, holding_period, transaction_cost):
         cfg.project.holding_period = holding_period
     if transaction_cost is not None:
         cfg.project.transaction_cost = transaction_cost
-    info("Excelleri okuyor...")
-    try:
-        df = read_excels_long(cfg)
-    except (FileNotFoundError, RuntimeError) as exc:
-        info(str(exc))
-        return
-    df = normalize(df)
-    if cfg.calendar.tplus1_mode == "calendar":
-        holidays = None
-        if cfg.calendar.holidays_source == "csv" and cfg.calendar.holidays_csv_path:
-            holidays = load_holidays_csv(cfg.calendar.holidays_csv_path)
-        tdays = build_trading_days(df, holidays)
-        df = add_next_close_calendar(df, tdays)
-    else:
-        df = add_next_close(df)
-    info("Göstergeler hesaplanıyor...")
-    df_ind = compute_indicators(df, cfg.indicators.params)
-    info("Filtre CSV okunuyor...")
-    try:
-        filters_df = load_filters_csv(cfg.data.filters_csv)
-    except FileNotFoundError as exc:
-        info(str(exc))
-        filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
-    if filters_df.empty:
-        info("Filtre CSV boş veya bulunamadı, işlem yapılmadı.")
-        return
-    day = pd.to_datetime(date_str).normalize()
-    sigs = run_screener(df_ind, filters_df, day)
-    trades = run_1g_returns(
-        df_ind, sigs, cfg.project.holding_period, cfg.project.transaction_cost
-    )
-    xu100_pct = None
-    if cfg.benchmark.xu100_source == "csv" and cfg.benchmark.xu100_csv_path:
-        s = load_xu100_pct(cfg.benchmark.xu100_csv_path)
-        xu100_pct = {day: float(s.get(day, float("nan")))}
-    if not trades.empty:
-        pivot = (
-            trades.groupby(["FilterCode", "Date"])["ReturnPct"]
-            .mean()
-            .unstack(fill_value=float("nan"))
-        )
-        pivot["Ortalama"] = pivot.mean(axis=1)
-        winrate = (
-            trades.groupby(["FilterCode", "Date"])["Win"]
-            .mean()
-            .unstack(fill_value=float("nan"))
-        )
-        winrate["Ortalama"] = winrate.mean(axis=1)
-    else:
-        pivot = pd.DataFrame(columns=[day, "Ortalama"])
-        winrate = pd.DataFrame()  # TİP DÜZELTİLDİ
-    out_dir = resolve_path(cfg.project.out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_xlsx = out_dir / f"SCAN_{day.date()}.xlsx"
-    info("Raporlar yazılıyor...")
-    val_sum = dataset_summary(df)
-    val_iss = quality_warnings(df)
-    outputs = write_reports(
-        trades,
-        [day],
-        pivot,
-        xu100_pct,
-        out_xlsx=out_xlsx,
-        out_csv_dir=None,
-        validation_summary=val_sum,
-        validation_issues=val_iss,
-        summary_winrate=winrate,
-        daily_sheet_prefix=cfg.report.daily_sheet_prefix,
-        summary_sheet_name=cfg.report.summary_sheet_name,
-        percent_fmt=cfg.report.percent_format,
-    )
-    info(f"Bitti. Çıktı: {outputs.get('excel')}")
+    _run_scan(cfg)
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
+from loguru import logger
 
 from backtest.utils import normalize_key
 from utils.paths import resolve_path
@@ -104,21 +105,37 @@ def read_excels_long(
 ) -> pd.DataFrame:
     if isinstance(cfg_or_path, (str, Path)):
         excel_dir = resolve_path(cfg_or_path)
-        enable_cache = False
+        enable_cache = None
         cache_path = None
     else:
         excel_dir = _guess_excel_dir_from_cfg(cfg_or_path)
-        enable_cache = False
+        enable_cache = None
         cache_path = None
         try:
-            enable_cache = bool(getattr(getattr(cfg_or_path, "data", None), "enable_cache", False))
-            cache_path = getattr(getattr(cfg_or_path, "data", None), "cache_parquet_path", None)
+            enable_cache = getattr(
+                getattr(cfg_or_path, "data", None), "enable_cache", None
+            )
+            cache_path = getattr(
+                getattr(cfg_or_path, "data", None), "cache_parquet_path", None
+            )
         except Exception:
             pass
-        if not enable_cache and isinstance(cfg_or_path, dict):
+        if enable_cache is None and isinstance(cfg_or_path, dict):
             d = cfg_or_path.get("data", {})
-            enable_cache = bool(d.get("enable_cache", False))
+            enable_cache = d.get("enable_cache", None)
             cache_path = d.get("cache_parquet_path", cache_path)
+
+    excel_files: List[Path] = []
+    if excel_dir and excel_dir.exists():
+        excel_files = sorted(p for p in excel_dir.glob("*.xlsx"))
+    if enable_cache is None:
+        enable_cache = len(excel_files) > 5
+        if enable_cache:
+            logger.info(
+                "Cache enabled automatically for %d Excel files", len(excel_files)
+            )
+    if enable_cache and not cache_path:
+        cache_path = excel_dir / "cache.parquet" if excel_dir else None
 
     if enable_cache and cache_path:
         try:
@@ -126,14 +143,12 @@ def read_excels_long(
             if cache_file.exists():
                 return pd.read_parquet(cache_file)
         except Exception as e:
-            if verbose:
-                print(f"[WARN] Önbellek okunamadı: {cache_path} -> {e}")
+            logger.warning("Önbellek okunamadı: %s -> %s", cache_path, e)
 
     if not excel_dir or not excel_dir.exists():
         raise FileNotFoundError(f"Excel klasörü bulunamadı: {excel_dir}")
 
     records: List[pd.DataFrame] = []
-    excel_files = sorted(p for p in excel_dir.glob("*.xlsx"))
     if not excel_files:
         raise RuntimeError(f"'{excel_dir}' altında .xlsx bulunamadı.")
 
@@ -195,9 +210,8 @@ def read_excels_long(
             cache_file = resolve_path(cache_path)
             cache_file.parent.mkdir(parents=True, exist_ok=True)
             full.to_parquet(cache_file, index=False)
-        except Exception as e:
-            if verbose:
-                print(f"[WARN] Önbelleğe yazılamadı: {cache_path} -> {e}")
+        except Exception as e:  # pragma: no cover - logging
+            logger.warning("Önbelleğe yazılamadı: %s -> %s", cache_path, e)
 
     return full
 
