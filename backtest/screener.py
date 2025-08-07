@@ -70,22 +70,30 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
         missing_cols = sq.names.difference(d.columns)
         if missing_cols:
             msg = f"Filter {code!r} skipped; missing columns: {sorted(missing_cols)}"
-            logger.warning("Filter skipped due to missing columns", code=code, missing=sorted(missing_cols))
+            logger.warning(
+                "Filter skipped due to missing columns", code=code, missing=sorted(missing_cols)
+            )
             warnings.warn(msg)
             continue
         valids.append((code, sq))
     out_frames = []
-    for code, sq in valids:
-        try:
-            hits = sq.filter(d)
-            if not hits.empty:
-                tmp = hits[["symbol"]].copy()
-                tmp["FilterCode"] = code
-                tmp["Date"] = day
-                out_frames.append(tmp)
-        except Exception as err:
-            warnings.warn(f"Filter {code!r} failed: {err}")
-            logger.warning("Filter {code!r} failed: {err}", code=code, err=err)
+    if valids:
+        masks = {}
+        for code, sq in valids:
+            try:
+                masks[code] = sq._mask(d)
+            except Exception as err:
+                warnings.warn(f"Filter {code!r} failed: {err}")
+                logger.warning("Filter {code!r} failed: {err}", code=code, err=err)
+        mask_df = pd.DataFrame(masks)
+        for code, mask in mask_df.items():
+            idx = mask[mask].index
+            if not len(idx):
+                continue
+            tmp = d.loc[idx, ["symbol"]].copy()
+            tmp["FilterCode"] = code
+            tmp["Date"] = day
+            out_frames.append(tmp)
     if not out_frames:
         logger.debug("run_screener end - no hits")
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])

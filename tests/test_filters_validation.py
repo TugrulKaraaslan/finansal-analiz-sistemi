@@ -5,7 +5,7 @@ from lib.validator import validate_filters
 
 def test_validate_filters_ok():
     df = validate_filters("tests/data/filters_valid.csv")
-    assert list(df.columns) == ["filter_name", "query", "group"]
+    assert list(df.columns) == ["FilterCode", "PythonQuery", "Group"]
     assert len(df) == 2
 
 

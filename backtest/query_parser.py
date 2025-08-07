@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import ast
 import string
+import re
 from typing import Set, Tuple
 
 import pandas as pd
@@ -37,8 +38,11 @@ class SafeQuery:
     }
 
     def __init__(self, expr: str):
-        self.expr = expr
-        ok, names, err = self._validate(expr)
+        expr_tr = re.sub(r"\band\b", "&", expr, flags=re.I)
+        expr_tr = re.sub(r"\bor\b", "|", expr_tr, flags=re.I)
+        expr_tr = re.sub(r"\bnot\b", "~", expr_tr, flags=re.I)
+        self.expr = expr_tr
+        ok, names, err = self._validate(expr_tr)
         self.is_safe = ok
         self.names = names
         self.error = err
@@ -73,14 +77,13 @@ class SafeQuery:
                     return False, names, f"attribute '{node.attr}' not allowed"
         return True, names, None
 
-    def filter(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Return rows from *df* matching the query expression.
-
-        Raises
-        ------
-        ValueError
-            If the stored expression is unsafe.
-        """
+    def _mask(self, df: pd.DataFrame) -> pd.Series:
         if not self.is_safe:
             raise ValueError(f"Unsafe query expression: {self.error}")
-        return df.query(self.expr)
+        env = {name: df[name] for name in df.columns}
+        env.update({"abs": abs})
+        return pd.eval(self.expr, engine="python", parser="pandas", local_dict=env)
+
+    def filter(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Return rows from *df* matching the query expression."""
+        return df[self._mask(df)]
