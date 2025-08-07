@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from backtest.config import RootCfg, load_config
+from backtest.config import load_config
 
 
 def _write_cfg(text: str) -> Path:
