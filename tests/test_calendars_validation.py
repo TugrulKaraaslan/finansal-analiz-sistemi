@@ -36,6 +36,9 @@ def test_build_trading_days_invalid_holidays():
 def test_load_holidays_csv_validation(tmp_path):
     with pytest.raises(TypeError):
         load_holidays_csv(123)
+    missing = tmp_path / "missing.csv"
+    with pytest.raises(FileNotFoundError):
+        load_holidays_csv(missing)
     csv_file = tmp_path / "hol.csv"
     csv_file.write_text("col\n1\n", encoding="utf-8")
     with pytest.raises(ValueError):
