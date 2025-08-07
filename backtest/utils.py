@@ -8,11 +8,13 @@ import unicodedata
 
 from loguru import logger
 
+from utils.paths import resolve_path
+
 
 def ensure_dir(path: str | Path):
-    p = Path(path)
+    p = resolve_path(path)
     target = p if not p.suffix else p.parent
-    target.mkdir(parents=True, exist_ok=True)  # TİP DÜZELTİLDİ
+    target.mkdir(parents=True, exist_ok=True)
 
 
 def info(msg: str):

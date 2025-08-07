@@ -6,6 +6,7 @@ from typing import Iterable, Optional, Set
 import warnings
 
 import pandas as pd
+from utils.paths import resolve_path
 
 
 def add_next_close(df: pd.DataFrame) -> pd.DataFrame:
@@ -28,15 +29,15 @@ def load_holidays_csv(path: str | Path) -> Set[pd.Timestamp]:
     """Read holiday CSV with a 'date' column (case-insens.),
     return set of Timestamps (date only)."""
     if not isinstance(path, (str, bytes, Path)):
-        raise TypeError("path must be a string or Path")  # TİP DÜZELTİLDİ
-    p = Path(path)
-    if not p.exists():  # PATH DÜZENLENDİ
+        raise TypeError("path must be a string or Path")
+    p = resolve_path(path)
+    if not p.exists():
         warnings.warn(f"Tatil CSV bulunamadı: {p}")
         return set()
     try:
-        h = pd.read_csv(p, encoding="utf-8")  # PATH DÜZENLENDİ
+        h = pd.read_csv(p, encoding="utf-8")
     except Exception:
-        warnings.warn(f"Tatil CSV okunamadı: {p}")  # PATH DÜZENLENDİ
+        warnings.warn(f"Tatil CSV okunamadı: {p}")
         return set()
     if h.empty:
         return set()

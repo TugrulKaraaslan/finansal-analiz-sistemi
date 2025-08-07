@@ -4,9 +4,12 @@ from __future__ import annotations
 from typing import Dict, List, Optional
 from pathlib import Path  # TİP DÜZELTİLDİ
 import warnings
+import os
 
 from pydantic import BaseModel, Field
 import yaml
+
+from utils.paths import resolve_path
 
 
 class ProjectCfg(BaseModel):
@@ -70,23 +73,27 @@ class RootCfg(BaseModel):
 
 
 def load_config(path: str | Path) -> RootCfg:
-    p = Path(path)
-    if not p.exists():  # PATH DÜZENLENDİ
+    p = resolve_path(path)
+    if not p.exists():
         warnings.warn(f"Config bulunamadı: {p}")
         return RootCfg(
             project=ProjectCfg(),
             data=DataCfg(excel_dir="", filters_csv=""),
         )
-    with open(p, "r", encoding="utf-8") as f:  # PATH DÜZENLENDİ
+    with p.open("r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     if not isinstance(cfg, dict):
         raise TypeError("Config içeriği sözlük olmalı")  # TİP DÜZELTİLDİ
     base = p.parent
+
     def _join(v: Optional[str]) -> Optional[str]:
         if not v:
             return v
-        vp = Path(v)
-        return str(base / vp) if not vp.is_absolute() else str(vp)
+        raw = os.path.expandvars(os.path.expanduser(v))
+        vp = Path(raw)
+        if not vp.is_absolute():
+            vp = base / vp
+        return str(resolve_path(vp))
 
     proj = cfg.get("project", {}) if isinstance(cfg, dict) else {}
     if isinstance(proj, dict) and proj.get("out_dir"):
