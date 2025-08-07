@@ -100,9 +100,16 @@ def load_config(path: str | Path) -> RootCfg:
             data[k] = _join(v)  # PATH DÜZENLENDİ
     cal = cfg.get("calendar", {}) if isinstance(cfg, dict) else {}
     if isinstance(cal, dict) and cal.get("holidays_csv_path"):
-        cal["holidays_csv_path"] = _join(cal.get("holidays_csv_path"))  # PATH DÜZENLENDİ
+        cal["holidays_csv_path"] = _join(
+            cal.get("holidays_csv_path")
+        )  # PATH DÜZENLENDİ
     bench = cfg.get("benchmark", {}) if isinstance(cfg, dict) else {}
     if isinstance(bench, dict) and bench.get("xu100_csv_path"):
         bench["xu100_csv_path"] = _join(bench.get("xu100_csv_path"))  # PATH DÜZENLENDİ
-    cfg["project"], cfg["data"], cfg["calendar"], cfg["benchmark"] = proj, data, cal, bench
+    cfg["project"], cfg["data"], cfg["calendar"], cfg["benchmark"] = (
+        proj,
+        data,
+        cal,
+        bench,
+    )
     return RootCfg(**cfg)

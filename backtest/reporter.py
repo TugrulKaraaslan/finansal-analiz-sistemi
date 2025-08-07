@@ -53,16 +53,24 @@ def write_reports(
     missing = req_cols.difference(trades_all.columns)
     if missing:
         raise ValueError(
-            f"trades_all missing columns: {', '.join(sorted(missing))}"  # TİP DÜZELTİLDİ
-        )
+            f"trades_all missing columns: {', '.join(sorted(missing))}"
+        )  # TİP DÜZELTİLDİ
     if summary_wide is not None and not isinstance(summary_wide, pd.DataFrame):
         raise TypeError("summary_wide must be a DataFrame or None")  # TİP DÜZELTİLDİ
     if summary_winrate is not None and not isinstance(summary_winrate, pd.DataFrame):
         raise TypeError("summary_winrate must be a DataFrame or None")  # TİP DÜZELTİLDİ
-    if validation_summary is not None and not isinstance(validation_summary, pd.DataFrame):
-        raise TypeError("validation_summary must be a DataFrame or None")  # TİP DÜZELTİLDİ
-    if validation_issues is not None and not isinstance(validation_issues, pd.DataFrame):
-        raise TypeError("validation_issues must be a DataFrame or None")  # TİP DÜZELTİLDİ
+    if validation_summary is not None and not isinstance(
+        validation_summary, pd.DataFrame
+    ):
+        raise TypeError(
+            "validation_summary must be a DataFrame or None"
+        )  # TİP DÜZELTİLDİ
+    if validation_issues is not None and not isinstance(
+        validation_issues, pd.DataFrame
+    ):
+        raise TypeError(
+            "validation_issues must be a DataFrame or None"
+        )  # TİP DÜZELTİLDİ
 
     if dates is None:
         dates = tuple()  # TİP DÜZELTİLDİ
@@ -78,7 +86,9 @@ def write_reports(
         out_xlsx_path = resolve_path(out_xlsx)
         _ensure_dir(out_xlsx_path)
         try:
-            writer = pd.ExcelWriter(out_xlsx_path, engine="xlsxwriter")  # PATH DÜZENLENDİ
+            writer = pd.ExcelWriter(
+                out_xlsx_path, engine="xlsxwriter"
+            )  # PATH DÜZENLENDİ
         except Exception:
             warnings.warn(f"Excel yazılamadı: {out_xlsx_path}")  # PATH DÜZENLENDİ
         else:
@@ -88,19 +98,21 @@ def write_reports(
                     day_df = day_df.sort_values(["FilterCode", "Symbol"])
                     sheet = f"{daily_sheet_prefix}{d}"
                     day_df.to_excel(writer, sheet_name=sheet, index=False)
-    
+
                 summary_wide.to_excel(writer, sheet_name=summary_sheet_name)
-    
+
                 if summary_winrate is not None and not summary_winrate.empty:
                     summary_winrate.to_excel(
                         writer, sheet_name=f"{summary_sheet_name}_WINRATE"
                     )
-    
+
                 if xu100_pct is not None:
                     if isinstance(xu100_pct, pd.Series):
                         xu100_series = xu100_pct.astype(float)  # TİP DÜZELTİLDİ
                     elif isinstance(xu100_pct, Mapping):
-                        xu100_series = pd.Series(dict(xu100_pct), dtype=float)  # TİP DÜZELTİLDİ
+                        xu100_series = pd.Series(
+                            dict(xu100_pct), dtype=float
+                        )  # TİP DÜZELTİLDİ
                     else:
                         raise TypeError(
                             "xu100_pct must be a mapping or Series"
@@ -128,7 +140,7 @@ def write_reports(
                     )
                     if not bist.empty:
                         bist.to_excel(writer, sheet_name="BIST")
-    
+
                 # Optional validation
                 if validation_summary is not None and not validation_summary.empty:
                     validation_summary.to_excel(
@@ -138,11 +150,11 @@ def write_reports(
                     validation_issues.to_excel(
                         writer, sheet_name="VALIDATION_ISSUES", index=False
                     )
-    
+
                 wb = writer.book
                 num_fmt = wb.add_format({"num_format": "0.00"})
                 pct_fmt = wb.add_format({"num_format": percent_fmt})
-    
+
                 for d in dates:
                     sheet = f"{daily_sheet_prefix}{d}"
                     ws = writer.sheets[sheet]
@@ -153,21 +165,21 @@ def write_reports(
                     rows = len(trades_all[trades_all["Date"] == d])
                     last_row = rows if rows > 0 else 0  # LOJİK HATASI DÜZELTİLDİ
                     ws.autofilter(0, 0, last_row, 6)
-    
+
                 if summary_sheet_name in writer.sheets:
                     ws = writer.sheets[summary_sheet_name]
                     ws.set_column(1, 100, 12, num_fmt)
-    
+
                 wr_sheet = f"{summary_sheet_name}_WINRATE"
                 if wr_sheet in writer.sheets:
                     ws = writer.sheets[wr_sheet]
                     ws.set_column(1, 100, 12, pct_fmt)
-    
+
                 diff_sheet = f"{summary_sheet_name}_DIFF"
                 if diff_sheet in writer.sheets:
                     ws = writer.sheets[diff_sheet]
                     ws.set_column(1, 100, 12, num_fmt)
-    
+
     if out_csv_dir:
         out_csv_path = resolve_path(out_csv_dir)
         out_csv_path.mkdir(parents=True, exist_ok=True)
