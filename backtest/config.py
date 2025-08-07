@@ -26,6 +26,7 @@ class DataCfg(BaseModel):
     filters_csv: str
     enable_cache: bool = False
     cache_parquet_path: Optional[str] = None
+    corporate_actions_csv: Optional[str] = None
     price_schema: Dict[str, List[str]] = Field(
         default_factory=lambda: {
             "date": ["Tarih", "Date", "tarih"],
@@ -96,7 +97,7 @@ def load_config(path: str | Path) -> RootCfg:
     if isinstance(proj, dict) and proj.get("out_dir"):
         proj["out_dir"] = _join(proj.get("out_dir"))  # PATH DÜZENLENDİ
     data = cfg.get("data", {}) if isinstance(cfg, dict) else {}
-    for k in ["excel_dir", "filters_csv", "cache_parquet_path"]:
+    for k in ["excel_dir", "filters_csv", "cache_parquet_path", "corporate_actions_csv"]:
         v = data.get(k)
         if v:
             data[k] = _join(v)  # PATH DÜZENLENDİ

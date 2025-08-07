@@ -102,3 +102,28 @@ def test_run_1g_returns_ignores_out_of_bounds_signals():
     out = run_1g_returns(df, sigs)
     assert len(out) == 1
     assert out.loc[0, "Date"] == pd.Timestamp("2024-01-01")
+
+
+def test_run_1g_returns_side_validation():
+    df = pd.DataFrame(
+        {
+            "symbol": ["AAA", "AAA"],
+            "date": pd.to_datetime(["2024-01-05", "2024-01-06"]),
+            "close": [10.0, 11.0],
+        }
+    )
+    sigs = pd.DataFrame(
+        {
+            "FilterCode": ["T1"],
+            "Symbol": ["AAA"],
+            "Date": [pd.to_datetime("2024-01-05")],
+            "Side": ["short"],
+        }
+    )
+    out = run_1g_returns(df, sigs)
+    assert out.loc[0, "Side"] == "short"
+    assert pytest.approx(out.loc[0, "ReturnPct"], 0.01) == -10.0
+    sigs_bad = sigs.copy()
+    sigs_bad["Side"] = ["foo"]
+    with pytest.raises(ValueError):
+        run_1g_returns(df, sigs_bad)

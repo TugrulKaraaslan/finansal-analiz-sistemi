@@ -4,11 +4,25 @@ from __future__ import annotations
 from typing import Dict, List, Optional
 
 import pandas as pd
-import pandas_ta as ta
+
+
+def _ema(series: pd.Series, length: int) -> pd.Series:
+    return series.ewm(span=length, adjust=False).mean()
+
+
+def _rsi(series: pd.Series, length: int) -> pd.Series:
+    delta = series.diff()
+    gain = delta.clip(lower=0).ewm(alpha=1 / length, adjust=False).mean()
+    loss = -delta.clip(upper=0).ewm(alpha=1 / length, adjust=False).mean()
+    rs = gain / loss
+    return 100 - (100 / (1 + rs))
 
 
 def compute_indicators(
-    df: pd.DataFrame, params: Optional[Dict[str, List[int]]] = None
+    df: pd.DataFrame,
+    params: Optional[Dict[str, List[int]]] = None,
+    *,
+    engine: str = "pandas_ta",
 ) -> pd.DataFrame:
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
@@ -32,28 +46,57 @@ def compute_indicators(
             ema_params = [ema_params]  # TİP DÜZELTİLDİ
         for p in ema_params:
             col = f"EMA_{p}"
-            g[col] = ta.ema(g["close"], length=int(p))
+            if engine == "pandas_ta":
+                try:
+                    import pandas_ta as ta  # noqa: WPS433
+                except ModuleNotFoundError as exc:  # pragma: no cover
+                    raise ImportError("pandas_ta kütüphanesi gerekli") from exc
+                g[col] = ta.ema(g["close"], length=int(p))
+            else:
+                g[col] = _ema(g["close"], int(p))
         rsi_params = params.get("rsi", [14])
         if isinstance(rsi_params, (int, float)):
             rsi_params = [rsi_params]  # TİP DÜZELTİLDİ
         for p in rsi_params:
             col = f"RSI_{p}"
-            g[col] = ta.rsi(g["close"], length=int(p))
-        macd_params = params.get("macd") or [12, 26, 9]  # TİP DÜZELTİLDİ
-        if isinstance(macd_params, (int, float)):
-            macd_params = [macd_params]  # TİP DÜZELTİLDİ
-        macd_params = list(macd_params)
-        if len(macd_params) < 3:
-            raise ValueError(
-                "macd params must have at least three values"
-            )  # TİP DÜZELTİLDİ
-        fast, slow, sig = map(int, macd_params[:3])
-        macd = ta.macd(g["close"], fast=fast, slow=slow, signal=sig)
-        if macd is not None and not macd.empty:
-            macd_cols = macd.columns.tolist()
-            g[f"MACD_{fast}_{slow}_{sig}"] = macd[macd_cols[0]]
-            g[f"MACD_{fast}_{slow}_{sig}_SIGNAL"] = macd[macd_cols[1]]
-            g[f"MACD_{fast}_{slow}_{sig}_HIST"] = macd[macd_cols[2]]
+            if engine == "pandas_ta":
+                try:
+                    import pandas_ta as ta  # noqa: WPS433
+                except ModuleNotFoundError as exc:  # pragma: no cover
+                    raise ImportError("pandas_ta kütüphanesi gerekli") from exc
+                g[col] = ta.rsi(g["close"], length=int(p))
+            else:
+                g[col] = _rsi(g["close"], int(p))
+        macd_params = params.get("macd", [])
+        if macd_params:
+            if isinstance(macd_params, (int, float)):
+                macd_params = [macd_params]  # TİP DÜZELTİLDİ
+            macd_params = list(macd_params)
+            if len(macd_params) < 3:
+                raise ValueError(
+                    "macd params must have at least three values",
+                )  # TİP DÜZELTİLDİ
+            fast, slow, sig = map(int, macd_params[:3])
+            if engine == "pandas_ta":
+                try:
+                    import pandas_ta as ta  # noqa: WPS433
+                except ModuleNotFoundError as exc:  # pragma: no cover
+                    raise ImportError("pandas_ta kütüphanesi gerekli") from exc
+                macd = ta.macd(g["close"], fast=fast, slow=slow, signal=sig)
+                if macd is not None and not macd.empty:
+                    macd_cols = macd.columns.tolist()
+                    g[f"MACD_{fast}_{slow}_{sig}"] = macd[macd_cols[0]]
+                    g[f"MACD_{fast}_{slow}_{sig}_SIGNAL"] = macd[macd_cols[1]]
+                    g[f"MACD_{fast}_{slow}_{sig}_HIST"] = macd[macd_cols[2]]
+            else:
+                ema_fast = _ema(g["close"], fast)
+                ema_slow = _ema(g["close"], slow)
+                macd_line = ema_fast - ema_slow
+                signal_line = _ema(macd_line, sig)
+                hist = macd_line - signal_line
+                g[f"MACD_{fast}_{slow}_{sig}"] = macd_line
+                g[f"MACD_{fast}_{slow}_{sig}_SIGNAL"] = signal_line
+                g[f"MACD_{fast}_{slow}_{sig}_HIST"] = hist
         g["CHANGE_1D_PERCENT"] = g["close"].pct_change(1) * 100.0
         g["CHANGE_5D_PERCENT"] = g["close"].pct_change(5) * 100.0
         g["RELATIVE_VOLUME"] = g["volume"] / g["volume"].rolling(20).mean()
