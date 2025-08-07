@@ -1,3 +1,4 @@
+# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 """Helpers for reading filter CSV files."""
 
 from __future__ import annotations
@@ -40,9 +41,7 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
 
     missing = REQUIRED_COLUMNS.difference(df.columns)
     if missing:
-        raise RuntimeError(
-            "Eksik kolon(lar): " + ", ".join(sorted(missing))
-        )
+        raise RuntimeError("Eksik kolon(lar): " + ", ".join(sorted(missing)))
 
     # basic normalization
     df["FilterCode"] = df["FilterCode"].astype(str).str.strip()
@@ -51,4 +50,3 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
 
 
 __all__ = ["load_filters_csv"]
-
