@@ -137,7 +137,7 @@ def scan_range(config_path, start_date, end_date, holding_period, transaction_co
     info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
     val_iss = quality_warnings(df)
-    write_reports(
+    outputs = write_reports(
         trades_all,
         days,
         pivot,
@@ -151,7 +151,9 @@ def scan_range(config_path, start_date, end_date, holding_period, transaction_co
         summary_sheet_name=cfg.report.summary_sheet_name,
         percent_fmt=cfg.report.percent_format,
     )
-    info(f"Bitti. Çıktı: {out_xlsx}")
+    info(f"Bitti. Çıktı: {outputs.get('excel')}")
+    if outputs.get("csv"):
+        info(f"CSV klasörü: {outputs['csv'][0].parent}")
 
 
 @cli.command("scan-day")
@@ -224,7 +226,7 @@ def scan_day(config_path, date_str, holding_period, transaction_cost):
     info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
     val_iss = quality_warnings(df)
-    write_reports(
+    outputs = write_reports(
         trades,
         [day],
         pivot,
@@ -238,7 +240,7 @@ def scan_day(config_path, date_str, holding_period, transaction_cost):
         summary_sheet_name=cfg.report.summary_sheet_name,
         percent_fmt=cfg.report.percent_format,
     )
-    info(f"Bitti. Çıktı: {out_xlsx}")
+    info(f"Bitti. Çıktı: {outputs.get('excel')}")
 
 
 if __name__ == "__main__":
