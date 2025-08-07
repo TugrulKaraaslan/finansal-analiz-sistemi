@@ -56,10 +56,8 @@ def load_xu100_pct(csv_path: str | Path) -> pd.Series:
             close_col = cols[k]
             break
     if close_col is None:
-        # fallback: second column if available
-        close_col = (
-            list(df.columns)[1] if len(df.columns) > 1 else list(df.columns)[0]
-        )  # TİP DÜZELTİLDİ
+        # fallback: second column (df has >=2 columns here)
+        close_col = list(df.columns)[1]
     # parse date tolerant
     df[c_date] = pd.to_datetime(df[c_date], errors="coerce", dayfirst=True).dt.date
     df[close_col] = pd.to_numeric(df[close_col], errors="coerce")
