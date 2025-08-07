@@ -5,6 +5,7 @@ import re
 import warnings
 
 import pandas as pd
+from loguru import logger
 
 from backtest.query_parser import SafeQuery
 
@@ -17,21 +18,42 @@ def _to_pandas_ops(expr: str) -> str:
 
 
 def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.DataFrame:
+    logger.debug(
+        "run_screener start - data rows: {rows_df}, filter rows: {rows_filters}, date: {day}",
+        rows_df=len(df_ind) if isinstance(df_ind, pd.DataFrame) else "?",
+        rows_filters=len(filters_df) if isinstance(filters_df, pd.DataFrame) else "?",
+        day=date,
+    )
+
     if not isinstance(df_ind, pd.DataFrame):
-        raise TypeError("df_ind must be a DataFrame")  # TİP DÜZELTİLDİ
+        logger.error("df_ind must be a DataFrame")
+        raise TypeError("df_ind must be a DataFrame")
     if not isinstance(filters_df, pd.DataFrame):
-        raise TypeError("filters_df must be a DataFrame")  # TİP DÜZELTİLDİ
+        logger.error("filters_df must be a DataFrame")
+        raise TypeError("filters_df must be a DataFrame")
+
+    if df_ind.empty:
+        logger.error("df_ind is empty")
+        raise ValueError("df_ind is empty")
+    if filters_df.empty:
+        logger.error("filters_df is empty")
+        raise ValueError("filters_df is empty")
+
     req_df = {"symbol", "date", "open", "high", "low", "close", "volume"}
     missing_df = req_df.difference(df_ind.columns)
     if missing_df:
-        raise ValueError(
-            f"df_ind missing columns: {', '.join(sorted(missing_df))}"
-        )  # TİP DÜZELTİLDİ
+        msg = f"df_ind missing columns: {', '.join(sorted(missing_df))}"
+        logger.error(msg)
+        raise ValueError(msg)
     if not {"FilterCode", "PythonQuery"}.issubset(filters_df.columns):
-        raise ValueError("filters_df missing required columns")  # TİP DÜZELTİLDİ
+        msg = "filters_df missing required columns"
+        logger.error(msg)
+        raise ValueError(msg)
+
     day = pd.to_datetime(date).date()
     d = df_ind[df_ind["date"] == day].copy()
     if d.empty:
+        logger.warning("No data for date {day}", day=day)
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
     d = d.reset_index(drop=True)
     out_rows = []
@@ -46,14 +68,14 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
             hits = safe.filter(d)
             if not hits.empty:
                 for sym in hits["symbol"]:
-                    out_rows.append(
-                        {"FilterCode": code, "Symbol": sym, "Date": day}
-                    )
+                    out_rows.append({"FilterCode": code, "Symbol": sym, "Date": day})
         except Exception as err:
             warnings.warn(f"Filter {code!r} failed: {err}")
+            logger.warning("Filter {code!r} failed: {err}", code=code, err=err)
             continue
     if not out_rows:
-        return pd.DataFrame(
-            columns=["FilterCode", "Symbol", "Date"]
-        )  # TİP DÜZELTİLDİ
-    return pd.DataFrame(out_rows)  # TİP DÜZELTİLDİ
+        logger.debug("run_screener end - no hits")
+        return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+    out = pd.DataFrame(out_rows)
+    logger.debug("run_screener end - produced {rows_out} rows", rows_out=len(out))
+    return out

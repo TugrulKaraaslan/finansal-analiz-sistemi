@@ -25,7 +25,94 @@ def test_run_screener_invalid_inputs():
         run_screener(df_ind, [], pd.Timestamp("2024-01-02"))
     with pytest.raises(ValueError):
         run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
-    df_ok = df_ind.assign(date=pd.to_datetime([]))
+    df_ok = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-02"]).date,
+            "open": [1.0],
+            "high": [1.0],
+            "low": [1.0],
+            "close": [1.0],
+            "volume": [100],
+        }
+    )
     bad_filters = pd.DataFrame({"FilterCode": []})
     with pytest.raises(ValueError):
         run_screener(df_ok, bad_filters, pd.Timestamp("2024-01-02"))
+
+
+def test_run_screener_empty_dataset_logs(caplog):
+    from loguru import logger
+
+    df_empty = pd.DataFrame(
+        columns=["symbol", "date", "open", "high", "low", "close", "volume"]
+    )
+    filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 1"]})
+    logger.add(caplog.handler, level="ERROR")
+    with pytest.raises(ValueError):
+        run_screener(df_empty, filters_df, pd.Timestamp("2024-01-02"))
+    assert "df_ind is empty" in caplog.text
+
+
+def test_run_screener_empty_filters_logs(caplog):
+    from loguru import logger
+
+    df_ind = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-02"]).date,
+            "open": [1.0],
+            "high": [1.0],
+            "low": [1.0],
+            "close": [1.0],
+            "volume": [100],
+        }
+    )
+    filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
+    logger.add(caplog.handler, level="ERROR")
+    with pytest.raises(ValueError):
+        run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
+    assert "filters_df is empty" in caplog.text
+
+
+def test_run_screener_logs_missing_df_columns(caplog):
+    from loguru import logger
+
+    df_ind = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-02"]).date,
+            "open": [1.0],
+            "high": [1.0],
+            "low": [1.0],
+            "volume": [100],
+        }
+    )
+    filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 1"]})
+    logger.add(caplog.handler, level="ERROR")
+    with pytest.raises(ValueError):
+        run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
+    assert caplog.records[0].levelname == "ERROR"
+    assert "df_ind missing columns: close" in caplog.text
+
+
+def test_run_screener_logs_missing_filters_columns(caplog):
+    from loguru import logger
+
+    df_ind = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-02"]).date,
+            "open": [1.0],
+            "high": [1.0],
+            "low": [1.0],
+            "close": [1.0],
+            "volume": [100],
+        }
+    )
+    filters_df = pd.DataFrame({"FilterCode": ["F1"]})
+    logger.add(caplog.handler, level="ERROR")
+    with pytest.raises(ValueError):
+        run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
+    assert caplog.records[0].levelname == "ERROR"
+    assert "filters_df missing required columns" in caplog.text
