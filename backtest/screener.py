@@ -32,7 +32,7 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
     day = pd.to_datetime(date).date()
     d = df_ind[df_ind["date"] == day].copy()
     if d.empty:
-        return pd.DataFrame(columns=["FilterCode", "Symbol", "Date", "mask"])
+        return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
     d = d.reset_index(drop=True)
     out_rows = []
     for _, row in filters_df.iterrows():
@@ -47,13 +47,13 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
             if not hits.empty:
                 for sym in hits["symbol"]:
                     out_rows.append(
-                        {"FilterCode": code, "Symbol": sym, "Date": day, "mask": True}
+                        {"FilterCode": code, "Symbol": sym, "Date": day}
                     )
         except Exception as err:
             warnings.warn(f"Filter {code!r} failed: {err}")
             continue
     if not out_rows:
         return pd.DataFrame(
-            columns=["FilterCode", "Symbol", "Date", "mask"]
+            columns=["FilterCode", "Symbol", "Date"]
         )  # TİP DÜZELTİLDİ
     return pd.DataFrame(out_rows)  # TİP DÜZELTİLDİ
