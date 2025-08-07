@@ -13,7 +13,7 @@ def normalize(df: pd.DataFrame) -> pd.DataFrame:
             raise ValueError(f"Eksik zorunlu kolon: {n}")  # TİP DÜZELTİLDİ
     df = df.copy()
     df["symbol"] = df["symbol"].astype(str).str.upper().str.strip()
-    df["date"] = pd.to_datetime(df["date"]).dt.date
+    df["date"] = pd.to_datetime(df["date"]).dt.normalize()
     for c in ["open", "high", "low", "close", "volume"]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
     df = (

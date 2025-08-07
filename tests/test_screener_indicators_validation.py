@@ -28,7 +28,7 @@ def test_run_screener_invalid_inputs():
     df_ok = pd.DataFrame(
         {
             "symbol": ["AAA"],
-            "date": pd.to_datetime(["2024-01-02"]).date,
+            "date": pd.to_datetime(["2024-01-02"]).normalize(),
             "open": [1.0],
             "high": [1.0],
             "low": [1.0],
@@ -60,7 +60,7 @@ def test_run_screener_empty_filters_logs(caplog):
     df_ind = pd.DataFrame(
         {
             "symbol": ["AAA"],
-            "date": pd.to_datetime(["2024-01-02"]).date,
+            "date": pd.to_datetime(["2024-01-02"]).normalize(),
             "open": [1.0],
             "high": [1.0],
             "low": [1.0],
@@ -81,7 +81,7 @@ def test_run_screener_logs_missing_df_columns(caplog):
     df_ind = pd.DataFrame(
         {
             "symbol": ["AAA"],
-            "date": pd.to_datetime(["2024-01-02"]).date,
+            "date": pd.to_datetime(["2024-01-02"]).normalize(),
             "open": [1.0],
             "high": [1.0],
             "low": [1.0],
@@ -102,7 +102,7 @@ def test_run_screener_logs_missing_filters_columns(caplog):
     df_ind = pd.DataFrame(
         {
             "symbol": ["AAA"],
-            "date": pd.to_datetime(["2024-01-02"]).date,
+            "date": pd.to_datetime(["2024-01-02"]).normalize(),
             "open": [1.0],
             "high": [1.0],
             "low": [1.0],

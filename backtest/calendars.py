@@ -106,7 +106,7 @@ def add_next_close_calendar(
     td = dict(zip(trading_days[:-1], trading_days[1:]))  # TİP DÜZELTİLDİ
     dates = pd.to_datetime(df["date"])
     next_dates = dates.apply(lambda d: td.get(pd.Timestamp(d).normalize(), pd.NaT))
-    df["next_date"] = next_dates.dt.date
+    df["next_date"] = next_dates.dt.normalize()
     # merge to get next_close for same symbol & next_date
     base = df[["symbol", "date", "close"]].copy()
     base.columns = ["symbol", "date", "close_curr"]

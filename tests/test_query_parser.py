@@ -15,11 +15,13 @@ def test_safequery_rejects_calls_and_attributes():
     assert not SafeQuery("df.__class__").is_safe
 
 
-def test_run_screener_skips_unsafe():
+def test_run_screener_skips_unsafe(caplog):
+    from loguru import logger
+
     df_ind = pd.DataFrame(
         {
             "symbol": ["AAA"],
-            "date": pd.to_datetime(["2024-01-02"]).date,
+            "date": pd.to_datetime(["2024-01-02"]).normalize(),
             "open": [1.0],
             "high": [1.0],
             "low": [1.0],
@@ -33,15 +35,17 @@ def test_run_screener_skips_unsafe():
             "PythonQuery": ["close > 0", "__import__('os').system('echo 1')"],
         }
     )
+    logger.add(caplog.handler, level="WARNING")
     res = run_screener(df_ind, filters, pd.Timestamp("2024-01-02"))
     assert res["FilterCode"].tolist() == ["SAFE"]
+    assert "unsafe expression" in caplog.text
 
 
 def test_run_screener_warns_on_error():
     df_ind = pd.DataFrame(
         {
             "symbol": ["AAA"],
-            "date": pd.to_datetime(["2024-01-02"]).date,
+            "date": pd.to_datetime(["2024-01-02"]).normalize(),
             "open": [1.0],
             "high": [1.0],
             "low": [1.0],
@@ -59,3 +63,11 @@ def test_run_screener_warns_on_error():
         res = run_screener(df_ind, filters, pd.Timestamp("2024-01-02"))
     assert res["FilterCode"].tolist() == ["GOOD"]
     assert any("BAD" in str(msg.message) for msg in w)
+
+
+def test_safequery_allows_whitelist_functions():
+    df = pd.DataFrame({"x": [1, 2, 3]})
+    q = SafeQuery("x.notna() and x.isin([1,2])")
+    assert q.is_safe
+    out = q.filter(df)
+    assert out["x"].tolist() == [1, 2]

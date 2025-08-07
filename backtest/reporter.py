@@ -94,9 +94,10 @@ def write_reports(
         else:
             with writer:
                 for d in dates:
-                    day_df = trades_all[trades_all["Date"] == d].copy()
+                    day_ts = pd.to_datetime(d).normalize()
+                    day_df = trades_all[trades_all["Date"] == day_ts].copy()
                     day_df = day_df.sort_values(["FilterCode", "Symbol"])
-                    sheet = f"{daily_sheet_prefix}{d}"
+                    sheet = f"{daily_sheet_prefix}{day_ts.date()}"
                     day_df.to_excel(writer, sheet_name=sheet, index=False)
 
                 summary_wide.to_excel(writer, sheet_name=summary_sheet_name)
@@ -156,13 +157,14 @@ def write_reports(
                 pct_fmt = wb.add_format({"num_format": percent_fmt})
 
                 for d in dates:
-                    sheet = f"{daily_sheet_prefix}{d}"
+                    day_ts = pd.to_datetime(d).normalize()
+                    sheet = f"{daily_sheet_prefix}{day_ts.date()}"
                     ws = writer.sheets[sheet]
                     ws.set_column(0, 2, 12)
                     ws.set_column(3, 4, 12)
                     ws.set_column(5, 5, 10, num_fmt)
                     ws.set_column(6, 6, 8)
-                    rows = len(trades_all[trades_all["Date"] == d])
+                    rows = len(trades_all[trades_all["Date"] == day_ts])
                     last_row = rows if rows > 0 else 0  # LOJİK HATASI DÜZELTİLDİ
                     ws.autofilter(0, 0, last_row, 6)
 

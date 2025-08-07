@@ -18,6 +18,10 @@ def compute_indicators(
         params = {}  # TİP DÜZELTİLDİ
     if df.empty:
         return df.copy()  # TİP DÜZELTİLDİ
+    req = {"symbol", "date", "close", "volume"}
+    missing = req.difference(df.columns)
+    if missing:
+        raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")
     df = df.copy()
     df = df.sort_values(["symbol", "date"])
     out_frames = []

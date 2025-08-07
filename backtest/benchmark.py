@@ -68,7 +68,7 @@ def load_xu100_pct(csv_path: str | Path) -> pd.Series:
         # fallback: second column (df has >=2 columns here)
         close_col = list(df.columns)[1]
     # parse date tolerant
-    df[c_date] = pd.to_datetime(df[c_date], errors="coerce", dayfirst=True).dt.date
+    df[c_date] = pd.to_datetime(df[c_date], errors="coerce", dayfirst=True).dt.normalize()
     df[close_col] = pd.to_numeric(df[close_col], errors="coerce")
     df = df.dropna(subset=[c_date, close_col]).sort_values(c_date)
     pct = df[close_col].pct_change(1) * 100.0
