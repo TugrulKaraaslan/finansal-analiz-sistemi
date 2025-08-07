@@ -46,6 +46,7 @@ def _run_scan(cfg) -> None:
         tdays = build_trading_days(df, holidays)
         df = add_next_close_calendar(df, tdays)
     else:
+        tdays = None
         df = add_next_close(df)
     info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(df, cfg.indicators.params)
@@ -86,7 +87,11 @@ def _run_scan(cfg) -> None:
     for d in days:
         sigs = run_screener(df_ind, filters_df, d)
         trades = run_1g_returns(
-            df_ind, sigs, cfg.project.holding_period, cfg.project.transaction_cost
+            df_ind,
+            sigs,
+            cfg.project.holding_period,
+            cfg.project.transaction_cost,
+            trading_days=tdays,
         )
         all_trades.append(trades)
     trades_all = (
@@ -95,10 +100,12 @@ def _run_scan(cfg) -> None:
         else pd.DataFrame(
             columns=[
                 "FilterCode",
+                "Group",
                 "Symbol",
                 "Date",
                 "EntryClose",
                 "ExitClose",
+                "Side",
                 "ReturnPct",
                 "Win",
             ]

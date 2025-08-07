@@ -57,7 +57,7 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(
         cli,
         "run_1g_returns",
-        lambda df, sigs, holding_period, transaction_cost: pd.DataFrame(
+        lambda df, sigs, holding_period, transaction_cost, **kwargs: pd.DataFrame(
             columns=[
                 "FilterCode",
                 "Symbol",
@@ -106,7 +106,7 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(
         cli,
         "run_1g_returns",
-        lambda df, sigs, holding_period, transaction_cost: pd.DataFrame(
+        lambda df, sigs, holding_period, transaction_cost, **kwargs: pd.DataFrame(
             columns=[
                 "FilterCode",
                 "Symbol",

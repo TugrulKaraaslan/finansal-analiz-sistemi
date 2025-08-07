@@ -24,3 +24,10 @@ def test_load_filters_semicolon(tmp_path):
     csv_file.write_text("FilterCode;PythonQuery\nF1;close>0\n", encoding="utf-8")
     df = load_filters_csv(csv_file)
     assert df.loc[0, "FilterCode"] == "F1"
+
+
+def test_load_filters_parse_error(tmp_path):
+    csv_file = tmp_path / "filters.csv"
+    csv_file.write_text("FilterCode,PythonQuery\n\"unclosed", encoding="utf-8")
+    with pytest.raises(RuntimeError):
+        load_filters_csv(csv_file)

@@ -30,9 +30,9 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
     Returns
     -------
     pandas.DataFrame
-        DataFrame containing the filter definitions. If the file is missing
-        or cannot be parsed, ``FileNotFoundError`` is raised. Missing required
-        columns raise ``RuntimeError``.
+        DataFrame containing the filter definitions. If the file is missing,
+        ``FileNotFoundError`` is raised. CSV parse issues raise
+        ``RuntimeError``. Missing required columns raise ``RuntimeError``.
     """
 
     p = resolve_path(path)
@@ -41,7 +41,7 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
     try:
         df = pd.read_csv(p, encoding="utf-8", sep=None, engine="python")
     except Exception as exc:
-        raise FileNotFoundError(f"Filters CSV okunamadı: {p}") from exc
+        raise RuntimeError(f"Filters CSV parse edilemedi: {p}") from exc
 
     missing = REQUIRED_COLUMNS.difference(df.columns)
     if missing:

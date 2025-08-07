@@ -102,15 +102,15 @@ def add_next_close_calendar(
     if not isinstance(trading_days, pd.DatetimeIndex):
         raise TypeError("trading_days must be a DatetimeIndex")  # TİP DÜZELTİLDİ
     df = df.copy().sort_values(["symbol", "date"])
-    # map current date -> next trading day
-    td = dict(zip(trading_days[:-1], trading_days[1:]))  # TİP DÜZELTİLDİ
-    dates = pd.to_datetime(df["date"])
-    next_dates = dates.apply(lambda d: td.get(pd.Timestamp(d).normalize(), pd.NaT))
-    df["next_date"] = next_dates.dt.normalize()
-    # merge to get next_close for same symbol & next_date
+    dates = pd.to_datetime(df["date"]).dt.normalize()
+    pos = trading_days.get_indexer(dates)
+    next_pos = pos + 1
+    next_dates = pd.Series(pd.NaT, index=df.index)
+    mask = (next_pos >= 0) & (next_pos < len(trading_days))
+    next_dates.loc[mask] = trading_days[next_pos[mask]]
+    df["next_date"] = next_dates
     base = df[["symbol", "date", "close"]].copy()
     base.columns = ["symbol", "date", "close_curr"]
-    # align df next_date with base date to pick next_close
     m = df.merge(
         base.rename(columns={"date": "next_date", "close_curr": "next_close"}),
         on=["symbol", "next_date"],

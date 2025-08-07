@@ -59,8 +59,11 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
     filters_df = filters_df.copy()
     filters_df["FilterCode"] = filters_df["FilterCode"].astype(str).str.strip()
     filters_df["expr"] = filters_df["PythonQuery"].astype(str).map(_to_pandas_ops)
+    groups = filters_df.get("Group")
+    if groups is None:
+        groups = [None] * len(filters_df)
     valids = []
-    for code, expr in zip(filters_df["FilterCode"], filters_df["expr"]):
+    for code, expr, grp in zip(filters_df["FilterCode"], filters_df["expr"], groups):
         sq = SafeQuery(expr)
         if not sq.is_safe:
             logger.warning(
@@ -75,29 +78,36 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
             )
             warnings.warn(msg)
             continue
-        valids.append((code, sq))
+        valids.append((code, grp, sq))
     out_frames = []
     if valids:
         masks = {}
-        for code, sq in valids:
+        for code, _, sq in valids:
             try:
                 masks[code] = sq._mask(d)
             except Exception as err:
                 warnings.warn(f"Filter {code!r} failed: {err}")
                 logger.warning("Filter {code!r} failed: {err}", code=code, err=err)
         mask_df = pd.DataFrame(masks)
-        for code, mask in mask_df.items():
+        for (code, grp, _), (_, mask) in zip(valids, mask_df.items()):
             idx = mask[mask].index
             if not len(idx):
                 continue
             tmp = d.loc[idx, ["symbol"]].copy()
             tmp["FilterCode"] = code
+            if grp is not None:
+                tmp["Group"] = grp
             tmp["Date"] = day
             out_frames.append(tmp)
     if not out_frames:
         logger.debug("run_screener end - no hits")
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
     out = pd.concat(out_frames, ignore_index=True)
-    out = out.rename(columns={"symbol": "Symbol"})[["FilterCode", "Symbol", "Date"]]
+    out = out.rename(columns={"symbol": "Symbol"})
+    cols = ["FilterCode"]
+    if "Group" in out.columns:
+        cols.append("Group")
+    cols.extend(["Symbol", "Date"])
+    out = out[cols]
     logger.debug("run_screener end - produced {rows_out} rows", rows_out=len(out))
     return out

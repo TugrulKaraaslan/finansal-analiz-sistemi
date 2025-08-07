@@ -46,3 +46,17 @@ def test_add_next_close_calendar():
     assert out.loc[0, "next_close"] == 11.0
     assert out.loc[0, "next_date"] == pd.Timestamp("2024-01-02")
     assert isinstance(out.loc[0, "next_date"], pd.Timestamp)
+
+
+def test_add_next_close_calendar_skips_weekend():
+    df = pd.DataFrame(
+        {
+            "symbol": ["AAA", "AAA"],
+            "date": pd.to_datetime(["2024-01-05", "2024-01-08"]).normalize(),
+            "close": [10.0, 11.0],
+        }
+    )
+    tdays = build_trading_days(df)
+    out = add_next_close_calendar(df, tdays)
+    assert out.loc[0, "next_date"] == pd.Timestamp("2024-01-08")
+    assert out.loc[0, "next_close"] == 11.0
