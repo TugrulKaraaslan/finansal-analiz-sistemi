@@ -1,3 +1,4 @@
+# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 import pandas as pd
 import pytest
 
@@ -15,7 +16,9 @@ def test_compute_indicators_invalid_inputs():
 
 def test_run_screener_invalid_inputs():
     filters_df = pd.DataFrame({"FilterCode": [], "PythonQuery": []})
-    df_ind = pd.DataFrame({"symbol": [], "open": [], "high": [], "low": [], "close": [], "volume": []})
+    df_ind = pd.DataFrame(
+        {"symbol": [], "open": [], "high": [], "low": [], "close": [], "volume": []}
+    )
     with pytest.raises(TypeError):
         run_screener([], filters_df, pd.Timestamp("2024-01-02"))
     with pytest.raises(TypeError):

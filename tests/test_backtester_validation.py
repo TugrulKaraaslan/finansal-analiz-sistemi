@@ -1,3 +1,4 @@
+# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 import pandas as pd
 import pytest
 
@@ -18,7 +19,11 @@ def _base_df():
 
 def _signals_df():
     return pd.DataFrame(
-        {"FilterCode": ["F"], "Symbol": ["AAA"], "Date": pd.to_datetime(["2024-01-01"]).date}
+        {
+            "FilterCode": ["F"],
+            "Symbol": ["AAA"],
+            "Date": pd.to_datetime(["2024-01-01"]).date,
+        }
     )
 
 
@@ -39,7 +44,9 @@ def test_run_1g_returns_missing_columns():
 
 
 def test_run_1g_returns_empty_signals():
-    res = run_1g_returns(_base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"]))
+    res = run_1g_returns(
+        _base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+    )
     assert list(res.columns) == [
         "FilterCode",
         "Symbol",

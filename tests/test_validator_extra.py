@@ -1,3 +1,4 @@
+# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from types import SimpleNamespace
 
 import pandas as pd
@@ -51,4 +52,6 @@ def test_write_reports_xu100_pct_type(monkeypatch):
         ]
     )
     with pytest.raises(TypeError):
-        write_reports(trades, [], pd.DataFrame(), xu100_pct=[1, 2], out_xlsx="dummy.xlsx")
+        write_reports(
+            trades, [], pd.DataFrame(), xu100_pct=[1, 2], out_xlsx="dummy.xlsx"
+        )

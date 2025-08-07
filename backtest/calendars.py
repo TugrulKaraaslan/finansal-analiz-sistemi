@@ -66,14 +66,18 @@ def build_trading_days(
     if holidays is not None:
         if isinstance(holidays, (int, float)):
             raise TypeError("holidays must be iterable or date-like")  # TİP DÜZELTİLDİ
-        if isinstance(holidays, Iterable) and not isinstance(holidays, (str, bytes, pd.Timestamp)):
+        if isinstance(holidays, Iterable) and not isinstance(
+            holidays, (str, bytes, pd.Timestamp)
+        ):
             hol_iter = list(holidays)
         else:
             hol_iter = [holidays]
         try:
             hol = set(pd.to_datetime(hol_iter).normalize())  # TİP DÜZELTİLDİ
         except Exception as e:  # pragma: no cover - defensive
-            raise ValueError("holidays contains non-date values") from e  # TİP DÜZELTİLDİ
+            raise ValueError(
+                "holidays contains non-date values"
+            ) from e  # TİP DÜZELTİLDİ
     else:
         hol = set()
     trade = [d for d in all_days if (not is_weekend(d)) and (d.normalize() not in hol)]

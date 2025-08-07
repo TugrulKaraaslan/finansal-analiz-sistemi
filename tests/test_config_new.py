@@ -1,3 +1,4 @@
+# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from pathlib import Path
 import tempfile
 import textwrap
@@ -15,6 +16,7 @@ def _write_cfg(text: str) -> Path:
         tmp.flush()
         return Path(tmp.name)
 
+
 def test_load_config_independent_defaults():
     cfg_text = textwrap.dedent(
         """
@@ -30,11 +32,11 @@ def test_load_config_independent_defaults():
     )
     path = _write_cfg(cfg_text)
     cfg1 = load_config(path)
-    cfg1.calendar.holidays_source = 'csv'
-    cfg1.indicators.params['ema'].append(99)
+    cfg1.calendar.holidays_source = "csv"
+    cfg1.indicators.params["ema"].append(99)
     cfg2 = load_config(path)
-    assert cfg2.calendar.holidays_source == 'none'
-    assert 99 not in cfg2.indicators.params['ema']
+    assert cfg2.calendar.holidays_source == "none"
+    assert 99 not in cfg2.indicators.params["ema"]
 
 
 def test_load_config_invalid_yaml():
