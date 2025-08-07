@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+import warnings
 
 import pandas as pd
 
@@ -48,7 +49,8 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
                     out_rows.append(
                         {"FilterCode": code, "Symbol": sym, "Date": day, "mask": True}
                     )
-        except Exception:
+        except Exception as err:
+            warnings.warn(f"Filter {code!r} failed: {err}")
             continue
     if not out_rows:
         return pd.DataFrame(

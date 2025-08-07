@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from backtest.query_parser import SafeQuery
 from backtest.screener import run_screener
@@ -34,3 +35,27 @@ def test_run_screener_skips_unsafe():
     )
     res = run_screener(df_ind, filters, pd.Timestamp("2024-01-02"))
     assert res["FilterCode"].tolist() == ["SAFE"]
+
+
+def test_run_screener_warns_on_error():
+    df_ind = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-02"]).date,
+            "open": [1.0],
+            "high": [1.0],
+            "low": [1.0],
+            "close": [1.0],
+            "volume": [100],
+        }
+    )
+    filters = pd.DataFrame(
+        {
+            "FilterCode": ["GOOD", "BAD"],
+            "PythonQuery": ["close > 0", "nonexistent > 0"],
+        }
+    )
+    with pytest.warns(UserWarning) as w:
+        res = run_screener(df_ind, filters, pd.Timestamp("2024-01-02"))
+    assert res["FilterCode"].tolist() == ["GOOD"]
+    assert any("BAD" in str(msg.message) for msg in w)
