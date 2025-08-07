@@ -12,24 +12,21 @@ def _read_csv_any(path: str | Path) -> pd.DataFrame:
     """Read CSV with fallback separator/decimal handling."""
     p = resolve_path(path)
     if not p.exists():
-        warnings.warn(f"CSV bulunamadı: {p}")
-        return pd.DataFrame()
+        raise FileNotFoundError(f"CSV bulunamadı: {p}")
     try:
         return pd.read_csv(p, encoding="utf-8")  # PATH DÜZENLENDİ
     except Exception:
         try:
             with p.open("r", encoding="utf-8") as f:  # PATH DÜZENLENDİ
                 sample = f.read(2048)
-        except Exception:
-            warnings.warn(f"CSV okunamadı: {p}")
-            return pd.DataFrame()
+        except Exception as e:  # SPECIFIC EXCEPTIONS
+            raise FileNotFoundError(f"CSV okunamadı: {p}") from e
         sep = ";" if sample.count(";") > sample.count(",") else ","
         dec = "," if sample.count(",") > sample.count(".") and sep == ";" else "."
         try:
             return pd.read_csv(p, sep=sep, decimal=dec, encoding="utf-8")  # PATH DÜZENLENDİ
-        except Exception:
-            warnings.warn(f"CSV parse edilemedi: {p}")
-            return pd.DataFrame()
+        except Exception as e:
+            raise RuntimeError(f"CSV parse edilemedi: {p}") from e
 
 
 def load_xu100_pct(csv_path: str | Path) -> pd.Series:
