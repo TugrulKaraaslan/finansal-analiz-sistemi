@@ -17,7 +17,7 @@ def _cfg():
         calendar=SimpleNamespace(
             tplus1_mode="price", holidays_source="none", holidays_csv_path=None
         ),
-        indicators=SimpleNamespace(params={}),
+        indicators=SimpleNamespace(params={}, engine="pandas_ta"),
         benchmark=SimpleNamespace(xu100_source="none", xu100_csv_path=None),
         report=SimpleNamespace(
             daily_sheet_prefix="SCAN_",
@@ -46,7 +46,9 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(cli, "read_excels_long", lambda _: dummy_df)
     monkeypatch.setattr(cli, "normalize", lambda df: df)
     monkeypatch.setattr(cli, "add_next_close", lambda df: df)
-    monkeypatch.setattr(cli, "compute_indicators", lambda df, params: df)
+    monkeypatch.setattr(
+        cli, "compute_indicators", lambda df, params, engine=None: df
+    )
     monkeypatch.setattr(
         cli,
         "run_screener",
@@ -95,7 +97,9 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(cli, "read_excels_long", lambda _: dummy_df)
     monkeypatch.setattr(cli, "normalize", lambda df: df)
     monkeypatch.setattr(cli, "add_next_close", lambda df: df)
-    monkeypatch.setattr(cli, "compute_indicators", lambda df, params: df)
+    monkeypatch.setattr(
+        cli, "compute_indicators", lambda df, params, engine=None: df
+    )
     monkeypatch.setattr(
         cli,
         "run_screener",

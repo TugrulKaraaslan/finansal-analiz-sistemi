@@ -62,8 +62,18 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
     groups = filters_df.get("Group")
     if groups is None:
         groups = [None] * len(filters_df)
+    sides = filters_df.get("Side")
+    if sides is None:
+        sides = [None] * len(filters_df)
     valids = []
-    for code, expr, grp in zip(filters_df["FilterCode"], filters_df["expr"], groups):
+    for code, expr, grp, side in zip(
+        filters_df["FilterCode"], filters_df["expr"], groups, sides
+    ):
+        side_norm = None
+        if side is not None and str(side).strip():
+            side_norm = str(side).strip().lower()
+            if side_norm not in {"long", "short"}:
+                raise ValueError(f"Geçersiz Side değeri: {side}")
         sq = SafeQuery(expr)
         if not sq.is_safe:
             logger.warning(
@@ -78,27 +88,26 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
             )
             warnings.warn(msg)
             continue
-        valids.append((code, grp, sq))
+        valids.append((code, grp, side_norm, sq))
     out_frames = []
-    if valids:
-        masks = {}
-        for code, _, sq in valids:
-            try:
-                masks[code] = sq._mask(d)
-            except Exception as err:
-                warnings.warn(f"Filter {code!r} failed: {err}")
-                logger.warning("Filter {code!r} failed: {err}", code=code, err=err)
-        mask_df = pd.DataFrame(masks)
-        for (code, grp, _), (_, mask) in zip(valids, mask_df.items()):
-            idx = mask[mask].index
-            if not len(idx):
-                continue
-            tmp = d.loc[idx, ["symbol"]].copy()
-            tmp["FilterCode"] = code
-            if grp is not None:
-                tmp["Group"] = grp
-            tmp["Date"] = day
-            out_frames.append(tmp)
+    for code, grp, side_norm, sq in valids:
+        try:
+            mask = sq._mask(d)
+        except Exception as err:
+            warnings.warn(f"Filter {code!r} failed: {err}")
+            logger.warning("Filter {code!r} failed: {err}", code=code, err=err)
+            continue
+        idx = mask[mask].index
+        if not len(idx):
+            continue
+        tmp = d.loc[idx, ["symbol"]].copy()
+        tmp["FilterCode"] = code
+        if grp is not None:
+            tmp["Group"] = grp
+        if side_norm is not None:
+            tmp["Side"] = side_norm
+        tmp["Date"] = day
+        out_frames.append(tmp)
     if not out_frames:
         logger.debug("run_screener end - no hits")
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
@@ -107,7 +116,10 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
     cols = ["FilterCode"]
     if "Group" in out.columns:
         cols.append("Group")
-    cols.extend(["Symbol", "Date"])
+    cols.append("Symbol")
+    if "Side" in out.columns:
+        cols.append("Side")
+    cols.append("Date")
     out = out[cols]
     logger.debug("run_screener end - produced {rows_out} rows", rows_out=len(out))
     return out

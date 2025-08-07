@@ -97,6 +97,41 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
+def apply_corporate_actions(
+    df: pd.DataFrame, csv_path: Optional[Union[str, Path]] = None
+) -> pd.DataFrame:
+    """Adjust price data for corporate actions using an adjustment CSV.
+
+    CSV must have columns: ``symbol``, ``date``, ``factor``. Prices prior to
+    ``date`` are multiplied by ``factor``.
+    """
+    if csv_path is None:
+        return df
+    try:
+        path = resolve_path(csv_path)
+    except Exception:
+        warnings.warn("Corporate actions path cannot be resolved")
+        return df
+    if not path.exists():
+        warnings.warn("Corporate actions file not found")
+        return df
+    adj = pd.read_csv(path)
+    if adj.empty:
+        return df
+    adj = adj.rename(columns=str.lower)
+    if not {"symbol", "date", "factor"}.issubset(adj.columns):
+        raise ValueError("corporate actions csv missing required columns")
+    adj["date"] = pd.to_datetime(adj["date"]).dt.normalize()
+    df = df.copy()
+    df["date"] = pd.to_datetime(df["date"]).dt.normalize()
+    price_cols = [c for c in ["open", "high", "low", "close"] if c in df.columns]
+    for sym, grp in adj.groupby("symbol"):
+        for _, row in grp.sort_values("date").iterrows():
+            mask = (df["symbol"] == sym) & (df["date"] < row["date"])
+            df.loc[mask, price_cols] = df.loc[mask, price_cols] * float(row["factor"])
+    return df
+
+
 def read_excels_long(
     cfg_or_path: Union[str, Path, Any],
     dayfirst: bool = True,

@@ -12,7 +12,7 @@ from .benchmark import load_xu100_pct
 from .calendars import (add_next_close, add_next_close_calendar,
                         build_trading_days, load_holidays_csv)
 from .config import load_config
-from .data_loader import read_excels_long
+from .data_loader import apply_corporate_actions, read_excels_long
 from .indicators import compute_indicators
 from .normalizer import normalize
 from .reporter import write_reports
@@ -38,6 +38,7 @@ def _run_scan(cfg) -> None:
     except (FileNotFoundError, RuntimeError) as exc:
         info(str(exc))
         return
+    df = apply_corporate_actions(df, getattr(cfg.data, "corporate_actions_csv", None))
     df = normalize(df)
     if cfg.calendar.tplus1_mode == "calendar":
         holidays = None
@@ -49,7 +50,9 @@ def _run_scan(cfg) -> None:
         tdays = None
         df = add_next_close(df)
     info("Göstergeler hesaplanıyor...")
-    df_ind = compute_indicators(df, cfg.indicators.params)
+    df_ind = compute_indicators(
+        df, cfg.indicators.params, engine=cfg.indicators.engine
+    )
     info("Filtre CSV okunuyor...")
     try:
         filters_df = load_filters_csv(cfg.data.filters_csv)

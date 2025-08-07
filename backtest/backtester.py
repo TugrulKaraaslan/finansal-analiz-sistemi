@@ -1,8 +1,22 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
+from enum import Enum
+
 import pandas as pd
 from loguru import logger
+
+
+class TradeSide(Enum):
+    LONG = "long"
+    SHORT = "short"
+
+    @classmethod
+    def from_value(cls, value: str) -> "TradeSide":
+        try:
+            return cls(value.lower())
+        except Exception as exc:  # pragma: no cover - explicit ValueError below
+            raise ValueError(f"Geçersiz Side değeri: {value!r}") from exc
 
 
 def run_1g_returns(
@@ -56,6 +70,14 @@ def run_1g_returns(
         msg = f"Eksik kolon(lar): {', '.join(sorted(missing_sig))}"
         logger.error(msg)
         raise ValueError(msg)
+
+    if "Side" in signals.columns:
+        sides = signals["Side"].dropna().astype(str).str.lower()
+        invalid = ~sides.isin([s.value for s in TradeSide])
+        if invalid.any():
+            bad_vals = signals["Side"][invalid].unique().tolist()
+            raise ValueError(f"Geçersiz Side değer(ler)i: {bad_vals}")
+        signals["Side"] = sides.map(lambda s: TradeSide.from_value(s).value)
 
     has_next = {"next_date", "next_close"}.issubset(df_with_next.columns)
     base_cols = ["symbol", "date", "close"]
@@ -125,13 +147,13 @@ def run_1g_returns(
         )
     merged = merged[~(invalid_entry | invalid_exit)]
 
-    sides = merged.get("Side")
-    if sides is not None:
-        side_series = sides.astype(str).str.lower().fillna("long")
+    if "Side" in merged.columns:
+        side_enum = merged["Side"].map(TradeSide.from_value)
     else:
-        side_series = pd.Series("long", index=merged.index)
+        side_enum = pd.Series(TradeSide.LONG, index=merged.index)
     pnl = merged["ExitClose"] / merged["EntryClose"] - 1.0
-    sign = side_series.map({"short": -1, "long": 1}).fillna(1)
+    sign = side_enum.map({TradeSide.SHORT: -1, TradeSide.LONG: 1})
+    merged["Side"] = side_enum.map(lambda s: s.value)
     merged["ReturnPct"] = pnl * 100.0 * sign - float(transaction_cost)
     merged["Win"] = merged["ReturnPct"] > 0.0
 
