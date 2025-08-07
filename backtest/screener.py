@@ -50,6 +50,8 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
             mask = pd.eval(
                 expr, local_dict=local_vars, engine="python", parser="pandas"
             )
+            if not isinstance(mask, pd.Series):
+                mask = pd.Series(mask, index=d.index)
             mask = mask.fillna(False)
             hits = d[mask].copy()
             if not hits.empty:
