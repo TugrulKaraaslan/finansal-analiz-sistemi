@@ -5,6 +5,8 @@ import re
 
 import pandas as pd
 
+from backtest.query_parser import SafeQuery
+
 
 def _to_pandas_ops(expr: str) -> str:
     expr = re.sub(r"\bAND\b", "&", expr, flags=re.I)
@@ -31,29 +33,16 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
     if d.empty:
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date", "mask"])
     d = d.reset_index(drop=True)
-    local_vars = {c: d[c] for c in d.columns}
-    local_vars.update(
-        {
-            "close": d["close"],
-            "open": d["open"],
-            "high": d["high"],
-            "low": d["low"],
-            "volume": d["volume"],
-        }
-    )
     out_rows = []
     for _, row in filters_df.iterrows():
         code = str(row["FilterCode"]).strip()
         expr = str(row["PythonQuery"])
         expr = _to_pandas_ops(expr)
+        safe = SafeQuery(expr)
+        if not safe.is_safe:
+            continue
         try:
-            mask = pd.eval(
-                expr, local_dict=local_vars, engine="python", parser="pandas"
-            )
-            if not isinstance(mask, pd.Series):
-                mask = pd.Series(mask, index=d.index)
-            mask = mask.fillna(False)
-            hits = d[mask].copy()
+            hits = safe.filter(d)
             if not hits.empty:
                 for sym in hits["symbol"]:
                     out_rows.append(
