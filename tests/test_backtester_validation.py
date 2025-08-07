@@ -44,16 +44,40 @@ def test_run_1g_returns_missing_columns():
 
 
 def test_run_1g_returns_empty_signals():
-    res = run_1g_returns(
-        _base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
-    )
-    assert list(res.columns) == [
-        "FilterCode",
-        "Symbol",
-        "Date",
-        "EntryClose",
-        "ExitClose",
-        "ReturnPct",
-        "Win",
-    ]
-    assert res.empty
+    with pytest.raises(ValueError):
+        run_1g_returns(
+            _base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+        )
+
+
+def test_run_1g_returns_logs_empty_signals(caplog):
+    from loguru import logger
+
+    logger.add(caplog.handler, level="ERROR")
+    with pytest.raises(ValueError):
+        run_1g_returns(
+            _base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+        )
+    assert "signals DataFrame is empty" in caplog.text
+
+
+def test_run_1g_returns_logs_missing_base_columns(caplog):
+    from loguru import logger
+
+    bad_df = _base_df().drop(columns=["close"])
+    logger.add(caplog.handler, level="ERROR")
+    with pytest.raises(ValueError):
+        run_1g_returns(bad_df, _signals_df())
+    assert caplog.records[0].levelname == "ERROR"
+    assert "Eksik kolon(lar): close" in caplog.text
+
+
+def test_run_1g_returns_logs_missing_signal_columns(caplog):
+    from loguru import logger
+
+    bad_sig = _signals_df().drop(columns=["Date"])
+    logger.add(caplog.handler, level="ERROR")
+    with pytest.raises(ValueError):
+        run_1g_returns(_base_df(), bad_sig)
+    assert caplog.records[0].levelname == "ERROR"
+    assert "Eksik kolon(lar): Date" in caplog.text
