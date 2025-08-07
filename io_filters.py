@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -25,19 +24,17 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
     -------
     pandas.DataFrame
         DataFrame containing the filter definitions. If the file is missing
-        or cannot be parsed, an empty DataFrame is returned and a warning is
-        issued. Missing required columns raise ``RuntimeError``.
+        or cannot be parsed, ``FileNotFoundError`` is raised. Missing required
+        columns raise ``RuntimeError``.
     """
 
     p = resolve_path(path)
     if not p.exists():
-        warnings.warn(f"Filters CSV bulunamadı: {p}")
-        return pd.DataFrame()
+        raise FileNotFoundError(f"Filters CSV bulunamadı: {p}")
     try:
         df = pd.read_csv(p, encoding="utf-8")
-    except Exception:
-        warnings.warn(f"Filters CSV okunamadı: {p}")
-        return pd.DataFrame()
+    except Exception as exc:
+        raise FileNotFoundError(f"Filters CSV okunamadı: {p}") from exc
 
     missing = REQUIRED_COLUMNS.difference(df.columns)
     if missing:
