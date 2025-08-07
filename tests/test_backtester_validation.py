@@ -9,9 +9,9 @@ def _base_df():
     return pd.DataFrame(
         {
             "symbol": ["AAA"],
-            "date": pd.to_datetime(["2024-01-01"]).date,
+            "date": pd.to_datetime(["2024-01-01"]).normalize(),
             "close": [1.0],
-            "next_date": pd.to_datetime(["2024-01-02"]).date,
+            "next_date": pd.to_datetime(["2024-01-02"]).normalize(),
             "next_close": [1.1],
         }
     )
@@ -22,7 +22,7 @@ def _signals_df():
         {
             "FilterCode": ["F"],
             "Symbol": ["AAA"],
-            "Date": pd.to_datetime(["2024-01-01"]).date,
+            "Date": pd.to_datetime(["2024-01-01"]).normalize(),
         }
     )
 

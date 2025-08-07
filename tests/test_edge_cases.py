@@ -24,6 +24,7 @@ def test_quality_warnings_no_issues():
         }
     )
     res = quality_warnings(df)
+    assert isinstance(df.loc[0, "date"], pd.Timestamp)
     assert list(res.columns) == ["symbol", "date", "issue", "value"]
     assert res.empty
 
@@ -42,5 +43,6 @@ def test_run_screener_no_hits():
     )  # TİP DÜZELTİLDİ
     filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 2"]})
     res = run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
+    assert isinstance(df_ind.loc[0, "date"], pd.Timestamp)
     assert list(res.columns) == ["FilterCode", "Symbol", "Date"]
     assert res.empty

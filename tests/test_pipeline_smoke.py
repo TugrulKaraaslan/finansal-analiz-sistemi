@@ -23,6 +23,8 @@ def test_pipeline_smoke():
             "relative_volume": [1.2, 0.9],
         }
     )
+    assert isinstance(df.loc[0, "date"], pd.Timestamp)
+    assert isinstance(df.loc[0, "next_date"], pd.Timestamp)
     filters = pd.DataFrame(
         {
             "FilterCode": ["T1"],
@@ -30,8 +32,10 @@ def test_pipeline_smoke():
         }
     )
     sigs = run_screener(df, filters, "2024-01-05")
+    assert isinstance(sigs.loc[0, "Date"], pd.Timestamp)
     out = run_1g_returns(df, sigs)
     assert not out.empty
+    assert isinstance(out.loc[0, "Date"], pd.Timestamp)
 
 
 def test_pipeline_no_signals():
@@ -50,6 +54,8 @@ def test_pipeline_no_signals():
             "relative_volume": [0.9],
         }
     )
+    assert isinstance(df.loc[0, "date"], pd.Timestamp)
+    assert isinstance(df.loc[0, "next_date"], pd.Timestamp)
     filters = pd.DataFrame(
         {
             "FilterCode": ["T1"],
