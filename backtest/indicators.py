@@ -40,7 +40,9 @@ def compute_indicators(
             macd_params = [macd_params]  # TİP DÜZELTİLDİ
         macd_params = list(macd_params)
         if len(macd_params) < 3:
-            raise ValueError("macd params must have at least three values")  # TİP DÜZELTİLDİ
+            raise ValueError(
+                "macd params must have at least three values"
+            )  # TİP DÜZELTİLDİ
         fast, slow, sig = map(int, macd_params[:3])
         macd = ta.macd(g["close"], fast=fast, slow=slow, signal=sig)
         if macd is not None and not macd.empty:

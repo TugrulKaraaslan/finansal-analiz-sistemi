@@ -1,3 +1,4 @@
+# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 """Path utilities."""
 
 from __future__ import annotations
@@ -31,4 +32,3 @@ def resolve_path(path: Union[str, os.PathLike]) -> Path:
 
 
 __all__ = ["resolve_path"]
-

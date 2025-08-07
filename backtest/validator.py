@@ -12,7 +12,9 @@ def dataset_summary(df: pd.DataFrame) -> pd.DataFrame:
     req = {"symbol", "date", "close"}
     missing = req.difference(df.columns)
     if missing:
-        raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")  # TİP DÜZELTİLDİ
+        raise ValueError(
+            f"Eksik kolon(lar): {', '.join(sorted(missing))}"
+        )  # TİP DÜZELTİLDİ
     if df.empty:
         return pd.DataFrame(
             columns=[
@@ -43,7 +45,9 @@ def quality_warnings(df: pd.DataFrame) -> pd.DataFrame:
     req = {"symbol", "date", "close"}
     missing = req.difference(df.columns)
     if missing:
-        raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")  # TİP DÜZELTİLDİ
+        raise ValueError(
+            f"Eksik kolon(lar): {', '.join(sorted(missing))}"
+        )  # TİP DÜZELTİLDİ
     issues = []
     if df.empty:
         return pd.DataFrame(columns=["symbol", "date", "issue", "value"])
@@ -74,4 +78,6 @@ def quality_warnings(df: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(
             columns=["symbol", "date", "issue", "value"]
         )  # TİP DÜZELTİLDİ
-    return pd.DataFrame(issues, columns=["symbol", "date", "issue", "value"])  # TİP DÜZELTİLDİ
+    return pd.DataFrame(
+        issues, columns=["symbol", "date", "issue", "value"]
+    )  # TİP DÜZELTİLDİ
