@@ -36,17 +36,12 @@ def run_1g_returns(
         raise ValueError("df_with_next is empty")
     if signals.empty:
         logger.warning("signals DataFrame is empty")
-        return pd.DataFrame(
-            columns=[
-                "FilterCode",
-                "Symbol",
-                "Date",
-                "EntryClose",
-                "ExitClose",
-                "ReturnPct",
-                "Win",
-            ]
-        )
+        cols = ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win"]
+        if "Group" in signals.columns:
+            cols.insert(1, "Group")
+        if "Side" in signals.columns:
+            cols.insert(len(cols) - 2, "Side")
+        return pd.DataFrame(columns=cols)
 
     req_base = {"symbol", "date", "close"}
     missing_base = req_base.difference(df_with_next.columns)
@@ -62,8 +57,14 @@ def run_1g_returns(
         logger.error(msg)
         raise ValueError(msg)
 
-    base = df_with_next[["symbol", "date", "close"]].copy()
+    has_next = {"next_date", "next_close"}.issubset(df_with_next.columns)
+    base_cols = ["symbol", "date", "close"]
+    if has_next:
+        base_cols.extend(["next_date", "next_close"])
+    base = df_with_next[base_cols].copy()
     base["date"] = pd.to_datetime(base["date"]).dt.normalize()
+    if has_next:
+        base["next_date"] = pd.to_datetime(base["next_date"]).dt.normalize()
     before = len(base)
     base = base.drop_duplicates(["symbol", "date"])
     if len(base) != before:
@@ -72,7 +73,7 @@ def run_1g_returns(
     signals = signals.copy()
     signals["Date"] = pd.to_datetime(signals["Date"]).dt.normalize()
     before_sig = len(signals)
-    signals = signals.drop_duplicates(["Symbol", "Date"])
+    signals = signals.drop_duplicates()
     if len(signals) != before_sig:
         logger.warning("dropped {n} duplicate signal rows", n=before_sig - len(signals))
     if trading_days is not None and not isinstance(trading_days, pd.DatetimeIndex):
@@ -84,25 +85,31 @@ def run_1g_returns(
     merged.rename(columns={"close": "EntryClose"}, inplace=True)
     merged = merged.drop(columns=["symbol", "date"])
 
-    if trading_days is not None:
-        td = pd.DatetimeIndex(trading_days).normalize()
-        td_pos = pd.Series(range(len(td)), index=td)
-
-        def calc_exit(d: pd.Timestamp) -> pd.Timestamp:
-            idx = td_pos.get(d, None)
-            if idx is None or idx + holding_period >= len(td):
-                return pd.NaT
-            return td[idx + holding_period]
-
-        merged["ExitDate"] = merged["Date"].map(calc_exit)
+    if has_next and holding_period == 1:
+        merged.rename(
+            columns={"next_date": "ExitDate", "next_close": "ExitClose"}, inplace=True
+        )
     else:
-        merged["ExitDate"] = merged["Date"] + pd.to_timedelta(holding_period, unit="D")
+        if trading_days is not None:
+            td = pd.DatetimeIndex(trading_days).normalize()
+            td_pos = pd.Series(range(len(td)), index=td)
 
-    exit_base = base.rename(columns={"date": "ExitDate", "close": "ExitClose"})
-    merged = merged.merge(
-        exit_base, left_on=["Symbol", "ExitDate"], right_on=["symbol", "ExitDate"], how="left"
-    )
-    merged.drop(columns=["symbol", "ExitDate"], inplace=True)
+            def calc_exit(d: pd.Timestamp) -> pd.Timestamp:
+                idx = td_pos.get(d, None)
+                if idx is None or idx + holding_period >= len(td):
+                    return pd.NaT
+                return td[idx + holding_period]
+
+            merged["ExitDate"] = merged["Date"].map(calc_exit)
+        else:
+            merged["ExitDate"] = merged["Date"] + pd.to_timedelta(
+                holding_period, unit="D"
+            )
+
+        exit_base = base.drop(columns=["next_date", "next_close"], errors="ignore").rename(
+            columns={"symbol": "Symbol", "date": "ExitDate", "close": "ExitClose"}
+        )
+        merged = merged.merge(exit_base, on=["Symbol", "ExitDate"], how="left")
 
     invalid_entry = (merged["EntryClose"] <= 0) | merged["EntryClose"].isna()
     invalid_exit = (merged["ExitClose"] <= 0) | merged["ExitClose"].isna()
@@ -117,14 +124,24 @@ def run_1g_returns(
             n=int(invalid_exit.sum()),
         )
     merged = merged[~(invalid_entry | invalid_exit)]
-    merged["ReturnPct"] = (
-        (merged["ExitClose"] / merged["EntryClose"] - 1.0) * 100.0
-        - float(transaction_cost)
-    )
+
+    sides = merged.get("Side")
+    if sides is not None:
+        side_series = sides.astype(str).str.lower().fillna("long")
+    else:
+        side_series = pd.Series("long", index=merged.index)
+    pnl = merged["ExitClose"] / merged["EntryClose"] - 1.0
+    sign = side_series.map({"short": -1, "long": 1}).fillna(1)
+    merged["ReturnPct"] = pnl * 100.0 * sign - float(transaction_cost)
     merged["Win"] = merged["ReturnPct"] > 0.0
 
-    out = merged[
-        ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win"]
-    ].copy()
+    cols = ["FilterCode"]
+    if "Group" in merged.columns:
+        cols.append("Group")
+    cols.extend(["Symbol", "Date", "EntryClose", "ExitClose"])
+    if "Side" in merged.columns:
+        cols.append("Side")
+    cols.extend(["ReturnPct", "Win"])
+    out = merged[cols].copy()
     logger.debug("run_1g_returns end - produced {rows_out} rows", rows_out=len(out))
     return out
