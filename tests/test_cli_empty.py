@@ -49,7 +49,7 @@ def test_scan_range_empty(monkeypatch):
         cli,
         "run_screener",
         lambda df, filters, d: pd.DataFrame(
-            columns=["FilterCode", "Symbol", "Date", "mask"]
+            columns=["FilterCode", "Symbol", "Date"]
         ),
     )
     monkeypatch.setattr(
@@ -98,7 +98,7 @@ def test_scan_day_empty(monkeypatch):
         cli,
         "run_screener",
         lambda df, filters, d: pd.DataFrame(
-            columns=["FilterCode", "Symbol", "Date", "mask"]
+            columns=["FilterCode", "Symbol", "Date"]
         ),
     )
     monkeypatch.setattr(

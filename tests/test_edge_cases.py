@@ -42,5 +42,5 @@ def test_run_screener_no_hits():
     )  # TİP DÜZELTİLDİ
     filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 2"]})
     res = run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
-    assert list(res.columns) == ["FilterCode", "Symbol", "Date", "mask"]
+    assert list(res.columns) == ["FilterCode", "Symbol", "Date"]
     assert res.empty
