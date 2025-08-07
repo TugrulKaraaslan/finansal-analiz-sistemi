@@ -10,6 +10,7 @@ def run_1g_returns(
     signals: pd.DataFrame,
     holding_period: int = 1,
     transaction_cost: float = 0.0,
+    trading_days: pd.DatetimeIndex | None = None,
 ) -> pd.DataFrame:
     """Calculate returns for screener signals."""
 
@@ -74,26 +75,48 @@ def run_1g_returns(
     signals = signals.drop_duplicates(["Symbol", "Date"])
     if len(signals) != before_sig:
         logger.warning("dropped {n} duplicate signal rows", n=before_sig - len(signals))
+    if trading_days is not None and not isinstance(trading_days, pd.DatetimeIndex):
+        raise TypeError("trading_days must be a DatetimeIndex")
 
     merged = signals.merge(
         base, left_on=["Symbol", "Date"], right_on=["symbol", "date"], how="left"
     )
     merged.rename(columns={"close": "EntryClose"}, inplace=True)
     merged = merged.drop(columns=["symbol", "date"])
-    merged["ExitDate"] = merged["Date"] + pd.to_timedelta(holding_period, unit="D")
+
+    if trading_days is not None:
+        td = pd.DatetimeIndex(trading_days).normalize()
+        td_pos = pd.Series(range(len(td)), index=td)
+
+        def calc_exit(d: pd.Timestamp) -> pd.Timestamp:
+            idx = td_pos.get(d, None)
+            if idx is None or idx + holding_period >= len(td):
+                return pd.NaT
+            return td[idx + holding_period]
+
+        merged["ExitDate"] = merged["Date"].map(calc_exit)
+    else:
+        merged["ExitDate"] = merged["Date"] + pd.to_timedelta(holding_period, unit="D")
+
     exit_base = base.rename(columns={"date": "ExitDate", "close": "ExitClose"})
     merged = merged.merge(
         exit_base, left_on=["Symbol", "ExitDate"], right_on=["symbol", "ExitDate"], how="left"
     )
     merged.drop(columns=["symbol", "ExitDate"], inplace=True)
-    merged = merged.dropna(subset=["EntryClose", "ExitClose"])
-    invalid = (merged["EntryClose"] <= 0) | merged["EntryClose"].isna()
-    if invalid.any():
+
+    invalid_entry = (merged["EntryClose"] <= 0) | merged["EntryClose"].isna()
+    invalid_exit = (merged["ExitClose"] <= 0) | merged["ExitClose"].isna()
+    if invalid_entry.any():
         logger.warning(
-            "run_1g_returns dropping {n} rows with non-positive EntryClose",
-            n=int(invalid.sum()),
+            "run_1g_returns dropping {n} rows with invalid EntryClose",
+            n=int(invalid_entry.sum()),
         )
-        merged = merged[~invalid]
+    if invalid_exit.any():
+        logger.warning(
+            "run_1g_returns dropping {n} rows with invalid ExitClose",
+            n=int(invalid_exit.sum()),
+        )
+    merged = merged[~(invalid_entry | invalid_exit)]
     merged["ReturnPct"] = (
         (merged["ExitClose"] / merged["EntryClose"] - 1.0) * 100.0
         - float(transaction_cost)

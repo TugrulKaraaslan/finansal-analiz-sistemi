@@ -64,8 +64,14 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
         sq = SafeQuery(expr)
         if not sq.is_safe:
             logger.warning(
-                "Filter skipped due to unsafe expression", code=code, expr=expr
+                "Filter skipped due to unsafe expression", code=code, expr=expr, reason=sq.error
             )
+            continue
+        missing_cols = sq.names.difference(d.columns)
+        if missing_cols:
+            msg = f"Filter {code!r} skipped; missing columns: {sorted(missing_cols)}"
+            logger.warning("Filter skipped due to missing columns", code=code, missing=sorted(missing_cols))
+            warnings.warn(msg)
             continue
         valids.append((code, sq))
     out_frames = []
