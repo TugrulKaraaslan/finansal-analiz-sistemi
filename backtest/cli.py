@@ -50,8 +50,12 @@ def scan_range(config_path, start_date, end_date):
     info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(df, cfg.indicators.params)
     info("Filtre CSV okunuyor...")
-    filters_df = load_filters_csv(cfg.data.filters_csv)
-    if filters_df.empty:
+    try:
+        filters_df = load_filters_csv(cfg.data.filters_csv)
+        if filters_df.empty:
+            filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
+    except FileNotFoundError as exc:
+        info(str(exc))
         filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
     all_days = sorted(pd.to_datetime(df_ind["date"]).dt.date.unique())
     if not all_days:
@@ -158,8 +162,12 @@ def scan_day(config_path, date_str):
     info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(df, cfg.indicators.params)
     info("Filtre CSV okunuyor...")
-    filters_df = load_filters_csv(cfg.data.filters_csv)
-    if filters_df.empty:
+    try:
+        filters_df = load_filters_csv(cfg.data.filters_csv)
+        if filters_df.empty:
+            filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
+    except FileNotFoundError as exc:
+        info(str(exc))
         filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
     day = pd.to_datetime(date_str).date()
     sigs = run_screener(df_ind, filters_df, day)
