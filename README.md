@@ -58,6 +58,11 @@ python -m backtest.cli scan-day --config examples/example_config.yaml --date 202
 ```
 SCAN 2024-01-02: 24 satır, ort. %1.2
 ```
+## Test Çalıştırma
+```bash
+pytest -q
+```
+
 
 ## Sürüm Notları
 - 1.1.0: Colab desteği ve yeni README.
