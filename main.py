@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from lib.validator import validate_filters
-
-validate_filters("filters.csv")
-
-
 def main() -> None:
     """Entry point."""
-    pass
+    from lib.validator import validate_filters
+
+    try:
+        validate_filters("filters.csv")
+    except FileNotFoundError:
+        print("filters.csv dosyası bulunamadı. Lütfen dosyanın mevcut olduğundan emin olun.")
 
 
 if __name__ == "__main__":
