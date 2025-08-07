@@ -22,10 +22,19 @@ class SafeQuery:
     """
 
     # characters permitted inside a query expression
-    _ALLOWED_CHARS: Set[str] = set("()&|><=+-/*.%[], ") | set(
-        string.ascii_letters + string.digits + "_"
+    _ALLOWED_CHARS: Set[str] = set("()&|><=+-/*.%[], '") | set(
+        string.ascii_letters + string.digits + "_\""
     )
-    _ALLOWED_FUNCS: Set[str] = {"isin", "notna"}
+    _ALLOWED_FUNCS: Set[str] = {
+        "isin",
+        "notna",
+        "str",
+        "contains",
+        "abs",
+        "rolling",
+        "shift",
+        "mean",
+    }
 
     def __init__(self, expr: str):
         self.expr = expr

@@ -32,7 +32,7 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
     if not p.exists():
         raise FileNotFoundError(f"Filters CSV bulunamadı: {p}")
     try:
-        df = pd.read_csv(p, encoding="utf-8")
+        df = pd.read_csv(p, encoding="utf-8", sep=None, engine="python")
     except Exception as exc:
         raise FileNotFoundError(f"Filters CSV okunamadı: {p}") from exc
 

@@ -17,6 +17,8 @@ class ProjectCfg(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     single_date: Optional[str] = None
+    holding_period: int = 1
+    transaction_cost: float = 0.0
 
 
 class DataCfg(BaseModel):

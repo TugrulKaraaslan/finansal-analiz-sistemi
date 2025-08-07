@@ -10,7 +10,9 @@ from backtest import cli
 
 def _cfg():
     return SimpleNamespace(
-        project=SimpleNamespace(out_dir="out", start_date=None, end_date=None),
+        project=SimpleNamespace(
+            out_dir="out", start_date=None, end_date=None, holding_period=1, transaction_cost=0.0
+        ),
         data=SimpleNamespace(filters_csv="dummy.csv"),
         calendar=SimpleNamespace(
             tplus1_mode="price", holidays_source="none", holidays_csv_path=None
@@ -55,7 +57,7 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(
         cli,
         "run_1g_returns",
-        lambda df, sigs: pd.DataFrame(
+        lambda df, sigs, holding_period, transaction_cost: pd.DataFrame(
             columns=[
                 "FilterCode",
                 "Symbol",
@@ -71,7 +73,7 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(cli, "dataset_summary", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "quality_warnings", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "info", lambda msg: None)
-    cli.scan_range.callback("cfg.yml", None, None)
+    cli.scan_range.callback("cfg.yml", None, None, None, None)
 
 
 def test_scan_day_empty(monkeypatch):
@@ -104,7 +106,7 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(
         cli,
         "run_1g_returns",
-        lambda df, sigs: pd.DataFrame(
+        lambda df, sigs, holding_period, transaction_cost: pd.DataFrame(
             columns=[
                 "FilterCode",
                 "Symbol",
@@ -120,4 +122,4 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(cli, "dataset_summary", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "quality_warnings", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "info", lambda msg: None)
-    cli.scan_day.callback("cfg.yml", "2024-01-02")
+    cli.scan_day.callback("cfg.yml", "2024-01-02", None, None)

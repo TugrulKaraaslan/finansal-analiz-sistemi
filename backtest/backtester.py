@@ -5,16 +5,13 @@ import pandas as pd
 from loguru import logger
 
 
-def run_1g_returns(df_with_next: pd.DataFrame, signals: pd.DataFrame) -> pd.DataFrame:
-    """Calculate 1G returns for screener signals.
-
-    Parameters
-    ----------
-    df_with_next:
-        DataFrame containing price data with next day's close.
-    signals:
-        Screener output with FilterCode, Symbol and Date columns.
-    """
+def run_1g_returns(
+    df_with_next: pd.DataFrame,
+    signals: pd.DataFrame,
+    holding_period: int = 1,
+    transaction_cost: float = 0.0,
+) -> pd.DataFrame:
+    """Calculate returns for screener signals."""
 
     logger.debug(
         "run_1g_returns start - base rows: {rows_base}, signals rows: {rows_sig}",
@@ -28,6 +25,10 @@ def run_1g_returns(df_with_next: pd.DataFrame, signals: pd.DataFrame) -> pd.Data
     if not isinstance(signals, pd.DataFrame):
         logger.error("signals must be a DataFrame")
         raise TypeError("signals must be a DataFrame")
+    if not isinstance(holding_period, int) or holding_period < 1:
+        raise ValueError("holding_period must be positive int")
+    if not isinstance(transaction_cost, (int, float)):
+        raise TypeError("transaction_cost must be numeric")
 
     if df_with_next.empty:
         logger.error("df_with_next is empty")
@@ -46,7 +47,7 @@ def run_1g_returns(df_with_next: pd.DataFrame, signals: pd.DataFrame) -> pd.Data
             ]
         )
 
-    req_base = {"symbol", "date", "close", "next_date", "next_close"}
+    req_base = {"symbol", "date", "close"}
     missing_base = req_base.difference(df_with_next.columns)
     if missing_base:
         msg = f"Eksik kolon(lar): {', '.join(sorted(missing_base))}"
@@ -60,14 +61,32 @@ def run_1g_returns(df_with_next: pd.DataFrame, signals: pd.DataFrame) -> pd.Data
         logger.error(msg)
         raise ValueError(msg)
 
-    base = df_with_next[["symbol", "date", "close", "next_date", "next_close"]].copy()
+    base = df_with_next[["symbol", "date", "close"]].copy()
+    base["date"] = pd.to_datetime(base["date"]).dt.normalize()
+    before = len(base)
+    base = base.drop_duplicates(["symbol", "date"])
+    if len(base) != before:
+        logger.warning("dropped {n} duplicate price rows", n=before - len(base))
+
+    signals = signals.copy()
+    signals["Date"] = pd.to_datetime(signals["Date"]).dt.normalize()
+    before_sig = len(signals)
+    signals = signals.drop_duplicates(["Symbol", "Date"])
+    if len(signals) != before_sig:
+        logger.warning("dropped {n} duplicate signal rows", n=before_sig - len(signals))
+
     merged = signals.merge(
         base, left_on=["Symbol", "Date"], right_on=["symbol", "date"], how="left"
     )
+    merged.rename(columns={"close": "EntryClose"}, inplace=True)
     merged = merged.drop(columns=["symbol", "date"])
-    merged = merged.dropna(subset=["close", "next_close"])
-    merged["EntryClose"] = merged["close"]
-    merged["ExitClose"] = merged["next_close"]
+    merged["ExitDate"] = merged["Date"] + pd.to_timedelta(holding_period, unit="D")
+    exit_base = base.rename(columns={"date": "ExitDate", "close": "ExitClose"})
+    merged = merged.merge(
+        exit_base, left_on=["Symbol", "ExitDate"], right_on=["symbol", "ExitDate"], how="left"
+    )
+    merged.drop(columns=["symbol", "ExitDate"], inplace=True)
+    merged = merged.dropna(subset=["EntryClose", "ExitClose"])
     invalid = (merged["EntryClose"] <= 0) | merged["EntryClose"].isna()
     if invalid.any():
         logger.warning(
@@ -75,7 +94,10 @@ def run_1g_returns(df_with_next: pd.DataFrame, signals: pd.DataFrame) -> pd.Data
             n=int(invalid.sum()),
         )
         merged = merged[~invalid]
-    merged["ReturnPct"] = (merged["ExitClose"] / merged["EntryClose"] - 1.0) * 100.0
+    merged["ReturnPct"] = (
+        (merged["ExitClose"] / merged["EntryClose"] - 1.0) * 100.0
+        - float(transaction_cost)
+    )
     merged["Win"] = merged["ReturnPct"] > 0.0
 
     out = merged[
