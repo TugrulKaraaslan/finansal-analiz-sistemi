@@ -33,11 +33,17 @@ def write_reports(
     validation_summary: Optional[pd.DataFrame] = None,
     validation_issues: Optional[pd.DataFrame] = None,
 ):
-    """Write daily/summary and optional sheets.
+    """Write daily/summary and optional sheets and return output paths.
     - SUMMARY: ReturnPct ortalamaları (sayısal 0.00 -> yüzde puan)
     - SUMMARY_WINRATE: Win-rate (0..1) (% format)
     - SUMMARY_DIFF: Filtre − BIST
     - VALIDATION_SUMMARY / VALIDATION_ISSUES: veri kalite raporu
+
+    Returns
+    -------
+    dict
+        Mapping of produced files. Keys are ``excel`` for the workbook and
+        ``csv`` for a list of CSV exports (if requested).
     """
     if not isinstance(trades_all, pd.DataFrame):
         raise TypeError("trades_all must be a DataFrame")  # TİP DÜZELTİLDİ
@@ -80,6 +86,7 @@ def write_reports(
         dates = tuple(dates)  # TİP DÜZELTİLDİ
     else:
         raise TypeError("dates must be iterable or date-like")  # TİP DÜZELTİLDİ
+    outputs: dict[str, Path | list[Path]] = {}
     if summary_wide is None:
         summary_wide = pd.DataFrame()  # TİP DÜZELTİLDİ
     if out_xlsx:
@@ -181,35 +188,48 @@ def write_reports(
                 if diff_sheet in writer.sheets:
                     ws = writer.sheets[diff_sheet]
                     ws.set_column(1, 100, 12, num_fmt)
+            outputs["excel"] = out_xlsx_path
 
     if out_csv_dir:
         out_csv_path = resolve_path(out_csv_dir)
         out_csv_path.mkdir(parents=True, exist_ok=True)
+        csv_paths: list[Path] = []
         try:
+            daily_csv = out_csv_path / "daily_trades.csv"
             trades_all.to_csv(
-                out_csv_path / "daily_trades.csv",
+                daily_csv,
                 index=False,
                 encoding="utf-8",
             )  # PATH DÜZENLENDİ
-            summary_wide.to_csv(
-                out_csv_path / "summary.csv", encoding="utf-8"
-            )  # PATH DÜZENLENDİ
+            csv_paths.append(daily_csv)
+            summary_csv = out_csv_path / "summary.csv"
+            summary_wide.to_csv(summary_csv, encoding="utf-8")  # PATH DÜZENLENDİ
+            csv_paths.append(summary_csv)
             if summary_winrate is not None and not summary_winrate.empty:
+                winrate_csv = out_csv_path / "summary_winrate.csv"
                 summary_winrate.to_csv(
-                    out_csv_path / "summary_winrate.csv",
+                    winrate_csv,
                     encoding="utf-8",
                 )  # PATH DÜZENLENDİ
+                csv_paths.append(winrate_csv)
             if validation_summary is not None and not validation_summary.empty:
+                val_sum_csv = out_csv_path / "validation_summary.csv"
                 validation_summary.to_csv(
-                    out_csv_path / "validation_summary.csv",
+                    val_sum_csv,
                     index=False,
                     encoding="utf-8",
                 )  # PATH DÜZENLENDİ
+                csv_paths.append(val_sum_csv)
             if validation_issues is not None and not validation_issues.empty:
+                val_iss_csv = out_csv_path / "validation_issues.csv"
                 validation_issues.to_csv(
-                    out_csv_path / "validation_issues.csv",
+                    val_iss_csv,
                     index=False,
                     encoding="utf-8",
                 )  # PATH DÜZENLENDİ
+                csv_paths.append(val_iss_csv)
         except Exception:
             warnings.warn(f"CSV yazılamadı: {out_csv_path}")  # PATH DÜZENLENDİ
+        else:
+            outputs["csv"] = csv_paths
+    return outputs
