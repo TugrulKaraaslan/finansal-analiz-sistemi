@@ -5,11 +5,13 @@ from pathlib import Path
 import warnings
 import pandas as pd
 
+from utils.paths import resolve_path
+
 
 def _read_csv_any(path: str | Path) -> pd.DataFrame:
     """Read CSV with fallback separator/decimal handling."""
-    p = Path(path)
-    if not p.exists():  # PATH DÜZENLENDİ
+    p = resolve_path(path)
+    if not p.exists():
         warnings.warn(f"CSV bulunamadı: {p}")
         return pd.DataFrame()
     try:
@@ -19,14 +21,14 @@ def _read_csv_any(path: str | Path) -> pd.DataFrame:
             with p.open("r", encoding="utf-8") as f:  # PATH DÜZENLENDİ
                 sample = f.read(2048)
         except Exception:
-            warnings.warn(f"CSV okunamadı: {p}")  # PATH DÜZENLENDİ
+            warnings.warn(f"CSV okunamadı: {p}")
             return pd.DataFrame()
         sep = ";" if sample.count(";") > sample.count(",") else ","
         dec = "," if sample.count(",") > sample.count(".") and sep == ";" else "."
         try:
             return pd.read_csv(p, sep=sep, decimal=dec, encoding="utf-8")  # PATH DÜZENLENDİ
         except Exception:
-            warnings.warn(f"CSV parse edilemedi: {p}")  # PATH DÜZENLENDİ
+            warnings.warn(f"CSV parse edilemedi: {p}")
             return pd.DataFrame()
 
 
@@ -36,7 +38,7 @@ def load_xu100_pct(csv_path: str | Path) -> pd.Series:
     df = _read_csv_any(csv_path)  # PATH DÜZENLENDİ
     # En az iki kolon yoksa tarih ve fiyat ayrılamaz
     if df.empty or df.shape[1] < 2:  # LOJİK HATASI DÜZELTİLDİ
-        warnings.warn(f"Boş CSV: {csv_path}")  # PATH DÜZENLENDİ
+        warnings.warn(f"Boş CSV: {csv_path}")
         return pd.Series(dtype=float)
     cols = {c.lower().strip(): c for c in df.columns}
     # date column

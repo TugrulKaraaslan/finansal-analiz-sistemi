@@ -7,6 +7,8 @@ import warnings
 
 import pandas as pd
 
+from utils.paths import resolve_path
+
 _TR_MAP = str.maketrans(
     {
         "İ": "I",
@@ -47,9 +49,12 @@ def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
     for p in paths:
         if not p:
             continue
-        p = Path(p)
-        if p.exists():
-            return p
+        try:
+            p_res = resolve_path(p)
+        except Exception:
+            continue
+        if p_res.exists():
+            return p_res
     return None
 
 
@@ -63,14 +68,14 @@ def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
             getattr(cfg, "data_path", None),
         )
         if cand:
-            return Path(cand)
+            return resolve_path(cand)
     except Exception:
         pass
     try:
         d = cfg.get("data", {}) if isinstance(cfg, dict) else {}
         cand = _first_existing(d.get("excel_dir"), d.get("path"), cfg.get("data_path"))
         if cand:
-            return Path(cand)
+            return resolve_path(cand)
     except Exception:
         pass
     return None
@@ -126,17 +131,17 @@ def read_excels_long(
     verbose: bool = False,
 ) -> pd.DataFrame:
     if isinstance(cfg_or_path, (str, Path)):
-        excel_dir = Path(cfg_or_path)
+        excel_dir = resolve_path(cfg_or_path)
     else:
         excel_dir = _guess_excel_dir_from_cfg(cfg_or_path)
-    if not excel_dir or not Path(excel_dir).exists():
-        warnings.warn(f"Excel klasörü bulunamadı: {excel_dir}")  # PATH DÜZENLENDİ
+    if not excel_dir or not excel_dir.exists():
+        warnings.warn(f"Excel klasörü bulunamadı: {excel_dir}")
         return pd.DataFrame()
 
     records: List[pd.DataFrame] = []
-    excel_files = sorted(p for p in Path(excel_dir).glob("*.xlsx"))  # PATH DÜZENLENDİ
+    excel_files = sorted(p for p in excel_dir.glob("*.xlsx"))
     if not excel_files:
-        warnings.warn(f"'{excel_dir}' altında .xlsx bulunamadı.")  # PATH DÜZENLENDİ
+        warnings.warn(f"'{excel_dir}' altında .xlsx bulunamadı.")
         return pd.DataFrame()
 
     for fpath in excel_files:

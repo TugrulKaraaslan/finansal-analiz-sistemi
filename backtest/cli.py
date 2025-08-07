@@ -1,10 +1,11 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
-from pathlib import Path
-
 import click
 import pandas as pd
+
+from io_filters import load_filters_csv
+from utils.paths import resolve_path
 
 from .backtester import run_1g_returns
 from .benchmark import load_xu100_pct
@@ -22,20 +23,6 @@ from .reporter import write_reports
 from .screener import run_screener
 from .utils import info
 from .validator import dataset_summary, quality_warnings
-
-
-def _read_filters_csv(path: str | Path) -> pd.DataFrame:
-    """Read filters CSV safely."""
-    p = Path(path)
-    if not p.exists():  # PATH DÜZENLENDİ
-        info(f"Filters CSV bulunamadı: {p}")  # PATH DÜZENLENDİ
-        return pd.DataFrame()
-    try:
-        with p.open("r", encoding="utf-8") as f:  # PATH DÜZENLENDİ
-            return pd.read_csv(f)
-    except Exception:
-        info(f"Filters CSV okunamadı: {p}")  # PATH DÜZENLENDİ
-        return pd.DataFrame()
 @click.group()
 def cli():
     pass
@@ -65,14 +52,9 @@ def scan_range(config_path, start_date, end_date):
     info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(df, cfg.indicators.params)
     info("Filtre CSV okunuyor...")
-    filters_df = _read_filters_csv(cfg.data.filters_csv)  # PATH DÜZENLENDİ
-    req = {"FilterCode", "PythonQuery"}
+    filters_df = load_filters_csv(cfg.data.filters_csv)
     if filters_df.empty:
-        filters_df = pd.DataFrame(columns=list(req))
-    elif not req.issubset(set(filters_df.columns)):
-        raise RuntimeError(
-            "filters CSV: 'FilterCode' ve 'PythonQuery' kolonlarını içermeli"
-        )
+        filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
     all_days = sorted(pd.to_datetime(df_ind["date"]).dt.date.unique())
     if not all_days:
         info("Taranacak tarih bulunamadı, veri seti boş.")  # LOJİK HATASI DÜZELTİLDİ
@@ -133,10 +115,10 @@ def scan_range(config_path, start_date, end_date):
         xu100_pct = {
             d: float(s.get(d, float("nan"))) for d in pivot.columns if d != "Ortalama"
         }
-    out_dir = Path(cfg.project.out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)  # PATH DÜZENLENDİ
-    out_xlsx = out_dir / f"{start}_{end}_1G_BIST100.xlsx"  # PATH DÜZENLENDİ
-    out_csv_dir = out_dir / "csv"  # PATH DÜZENLENDİ
+    out_dir = resolve_path(cfg.project.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_xlsx = out_dir / f"{start}_{end}_1G_BIST100.xlsx"
+    out_csv_dir = out_dir / "csv"
     info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
     val_iss = quality_warnings(df)
@@ -178,14 +160,9 @@ def scan_day(config_path, date_str):
     info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(df, cfg.indicators.params)
     info("Filtre CSV okunuyor...")
-    filters_df = _read_filters_csv(cfg.data.filters_csv)  # PATH DÜZENLENDİ
-    req = {"FilterCode", "PythonQuery"}
+    filters_df = load_filters_csv(cfg.data.filters_csv)
     if filters_df.empty:
-        filters_df = pd.DataFrame(columns=list(req))
-    elif not req.issubset(set(filters_df.columns)):
-        raise RuntimeError(
-            "filters CSV: 'FilterCode' ve 'PythonQuery' kolonlarını içermeli"
-        )
+        filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
     day = pd.to_datetime(date_str).date()
     sigs = run_screener(df_ind, filters_df, day)
     trades = run_1g_returns(df_ind, sigs)
@@ -209,9 +186,9 @@ def scan_day(config_path, date_str):
     else:
         pivot = pd.DataFrame(columns=[day, "Ortalama"])
         winrate = pd.DataFrame()  # TİP DÜZELTİLDİ
-    out_dir = Path(cfg.project.out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)  # PATH DÜZENLENDİ
-    out_xlsx = out_dir / f"SCAN_{day}.xlsx"  # PATH DÜZENLENDİ
+    out_dir = resolve_path(cfg.project.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_xlsx = out_dir / f"SCAN_{day}.xlsx"
     info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
     val_iss = quality_warnings(df)

@@ -8,13 +8,15 @@ from typing import Iterable, Optional, Mapping  # TİP DÜZELTİLDİ
 import warnings
 import pandas as pd
 
+from utils.paths import resolve_path
 
-def _ensure_dir(path: Optional[str]):
+
+def _ensure_dir(path: Optional[str | Path]):
     if not path:
         return
-    p = Path(path)
+    p = resolve_path(path)
     target = p if not p.suffix else p.parent
-    target.mkdir(parents=True, exist_ok=True)  # TİP DÜZELTİLDİ
+    target.mkdir(parents=True, exist_ok=True)
 
 
 def write_reports(
@@ -73,7 +75,7 @@ def write_reports(
     if summary_wide is None:
         summary_wide = pd.DataFrame()  # TİP DÜZELTİLDİ
     if out_xlsx:
-        out_xlsx_path = Path(out_xlsx)
+        out_xlsx_path = resolve_path(out_xlsx)
         _ensure_dir(out_xlsx_path)
         try:
             writer = pd.ExcelWriter(out_xlsx_path, engine="xlsxwriter")  # PATH DÜZENLENDİ
@@ -167,8 +169,8 @@ def write_reports(
                     ws.set_column(1, 100, 12, num_fmt)
     
     if out_csv_dir:
-        out_csv_path = Path(out_csv_dir)
-        out_csv_path.mkdir(parents=True, exist_ok=True)  # PATH DÜZENLENDİ
+        out_csv_path = resolve_path(out_csv_dir)
+        out_csv_path.mkdir(parents=True, exist_ok=True)
         try:
             trades_all.to_csv(
                 out_csv_path / "daily_trades.csv",
