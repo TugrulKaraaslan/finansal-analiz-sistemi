@@ -37,7 +37,11 @@ def scan_range(config_path, start_date, end_date):
     if end_date:
         cfg.project.end_date = end_date
     info("Excelleri okuyor...")
-    df = read_excels_long(cfg)
+    try:
+        df = read_excels_long(cfg)
+    except (FileNotFoundError, RuntimeError) as exc:
+        info(str(exc))
+        return
     df = normalize(df)
     if cfg.calendar.tplus1_mode == "calendar":
         holidays = None
@@ -149,7 +153,11 @@ def scan_day(config_path, date_str):
     cfg.project.single_date = date_str
     cfg.project.run_mode = "single"
     info("Excelleri okuyor...")
-    df = read_excels_long(cfg)
+    try:
+        df = read_excels_long(cfg)
+    except (FileNotFoundError, RuntimeError) as exc:
+        info(str(exc))
+        return
     df = normalize(df)
     if cfg.calendar.tplus1_mode == "calendar":
         holidays = None

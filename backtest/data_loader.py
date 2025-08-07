@@ -158,14 +158,12 @@ def read_excels_long(
                 print(f"[WARN] Önbellek okunamadı: {cache_path} -> {e}")
 
     if not excel_dir or not excel_dir.exists():
-        warnings.warn(f"Excel klasörü bulunamadı: {excel_dir}")
-        return pd.DataFrame()
+        raise FileNotFoundError(f"Excel klasörü bulunamadı: {excel_dir}")
 
     records: List[pd.DataFrame] = []
     excel_files = sorted(p for p in excel_dir.glob("*.xlsx"))
     if not excel_files:
-        warnings.warn(f"'{excel_dir}' altında .xlsx bulunamadı.")
-        return pd.DataFrame()
+        raise RuntimeError(f"'{excel_dir}' altında .xlsx bulunamadı.")
 
     for fpath in excel_files:
         try:
