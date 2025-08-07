@@ -14,19 +14,27 @@ def _read_csv_any(path: str | Path) -> pd.DataFrame:
     if not p.exists():
         raise FileNotFoundError(f"CSV bulunamadı: {p}")
     try:
-        return pd.read_csv(p, encoding="utf-8")  # PATH DÜZENLENDİ
+        df = pd.read_csv(p, encoding="utf-8")  # PATH DÜZENLENDİ
+        if df.shape[1] > 1:
+            return df
     except Exception:
-        try:
-            with p.open("r", encoding="utf-8") as f:  # PATH DÜZENLENDİ
-                sample = f.read(2048)
-        except Exception as e:  # SPECIFIC EXCEPTIONS
-            raise FileNotFoundError(f"CSV okunamadı: {p}") from e
-        sep = ";" if sample.count(";") > sample.count(",") else ","
-        dec = "," if sample.count(",") > sample.count(".") and sep == ";" else "."
-        try:
-            return pd.read_csv(p, sep=sep, decimal=dec, encoding="utf-8")  # PATH DÜZENLENDİ
-        except Exception as e:
-            raise RuntimeError(f"CSV parse edilemedi: {p}") from e
+        pass
+    try:
+        with p.open("r", encoding="utf-8") as f:  # PATH DÜZENLENDİ
+            sample = f.read(2048)
+    except Exception as e:  # SPECIFIC EXCEPTIONS
+        raise FileNotFoundError(f"CSV okunamadı: {p}") from e
+    import csv
+    try:
+        dialect = csv.Sniffer().sniff(sample, delimiters=";,")
+        sep = dialect.delimiter
+    except Exception:
+        sep = ","
+    dec = "," if sep == ";" else "."
+    try:
+        return pd.read_csv(p, sep=sep, decimal=dec, encoding="utf-8")  # PATH DÜZENLENDİ
+    except Exception as e:
+        raise RuntimeError(f"CSV parse edilemedi: {p}") from e
 
 
 def load_xu100_pct(csv_path: str | Path) -> pd.Series:
