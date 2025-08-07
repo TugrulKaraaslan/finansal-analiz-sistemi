@@ -1,12 +1,12 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
-from typing import Dict, List, Optional
-from pathlib import Path  # TİP DÜZELTİLDİ
 import os
+from pathlib import Path  # TİP DÜZELTİLDİ
+from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field
 import yaml
+from pydantic import BaseModel, Field
 
 from utils.paths import resolve_path
 

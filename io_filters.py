@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import warnings
+from pathlib import Path
 
 import pandas as pd
 
 from utils.paths import resolve_path
-
 
 REQUIRED_COLUMNS = {"FilterCode", "PythonQuery"}
 

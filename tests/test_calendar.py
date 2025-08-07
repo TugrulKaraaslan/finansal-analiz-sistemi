@@ -3,11 +3,8 @@ from __future__ import annotations
 
 import pandas as pd
 
-from backtest.calendars import (
-    add_next_close,
-    add_next_close_calendar,
-    build_trading_days,
-)
+from backtest.calendars import (add_next_close, add_next_close_calendar,
+                                build_trading_days)
 
 
 def test_next_close():

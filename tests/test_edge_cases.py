@@ -1,8 +1,10 @@
 import pandas as pd
 import pytest
+
 from backtest.normalizer import normalize
-from backtest.validator import quality_warnings
 from backtest.screener import run_screener
+from backtest.validator import quality_warnings
+
 
 def test_normalize_type_and_missing_columns():
     with pytest.raises(TypeError):
