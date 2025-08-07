@@ -7,42 +7,8 @@ from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
+from backtest.utils import normalize_key
 from utils.paths import resolve_path
-
-_TR_MAP = str.maketrans(
-    {
-        "İ": "I",
-        "I": "I",
-        "ı": "i",
-        "Ş": "S",
-        "ş": "s",
-        "Ğ": "G",
-        "ğ": "g",
-        "Ü": "U",
-        "ü": "u",
-        "Ö": "O",
-        "ö": "o",
-        "Ç": "C",
-        "ç": "c",
-    }
-)
-
-
-def re_sub(pat: str, repl: str, s: str) -> str:
-    import re
-
-    return re.sub(pat, repl, s)
-
-
-def normalize_key(s: Optional[str]) -> str:  # TİP DÜZELTİLDİ
-    if s is None:
-        return ""
-    s = str(s).strip()
-    s = s.translate(_TR_MAP)
-    s = s.lower()
-    s = re_sub(r"[^\w]+", "_", s)
-    s = re_sub(r"_{2,}", "_", s).strip("_")
-    return s
 
 
 def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
@@ -228,4 +194,4 @@ def read_excels_long(
     return full
 
 
-__all__ = ["read_excels_long", "normalize_key", "normalize_columns"]
+__all__ = ["read_excels_long", "normalize_columns"]
