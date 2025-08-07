@@ -1,6 +1,5 @@
-import pandas as pd
 import pytest
-from pathlib import Path
+import pandas as pd
 
 from backtest.calendars import (
     add_next_close,
@@ -38,6 +37,6 @@ def test_load_holidays_csv_validation(tmp_path):
     with pytest.raises(TypeError):
         load_holidays_csv(123)
     csv_file = tmp_path / "hol.csv"
-    csv_file.write_text("col\n1\n")
+    csv_file.write_text("col\n1\n", encoding="utf-8")
     with pytest.raises(ValueError):
         load_holidays_csv(csv_file)
