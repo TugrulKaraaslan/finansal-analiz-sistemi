@@ -1,12 +1,8 @@
-import pytest
 import pandas as pd
+import pytest
 
-from backtest.calendars import (
-    add_next_close,
-    add_next_close_calendar,
-    build_trading_days,
-    load_holidays_csv,
-)
+from backtest.calendars import (add_next_close, add_next_close_calendar,
+                                build_trading_days, load_holidays_csv)
 
 
 def test_add_next_close_invalid_inputs():

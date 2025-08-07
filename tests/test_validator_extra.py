@@ -1,9 +1,10 @@
-import pandas as pd
-import pytest
 from types import SimpleNamespace
 
-from backtest.validator import dataset_summary, quality_warnings
+import pandas as pd
+import pytest
+
 from backtest.reporter import write_reports
+from backtest.validator import dataset_summary, quality_warnings
 
 
 def test_dataset_summary_invalid_type():

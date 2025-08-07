@@ -1,8 +1,10 @@
-import tempfile, textwrap
+import tempfile
+import textwrap
 from pathlib import Path
+
 import pytest
 
-from backtest.config import load_config, RootCfg
+from backtest.config import RootCfg, load_config
 
 
 def _write_cfg(text: str) -> Path:

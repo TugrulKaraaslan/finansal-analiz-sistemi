@@ -1,10 +1,10 @@
 # DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Optional  # TİP DÜZELTİLDİ
 import re
 import unicodedata
+from pathlib import Path
+from typing import Optional  # TİP DÜZELTİLDİ
 
 from loguru import logger
 
