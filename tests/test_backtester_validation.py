@@ -9,9 +9,9 @@ def _base_df():
     return pd.DataFrame(
         {
             "symbol": ["AAA"],
-            "date": pd.to_datetime(["2024-01-01"]).date,
+            "date": pd.to_datetime(["2024-01-01"]).normalize(),
             "close": [1.0],
-            "next_date": pd.to_datetime(["2024-01-02"]).date,
+            "next_date": pd.to_datetime(["2024-01-02"]).normalize(),
             "next_close": [1.1],
         }
     )
@@ -22,7 +22,7 @@ def _signals_df():
         {
             "FilterCode": ["F"],
             "Symbol": ["AAA"],
-            "Date": pd.to_datetime(["2024-01-01"]).date,
+            "Date": pd.to_datetime(["2024-01-01"]).normalize(),
         }
     )
 
@@ -44,20 +44,20 @@ def test_run_1g_returns_missing_columns():
 
 
 def test_run_1g_returns_empty_signals():
-    with pytest.raises(ValueError):
-        run_1g_returns(
-            _base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
-        )
+    out = run_1g_returns(
+        _base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+    )
+    assert out.empty
 
 
 def test_run_1g_returns_logs_empty_signals(caplog):
     from loguru import logger
 
-    logger.add(caplog.handler, level="ERROR")
-    with pytest.raises(ValueError):
-        run_1g_returns(
-            _base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
-        )
+    logger.add(caplog.handler, level="WARNING")
+    out = run_1g_returns(
+        _base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+    )
+    assert out.empty
     assert "signals DataFrame is empty" in caplog.text
 
 

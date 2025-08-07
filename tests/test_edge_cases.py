@@ -19,11 +19,12 @@ def test_quality_warnings_no_issues():
     df = pd.DataFrame(
         {
             "symbol": ["AAA", "AAA"],
-            "date": pd.to_datetime(["2024-01-01", "2024-01-02"]).date,
+            "date": pd.to_datetime(["2024-01-01", "2024-01-02"]).normalize(),
             "close": [1.0, 2.0],
         }
     )
     res = quality_warnings(df)
+    assert isinstance(df.loc[0, "date"], pd.Timestamp)
     assert list(res.columns) == ["symbol", "date", "issue", "value"]
     assert res.empty
 
@@ -32,7 +33,7 @@ def test_run_screener_no_hits():
     df_ind = pd.DataFrame(
         {
             "symbol": ["AAA"],
-            "date": pd.to_datetime(["2024-01-02"]).date,
+            "date": pd.to_datetime(["2024-01-02"]).normalize(),
             "open": [1.0],
             "high": [1.0],
             "low": [1.0],
@@ -42,5 +43,6 @@ def test_run_screener_no_hits():
     )  # TİP DÜZELTİLDİ
     filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 2"]})
     res = run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
+    assert isinstance(df_ind.loc[0, "date"], pd.Timestamp)
     assert list(res.columns) == ["FilterCode", "Symbol", "Date"]
     assert res.empty

@@ -33,8 +33,18 @@ def run_1g_returns(df_with_next: pd.DataFrame, signals: pd.DataFrame) -> pd.Data
         logger.error("df_with_next is empty")
         raise ValueError("df_with_next is empty")
     if signals.empty:
-        logger.error("signals DataFrame is empty")
-        raise ValueError("signals DataFrame is empty")
+        logger.warning("signals DataFrame is empty")
+        return pd.DataFrame(
+            columns=[
+                "FilterCode",
+                "Symbol",
+                "Date",
+                "EntryClose",
+                "ExitClose",
+                "ReturnPct",
+                "Win",
+            ]
+        )
 
     req_base = {"symbol", "date", "close", "next_date", "next_close"}
     missing_base = req_base.difference(df_with_next.columns)
@@ -58,6 +68,13 @@ def run_1g_returns(df_with_next: pd.DataFrame, signals: pd.DataFrame) -> pd.Data
     merged = merged.dropna(subset=["close", "next_close"])
     merged["EntryClose"] = merged["close"]
     merged["ExitClose"] = merged["next_close"]
+    invalid = (merged["EntryClose"] <= 0) | merged["EntryClose"].isna()
+    if invalid.any():
+        logger.warning(
+            "run_1g_returns dropping {n} rows with non-positive EntryClose",
+            n=int(invalid.sum()),
+        )
+        merged = merged[~invalid]
     merged["ReturnPct"] = (merged["ExitClose"] / merged["EntryClose"] - 1.0) * 100.0
     merged["Win"] = merged["ReturnPct"] > 0.0
 

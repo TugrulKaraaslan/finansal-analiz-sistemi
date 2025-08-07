@@ -56,22 +56,23 @@ def scan_range(config_path, start_date, end_date):
     info("Filtre CSV okunuyor...")
     try:
         filters_df = load_filters_csv(cfg.data.filters_csv)
-        if filters_df.empty:
-            filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
     except FileNotFoundError as exc:
         info(str(exc))
         filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
-    all_days = sorted(pd.to_datetime(df_ind["date"]).dt.date.unique())
+    if filters_df.empty:
+        info("Filtre CSV boş veya bulunamadı, işlem yapılmadı.")
+        return
+    all_days = sorted(pd.to_datetime(df_ind["date"]).dt.normalize().unique())
     if not all_days:
         info("Taranacak tarih bulunamadı, veri seti boş.")  # LOJİK HATASI DÜZELTİLDİ
         return  # Liste boşsa başlangıç/bitiş alınamaz
     start = (
-        pd.to_datetime(cfg.project.start_date).date()
+        pd.to_datetime(cfg.project.start_date).normalize()
         if cfg.project.start_date
         else all_days[0]
     )
     end = (
-        pd.to_datetime(cfg.project.end_date).date()
+        pd.to_datetime(cfg.project.end_date).normalize()
         if cfg.project.end_date
         else all_days[len(all_days) - 1]  # Negatif indeks yerine açık indeks
     )  # LOJİK HATASI DÜZELTİLDİ
@@ -123,7 +124,7 @@ def scan_range(config_path, start_date, end_date):
         }
     out_dir = resolve_path(cfg.project.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_xlsx = out_dir / f"{start}_{end}_1G_BIST100.xlsx"
+    out_xlsx = out_dir / f"{start.date()}_{end.date()}_1G_BIST100.xlsx"
     out_csv_dir = out_dir / "csv"
     info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
@@ -172,12 +173,13 @@ def scan_day(config_path, date_str):
     info("Filtre CSV okunuyor...")
     try:
         filters_df = load_filters_csv(cfg.data.filters_csv)
-        if filters_df.empty:
-            filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
     except FileNotFoundError as exc:
         info(str(exc))
         filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
-    day = pd.to_datetime(date_str).date()
+    if filters_df.empty:
+        info("Filtre CSV boş veya bulunamadı, işlem yapılmadı.")
+        return
+    day = pd.to_datetime(date_str).normalize()
     sigs = run_screener(df_ind, filters_df, day)
     trades = run_1g_returns(df_ind, sigs)
     xu100_pct = None
@@ -202,7 +204,7 @@ def scan_day(config_path, date_str):
         winrate = pd.DataFrame()  # TİP DÜZELTİLDİ
     out_dir = resolve_path(cfg.project.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_xlsx = out_dir / f"SCAN_{day}.xlsx"
+    out_xlsx = out_dir / f"SCAN_{day.date()}.xlsx"
     info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
     val_iss = quality_warnings(df)

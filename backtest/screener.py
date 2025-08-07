@@ -50,7 +50,7 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
         logger.error(msg)
         raise ValueError(msg)
 
-    day = pd.to_datetime(date).date()
+    day = pd.to_datetime(date).normalize()
     d = df_ind[df_ind["date"] == day].copy()
     if d.empty:
         logger.warning("No data for date {day}", day=day)
@@ -63,6 +63,9 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
         expr = _to_pandas_ops(expr)
         safe = SafeQuery(expr)
         if not safe.is_safe:
+            logger.warning(
+                "Filter skipped due to unsafe expression", code=code, expr=expr
+            )
             continue
         try:
             hits = safe.filter(d)

@@ -11,10 +11,10 @@ def test_pipeline_smoke():
     df = pd.DataFrame(
         {
             "symbol": ["AAA", "AAA"],
-            "date": pd.to_datetime(["2024-01-05", "2024-01-08"]).date,
+            "date": pd.to_datetime(["2024-01-05", "2024-01-08"]).normalize(),
             "close": [10.0, 11.0],
             "next_close": [11.0, None],
-            "next_date": pd.to_datetime(["2024-01-08", "2024-01-09"]).date,
+            "next_date": pd.to_datetime(["2024-01-08", "2024-01-09"]).normalize(),
             "open": [10.0, 11.0],
             "high": [10.0, 11.0],
             "low": [10.0, 11.0],
@@ -23,6 +23,39 @@ def test_pipeline_smoke():
             "relative_volume": [1.2, 0.9],
         }
     )
+    assert isinstance(df.loc[0, "date"], pd.Timestamp)
+    assert isinstance(df.loc[0, "next_date"], pd.Timestamp)
+    filters = pd.DataFrame(
+        {
+            "FilterCode": ["T1"],
+            "PythonQuery": ["(rsi_14 > 65) and (relative_volume > 1.0)"],
+        }
+    )
+    sigs = run_screener(df, filters, "2024-01-05")
+    assert isinstance(sigs.loc[0, "Date"], pd.Timestamp)
+    out = run_1g_returns(df, sigs)
+    assert not out.empty
+    assert isinstance(out.loc[0, "Date"], pd.Timestamp)
+
+
+def test_pipeline_no_signals():
+    df = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-05"]).normalize(),
+            "close": [10.0],
+            "next_close": [11.0],
+            "next_date": pd.to_datetime(["2024-01-08"]).normalize(),
+            "open": [10.0],
+            "high": [10.0],
+            "low": [10.0],
+            "volume": [100],
+            "rsi_14": [60],
+            "relative_volume": [0.9],
+        }
+    )
+    assert isinstance(df.loc[0, "date"], pd.Timestamp)
+    assert isinstance(df.loc[0, "next_date"], pd.Timestamp)
     filters = pd.DataFrame(
         {
             "FilterCode": ["T1"],
@@ -31,4 +64,13 @@ def test_pipeline_smoke():
     )
     sigs = run_screener(df, filters, "2024-01-05")
     out = run_1g_returns(df, sigs)
-    assert not out.empty
+    assert out.empty
+    assert list(out.columns) == [
+        "FilterCode",
+        "Symbol",
+        "Date",
+        "EntryClose",
+        "ExitClose",
+        "ReturnPct",
+        "Win",
+    ]
