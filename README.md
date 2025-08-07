@@ -64,6 +64,13 @@ pytest -q
 ```
 
 
+## Backtest Akış Rehberi
+1. **Veri Yükleme:** `backtest.data_loader.read_excels_long` ile Excel fiyat dosyalarını okuyun. Gerekirse `backtest.calendars.add_next_close_calendar` ile işlem günlerine göre `next_date` ve `next_close` alanlarını ekleyin.
+2. **İndikatör Hesabı:** `indicator_calculator.py` veya benzeri bir araçla göstergeleri hesaplayın ve veri ile birleştirin.
+3. **Filtreleme:** `backtest.screener.run_screener` fonksiyonunu kullanarak `filters.csv` içindeki sorguları çalıştırın.
+4. **Getiri Hesabı:** Filtre sonuçlarını `backtest.backtester.run_1g_returns` fonksiyonuna vererek T+N getirilerini hesaplayın. Tatil ve hafta sonu hatalarını önlemek için `trading_days` parametresine işlem günlerini geçin.
+5. **Raporlama:** Çıktıları `backtest.reporter.write_reports` veya `backtest.report.write_report` aracılığıyla Excel/CSV olarak kaydedin.
+
 ## Sürüm Notları
 - 1.1.0: Colab desteği ve yeni README.
 - 1.0.0: İlk yayımlanan sürüm.

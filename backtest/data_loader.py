@@ -17,7 +17,8 @@ def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
             continue
         try:
             p_res = resolve_path(p)
-        except Exception:
+        except OSError:
+            # path is invalid or cannot be resolved, try next candidate
             continue
         if p_res.exists():
             return p_res
@@ -87,7 +88,12 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
         key = normalize_key(c).strip("_")
         std = COL_ALIASES.get(key, key)
         rename_map[c] = std
-    return df.rename(columns=rename_map)
+    result = df.rename(columns=rename_map)
+    # renaming may cause different original names to map to the same target
+    if result.columns.duplicated().any():
+        dup = result.columns[result.columns.duplicated()].tolist()
+        raise ValueError(f"Duplicate columns after normalization: {dup}")
+    return result
 
 
 def read_excels_long(
@@ -179,6 +185,8 @@ def read_excels_long(
 
     full = pd.concat(records, ignore_index=True)
     full = full.sort_values(["symbol", "date"], kind="mergesort").reset_index(drop=True)
+    # remove duplicate symbol/date combinations that may appear across sheets/files
+    full.drop_duplicates(["symbol", "date"], inplace=True)
     if "close" in full.columns:
         full = full.dropna(subset=["close"])
 
