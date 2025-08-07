@@ -56,29 +56,34 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
         logger.warning("No data for date {day}", day=day)
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
     d = d.reset_index(drop=True)
-    out_rows = []
-    for _, row in filters_df.iterrows():
-        code = str(row["FilterCode"]).strip()
-        expr = str(row["PythonQuery"])
-        expr = _to_pandas_ops(expr)
-        safe = SafeQuery(expr)
-        if not safe.is_safe:
+    filters_df = filters_df.copy()
+    filters_df["FilterCode"] = filters_df["FilterCode"].astype(str).str.strip()
+    filters_df["expr"] = filters_df["PythonQuery"].astype(str).map(_to_pandas_ops)
+    valids = []
+    for code, expr in zip(filters_df["FilterCode"], filters_df["expr"]):
+        sq = SafeQuery(expr)
+        if not sq.is_safe:
             logger.warning(
                 "Filter skipped due to unsafe expression", code=code, expr=expr
             )
             continue
+        valids.append((code, sq))
+    out_frames = []
+    for code, sq in valids:
         try:
-            hits = safe.filter(d)
+            hits = sq.filter(d)
             if not hits.empty:
-                for sym in hits["symbol"]:
-                    out_rows.append({"FilterCode": code, "Symbol": sym, "Date": day})
+                tmp = hits[["symbol"]].copy()
+                tmp["FilterCode"] = code
+                tmp["Date"] = day
+                out_frames.append(tmp)
         except Exception as err:
             warnings.warn(f"Filter {code!r} failed: {err}")
             logger.warning("Filter {code!r} failed: {err}", code=code, err=err)
-            continue
-    if not out_rows:
+    if not out_frames:
         logger.debug("run_screener end - no hits")
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
-    out = pd.DataFrame(out_rows)
+    out = pd.concat(out_frames, ignore_index=True)
+    out = out.rename(columns={"symbol": "Symbol"})[["FilterCode", "Symbol", "Date"]]
     logger.debug("run_screener end - produced {rows_out} rows", rows_out=len(out))
     return out

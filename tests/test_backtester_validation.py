@@ -8,11 +8,11 @@ from backtest.backtester import run_1g_returns
 def _base_df():
     return pd.DataFrame(
         {
-            "symbol": ["AAA"],
-            "date": pd.to_datetime(["2024-01-01"]).normalize(),
-            "close": [1.0],
-            "next_date": pd.to_datetime(["2024-01-02"]).normalize(),
-            "next_close": [1.1],
+            "symbol": ["AAA", "AAA"],
+            "date": pd.to_datetime(["2024-01-01", "2024-01-02"]).normalize(),
+            "close": [1.0, 1.1],
+            "next_date": pd.to_datetime(["2024-01-02", "2024-01-03"]).normalize(),
+            "next_close": [1.1, 1.2],
         }
     )
 

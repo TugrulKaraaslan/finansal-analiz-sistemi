@@ -11,10 +11,8 @@ def test_pipeline_smoke():
     df = pd.DataFrame(
         {
             "symbol": ["AAA", "AAA"],
-            "date": pd.to_datetime(["2024-01-05", "2024-01-08"]).normalize(),
+            "date": pd.to_datetime(["2024-01-05", "2024-01-06"]).normalize(),
             "close": [10.0, 11.0],
-            "next_close": [11.0, None],
-            "next_date": pd.to_datetime(["2024-01-08", "2024-01-09"]).normalize(),
             "open": [10.0, 11.0],
             "high": [10.0, 11.0],
             "low": [10.0, 11.0],
@@ -24,7 +22,6 @@ def test_pipeline_smoke():
         }
     )
     assert isinstance(df.loc[0, "date"], pd.Timestamp)
-    assert isinstance(df.loc[0, "next_date"], pd.Timestamp)
     filters = pd.DataFrame(
         {
             "FilterCode": ["T1"],
@@ -41,21 +38,18 @@ def test_pipeline_smoke():
 def test_pipeline_no_signals():
     df = pd.DataFrame(
         {
-            "symbol": ["AAA"],
-            "date": pd.to_datetime(["2024-01-05"]).normalize(),
-            "close": [10.0],
-            "next_close": [11.0],
-            "next_date": pd.to_datetime(["2024-01-08"]).normalize(),
-            "open": [10.0],
-            "high": [10.0],
-            "low": [10.0],
-            "volume": [100],
-            "rsi_14": [60],
-            "relative_volume": [0.9],
+            "symbol": ["AAA", "AAA"],
+            "date": pd.to_datetime(["2024-01-05", "2024-01-06"]).normalize(),
+            "close": [10.0, 11.0],
+            "open": [10.0, 11.0],
+            "high": [10.0, 11.0],
+            "low": [10.0, 11.0],
+            "volume": [100, 100],
+            "rsi_14": [60, 60],
+            "relative_volume": [0.9, 0.9],
         }
     )
     assert isinstance(df.loc[0, "date"], pd.Timestamp)
-    assert isinstance(df.loc[0, "next_date"], pd.Timestamp)
     filters = pd.DataFrame(
         {
             "FilterCode": ["T1"],

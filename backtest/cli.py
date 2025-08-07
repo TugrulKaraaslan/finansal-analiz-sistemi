@@ -30,12 +30,18 @@ def cli():
 @click.option("--config", "config_path", required=True, help="YAML config yolu")
 @click.option("--start", "start_date", required=False, default=None, help="YYYY-MM-DD")
 @click.option("--end", "end_date", required=False, default=None, help="YYYY-MM-DD")
-def scan_range(config_path, start_date, end_date):
+@click.option("--holding-period", default=None, type=int)
+@click.option("--transaction-cost", default=None, type=float)
+def scan_range(config_path, start_date, end_date, holding_period, transaction_cost):
     cfg = load_config(config_path)
     if start_date:
         cfg.project.start_date = start_date
     if end_date:
         cfg.project.end_date = end_date
+    if holding_period is not None:
+        cfg.project.holding_period = holding_period
+    if transaction_cost is not None:
+        cfg.project.transaction_cost = transaction_cost
     info("Excelleri okuyor...")
     try:
         df = read_excels_long(cfg)
@@ -83,7 +89,9 @@ def scan_range(config_path, start_date, end_date):
     info(f"{len(days)} gün taranacak...")
     for d in days:
         sigs = run_screener(df_ind, filters_df, d)
-        trades = run_1g_returns(df_ind, sigs)
+        trades = run_1g_returns(
+            df_ind, sigs, cfg.project.holding_period, cfg.project.transaction_cost
+        )
         all_trades.append(trades)
     trades_all = (
         pd.concat(all_trades, ignore_index=True)
@@ -149,10 +157,16 @@ def scan_range(config_path, start_date, end_date):
 @cli.command("scan-day")
 @click.option("--config", "config_path", required=True)
 @click.option("--date", "date_str", required=True, help="YYYY-MM-DD")
-def scan_day(config_path, date_str):
+@click.option("--holding-period", default=None, type=int)
+@click.option("--transaction-cost", default=None, type=float)
+def scan_day(config_path, date_str, holding_period, transaction_cost):
     cfg = load_config(config_path)
     cfg.project.single_date = date_str
     cfg.project.run_mode = "single"
+    if holding_period is not None:
+        cfg.project.holding_period = holding_period
+    if transaction_cost is not None:
+        cfg.project.transaction_cost = transaction_cost
     info("Excelleri okuyor...")
     try:
         df = read_excels_long(cfg)
@@ -181,7 +195,9 @@ def scan_day(config_path, date_str):
         return
     day = pd.to_datetime(date_str).normalize()
     sigs = run_screener(df_ind, filters_df, day)
-    trades = run_1g_returns(df_ind, sigs)
+    trades = run_1g_returns(
+        df_ind, sigs, cfg.project.holding_period, cfg.project.transaction_cost
+    )
     xu100_pct = None
     if cfg.benchmark.xu100_source == "csv" and cfg.benchmark.xu100_csv_path:
         s = load_xu100_pct(cfg.benchmark.xu100_csv_path)

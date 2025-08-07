@@ -59,10 +59,6 @@ def compute_indicators(
         g["RELATIVE_VOLUME"] = g["volume"] / g["volume"].rolling(20).mean()
         out_frames.append(g)
     df2 = pd.concat(out_frames, ignore_index=True)
-    for c in df2.columns:
-        low = c.lower()
-        if low not in df2.columns:
-            df2[low] = df2[c]
     alias_map = {
         "rsi_14": "RSI_14",
         "ema_10": "EMA_10",

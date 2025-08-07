@@ -73,3 +73,19 @@ def test_safequery_allows_whitelist_functions():
     assert q.is_safe
     out = q.filter(df)
     assert out["x"].tolist() == [1, 2]
+
+
+def test_safequery_allows_strings_and_methods():
+    df = pd.DataFrame({"symbol": ["AAA", "BBB"], "close": [1, 2]})
+    q = SafeQuery("symbol == 'AAA' & close.abs() > 0")
+    assert q.is_safe
+    out = q.filter(df)
+    assert out["symbol"].tolist() == ["AAA"]
+
+
+def test_safequery_allows_str_contains():
+    df = pd.DataFrame({"symbol": ["AAA", "BBB"]})
+    q = SafeQuery("symbol.str.contains('A')")
+    assert q.is_safe
+    out = q.filter(df)
+    assert out["symbol"].tolist() == ["AAA"]
