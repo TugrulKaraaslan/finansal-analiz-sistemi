@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from backtest.indicators import compute_indicators
 
@@ -43,3 +44,19 @@ def test_pandas_ta_fallback(monkeypatch):
     res = compute_indicators(df, params={}, engine="pandas_ta")
     res2 = compute_indicators(df, params={}, engine="builtin")
     pd.testing.assert_series_equal(res["EMA_10"], res2["EMA_10"])
+
+
+def test_invalid_engine():
+    df = _sample_df()
+    with pytest.raises(ValueError):
+        compute_indicators(df, params={}, engine="unknown")
+
+
+def test_param_validation():
+    df = _sample_df()
+    with pytest.raises(ValueError):
+        compute_indicators(df, params={"ema": [-5]}, engine="builtin")
+    with pytest.raises(ValueError):
+        compute_indicators(df, params={"rsi": [0]}, engine="builtin")
+    with pytest.raises(ValueError):
+        compute_indicators(df, params={"macd": [12, 26, -9]}, engine="builtin")

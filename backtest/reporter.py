@@ -188,7 +188,10 @@ def write_reports(
                 if diff_sheet in writer.sheets:
                     ws = writer.sheets[diff_sheet]
                     ws.set_column(1, 100, 12, num_fmt)
-            outputs["excel"] = out_xlsx_path
+            if out_xlsx_path.exists():
+                outputs["excel"] = out_xlsx_path
+            else:
+                warnings.warn(f"Excel yazılamadı: {out_xlsx_path}")
 
     if out_csv_dir:
         out_csv_path = resolve_path(out_csv_dir)
@@ -231,5 +234,8 @@ def write_reports(
         except Exception:
             warnings.warn(f"CSV yazılamadı: {out_csv_path}")  # PATH DÜZENLENDİ
         else:
-            outputs["csv"] = csv_paths
+            missing = [p for p in csv_paths if not p.exists()]
+            if missing:
+                warnings.warn(f"CSV yazılamadı: {missing}")
+            outputs["csv"] = [p for p in csv_paths if p.exists()]
     return outputs

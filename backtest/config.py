@@ -84,16 +84,14 @@ def load_config(path: str | Path) -> RootCfg:
         raise TypeError("Config içeriği sözlük olmalı")  # TİP DÜZELTİLDİ
     base = p.parent
 
-    def _join(v: Optional[str]) -> Optional[str]:
+    def _join(v: Optional[str], *, allow_cwd: bool = False) -> Optional[str]:
         if not v:
             return v
         raw = os.path.expandvars(v)
         vp = Path(raw).expanduser()
         if not vp.is_absolute():
-            # first try relative to config file
             candidate = (base / vp).resolve()
-            if not candidate.exists():
-                # fallback to current working directory only if that path exists
+            if allow_cwd and not candidate.exists():
                 cwd_candidate = (Path.cwd() / vp).resolve()
                 if cwd_candidate.exists():
                     candidate = cwd_candidate
@@ -109,7 +107,7 @@ def load_config(path: str | Path) -> RootCfg:
     for k in ["excel_dir", "filters_csv", "cache_parquet_path", "corporate_actions_csv"]:
         v = data.get(k)
         if v:
-            data[k] = _join(v)  # PATH DÜZENLENDİ
+            data[k] = _join(v, allow_cwd=(k == "filters_csv"))  # PATH DÜZENLENDİ
     cal = cfg.get("calendar", {}) if isinstance(cfg, dict) else {}
     if isinstance(cal, dict) and cal.get("holidays_csv_path"):
         cal["holidays_csv_path"] = _join(

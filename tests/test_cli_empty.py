@@ -4,6 +4,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import pandas as pd
+import pytest
 
 from backtest import cli
 
@@ -49,6 +50,8 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(
         cli, "compute_indicators", lambda df, params, engine=None: df
     )
+    filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]})
+    monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
     monkeypatch.setattr(
         cli,
         "run_screener",
@@ -71,7 +74,7 @@ def test_scan_range_empty(monkeypatch):
             ]
         ),
     )
-    monkeypatch.setattr(cli, "write_reports", lambda *args, **kwargs: None)
+    monkeypatch.setattr(cli, "write_reports", lambda *args, **kwargs: {})
     monkeypatch.setattr(cli, "dataset_summary", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "quality_warnings", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "info", lambda msg: None)
@@ -100,6 +103,8 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(
         cli, "compute_indicators", lambda df, params, engine=None: df
     )
+    filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]})
+    monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
     monkeypatch.setattr(
         cli,
         "run_screener",
@@ -122,8 +127,21 @@ def test_scan_day_empty(monkeypatch):
             ]
         ),
     )
-    monkeypatch.setattr(cli, "write_reports", lambda *args, **kwargs: None)
+    monkeypatch.setattr(cli, "write_reports", lambda *args, **kwargs: {})
     monkeypatch.setattr(cli, "dataset_summary", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "quality_warnings", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "info", lambda msg: None)
     cli.scan_day.callback("cfg.yml", "2024-01-02", None, None)
+
+
+def test_scan_range_missing_excel(monkeypatch):
+    cfg = _cfg()
+    monkeypatch.setattr(cli, "load_config", lambda _: cfg)
+
+    def _raise(_):
+        raise FileNotFoundError("missing")
+
+    monkeypatch.setattr(cli, "read_excels_long", _raise)
+    with pytest.raises(SystemExit) as exc:
+        cli.scan_range.callback("cfg.yml", None, None, None, None)
+    assert exc.value.code == 1
