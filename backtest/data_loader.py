@@ -93,7 +93,11 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     # renaming may cause different original names to map to the same target
     if result.columns.duplicated().any():
         dup = result.columns[result.columns.duplicated()].tolist()
-        raise ValueError(f"Duplicate columns after normalization: {dup}")
+        warnings.warn(
+            f"Normalize sonrası tekrar eden kolonlar bulundu ve ilk değerler tutuldu: {dup}"
+        )
+        # keep first occurrence, drop subsequent duplicates
+        result = result.loc[:, ~result.columns.duplicated()]
     return result
 
 
@@ -231,7 +235,9 @@ def read_excels_long(
 
     if not records:
         warnings.warn("Hiçbir sheet/çalışma sayfasından veri toplanamadı.")
-        return pd.DataFrame()
+        # return an empty DataFrame with expected columns so downstream code doesn't fail
+        cols = ["date", "open", "high", "low", "close", "volume", "symbol"]
+        return pd.DataFrame(columns=cols)
 
     full = pd.concat(records, ignore_index=True)
     full = full.sort_values(["symbol", "date"], kind="mergesort").reset_index(drop=True)

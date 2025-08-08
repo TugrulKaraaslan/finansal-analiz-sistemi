@@ -90,8 +90,17 @@ def load_config(path: str | Path) -> RootCfg:
         raw = os.path.expandvars(v)
         vp = Path(raw).expanduser()
         if not vp.is_absolute():
-            vp = base / vp
-        return str(vp.resolve())
+            # first try relative to config file
+            candidate = (base / vp).resolve()
+            if not candidate.exists():
+                # fallback to current working directory only if that path exists
+                cwd_candidate = (Path.cwd() / vp).resolve()
+                if cwd_candidate.exists():
+                    candidate = cwd_candidate
+            vp = candidate
+        else:
+            vp = vp.resolve()
+        return str(vp)
 
     proj = cfg.get("project", {}) if isinstance(cfg, dict) else {}
     if isinstance(proj, dict) and proj.get("out_dir"):

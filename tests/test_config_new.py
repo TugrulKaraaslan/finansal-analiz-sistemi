@@ -63,8 +63,10 @@ def test_load_config_relative_paths(tmp_path):
     cfg_file.write_text(cfg_text, encoding="utf-8")  # PATH DÜZENLENDİ
     cfg = load_config(cfg_file)
     base = cfg_file.parent
+    cwd = Path.cwd()
     assert cfg.project.out_dir == str(base / "out")
     assert cfg.data.excel_dir == str(base / "data")
-    assert cfg.data.filters_csv == str(base / "filters.csv")
+    # filters.csv exists in working directory, so path falls back there
+    assert cfg.data.filters_csv == str(cwd / "filters.csv")
     assert cfg.calendar.holidays_csv_path == str(base / "hol.csv")
     assert cfg.benchmark.xu100_csv_path == str(base / "xu.csv")
