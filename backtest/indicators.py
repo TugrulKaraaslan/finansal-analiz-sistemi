@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
+import numpy as np
 import pandas as pd
 from loguru import logger
 
@@ -132,7 +133,7 @@ def compute_indicators(
                 g[f"MACD_{fast}_{slow}_{sig}_HIST"] = hist
         g["CHANGE_1D_PERCENT"] = g["close"].pct_change(1) * 100.0
         g["CHANGE_5D_PERCENT"] = g["close"].pct_change(5) * 100.0
-        vol_mean = g["volume"].rolling(20, min_periods=1).mean().replace(0, pd.NA)
+        vol_mean = g["volume"].rolling(20, min_periods=1).mean().replace(0, np.nan)
         g["RELATIVE_VOLUME"] = (g["volume"] / vol_mean).fillna(0)
         out_frames.append(g)
     df2 = pd.concat(out_frames, ignore_index=True)

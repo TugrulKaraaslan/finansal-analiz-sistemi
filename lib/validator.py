@@ -15,11 +15,14 @@ from pathlib import Path
 import pandas as pd
 
 try:  # Pandera import may vary by version
-    import pandera as pa
-except Exception as exc:  # pragma: no cover - import error path
-    raise ImportError(
-        "Pandera is required for filter validation. Install with 'pip install pandera'."
-    ) from exc
+    import pandera.pandas as pa  # preferred in newer versions
+except Exception:
+    try:  # pragma: no cover - fallback for older pandera releases
+        import pandera as pa
+    except Exception as exc:  # pragma: no cover - import error path
+        raise ImportError(
+            "Pandera is required for filter validation. Install with 'pip install pandera'."
+        ) from exc
 
 
 _SCHEMA = pa.DataFrameSchema(
