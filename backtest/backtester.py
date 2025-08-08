@@ -73,7 +73,7 @@ def run_1g_returns(
 
     if df_with_next.empty:
         logger.warning("df_with_next is empty")
-        cols = ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win"]
+        cols = ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win", "Reason"]
         if "Group" in signals.columns:
             cols.insert(1, "Group")
         if "Side" in signals.columns:
@@ -81,7 +81,7 @@ def run_1g_returns(
         return pd.DataFrame(columns=cols)
     if signals.empty:
         logger.warning("signals DataFrame is empty")
-        cols = ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win"]
+        cols = ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win", "Reason"]
         if "Group" in signals.columns:
             cols.insert(1, "Group")
         if "Side" in signals.columns:
@@ -165,39 +165,51 @@ def run_1g_returns(
                 return td[idx + holding_period]
 
             merged["ExitDate"] = merged["Date"].map(calc_exit)
-        else:
-            merged["ExitDate"] = merged["Date"] + pd.to_timedelta(
-                holding_period, unit="D"
+            exit_base = base.drop(columns=["next_date", "next_close"], errors="ignore").rename(
+                columns={"symbol": "Symbol", "date": "ExitDate", "close": "ExitClose"}
             )
-
-        exit_base = base.drop(columns=["next_date", "next_close"], errors="ignore").rename(
-            columns={"symbol": "Symbol", "date": "ExitDate", "close": "ExitClose"}
-        )
-        merged = merged.merge(exit_base, on=["Symbol", "ExitDate"], how="left")
+            merged = merged.merge(exit_base, on=["Symbol", "ExitDate"], how="left")
+        else:
+            next_lookup = base.set_index(["symbol", "date"])["next_date"]
+            close_lookup = base.set_index(["symbol", "date"])["close"]
+            merged["ExitDate"] = merged["Date"]
+            for _ in range(holding_period):
+                merged["ExitDate"] = (
+                    pd.MultiIndex.from_frame(merged[["Symbol", "ExitDate"]])
+                    .map(next_lookup)
+                )
+            merged["ExitClose"] = (
+                pd.MultiIndex.from_frame(merged[["Symbol", "ExitDate"]])
+                .map(close_lookup)
+            )
 
     invalid_entry = (merged["EntryClose"] <= 0) | merged["EntryClose"].isna()
     invalid_exit = (merged["ExitClose"] <= 0) | merged["ExitClose"].isna()
+    merged["Reason"] = pd.NA
     if invalid_entry.any():
         logger.warning(
-            "run_1g_returns dropping {n} rows with invalid EntryClose",
+            "run_1g_returns marking {n} rows with invalid EntryClose",
             n=int(invalid_entry.sum()),
         )
+        merged.loc[invalid_entry, "Reason"] = "invalid_entry"
     if invalid_exit.any():
         logger.warning(
-            "run_1g_returns dropping {n} rows with invalid ExitClose",
+            "run_1g_returns marking {n} rows with invalid ExitClose",
             n=int(invalid_exit.sum()),
         )
-    merged = merged[~(invalid_entry | invalid_exit)]
+        merged.loc[invalid_exit & merged["Reason"].isna(), "Reason"] = "invalid_exit"
 
+    valid = ~(invalid_entry | invalid_exit)
     if "Side" in merged.columns:
-        side_enum = merged["Side"].map(TradeSide.from_value)
+        side_enum = merged.loc[valid, "Side"].map(TradeSide.from_value)
     else:
         side_enum = pd.Series(TradeSide.LONG, index=merged.index)
-    pnl = merged["ExitClose"] / merged["EntryClose"] - 1.0
+        side_enum = side_enum.loc[valid]
+    pnl = merged.loc[valid, "ExitClose"] / merged.loc[valid, "EntryClose"] - 1.0
     sign = side_enum.map({TradeSide.SHORT: -1, TradeSide.LONG: 1})
-    merged["Side"] = side_enum.map(lambda s: s.value)
-    merged["ReturnPct"] = pnl * 100.0 * sign - float(transaction_cost)
-    merged["Win"] = merged["ReturnPct"] > 0.0
+    merged.loc[valid, "Side"] = side_enum.map(lambda s: s.value)
+    merged.loc[valid, "ReturnPct"] = pnl * 100.0 * sign - float(transaction_cost)
+    merged.loc[valid, "Win"] = merged.loc[valid, "ReturnPct"] > 0.0
 
     cols = ["FilterCode"]
     if "Group" in merged.columns:
@@ -206,6 +218,8 @@ def run_1g_returns(
     if "Side" in merged.columns:
         cols.append("Side")
     cols.extend(["ReturnPct", "Win"])
+    if "Reason" in merged.columns:
+        cols.append("Reason")
     out = merged[cols].copy()
     logger.debug("run_1g_returns end - produced {rows_out} rows", rows_out=len(out))
     return out

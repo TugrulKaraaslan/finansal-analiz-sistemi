@@ -24,6 +24,7 @@ def test_write_reports_returns_paths(tmp_path):
             "ExitClose": [11.0],
             "ReturnPct": [10.0],
             "Win": [True],
+            "Reason": [pd.NA],
         }
     )
     summary = (
@@ -64,6 +65,7 @@ def test_write_reports_raises_on_excel_error(monkeypatch, tmp_path):
             "ExitClose": [11.0],
             "ReturnPct": [10.0],
             "Win": [True],
+            "Reason": [pd.NA],
         }
     )
     summary = trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack()
@@ -86,6 +88,7 @@ def test_write_reports_warns_if_file_missing(monkeypatch, tmp_path):
             "ExitClose": [11.0],
             "ReturnPct": [10.0],
             "Win": [True],
+            "Reason": [pd.NA],
         }
     )
     summary = trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack()

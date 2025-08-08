@@ -36,5 +36,7 @@ def test_pipeline_end_to_end():
         "Side",
         "ReturnPct",
         "Win",
+        "Reason",
     ]
+    assert out["Reason"].isna().all()
     assert out.loc[0, "ReturnPct"] == pytest.approx((12.0 / 11.0 - 1) * 100)

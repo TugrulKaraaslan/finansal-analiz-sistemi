@@ -82,15 +82,23 @@ COL_ALIASES: Dict[str, str] = {
 }
 
 
-def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+def normalize_columns(df: pd.DataFrame, price_schema: Optional[Dict[str, Iterable[str] | str]] = None) -> pd.DataFrame:
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
+    mapping = COL_ALIASES.copy()
+    if price_schema:
+        for std, aliases in price_schema.items():
+            if isinstance(aliases, str):
+                aliases = [aliases]
+            for a in aliases:
+                mapping[normalize_key(a).strip("_")] = std
+
     rename_map: Dict[str, str] = {}
     seen: Dict[str, str] = {}
     drops: List[str] = []
     for c in df.columns:
         key = normalize_key(c).strip("_")
-        std = COL_ALIASES.get(key, key)
+        std = mapping.get(key, key)
         if std in seen:
             drops.append(c)
             continue
@@ -173,6 +181,8 @@ def apply_corporate_actions(
     )
     merged["cum_factor"] = merged["cum_factor"].fillna(1.0)
     merged.loc[:, price_cols] = merged.loc[:, price_cols].mul(merged["cum_factor"], axis=0)
+    if "volume" in merged.columns:
+        merged["volume"] = merged["volume"].div(merged["cum_factor"])
     merged = merged.drop(columns=["cum_factor"])
     # benchmark note: vectorized version ~5x faster on 10k rows vs loop
     return merged
@@ -185,6 +195,7 @@ def read_excels_long(
     engine: str = "auto",
     verbose: bool = False,
 ) -> pd.DataFrame:
+    price_schema = None
     if isinstance(cfg_or_path, (str, Path)):
         excel_dir = resolve_path(cfg_or_path)
         enable_cache = None
@@ -200,12 +211,16 @@ def read_excels_long(
             cache_path = getattr(
                 getattr(cfg_or_path, "data", None), "cache_parquet_path", None
             )
+            price_schema = getattr(
+                getattr(cfg_or_path, "data", None), "price_schema", None
+            )
         except Exception:
             pass
         if enable_cache is None and isinstance(cfg_or_path, dict):
             d = cfg_or_path.get("data", {})
             enable_cache = d.get("enable_cache", None)
             cache_path = d.get("cache_parquet_path", cache_path)
+            price_schema = d.get("price_schema", price_schema)
 
     excel_files: List[Path] = []
     if excel_dir and excel_dir.exists():
@@ -255,48 +270,47 @@ def read_excels_long(
 
     for fpath in excel_files:
         try:
-            xls = pd.ExcelFile(fpath, engine=engine_to_use)
+            with pd.ExcelFile(fpath, engine=engine_to_use) as xls:
+                for sheet in xls.sheet_names:
+                    try:
+                        df = xls.parse(sheet_name=sheet, header=0)
+                        if df is None or df.empty:
+                            continue
+                        df = normalize_columns(df, price_schema=price_schema)
+                        if "date" not in df.columns:
+                            df.columns = [normalize_key(c) for c in df.columns]
+                        if "date" not in df.columns:
+                            if verbose:
+                                print(f"[SKIP] {fpath}:{sheet} 'date' bulunamadı.")
+                            continue
+
+                        parse_kwargs: Dict[str, Any] = {"errors": "coerce"}
+                        if date_format:
+                            parse_kwargs["format"] = date_format
+                        else:
+                            parse_kwargs["dayfirst"] = dayfirst
+                        df["date"] = pd.to_datetime(df["date"], **parse_kwargs)
+                        df = df.dropna(subset=["date"])
+
+                        keep = [
+                            c
+                            for c in ["open", "high", "low", "close", "volume"]
+                            if c in df.columns
+                        ]
+                        df = df[["date", *keep]].copy()
+                        for c in keep:
+                            df[c] = pd.to_numeric(df[c], errors="coerce")
+
+                        df["symbol"] = str(sheet).strip().upper()
+                        records.append(df)
+                    except Exception as e:
+                        if verbose:
+                            print(f"[WARN] Sheet işlenemedi: {fpath}:{sheet} -> {e}")
+                        continue
         except Exception as e:
             if verbose:
                 print(f"[WARN] Excel açılamadı: {fpath} -> {e}")
             continue
-
-        for sheet in xls.sheet_names:
-            try:
-                df = xls.parse(sheet_name=sheet, header=0)
-                if df is None or df.empty:
-                    continue
-                df = normalize_columns(df)
-                if "date" not in df.columns:
-                    df.columns = [normalize_key(c) for c in df.columns]
-                if "date" not in df.columns:
-                    if verbose:
-                        print(f"[SKIP] {fpath}:{sheet} 'date' bulunamadı.")
-                    continue
-
-                parse_kwargs: Dict[str, Any] = {"errors": "coerce"}
-                if date_format:
-                    parse_kwargs["format"] = date_format
-                else:
-                    parse_kwargs["dayfirst"] = dayfirst
-                df["date"] = pd.to_datetime(df["date"], **parse_kwargs)
-                df = df.dropna(subset=["date"])
-
-                keep = [
-                    c
-                    for c in ["open", "high", "low", "close", "volume"]
-                    if c in df.columns
-                ]
-                df = df[["date", *keep]].copy()
-                for c in keep:
-                    df[c] = pd.to_numeric(df[c], errors="coerce")
-
-                df["symbol"] = str(sheet).strip().upper()
-                records.append(df)
-            except Exception as e:
-                if verbose:
-                    print(f"[WARN] Sheet işlenemedi: {fpath}:{sheet} -> {e}")
-                continue
 
     if not records:
         warnings.warn("Hiçbir sheet/çalışma sayfasından veri toplanamadı.")

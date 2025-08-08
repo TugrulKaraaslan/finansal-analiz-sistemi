@@ -20,8 +20,10 @@ def test_apply_corporate_actions(tmp_path):
     adj = apply_corporate_actions(df, csv)
     first = adj.loc[adj["date"] == pd.Timestamp("2024-01-01"), "close"].iloc[0]
     second = adj.loc[adj["date"] == pd.Timestamp("2024-01-02"), "close"].iloc[0]
+    vol_first = adj.loc[adj["date"] == pd.Timestamp("2024-01-01"), "volume"].iloc[0]
     assert first == 5.0
     assert second == 20.0
+    assert vol_first == 200
 
 
 def _apply_loop(df, adj):
@@ -34,6 +36,8 @@ def _apply_loop(df, adj):
         for _, row in grp.sort_values("date").iterrows():
             mask = (df["symbol"] == sym) & (df["date"] < row["date"])
             df.loc[mask, price_cols] = df.loc[mask, price_cols] * float(row["factor"])
+            if "volume" in df.columns:
+                df.loc[mask, "volume"] = df.loc[mask, "volume"] / float(row["factor"])
     return df
 
 
@@ -60,4 +64,4 @@ def test_apply_corporate_actions_equivalence(tmp_path):
     adj.to_csv(csv, index=False)
     vec = apply_corporate_actions(df, csv)
     manual = _apply_loop(df, adj)
-    pd.testing.assert_frame_equal(vec, manual)
+    pd.testing.assert_frame_equal(vec, manual, check_dtype=False)
