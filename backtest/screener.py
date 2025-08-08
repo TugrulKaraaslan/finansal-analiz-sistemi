@@ -17,7 +17,12 @@ def _to_pandas_ops(expr: str) -> str:
     return expr
 
 
-def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.DataFrame:
+def run_screener(
+    df_ind: pd.DataFrame,
+    filters_df: pd.DataFrame,
+    date,
+    strict: bool = True,
+) -> pd.DataFrame:
     logger.debug(
         "run_screener start - data rows: {rows_df}, filter rows: {rows_filters}, date: {day}",
         rows_df=len(df_ind) if isinstance(df_ind, pd.DataFrame) else "?",
@@ -82,7 +87,10 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
             continue
         missing_cols = sq.names.difference(d.columns)
         if missing_cols:
-            msg = f"Filter {code!r} skipped; missing columns: {sorted(missing_cols)}"
+            msg = f"Filter {code!r} missing columns: {sorted(missing_cols)}"
+            if strict:
+                logger.error("Filter missing columns", code=code, missing=sorted(missing_cols))
+                raise ValueError(msg)
             logger.warning(
                 "Filter skipped due to missing columns", code=code, missing=sorted(missing_cols)
             )

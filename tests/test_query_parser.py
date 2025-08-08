@@ -42,7 +42,29 @@ def test_run_screener_skips_unsafe(caplog):
     assert "unsafe expression" in caplog.text
 
 
-def test_run_screener_warns_on_error():
+def test_run_screener_missing_columns_raises():
+    df_ind = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-02"]).normalize(),
+            "open": [1.0],
+            "high": [1.0],
+            "low": [1.0],
+            "close": [1.0],
+            "volume": [100],
+        }
+    )
+    filters = pd.DataFrame(
+        {
+            "FilterCode": ["GOOD", "BAD"],
+            "PythonQuery": ["close > 0", "nonexistent > 0"],
+        }
+    )
+    with pytest.raises(ValueError):
+        run_screener(df_ind, filters, pd.Timestamp("2024-01-02"))
+
+
+def test_run_screener_warns_on_error_relaxed():
     df_ind = pd.DataFrame(
         {
             "symbol": ["AAA"],
@@ -61,7 +83,9 @@ def test_run_screener_warns_on_error():
         }
     )
     with pytest.warns(UserWarning) as w:
-        res = run_screener(df_ind, filters, pd.Timestamp("2024-01-02"))
+        res = run_screener(
+            df_ind, filters, pd.Timestamp("2024-01-02"), strict=False
+        )
     assert res["FilterCode"].tolist() == ["GOOD"]
     assert isinstance(res.loc[0, "Date"], pd.Timestamp)
     assert any("BAD" in str(msg.message) for msg in w)
