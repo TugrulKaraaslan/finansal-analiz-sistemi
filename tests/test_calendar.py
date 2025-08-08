@@ -3,8 +3,14 @@ from __future__ import annotations
 
 import pandas as pd
 
-from backtest.calendars import (add_next_close, add_next_close_calendar,
-                                build_trading_days)
+import pytest
+
+from backtest.calendars import (
+    add_next_close,
+    add_next_close_calendar,
+    build_trading_days,
+    check_missing_trading_days,
+)
 
 
 def test_next_close():
@@ -60,3 +66,15 @@ def test_add_next_close_calendar_skips_weekend():
     out = add_next_close_calendar(df, tdays)
     assert out.loc[0, "next_date"] == pd.Timestamp("2024-01-08")
     assert out.loc[0, "next_close"] == 11.0
+
+
+def test_check_missing_trading_days_raise():
+    df = pd.DataFrame({"date": pd.to_datetime(["2024-01-01", "2024-01-03"]).normalize()})
+    with pytest.raises(ValueError):
+        check_missing_trading_days(df)
+
+
+def test_check_missing_trading_days_warn():
+    df = pd.DataFrame({"date": pd.to_datetime(["2024-01-01", "2024-01-03"]).normalize()})
+    with pytest.warns(UserWarning):
+        check_missing_trading_days(df, raise_error=False)
