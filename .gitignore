@@ -1,1 +1,4 @@
-__pycache__/\n*.pyc\n.ipynb_checkpoints/\nraporlar/\n
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+raporlar/
