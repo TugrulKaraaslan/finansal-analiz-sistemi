@@ -24,7 +24,8 @@ def run_screener(
     strict: bool = True,
 ) -> pd.DataFrame:
     logger.debug(
-        "run_screener start - data rows: {rows_df}, filter rows: {rows_filters}, date: {day}",
+        "run_screener start - data rows: {rows_df}, "
+        "filter rows: {rows_filters}, date: {day}",
         rows_df=len(df_ind) if isinstance(df_ind, pd.DataFrame) else "?",
         rows_filters=len(filters_df) if isinstance(filters_df, pd.DataFrame) else "?",
         day=date,
@@ -82,17 +83,26 @@ def run_screener(
         sq = SafeQuery(expr)
         if not sq.is_safe:
             logger.warning(
-                "Filter skipped due to unsafe expression", code=code, expr=expr, reason=sq.error
+                "Filter skipped due to unsafe expression",
+                code=code,
+                expr=expr,
+                reason=sq.error,
             )
             continue
         missing_cols = sq.names.difference(d.columns)
         if missing_cols:
             msg = f"Filter {code!r} missing columns: {sorted(missing_cols)}"
             if strict:
-                logger.error("Filter missing columns", code=code, missing=sorted(missing_cols))
+                logger.error(
+                    "Filter missing columns",
+                    code=code,
+                    missing=sorted(missing_cols),
+                )
                 raise ValueError(msg)
             logger.warning(
-                "Filter skipped due to missing columns", code=code, missing=sorted(missing_cols)
+                "Filter skipped due to missing columns",
+                code=code,
+                missing=sorted(missing_cols),
             )
             warnings.warn(msg)
             continue
@@ -120,6 +130,7 @@ def run_screener(
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
     out = pd.concat(out_frames, ignore_index=True)
     out = out.rename(columns={"symbol": "Symbol"})
+    out.drop_duplicates(["FilterCode", "Symbol", "Date"], inplace=True)
     cols = ["FilterCode"]
     if "Group" in out.columns:
         cols.append("Group")
