@@ -180,17 +180,24 @@ def write_reports(
 
                 if summary_sheet_name in writer.sheets:
                     ws = writer.sheets[summary_sheet_name]
-                    ws.set_column(1, 100, 12, num_fmt)
+                    idx_cols = summary_wide.index.nlevels
+                    ws.set_column(idx_cols, 100, 12, num_fmt)
 
                 wr_sheet = f"{summary_sheet_name}_WINRATE"
                 if wr_sheet in writer.sheets:
                     ws = writer.sheets[wr_sheet]
-                    ws.set_column(1, 100, 12, pct_fmt)
+                    idx_cols = (
+                        summary_winrate.index.nlevels
+                        if summary_winrate is not None
+                        else 1
+                    )
+                    ws.set_column(idx_cols, 100, 12, pct_fmt)
 
                 diff_sheet = f"{summary_sheet_name}_DIFF"
                 if diff_sheet in writer.sheets:
                     ws = writer.sheets[diff_sheet]
-                    ws.set_column(1, 100, 12, num_fmt)
+                    idx_cols = summary_wide.index.nlevels
+                    ws.set_column(idx_cols, 100, 12, num_fmt)
             if out_xlsx_path.exists():
                 outputs["excel"] = out_xlsx_path
             else:
