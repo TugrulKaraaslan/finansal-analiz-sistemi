@@ -123,14 +123,14 @@ def _run_scan(cfg) -> None:
     )
     if not trades_all.empty:
         pivot = (
-            trades_all.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack(
+            trades_all.groupby(["FilterCode", "Side", "Date"])["ReturnPct"].mean().unstack(
                 fill_value=float("nan")
             )
         )
         pivot = pivot.reindex(columns=days)
         pivot["Ortalama"] = pivot.mean(axis=1)
         winrate = (
-            trades_all.groupby(["FilterCode", "Date"])["Win"].mean().unstack(
+            trades_all.groupby(["FilterCode", "Side", "Date"])["Win"].mean().unstack(
                 fill_value=float("nan")
             )
         )

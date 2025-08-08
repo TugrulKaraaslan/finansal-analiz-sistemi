@@ -22,18 +22,19 @@ def test_write_reports_returns_paths(tmp_path):
             "Date": [pd.Timestamp("2024-01-01")],
             "EntryClose": [10.0],
             "ExitClose": [11.0],
+            "Side": ["long"],
             "ReturnPct": [10.0],
             "Win": [True],
             "Reason": [pd.NA],
         }
     )
     summary = (
-        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
+        trades.groupby(["FilterCode", "Side", "Date"])["ReturnPct"]
         .mean()
         .unstack(fill_value=float("nan"))
     )
     winrate = (
-        trades.groupby(["FilterCode", "Date"])["Win"]
+        trades.groupby(["FilterCode", "Side", "Date"])["Win"]
         .mean()
         .unstack(fill_value=float("nan"))
     )
@@ -63,13 +64,14 @@ def test_write_reports_preserves_excel_columns(tmp_path):
             "Date": [pd.Timestamp("2024-01-01")],
             "EntryClose": [10.0],
             "ExitClose": [11.0],
+            "Side": ["long"],
             "ReturnPct": [10.0],
             "Win": [True],
             "Reason": [pd.NA],
         }
     )
     summary = (
-        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
+        trades.groupby(["FilterCode", "Side", "Date"])["ReturnPct"]
         .mean()
         .unstack(fill_value=float("nan"))
     )
@@ -92,12 +94,13 @@ def test_write_reports_raises_on_excel_error(monkeypatch, tmp_path):
             "Date": [pd.Timestamp("2024-01-01")],
             "EntryClose": [10.0],
             "ExitClose": [11.0],
+            "Side": ["long"],
             "ReturnPct": [10.0],
             "Win": [True],
             "Reason": [pd.NA],
         }
     )
-    summary = trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack()
+    summary = trades.groupby(["FilterCode", "Side", "Date"])["ReturnPct"].mean().unstack()
 
     def _bad_writer(*args, **kwargs):
         raise OSError("fail")
@@ -115,12 +118,13 @@ def test_write_reports_warns_if_file_missing(monkeypatch, tmp_path):
             "Date": [pd.Timestamp("2024-01-01")],
             "EntryClose": [10.0],
             "ExitClose": [11.0],
+            "Side": ["long"],
             "ReturnPct": [10.0],
             "Win": [True],
             "Reason": [pd.NA],
         }
     )
-    summary = trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack()
+    summary = trades.groupby(["FilterCode", "Side", "Date"])["ReturnPct"].mean().unstack()
     out_xlsx = tmp_path / "out.xlsx"
     real_exists = pathlib.Path.exists
 
