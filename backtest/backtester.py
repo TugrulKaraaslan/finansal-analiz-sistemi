@@ -114,12 +114,26 @@ def run_1g_returns(
         trading_days = build_trading_days(df_with_next)
 
     if "Side" in signals.columns:
-        sides = signals["Side"].fillna("long").astype(str).str.lower()
-        invalid = ~sides.isin([s.value for s in TradeSide])
+        sides = signals["Side"].fillna("").astype(str).str.lower()
+        valid_mask = sides.isin([s.value for s in TradeSide]) | (sides == "")
+        invalid = ~valid_mask
         if invalid.any():
             bad_vals = sides[invalid].unique().tolist()
-            raise ValueError(f"Geçersiz Side değer(ler)i: {bad_vals}")
-        signals["Side"] = sides.map(TradeSide.from_value)
+            logger.warning(
+                "dropping rows with invalid Side values: {bad}", bad=bad_vals
+            )
+            signals = signals.loc[valid_mask].copy()
+            sides = sides.loc[valid_mask]
+            if signals.empty:
+                logger.warning("signals DataFrame is empty after dropping invalid Side")
+                cols = ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win", "Reason"]
+                if "Group" in signals.columns:
+                    cols.insert(1, "Group")
+                if "Side" in signals.columns:
+                    cols.insert(len(cols) - 2, "Side")
+                return pd.DataFrame(columns=cols)
+        signals = signals.copy()
+        signals["Side"] = sides.replace("", "long").map(TradeSide.from_value)
 
     has_next = {"next_date", "next_close"}.issubset(df_with_next.columns)
     base_cols = ["symbol", "date", "close"]

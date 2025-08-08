@@ -130,8 +130,8 @@ def test_run_1g_returns_side_validation():
     assert pytest.approx(out.loc[0, "ReturnPct"], 0.01) == -10.0
     sigs_bad = sigs.copy()
     sigs_bad["Side"] = ["foo"]
-    with pytest.raises(ValueError):
-        run_1g_returns(df, sigs_bad)
+    out_bad = run_1g_returns(df, sigs_bad)
+    assert out_bad.empty
 
 
 def test_run_1g_returns_fills_missing_side_with_long():

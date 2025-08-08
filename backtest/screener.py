@@ -21,7 +21,7 @@ def run_screener(
     df_ind: pd.DataFrame,
     filters_df: pd.DataFrame,
     date,
-    strict: bool = True,
+    strict: bool = False,
     raise_on_error: bool = True,
 ) -> pd.DataFrame:
     """Run the screener filters for a given date.
@@ -36,7 +36,8 @@ def run_screener(
         The date to evaluate the filters on.
     strict : bool, optional
         If ``True``, any filter referencing missing columns raises a
-        :class:`ValueError`.
+        :class:`ValueError`. When ``False`` (default) such filters are skipped
+        with a warning.
     raise_on_error : bool, optional
         Controls behaviour when a filter's expression fails to evaluate.
         When ``True`` (default) a :class:`RuntimeError` is raised
@@ -108,7 +109,10 @@ def run_screener(
         if pd.notna(side) and str(side).strip():
             side_norm = str(side).strip().lower()
             if side_norm not in {"long", "short"}:
-                raise ValueError(f"Geçersiz Side değeri: {side}")
+                logger.warning(
+                    "Filter skipped due to invalid Side", code=code, side=side
+                )
+                continue
         sq = SafeQuery(expr)
         if not sq.is_safe:
             logger.warning(
