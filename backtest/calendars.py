@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Iterable, Optional, Set
 
 import pandas as pd
+import warnings
 
 from utils.paths import resolve_path
 
@@ -82,6 +83,35 @@ def build_trading_days(
         hol = set()
     trade = [d for d in all_days if (not is_weekend(d)) and (d.normalize() not in hol)]
     return pd.DatetimeIndex(trade)
+
+
+def check_missing_trading_days(
+    df: pd.DataFrame,
+    holidays: Optional[Iterable[pd.Timestamp]] = None,
+    *,
+    raise_error: bool = True,
+) -> pd.DatetimeIndex:
+    """Compare actual data dates with expected trading days.
+
+    If any trading days are missing from the DataFrame, either raise ``ValueError``
+    or emit a ``UserWarning`` depending on ``raise_error``. Returns the missing
+    days as a ``DatetimeIndex``.
+    """
+
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a DataFrame")
+
+    trading_days = build_trading_days(df, holidays)
+    actual = set(pd.to_datetime(df["date"]).dt.normalize())
+    missing = pd.DatetimeIndex([d for d in trading_days if d not in actual])
+
+    if len(missing) > 0:
+        msg = "Missing trading days: " + ", ".join(d.strftime("%Y-%m-%d") for d in missing)
+        if raise_error:
+            raise ValueError(msg)
+        else:  # pragma: no cover - warning path
+            warnings.warn(msg)
+    return missing
 
 
 def add_next_close_calendar(
