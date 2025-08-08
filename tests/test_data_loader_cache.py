@@ -8,7 +8,16 @@ from backtest.data_loader import read_excels_long
 
 def _make_excels(tmp_path, count):
     for i in range(count):
-        df = pd.DataFrame({"date": ["2020-01-01"], "close": [i]})
+        df = pd.DataFrame(
+            {
+                "date": ["2020-01-01"],
+                "open": [i],
+                "high": [i],
+                "low": [i],
+                "close": [i],
+                "volume": [1],
+            }
+        )
         df.to_excel(tmp_path / f"f{i}.xlsx", index=False)
 
 

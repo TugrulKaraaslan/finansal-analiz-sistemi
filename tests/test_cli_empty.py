@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import pandas as pd
 import pytest
 
+import click
 from backtest import cli
 
 
@@ -142,6 +143,6 @@ def test_scan_range_missing_excel(monkeypatch):
         raise FileNotFoundError("missing")
 
     monkeypatch.setattr(cli, "read_excels_long", _raise)
-    with pytest.raises(SystemExit) as exc:
+    with pytest.raises(click.ClickException) as exc:
         cli.scan_range.callback("cfg.yml", None, None, None, None)
-    assert exc.value.code == 1
+    assert "missing" in str(exc.value)
