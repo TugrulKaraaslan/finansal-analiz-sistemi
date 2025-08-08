@@ -22,7 +22,32 @@ def run_screener(
     filters_df: pd.DataFrame,
     date,
     strict: bool = True,
+    raise_on_error: bool = True,
 ) -> pd.DataFrame:
+    """Run the screener filters for a given date.
+
+    Parameters
+    ----------
+    df_ind : pd.DataFrame
+        Indicator data with at least ``symbol`` and ``date`` columns.
+    filters_df : pd.DataFrame
+        DataFrame describing the filter expressions.
+    date : datetime-like
+        The date to evaluate the filters on.
+    strict : bool, optional
+        If ``True``, any filter referencing missing columns raises a
+        :class:`ValueError`.
+    raise_on_error : bool, optional
+        Controls behaviour when a filter's expression fails to evaluate.
+        When ``True`` (default) a :class:`RuntimeError` is raised
+        immediately.  When ``False`` the error is logged and a warning is
+        emitted, allowing processing to continue.
+
+    Returns
+    -------
+    pd.DataFrame
+        Resulting matches for each filter.
+    """
     logger.debug(
         "run_screener start - data rows: {rows_df}, "
         "filter rows: {rows_filters}, date: {day}",
@@ -112,6 +137,8 @@ def run_screener(
         try:
             filtered = sq.filter(d)
         except Exception as err:
+            if raise_on_error:
+                raise RuntimeError(f"Filter {code!r} failed: {err}") from err
             warnings.warn(f"Filter {code!r} failed: {err}")
             logger.warning("Filter {code!r} failed: {err}", code=code, err=err)
             continue

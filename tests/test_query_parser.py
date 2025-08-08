@@ -91,6 +91,58 @@ def test_run_screener_warns_on_error_relaxed():
     assert any("BAD" in str(msg.message) for msg in w)
 
 
+def test_run_screener_raises_on_filter_error_default():
+    df_ind = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-02"]).normalize(),
+            "open": [1.0],
+            "high": [1.0],
+            "low": [1.0],
+            "close": [1.0],
+            "volume": [100],
+        }
+    )
+    filters = pd.DataFrame(
+        {
+            "FilterCode": ["BAD"],
+            "PythonQuery": ["1/0 > 0"],
+        }
+    )
+    with pytest.raises(RuntimeError):
+        run_screener(df_ind, filters, pd.Timestamp("2024-01-02"))
+
+
+def test_run_screener_warns_on_filter_error_disabled():
+    df_ind = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-02"]).normalize(),
+            "open": [1.0],
+            "high": [1.0],
+            "low": [1.0],
+            "close": [1.0],
+            "volume": [100],
+        }
+    )
+    filters = pd.DataFrame(
+        {
+            "FilterCode": ["GOOD", "BAD"],
+            "PythonQuery": ["close > 0", "1/0 > 0"],
+        }
+    )
+    with pytest.warns(UserWarning) as w:
+        res = run_screener(
+            df_ind,
+            filters,
+            pd.Timestamp("2024-01-02"),
+            raise_on_error=False,
+        )
+    assert res["FilterCode"].tolist() == ["GOOD"]
+    assert isinstance(res.loc[0, "Date"], pd.Timestamp)
+    assert any("BAD" in str(msg.message) for msg in w)
+
+
 def test_safequery_allows_whitelist_functions():
     df = pd.DataFrame({"x": [1, 2, 3]})
     q = SafeQuery("x.notna() and x.isin([1,2])")
