@@ -88,6 +88,10 @@ def run_screener(
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
     d = d.reset_index(drop=True)
     filters_df = filters_df.copy()
+    dups = filters_df["FilterCode"].duplicated()
+    if dups.any():
+        dup_codes = filters_df.loc[dups, "FilterCode"].tolist()
+        raise ValueError(f"Duplicate FilterCode detected: {dup_codes}")
     filters_df["FilterCode"] = filters_df["FilterCode"].astype(str).str.strip()
     filters_df["expr"] = filters_df["PythonQuery"].astype(str).map(_to_pandas_ops)
     groups = filters_df.get("Group")
