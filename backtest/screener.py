@@ -105,7 +105,7 @@ def run_screener(
         filters_df["FilterCode"], filters_df["expr"], groups, sides
     ):
         side_norm = None
-        if side is not None and str(side).strip():
+        if pd.notna(side) and str(side).strip():
             side_norm = str(side).strip().lower()
             if side_norm not in {"long", "short"}:
                 raise ValueError(f"Geçersiz Side değeri: {side}")
