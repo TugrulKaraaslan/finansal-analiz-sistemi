@@ -13,7 +13,13 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
-import pandera.pandas as pa
+
+try:  # Pandera import may vary by version
+    import pandera as pa
+except Exception as exc:  # pragma: no cover - import error path
+    raise ImportError(
+        "Pandera is required for filter validation. Install with 'pip install pandera'."
+    ) from exc
 
 
 _SCHEMA = pa.DataFrameSchema(

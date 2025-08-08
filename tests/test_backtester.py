@@ -23,6 +23,8 @@ def test_backtester_basic():
         }
     )
     out = run_1g_returns(df, sigs)
+    assert "Reason" in out.columns
+    assert out["Reason"].isna().all()
     assert pytest.approx(out.loc[0, "ReturnPct"], 0.01) == 10.0
 
 
@@ -43,6 +45,7 @@ def test_run_1g_returns_drops_duplicates():
     )
     out = run_1g_returns(df, sigs)
     assert len(out) == 1
+    assert "Reason" in out.columns
 
 
 def test_run_1g_returns_holding_period_and_cost():
@@ -81,7 +84,8 @@ def test_run_1g_returns_exit_date_out_of_bounds_returns_empty():
         }
     )
     out = run_1g_returns(df, sigs)
-    assert out.empty
+    assert out.loc[0, "Reason"] == "invalid_exit"
+    assert out["ReturnPct"].isna().all()
 
 
 def test_run_1g_returns_ignores_out_of_bounds_signals():
@@ -100,8 +104,9 @@ def test_run_1g_returns_ignores_out_of_bounds_signals():
         }
     )
     out = run_1g_returns(df, sigs)
-    assert len(out) == 1
+    assert len(out) == 2
     assert out.loc[0, "Date"] == pd.Timestamp("2024-01-01")
+    assert out.loc[1, "Reason"] == "invalid_exit"
 
 
 def test_run_1g_returns_side_validation():
@@ -150,6 +155,27 @@ def test_run_1g_returns_fills_missing_exit_data():
     out2 = run_1g_returns(df, sigs, holding_period=2)
     assert out2.loc[0, "ExitClose"] == 12.0
     assert pytest.approx(out2.loc[0, "ReturnPct"], 0.01) == 20.0
+
+
+def test_run_1g_returns_multiday_price_mode():
+    df = pd.DataFrame(
+        {
+            "symbol": ["AAA", "AAA", "AAA"],
+            "date": pd.to_datetime(["2024-01-05", "2024-01-08", "2024-01-09"]),
+            "close": [10.0, 11.0, 13.0],
+        }
+    )
+    sigs = pd.DataFrame(
+        {
+            "FilterCode": ["T1"],
+            "Symbol": ["AAA"],
+            "Date": [pd.to_datetime("2024-01-05")],
+        }
+    )
+    out = run_1g_returns(df, sigs, holding_period=2)
+    assert out.loc[0, "ExitClose"] == 13.0
+    assert out["Reason"].isna().all()
+    assert pytest.approx(out.loc[0, "ReturnPct"], 0.01) == 30.0
 
 
 def test_run_1g_returns_empty_base_returns_empty(caplog):

@@ -53,7 +53,6 @@ def quality_warnings(df: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(columns=["symbol", "date", "issue", "value"])
     g = df.sort_values(["symbol", "date"]).groupby("symbol")
     for sym, x in g:
-        # non-monotonic date
         if not x["date"].is_monotonic_increasing:
             issues.append(
                 {
@@ -63,15 +62,57 @@ def quality_warnings(df: pd.DataFrame) -> pd.DataFrame:
                     "value": "",
                 }
             )
-        # negative/zero close
-        bad = x[x["close"] <= 0]
-        for _, r in bad.iterrows():
+        bad_close = x[x["close"] <= 0]
+        for _, r in bad_close.iterrows():
             issues.append(
                 {
                     "symbol": sym,
                     "date": r["date"],
                     "issue": "non_positive_close",
                     "value": r["close"],
+                }
+            )
+        if "volume" in x.columns:
+            bad_vol = x[x["volume"] <= 0]
+            for _, r in bad_vol.iterrows():
+                issues.append(
+                    {
+                        "symbol": sym,
+                        "date": r["date"],
+                        "issue": "non_positive_volume",
+                        "value": r["volume"],
+                    }
+                )
+        if {"high", "low"}.issubset(x.columns):
+            bad_hl = x[x["high"] < x["low"]]
+            for _, r in bad_hl.iterrows():
+                issues.append(
+                    {
+                        "symbol": sym,
+                        "date": r["date"],
+                        "issue": "high_lt_low",
+                        "value": f"{r['high']}<{r['low']}",
+                    }
+                )
+        if "open" in x.columns:
+            na_open = x[x["open"].isna()]
+            for _, r in na_open.iterrows():
+                issues.append(
+                    {
+                        "symbol": sym,
+                        "date": r["date"],
+                        "issue": "na_open",
+                        "value": "",
+                    }
+                )
+        na_close = x[x["close"].isna()]
+        for _, r in na_close.iterrows():
+            issues.append(
+                {
+                    "symbol": sym,
+                    "date": r["date"],
+                    "issue": "na_close",
+                    "value": "",
                 }
             )
     if not issues:

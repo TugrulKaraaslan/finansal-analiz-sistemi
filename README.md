@@ -42,6 +42,9 @@ python -m backtest.cli scan-day --config examples/example_config.yaml --date 202
 !python -m backtest.cli scan-day --config examples/example_config.yaml --date 2024-01-02
 ```
 
+> Not: Filtre CSV doğrulaması için [Pandera](https://pandera.readthedocs.io/) gereklidir. 
+> `pip install pandera` komutuyla kurulabilir.
+
 ## Örnek Çalıştırma
 - `examples/example_config.yaml` içindeki `excel_dir` ve `filters_csv` yollarını düzenleyin.
 - Tek gün tarama:

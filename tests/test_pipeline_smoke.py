@@ -67,4 +67,5 @@ def test_pipeline_no_signals():
         "ExitClose",
         "ReturnPct",
         "Win",
+        "Reason",
     ]

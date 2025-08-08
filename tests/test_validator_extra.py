@@ -25,6 +25,35 @@ def test_quality_warnings_missing_columns():
         quality_warnings(df)
 
 
+def test_quality_warnings_extra_checks():
+    df = pd.DataFrame(
+        {
+            "symbol": ["AAA"] * 5,
+            "date": pd.to_datetime(
+                [
+                    "2024-01-01",
+                    "2024-01-02",
+                    "2024-01-03",
+                    "2024-01-04",
+                    "2024-01-05",
+                ]
+            ),
+            "open": [1.0, 1.0, 1.0, None, 1.0],
+            "high": [2.0, 2.0, 0.5, 2.0, 2.0],
+            "low": [1.0, 1.0, 1.0, 1.0, 3.0],
+            "close": [1.0, 1.0, 1.0, 1.0, float("nan")],
+            "volume": [100, 0, 100, 100, -5],
+        }
+    )
+    issues = quality_warnings(df)
+    assert set(issues["issue"]) == {
+        "non_positive_volume",
+        "high_lt_low",
+        "na_open",
+        "na_close",
+    }
+
+
 class _DummyWriter:
     def __init__(self, *args, **kwargs):
         self.book = SimpleNamespace(add_format=lambda *a, **k: None)
@@ -49,6 +78,7 @@ def test_write_reports_xu100_pct_type(monkeypatch):
             "ExitClose",
             "ReturnPct",
             "Win",
+            "Reason",
         ]
     )
     with pytest.raises(TypeError):

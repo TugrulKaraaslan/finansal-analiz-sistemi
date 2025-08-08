@@ -72,6 +72,7 @@ def test_scan_range_empty(monkeypatch):
                 "ExitClose",
                 "ReturnPct",
                 "Win",
+                "Reason",
             ]
         ),
     )
@@ -125,6 +126,7 @@ def test_scan_day_empty(monkeypatch):
                 "ExitClose",
                 "ReturnPct",
                 "Win",
+                "Reason",
             ]
         ),
     )
