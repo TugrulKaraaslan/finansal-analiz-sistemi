@@ -14,6 +14,16 @@
 | tests/ | Birim testleri |
 | filters.csv | Filtre tanımları |
 
+## İndikatör Kolonları ve Örnek Filtreler
+Aşağıdaki tablo bazı sık kullanılan indikatör kolonlarını ve bunlara ilişkin örnek filtreleri gösterir:
+
+| Kolon(lar) | Açıklama | Örnek Filtre |
+| --- | --- | --- |
+| `rsi_14` | 14 periyotluk Relative Strength Index | `(rsi_14 > 70)` (aşırı alım) |
+| `ema_20`, `ema_50` | 20 ve 50 periyotluk üstel hareketli ortalamalar | `ema_20_keser_ema_50_yukari` (yukarı kesişim) |
+| `macd_line`, `macd_signal` | MACD göstergesi ana ve sinyal çizgisi | `macd_line > macd_signal` |
+| `stochrsi_k`, `stochrsi_d` | Stokastik RSI çizgileri | `stochrsi_k_keser_stochrsi_d_yukari` |
+
 ## Filtre CSV Açıklaması
 - Satırlar `;` ile ayrılır.
 - Kolonlar:
@@ -23,11 +33,15 @@
 | FilterCode | Filtrenin raporda görünecek kısa adı |
 | PythonQuery | `pandas` ifadesi, örn: `(rsi_14 > 65) and (relative_volume > 1)` |
 | Group *(opsiyonel)* | Filtreleri kategorize etmek için kullanılabilir |
+| Side *(opsiyonel)* | İşlem yönü (`long`/`short`), belirtilmezse `long` varsayılır |
 
-- Örnek satır:
-```csv
-T24;(rsi_14 > 65) and (relative_volume > 1.0)
-```
+- Örnek tablo:
+
+| FilterCode | PythonQuery | Group | Side |
+| --- | --- | --- | --- |
+| RSI70 | `(rsi_14 > 70)` | Momentum | long |
+| EMA20_50 | `ema_20_keser_ema_50_yukari` | Trend | long |
+| RSI30_SHORT | `rsi_14_keser_30p0_asagi` | Momentum | short |
 
 ## Kurulum ve Çalıştırma
 ### Yerel
