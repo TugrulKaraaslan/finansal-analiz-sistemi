@@ -160,3 +160,25 @@ def test_run_screener_side_validation():
     bad["Side"] = ["foo"]
     with pytest.raises(ValueError):
         run_screener(df_ind, bad, pd.Timestamp("2024-01-02"))
+
+
+def test_run_screener_duplicate_filter_code():
+    df_ind = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-02"]).normalize(),
+            "open": [1.0],
+            "high": [1.0],
+            "low": [1.0],
+            "close": [1.0],
+            "volume": [100],
+        }
+    )
+    filters_df = pd.DataFrame(
+        {
+            "FilterCode": ["F1", "F1"],
+            "PythonQuery": ["close > 0", "close > 1"],
+        }
+    )
+    with pytest.raises(ValueError, match="Duplicate FilterCode"):
+        run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
