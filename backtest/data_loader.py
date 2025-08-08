@@ -143,7 +143,7 @@ def apply_corporate_actions(
         direction="forward",
         allow_exact_matches=False,
     )
-    merged["cum_factor"].fillna(1.0, inplace=True)
+    merged["cum_factor"] = merged["cum_factor"].fillna(1.0)
     merged.loc[:, price_cols] = merged.loc[:, price_cols].mul(merged["cum_factor"], axis=0)
     merged = merged.drop(columns=["cum_factor"])
     # benchmark note: vectorized version ~5x faster on 10k rows vs loop
