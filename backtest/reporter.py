@@ -128,7 +128,11 @@ def write_reports(
                         raise TypeError(
                             "xu100_pct must be a mapping or Series"
                         )  # TİP DÜZELTİLDİ
-                    cols = [c for c in summary_wide.columns if c != "Ortalama"]
+                    cols = [
+                        c
+                        for c in summary_wide.columns
+                        if c not in {"Ortalama", "TradeCount"}
+                    ]
                     if set(cols).issubset(set(xu100_series.index)):
                         diff = summary_wide.copy()
                         for c in cols:

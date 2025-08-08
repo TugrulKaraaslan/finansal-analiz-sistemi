@@ -136,3 +136,36 @@ def test_write_reports_warns_if_file_missing(monkeypatch, tmp_path):
     monkeypatch.setattr(pathlib.Path, "exists", fake_exists)
     with pytest.warns(UserWarning):
         write_reports(trades, [pd.Timestamp("2024-01-01")], summary, out_xlsx=out_xlsx)
+
+
+def test_write_reports_includes_trade_count(tmp_path):
+    trades = pd.DataFrame(
+        {
+            "FilterCode": ["f1", "f1"],
+            "Symbol": ["SYM1", "SYM2"],
+            "Date": [pd.Timestamp("2024-01-01"), pd.Timestamp("2024-01-01")],
+            "EntryClose": [10.0, 12.0],
+            "ExitClose": [11.0, 13.0],
+            "Side": ["long", "short"],
+            "ReturnPct": [10.0, 8.333333333333332],
+            "Win": [True, False],
+            "Reason": [pd.NA, pd.NA],
+        }
+    )
+    summary = (
+        trades.groupby(["FilterCode", "Side", "Date"])["ReturnPct"]
+        .mean()
+        .unstack(fill_value=float("nan"))
+    )
+    trade_counts = trades.groupby(["FilterCode", "Side"])["Symbol"].count()
+    summary = summary.assign(TradeCount=trade_counts)
+    out_xlsx = tmp_path / "out.xlsx"
+    write_reports(
+        trades,
+        [pd.Timestamp("2024-01-01")],
+        summary,
+        out_xlsx=out_xlsx,
+    )
+    df = pd.read_excel(out_xlsx, sheet_name="SUMMARY")
+    assert "TradeCount" in df.columns
+    assert set(df["TradeCount"]) == {1}

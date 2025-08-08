@@ -136,14 +136,21 @@ def _run_scan(cfg) -> None:
         )
         winrate = winrate.reindex(columns=days)
         winrate["Ortalama"] = winrate.mean(axis=1)
+        group_cols = ["FilterCode"]
+        if "Side" in trades_all.columns:
+            group_cols.append("Side")
+        trade_counts = trades_all.groupby(group_cols)["Symbol"].count()
+        pivot = pivot.assign(TradeCount=trade_counts)
     else:
-        pivot = pd.DataFrame(columns=[*days, "Ortalama"])
+        pivot = pd.DataFrame(columns=[*days, "Ortalama", "TradeCount"])
         winrate = pd.DataFrame(columns=[*days, "Ortalama"])
     xu100_pct = None
     if cfg.benchmark.xu100_source == "csv" and cfg.benchmark.xu100_csv_path:
         s = load_xu100_pct(cfg.benchmark.xu100_csv_path)
         xu100_pct = {
-            d: float(s.get(d, float("nan"))) for d in pivot.columns if d != "Ortalama"
+            d: float(s.get(d, float("nan")))
+            for d in pivot.columns
+            if d not in {"Ortalama", "TradeCount"}
         }
     out_dir = resolve_path(cfg.project.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
