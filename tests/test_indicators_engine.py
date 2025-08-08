@@ -26,3 +26,20 @@ def test_builtin_engine_basic():
     res = compute_indicators(df, params={}, engine="builtin")
     assert "EMA_10" in res.columns
     assert "RSI_14" in res.columns
+
+
+def test_pandas_ta_fallback(monkeypatch):
+    import builtins
+
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "pandas_ta":
+            raise ModuleNotFoundError
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+    df = _sample_df()
+    res = compute_indicators(df, params={}, engine="pandas_ta")
+    res2 = compute_indicators(df, params={}, engine="builtin")
+    pd.testing.assert_series_equal(res["EMA_10"], res2["EMA_10"])

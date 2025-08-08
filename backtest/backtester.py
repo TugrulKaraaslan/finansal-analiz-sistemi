@@ -48,8 +48,13 @@ def run_1g_returns(
         raise TypeError("transaction_cost must be numeric")
 
     if df_with_next.empty:
-        logger.error("df_with_next is empty")
-        raise ValueError("df_with_next is empty")
+        logger.warning("df_with_next is empty")
+        cols = ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win"]
+        if "Group" in signals.columns:
+            cols.insert(1, "Group")
+        if "Side" in signals.columns:
+            cols.insert(len(cols) - 2, "Side")
+        return pd.DataFrame(columns=cols)
     if signals.empty:
         logger.warning("signals DataFrame is empty")
         cols = ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win"]

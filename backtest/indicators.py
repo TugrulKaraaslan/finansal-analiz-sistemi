@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Dict, List, Optional
 
 import pandas as pd
+from loguru import logger
 
 
 def _ema(series: pd.Series, length: int) -> pd.Series:
@@ -22,7 +23,7 @@ def compute_indicators(
     df: pd.DataFrame,
     params: Optional[Dict[str, List[int]]] = None,
     *,
-    engine: str = "pandas_ta",
+    engine: str = "builtin",
 ) -> pd.DataFrame:
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
@@ -38,6 +39,17 @@ def compute_indicators(
         raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")
     df = df.copy()
     df = df.sort_values(["symbol", "date"])
+
+    use_pandas_ta = engine == "pandas_ta"
+    ta = None
+    if use_pandas_ta:
+        try:  # pragma: no cover - optional dependency
+            import pandas_ta as ta  # noqa: WPS433
+        except ModuleNotFoundError:  # pragma: no cover
+            logger.warning(
+                "pandas_ta kütüphanesi bulunamadı, builtin hesaplamalara dönülüyor",
+            )
+            use_pandas_ta = False
     out_frames = []
     for sym, g in df.groupby("symbol", group_keys=False):
         g = g.copy()
@@ -46,11 +58,7 @@ def compute_indicators(
             ema_params = [ema_params]  # TİP DÜZELTİLDİ
         for p in ema_params:
             col = f"EMA_{p}"
-            if engine == "pandas_ta":
-                try:
-                    import pandas_ta as ta  # noqa: WPS433
-                except ModuleNotFoundError as exc:  # pragma: no cover
-                    raise ImportError("pandas_ta kütüphanesi gerekli") from exc
+            if use_pandas_ta and ta is not None:
                 g[col] = ta.ema(g["close"], length=int(p))
             else:
                 g[col] = _ema(g["close"], int(p))
@@ -59,11 +67,7 @@ def compute_indicators(
             rsi_params = [rsi_params]  # TİP DÜZELTİLDİ
         for p in rsi_params:
             col = f"RSI_{p}"
-            if engine == "pandas_ta":
-                try:
-                    import pandas_ta as ta  # noqa: WPS433
-                except ModuleNotFoundError as exc:  # pragma: no cover
-                    raise ImportError("pandas_ta kütüphanesi gerekli") from exc
+            if use_pandas_ta and ta is not None:
                 g[col] = ta.rsi(g["close"], length=int(p))
             else:
                 g[col] = _rsi(g["close"], int(p))
@@ -77,11 +81,7 @@ def compute_indicators(
                     "macd params must have at least three values",
                 )  # TİP DÜZELTİLDİ
             fast, slow, sig = map(int, macd_params[:3])
-            if engine == "pandas_ta":
-                try:
-                    import pandas_ta as ta  # noqa: WPS433
-                except ModuleNotFoundError as exc:  # pragma: no cover
-                    raise ImportError("pandas_ta kütüphanesi gerekli") from exc
+            if use_pandas_ta and ta is not None:
                 macd = ta.macd(g["close"], fast=fast, slow=slow, signal=sig)
                 if macd is not None and not macd.empty:
                     macd_cols = macd.columns.tolist()

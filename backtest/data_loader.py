@@ -5,6 +5,7 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+import importlib.util
 import pandas as pd
 from loguru import logger
 
@@ -139,7 +140,7 @@ def apply_corporate_actions(
 def read_excels_long(
     cfg_or_path: Union[str, Path, Any],
     dayfirst: bool = True,
-    engine: str = "openpyxl",
+    engine: str = "auto",
     verbose: bool = False,
 ) -> pd.DataFrame:
     if isinstance(cfg_or_path, (str, Path)):
@@ -191,9 +192,28 @@ def read_excels_long(
     if not excel_files:
         raise RuntimeError(f"'{excel_dir}' altında .xlsx bulunamadı.")
 
+    if engine == "auto":
+        if importlib.util.find_spec("openpyxl"):
+            engine_to_use = "openpyxl"
+        elif importlib.util.find_spec("xlrd"):
+            engine_to_use = "xlrd"
+        else:
+            raise ImportError(
+                "Excel okumak için 'openpyxl' veya 'xlrd' paketleri gerekli"
+            )
+    elif engine == "openpyxl" and not importlib.util.find_spec("openpyxl"):
+        if importlib.util.find_spec("xlrd"):
+            engine_to_use = "xlrd"
+        else:
+            raise ImportError(
+                "'openpyxl' bulunamadı ve alternatif Excel motoru saptanamadı"
+            )
+    else:
+        engine_to_use = engine
+
     for fpath in excel_files:
         try:
-            xls = pd.ExcelFile(fpath, engine=engine)
+            xls = pd.ExcelFile(fpath, engine=engine_to_use)
         except Exception as e:
             if verbose:
                 print(f"[WARN] Excel açılamadı: {fpath} -> {e}")

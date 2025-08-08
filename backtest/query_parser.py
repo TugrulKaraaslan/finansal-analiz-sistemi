@@ -35,6 +35,10 @@ class SafeQuery:
         "rolling",
         "shift",
         "mean",
+        "max",
+        "min",
+        "std",
+        "median",
     }
 
     def __init__(self, expr: str):
@@ -77,13 +81,13 @@ class SafeQuery:
                     return False, names, f"attribute '{node.attr}' not allowed"
         return True, names, None
 
-    def _mask(self, df: pd.DataFrame) -> pd.Series:
+    def get_mask(self, df: pd.DataFrame) -> pd.Series:
         if not self.is_safe:
             raise ValueError(f"Unsafe query expression: {self.error}")
         env = {name: df[name] for name in df.columns}
-        env.update({"abs": abs})
+        env.update({"abs": abs, "max": max, "min": min})
         return pd.eval(self.expr, engine="python", parser="pandas", local_dict=env)
 
     def filter(self, df: pd.DataFrame) -> pd.DataFrame:
         """Return rows from *df* matching the query expression."""
-        return df[self._mask(df)]
+        return df[self.get_mask(df)]
