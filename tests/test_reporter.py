@@ -55,6 +55,35 @@ def test_write_reports_returns_paths(tmp_path):
         assert p.exists()
 
 
+def test_write_reports_preserves_excel_columns(tmp_path):
+    trades = pd.DataFrame(
+        {
+            "FilterCode": ["f1"],
+            "Symbol": ["SYM"],
+            "Date": [pd.Timestamp("2024-01-01")],
+            "EntryClose": [10.0],
+            "ExitClose": [11.0],
+            "ReturnPct": [10.0],
+            "Win": [True],
+            "Reason": [pd.NA],
+        }
+    )
+    summary = (
+        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
+        .mean()
+        .unstack(fill_value=float("nan"))
+    )
+    out_xlsx = tmp_path / "out.xlsx"
+    write_reports(
+        trades,
+        [pd.Timestamp("2024-01-01")],
+        summary,
+        out_xlsx=out_xlsx,
+    )
+    df = pd.read_excel(out_xlsx, sheet_name="SCAN_2024-01-01")
+    assert list(df.columns) == list(trades.columns)
+
+
 def test_write_reports_raises_on_excel_error(monkeypatch, tmp_path):
     trades = pd.DataFrame(
         {
