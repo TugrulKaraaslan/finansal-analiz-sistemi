@@ -13,7 +13,12 @@ from backtest import cli
 def _cfg():
     return SimpleNamespace(
         project=SimpleNamespace(
-            out_dir="out", start_date=None, end_date=None, holding_period=1, transaction_cost=0.0
+            out_dir="out",
+            start_date=None,
+            end_date=None,
+            holding_period=1,
+            transaction_cost=0.0,
+            raise_on_error=False,
         ),
         data=SimpleNamespace(filters_csv="dummy.csv"),
         calendar=SimpleNamespace(
@@ -53,13 +58,11 @@ def test_scan_range_empty(monkeypatch):
     )
     filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]})
     monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
-    monkeypatch.setattr(
-        cli,
-        "run_screener",
-        lambda df, filters, d: pd.DataFrame(
-            columns=["FilterCode", "Symbol", "Date"]
-        ),
-    )
+    def _run_screener(df, filters, d, raise_on_error=None):
+        assert raise_on_error is False
+        return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+
+    monkeypatch.setattr(cli, "run_screener", _run_screener)
     monkeypatch.setattr(
         cli,
         "run_1g_returns",
@@ -108,13 +111,11 @@ def test_scan_day_empty(monkeypatch):
     )
     filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]})
     monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
-    monkeypatch.setattr(
-        cli,
-        "run_screener",
-        lambda df, filters, d: pd.DataFrame(
-            columns=["FilterCode", "Symbol", "Date"]
-        ),
-    )
+    def _run_screener(df, filters, d, raise_on_error=None):
+        assert raise_on_error is False
+        return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+
+    monkeypatch.setattr(cli, "run_screener", _run_screener)
     monkeypatch.setattr(
         cli,
         "run_1g_returns",

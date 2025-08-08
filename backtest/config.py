@@ -19,6 +19,7 @@ class ProjectCfg(BaseModel):
     single_date: Optional[str] = None
     holding_period: int = 1
     transaction_cost: float = 0.0
+    raise_on_error: bool = False
 
 
 class DataCfg(BaseModel):

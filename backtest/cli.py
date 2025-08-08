@@ -95,7 +95,9 @@ def _run_scan(cfg) -> None:
     if len(days) > 1:
         info(f"{len(days)} gün taranacak...")
     for d in days:
-        sigs = run_screener(df_ind, filters_df, d)
+        sigs = run_screener(
+            df_ind, filters_df, d, raise_on_error=cfg.project.raise_on_error
+        )
         trades = run_1g_returns(
             df_ind,
             sigs,
