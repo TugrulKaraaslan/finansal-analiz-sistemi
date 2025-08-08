@@ -127,16 +127,18 @@ def _run_scan(cfg) -> None:
                 fill_value=float("nan")
             )
         )
+        pivot = pivot.reindex(columns=days)
         pivot["Ortalama"] = pivot.mean(axis=1)
         winrate = (
             trades_all.groupby(["FilterCode", "Date"])["Win"].mean().unstack(
                 fill_value=float("nan")
             )
         )
+        winrate = winrate.reindex(columns=days)
         winrate["Ortalama"] = winrate.mean(axis=1)
     else:
         pivot = pd.DataFrame(columns=[*days, "Ortalama"])
-        winrate = pd.DataFrame()
+        winrate = pd.DataFrame(columns=[*days, "Ortalama"])
     xu100_pct = None
     if cfg.benchmark.xu100_source == "csv" and cfg.benchmark.xu100_csv_path:
         s = load_xu100_pct(cfg.benchmark.xu100_csv_path)
@@ -171,6 +173,7 @@ def _run_scan(cfg) -> None:
     info(f"Bitti. Çıktı: {outputs.get('excel')}")
     if outputs.get("csv"):
         info(f"CSV klasörü: {outputs['csv'][0].parent}")
+
 
 @cli.command("scan-range")
 @click.option("--config", "config_path", required=True, help="YAML config yolu")
