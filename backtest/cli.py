@@ -139,7 +139,8 @@ def _run_scan(cfg) -> None:
         group_cols = ["FilterCode"]
         if "Side" in trades_all.columns:
             group_cols.append("Side")
-        trade_counts = trades_all.groupby(group_cols)["Symbol"].count()
+        valid_trades = trades_all[trades_all["ReturnPct"].notna()]
+        trade_counts = valid_trades.groupby(group_cols)["Symbol"].count()
         pivot = pivot.assign(TradeCount=trade_counts)
     else:
         pivot = pd.DataFrame(columns=[*days, "Ortalama", "TradeCount"])
