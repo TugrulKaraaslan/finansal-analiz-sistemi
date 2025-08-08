@@ -132,7 +132,8 @@ def compute_indicators(
                 g[f"MACD_{fast}_{slow}_{sig}_HIST"] = hist
         g["CHANGE_1D_PERCENT"] = g["close"].pct_change(1) * 100.0
         g["CHANGE_5D_PERCENT"] = g["close"].pct_change(5) * 100.0
-        g["RELATIVE_VOLUME"] = g["volume"] / g["volume"].rolling(20).mean()
+        vol_mean = g["volume"].rolling(20, min_periods=1).mean().replace(0, pd.NA)
+        g["RELATIVE_VOLUME"] = (g["volume"] / vol_mean).fillna(0)
         out_frames.append(g)
     df2 = pd.concat(out_frames, ignore_index=True)
     alias_map = {
