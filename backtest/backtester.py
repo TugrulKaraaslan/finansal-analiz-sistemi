@@ -6,6 +6,8 @@ from enum import Enum
 import pandas as pd
 from loguru import logger
 
+from .calendars import add_next_close, add_next_close_calendar, build_trading_days
+
 
 class TradeSide(Enum):
     LONG = "long"
@@ -70,6 +72,17 @@ def run_1g_returns(
         msg = f"Eksik kolon(lar): {', '.join(sorted(missing_sig))}"
         logger.error(msg)
         raise ValueError(msg)
+
+    has_next = {"next_date", "next_close"}.issubset(df_with_next.columns)
+    if not has_next:
+        if trading_days is not None:
+            df_with_next = add_next_close_calendar(df_with_next, trading_days)
+        else:
+            df_with_next = add_next_close(df_with_next)
+        has_next = True
+
+    if trading_days is None:
+        trading_days = build_trading_days(df_with_next)
 
     if "Side" in signals.columns:
         sides = signals["Side"].dropna().astype(str).str.lower()

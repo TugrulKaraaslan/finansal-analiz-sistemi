@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import warnings
+import numpy as np
 
 import pandas as pd
 
@@ -35,11 +36,13 @@ def rsi_14(close: pd.Series) -> pd.Series:
     delta = close.diff()
     gain = delta.clip(lower=0)
     loss = -delta.clip(upper=0)
-    avg_gain = gain.rolling(window=14, min_periods=14).mean()
-    avg_loss = loss.rolling(window=14, min_periods=14).mean()
+    avg_gain = gain.ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
+    avg_loss = loss.ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
+    zero_loss = avg_loss == 0
+    avg_loss = avg_loss.replace(0, np.nan)
     rs = avg_gain / avg_loss
     rsi = 100 - (100 / (1 + rs))
-    return rsi
+    return rsi.where(~zero_loss, 100)
 
 
 def adx_14(high: pd.Series, low: pd.Series, close: pd.Series) -> pd.Series:
@@ -49,9 +52,11 @@ def adx_14(high: pd.Series, low: pd.Series, close: pd.Series) -> pd.Series:
     length is shorter than the calculation period by returning a series of NaNs.
     """
     if ta is None:  # pragma: no cover - depends on optional dependency
-        raise NotImplementedError(
-            "pandas_ta is required for adx_14; install pandas_ta to use this indicator"
-        ) from _PANDAS_TA_ERR
+        warnings.warn(
+            "pandas_ta module not found; ADX indicator returning NaN series",
+            RuntimeWarning,
+        )
+        return pd.Series([float("nan")] * len(close), index=close.index)
     out = ta.adx(high, low, close, length=14)
     if out is None or "ADX_14" not in out:
         return pd.Series([float("nan")] * len(close), index=close.index)
