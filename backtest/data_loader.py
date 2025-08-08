@@ -303,6 +303,8 @@ def read_excels_long(
                         df = df[["date", *keep]].copy()
                         for c in keep:
                             df[c] = pd.to_numeric(df[c], errors="coerce")
+                        df = df.dropna(subset=keep)
+                        df = df[(df[keep] >= 0).all(axis=1)]
 
                         df["symbol"] = str(sheet).strip().upper()
                         records.append(df)
