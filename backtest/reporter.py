@@ -63,6 +63,7 @@ def write_reports(
         )  # TİP DÜZELTİLDİ
     if "Reason" not in trades_all.columns:
         trades_all["Reason"] = pd.NA
+    n_cols = trades_all.shape[1]
     if summary_wide is not None and not isinstance(summary_wide, pd.DataFrame):
         raise TypeError("summary_wide must be a DataFrame or None")  # TİP DÜZELTİLDİ
     if summary_winrate is not None and not isinstance(summary_winrate, pd.DataFrame):
@@ -175,7 +176,7 @@ def write_reports(
                     ws.set_column(6, 6, 8)
                     rows = len(trades_all[trades_all["Date"] == day_ts])
                     last_row = rows if rows > 0 else 0  # LOJİK HATASI DÜZELTİLDİ
-                    ws.autofilter(0, 0, last_row, day_df.shape[1] - 1)
+                    ws.autofilter(0, 0, last_row, n_cols - 1)
 
                 if summary_sheet_name in writer.sheets:
                     ws = writer.sheets[summary_sheet_name]
