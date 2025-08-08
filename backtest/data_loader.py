@@ -160,6 +160,9 @@ def apply_corporate_actions(
     adj = adj.rename(columns=str.lower)
     if not {"symbol", "date", "factor"}.issubset(adj.columns):
         raise ValueError("corporate actions csv missing required columns")
+    adj["factor"] = pd.to_numeric(adj["factor"], errors="coerce")
+    if (adj["factor"] <= 0).any() or adj["factor"].isna().any():
+        raise ValueError("corporate actions csv contains invalid factor")
     adj["date"] = pd.to_datetime(adj["date"]).dt.normalize()
     df = df.copy()
     df["date"] = pd.to_datetime(df["date"]).dt.normalize()
