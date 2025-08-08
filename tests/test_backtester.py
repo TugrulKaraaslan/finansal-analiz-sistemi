@@ -134,6 +134,41 @@ def test_run_1g_returns_side_validation():
         run_1g_returns(df, sigs_bad)
 
 
+def test_run_1g_returns_fills_missing_side_with_long():
+    df = pd.DataFrame(
+        {
+            "symbol": ["AAA", "AAA", "BBB", "BBB", "CCC", "CCC"],
+            "date": pd.to_datetime(
+                [
+                    "2024-01-01",
+                    "2024-01-02",
+                    "2024-01-01",
+                    "2024-01-02",
+                    "2024-01-01",
+                    "2024-01-02",
+                ]
+            ),
+            "close": [10.0, 11.0, 20.0, 22.0, 30.0, 33.0],
+        }
+    )
+    sigs = pd.DataFrame(
+        {
+            "FilterCode": ["T1", "T1", "T1"],
+            "Symbol": ["AAA", "BBB", "CCC"],
+            "Date": pd.to_datetime(
+                ["2024-01-01", "2024-01-01", "2024-01-01"]
+            ),
+            "Side": [pd.NA, "short", None],
+        }
+    )
+    out = run_1g_returns(df, sigs).set_index("Symbol")
+    assert out.loc["AAA", "Side"] == "long"
+    assert out.loc["CCC", "Side"] == "long"
+    assert out.loc["BBB", "Side"] == "short"
+    assert pytest.approx(out.loc["AAA", "ReturnPct"], 0.01) == 10.0
+    assert pytest.approx(out.loc["CCC", "ReturnPct"], 0.01) == 10.0
+    assert pytest.approx(out.loc["BBB", "ReturnPct"], 0.01) == -10.0
+
 def test_run_1g_returns_fills_missing_exit_data():
     df = pd.DataFrame(
         {

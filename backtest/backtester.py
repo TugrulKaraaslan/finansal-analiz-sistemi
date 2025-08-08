@@ -114,12 +114,12 @@ def run_1g_returns(
         trading_days = build_trading_days(df_with_next)
 
     if "Side" in signals.columns:
-        sides = signals["Side"].dropna().astype(str).str.lower()
+        sides = signals["Side"].fillna("long").astype(str).str.lower()
         invalid = ~sides.isin([s.value for s in TradeSide])
         if invalid.any():
-            bad_vals = signals["Side"][invalid].unique().tolist()
+            bad_vals = sides[invalid].unique().tolist()
             raise ValueError(f"Geçersiz Side değer(ler)i: {bad_vals}")
-        signals["Side"] = sides.map(lambda s: TradeSide.from_value(s).value)
+        signals["Side"] = sides.map(TradeSide.from_value)
 
     has_next = {"next_date", "next_close"}.issubset(df_with_next.columns)
     base_cols = ["symbol", "date", "close"]
@@ -201,7 +201,7 @@ def run_1g_returns(
 
     valid = ~(invalid_entry | invalid_exit)
     if "Side" in merged.columns:
-        side_enum = merged.loc[valid, "Side"].map(TradeSide.from_value)
+        side_enum = merged.loc[valid, "Side"]
     else:
         side_enum = pd.Series(TradeSide.LONG, index=merged.index)
         side_enum = side_enum.loc[valid]
