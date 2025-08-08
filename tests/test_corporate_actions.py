@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from backtest.data_loader import apply_corporate_actions
 
@@ -65,3 +66,23 @@ def test_apply_corporate_actions_equivalence(tmp_path):
     vec = apply_corporate_actions(df, csv)
     manual = _apply_loop(df, adj)
     pd.testing.assert_frame_equal(vec, manual, check_dtype=False)
+
+
+@pytest.mark.parametrize("factor", [0, -1, "foo"])
+def test_apply_corporate_actions_invalid_factor(tmp_path, factor):
+    df = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-02"]),
+            "open": [10.0],
+            "high": [10.0],
+            "low": [10.0],
+            "close": [10.0],
+        }
+    )
+    csv = tmp_path / "actions.csv"
+    csv.write_text(
+        f"symbol,date,factor\nAAA,2024-01-02,{factor}\n", encoding="utf-8"
+    )
+    with pytest.raises(ValueError):
+        apply_corporate_actions(df, csv)
