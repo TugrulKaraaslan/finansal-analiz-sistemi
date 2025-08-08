@@ -18,8 +18,8 @@ data:
     open: ["Açılış","Open"]
     high: ["Yüksek","High"]
     low:  ["Düşük","Low"]
-    close:["Kapanış","Close"]
-    volume:["Hacim","Volume","Adet"]
+    close: ["Kapanış","Close"]
+    volume: ["Hacim","Volume","Adet"]
 
 calendar:
   tplus1_mode: "price"   # price: sembol-bazlı bir sonraki bar; calendar: takvim bazlı T+1
