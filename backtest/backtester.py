@@ -73,20 +73,40 @@ def run_1g_returns(
 
     if df_with_next.empty:
         logger.warning("df_with_next is empty")
-        cols = ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win", "Reason"]
+        cols = [
+            "FilterCode",
+            "Symbol",
+            "Date",
+            "EntryClose",
+            "ExitClose",
+            "ReturnPct",
+            "Win",
+            "Reason",
+        ]
         if "Group" in signals.columns:
             cols.insert(1, "Group")
-        if "Side" in signals.columns:
-            cols.insert(len(cols) - 2, "Side")
-        return pd.DataFrame(columns=cols)
+        cols.insert(cols.index("ReturnPct"), "Side")
+        empty_df = pd.DataFrame(columns=cols)
+        empty_df["Side"] = pd.Series(dtype="object")
+        return empty_df
     if signals.empty:
         logger.warning("signals DataFrame is empty")
-        cols = ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win", "Reason"]
+        cols = [
+            "FilterCode",
+            "Symbol",
+            "Date",
+            "EntryClose",
+            "ExitClose",
+            "ReturnPct",
+            "Win",
+            "Reason",
+        ]
         if "Group" in signals.columns:
             cols.insert(1, "Group")
-        if "Side" in signals.columns:
-            cols.insert(len(cols) - 2, "Side")
-        return pd.DataFrame(columns=cols)
+        cols.insert(cols.index("ReturnPct"), "Side")
+        empty_df = pd.DataFrame(columns=cols)
+        empty_df["Side"] = pd.Series(dtype="object")
+        return empty_df
 
     req_base = {"symbol", "date", "close"}
     missing_base = req_base.difference(df_with_next.columns)
@@ -126,12 +146,22 @@ def run_1g_returns(
             sides = sides.loc[valid_mask]
             if signals.empty:
                 logger.warning("signals DataFrame is empty after dropping invalid Side")
-                cols = ["FilterCode", "Symbol", "Date", "EntryClose", "ExitClose", "ReturnPct", "Win", "Reason"]
+                cols = [
+                    "FilterCode",
+                    "Symbol",
+                    "Date",
+                    "EntryClose",
+                    "ExitClose",
+                    "ReturnPct",
+                    "Win",
+                    "Reason",
+                ]
                 if "Group" in signals.columns:
                     cols.insert(1, "Group")
-                if "Side" in signals.columns:
-                    cols.insert(len(cols) - 2, "Side")
-                return pd.DataFrame(columns=cols)
+                cols.insert(cols.index("ReturnPct"), "Side")
+                empty_df = pd.DataFrame(columns=cols)
+                empty_df["Side"] = pd.Series(dtype="object")
+                return empty_df
         signals = signals.copy()
         signals["Side"] = sides.replace("", "long").map(TradeSide.from_value)
 

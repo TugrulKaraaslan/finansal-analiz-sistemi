@@ -65,6 +65,7 @@ def test_pipeline_no_signals():
         "Date",
         "EntryClose",
         "ExitClose",
+        "Side",
         "ReturnPct",
         "Win",
         "Reason",
