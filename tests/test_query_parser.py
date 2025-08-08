@@ -61,7 +61,7 @@ def test_run_screener_missing_columns_raises():
         }
     )
     with pytest.raises(ValueError):
-        run_screener(df_ind, filters, pd.Timestamp("2024-01-02"))
+        run_screener(df_ind, filters, pd.Timestamp("2024-01-02"), strict=True)
 
 
 def test_run_screener_warns_on_error_relaxed():

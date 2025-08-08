@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
+import numpy as np
 import pandas as pd
 from loguru import logger
 
@@ -17,6 +18,19 @@ def _rsi(series: pd.Series, length: int) -> pd.Series:
     loss = -delta.clip(upper=0).ewm(alpha=1 / length, adjust=False).mean()
     rs = gain / loss
     return 100 - (100 / (1 + rs))
+
+
+def _stoch_rsi(
+    series: pd.Series, rsi_len: int, stoch_len: int, k: int, d: int
+) -> tuple[pd.Series, pd.Series]:
+    rsi = _rsi(series, rsi_len)
+    min_rsi = rsi.rolling(stoch_len, min_periods=stoch_len).min()
+    max_rsi = rsi.rolling(stoch_len, min_periods=stoch_len).max()
+    range_rsi = (max_rsi - min_rsi).replace(0, np.nan)
+    stoch = (rsi - min_rsi) / range_rsi
+    k_line = stoch.rolling(k, min_periods=k).mean() * 100
+    d_line = k_line.rolling(d, min_periods=d).mean()
+    return k_line, d_line
 
 
 def compute_indicators(
@@ -101,6 +115,26 @@ def compute_indicators(
                 g[col] = ta.rsi(g["close"], length=p_int)
             else:
                 g[col] = _rsi(g["close"], p_int)
+        stoch_params = params.get("stochrsi", [14, 14, 3, 3])
+        if isinstance(stoch_params, (int, float)):
+            stoch_params = [stoch_params]
+        stoch_params = list(stoch_params)
+        if len(stoch_params) < 4:
+            stoch_params = [14, 14, 3, 3]
+        rsi_len, stoch_len, k, d_ = map(int, stoch_params[:4])
+        if rsi_len <= 0 or stoch_len <= 0 or k <= 0 or d_ <= 0:
+            raise ValueError("stochrsi params must be positive")
+        if use_pandas_ta and ta is not None:
+            stoch = ta.stochrsi(
+                g["close"], length=stoch_len, rsi_length=rsi_len, k=k, d=d_
+            )
+            if stoch is not None and not stoch.empty:
+                g[f"STOCHRSIk_{rsi_len}_{stoch_len}_{k}_{d_}"] = stoch.iloc[:, 0]
+                g[f"STOCHRSId_{rsi_len}_{stoch_len}_{k}_{d_}"] = stoch.iloc[:, 1]
+        else:
+            k_line, d_line = _stoch_rsi(g["close"], rsi_len, stoch_len, k, d_)
+            g[f"STOCHRSIk_{rsi_len}_{stoch_len}_{k}_{d_}"] = k_line
+            g[f"STOCHRSId_{rsi_len}_{stoch_len}_{k}_{d_}"] = d_line
         macd_params = params.get("macd", [])
         if macd_params:
             if isinstance(macd_params, (int, float)):
@@ -145,6 +179,8 @@ def compute_indicators(
         "change_1d_percent": "CHANGE_1D_PERCENT",
         "change_1w_percent": "CHANGE_5D_PERCENT",
         "relative_volume": "RELATIVE_VOLUME",
+        "stochrsi_k": "STOCHRSIk_14_14_3_3",
+        "stochrsi_d": "STOCHRSId_14_14_3_3",
     }
     alias_map_extra = {
         "degisim_1g_yuzde": "CHANGE_1D_PERCENT",

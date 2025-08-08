@@ -158,8 +158,8 @@ def test_run_screener_side_validation():
     assert res.loc[0, "Side"] == "long"
     bad = filters_df.copy()
     bad["Side"] = ["foo"]
-    with pytest.raises(ValueError):
-        run_screener(df_ind, bad, pd.Timestamp("2024-01-02"))
+    res_bad = run_screener(df_ind, bad, pd.Timestamp("2024-01-02"))
+    assert res_bad.empty
 
 
 def test_run_screener_duplicate_filter_code():

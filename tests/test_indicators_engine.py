@@ -27,6 +27,16 @@ def test_builtin_engine_basic():
     res = compute_indicators(df, params={}, engine="builtin")
     assert "EMA_10" in res.columns
     assert "RSI_14" in res.columns
+    assert "STOCHRSIk_14_14_3_3" in res.columns
+    assert "STOCHRSId_14_14_3_3" in res.columns
+
+
+def test_stochrsi_params():
+    df = _sample_df()
+    res = compute_indicators(
+        df, params={"stochrsi": [14, 14, 3, 3]}, engine="builtin"
+    )
+    assert "STOCHRSIk_14_14_3_3" in res.columns
 
 
 def test_pandas_ta_fallback(monkeypatch):
