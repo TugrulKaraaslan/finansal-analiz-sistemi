@@ -228,6 +228,8 @@ def read_excels_long(
     excel_files: List[Path] = []
     if excel_dir and excel_dir.exists():
         excel_files = sorted(p for p in excel_dir.glob("*.xlsx"))
+    if enable_cache is not None:
+        enable_cache = bool(str(enable_cache).lower() in ("true", "1"))
     if enable_cache is None:
         enable_cache = len(excel_files) > 5
         if enable_cache:
