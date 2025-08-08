@@ -92,15 +92,14 @@ def run_screener(df_ind: pd.DataFrame, filters_df: pd.DataFrame, date) -> pd.Dat
     out_frames = []
     for code, grp, side_norm, sq in valids:
         try:
-            mask = sq.get_mask(d)
+            filtered = sq.filter(d)
         except Exception as err:
             warnings.warn(f"Filter {code!r} failed: {err}")
             logger.warning("Filter {code!r} failed: {err}", code=code, err=err)
             continue
-        idx = mask[mask].index
-        if not len(idx):
+        if filtered.empty:
             continue
-        tmp = d.loc[idx, ["symbol"]].copy()
+        tmp = filtered.loc[:, ["symbol"]].copy()
         tmp["FilterCode"] = code
         if grp is not None:
             tmp["Group"] = grp

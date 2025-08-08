@@ -3,14 +3,20 @@ from __future__ import annotations
 
 import click
 import pandas as pd
+import sys
+from loguru import logger
 
 from io_filters import load_filters_csv
 from utils.paths import resolve_path
 
 from .backtester import run_1g_returns
 from .benchmark import load_xu100_pct
-from .calendars import (add_next_close, add_next_close_calendar,
-                        build_trading_days, load_holidays_csv)
+from .calendars import (
+    add_next_close,
+    add_next_close_calendar,
+    build_trading_days,
+    load_holidays_csv,
+)
 from .config import load_config
 from .data_loader import apply_corporate_actions, read_excels_long
 from .indicators import compute_indicators
@@ -36,8 +42,9 @@ def _run_scan(cfg) -> None:
     try:
         df = read_excels_long(cfg)
     except (FileNotFoundError, RuntimeError) as exc:
-        info(str(exc))
-        return
+        logger.error(str(exc))
+        click.echo(str(exc), err=True)
+        sys.exit(1)
     df = apply_corporate_actions(df, getattr(cfg.data, "corporate_actions_csv", None))
     df = normalize(df)
     if cfg.calendar.tplus1_mode == "calendar":
@@ -57,11 +64,14 @@ def _run_scan(cfg) -> None:
     try:
         filters_df = load_filters_csv(cfg.data.filters_csv)
     except FileNotFoundError as exc:
-        info(str(exc))
-        filters_df = pd.DataFrame(columns=["FilterCode", "PythonQuery", "Group"])
+        logger.error(str(exc))
+        click.echo(str(exc), err=True)
+        sys.exit(1)
     if filters_df.empty:
-        info("Filtre CSV boş veya bulunamadı, işlem yapılmadı.")
-        return
+        msg = "Filtre CSV boş veya bulunamadı, işlem yapılmadı."
+        logger.error(msg)
+        click.echo(msg, err=True)
+        sys.exit(1)
 
     all_days = sorted(pd.to_datetime(df_ind["date"]).dt.normalize().unique())
     if cfg.project.run_mode == "single" and cfg.project.single_date:
@@ -69,8 +79,10 @@ def _run_scan(cfg) -> None:
         days = [day]
     else:
         if not all_days:
-            info("Taranacak tarih bulunamadı, veri seti boş.")
-            return
+            msg = "Taranacak tarih bulunamadı, veri seti boş."
+            logger.error(msg)
+            click.echo(msg, err=True)
+            sys.exit(1)
         start = (
             pd.to_datetime(cfg.project.start_date).normalize()
             if cfg.project.start_date

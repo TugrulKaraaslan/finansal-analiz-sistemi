@@ -33,6 +33,9 @@ def compute_indicators(
         params = {}  # TİP DÜZELTİLDİ
     if df.empty:
         return df.copy()  # TİP DÜZELTİLDİ
+    supported_engines = {"builtin", "pandas_ta"}
+    if engine not in supported_engines:
+        raise ValueError(f"Unsupported engine: {engine}")
     req = {"symbol", "date", "close", "volume"}
     missing = req.difference(df.columns)
     if missing:
@@ -40,6 +43,7 @@ def compute_indicators(
     df = df.copy()
     df = df.sort_values(["symbol", "date"])
 
+    logger.info("compute_indicators using engine=%s", engine)
     use_pandas_ta = engine == "pandas_ta"
     ta = None
     if use_pandas_ta:
@@ -56,21 +60,29 @@ def compute_indicators(
         ema_params = params.get("ema", [10, 20, 50])
         if isinstance(ema_params, (int, float)):
             ema_params = [ema_params]  # TİP DÜZELTİLDİ
+        logger.info("EMA params: %s", ema_params)
         for p in ema_params:
-            col = f"EMA_{p}"
+            p_int = int(p)
+            if p_int <= 0:
+                raise ValueError("EMA period must be positive")
+            col = f"EMA_{p_int}"
             if use_pandas_ta and ta is not None:
-                g[col] = ta.ema(g["close"], length=int(p))
+                g[col] = ta.ema(g["close"], length=p_int)
             else:
-                g[col] = _ema(g["close"], int(p))
+                g[col] = _ema(g["close"], p_int)
         rsi_params = params.get("rsi", [14])
         if isinstance(rsi_params, (int, float)):
             rsi_params = [rsi_params]  # TİP DÜZELTİLDİ
+        logger.info("RSI params: %s", rsi_params)
         for p in rsi_params:
-            col = f"RSI_{p}"
+            p_int = int(p)
+            if p_int <= 0:
+                raise ValueError("RSI period must be positive")
+            col = f"RSI_{p_int}"
             if use_pandas_ta and ta is not None:
-                g[col] = ta.rsi(g["close"], length=int(p))
+                g[col] = ta.rsi(g["close"], length=p_int)
             else:
-                g[col] = _rsi(g["close"], int(p))
+                g[col] = _rsi(g["close"], p_int)
         macd_params = params.get("macd", [])
         if macd_params:
             if isinstance(macd_params, (int, float)):
@@ -81,6 +93,9 @@ def compute_indicators(
                     "macd params must have at least three values",
                 )  # TİP DÜZELTİLDİ
             fast, slow, sig = map(int, macd_params[:3])
+            if fast <= 0 or slow <= 0 or sig <= 0:
+                raise ValueError("macd params must be positive")
+            logger.info("MACD params: %s", macd_params[:3])
             if use_pandas_ta and ta is not None:
                 macd = ta.macd(g["close"], fast=fast, slow=slow, signal=sig)
                 if macd is not None and not macd.empty:

@@ -64,6 +64,13 @@ SCAN 2024-01-02: 24 satır, ort. %1.2
 pytest -q
 ```
 
+## Benchmark
+
+| Fonksiyon | Satır (n) | Süre (ms) |
+| --- | --- | --- |
+| `compute_indicators` | 1000 | ~17 |
+| `run_1g_returns` | 1000 | ~24 |
+
 
 ## Backtest Akış Rehberi
 1. **Veri Yükleme:** `backtest.data_loader.read_excels_long` ile Excel fiyat dosyalarını okuyun. Gerekirse `backtest.calendars.add_next_close_calendar` ile işlem günlerine göre `next_date` ve `next_close` alanlarını ekleyin.

@@ -74,3 +74,29 @@ def test_write_reports_raises_on_excel_error(monkeypatch, tmp_path):
     monkeypatch.setattr(pd, "ExcelWriter", _bad_writer)
     with pytest.raises(RuntimeError):
         write_reports(trades, [pd.Timestamp("2024-01-01")], summary, out_xlsx=tmp_path / "out.xlsx")
+
+
+def test_write_reports_warns_if_file_missing(monkeypatch, tmp_path):
+    trades = pd.DataFrame(
+        {
+            "FilterCode": ["f1"],
+            "Symbol": ["SYM"],
+            "Date": [pd.Timestamp("2024-01-01")],
+            "EntryClose": [10.0],
+            "ExitClose": [11.0],
+            "ReturnPct": [10.0],
+            "Win": [True],
+        }
+    )
+    summary = trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack()
+    out_xlsx = tmp_path / "out.xlsx"
+    real_exists = pathlib.Path.exists
+
+    def fake_exists(self):
+        if self == out_xlsx.resolve():
+            return False
+        return real_exists(self)
+
+    monkeypatch.setattr(pathlib.Path, "exists", fake_exists)
+    with pytest.warns(UserWarning):
+        write_reports(trades, [pd.Timestamp("2024-01-01")], summary, out_xlsx=out_xlsx)
