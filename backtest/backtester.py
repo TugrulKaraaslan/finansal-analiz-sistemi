@@ -28,7 +28,29 @@ def run_1g_returns(
     transaction_cost: float = 0.0,
     trading_days: pd.DatetimeIndex | None = None,
 ) -> pd.DataFrame:
-    """Calculate returns for screener signals."""
+    """Calculate 1G returns for screener signals.
+
+    Parameters
+    ----------
+    df_with_next : pandas.DataFrame
+        Price data including ``symbol``, ``date`` and ``close`` columns. If
+        ``next_close`` and ``next_date`` are missing they are computed
+        automatically.
+    signals : pandas.DataFrame
+        Screener output containing at least ``FilterCode``, ``Symbol`` and
+        ``Date`` columns.
+    holding_period : int, default 1
+        Number of trading days to hold each position.
+    transaction_cost : float, default 0.0
+        Commission or slippage in percentage points. Must be non-negative.
+    trading_days : pandas.DatetimeIndex, optional
+        Explicit trading calendar used to determine exit dates.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A DataFrame with calculated returns and win/loss flags for each signal.
+    """
 
     logger.debug(
         "run_1g_returns start - base rows: {rows_base}, signals rows: {rows_sig}",
@@ -46,6 +68,8 @@ def run_1g_returns(
         raise ValueError("holding_period must be positive int")
     if not isinstance(transaction_cost, (int, float)):
         raise TypeError("transaction_cost must be numeric")
+    if float(transaction_cost) < 0:
+        raise ValueError("transaction_cost must be non-negative")
 
     if df_with_next.empty:
         logger.warning("df_with_next is empty")

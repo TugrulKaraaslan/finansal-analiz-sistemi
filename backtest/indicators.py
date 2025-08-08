@@ -25,6 +25,24 @@ def compute_indicators(
     *,
     engine: str = "builtin",
 ) -> pd.DataFrame:
+    """Compute technical indicators for price data.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Input price data with at least ``symbol``, ``date``, ``close`` and
+        ``volume`` columns.
+    params : dict, optional
+        Mapping of indicator names to parameter lists. Supported keys include
+        ``ema``, ``rsi`` and ``macd``.
+    engine : str, default "builtin"
+        Indicator engine to use; either ``"builtin"`` or ``"pandas_ta"``.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing the original data along with computed indicators.
+    """
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
     if params is not None and not isinstance(params, dict):
@@ -43,7 +61,7 @@ def compute_indicators(
     df = df.copy()
     df = df.sort_values(["symbol", "date"])
 
-    logger.info("compute_indicators using engine=%s", engine)
+    logger.debug("compute_indicators using engine=%s", engine)
     use_pandas_ta = engine == "pandas_ta"
     ta = None
     if use_pandas_ta:
@@ -60,7 +78,7 @@ def compute_indicators(
         ema_params = params.get("ema", [10, 20, 50])
         if isinstance(ema_params, (int, float)):
             ema_params = [ema_params]  # TİP DÜZELTİLDİ
-        logger.info("EMA params: %s", ema_params)
+        logger.debug("EMA params: %s", ema_params)
         for p in ema_params:
             p_int = int(p)
             if p_int <= 0:
@@ -73,7 +91,7 @@ def compute_indicators(
         rsi_params = params.get("rsi", [14])
         if isinstance(rsi_params, (int, float)):
             rsi_params = [rsi_params]  # TİP DÜZELTİLDİ
-        logger.info("RSI params: %s", rsi_params)
+        logger.debug("RSI params: %s", rsi_params)
         for p in rsi_params:
             p_int = int(p)
             if p_int <= 0:
@@ -95,7 +113,7 @@ def compute_indicators(
             fast, slow, sig = map(int, macd_params[:3])
             if fast <= 0 or slow <= 0 or sig <= 0:
                 raise ValueError("macd params must be positive")
-            logger.info("MACD params: %s", macd_params[:3])
+            logger.debug("MACD params: %s", macd_params[:3])
             if use_pandas_ta and ta is not None:
                 macd = ta.macd(g["close"], fast=fast, slow=slow, signal=sig)
                 if macd is not None and not macd.empty:

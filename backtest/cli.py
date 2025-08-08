@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import click
 import pandas as pd
-import sys
 from loguru import logger
 
 from io_filters import load_filters_csv
@@ -43,8 +42,7 @@ def _run_scan(cfg) -> None:
         df = read_excels_long(cfg)
     except (FileNotFoundError, RuntimeError) as exc:
         logger.error(str(exc))
-        click.echo(str(exc), err=True)
-        sys.exit(1)
+        raise click.ClickException(str(exc))
     df = apply_corporate_actions(df, getattr(cfg.data, "corporate_actions_csv", None))
     df = normalize(df)
     if cfg.calendar.tplus1_mode == "calendar":
@@ -65,13 +63,11 @@ def _run_scan(cfg) -> None:
         filters_df = load_filters_csv(cfg.data.filters_csv)
     except FileNotFoundError as exc:
         logger.error(str(exc))
-        click.echo(str(exc), err=True)
-        sys.exit(1)
+        raise click.ClickException(str(exc))
     if filters_df.empty:
         msg = "Filtre CSV boş veya bulunamadı, işlem yapılmadı."
         logger.error(msg)
-        click.echo(msg, err=True)
-        sys.exit(1)
+        raise click.ClickException(msg)
 
     all_days = sorted(pd.to_datetime(df_ind["date"]).dt.normalize().unique())
     if cfg.project.run_mode == "single" and cfg.project.single_date:
@@ -81,8 +77,7 @@ def _run_scan(cfg) -> None:
         if not all_days:
             msg = "Taranacak tarih bulunamadı, veri seti boş."
             logger.error(msg)
-            click.echo(msg, err=True)
-            sys.exit(1)
+            raise click.ClickException(msg)
         start = (
             pd.to_datetime(cfg.project.start_date).normalize()
             if cfg.project.start_date

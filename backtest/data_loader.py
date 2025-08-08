@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import warnings
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 import importlib.util
 import pandas as pd
@@ -98,6 +98,34 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
         seen[std] = c
     result = df.drop(columns=drops).rename(columns=rename_map)
     return result
+
+
+def validate_columns(df: pd.DataFrame, required: Iterable[str]) -> pd.DataFrame:
+    """Ensure that ``df`` contains all columns in ``required``.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame to validate.
+    required : Iterable[str]
+        Collection of expected column names.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The original DataFrame if validation succeeds.
+
+    Raises
+    ------
+    ValueError
+        If any of the required columns are missing.
+    """
+    missing = set(required).difference(df.columns)
+    if missing:
+        raise ValueError(
+            f"Missing required columns: {', '.join(sorted(missing))}"
+        )
+    return df
 
 
 def apply_corporate_actions(
@@ -283,6 +311,8 @@ def read_excels_long(
     if "close" in full.columns:
         full = full.dropna(subset=["close"])
 
+    validate_columns(full, ["date", "open", "high", "low", "close", "volume", "symbol"])
+
     if enable_cache and cache_path:
         try:
             cache_file = resolve_path(cache_path)
@@ -294,4 +324,4 @@ def read_excels_long(
     return full
 
 
-__all__ = ["read_excels_long", "normalize_columns"]
+__all__ = ["read_excels_long", "normalize_columns", "apply_corporate_actions", "validate_columns"]

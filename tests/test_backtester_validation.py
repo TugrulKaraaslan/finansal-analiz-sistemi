@@ -81,3 +81,8 @@ def test_run_1g_returns_logs_missing_signal_columns(caplog):
         run_1g_returns(_base_df(), bad_sig)
     assert caplog.records[0].levelname == "ERROR"
     assert "Eksik kolon(lar): Date" in caplog.text
+
+
+def test_run_1g_returns_negative_transaction_cost():
+    with pytest.raises(ValueError):
+        run_1g_returns(_base_df(), _signals_df(), transaction_cost=-0.1)
