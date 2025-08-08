@@ -86,19 +86,17 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
     rename_map: Dict[str, str] = {}
+    seen: Dict[str, str] = {}
+    drops: List[str] = []
     for c in df.columns:
         key = normalize_key(c).strip("_")
         std = COL_ALIASES.get(key, key)
+        if std in seen:
+            drops.append(c)
+            continue
         rename_map[c] = std
-    result = df.rename(columns=rename_map)
-    # renaming may cause different original names to map to the same target
-    if result.columns.duplicated().any():
-        dup = result.columns[result.columns.duplicated()].tolist()
-        warnings.warn(
-            f"Normalize sonrası tekrar eden kolonlar bulundu ve ilk değerler tutuldu: {dup}"
-        )
-        # keep first occurrence, drop subsequent duplicates
-        result = result.loc[:, ~result.columns.duplicated()]
+        seen[std] = c
+    result = df.drop(columns=drops).rename(columns=rename_map)
     return result
 
 
@@ -154,7 +152,8 @@ def apply_corporate_actions(
 
 def read_excels_long(
     cfg_or_path: Union[str, Path, Any],
-    dayfirst: bool = True,
+    dayfirst: bool = False,
+    date_format: Optional[str] = "%Y-%m-%d",
     engine: str = "auto",
     verbose: bool = False,
 ) -> pd.DataFrame:
@@ -247,9 +246,12 @@ def read_excels_long(
                         print(f"[SKIP] {fpath}:{sheet} 'date' bulunamadı.")
                     continue
 
-                df["date"] = pd.to_datetime(
-                    df["date"], errors="coerce", dayfirst=dayfirst
-                )
+                parse_kwargs: Dict[str, Any] = {"errors": "coerce"}
+                if date_format:
+                    parse_kwargs["format"] = date_format
+                else:
+                    parse_kwargs["dayfirst"] = dayfirst
+                df["date"] = pd.to_datetime(df["date"], **parse_kwargs)
                 df = df.dropna(subset=["date"])
 
                 keep = [
