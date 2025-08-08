@@ -3,6 +3,7 @@ from __future__ import annotations
 import pathlib
 
 import pandas as pd
+import pytest
 
 from backtest.reporter import _ensure_dir, write_reports
 
@@ -51,3 +52,25 @@ def test_write_reports_returns_paths(tmp_path):
     assert {"daily_trades.csv", "summary.csv", "summary_winrate.csv"}.issubset(csv_names)
     for p in outputs.get("csv", []):
         assert p.exists()
+
+
+def test_write_reports_raises_on_excel_error(monkeypatch, tmp_path):
+    trades = pd.DataFrame(
+        {
+            "FilterCode": ["f1"],
+            "Symbol": ["SYM"],
+            "Date": [pd.Timestamp("2024-01-01")],
+            "EntryClose": [10.0],
+            "ExitClose": [11.0],
+            "ReturnPct": [10.0],
+            "Win": [True],
+        }
+    )
+    summary = trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack()
+
+    def _bad_writer(*args, **kwargs):
+        raise OSError("fail")
+
+    monkeypatch.setattr(pd, "ExcelWriter", _bad_writer)
+    with pytest.raises(RuntimeError):
+        write_reports(trades, [pd.Timestamp("2024-01-01")], summary, out_xlsx=tmp_path / "out.xlsx")

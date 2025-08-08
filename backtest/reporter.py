@@ -96,8 +96,8 @@ def write_reports(
             writer = pd.ExcelWriter(
                 out_xlsx_path, engine="xlsxwriter"
             )  # PATH DÜZENLENDİ
-        except Exception:
-            warnings.warn(f"Excel yazılamadı: {out_xlsx_path}")  # PATH DÜZENLENDİ
+        except Exception as exc:
+            raise RuntimeError(f"Excel yazılamadı: {out_xlsx_path}") from exc
         else:
             with writer:
                 for d in dates:

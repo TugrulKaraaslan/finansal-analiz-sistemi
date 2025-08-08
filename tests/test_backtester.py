@@ -150,3 +150,20 @@ def test_run_1g_returns_fills_missing_exit_data():
     out2 = run_1g_returns(df, sigs, holding_period=2)
     assert out2.loc[0, "ExitClose"] == 12.0
     assert pytest.approx(out2.loc[0, "ReturnPct"], 0.01) == 20.0
+
+
+def test_run_1g_returns_empty_base_returns_empty(caplog):
+    from loguru import logger
+
+    df = pd.DataFrame(columns=["symbol", "date", "close"])
+    sigs = pd.DataFrame(
+        {
+            "FilterCode": ["T1"],
+            "Symbol": ["AAA"],
+            "Date": [pd.Timestamp("2024-01-05")],
+        }
+    )
+    logger.add(caplog.handler, level="WARNING")
+    out = run_1g_returns(df, sigs)
+    assert out.empty
+    assert "df_with_next is empty" in caplog.text

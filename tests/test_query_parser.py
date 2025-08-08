@@ -89,3 +89,16 @@ def test_safequery_allows_str_contains():
     assert q.is_safe
     out = q.filter(df)
     assert out["symbol"].tolist() == ["AAA"]
+
+
+def test_safequery_allows_extra_funcs():
+    df = pd.DataFrame({"x": [1, 2, 3, 4, 5]})
+    q = SafeQuery("x.rolling(2).max() >= 2")
+    assert q.is_safe
+    assert not q.filter(df).empty
+    q2 = SafeQuery("x.rolling(2).std() >= 0")
+    assert q2.is_safe
+    assert not q2.filter(df).empty
+    q3 = SafeQuery("x.rolling(2).median() >= 1")
+    assert q3.is_safe
+    assert not q3.filter(df).empty
