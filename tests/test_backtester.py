@@ -127,3 +127,26 @@ def test_run_1g_returns_side_validation():
     sigs_bad["Side"] = ["foo"]
     with pytest.raises(ValueError):
         run_1g_returns(df, sigs_bad)
+
+
+def test_run_1g_returns_fills_missing_exit_data():
+    df = pd.DataFrame(
+        {
+            "symbol": ["AAA", "AAA", "AAA"],
+            "date": pd.to_datetime(["2024-01-05", "2024-01-08", "2024-01-09"]),
+            "close": [10.0, 11.0, 12.0],
+        }
+    )
+    sigs = pd.DataFrame(
+        {
+            "FilterCode": ["T1"],
+            "Symbol": ["AAA"],
+            "Date": [pd.to_datetime("2024-01-05")],
+        }
+    )
+    out1 = run_1g_returns(df, sigs)
+    assert out1.loc[0, "ExitClose"] == 11.0
+    assert pytest.approx(out1.loc[0, "ReturnPct"], 0.01) == 10.0
+    out2 = run_1g_returns(df, sigs, holding_period=2)
+    assert out2.loc[0, "ExitClose"] == 12.0
+    assert pytest.approx(out2.loc[0, "ReturnPct"], 0.01) == 20.0

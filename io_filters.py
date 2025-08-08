@@ -50,6 +50,10 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
     # basic normalization
     df["FilterCode"] = df["FilterCode"].astype(str).str.strip()
     df["PythonQuery"] = df["PythonQuery"].astype(str)
+    dups = df["FilterCode"][df["FilterCode"].duplicated()]
+    if not dups.empty:
+        dup_codes = ", ".join(sorted(dups.unique()))
+        raise RuntimeError(f"Duplicate FilterCode detected: {dup_codes}")
     return df
 
 
