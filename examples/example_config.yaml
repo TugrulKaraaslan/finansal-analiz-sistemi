@@ -9,7 +9,7 @@ project:
   transaction_cost: 0.0
 
 data:
-  excel_dir: "Veri"
+  excel_dir: "../Veri"
   filters_csv: "filters.csv"
   enable_cache: false
   cache_parquet_path: "cache/prices.parquet"
