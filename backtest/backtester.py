@@ -3,10 +3,16 @@ from __future__ import annotations
 
 from enum import Enum
 
+import warnings
 import pandas as pd
 from loguru import logger
 
-from .calendars import add_next_close, add_next_close_calendar, build_trading_days
+from .calendars import (
+    add_next_close,
+    add_next_close_calendar,
+    build_trading_days,
+    check_missing_trading_days,
+)
 
 
 class TradeSide(Enum):
@@ -124,6 +130,12 @@ def run_1g_returns(
 
     has_next = {"next_date", "next_close"}.issubset(df_with_next.columns)
     if not has_next:
+        missing_days = check_missing_trading_days(df_with_next, raise_error=False)
+        if not missing_days.empty:
+            warnings.warn(
+                "Missing trading days: "
+                + ", ".join(d.strftime("%Y-%m-%d") for d in missing_days)
+            )
         if trading_days is not None:
             df_with_next = add_next_close_calendar(df_with_next, trading_days)
         else:
