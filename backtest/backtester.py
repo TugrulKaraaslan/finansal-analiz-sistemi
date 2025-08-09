@@ -11,7 +11,7 @@ from .calendars import (
     add_next_close,
     add_next_close_calendar,
     build_trading_days,
-    check_missing_trading_days,
+    check_missing_trading_days_by_symbol,
 )
 
 
@@ -130,12 +130,15 @@ def run_1g_returns(
 
     has_next = {"next_date", "next_close"}.issubset(df_with_next.columns)
     if not has_next:
-        missing_days = check_missing_trading_days(df_with_next, raise_error=False)
-        if not missing_days.empty:
-            warnings.warn(
-                "Missing trading days: "
-                + ", ".join(d.strftime("%Y-%m-%d") for d in missing_days)
-            )
+        missing_days = check_missing_trading_days_by_symbol(
+            df_with_next, raise_error=False
+        )
+        if missing_days:
+            parts = []
+            for sym, days in missing_days.items():
+                day_str = ", ".join(d.strftime("%Y-%m-%d") for d in days)
+                parts.append(f"{sym}: {day_str}")
+            warnings.warn("Missing trading days: " + "; ".join(parts))
         if trading_days is not None:
             df_with_next = add_next_close_calendar(df_with_next, trading_days)
         else:
