@@ -7,6 +7,7 @@ import re
 from typing import Set, Tuple
 
 import pandas as pd
+import numpy as np
 
 
 class SafeQuery:
@@ -39,6 +40,10 @@ class SafeQuery:
         "min",
         "std",
         "median",
+        "log",
+        "exp",
+        "floor",
+        "ceil",
     }
 
     def __init__(self, expr: str):
@@ -86,7 +91,17 @@ class SafeQuery:
         if not self.is_safe:
             raise ValueError(f"Unsafe query expression: {self.error}")
         env = {name: df[name] for name in df.columns}
-        env.update({"abs": abs, "max": max, "min": min})
+        env.update(
+            {
+                "abs": abs,
+                "max": max,
+                "min": min,
+                "log": np.log,
+                "exp": np.exp,
+                "floor": np.floor,
+                "ceil": np.ceil,
+            }
+        )
         mask = pd.eval(
             self.expr, engine="python", parser="pandas", local_dict=env
         )

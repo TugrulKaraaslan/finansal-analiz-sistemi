@@ -244,31 +244,30 @@ def run_1g_returns(
 
     invalid_entry = (merged["EntryClose"] <= 0) | merged["EntryClose"].isna()
     invalid_exit = (merged["ExitClose"] <= 0) | merged["ExitClose"].isna()
-    merged["Reason"] = pd.NA
     if invalid_entry.any():
         logger.warning(
-            "run_1g_returns marking {n} rows with invalid EntryClose",
+            "run_1g_returns dropping {n} rows with invalid EntryClose",
             n=int(invalid_entry.sum()),
         )
-        merged.loc[invalid_entry, "Reason"] = "invalid_entry"
     if invalid_exit.any():
         logger.warning(
-            "run_1g_returns marking {n} rows with invalid ExitClose",
+            "run_1g_returns dropping {n} rows with invalid ExitClose",
             n=int(invalid_exit.sum()),
         )
-        merged.loc[invalid_exit & merged["Reason"].isna(), "Reason"] = "invalid_exit"
+    invalid = invalid_entry | invalid_exit
+    if invalid.any():
+        merged = merged.loc[~invalid].copy()
 
-    valid = ~(invalid_entry | invalid_exit)
+    merged["Reason"] = pd.NA
     if "Side" in merged.columns:
-        side_enum = merged.loc[valid, "Side"]
+        side_enum = merged["Side"]
     else:
         side_enum = pd.Series(TradeSide.LONG, index=merged.index)
-        side_enum = side_enum.loc[valid]
-    pnl = merged.loc[valid, "ExitClose"] / merged.loc[valid, "EntryClose"] - 1.0
+    pnl = merged["ExitClose"] / merged["EntryClose"] - 1.0
     sign = side_enum.map({TradeSide.SHORT: -1, TradeSide.LONG: 1})
-    merged.loc[valid, "Side"] = side_enum.map(lambda s: s.value)
-    merged.loc[valid, "ReturnPct"] = pnl * 100.0 * sign - float(transaction_cost)
-    merged.loc[valid, "Win"] = merged.loc[valid, "ReturnPct"] > 0.0
+    merged["Side"] = side_enum.map(lambda s: s.value)
+    merged["ReturnPct"] = pnl * 100.0 * sign - float(transaction_cost)
+    merged["Win"] = merged["ReturnPct"] > 0.0
 
     cols = ["FilterCode"]
     if "Group" in merged.columns:
