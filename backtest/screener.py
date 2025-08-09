@@ -21,7 +21,7 @@ def run_screener(
     df_ind: pd.DataFrame,
     filters_df: pd.DataFrame,
     date,
-    strict: bool = False,
+    strict: bool = True,
     raise_on_error: bool = True,
 ) -> pd.DataFrame:
     """Run the screener filters for a given date.
@@ -35,9 +35,9 @@ def run_screener(
     date : datetime-like
         The date to evaluate the filters on.
     strict : bool, optional
-        If ``True``, any filter referencing missing columns raises a
-        :class:`ValueError`. When ``False`` (default) such filters are skipped
-        with a warning.
+        If ``True`` (default), any filter referencing missing columns raises a
+        :class:`ValueError`. When ``False`` such filters are skipped with a
+        warning.
     raise_on_error : bool, optional
         Controls behaviour when a filter's expression fails to evaluate.
         When ``True`` (default) a :class:`RuntimeError` is raised
@@ -151,7 +151,6 @@ def run_screener(
                 code=code,
                 missing=sorted(missing_cols),
             )
-            warnings.warn(msg)
             continue
         valids.append((code, grp, side_norm, sq))
     out_frames = []

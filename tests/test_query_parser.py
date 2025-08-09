@@ -64,7 +64,9 @@ def test_run_screener_missing_columns_raises():
         run_screener(df_ind, filters, pd.Timestamp("2024-01-02"), strict=True)
 
 
-def test_run_screener_warns_on_error_relaxed():
+def test_run_screener_skips_missing_columns_relaxed(caplog):
+    from loguru import logger
+
     df_ind = pd.DataFrame(
         {
             "symbol": ["AAA"],
@@ -82,13 +84,13 @@ def test_run_screener_warns_on_error_relaxed():
             "PythonQuery": ["close > 0", "nonexistent > 0"],
         }
     )
-    with pytest.warns(UserWarning) as w:
-        res = run_screener(
-            df_ind, filters, pd.Timestamp("2024-01-02"), strict=False
-        )
+    logger.add(caplog.handler, level="WARNING")
+    res = run_screener(
+        df_ind, filters, pd.Timestamp("2024-01-02"), strict=False
+    )
     assert res["FilterCode"].tolist() == ["GOOD"]
     assert isinstance(res.loc[0, "Date"], pd.Timestamp)
-    assert any("BAD" in str(msg.message) for msg in w)
+    assert "Filter skipped due to missing columns" in caplog.text
 
 
 def test_run_screener_raises_on_filter_error_default():
@@ -178,3 +180,11 @@ def test_safequery_allows_extra_funcs():
     q3 = SafeQuery("x.rolling(2).median() >= 1")
     assert q3.is_safe
     assert not q3.filter(df).empty
+
+
+def test_safequery_allows_math_funcs():
+    df = pd.DataFrame({"x": [1.0, 2.0, 3.0]})
+    q = SafeQuery("log(x) >= 0 & exp(x) > 0 & floor(x) >= 1 & ceil(x) <= 4")
+    assert q.is_safe
+    out = q.filter(df)
+    assert out["x"].tolist() == [1.0, 2.0, 3.0]

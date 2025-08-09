@@ -99,7 +99,7 @@ def _run_scan(cfg) -> None:
             df_ind,
             filters_df,
             d,
-            strict=cfg.project.strict_filters,
+            strict=True,
             raise_on_error=cfg.project.raise_on_error,
         )
         trades = run_1g_returns(

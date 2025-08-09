@@ -84,8 +84,7 @@ def test_run_1g_returns_exit_date_out_of_bounds_returns_empty():
         }
     )
     out = run_1g_returns(df, sigs)
-    assert out.loc[0, "Reason"] == "invalid_exit"
-    assert out["ReturnPct"].isna().all()
+    assert out.empty
 
 
 def test_run_1g_returns_ignores_out_of_bounds_signals():
@@ -104,9 +103,8 @@ def test_run_1g_returns_ignores_out_of_bounds_signals():
         }
     )
     out = run_1g_returns(df, sigs)
-    assert len(out) == 2
+    assert len(out) == 1
     assert out.loc[0, "Date"] == pd.Timestamp("2024-01-01")
-    assert out.loc[1, "Reason"] == "invalid_exit"
 
 
 def test_run_1g_returns_side_validation():
