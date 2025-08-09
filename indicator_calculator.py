@@ -5,16 +5,14 @@ import numpy as np
 
 import pandas as pd
 
-_PANDAS_TA_ERR: Exception | None = None
 try:  # library is optional
     import pandas_ta as ta  # type: ignore
-except Exception as err:  # pragma: no cover - executed when pandas_ta missing
+except Exception:  # pragma: no cover - executed when pandas_ta missing
     ta = None  # type: ignore
     warnings.warn(
         "pandas_ta module not found; ADX indicator will be unavailable",
         ImportWarning,
     )
-    _PANDAS_TA_ERR = err
 
 
 def sma_5(close: pd.Series) -> pd.Series:
