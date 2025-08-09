@@ -68,7 +68,7 @@ def test_run_1g_returns_holding_period_and_cost():
     assert pytest.approx(out.loc[0, "ReturnPct"], 0.01) == expected
 
 
-def test_run_1g_returns_exit_date_out_of_bounds_returns_empty():
+def test_run_1g_returns_marks_exit_date_out_of_bounds():
     df = pd.DataFrame(
         {
             "symbol": ["AAA", "AAA"],
@@ -84,7 +84,9 @@ def test_run_1g_returns_exit_date_out_of_bounds_returns_empty():
         }
     )
     out = run_1g_returns(df, sigs)
-    assert out.empty
+    assert len(out) == 1
+    assert out.loc[0, "Reason"] == "Invalid ExitClose"
+    assert pd.isna(out.loc[0, "ReturnPct"])
 
 
 def test_run_1g_returns_ignores_out_of_bounds_signals():
@@ -103,8 +105,8 @@ def test_run_1g_returns_ignores_out_of_bounds_signals():
         }
     )
     out = run_1g_returns(df, sigs)
-    assert len(out) == 1
-    assert out.loc[0, "Date"] == pd.Timestamp("2024-01-01")
+    assert len(out) == 2
+    assert pd.isna(out.loc[out["Date"] == pd.Timestamp("2024-01-03"), "ReturnPct"]).all()
 
 
 def test_run_1g_returns_side_validation():
@@ -129,7 +131,8 @@ def test_run_1g_returns_side_validation():
     sigs_bad = sigs.copy()
     sigs_bad["Side"] = ["foo"]
     out_bad = run_1g_returns(df, sigs_bad)
-    assert out_bad.empty
+    assert out_bad.loc[0, "Reason"] == "Invalid Side"
+    assert pd.isna(out_bad.loc[0, "ReturnPct"])
 
 
 def test_run_1g_returns_fills_missing_side_with_long():

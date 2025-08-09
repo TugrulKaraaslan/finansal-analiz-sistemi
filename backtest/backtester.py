@@ -128,6 +128,8 @@ def run_1g_returns(
         logger.error(msg)
         raise ValueError(msg)
 
+    extras: list[pd.DataFrame] = []
+
     has_next = {"next_date", "next_close"}.issubset(df_with_next.columns)
     if not has_next:
         missing_days = check_missing_trading_days_by_symbol(
@@ -148,6 +150,7 @@ def run_1g_returns(
     if trading_days is None:
         trading_days = build_trading_days(df_with_next)
 
+    invalid_side = pd.DataFrame()
     if "Side" in signals.columns:
         sides = signals["Side"].fillna("").astype(str).str.lower()
         valid_mask = sides.isin([s.value for s in TradeSide]) | (sides == "")
@@ -157,28 +160,41 @@ def run_1g_returns(
             logger.warning(
                 "dropping rows with invalid Side values: {bad}", bad=bad_vals
             )
+            invalid_side = signals.loc[invalid].copy()
+            invalid_side["Reason"] = "Invalid Side"
+            invalid_side = invalid_side.assign(
+                EntryClose=pd.NA,
+                ExitClose=pd.NA,
+                Side=pd.NA,
+                ReturnPct=pd.NA,
+                Win=pd.NA,
+            )
+            invalid_side["Date"] = pd.to_datetime(invalid_side["Date"]).dt.normalize()
             signals = signals.loc[valid_mask].copy()
             sides = sides.loc[valid_mask]
             if signals.empty:
-                logger.warning("signals DataFrame is empty after dropping invalid Side")
                 cols = [
                     "FilterCode",
                     "Symbol",
                     "Date",
                     "EntryClose",
                     "ExitClose",
+                    "Side",
                     "ReturnPct",
                     "Win",
                     "Reason",
                 ]
-                if "Group" in signals.columns:
+                if "Group" in invalid_side.columns:
                     cols.insert(1, "Group")
-                cols.insert(cols.index("ReturnPct"), "Side")
-                empty_df = pd.DataFrame(columns=cols)
-                empty_df["Side"] = pd.Series(dtype="object")
-                return empty_df
+                extras.append(invalid_side[cols])
+                return pd.concat(extras, ignore_index=True)
         signals = signals.copy()
         signals["Side"] = sides.replace("", "long").map(TradeSide.from_value)
+    else:
+        invalid_side = pd.DataFrame()
+
+    if not invalid_side.empty:
+        extras.append(invalid_side)
 
     has_next = {"next_date", "next_close"}.issubset(df_with_next.columns)
     base_cols = ["symbol", "date", "close"]
@@ -244,19 +260,42 @@ def run_1g_returns(
 
     invalid_entry = (merged["EntryClose"] <= 0) | merged["EntryClose"].isna()
     invalid_exit = (merged["ExitClose"] <= 0) | merged["ExitClose"].isna()
+    invalid_prices = pd.DataFrame()
     if invalid_entry.any():
         logger.warning(
             "run_1g_returns dropping {n} rows with invalid EntryClose",
             n=int(invalid_entry.sum()),
+        )
+        invalid_prices = pd.concat(
+            [
+                invalid_prices,
+                merged.loc[invalid_entry].assign(
+                    Reason="Invalid EntryClose",
+                    ReturnPct=pd.NA,
+                    Win=pd.NA,
+                ),
+            ]
         )
     if invalid_exit.any():
         logger.warning(
             "run_1g_returns dropping {n} rows with invalid ExitClose",
             n=int(invalid_exit.sum()),
         )
-    invalid = invalid_entry | invalid_exit
-    if invalid.any():
-        merged = merged.loc[~invalid].copy()
+        invalid_prices = pd.concat(
+            [
+                invalid_prices,
+                merged.loc[invalid_exit & ~invalid_entry].assign(
+                    Reason="Invalid ExitClose",
+                    ReturnPct=pd.NA,
+                    Win=pd.NA,
+                ),
+            ]
+        )
+    valid_mask_prices = ~(invalid_entry | invalid_exit)
+    merged = merged.loc[valid_mask_prices].copy()
+
+    if not invalid_prices.empty:
+        extras.append(invalid_prices)
 
     merged["Reason"] = pd.NA
     if "Side" in merged.columns:
@@ -270,14 +309,17 @@ def run_1g_returns(
     merged["Win"] = merged["ReturnPct"] > 0.0
 
     cols = ["FilterCode"]
-    if "Group" in merged.columns:
+    if "Group" in merged.columns or any("Group" in e.columns for e in extras):
         cols.append("Group")
-    cols.extend(["Symbol", "Date", "EntryClose", "ExitClose"])
-    if "Side" in merged.columns:
-        cols.append("Side")
-    cols.extend(["ReturnPct", "Win"])
-    if "Reason" in merged.columns:
-        cols.append("Reason")
+    cols.extend(["Symbol", "Date", "EntryClose", "ExitClose", "Side", "ReturnPct", "Win", "Reason"])
     out = merged[cols].copy()
+    if extras:
+        aligned = []
+        for ex in extras:
+            for col in cols:
+                if col not in ex.columns:
+                    ex[col] = pd.NA
+            aligned.append(ex[cols])
+        out = pd.concat([out, *aligned], ignore_index=True)
     logger.debug("run_1g_returns end - produced {rows_out} rows", rows_out=len(out))
     return out

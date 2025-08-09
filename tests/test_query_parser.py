@@ -36,7 +36,7 @@ def test_run_screener_skips_unsafe(caplog):
         }
     )
     logger.add(caplog.handler, level="WARNING")
-    res = run_screener(df_ind, filters, pd.Timestamp("2024-01-02"))
+    res = run_screener(df_ind, filters, pd.Timestamp("2024-01-02"), strict=False)
     assert res["FilterCode"].tolist() == ["SAFE"]
     assert isinstance(res.loc[0, "Date"], pd.Timestamp)
     assert "unsafe expression" in caplog.text

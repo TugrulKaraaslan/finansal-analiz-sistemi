@@ -40,7 +40,7 @@ def _run_scan(cfg) -> None:
     info("Excelleri okuyor...")
     try:
         df = read_excels_long(cfg)
-    except (FileNotFoundError, RuntimeError) as exc:
+    except (FileNotFoundError, RuntimeError, ImportError) as exc:
         logger.error(str(exc))
         raise click.ClickException(str(exc))
     df = apply_corporate_actions(df, getattr(cfg.data, "corporate_actions_csv", None))
