@@ -19,6 +19,7 @@ def _cfg():
             holding_period=1,
             transaction_cost=0.0,
             raise_on_error=False,
+            strict_filters=False,
         ),
         data=SimpleNamespace(filters_csv="dummy.csv"),
         calendar=SimpleNamespace(
@@ -58,8 +59,9 @@ def test_scan_range_empty(monkeypatch):
     )
     filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]})
     monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
-    def _run_screener(df, filters, d, raise_on_error=None):
+    def _run_screener(df, filters, d, strict=None, raise_on_error=None):
         assert raise_on_error is False
+        assert strict is False
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
 
     monkeypatch.setattr(cli, "run_screener", _run_screener)
@@ -111,8 +113,9 @@ def test_scan_day_empty(monkeypatch):
     )
     filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]})
     monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
-    def _run_screener(df, filters, d, raise_on_error=None):
+    def _run_screener(df, filters, d, strict=None, raise_on_error=None):
         assert raise_on_error is False
+        assert strict is False
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
 
     monkeypatch.setattr(cli, "run_screener", _run_screener)

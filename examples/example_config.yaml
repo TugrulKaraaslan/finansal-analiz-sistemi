@@ -7,6 +7,7 @@ project:
   single_date: null
   holding_period: 1
   transaction_cost: 0.0
+  strict_filters: false
 
 data:
   excel_dir: "../Veri"

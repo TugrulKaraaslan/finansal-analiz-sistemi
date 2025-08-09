@@ -20,6 +20,7 @@ class ProjectCfg(BaseModel):
     holding_period: int = 1
     transaction_cost: float = 0.0
     raise_on_error: bool = False
+    strict_filters: bool = False
 
 
 class DataCfg(BaseModel):
