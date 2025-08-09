@@ -1,6 +1,4 @@
 import pandas as pd
-import pytest
-
 from backtest.data_loader import read_excels_long
 
 

@@ -65,12 +65,6 @@ def test_read_excels_long_price_schema(tmp_path, monkeypatch):
 def test_read_excels_long_closes_files(tmp_path, monkeypatch):
     (tmp_path / "a.xlsx").write_text("dummy")
     instances = []
-
-    def _factory(*args, **kwargs):
-        inst = _DummyExcelFile(*args, **kwargs)
-        instances.append(inst)
-        return inst
-
     def _factory(*args, **kwargs):
         inst = _StdExcelFile(*args, **kwargs)
         instances.append(inst)
