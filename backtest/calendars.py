@@ -114,6 +114,41 @@ def check_missing_trading_days(
     return missing
 
 
+def check_missing_trading_days_by_symbol(
+    df: pd.DataFrame,
+    holidays: Optional[Iterable[pd.Timestamp]] = None,
+    *,
+    raise_error: bool = True,
+) -> dict[str, pd.DatetimeIndex]:
+    """Check missing trading days separately for each symbol.
+
+    Returns a mapping from symbol to a ``DatetimeIndex`` of missing days.
+    If any symbol has missing days, either raises ``ValueError`` or emits a
+    warning depending on ``raise_error``.
+    """
+
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a DataFrame")
+
+    missing: dict[str, pd.DatetimeIndex] = {}
+    for sym, sub in df.groupby("symbol"):
+        miss = check_missing_trading_days(sub, holidays, raise_error=False)
+        if len(miss) > 0:
+            missing[sym] = miss
+
+    if missing:
+        parts = []
+        for sym, days in missing.items():
+            day_str = ", ".join(d.strftime("%Y-%m-%d") for d in days)
+            parts.append(f"{sym}: {day_str}")
+        msg = "Missing trading days: " + "; ".join(parts)
+        if raise_error:
+            raise ValueError(msg)
+        else:  # pragma: no cover - warning path
+            warnings.warn(msg)
+    return missing
+
+
 def add_next_close_calendar(
     df: pd.DataFrame, trading_days: pd.DatetimeIndex
 ) -> pd.DataFrame:

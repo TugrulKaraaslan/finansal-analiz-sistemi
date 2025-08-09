@@ -65,7 +65,8 @@ class SafeQuery:
             return False, names, "syntax error"
         for node in ast.walk(tree):
             if isinstance(node, ast.Name):
-                names.add(node.id)
+                if node.id not in cls._ALLOWED_FUNCS:
+                    names.add(node.id)
             if isinstance(node, ast.Call):
                 func = node.func
                 if isinstance(func, ast.Attribute):

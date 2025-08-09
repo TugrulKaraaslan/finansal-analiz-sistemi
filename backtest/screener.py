@@ -82,6 +82,9 @@ def run_screener(
         logger.error(msg)
         raise ValueError(msg)
 
+    df_ind = df_ind.copy()
+    df_ind["date"] = pd.to_datetime(df_ind["date"]).dt.normalize()
+
     def _empty_output() -> pd.DataFrame:
         cols = ["FilterCode"]
         if "Group" in filters_df.columns:
