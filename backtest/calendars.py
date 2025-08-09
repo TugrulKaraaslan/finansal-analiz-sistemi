@@ -134,9 +134,11 @@ def add_next_close_calendar(
     df = df.copy().sort_values(["symbol", "date"])
     dates = pd.to_datetime(df["date"]).dt.normalize()
     pos = trading_days.get_indexer(dates)
-    next_pos = pos + 1
+    valid_pos = pos >= 0
+    next_pos = pos.copy()
+    next_pos[valid_pos] = pos[valid_pos] + 1
     next_dates = pd.Series(pd.NaT, index=df.index)
-    mask = (next_pos >= 0) & (next_pos < len(trading_days))
+    mask = valid_pos & (next_pos < len(trading_days))
     next_dates.loc[mask] = trading_days[next_pos[mask]]
     df["next_date"] = next_dates
     base = df[["symbol", "date", "close"]].copy()
