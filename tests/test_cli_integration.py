@@ -1,6 +1,3 @@
-from pathlib import Path
-from types import SimpleNamespace
-
 import pandas as pd
 from click.testing import CliRunner
 
