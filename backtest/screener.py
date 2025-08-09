@@ -123,12 +123,22 @@ def run_screener(
         if pd.notna(side) and str(side).strip():
             side_norm = str(side).strip().lower()
             if side_norm not in {"long", "short"}:
+                msg = f"Filter {code!r} has invalid Side {side!r}"
+                if strict:
+                    logger.error("Filter invalid Side", code=code, side=side)
+                    raise ValueError(msg)
                 logger.warning(
                     "Filter skipped due to invalid Side", code=code, side=side
                 )
                 continue
         sq = SafeQuery(expr)
         if not sq.is_safe:
+            msg = f"Filter {code!r} unsafe expression: {sq.error}"
+            if strict:
+                logger.error(
+                    "Filter unsafe expression", code=code, expr=expr, reason=sq.error
+                )
+                raise ValueError(msg)
             logger.warning(
                 "Filter skipped due to unsafe expression",
                 code=code,

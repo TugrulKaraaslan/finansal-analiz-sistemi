@@ -47,7 +47,7 @@ Aşağıdaki tablo bazı sık kullanılan indikatör kolonlarını ve bunlara il
 ### Yerel
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt  # Excel okuma için openpyxl/xlrd gereklidir
 python -m backtest.cli scan-day --config examples/example_config.yaml --date 2024-01-02
 ```
 ### Google Colab
