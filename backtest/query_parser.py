@@ -86,8 +86,16 @@ class SafeQuery:
             raise ValueError(f"Unsafe query expression: {self.error}")
         env = {name: df[name] for name in df.columns}
         env.update({"abs": abs, "max": max, "min": min})
-        return pd.eval(self.expr, engine="python", parser="pandas", local_dict=env)
+        mask = pd.eval(
+            self.expr, engine="python", parser="pandas", local_dict=env
+        )
+        if not pd.api.types.is_bool_dtype(mask):
+            raise ValueError("Query expression must evaluate to a boolean mask")
+        return mask
 
     def filter(self, df: pd.DataFrame) -> pd.DataFrame:
         """Return rows from *df* matching the query expression."""
-        return df[self.get_mask(df)]
+        mask = self.get_mask(df)
+        if not pd.api.types.is_bool_dtype(mask):
+            raise ValueError("Query expression must evaluate to a boolean mask")
+        return df[mask]

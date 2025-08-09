@@ -16,3 +16,17 @@ def test_filter_rejects_unsafe_expression():
     q = SafeQuery("__import__('os').system('echo 1')")
     with pytest.raises(ValueError):
         q.filter(df)
+
+
+def test_get_mask_requires_boolean_result():
+    df = pd.DataFrame({"x": [1, 2, 3]})
+    q = SafeQuery("x + 1")
+    with pytest.raises(ValueError):
+        q.get_mask(df)
+
+
+def test_filter_rejects_non_boolean_mask():
+    df = pd.DataFrame({"x": [1, 2, 3]})
+    q = SafeQuery("x + 1")
+    with pytest.raises(ValueError):
+        q.filter(df)
