@@ -1,4 +1,5 @@
-"""Portfolio performance utilities.
+"""
+Portfolio performance utilities.
 
 This module provides vectorized return calculations for a price series.
 
