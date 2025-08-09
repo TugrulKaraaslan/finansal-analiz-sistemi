@@ -82,11 +82,22 @@ def run_screener(
         logger.error(msg)
         raise ValueError(msg)
 
+    def _empty_output() -> pd.DataFrame:
+        cols = ["FilterCode"]
+        if "Group" in filters_df.columns:
+            cols.append("Group")
+        cols.append("Symbol")
+        if "Side" in filters_df.columns:
+            cols.append("Side")
+        cols.append("Date")
+        data = {c: pd.Series(dtype=object) for c in cols}
+        return pd.DataFrame(data, columns=cols)
+
     day = pd.to_datetime(date).normalize()
     d = df_ind[df_ind["date"] == day].copy()
     if d.empty:
         logger.warning("No data for date {day}", day=day)
-        return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+        return _empty_output()
     d = d.reset_index(drop=True)
     filters_df = filters_df.copy()
     dups = filters_df["FilterCode"].duplicated()
@@ -162,7 +173,7 @@ def run_screener(
         out_frames.append(tmp)
     if not out_frames:
         logger.debug("run_screener end - no hits")
-        return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+        return _empty_output()
     out = pd.concat(out_frames, ignore_index=True)
     out = out.rename(columns={"symbol": "Symbol"})
     out.drop_duplicates(["FilterCode", "Symbol", "Date"], inplace=True)
