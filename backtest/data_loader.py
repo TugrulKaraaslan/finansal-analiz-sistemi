@@ -10,6 +10,7 @@ import pandas as pd
 from loguru import logger
 
 from backtest.utils import normalize_key
+from backtest.utils.names import canonicalize_columns
 from utils.paths import resolve_path
 
 
@@ -282,6 +283,7 @@ def read_excels_long(
                         if df is None or df.empty:
                             continue
                         df = normalize_columns(df, price_schema=price_schema)
+                        df = canonicalize_columns(df)
                         if "date" not in df.columns:
                             df.columns = [normalize_key(c) for c in df.columns]
                         if "date" not in df.columns:
@@ -302,14 +304,13 @@ def read_excels_long(
                             for c in ["open", "high", "low", "close", "volume"]
                             if c in df.columns
                         ]
-                        df = df[["date", *keep]].copy()
                         for c in keep:
                             df[c] = pd.to_numeric(df[c], errors="coerce")
                         df = df.dropna(subset=keep)
                         df = df[(df[keep] >= 0).all(axis=1)]
 
                         df["symbol"] = str(sheet).strip().upper()
-                        records.append(df)
+                        records.append(df.copy())
                     except Exception as e:
                         if verbose:
                             print(f"[WARN] Sheet işlenemedi: {fpath}:{sheet} -> {e}")
@@ -332,6 +333,7 @@ def read_excels_long(
     if "close" in full.columns:
         full = full.dropna(subset=["close"])
 
+    full = canonicalize_columns(full)
     validate_columns(full, ["date", "open", "high", "low", "close", "volume", "symbol"])
 
     if enable_cache and cache_path:

@@ -7,6 +7,8 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
+from backtest.utils.names import canonicalize_columns
+
 
 def _ema(series: pd.Series, length: int) -> pd.Series:
     return series.ewm(span=length, adjust=False).mean()
@@ -170,27 +172,30 @@ def compute_indicators(
         g["RELATIVE_VOLUME"] = (g["volume"] / vol_mean).fillna(0)
         out_frames.append(g)
     df2 = pd.concat(out_frames, ignore_index=True)
-    alias_map = {
-        "rsi_14": "RSI_14",
+    df2 = canonicalize_columns(df2)
+    turkish_alias = {
+        "degisim_1g_yuzde": "change_1d_percent",
+        "degisim_5g_yuzde": "change_1w_percent",
+        "hacim_goreli": "relative_volume",
+    }
+    for alias, base in turkish_alias.items():
+        if base in df2.columns:
+            df2[alias] = df2[base]
+    upper_alias = {
         "ema_10": "EMA_10",
         "ema_20": "EMA_20",
         "ema_50": "EMA_50",
+        "rsi_14": "RSI_14",
+        "stochrsi_k": "STOCHRSIk_14_14_3_3",
+        "stochrsi_d": "STOCHRSId_14_14_3_3",
         "macd_12_26_9_hist": "MACD_12_26_9_HIST",
         "change_1d_percent": "CHANGE_1D_PERCENT",
         "change_1w_percent": "CHANGE_5D_PERCENT",
         "relative_volume": "RELATIVE_VOLUME",
-        "stochrsi_k": "STOCHRSIk_14_14_3_3",
-        "stochrsi_d": "STOCHRSId_14_14_3_3",
     }
-    alias_map_extra = {
-        "degisim_1g_yuzde": "CHANGE_1D_PERCENT",
-        "degisim_5g_yuzde": "CHANGE_5D_PERCENT",
-        "hacim_goreli": "RELATIVE_VOLUME",
-    }
-    alias_map.update(alias_map_extra)
-    for low, up in alias_map.items():
-        if up in df2.columns:
-            df2[low] = df2[up]
+    for base, up in upper_alias.items():
+        if base in df2.columns:
+            df2[up] = df2[base]
     return df2
 
 

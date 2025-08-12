@@ -9,6 +9,8 @@ from typing import Set, Tuple
 import pandas as pd
 import numpy as np
 
+from backtest.utils.names import canonicalize_filter_token
+
 
 class SafeQuery:
     """Validate and run pandas ``DataFrame.query`` expressions.
@@ -50,10 +52,23 @@ class SafeQuery:
         expr_tr = re.sub(r"\band\b", "&", expr, flags=re.I)
         expr_tr = re.sub(r"\bor\b", "|", expr_tr, flags=re.I)
         expr_tr = re.sub(r"\bnot\b", "~", expr_tr, flags=re.I)
+
+        class _Canon(ast.NodeTransformer):
+            def visit_Name(self, node):
+                if node.id in SafeQuery._ALLOWED_FUNCS:
+                    return node
+                node.id = canonicalize_filter_token(node.id)
+                return node
+
+        tree = ast.parse(expr_tr, mode="eval")
+        tree = _Canon().visit(tree)
+        ast.fix_missing_locations(tree)
+        expr_tr = ast.unparse(tree)
+
         self.expr = expr_tr
         ok, names, err = self._validate(expr_tr)
         self.is_safe = ok
-        self.names = names
+        self.names = {canonicalize_filter_token(n) for n in names}
         self.error = err
 
     @classmethod

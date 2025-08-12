@@ -22,7 +22,7 @@ from .indicators import compute_indicators
 from .normalizer import normalize
 from .reporter import write_reports
 from .screener import run_screener
-from .utils import info
+from .utils import info, set_name_normalization
 from .validator import dataset_summary, quality_warnings
 
 
@@ -195,7 +195,21 @@ def _run_scan(cfg) -> None:
 @click.option("--end", "end_date", required=False, default=None, help="YYYY-MM-DD")
 @click.option("--holding-period", default=None, type=int)
 @click.option("--transaction-cost", default=None, type=float)
-def scan_range(config_path, start_date, end_date, holding_period, transaction_cost):
+@click.option(
+    "--name-normalization",
+    "name_normalization",
+    type=click.Choice(["off", "smart", "strict"]),
+    default="smart",
+)
+def scan_range(
+    config_path,
+    start_date,
+    end_date,
+    holding_period,
+    transaction_cost,
+    name_normalization="smart",
+):
+    set_name_normalization(name_normalization)
     cfg = load_config(config_path)
     if start_date:
         cfg.project.start_date = start_date
