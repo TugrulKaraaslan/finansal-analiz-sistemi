@@ -66,6 +66,18 @@ python -m backtest.cli scan-day --config examples/example_config.yaml --date 202
 python -m backtest.cli scan-day --config examples/example_config.yaml --date 2025-03-07
 ```
 
+### Config ile Çok Gün Aralığı Örneği
+Linux ortamında `Veri` klasör adının büyük harfle yazıldığına dikkat edin.
+
+```bash
+python -m backtest.cli scan-range \
+  --config config_scan.yml \
+  --start 2025-03-07 \
+  --end   2025-03-11 \
+  --holding-period 1 \
+  --transaction-cost 0.0005
+```
+
 ## Çıktı Açıklaması
 - Excel: `raporlar/{start}_{end}_1G_BIST100.xlsx`
 - Sheet'ler:
@@ -76,7 +88,7 @@ python -m backtest.cli scan-day --config examples/example_config.yaml --date 202
 ```
 SCAN 2024-01-02: 24 satır, ort. %1.2
 ```
-## Test Çalıştırma
+## Test Çalıştırma (isteğe bağlı)
 ```bash
 pytest -q
 ```
