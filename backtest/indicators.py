@@ -192,3 +192,50 @@ def compute_indicators(
         if up in df2.columns:
             df2[low] = df2[up]
     return df2
+
+
+def _ensure_adx_stochrsi(df):
+    try:
+        import pandas_ta as ta
+    except ModuleNotFoundError:  # pragma: no cover - optional dependency
+        return df
+
+    if {"high", "low", "close"}.issubset(df.columns):
+        adx = ta.adx(high=df["high"], low=df["low"], close=df["close"], length=14)
+        if adx is not None:
+            df[adx.columns] = adx
+    if "close" in df.columns:
+        stochrsi = ta.stochrsi(close=df["close"], length=14, rsi_length=14, k=3, d=3)
+        if stochrsi is not None:
+            df[stochrsi.columns] = stochrsi
+    rename_map = {
+        "ADX_14": "adx_14",
+        "DMP_14": "dmp_14",
+        "DMN_14": "dmn_14",
+        "STOCHRSIk_14_14_3_3": "stochrsi_k",
+        "STOCHRSId_14_14_3_3": "stochrsi_d",
+    }
+    r = {k: v for k, v in rename_map.items() if k in df.columns and v not in df.columns}
+    if r:
+        df.rename(columns=r, inplace=True)
+
+    def _cross(a, b):
+        up = (a.shift(1) <= b.shift(1)) & (a > b)
+        down = (a.shift(1) >= b.shift(1)) & (a < b)
+        return up.astype(int), down.astype(int)
+
+    if "stochrsi_d" in df.columns and "stochrsi_k" in df.columns:
+        up, down = _cross(df["stochrsi_d"], df["stochrsi_k"])
+        df["stochrsi_d_keser_stochrsi_k_yukari"] = up
+        df["stochrsi_d_keser_stochrsi_k_asagi"] = down
+    return df
+
+
+if "_compute_indicators_wrapped" not in globals():
+    _orig_compute_indicators = compute_indicators
+
+    def compute_indicators(*args, **kwargs):  # type: ignore
+        df = _orig_compute_indicators(*args, **kwargs)
+        return _ensure_adx_stochrsi(df)
+
+    _compute_indicators_wrapped = True

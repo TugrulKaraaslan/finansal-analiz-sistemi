@@ -1,0 +1,11 @@
+project:
+  output_dir: ./raporlar
+data:
+  excel_dir: ./Veri
+  filters_csv: ./filters.csv
+calendar:
+  holidays: TR
+benchmark:
+  xu100_csv_path: null
+options:
+  t_plus_one: false

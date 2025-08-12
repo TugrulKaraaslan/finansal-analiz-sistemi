@@ -1,67 +1,32 @@
-# Colab Kurulum & Çalıştırma (v1.3.2)
+# Google Colab Hızlı Başlangıç
 
-Bu rehber, Google Colab üzerinde projeyi sıfırdan hatasız çalıştırmanız için hazırlanmıştır.
+Aşağıdaki tek hücre Colab ortamında projeyi kurar, pandas_ta için NumPy 2 yamasını uygular ve kısa bir backtest çalıştırır. Hücreyi olduğu gibi kopyalayıp çalıştırabilirsiniz.
 
-## 1) Gereksinimleri sabit sürümlerle kur
 ```python
-!pip install -q -U pip
-req = """
-numpy==1.26.4
-pandas==2.2.2
-pandas-ta==0.3.14b0
-pyarrow==21.0.0
-openpyxl
-xlsxwriter
-loguru
-tqdm
-click
-pydantic
-""".strip()
-from pathlib import Path
-p = Path("requirements_colab.txt")  # PATH DÜZENLENDİ
-with p.open("w", encoding="utf-8") as f:  # PATH DÜZENLENDİ
-    f.write(req)
-!pip install -q --force-reinstall -r requirements_colab.txt
-```
+%pip install -U pip
+%pip install -r requirements_colab.txt
 
-## 2) Runtime'ı yeniden başlat
-```python
-import os, signal; os.kill(os.getpid(), 9)
-```
+import os
+os.system(r"grep -rl 'from numpy import NaN' /usr/local/lib/python*/dist-packages/pandas_ta | xargs -r sed -i 's/from numpy import NaN/from numpy import nan/g'")
+os.system(r"grep -rl 'np\\.NaN'              /usr/local/lib/python*/dist-packages/pandas_ta | xargs -r sed -i 's/np\\.NaN/np.nan/g'")
 
-## 3) Drive'ı bağla ve ZIP'i /content'e kopyala (Drive kullanıyorsanız)
-```python
-from google.colab import drive
-drive.mount('/content/drive')
-
-# Gerçek konumunuza göre yolu düzenleyin
-!cp '/content/drive/MyDrive/backtest_project_v1_3_2_full.zip' /content/
-```
-
-## 4) Projeyi aç (veya elinizdeki zip'i yükleyip açın)
-```python
-!unzip -o /content/backtest_project_v1_3_2_full.zip -d /content/
-%cd /content/backtest_project
+%cd /content/finansal-analiz-sistemi
+%env PYTHONPATH=/content/finansal-analiz-sistemi
 !mkdir -p raporlar
+
+import numpy as np, pandas as pd, pandas_ta as ta
+print("NumPy:", np.__version__, "| Pandas:", pd.__version__)
+print("pandas-ta import OK")
+
+!python -m backtest.cli scan-range --config config_scan.yml \
+  --start 2025-03-07 --end 2025-03-11 \
+  --holding-period 1 --transaction-cost 0.0005
+
+!ls -la raporlar | head
 ```
 
-## 5) CLI yardımı ve test
-```python
-!PYTHONPATH=. python -m backtest.cli --help
-!PYTHONPATH=. python -m backtest.cli scan-range --help
+İsteğe bağlı olarak testleri çalıştırmak için:
+
+```bash
+pytest -q
 ```
-
-## 6) Hızlı çalışma örnekleri
-```python
-# Çok gün aralığı (örnek)
-!PYTHONPATH=. python -m backtest.cli scan-range       --start 2025-03-07 --end 2025-03-11       --data-path ./Veri       --filter-path ./filters.csv       --output-dir ./raporlar
-
-# Tek gün (örnek)
-!PYTHONPATH=. python -m backtest.cli scan-day       --date 2025-03-07       --data-path ./Veri       --filter-path ./filters.csv       --output-dir ./raporlar
-```
-
-### Notlar
-- `./Veri` klasörü altında 13 Excel dosyası (çoklu sheet'li) bulunmalıdır.
-- `filters.csv` kök dizinde olmalıdır.
-- Çıktılar `./raporlar/` altına yazılır (Excel/CSV).
-- BIST farkı, ortalama getiri ve win-rate hesapları raporlarda mevcuttur.
