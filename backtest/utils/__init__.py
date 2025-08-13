@@ -4,12 +4,7 @@ import re
 import unicodedata
 from typing import Optional
 
-from .names import (
-    canonical_name,
-    canonicalize_columns,
-    canonicalize_filter_token,
-    set_name_normalization,
-)
+from .names import set_name_normalization
 
 def normalize_key(s: Optional[str]) -> str:
     if s is None:
@@ -42,8 +37,5 @@ def normalize_key(s: Optional[str]) -> str:
 
 __all__ = [
     "normalize_key",
-    "canonical_name",
-    "canonicalize_columns",
-    "canonicalize_filter_token",
     "set_name_normalization",
 ]
