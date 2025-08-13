@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pathlib import Path
 import csv
+from pathlib import Path
 
 # Path to the filters definition file relative to the repository root
 _FILTERS_CSV = Path(__file__).resolve().parent.parent / "filters.csv"

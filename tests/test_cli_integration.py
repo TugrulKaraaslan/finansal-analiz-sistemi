@@ -1,6 +1,7 @@
+import textwrap
+
 import pandas as pd
 from click.testing import CliRunner
-import textwrap
 
 from backtest import cli
 

@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from backtest.calendars import add_next_close_calendar, build_trading_days
 from backtest.backtester import run_1g_returns
+from backtest.calendars import add_next_close_calendar, build_trading_days
 from backtest.screener import run_screener
 
 

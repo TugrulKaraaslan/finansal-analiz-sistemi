@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import logging
 from typing import Dict, List, Optional
 
-import logging
 import numpy as np
 import pandas as pd  # module-level; fonksiyon içi import yok
 
@@ -127,8 +127,9 @@ def compute_indicators(
     ta = None
     if use_pandas_ta:
         try:  # pragma: no cover - optional dependency
-            import pandas_ta as ta
             from importlib.metadata import version
+
+            import pandas_ta as ta
             from packaging.version import Version
 
             np_major = int(np.__version__.split(".")[0])

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-import pandas as pd
 import warnings
 
-from backtest.utils import normalize_key
+import pandas as pd
+
 from backtest.data_loader import normalize_columns
+from backtest.utils import normalize_key
 
 
 def test_normalize_key_basic():

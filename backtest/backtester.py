@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import warnings
 from enum import Enum
 
-import warnings
 import numpy as np
 import pandas as pd
 from loguru import logger

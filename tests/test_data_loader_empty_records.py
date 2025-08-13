@@ -1,8 +1,9 @@
 import importlib.util
+
 import pandas as pd
 import pytest
 
-from backtest.data_loader import read_excels_long, apply_corporate_actions
+from backtest.data_loader import apply_corporate_actions, read_excels_long
 
 
 def test_read_excels_long_no_valid_sheets(tmp_path):
