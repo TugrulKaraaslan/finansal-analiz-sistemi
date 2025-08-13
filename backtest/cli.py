@@ -21,12 +21,17 @@ from .indicators import compute_indicators
 from .normalizer import normalize
 from .reporter import write_reports
 from .screener import run_screener
-from .utils import info, set_name_normalization
+from .utils import set_name_normalization
 from .validator import dataset_summary, quality_warnings
 
 @click.group()
 def cli():
     pass
+
+
+def info(msg: str) -> None:  # pragma: no cover - compatibility wrapper
+    """Compatibility wrapper for legacy utils.info."""
+    logger.info(msg)
 
 def _run_scan(cfg) -> None:
     """Common execution for scan commands.
@@ -34,7 +39,7 @@ def _run_scan(cfg) -> None:
     The filters CSV must provide ``FilterCode`` and ``PythonQuery`` columns and
     may include an optional ``Group`` column.
     """
-    info("Excelleri okuyor...")
+    logger.info("Excelleri okuyor...")
     try:
         df = read_excels_long(cfg)
     except (FileNotFoundError, RuntimeError, ImportError) as exc:
@@ -51,11 +56,11 @@ def _run_scan(cfg) -> None:
     else:
         tdays = None
         df = add_next_close(df)
-    info("Göstergeler hesaplanıyor...")
+    logger.info("Göstergeler hesaplanıyor...")
     df_ind = compute_indicators(
         df, cfg.indicators.params, engine=cfg.indicators.engine
     )
-    info("Filtre CSV okunuyor...")
+    logger.info("Filtre CSV okunuyor...")
     try:
         filters_df = load_filters_csv(cfg.data.filters_csv)
     except FileNotFoundError as exc:
@@ -90,7 +95,7 @@ def _run_scan(cfg) -> None:
         days = [d for d in all_days if start <= d <= end]
     all_trades = []
     if len(days) > 1:
-        info(f"{len(days)} gün taranacak...")
+        logger.info(f"{len(days)} gün taranacak...")
     for d in days:
         sigs = run_screener(
             df_ind,
@@ -164,7 +169,7 @@ def _run_scan(cfg) -> None:
     else:
         out_xlsx = out_dir / f"{days[0].date()}_{days[-1].date()}_1G_BIST100.xlsx"
         out_csv_dir = out_dir / "csv"
-    info("Raporlar yazılıyor...")
+    logger.info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
     val_iss = quality_warnings(df)
     outputs = write_reports(
@@ -181,9 +186,9 @@ def _run_scan(cfg) -> None:
         summary_sheet_name=cfg.report.summary_sheet_name,
         percent_fmt=cfg.report.percent_format,
     )
-    info(f"Bitti. Çıktı: {outputs.get('excel')}")
+    logger.info(f"Bitti. Çıktı: {outputs.get('excel')}")
     if outputs.get("csv"):
-        info(f"CSV klasörü: {outputs['csv'][0].parent}")
+        logger.info(f"CSV klasörü: {outputs['csv'][0].parent}")
 
 @cli.command("scan-range")
 @click.option("--config", "config_path", required=True, help="YAML config yolu")
