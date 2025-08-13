@@ -5,11 +5,13 @@ def test_imports():
     # pandas_ta opsiyonel: yoksa test patlamasın
     try:
         import pandas_ta as _pta  # noqa: F401
+
         has_pandas_ta = True
     except ModuleNotFoundError:
         has_pandas_ta = False
 
     import backtest
+
     # Alt modüller yüklenebiliyor mu? (sıra önemli değil)
     from backtest import data_loader, indicators, screener  # noqa: F401
 

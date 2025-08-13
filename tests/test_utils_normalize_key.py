@@ -8,7 +8,6 @@ from backtest.data_loader import normalize_columns
 from backtest.utils import normalize_key
 
 
-
 def test_normalize_key_basic():
     assert normalize_key("İşlem Hacmi") == "islem_hacmi"
 
