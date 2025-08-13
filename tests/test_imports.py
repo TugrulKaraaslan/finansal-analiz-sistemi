@@ -1,9 +1,12 @@
 def test_imports():
-    import numpy as np  # noqa: F401
-    import pandas as pd  # noqa: F401
+    import numpy as np
+    import pandas as pd
     try:
-        import pandas_ta  # noqa: F401
+        import pandas_ta
     except ModuleNotFoundError:
-        pass
-    import backtest  # noqa: F401
-    from backtest import indicators, screener, data_loader  # noqa: F401
+        pandas_ta = None
+    import backtest
+    from backtest import indicators, screener, data_loader
+    assert np and pd and backtest and indicators and screener and data_loader
+    if pandas_ta:
+        assert pandas_ta
