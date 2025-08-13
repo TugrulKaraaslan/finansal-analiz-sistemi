@@ -7,9 +7,9 @@ import logging
 import numpy as np
 import pandas as pd  # module-level; fonksiyon içi import yok
 
-logger = logging.getLogger(__name__)
-
 from backtest.utils.names import canonicalize_columns
+
+logger = logging.getLogger(__name__)
 
 
 def _safe_alias(df2: pd.DataFrame, alias: str, base: str) -> bool:
@@ -123,7 +123,7 @@ def compute_indicators(
     ta = None
     if use_pandas_ta:
         try:  # pragma: no cover - optional dependency
-            import pandas_ta as ta  # noqa: WPS433
+            import pandas_ta as ta
             from importlib.metadata import version
             from packaging.version import Version
 
