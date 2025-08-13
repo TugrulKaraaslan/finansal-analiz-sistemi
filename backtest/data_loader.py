@@ -1,4 +1,3 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 import warnings
@@ -13,7 +12,6 @@ from backtest.utils import normalize_key
 from backtest.utils.names import canonicalize_columns
 from utils.paths import resolve_path
 
-
 def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
     for p in paths:
         if not p:
@@ -26,7 +24,6 @@ def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
         if p_res.exists():
             return p_res
     return None
-
 
 def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
     if cfg is None:
@@ -49,7 +46,6 @@ def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
             return None
 
     return None
-
 
 COL_ALIASES: Dict[str, str] = {
     "date": "date",
@@ -82,10 +78,9 @@ COL_ALIASES: Dict[str, str] = {
     "kapanis_fiyat": "close",
 }
 
-
 def normalize_columns(df: pd.DataFrame, price_schema: Optional[Dict[str, Iterable[str] | str]] = None) -> pd.DataFrame:
     if not isinstance(df, pd.DataFrame):
-        raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
+        raise TypeError("df must be a DataFrame")
     mapping = COL_ALIASES.copy()
     if price_schema:
         for std, aliases in price_schema.items():
@@ -107,7 +102,6 @@ def normalize_columns(df: pd.DataFrame, price_schema: Optional[Dict[str, Iterabl
         seen[std] = c
     result = df.drop(columns=drops).rename(columns=rename_map)
     return result
-
 
 def validate_columns(df: pd.DataFrame, required: Iterable[str]) -> pd.DataFrame:
     """Ensure that ``df`` contains all columns in ``required``.
@@ -135,7 +129,6 @@ def validate_columns(df: pd.DataFrame, required: Iterable[str]) -> pd.DataFrame:
             f"Missing required columns: {', '.join(sorted(missing))}"
         )
     return df
-
 
 def apply_corporate_actions(
     df: pd.DataFrame, csv_path: Optional[Union[str, Path]] = None
@@ -190,7 +183,6 @@ def apply_corporate_actions(
     merged = merged.drop(columns=["cum_factor"])
     # benchmark note: vectorized version ~5x faster on 10k rows vs loop
     return merged
-
 
 def read_excels_long(
     cfg_or_path: Union[str, Path, Any],
@@ -359,6 +351,5 @@ def read_excels_long(
             logger.warning("Önbelleğe yazılamadı: {} -> {}", cache_path, e)
 
     return full
-
 
 __all__ = ["read_excels_long", "normalize_columns", "apply_corporate_actions", "validate_columns"]

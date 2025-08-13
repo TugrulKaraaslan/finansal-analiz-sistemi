@@ -1,4 +1,3 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 """Utility package for shared helpers."""
 
 from .paths import resolve_path

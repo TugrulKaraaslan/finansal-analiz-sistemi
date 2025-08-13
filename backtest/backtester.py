@@ -1,4 +1,3 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 from enum import Enum
@@ -14,7 +13,6 @@ from .calendars import (
     check_missing_trading_days_by_symbol,
 )
 
-
 class TradeSide(Enum):
     LONG = "long"
     SHORT = "short"
@@ -25,7 +23,6 @@ class TradeSide(Enum):
             return cls(value.lower())
         except Exception as exc:  # pragma: no cover - explicit ValueError below
             raise ValueError(f"Geçersiz Side değeri: {value!r}") from exc
-
 
 def run_1g_returns(
     df_with_next: pd.DataFrame,

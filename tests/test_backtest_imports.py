@@ -1,11 +1,9 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 import importlib
 import pkgutil
 
 import backtest
-
 
 def test_backtest_all_modules_importable():
     for module_info in pkgutil.iter_modules(backtest.__path__):

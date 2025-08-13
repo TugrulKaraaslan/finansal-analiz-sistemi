@@ -1,10 +1,8 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 import pandas as pd
 import pytest
 
 from backtest.indicators import compute_indicators
 from backtest.screener import run_screener
-
 
 def test_compute_indicators_invalid_inputs():
     with pytest.raises(TypeError):
@@ -12,7 +10,6 @@ def test_compute_indicators_invalid_inputs():
     df = pd.DataFrame()
     with pytest.raises(TypeError):
         compute_indicators(df, params=[])
-
 
 def test_run_screener_invalid_inputs():
     filters_df = pd.DataFrame({"FilterCode": [], "PythonQuery": []})
@@ -40,7 +37,6 @@ def test_run_screener_invalid_inputs():
     with pytest.raises(ValueError):
         run_screener(df_ok, bad_filters, pd.Timestamp("2024-01-02"))
 
-
 def test_run_screener_empty_dataset_logs(caplog):
     from loguru import logger
 
@@ -52,7 +48,6 @@ def test_run_screener_empty_dataset_logs(caplog):
     with pytest.raises(ValueError):
         run_screener(df_empty, filters_df, pd.Timestamp("2024-01-02"))
     assert "df_ind is empty" in caplog.text
-
 
 def test_run_screener_empty_filters_logs(caplog):
     from loguru import logger
@@ -74,7 +69,6 @@ def test_run_screener_empty_filters_logs(caplog):
         run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
     assert "filters_df is empty" in caplog.text
 
-
 def test_run_screener_logs_missing_df_columns(caplog):
     from loguru import logger
 
@@ -94,7 +88,6 @@ def test_run_screener_logs_missing_df_columns(caplog):
         run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
     assert caplog.records[0].levelname == "ERROR"
     assert "df_ind missing columns: close" in caplog.text
-
 
 def test_run_screener_logs_missing_filters_columns(caplog):
     from loguru import logger
@@ -117,7 +110,6 @@ def test_run_screener_logs_missing_filters_columns(caplog):
     assert caplog.records[0].levelname == "ERROR"
     assert "filters_df missing required columns" in caplog.text
 
-
 def test_run_screener_outputs_timestamp_dates():
     df_ind = pd.DataFrame(
         {
@@ -133,7 +125,6 @@ def test_run_screener_outputs_timestamp_dates():
     filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 0"]})
     res = run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
     assert isinstance(res.loc[0, "Date"], pd.Timestamp)
-
 
 def test_run_screener_side_validation():
     df_ind = pd.DataFrame(
@@ -160,7 +151,6 @@ def test_run_screener_side_validation():
     bad["Side"] = ["foo"]
     with pytest.raises(ValueError):
         run_screener(df_ind, bad, pd.Timestamp("2024-01-02"))
-
 
 def test_run_screener_duplicate_filter_code():
     df_ind = pd.DataFrame(

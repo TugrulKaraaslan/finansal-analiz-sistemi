@@ -1,4 +1,3 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from pathlib import Path
 import tempfile
 import textwrap
@@ -7,15 +6,13 @@ import pytest
 
 from backtest.config import load_config
 
-
 def _write_cfg(text: str) -> Path:
     with tempfile.NamedTemporaryFile(
         "w", delete=False, encoding="utf-8"
-    ) as tmp:  # PATH DÜZENLENDİ
+    ) as tmp:
         tmp.write(text)
         tmp.flush()
         return Path(tmp.name)
-
 
 def test_load_config_independent_defaults():
     cfg_text = textwrap.dedent(
@@ -38,12 +35,10 @@ def test_load_config_independent_defaults():
     assert cfg2.calendar.holidays_source == "none"
     assert 99 not in cfg2.indicators.params["ema"]
 
-
 def test_load_config_invalid_yaml():
     path = _write_cfg("- just\n- a\n- list\n")
     with pytest.raises(TypeError):
         load_config(path)
-
 
 def test_load_config_relative_paths(tmp_path):
     cfg_text = textwrap.dedent(
@@ -59,8 +54,8 @@ def test_load_config_relative_paths(tmp_path):
           xu100_csv_path: xu.csv
         """
     )
-    cfg_file = tmp_path / "cfg.yaml"  # PATH DÜZENLENDİ
-    cfg_file.write_text(cfg_text, encoding="utf-8")  # PATH DÜZENLENDİ
+    cfg_file = tmp_path / "cfg.yaml"
+    cfg_file.write_text(cfg_text, encoding="utf-8")
     cfg = load_config(cfg_file)
     base = cfg_file.parent
     cwd = Path.cwd()

@@ -1,15 +1,13 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 import warnings
-from datetime import date  # TİP DÜZELTİLDİ
+from datetime import date
 from pathlib import Path
-from typing import Iterable, Mapping, Optional  # TİP DÜZELTİLDİ
+from typing import Iterable, Mapping, Optional
 
 import pandas as pd
 
 from utils.paths import resolve_path
-
 
 def _ensure_dir(path: Optional[str | Path]):
     if not path:
@@ -18,10 +16,9 @@ def _ensure_dir(path: Optional[str | Path]):
     target = p if not p.suffix else p.parent
     target.mkdir(parents=True, exist_ok=True)
 
-
 def write_reports(
     trades_all: pd.DataFrame,
-    dates: Optional[Iterable] = None,  # TİP DÜZELTİLDİ
+    dates: Optional[Iterable] = None,
     summary_wide: Optional[pd.DataFrame] = None,
     xu100_pct: Optional[Mapping] = None,
     out_xlsx: Optional[str] = None,
@@ -46,7 +43,7 @@ def write_reports(
         ``csv`` for a list of CSV exports (if requested).
     """
     if not isinstance(trades_all, pd.DataFrame):
-        raise TypeError("trades_all must be a DataFrame")  # TİP DÜZELTİLDİ
+        raise TypeError("trades_all must be a DataFrame")
     req_cols = {
         "FilterCode",
         "Symbol",
@@ -60,45 +57,45 @@ def write_reports(
     if missing:
         raise ValueError(
             f"trades_all missing columns: {', '.join(sorted(missing))}"
-        )  # TİP DÜZELTİLDİ
+        )
     if "Reason" not in trades_all.columns:
         trades_all["Reason"] = pd.NA
     n_cols = trades_all.shape[1]
     if summary_wide is not None and not isinstance(summary_wide, pd.DataFrame):
-        raise TypeError("summary_wide must be a DataFrame or None")  # TİP DÜZELTİLDİ
+        raise TypeError("summary_wide must be a DataFrame or None")
     if summary_winrate is not None and not isinstance(summary_winrate, pd.DataFrame):
-        raise TypeError("summary_winrate must be a DataFrame or None")  # TİP DÜZELTİLDİ
+        raise TypeError("summary_winrate must be a DataFrame or None")
     if validation_summary is not None and not isinstance(
         validation_summary, pd.DataFrame
     ):
         raise TypeError(
             "validation_summary must be a DataFrame or None"
-        )  # TİP DÜZELTİLDİ
+        )
     if validation_issues is not None and not isinstance(
         validation_issues, pd.DataFrame
     ):
         raise TypeError(
             "validation_issues must be a DataFrame or None"
-        )  # TİP DÜZELTİLDİ
+        )
 
     if dates is None:
-        dates = tuple()  # TİP DÜZELTİLDİ
+        dates = tuple()
     elif isinstance(dates, (str, bytes, pd.Timestamp, date)):
-        dates = (dates,)  # TİP DÜZELTİLDİ
+        dates = (dates,)
     elif isinstance(dates, Iterable):
-        dates = tuple(dates)  # TİP DÜZELTİLDİ
+        dates = tuple(dates)
     else:
-        raise TypeError("dates must be iterable or date-like")  # TİP DÜZELTİLDİ
+        raise TypeError("dates must be iterable or date-like")
     outputs: dict[str, Path | list[Path]] = {}
     if summary_wide is None:
-        summary_wide = pd.DataFrame()  # TİP DÜZELTİLDİ
+        summary_wide = pd.DataFrame()
     if out_xlsx:
         out_xlsx_path = resolve_path(out_xlsx)
         _ensure_dir(out_xlsx_path)
         try:
             writer = pd.ExcelWriter(
                 out_xlsx_path, engine="xlsxwriter"
-            )  # PATH DÜZENLENDİ
+            )
         except Exception as exc:
             raise RuntimeError(f"Excel yazılamadı: {out_xlsx_path}") from exc
         else:
@@ -119,15 +116,15 @@ def write_reports(
 
                 if xu100_pct is not None:
                     if isinstance(xu100_pct, pd.Series):
-                        xu100_series = xu100_pct.astype(float)  # TİP DÜZELTİLDİ
+                        xu100_series = xu100_pct.astype(float)
                     elif isinstance(xu100_pct, Mapping):
                         xu100_series = pd.Series(
                             dict(xu100_pct), dtype=float
-                        )  # TİP DÜZELTİLDİ
+                        )
                     else:
                         raise TypeError(
                             "xu100_pct must be a mapping or Series"
-                        )  # TİP DÜZELTİLDİ
+                        )
                     cols = [
                         c
                         for c in summary_wide.columns
@@ -179,7 +176,7 @@ def write_reports(
                     ws.set_column(5, 5, 10, num_fmt)
                     ws.set_column(6, 6, 8)
                     rows = len(trades_all[trades_all["Date"] == day_ts])
-                    last_row = rows if rows > 0 else 0  # LOJİK HATASI DÜZELTİLDİ
+                    last_row = rows if rows > 0 else 0
                     ws.autofilter(0, 0, last_row, n_cols - 1)
 
                 if summary_sheet_name in writer.sheets:
@@ -217,17 +214,17 @@ def write_reports(
                 daily_csv,
                 index=False,
                 encoding="utf-8",
-            )  # PATH DÜZENLENDİ
+            )
             csv_paths.append(daily_csv)
             summary_csv = out_csv_path / "summary.csv"
-            summary_wide.to_csv(summary_csv, encoding="utf-8")  # PATH DÜZENLENDİ
+            summary_wide.to_csv(summary_csv, encoding="utf-8")
             csv_paths.append(summary_csv)
             if summary_winrate is not None and not summary_winrate.empty:
                 winrate_csv = out_csv_path / "summary_winrate.csv"
                 summary_winrate.to_csv(
                     winrate_csv,
                     encoding="utf-8",
-                )  # PATH DÜZENLENDİ
+                )
                 csv_paths.append(winrate_csv)
             if validation_summary is not None and not validation_summary.empty:
                 val_sum_csv = out_csv_path / "validation_summary.csv"
@@ -235,7 +232,7 @@ def write_reports(
                     val_sum_csv,
                     index=False,
                     encoding="utf-8",
-                )  # PATH DÜZENLENDİ
+                )
                 csv_paths.append(val_sum_csv)
             if validation_issues is not None and not validation_issues.empty:
                 val_iss_csv = out_csv_path / "validation_issues.csv"
@@ -243,10 +240,10 @@ def write_reports(
                     val_iss_csv,
                     index=False,
                     encoding="utf-8",
-                )  # PATH DÜZENLENDİ
+                )
                 csv_paths.append(val_iss_csv)
         except Exception:
-            warnings.warn(f"CSV yazılamadı: {out_csv_path}")  # PATH DÜZENLENDİ
+            warnings.warn(f"CSV yazılamadı: {out_csv_path}")
         else:
             missing = [p for p in csv_paths if not p.exists()]
             if missing:
