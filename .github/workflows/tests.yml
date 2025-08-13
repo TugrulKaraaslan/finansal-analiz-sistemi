@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all:
+          pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
       - name: Show versions
         run: pip freeze | grep -Ei 'pandas(-ta)?|numpy|pandera|PyYAML' || true
       - name: Run tests

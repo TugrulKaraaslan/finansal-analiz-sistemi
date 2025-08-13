@@ -47,8 +47,8 @@ Aşağıdaki tablo bazı sık kullanılan indikatör kolonlarını ve bunlara il
 ### Yerel
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt -c constraints.txt --only-binary=:all:
-pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all:  # test/geliştirici ortamı
+pip install -r requirements.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
+pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta  # test/geliştirici ortamı
 ```
 
 Python 3.10–3.12 sürümleri desteklenir; 3.13 henüz destek dışıdır.
@@ -58,7 +58,7 @@ python -m backtest.cli scan-day --config examples/example_config.yaml --date 202
 ```
 ### Google Colab
 ```python
-!pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all:
+!pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
 # Uygun wheel bulunamazsa veya pandas_ta uyumsuzluğu olursa:
 !pip install "numpy<2.0" "pandas<2.2" pandas-ta==0.3.14b0
 !python -m backtest.cli scan-day --config config/colab_config.yaml --date 2024-01-02
@@ -134,7 +134,7 @@ SCAN 2024-01-02: 24 satır, ort. %1.2
 ```
 ## Test Çalıştırma (isteğe bağlı)
 ```bash
-pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all:
+pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
 pytest -q
 ```
 

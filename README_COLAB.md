@@ -3,7 +3,8 @@
 Aşağıdaki hücre Colab ortamında projeyi kurar ve örnek bir tarama çalıştırır:
 
 ```python
-%pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all:
+# pip kurulumu
+%pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
 # Uygun wheel bulunamazsa veya pandas_ta uyumsuzluğu olursa:
 %pip install "numpy<2.0" "pandas<2.2" pandas-ta==0.3.14b0
 
@@ -38,6 +39,6 @@ isim dönüşümlerini raporlar; `filters_fixed.csv` dosyasını üretir.
 İsteğe bağlı olarak testleri çalıştırmak için:
 
 ```python
-%pip install -q -r requirements_dev.txt -c constraints.txt --only-binary=:all:
+%pip install -q -r requirements_dev.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
 !pytest -q
 ```
