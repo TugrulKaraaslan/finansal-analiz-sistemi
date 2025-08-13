@@ -1,0 +1,9 @@
+[project]
+name = "finansal-analiz-sistemi"
+version = "0.0.0"
+requires-python = ">=3.10,<3.13"
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]

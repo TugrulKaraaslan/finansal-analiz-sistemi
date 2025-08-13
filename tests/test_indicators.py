@@ -1,11 +1,10 @@
-import io
+import logging
 import numpy as np
 import pandas as pd
 import pytest
 
 import indicator_calculator as ic
 from backtest.indicators import _safe_alias, compute_indicators
-from loguru import logger
 
 
 def test_indicator_calculator_outputs():
@@ -69,20 +68,16 @@ def test_existing_relative_volume_preserved():
     )
 
 
-def test_safe_alias_dataframe_base():
+def test_safe_alias_dataframe_base(caplog):
     df = pd.DataFrame([[1, 2], [3, 4]], columns=["base", "base"])
-    buf = io.StringIO()
-    h = logger.add(buf, level="WARNING")
-    try:
+    with caplog.at_level(logging.WARNING, logger="backtest.indicators"):
         added = _safe_alias(df, "alias", "base")
-    finally:
-        logger.remove(h)
     assert not added
-    assert "alias skipped" in buf.getvalue()
+    assert "alias skipped" in caplog.text
     assert "alias" not in df.columns
 
 
-def test_duplicate_columns_dropped():
+def test_duplicate_columns_dropped(caplog):
     df = pd.DataFrame(
         {
             "symbol": ["AAA"] * 2,
@@ -92,11 +87,7 @@ def test_duplicate_columns_dropped():
             "Change 1D Percent": [5.0, 6.0],
         }
     )
-    buf = io.StringIO()
-    h = logger.add(buf, level="INFO")
-    try:
+    with caplog.at_level(logging.INFO, logger="backtest.indicators"):
         res = compute_indicators(df, params={}, engine="builtin")
-    finally:
-        logger.remove(h)
     assert res.columns.tolist().count("change_1d_percent") == 1
-    assert "duplicate columns dropped" in buf.getvalue()
+    assert "duplicate columns dropped" in caplog.text

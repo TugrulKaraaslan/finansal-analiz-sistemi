@@ -1,5 +1,5 @@
-numpy>=2,<3
-pandas>=2.2,<3
+numpy
+pandas
 pandas-ta
 pyarrow
 openpyxl

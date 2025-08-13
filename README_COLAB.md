@@ -3,9 +3,9 @@
 Aşağıdaki hücre Colab ortamında projeyi kurar ve örnek bir tarama çalıştırır:
 
 ```python
-%pip install -q -r requirements_colab.txt
-# NumPy 2 ile uyumsuzluk yaşanırsa:
-%pip install "numpy<2.0" "pandas<2.2"
+%pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all:
+# Uygun wheel bulunamazsa veya pandas_ta uyumsuzluğu olursa:
+%pip install "numpy<2.0" "pandas<2.2" pandas_ta==0.3.14b0
 
 %cd /content/finansal-analiz-sistemi
 %env PYTHONPATH=/content/finansal-analiz-sistemi

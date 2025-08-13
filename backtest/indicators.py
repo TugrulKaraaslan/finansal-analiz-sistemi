@@ -3,9 +3,11 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
+import logging
 import numpy as np
 import pandas as pd  # module-level; fonksiyon içi import yok
-from loguru import logger
+
+logger = logging.getLogger(__name__)
 
 from backtest.utils.names import canonicalize_columns
 
@@ -31,7 +33,7 @@ def _safe_alias(df2: pd.DataFrame, alias: str, base: str) -> bool:
         logger.debug("base missing for alias: %s -> %s", alias, base)
         return False
     if alias in df2.columns:
-        logger.debug("alias exists, skipping: %s", alias)
+        logger.debug("alias exists, skipping overwrite: %s", alias)
         return False
     val = df2[base]
     if isinstance(val, pd.DataFrame):
@@ -41,6 +43,7 @@ def _safe_alias(df2: pd.DataFrame, alias: str, base: str) -> bool:
             val = val.iloc[:, -1]
     if isinstance(val, pd.Series):
         df2[alias] = val
+        logger.debug("alias set: %s from base=%s", alias, base)
         return True
     logger.warning("alias skipped (non-1d): alias=%s base=%s", alias, base)
     return False

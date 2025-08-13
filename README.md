@@ -47,14 +47,19 @@ Aşağıdaki tablo bazı sık kullanılan indikatör kolonlarını ve bunlara il
 ### Yerel
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt  # Excel okuma için openpyxl/xlrd gereklidir
+pip install -r requirements.txt -c constraints.txt --only-binary=:all:
+```
+
+Python 3.10–3.12 sürümleri desteklenir; 3.13 henüz destek dışıdır.
+
+```bash
 python -m backtest.cli scan-day --config examples/example_config.yaml --date 2024-01-02
 ```
 ### Google Colab
 ```python
-!pip install -q -r requirements_colab.txt
-# NumPy 2 ile uyumsuzluk yaşanırsa:
-!pip install "numpy<2.0" "pandas<2.2"
+!pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all:
+# Uygun wheel bulunamazsa veya pandas_ta uyumsuzluğu olursa:
+!pip install "numpy<2.0" "pandas<2.2" pandas_ta==0.3.14b0
 !python -m backtest.cli scan-day --config config/colab_config.yaml --date 2024-01-02
 ```
 
