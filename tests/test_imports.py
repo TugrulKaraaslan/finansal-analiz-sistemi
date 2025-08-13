@@ -4,6 +4,7 @@ def test_imports():
 
     try:
         import pandas_ta
+
         assert pandas_ta
     except ModuleNotFoundError:
         pass
