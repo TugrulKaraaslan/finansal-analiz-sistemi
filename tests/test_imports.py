@@ -3,7 +3,8 @@ def test_imports():
     import pandas as pd
 
     try:
-        import pandas_ta  # noqa: F401
+        import pandas_ta
+        assert pandas_ta
     except ModuleNotFoundError:
         pass
 
