@@ -29,9 +29,10 @@ def test_run_1g_returns_perf():
     df = _sample_df()
     df["next_close"] = df["close"]
     df["next_date"] = df["date"]
-    sigs = pd.DataFrame({"FilterCode": ["F"], "Symbol": ["AAA"], "Date": [df["date"].iloc[0]]})
+    sigs = pd.DataFrame(
+        {"FilterCode": ["F"], "Symbol": ["AAA"], "Date": [df["date"].iloc[0]]}
+    )
     start = time.perf_counter()
     run_1g_returns(df, sigs, holding_period=1, transaction_cost=0.0)
     elapsed = time.perf_counter() - start
     assert elapsed < 1.0
-

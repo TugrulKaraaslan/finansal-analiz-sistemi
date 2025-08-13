@@ -5,6 +5,7 @@ import pkgutil
 
 import backtest
 
+
 def test_backtest_all_modules_importable():
     for module_info in pkgutil.iter_modules(backtest.__path__):
         name = module_info.name

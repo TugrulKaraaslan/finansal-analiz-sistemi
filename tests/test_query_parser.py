@@ -93,9 +93,7 @@ def test_run_screener_skips_missing_columns_relaxed(caplog):
         }
     )
     logger.add(caplog.handler, level="WARNING")
-    res = run_screener(
-        df_ind, filters, pd.Timestamp("2024-01-02"), strict=False
-    )
+    res = run_screener(df_ind, filters, pd.Timestamp("2024-01-02"), strict=False)
     assert res["FilterCode"].tolist() == ["GOOD"]
     assert isinstance(res.loc[0, "Date"], pd.Timestamp)
     assert "Filter skipped due to missing columns" in caplog.text

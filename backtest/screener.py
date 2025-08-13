@@ -8,11 +8,13 @@ from loguru import logger
 
 from backtest.query_parser import SafeQuery
 
+
 def _to_pandas_ops(expr: str) -> str:
     expr = re.sub(r"\bAND\b", "&", expr, flags=re.I)
     expr = re.sub(r"\bOR\b", "|", expr, flags=re.I)
     expr = re.sub(r"\bNOT\b", "~", expr, flags=re.I)
     return expr
+
 
 def run_screener(
     df_ind: pd.DataFrame,

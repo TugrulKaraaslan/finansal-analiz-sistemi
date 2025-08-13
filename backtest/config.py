@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from utils.paths import resolve_path
 
+
 class ProjectCfg(BaseModel):
     out_dir: str = "raporlar"
     run_mode: str = "range"  # range | single
@@ -18,6 +19,7 @@ class ProjectCfg(BaseModel):
     holding_period: int = 1
     transaction_cost: float = 0.0
     raise_on_error: bool = False
+
 
 class DataCfg(BaseModel):
     excel_dir: str
@@ -36,10 +38,12 @@ class DataCfg(BaseModel):
         }
     )
 
+
 class CalendarCfg(BaseModel):
     tplus1_mode: str = "price"  # price | calendar
     holidays_source: str = "none"  # none | csv
     holidays_csv_path: Optional[str] = None
+
 
 class IndicatorsCfg(BaseModel):
     engine: str = "pandas_ta"  # pandas_ta | ta_lib
@@ -47,14 +51,17 @@ class IndicatorsCfg(BaseModel):
         default_factory=lambda: {"rsi": [14], "ema": [10, 20, 50], "macd": [12, 26, 9]}
     )
 
+
 class BenchmarkCfg(BaseModel):
     xu100_source: str = "none"  # csv | none
     xu100_csv_path: Optional[str] = None
+
 
 class ReportCfg(BaseModel):
     percent_format: str = "0.00%"
     daily_sheet_prefix: str = "SCAN_"
     summary_sheet_name: str = "SUMMARY"
+
 
 class RootCfg(BaseModel):
     project: ProjectCfg
@@ -63,6 +70,7 @@ class RootCfg(BaseModel):
     indicators: IndicatorsCfg = Field(default_factory=IndicatorsCfg)
     benchmark: BenchmarkCfg = Field(default_factory=BenchmarkCfg)
     report: ReportCfg = Field(default_factory=ReportCfg)
+
 
 def load_config(path: str | Path) -> RootCfg:
     p = resolve_path(path)
@@ -111,9 +119,7 @@ def load_config(path: str | Path) -> RootCfg:
             data[k] = _join(v, allow_cwd=(k == "filters_csv"))
     cal = cfg.get("calendar", {}) if isinstance(cfg, dict) else {}
     if isinstance(cal, dict) and cal.get("holidays_csv_path"):
-        cal["holidays_csv_path"] = _join(
-            cal.get("holidays_csv_path")
-        )
+        cal["holidays_csv_path"] = _join(cal.get("holidays_csv_path"))
     bench = cfg.get("benchmark", {}) if isinstance(cfg, dict) else {}
     if isinstance(bench, dict) and bench.get("xu100_csv_path"):
         bench["xu100_csv_path"] = _join(bench.get("xu100_csv_path"))

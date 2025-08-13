@@ -33,9 +33,7 @@ def test_builtin_engine_basic():
 
 def test_stochrsi_params():
     df = _sample_df()
-    res = compute_indicators(
-        df, params={"stochrsi": [14, 14, 3, 3]}, engine="builtin"
-    )
+    res = compute_indicators(df, params={"stochrsi": [14, 14, 3, 3]}, engine="builtin")
     assert "STOCHRSIk_14_14_3_3" in res.columns
 
 

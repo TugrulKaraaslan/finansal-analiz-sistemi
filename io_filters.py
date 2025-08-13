@@ -14,6 +14,7 @@ from utils.paths import resolve_path
 
 REQUIRED_COLUMNS = {"FilterCode", "PythonQuery"}
 
+
 def load_filters_csv(path: str | Path) -> pd.DataFrame:
     """Load filters from CSV with validation and basic normalization.
 
@@ -57,5 +58,6 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
         dup_codes = ", ".join(sorted(dups.unique()))
         raise RuntimeError(f"Duplicate FilterCode detected: {dup_codes}")
     return df
+
 
 __all__ = ["load_filters_csv"]
