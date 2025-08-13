@@ -53,11 +53,49 @@ python -m backtest.cli scan-day --config examples/example_config.yaml --date 202
 ### Google Colab
 ```python
 !pip install -q -r requirements_colab.txt
-!python -m backtest.cli scan-day --config examples/example_config.yaml --date 2024-01-02
+# NumPy 2 ile uyumsuzluk yaşanırsa:
+!pip install "numpy<2.0" "pandas<2.2"
+!python -m backtest.cli scan-day --config config/colab_config.yaml --date 2024-01-02
 ```
 
 > Not: Filtre CSV doğrulaması için [Pandera](https://pandera.readthedocs.io/) gereklidir. 
 > `pip install pandera` komutuyla kurulabilir.
+
+### Config Şeması Örneği
+
+Aşağıdaki YAML şeması minimum zorunlu alanları gösterir:
+
+```yaml
+project:
+  out_dir: raporlar
+data:
+  excel_dir: Veri  # fiyat excellerinin klasörü
+  filters_csv: filters.csv  # filtre tanımları
+```
+
+`data.excel_dir` ve `data.filters_csv` alanları eksikse komut satırında
+`config.data.* zorunlu; örnek için examples/example_config.yaml` şeklinde
+bir hata mesajı gösterilir.
+
+### Gösterge Motoru Davranışı
+
+- Varsayılan olarak `pandas_ta` yüklüyse ve NumPy sürümüyle uyumluysa
+  göstergeler bu motor ile hesaplanır.
+- `pandas_ta` eksik veya NumPy 2 ile uyumsuzsa otomatik olarak yerleşik
+  hesaplamalara dönülür. Konsolda örnek mesaj:
+
+  ```
+  compute_indicators using engine=builtin
+  ```
+
+### Var Olan Kolonların Korunması
+
+- Mevcut bir kolon üzerine yazılmaz; `relative_volume` ya da
+  `hacim_goreli` veride zaten varsa yeniden hesaplanmaz ve alias üretilmez.
+- Çoklu kolon → tek kolon kopyalama hataları engellenir; uygun olmayan
+  durumlar `alias skipped` uyarısı ile geçilir.
+- `pd.concat` sonrası oluşan mükerrer kolon adları tekilleştirilir ve
+  logda listelenir.
 
 ## Örnek Çalıştırma
 - `examples/example_config.yaml` içindeki `excel_dir` ve `filters_csv` yollarını düzenleyin.

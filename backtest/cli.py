@@ -210,7 +210,11 @@ def scan_range(
     name_normalization="smart",
 ):
     set_name_normalization(name_normalization)
-    cfg = load_config(config_path)
+    try:
+        cfg = load_config(config_path)
+    except Exception as exc:  # kullanıcı dostu mesaj
+        logger.error(str(exc))
+        raise click.ClickException(str(exc))
     if start_date:
         cfg.project.start_date = start_date
     if end_date:
@@ -229,7 +233,11 @@ def scan_range(
 @click.option("--holding-period", default=None, type=int)
 @click.option("--transaction-cost", default=None, type=float)
 def scan_day(config_path, date_str, holding_period, transaction_cost):
-    cfg = load_config(config_path)
+    try:
+        cfg = load_config(config_path)
+    except Exception as exc:  # kullanıcı dostu mesaj
+        logger.error(str(exc))
+        raise click.ClickException(str(exc))
     cfg.project.single_date = date_str
     cfg.project.run_mode = "single"
     if holding_period is not None:

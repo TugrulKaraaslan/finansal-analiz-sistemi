@@ -18,7 +18,7 @@ def test_relative_volume_no_nan_and_no_div_zero():
         }
     )
     res = compute_indicators(df)
-    rv = res["RELATIVE_VOLUME"]
+    rv = res["relative_volume"]
     assert rv.notna().all()
     assert not np.isinf(rv).any()
     assert rv.iloc[0] == 0

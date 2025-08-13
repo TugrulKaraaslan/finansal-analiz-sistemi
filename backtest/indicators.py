@@ -4,10 +4,46 @@ from __future__ import annotations
 from typing import Dict, List, Optional
 
 import numpy as np
-import pandas as pd
+import pandas as pd  # module-level; fonksiyon içi import yok
 from loguru import logger
 
 from backtest.utils.names import canonicalize_columns
+
+
+def _safe_alias(df2: pd.DataFrame, alias: str, base: str) -> bool:
+    """Safely copy ``base`` column to ``alias`` without raising.
+
+    Parameters
+    ----------
+    df2 : pandas.DataFrame
+        Target frame to mutate.
+    alias : str
+        New column name.
+    base : str
+        Existing column name to copy from.
+
+    Returns
+    -------
+    bool
+        True if alias added, False otherwise.
+    """
+    if base not in df2.columns:
+        logger.debug("base missing for alias: %s -> %s", alias, base)
+        return False
+    if alias in df2.columns:
+        logger.debug("alias exists, skipping: %s", alias)
+        return False
+    val = df2[base]
+    if isinstance(val, pd.DataFrame):
+        if base in val.columns:
+            val = val[base]
+        else:
+            val = val.iloc[:, -1]
+    if isinstance(val, pd.Series):
+        df2[alias] = val
+        return True
+    logger.warning("alias skipped (non-1d): alias=%s base=%s", alias, base)
+    return False
 
 
 def _ema(series: pd.Series, length: int) -> pd.Series:
@@ -76,18 +112,32 @@ def compute_indicators(
         raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")
     df = df.copy()
     df = df.sort_values(["symbol", "date"])
+    rv_preexisting = bool(
+        {"RELATIVE_VOLUME", "relative_volume", "hacim_goreli", "HACIM_GORELI"}.intersection(df.columns)
+    )
 
-    logger.debug("compute_indicators using engine=%s", engine)
     use_pandas_ta = engine == "pandas_ta"
     ta = None
     if use_pandas_ta:
         try:  # pragma: no cover - optional dependency
             import pandas_ta as ta  # noqa: WPS433
-        except ModuleNotFoundError:  # pragma: no cover
+            from importlib.metadata import version
+            from packaging.version import Version
+
+            np_major = int(np.__version__.split(".")[0])
+            ta_ver = Version(version("pandas_ta"))
+            if np_major >= 2 and ta_ver < Version("0.3.14b0"):
+                raise RuntimeError("pandas_ta numpy>=2 ile uyumsuz")
+        except Exception as exc:  # pragma: no cover
             logger.warning(
-                "pandas_ta kütüphanesi bulunamadı, builtin hesaplamalara dönülüyor",
+                "pandas_ta kullanılamadı (%s), builtin hesaplamalara dönülüyor", exc
             )
             use_pandas_ta = False
+            ta = None
+    logger.info(
+        "compute_indicators using engine=%s",
+        "pandas_ta" if use_pandas_ta else "builtin",
+    )
     out_frames = []
     for sym, g in df.groupby("symbol", group_keys=False):
         g = g.copy()
@@ -168,19 +218,43 @@ def compute_indicators(
                 g[f"MACD_{fast}_{slow}_{sig}_HIST"] = hist
         g["CHANGE_1D_PERCENT"] = g["close"].pct_change(1) * 100.0
         g["CHANGE_5D_PERCENT"] = g["close"].pct_change(5) * 100.0
-        vol_mean = g["volume"].rolling(20, min_periods=1).mean().replace(0, np.nan)
-        g["RELATIVE_VOLUME"] = (g["volume"] / vol_mean).fillna(0)
+        rv_cols = {"RELATIVE_VOLUME", "relative_volume", "hacim_goreli", "HACIM_GORELI"}
+        if rv_cols.intersection(g.columns):
+            logger.debug("using existing relative volume for %s", sym)
+        else:
+            vol_mean = g["volume"].rolling(20, min_periods=1).mean().replace(0, np.nan)
+            g["RELATIVE_VOLUME"] = (g["volume"] / vol_mean).fillna(0)
         out_frames.append(g)
     df2 = pd.concat(out_frames, ignore_index=True)
     df2 = canonicalize_columns(df2)
+    dups = df2.columns[df2.columns.duplicated(keep="last")].tolist()
+    if dups:
+        logger.info("duplicate columns dropped: %s", dups)
+    df2 = df2.loc[:, ~df2.columns.duplicated(keep="last")]
+
+    preferred_names = {"relative_volume", "hacim_goreli"}
+    skip_alias_bases: set[str] = set()
+    if rv_preexisting:
+        for name in preferred_names:
+            if name in df2.columns:
+                logger.debug("using existing column for volume-relative: %s", name)
+                skip_alias_bases.add(name)
+
+    alias_added = 0
+    alias_skipped = 0
+
     turkish_alias = {
         "degisim_1g_yuzde": "change_1d_percent",
         "degisim_5g_yuzde": "change_1w_percent",
         "hacim_goreli": "relative_volume",
     }
     for alias, base in turkish_alias.items():
-        if base in df2.columns:
-            df2[alias] = df2[base]
+        if base in skip_alias_bases:
+            continue
+        if _safe_alias(df2, alias, base):
+            alias_added += 1
+        else:
+            alias_skipped += 1
     upper_alias = {
         "ema_10": "EMA_10",
         "ema_20": "EMA_20",
@@ -194,8 +268,13 @@ def compute_indicators(
         "relative_volume": "RELATIVE_VOLUME",
     }
     for base, up in upper_alias.items():
-        if base in df2.columns:
-            df2[up] = df2[base]
+        if base in skip_alias_bases:
+            continue
+        if _safe_alias(df2, up, base):
+            alias_added += 1
+        else:
+            alias_skipped += 1
+    logger.info("aliases added=%s skipped=%s", alias_added, alias_skipped)
     return df2
 
 
