@@ -12,10 +12,11 @@ class _DummyExcelFile:
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc, tb):
+    def __exit__(self, _exc_type, _exc, _tb):
         self.closed = True
 
     def parse(self, sheet_name, header=0):
+        _ = sheet_name, header
         return pd.DataFrame(
             {
                 "Tarih": ["2024-01-01"],
@@ -30,6 +31,7 @@ class _DummyExcelFile:
 
 class _StdExcelFile(_DummyExcelFile):
     def parse(self, sheet_name, header=0):  # type: ignore[override]
+        _ = sheet_name, header
         return pd.DataFrame(
             {
                 "date": ["2024-01-01"],
@@ -65,6 +67,7 @@ def test_read_excels_long_price_schema(tmp_path, monkeypatch):
 def test_read_excels_long_closes_files(tmp_path, monkeypatch):
     (tmp_path / "a.xlsx").write_text("dummy")
     instances = []
+
     def _factory(*args, **kwargs):
         inst = _StdExcelFile(*args, **kwargs)
         instances.append(inst)

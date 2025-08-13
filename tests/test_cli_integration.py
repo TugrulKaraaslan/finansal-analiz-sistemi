@@ -1,5 +1,6 @@
 import pandas as pd
 from click.testing import CliRunner
+import textwrap
 
 from backtest import cli
 
@@ -20,49 +21,47 @@ def test_cli_scan_range_integration(tmp_path):
     filters_csv.write_text("FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8")
     cfg_path = tmp_path / "cfg.yaml"
     cfg_path.write_text(
-        (
+        textwrap.dedent(
             """
-project:
-  out_dir: "{out_dir}"
-  run_mode: "range"
-  start_date: "2024-01-02"
-  end_date: "2024-01-02"
-  holding_period: 1
-  transaction_cost: 0.0
+            project:
+              out_dir: "{out_dir}"
+              run_mode: "range"
+              start_date: "2024-01-02"
+              end_date: "2024-01-02"
+              holding_period: 1
+              transaction_cost: 0.0
 
-data:
-  excel_dir: "{out_dir}"
-  filters_csv: "{filters}"
-  enable_cache: false
-  cache_parquet_path: "{out_dir}/cache.parquet"
-  price_schema:
-    date: ["Tarih"]
-    open: ["Açılış"]
-    high: ["Yüksek"]
-    low: ["Düşük"]
-    close: ["Kapanış"]
-    volume: ["Hacim"]
+            data:
+              excel_dir: "{out_dir}"
+              filters_csv: "{filters}"
+              enable_cache: false
+              cache_parquet_path: "{out_dir}/cache.parquet"
+              price_schema:
+                date: ["Tarih"]
+                open: ["Açılış"]
+                high: ["Yüksek"]
+                low: ["Düşük"]
+                close: ["Kapanış"]
+                volume: ["Hacim"]
 
-calendar:
-  tplus1_mode: "price"
-  holidays_source: "none"
-  holidays_csv_path: ""
+            calendar:
+              tplus1_mode: "price"
+              holidays_source: "none"
+              holidays_csv_path: ""
 
-indicators:
-  engine: "builtin"
-  params: {{}}
+            indicators:
+              engine: "builtin"
+              params: {{}}
 
-benchmark:
-  xu100_source: "none"
-  xu100_csv_path: ""
+            benchmark:
+              xu100_source: "none"
+              xu100_csv_path: ""
 
-report:
-  excel: true
-  csv: false
-  percent_format: "0.00%"
-  daily_sheet_prefix: "SCAN_"
-  summary_sheet_name: "SUMMARY"
-"""
+            report:
+              percent_format: "0.00%"
+              daily_sheet_prefix: "SCAN_"
+              summary_sheet_name: "SUMMARY"
+            """
         ).format(out_dir=tmp_path, filters=filters_csv),
         encoding="utf-8",
     )
@@ -72,7 +71,7 @@ report:
     assert (tmp_path / "SCAN_2024-01-02.xlsx").exists()
 
 
-def test_cli_scan_strict_filters_missing_column(tmp_path):
+def test_cli_scan_missing_column(tmp_path):
     df = pd.DataFrame(
         {
             "Tarih": ["2024-01-02"],
@@ -91,50 +90,47 @@ def test_cli_scan_strict_filters_missing_column(tmp_path):
     )
     cfg_path = tmp_path / "cfg.yaml"
     cfg_path.write_text(
-        (
+        textwrap.dedent(
             """
-project:
-  out_dir: "{out_dir}"
-  run_mode: "range"
-  start_date: "2024-01-02"
-  end_date: "2024-01-02"
-  holding_period: 1
-  transaction_cost: 0.0
-  strict_filters: true
+            project:
+              out_dir: "{out_dir}"
+              run_mode: "range"
+              start_date: "2024-01-02"
+              end_date: "2024-01-02"
+              holding_period: 1
+              transaction_cost: 0.0
 
-data:
-  excel_dir: "{out_dir}"
-  filters_csv: "{filters}"
-  enable_cache: false
-  cache_parquet_path: "{out_dir}/cache.parquet"
-  price_schema:
-    date: ["Tarih"]
-    open: ["Açılış"]
-    high: ["Yüksek"]
-    low: ["Düşük"]
-    close: ["Kapanış"]
-    volume: ["Hacim"]
+            data:
+              excel_dir: "{out_dir}"
+              filters_csv: "{filters}"
+              enable_cache: false
+              cache_parquet_path: "{out_dir}/cache.parquet"
+              price_schema:
+                date: ["Tarih"]
+                open: ["Açılış"]
+                high: ["Yüksek"]
+                low: ["Düşük"]
+                close: ["Kapanış"]
+                volume: ["Hacim"]
 
-calendar:
-  tplus1_mode: "price"
-  holidays_source: "none"
-  holidays_csv_path: ""
+            calendar:
+              tplus1_mode: "price"
+              holidays_source: "none"
+              holidays_csv_path: ""
 
-indicators:
-  engine: "builtin"
-  params: {{}}
+            indicators:
+              engine: "builtin"
+              params: {{}}
 
-benchmark:
-  xu100_source: "none"
-  xu100_csv_path: ""
+            benchmark:
+              xu100_source: "none"
+              xu100_csv_path: ""
 
-report:
-  excel: true
-  csv: false
-  percent_format: "0.00%"
-  daily_sheet_prefix: "SCAN_"
-  summary_sheet_name: "SUMMARY"
-"""
+            report:
+              percent_format: "0.00%"
+              daily_sheet_prefix: "SCAN_"
+              summary_sheet_name: "SUMMARY"
+            """
         ).format(out_dir=tmp_path, filters=filters_csv),
         encoding="utf-8",
     )
