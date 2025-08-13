@@ -3,6 +3,7 @@ from __future__ import annotations
 from enum import Enum
 
 import warnings
+import numpy as np
 import pandas as pd
 from loguru import logger
 
@@ -310,13 +311,22 @@ def run_1g_returns(
         cols.append("Group")
     cols.extend(["Symbol", "Date", "EntryClose", "ExitClose", "Side", "ReturnPct", "Win", "Reason"])
     out = merged[cols].copy()
+    frames = [out]
     if extras:
-        aligned = []
         for ex in extras:
             for col in cols:
                 if col not in ex.columns:
                     ex[col] = pd.NA
-            aligned.append(ex[cols])
-        out = pd.concat([out, *aligned], ignore_index=True)
+            ex = ex[cols]
+            frames.append(ex)
+    # Exclude empty or all-NA DataFrames to avoid pandas FutureWarning
+    frames = [f.replace({pd.NA: np.nan}) for f in frames]
+    frames = [f for f in frames if not f.dropna(how="all").empty]
+    if not frames:
+        out = pd.DataFrame(columns=cols)
+    elif len(frames) == 1:
+        out = frames[0]
+    else:
+        out = pd.concat(frames, ignore_index=True)
     logger.debug("run_1g_returns end - produced {rows_out} rows", rows_out=len(out))
     return out
