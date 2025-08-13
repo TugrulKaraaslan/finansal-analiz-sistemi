@@ -1,6 +1,6 @@
 # Google Colab Hızlı Başlangıç
 
-Aşağıdaki hücre Colab ortamında projeyi kurar ve örnek bir tarama çalıştırır:
+Aşağıdaki hücreler Colab ortamında projeyi kurar, ortamı doğrular ve örnek bir tarama çalıştırır:
 
 ```python
 # pip kurulumu
@@ -11,7 +11,17 @@ Aşağıdaki hücre Colab ortamında projeyi kurar ve örnek bir tarama çalış
 %cd /content/finansal-analiz-sistemi
 %env PYTHONPATH=/content/finansal-analiz-sistemi
 !mkdir -p raporlar
+```
 
+## Ortam Doğrulama
+
+```python
+!python tools/verify_env.py
+```
+
+## Örnek Tarama
+
+```python
 !python -m backtest.cli scan-range --config config/colab_config.yaml \
   --start 2025-03-07 --end 2025-03-11 \
   --holding-period 1 --transaction-cost 0.0005
