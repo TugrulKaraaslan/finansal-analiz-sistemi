@@ -1,13 +1,14 @@
 """Safe evaluation for DataFrame queries."""
+
 from __future__ import annotations
 
 import ast
-import string
 import re
+import string
 from typing import Set, Tuple
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from backtest.utils.names import canonicalize_filter_token
 
@@ -27,7 +28,7 @@ class SafeQuery:
 
     # characters permitted inside a query expression
     _ALLOWED_CHARS: Set[str] = set("()&|><=+-/*.%[], '~") | set(
-        string.ascii_letters + string.digits + "_\""
+        string.ascii_letters + string.digits + '_"'
     )
     _ALLOWED_FUNCS: Set[str] = {
         "isin",
@@ -117,9 +118,7 @@ class SafeQuery:
                 "ceil": np.ceil,
             }
         )
-        mask = pd.eval(
-            self.expr, engine="python", parser="pandas", local_dict=env
-        )
+        mask = pd.eval(self.expr, engine="python", parser="pandas", local_dict=env)
         if not pd.api.types.is_bool_dtype(mask):
             raise ValueError("Query expression must evaluate to a boolean mask")
         return mask

@@ -5,6 +5,7 @@ import pytest
 
 from backtest.backtester import run_1g_returns
 
+
 def test_backtester_basic():
     df = pd.DataFrame(
         {
@@ -25,6 +26,7 @@ def test_backtester_basic():
     assert out["Reason"].isna().all()
     assert pytest.approx(out.loc[0, "ReturnPct"], 0.01) == 10.0
 
+
 def test_run_1g_returns_drops_duplicates():
     df = pd.DataFrame(
         {
@@ -44,6 +46,7 @@ def test_run_1g_returns_drops_duplicates():
     assert len(out) == 1
     assert "Reason" in out.columns
 
+
 def test_run_1g_returns_holding_period_and_cost():
     df = pd.DataFrame(
         {
@@ -62,6 +65,7 @@ def test_run_1g_returns_holding_period_and_cost():
     out = run_1g_returns(df, sigs, holding_period=2, transaction_cost=1.0)
     expected = ((12.0 / 10.0 - 1.0) * 100.0) - 1.0
     assert pytest.approx(out.loc[0, "ReturnPct"], 0.01) == expected
+
 
 def test_run_1g_returns_marks_exit_date_out_of_bounds():
     df = pd.DataFrame(
@@ -83,6 +87,7 @@ def test_run_1g_returns_marks_exit_date_out_of_bounds():
     assert out.loc[0, "Reason"] == "Invalid ExitClose"
     assert pd.isna(out.loc[0, "ReturnPct"])
 
+
 def test_run_1g_returns_ignores_out_of_bounds_signals():
     df = pd.DataFrame(
         {
@@ -100,7 +105,10 @@ def test_run_1g_returns_ignores_out_of_bounds_signals():
     )
     out = run_1g_returns(df, sigs)
     assert len(out) == 2
-    assert pd.isna(out.loc[out["Date"] == pd.Timestamp("2024-01-03"), "ReturnPct"]).all()
+    assert pd.isna(
+        out.loc[out["Date"] == pd.Timestamp("2024-01-03"), "ReturnPct"]
+    ).all()
+
 
 def test_run_1g_returns_side_validation():
     df = pd.DataFrame(
@@ -127,6 +135,7 @@ def test_run_1g_returns_side_validation():
     assert out_bad.loc[0, "Reason"] == "Invalid Side"
     assert pd.isna(out_bad.loc[0, "ReturnPct"])
 
+
 def test_run_1g_returns_fills_missing_side_with_long():
     df = pd.DataFrame(
         {
@@ -148,9 +157,7 @@ def test_run_1g_returns_fills_missing_side_with_long():
         {
             "FilterCode": ["T1", "T1", "T1"],
             "Symbol": ["AAA", "BBB", "CCC"],
-            "Date": pd.to_datetime(
-                ["2024-01-01", "2024-01-01", "2024-01-01"]
-            ),
+            "Date": pd.to_datetime(["2024-01-01", "2024-01-01", "2024-01-01"]),
             "Side": [pd.NA, "short", None],
         }
     )
@@ -161,6 +168,7 @@ def test_run_1g_returns_fills_missing_side_with_long():
     assert pytest.approx(out.loc["AAA", "ReturnPct"], 0.01) == 10.0
     assert pytest.approx(out.loc["CCC", "ReturnPct"], 0.01) == 10.0
     assert pytest.approx(out.loc["BBB", "ReturnPct"], 0.01) == -10.0
+
 
 def test_run_1g_returns_fills_missing_exit_data():
     df = pd.DataFrame(
@@ -184,6 +192,7 @@ def test_run_1g_returns_fills_missing_exit_data():
     assert out2.loc[0, "ExitClose"] == 12.0
     assert pytest.approx(out2.loc[0, "ReturnPct"], 0.01) == 20.0
 
+
 def test_run_1g_returns_multiday_price_mode():
     df = pd.DataFrame(
         {
@@ -203,6 +212,7 @@ def test_run_1g_returns_multiday_price_mode():
     assert out.loc[0, "ExitClose"] == 13.0
     assert out["Reason"].isna().all()
     assert pytest.approx(out.loc[0, "ReturnPct"], 0.01) == 30.0
+
 
 def test_run_1g_returns_empty_base_returns_empty(caplog):
     from loguru import logger

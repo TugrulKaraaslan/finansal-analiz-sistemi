@@ -22,4 +22,5 @@ def test_alias_cases():
 def test_imports():
     import backtest
     from backtest.utils import names
+
     assert backtest and names

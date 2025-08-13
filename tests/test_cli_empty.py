@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import click
 import pandas as pd
 import pytest
 
-import click
 from backtest import cli
+
 
 def _cfg():
     return SimpleNamespace(
@@ -31,6 +32,7 @@ def _cfg():
         ),
     )
 
+
 def test_scan_range_empty(monkeypatch):
     cfg = _cfg()
     monkeypatch.setattr(cli, "load_config", lambda _: cfg)
@@ -50,9 +52,7 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(cli, "read_excels_long", lambda _: dummy_df)
     monkeypatch.setattr(cli, "normalize", lambda df: df)
     monkeypatch.setattr(cli, "add_next_close", lambda df: df)
-    monkeypatch.setattr(
-        cli, "compute_indicators", lambda df, params, engine=None: df
-    )
+    monkeypatch.setattr(cli, "compute_indicators", lambda df, params, engine=None: df)
     filters_df = pd.DataFrame(
         {"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]}
     )
@@ -86,6 +86,7 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(cli, "quality_warnings", lambda df: pd.DataFrame())
     cli.scan_range.callback("cfg.yml", None, None, None, None)
 
+
 def test_scan_day_empty(monkeypatch):
     cfg = _cfg()
     monkeypatch.setattr(cli, "load_config", lambda _: cfg)
@@ -105,9 +106,7 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(cli, "read_excels_long", lambda _: dummy_df)
     monkeypatch.setattr(cli, "normalize", lambda df: df)
     monkeypatch.setattr(cli, "add_next_close", lambda df: df)
-    monkeypatch.setattr(
-        cli, "compute_indicators", lambda df, params, engine=None: df
-    )
+    monkeypatch.setattr(cli, "compute_indicators", lambda df, params, engine=None: df)
     filters_df = pd.DataFrame(
         {"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]}
     )
@@ -140,6 +139,7 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(cli, "dataset_summary", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "quality_warnings", lambda df: pd.DataFrame())
     cli.scan_day.callback("cfg.yml", "2024-01-02", None, None)
+
 
 def test_scan_range_missing_excel(monkeypatch):
     cfg = _cfg()

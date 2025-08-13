@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+
 def dataset_summary(df: pd.DataFrame) -> pd.DataFrame:
     """Return simple stats per symbol: first/last date, rows, NA close
     count, dup count."""
@@ -10,9 +11,7 @@ def dataset_summary(df: pd.DataFrame) -> pd.DataFrame:
     req = {"symbol", "date", "close"}
     missing = req.difference(df.columns)
     if missing:
-        raise ValueError(
-            f"Eksik kolon(lar): {', '.join(sorted(missing))}"
-        )
+        raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")
     if df.empty:
         return pd.DataFrame(
             columns=[
@@ -34,6 +33,7 @@ def dataset_summary(df: pd.DataFrame) -> pd.DataFrame:
     out["dup_symbol_date"] = out["symbol"].map(dup).fillna(0).astype(int)
     return out.sort_values("symbol").reset_index(drop=True)
 
+
 def quality_warnings(df: pd.DataFrame) -> pd.DataFrame:
     """Return row-level issues for quick inspection (date order, negative
     prices, etc.)."""
@@ -42,9 +42,7 @@ def quality_warnings(df: pd.DataFrame) -> pd.DataFrame:
     req = {"symbol", "date", "close"}
     missing = req.difference(df.columns)
     if missing:
-        raise ValueError(
-            f"Eksik kolon(lar): {', '.join(sorted(missing))}"
-        )
+        raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")
     issues = []
     if df.empty:
         return pd.DataFrame(columns=["symbol", "date", "issue", "value"])
@@ -113,9 +111,5 @@ def quality_warnings(df: pd.DataFrame) -> pd.DataFrame:
                 }
             )
     if not issues:
-        return pd.DataFrame(
-            columns=["symbol", "date", "issue", "value"]
-        )
-    return pd.DataFrame(
-        issues, columns=["symbol", "date", "issue", "value"]
-    )
+        return pd.DataFrame(columns=["symbol", "date", "issue", "value"])
+    return pd.DataFrame(issues, columns=["symbol", "date", "issue", "value"])

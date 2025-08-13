@@ -81,8 +81,6 @@ def test_apply_corporate_actions_invalid_factor(tmp_path, factor):
         }
     )
     csv = tmp_path / "actions.csv"
-    csv.write_text(
-        f"symbol,date,factor\nAAA,2024-01-02,{factor}\n", encoding="utf-8"
-    )
+    csv.write_text(f"symbol,date,factor\nAAA,2024-01-02,{factor}\n", encoding="utf-8")
     with pytest.raises(ValueError):
         apply_corporate_actions(df, csv)

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import warnings
 from enum import Enum
 
-import warnings
 import numpy as np
 import pandas as pd
 from loguru import logger
@@ -14,6 +14,7 @@ from .calendars import (
     check_missing_trading_days_by_symbol,
 )
 
+
 class TradeSide(Enum):
     LONG = "long"
     SHORT = "short"
@@ -24,6 +25,7 @@ class TradeSide(Enum):
             return cls(value.lower())
         except Exception as exc:  # pragma: no cover - explicit ValueError below
             raise ValueError(f"Geçersiz Side değeri: {value!r}") from exc
+
 
 def run_1g_returns(
     df_with_next: pd.DataFrame,
@@ -238,7 +240,9 @@ def run_1g_returns(
                 return td[idx + holding_period]
 
             merged["ExitDate"] = merged["Date"].map(calc_exit)
-            exit_base = base.drop(columns=["next_date", "next_close"], errors="ignore").rename(
+            exit_base = base.drop(
+                columns=["next_date", "next_close"], errors="ignore"
+            ).rename(
                 columns={"symbol": "Symbol", "date": "ExitDate", "close": "ExitClose"}
             )
             merged = merged.merge(exit_base, on=["Symbol", "ExitDate"], how="left")
@@ -247,14 +251,12 @@ def run_1g_returns(
             close_lookup = base.set_index(["symbol", "date"])["close"]
             merged["ExitDate"] = merged["Date"]
             for _ in range(holding_period):
-                merged["ExitDate"] = (
-                    pd.MultiIndex.from_frame(merged[["Symbol", "ExitDate"]])
-                    .map(next_lookup)
-                )
-            merged["ExitClose"] = (
-                pd.MultiIndex.from_frame(merged[["Symbol", "ExitDate"]])
-                .map(close_lookup)
-            )
+                merged["ExitDate"] = pd.MultiIndex.from_frame(
+                    merged[["Symbol", "ExitDate"]]
+                ).map(next_lookup)
+            merged["ExitClose"] = pd.MultiIndex.from_frame(
+                merged[["Symbol", "ExitDate"]]
+            ).map(close_lookup)
 
     invalid_entry = (merged["EntryClose"] <= 0) | merged["EntryClose"].isna()
     invalid_exit = (merged["ExitClose"] <= 0) | merged["ExitClose"].isna()
@@ -309,7 +311,18 @@ def run_1g_returns(
     cols = ["FilterCode"]
     if "Group" in merged.columns or any("Group" in e.columns for e in extras):
         cols.append("Group")
-    cols.extend(["Symbol", "Date", "EntryClose", "ExitClose", "Side", "ReturnPct", "Win", "Reason"])
+    cols.extend(
+        [
+            "Symbol",
+            "Date",
+            "EntryClose",
+            "ExitClose",
+            "Side",
+            "ReturnPct",
+            "Win",
+            "Reason",
+        ]
+    )
     out = merged[cols].copy()
     frames = [out]
     if extras:
