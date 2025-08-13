@@ -51,6 +51,12 @@ pip install -r requirements.txt -c constraints.txt --only-binary=:all: --no-bina
 pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta  # test/geliştirici ortamı
 ```
 
+#### Ortam Doğrulama
+
+```python
+!python tools/verify_env.py
+```
+
 Python 3.10–3.12 sürümleri desteklenir; 3.13 henüz destek dışıdır.
 
 Excel dosyalarını okuyup yazmak için gerekli `openpyxl` ve `XlsxWriter` paketleri de bu gereksinimlerle kurulur.
@@ -65,6 +71,7 @@ python -m backtest.cli scan-day --config examples/example_config.yaml --date 202
 !pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
 # Uygun wheel bulunamazsa veya pandas_ta uyumsuzluğu olursa:
 !pip install "numpy<2.0" "pandas<2.2" pandas-ta==0.3.14b0
+!python tools/verify_env.py
 !python -m backtest.cli scan-day --config config/colab_config.yaml --date 2024-01-02
 ```
 
