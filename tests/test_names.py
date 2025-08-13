@@ -20,5 +20,6 @@ def test_alias_cases():
 
 
 def test_imports():
-    import backtest  # noqa: F401
-    from backtest.utils import names  # noqa: F401
+    import backtest
+    from backtest.utils import names
+    assert backtest and names
