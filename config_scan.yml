@@ -1,0 +1,29 @@
+project:
+  out_dir: raporlar
+  run_mode: range
+  start_date: "2025-03-07"
+  end_date: "2025-03-11"
+  holding_period: 1
+  transaction_cost: 0.0
+  stop_on_filter_error: false
+  raise_on_error: false
+
+data:
+  excel_dir: Veri
+  filters_csv: filters.csv
+  enable_cache: false
+
+calendar:
+  tplus1_mode: price
+
+indicators:
+  engine: none
+  params: {}
+
+benchmark:
+  xu100_source: none
+
+report:
+  percent_format: "0.00%"
+  daily_sheet_prefix: "SCAN_"
+  summary_sheet_name: "SUMMARY"

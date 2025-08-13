@@ -7,7 +7,8 @@ project:
   single_date: null
   holding_period: 1
   transaction_cost: 0.0
-
+  stop_on_filter_error: false
+  
 data:
   excel_dir: "../Veri"
   filters_csv: "filters.csv"
@@ -27,7 +28,7 @@ calendar:
   holidays_csv_path: ""      # ör: examples/holidays_tr.csv
 
 indicators:
-  engine: "pandas_ta"
+  engine: "pandas_ta"  # pandas_ta | builtin | none
   params:
     rsi: [14]
     ema: [10,20,50]

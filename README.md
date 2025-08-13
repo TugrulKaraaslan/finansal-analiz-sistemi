@@ -105,6 +105,24 @@ bir hata mesajı gösterilir.
 - `pd.concat` sonrası oluşan mükerrer kolon adları tekilleştirilir ve
   logda listelenir.
 
+### Hazır Gösterge Kolonları ve Kesişimler
+
+- Veride indikatör kolonları önceden hesaplanmışsa `indicators.engine: "none"`
+  ayarıyla hesaplama adımı tamamen atlanır.
+- Sistem, tanımlı kolonlardan otomatik olarak kesişim alanları üretir; örn.
+  `sma_10_keser_sma_50_yukari` veya `adx_14_keser_20p0_asagi`.
+- Eksik kaynak kolonlar işlem akışını durdurmaz, sadece uyarı logu bırakılır.
+
+Örnek config parçası:
+
+```yaml
+indicators:
+  engine: "none"
+  params: {}
+project:
+  stop_on_filter_error: false  # eksik kolonda filtreyi atla
+```
+
 ## Örnek Çalıştırma
 - `examples/example_config.yaml` içindeki `excel_dir` ve `filters_csv` yollarını düzenleyin.
 - Tek gün tarama:
