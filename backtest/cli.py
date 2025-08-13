@@ -28,11 +28,6 @@ from .validator import dataset_summary, quality_warnings
 def cli():
     pass
 
-
-def info(msg: str) -> None:  # pragma: no cover - compatibility wrapper
-    """Compatibility wrapper for legacy utils.info."""
-    logger.info(msg)
-
 def _run_scan(cfg) -> None:
     """Common execution for scan commands.
 
