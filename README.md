@@ -117,7 +117,7 @@ Linux ortamında `Veri` klasör adının büyük harfle yazıldığına dikkat e
 
 ```bash
 python -m backtest.cli scan-range \
-  --config config_scan.yml \
+  --config examples/example_config.yaml \
   --start 2025-03-07 \
   --end   2025-03-11 \
   --holding-period 1 \
