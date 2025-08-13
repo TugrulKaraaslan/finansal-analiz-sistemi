@@ -147,11 +147,11 @@ def run_1g_returns(
     if trading_days is None:
         trading_days = build_trading_days(df_with_next)
 
-    invalid_side = pd.DataFrame()
     if "Side" in signals.columns:
         sides = signals["Side"].fillna("").astype(str).str.lower()
         valid_mask = sides.isin([s.value for s in TradeSide]) | (sides == "")
         invalid = ~valid_mask
+        invalid_side = pd.DataFrame()
         if invalid.any():
             bad_vals = sides[invalid].unique().tolist()
             logger.warning(
