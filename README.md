@@ -47,17 +47,63 @@ Aşağıdaki tablo bazı sık kullanılan indikatör kolonlarını ve bunlara il
 ### Yerel
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt  # Excel okuma için openpyxl/xlrd gereklidir
+pip install -r requirements.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
+pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta  # test/geliştirici ortamı
+```
+
+Python 3.10–3.12 sürümleri desteklenir; 3.13 henüz destek dışıdır.
+
+Excel dosyalarını okuyup yazmak için gerekli `openpyxl` ve `XlsxWriter` paketleri de bu gereksinimlerle kurulur.
+
+```bash
 python -m backtest.cli scan-day --config examples/example_config.yaml --date 2024-01-02
 ```
 ### Google Colab
 ```python
-!pip install -q -r requirements_colab.txt
-!python -m backtest.cli scan-day --config examples/example_config.yaml --date 2024-01-02
+!pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
+# Uygun wheel bulunamazsa veya pandas_ta uyumsuzluğu olursa:
+!pip install "numpy<2.0" "pandas<2.2" pandas-ta==0.3.14b0
+!python -m backtest.cli scan-day --config config/colab_config.yaml --date 2024-01-02
 ```
 
-> Not: Filtre CSV doğrulaması için [Pandera](https://pandera.readthedocs.io/) gereklidir. 
-> `pip install pandera` komutuyla kurulabilir.
+> Not: Filtre CSV doğrulaması için [Pandera](https://pandera.readthedocs.io/) gerekir.
+> Geliştiriciler `requirements_dev.txt` ile kurulmuş olur.
+
+### Config Şeması Örneği
+
+Aşağıdaki YAML şeması minimum zorunlu alanları gösterir:
+
+```yaml
+project:
+  out_dir: raporlar
+data:
+  excel_dir: Veri  # fiyat excellerinin klasörü
+  filters_csv: filters.csv  # filtre tanımları
+```
+
+`data.excel_dir` ve `data.filters_csv` alanları eksikse komut satırında
+`config.data.* zorunlu; örnek için examples/example_config.yaml` şeklinde
+bir hata mesajı gösterilir.
+
+### Gösterge Motoru Davranışı
+
+- Varsayılan olarak `pandas_ta` yüklüyse ve NumPy sürümüyle uyumluysa
+  göstergeler bu motor ile hesaplanır.
+- `pandas_ta` eksik veya NumPy 2 ile uyumsuzsa otomatik olarak yerleşik
+  hesaplamalara dönülür. Konsolda örnek mesaj:
+
+  ```
+  compute_indicators using engine=builtin
+  ```
+
+### Var Olan Kolonların Korunması
+
+- Mevcut bir kolon üzerine yazılmaz; `relative_volume` ya da
+  `hacim_goreli` veride zaten varsa yeniden hesaplanmaz ve alias üretilmez.
+- Çoklu kolon → tek kolon kopyalama hataları engellenir; uygun olmayan
+  durumlar `alias skipped` uyarısı ile geçilir.
+- `pd.concat` sonrası oluşan mükerrer kolon adları tekilleştirilir ve
+  logda listelenir.
 
 ## Örnek Çalıştırma
 - `examples/example_config.yaml` içindeki `excel_dir` ve `filters_csv` yollarını düzenleyin.
@@ -90,6 +136,7 @@ SCAN 2024-01-02: 24 satır, ort. %1.2
 ```
 ## Test Çalıştırma (isteğe bağlı)
 ```bash
+pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
 pytest -q
 ```
 

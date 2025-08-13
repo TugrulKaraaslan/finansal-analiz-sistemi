@@ -106,6 +106,11 @@ def load_config(path: str | Path) -> RootCfg:
     if isinstance(proj, dict) and proj.get("out_dir"):
         proj["out_dir"] = _join(proj.get("out_dir"))  # PATH DÜZENLENDİ
     data = cfg.get("data", {}) if isinstance(cfg, dict) else {}
+    for req_key in ("excel_dir", "filters_csv"):
+        if not data.get(req_key):
+            raise ValueError(
+                f"config.data.{req_key} zorunlu; örnek için examples/example_config.yaml"
+            )
     for k in ["excel_dir", "filters_csv", "cache_parquet_path", "corporate_actions_csv"]:
         v = data.get(k)
         if v:

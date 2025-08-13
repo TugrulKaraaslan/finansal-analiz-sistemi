@@ -1,29 +1,25 @@
 # Google Colab Hızlı Başlangıç
 
-Aşağıdaki tek hücre Colab ortamında projeyi kurar, pandas_ta için NumPy 2 yamasını uygular ve kısa bir backtest çalıştırır. Hücreyi olduğu gibi kopyalayıp çalıştırabilirsiniz.
+Aşağıdaki hücre Colab ortamında projeyi kurar ve örnek bir tarama çalıştırır:
 
 ```python
-%pip install -U pip
-%pip install -r requirements_colab.txt
-
-import os
-os.system(r"grep -rl 'from numpy import NaN' /usr/local/lib/python*/dist-packages/pandas_ta | xargs -r sed -i 's/from numpy import NaN/from numpy import nan/g'")
-os.system(r"grep -rl 'np\\.NaN'              /usr/local/lib/python*/dist-packages/pandas_ta | xargs -r sed -i 's/np\\.NaN/np.nan/g'")
+# pip kurulumu
+%pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
+# Uygun wheel bulunamazsa veya pandas_ta uyumsuzluğu olursa:
+%pip install "numpy<2.0" "pandas<2.2" pandas-ta==0.3.14b0
 
 %cd /content/finansal-analiz-sistemi
 %env PYTHONPATH=/content/finansal-analiz-sistemi
 !mkdir -p raporlar
 
-import numpy as np, pandas as pd, pandas_ta as ta
-print("NumPy:", np.__version__, "| Pandas:", pd.__version__)
-print("pandas-ta import OK")
-
-!python -m backtest.cli scan-range --config config_scan.yml \
+!python -m backtest.cli scan-range --config config/colab_config.yaml \
   --start 2025-03-07 --end 2025-03-11 \
   --holding-period 1 --transaction-cost 0.0005
 
 !ls -la raporlar | head
 ```
+
+> Excel okuma/yazma için gerekli `openpyxl` ve `XlsxWriter` paketleri `requirements_colab.txt` içinde yer alır.
 
 ## İsim normalizasyonu
 
@@ -44,6 +40,7 @@ isim dönüşümlerini raporlar; `filters_fixed.csv` dosyasını üretir.
 
 İsteğe bağlı olarak testleri çalıştırmak için:
 
-```bash
-pytest -q
+```python
+%pip install -q -r requirements_dev.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
+!pytest -q
 ```
