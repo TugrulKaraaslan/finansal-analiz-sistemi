@@ -1,13 +1,11 @@
 import importlib
 import sys
 
-RECOMMENDED_CMD = (
-    'pip install "numpy<2.0.0" "pandas<2.2" pandas-ta==0.3.14b0'
-)
+RECOMMENDED_CMD = 'pip install "numpy<2.0.0" "pandas<2.2" pandas-ta==0.3.14b0'
 
 
 def _parse(version: str) -> tuple:
-    return tuple(int(part) for part in version.split('.') if part.isdigit())
+    return tuple(int(part) for part in version.split(".") if part.isdigit())
 
 
 def _check(pkg: str, max_version: str) -> bool:
