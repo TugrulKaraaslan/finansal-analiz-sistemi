@@ -1,9 +1,9 @@
 import pandas as pd
 import pytest
 
+from backtest.backtester import run_1g_returns
 from backtest.indicators import compute_indicators
 from backtest.screener import run_screener
-from backtest.backtester import run_1g_returns
 
 
 def test_pipeline_end_to_end():

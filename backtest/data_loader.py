@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import importlib.util
 import warnings
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-import importlib.util
 import pandas as pd
 from loguru import logger
 

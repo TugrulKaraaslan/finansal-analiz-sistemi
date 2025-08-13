@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import Iterable, Optional, Set
 
 import pandas as pd
-import warnings
 
 from utils.paths import resolve_path
 

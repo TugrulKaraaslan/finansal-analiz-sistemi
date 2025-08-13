@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import click
 import pandas as pd
 import pytest
 
-import click
 from backtest import cli
 
 
