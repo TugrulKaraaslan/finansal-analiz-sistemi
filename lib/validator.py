@@ -21,7 +21,10 @@ except Exception:
         import pandera as pa
     except Exception as exc:  # pragma: no cover - import error path
         raise ImportError(
-            "Pandera is required for filter validation. Install with 'pip install pandera'."
+            (
+                "Pandera is required for filter validation. Install with "
+                "'pip install pandera'."
+            )
         ) from exc
 
 
@@ -55,8 +58,12 @@ def validate_filters(path: str | Path) -> pd.DataFrame:
             first = fc[fc["index"].notna()].iloc[0]
             column = first["column"]
             row_num = int(first["index"]) + 2
-            raise ValueError(f"{p.name} satır {row_num} – {column} boş olamaz") from None
-        raise ValueError(f"{p.name} şema doğrulaması başarısız") from None
+            raise ValueError(
+                f"{p.name} satır {row_num} – {column} boş olamaz"
+            ) from None
+        raise ValueError(
+            f"{p.name} şema doğrulaması başarısız"
+        ) from None
     return df
 
 
