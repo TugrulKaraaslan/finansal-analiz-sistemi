@@ -21,7 +21,7 @@ from .indicators import compute_indicators
 from .normalizer import normalize
 from .reporter import write_reports
 from .screener import run_screener
-from .utils import set_name_normalization
+from .utils.names import set_name_normalization
 from .validator import dataset_summary, quality_warnings
 
 @click.group()

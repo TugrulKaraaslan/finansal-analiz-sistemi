@@ -4,8 +4,6 @@ import re
 import unicodedata
 from typing import Optional
 
-from .names import set_name_normalization
-
 def normalize_key(s: Optional[str]) -> str:
     if s is None:
         return ""
@@ -35,7 +33,4 @@ def normalize_key(s: Optional[str]) -> str:
     return s.strip("_")
 
 
-__all__ = [
-    "normalize_key",
-    "set_name_normalization",
-]
+__all__ = ["normalize_key"]
