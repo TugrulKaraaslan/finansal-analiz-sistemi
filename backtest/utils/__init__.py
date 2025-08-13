@@ -65,4 +65,3 @@ __all__ = [
     "canonicalize_filter_token",
     "set_name_normalization",
 ]
-

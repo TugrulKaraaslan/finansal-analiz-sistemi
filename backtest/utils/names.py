@@ -75,14 +75,14 @@ ALIAS: Dict[str, str] = {
 
 # Örüntü temelli genel kurallar (EMA, SMA, RSI, MOM/ROC n, vb.)
 _PATTERNS = [
-    (re.compile(r"^ema[_\-]?(\d+)$"),      lambda m: f"ema_{m.group(1)}"),
-    (re.compile(r"^sma[_\-]?(\d+)$"),      lambda m: f"sma_{m.group(1)}"),
-    (re.compile(r"^rsi[_\-]?(\d+)$"),      lambda m: f"rsi_{m.group(1)}"),
+    (re.compile(r"^ema[_\-]?(\d+)$"), lambda m: f"ema_{m.group(1)}"),
+    (re.compile(r"^sma[_\-]?(\d+)$"), lambda m: f"sma_{m.group(1)}"),
+    (re.compile(r"^rsi[_\-]?(\d+)$"), lambda m: f"rsi_{m.group(1)}"),
     (re.compile(r"^(mom|momentum)[_\-]?(\d+)$"), lambda m: f"momentum_{m.group(2)}"),
-    (re.compile(r"^roc[_\-]?(\d+)$"),      lambda m: f"roc_{m.group(1)}"),
-    (re.compile(r"^adx[_\-]?(\d+)$"),      lambda m: f"adx_{m.group(1)}"),
-    (re.compile(r"^dmp[_\-]?(\d+)$"),      lambda m: f"dmp_{m.group(1)}"),
-    (re.compile(r"^dmn[_\-]?(\d+)$"),      lambda m: f"dmn_{m.group(1)}"),
+    (re.compile(r"^roc[_\-]?(\d+)$"), lambda m: f"roc_{m.group(1)}"),
+    (re.compile(r"^adx[_\-]?(\d+)$"), lambda m: f"adx_{m.group(1)}"),
+    (re.compile(r"^dmp[_\-]?(\d+)$"), lambda m: f"dmp_{m.group(1)}"),
+    (re.compile(r"^dmn[_\-]?(\d+)$"), lambda m: f"dmn_{m.group(1)}"),
 ]
 
 
