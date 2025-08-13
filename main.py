@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+from io_filters import load_filters_csv
+
+
 def main() -> None:
     """Entry point."""
-    from lib.validator import validate_filters
-
     try:
-        validate_filters("filters.csv")
+        load_filters_csv("filters.csv")
     except FileNotFoundError:
-        print("filters.csv dosyası bulunamadı. Lütfen dosyanın mevcut olduğundan emin olun.")
+        print(
+            "filters.csv dosyası bulunamadı. Lütfen dosyanın mevcut olduğundan "
+            "emin olun."
+        )
 
 
 if __name__ == "__main__":

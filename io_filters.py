@@ -47,9 +47,13 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
     if missing:
         raise RuntimeError("Eksik kolon(lar): " + ", ".join(sorted(missing)))
 
-    # basic normalization
-    df["FilterCode"] = df["FilterCode"].astype(str).str.strip()
-    df["PythonQuery"] = df["PythonQuery"].astype(str)
+    # basic normalization and emptiness checks
+    df["FilterCode"] = df["FilterCode"].fillna("").astype(str).str.strip()
+    df["PythonQuery"] = df["PythonQuery"].fillna("").astype(str).str.strip()
+    if df["FilterCode"].eq("").any():
+        raise RuntimeError("FilterCode boş olamaz")
+    if df["PythonQuery"].eq("").any():
+        raise RuntimeError("PythonQuery boş olamaz")
     dups = df["FilterCode"][df["FilterCode"].duplicated()]
     if not dups.empty:
         dup_codes = ", ".join(sorted(dups.unique()))
