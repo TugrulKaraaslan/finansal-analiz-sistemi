@@ -1,4 +1,3 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 import pandas as pd
@@ -11,7 +10,6 @@ from backtest.calendars import (
     build_trading_days,
     check_missing_trading_days,
 )
-
 
 def test_next_close():
     df = pd.DataFrame(
@@ -30,13 +28,11 @@ def test_next_close():
     assert out.loc[0, "next_close"] == 11
     assert pd.isna(out.loc[2, "next_close"])
 
-
 def test_build_trading_days_single_holiday():
     df = pd.DataFrame({"date": pd.to_datetime(["2024-01-01", "2024-01-03"]).normalize()})
     tdays = build_trading_days(df, pd.Timestamp("2024-01-02"))
     assert pd.Timestamp("2024-01-02") not in tdays
     assert isinstance(tdays[0], pd.Timestamp)
-
 
 def test_add_next_close_calendar():
     df = pd.DataFrame(
@@ -53,7 +49,6 @@ def test_add_next_close_calendar():
     assert out.loc[0, "next_date"] == pd.Timestamp("2024-01-02")
     assert isinstance(out.loc[0, "next_date"], pd.Timestamp)
 
-
 def test_add_next_close_calendar_skips_weekend():
     df = pd.DataFrame(
         {
@@ -67,12 +62,10 @@ def test_add_next_close_calendar_skips_weekend():
     assert out.loc[0, "next_date"] == pd.Timestamp("2024-01-08")
     assert out.loc[0, "next_close"] == 11.0
 
-
 def test_check_missing_trading_days_raise():
     df = pd.DataFrame({"date": pd.to_datetime(["2024-01-01", "2024-01-03"]).normalize()})
     with pytest.raises(ValueError):
         check_missing_trading_days(df)
-
 
 def test_check_missing_trading_days_warn():
     df = pd.DataFrame({"date": pd.to_datetime(["2024-01-01", "2024-01-03"]).normalize()})

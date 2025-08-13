@@ -1,4 +1,3 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -8,7 +7,6 @@ import pytest
 
 import click
 from backtest import cli
-
 
 def _cfg():
     return SimpleNamespace(
@@ -32,7 +30,6 @@ def _cfg():
             percent_format="0.00%",
         ),
     )
-
 
 def test_scan_range_empty(monkeypatch):
     cfg = _cfg()
@@ -90,7 +87,6 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(cli, "info", lambda msg: None)
     cli.scan_range.callback("cfg.yml", None, None, None, None)
 
-
 def test_scan_day_empty(monkeypatch):
     cfg = _cfg()
     monkeypatch.setattr(cli, "load_config", lambda _: cfg)
@@ -146,7 +142,6 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(cli, "quality_warnings", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "info", lambda msg: None)
     cli.scan_day.callback("cfg.yml", "2024-01-02", None, None)
-
 
 def test_scan_range_missing_excel(monkeypatch):
     cfg = _cfg()

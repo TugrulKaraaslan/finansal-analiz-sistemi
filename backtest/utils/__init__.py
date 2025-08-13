@@ -1,10 +1,9 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 import re
 import unicodedata
 from pathlib import Path
-from typing import Optional  # TİP DÜZELTİLDİ
+from typing import Optional
 
 from loguru import logger
 
@@ -16,18 +15,15 @@ from .names import (
     set_name_normalization,
 )
 
-
 def ensure_dir(path: str | Path):
     p = resolve_path(path)
     target = p if not p.suffix else p.parent
     target.mkdir(parents=True, exist_ok=True)
 
-
 def info(msg: str):
     logger.info(msg)
 
-
-def normalize_key(s: Optional[str]) -> str:  # TİP DÜZELTİLDİ
+def normalize_key(s: Optional[str]) -> str:
     if s is None:
         return ""
     s = str(s).strip()
@@ -54,7 +50,6 @@ def normalize_key(s: Optional[str]) -> str:  # TİP DÜZELTİLDİ
     s = s.lower()
     s = re.sub(r"[^a-z0-9]+", "_", s)
     return s.strip("_")
-
 
 __all__ = [
     "ensure_dir",

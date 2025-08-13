@@ -1,15 +1,13 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 import os
-from pathlib import Path  # TİP DÜZELTİLDİ
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import yaml
 from pydantic import BaseModel, Field
 
 from utils.paths import resolve_path
-
 
 class ProjectCfg(BaseModel):
     out_dir: str = "raporlar"
@@ -20,7 +18,6 @@ class ProjectCfg(BaseModel):
     holding_period: int = 1
     transaction_cost: float = 0.0
     raise_on_error: bool = False
-
 
 class DataCfg(BaseModel):
     excel_dir: str
@@ -39,12 +36,10 @@ class DataCfg(BaseModel):
         }
     )
 
-
 class CalendarCfg(BaseModel):
     tplus1_mode: str = "price"  # price | calendar
     holidays_source: str = "none"  # none | csv
     holidays_csv_path: Optional[str] = None
-
 
 class IndicatorsCfg(BaseModel):
     engine: str = "pandas_ta"  # pandas_ta | ta_lib
@@ -52,26 +47,22 @@ class IndicatorsCfg(BaseModel):
         default_factory=lambda: {"rsi": [14], "ema": [10, 20, 50], "macd": [12, 26, 9]}
     )
 
-
 class BenchmarkCfg(BaseModel):
     xu100_source: str = "none"  # csv | none
     xu100_csv_path: Optional[str] = None
-
 
 class ReportCfg(BaseModel):
     percent_format: str = "0.00%"
     daily_sheet_prefix: str = "SCAN_"
     summary_sheet_name: str = "SUMMARY"
 
-
 class RootCfg(BaseModel):
     project: ProjectCfg
     data: DataCfg
-    calendar: CalendarCfg = Field(default_factory=CalendarCfg)  # TİP DÜZELTİLDİ
-    indicators: IndicatorsCfg = Field(default_factory=IndicatorsCfg)  # TİP DÜZELTİLDİ
-    benchmark: BenchmarkCfg = Field(default_factory=BenchmarkCfg)  # TİP DÜZELTİLDİ
-    report: ReportCfg = Field(default_factory=ReportCfg)  # TİP DÜZELTİLDİ
-
+    calendar: CalendarCfg = Field(default_factory=CalendarCfg)
+    indicators: IndicatorsCfg = Field(default_factory=IndicatorsCfg)
+    benchmark: BenchmarkCfg = Field(default_factory=BenchmarkCfg)
+    report: ReportCfg = Field(default_factory=ReportCfg)
 
 def load_config(path: str | Path) -> RootCfg:
     p = resolve_path(path)
@@ -80,7 +71,7 @@ def load_config(path: str | Path) -> RootCfg:
     with p.open("r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     if not isinstance(cfg, dict):
-        raise TypeError("Config içeriği sözlük olmalı")  # TİP DÜZELTİLDİ
+        raise TypeError("Config içeriği sözlük olmalı")
     base = p.parent
 
     def _join(v: Optional[str], *, allow_cwd: bool = False) -> Optional[str]:
@@ -101,7 +92,7 @@ def load_config(path: str | Path) -> RootCfg:
 
     proj = cfg.get("project", {}) if isinstance(cfg, dict) else {}
     if isinstance(proj, dict) and proj.get("out_dir"):
-        proj["out_dir"] = _join(proj.get("out_dir"))  # PATH DÜZENLENDİ
+        proj["out_dir"] = _join(proj.get("out_dir"))
     data = cfg.get("data", {}) if isinstance(cfg, dict) else {}
     for req_key in ("excel_dir", "filters_csv"):
         if not data.get(req_key):
@@ -117,15 +108,15 @@ def load_config(path: str | Path) -> RootCfg:
     ]:
         v = data.get(k)
         if v:
-            data[k] = _join(v, allow_cwd=(k == "filters_csv"))  # PATH DÜZENLENDİ
+            data[k] = _join(v, allow_cwd=(k == "filters_csv"))
     cal = cfg.get("calendar", {}) if isinstance(cfg, dict) else {}
     if isinstance(cal, dict) and cal.get("holidays_csv_path"):
         cal["holidays_csv_path"] = _join(
             cal.get("holidays_csv_path")
-        )  # PATH DÜZENLENDİ
+        )
     bench = cfg.get("benchmark", {}) if isinstance(cfg, dict) else {}
     if isinstance(bench, dict) and bench.get("xu100_csv_path"):
-        bench["xu100_csv_path"] = _join(bench.get("xu100_csv_path"))  # PATH DÜZENLENDİ
+        bench["xu100_csv_path"] = _join(bench.get("xu100_csv_path"))
     cfg["project"], cfg["data"], cfg["calendar"], cfg["benchmark"] = (
         proj,
         data,

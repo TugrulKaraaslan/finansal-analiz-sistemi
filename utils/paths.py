@@ -1,4 +1,3 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 """Path utilities."""
 
 from __future__ import annotations
@@ -6,7 +5,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from typing import Union
-
 
 def resolve_path(path: Union[str, os.PathLike]) -> Path:
     """Expand user home (``~``) and environment variables safely.
@@ -29,6 +27,5 @@ def resolve_path(path: Union[str, os.PathLike]) -> Path:
     expanded = os.path.expandvars(str(path))
     expanded = os.path.expanduser(expanded)
     return Path(expanded).resolve()
-
 
 __all__ = ["resolve_path"]

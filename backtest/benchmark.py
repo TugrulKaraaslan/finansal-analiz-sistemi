@@ -1,4 +1,3 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 import warnings
@@ -8,20 +7,19 @@ import pandas as pd
 
 from utils.paths import resolve_path
 
-
 def _read_csv_any(path: str | Path) -> pd.DataFrame:
     """Read CSV with fallback separator/decimal handling."""
     p = resolve_path(path)
     if not p.exists():
         raise FileNotFoundError(f"CSV bulunamadı: {p}")
     try:
-        df = pd.read_csv(p, encoding="utf-8")  # PATH DÜZENLENDİ
+        df = pd.read_csv(p, encoding="utf-8")
         if df.shape[1] > 1:
             return df
     except Exception:
         pass
     try:
-        with p.open("r", encoding="utf-8") as f:  # PATH DÜZENLENDİ
+        with p.open("r", encoding="utf-8") as f:
             sample = f.read(2048)
     except Exception as e:  # SPECIFIC EXCEPTIONS
         raise FileNotFoundError(f"CSV okunamadı: {p}") from e
@@ -33,17 +31,16 @@ def _read_csv_any(path: str | Path) -> pd.DataFrame:
         sep = ","
     dec = "," if sep == ";" else "."
     try:
-        return pd.read_csv(p, sep=sep, decimal=dec, encoding="utf-8")  # PATH DÜZENLENDİ
+        return pd.read_csv(p, sep=sep, decimal=dec, encoding="utf-8")
     except Exception as e:
         raise RuntimeError(f"CSV parse edilemedi: {p}") from e
 
-
 def load_xu100_pct(csv_path: str | Path) -> pd.Series:
     if not isinstance(csv_path, (str, Path)):
-        raise TypeError("csv_path must be str or Path")  # TİP DÜZELTİLDİ
-    df = _read_csv_any(csv_path)  # PATH DÜZENLENDİ
+        raise TypeError("csv_path must be str or Path")
+    df = _read_csv_any(csv_path)
     # En az iki kolon yoksa tarih ve fiyat ayrılamaz
-    if df.empty or df.shape[1] < 2:  # LOJİK HATASI DÜZELTİLDİ
+    if df.empty or df.shape[1] < 2:
         warnings.warn(f"Boş CSV: {csv_path}")
         return pd.Series(dtype=float)
     cols = {c.lower().strip(): c for c in df.columns}
@@ -58,7 +55,7 @@ def load_xu100_pct(csv_path: str | Path) -> pd.Series:
         "adj_close",
         "kapanis_tl",
         "fiyat",
-    )  # TİP DÜZELTİLDİ
+    )
     close_col = None
     for k in cand:
         if k in cols:

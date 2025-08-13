@@ -1,4 +1,3 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from types import SimpleNamespace
 
 import pandas as pd
@@ -7,23 +6,19 @@ import pytest
 from backtest.reporter import write_reports
 from backtest.validator import dataset_summary, quality_warnings
 
-
 def test_dataset_summary_invalid_type():
     with pytest.raises(TypeError):
         dataset_summary([])  # not a DataFrame
-
 
 def test_dataset_summary_missing_columns():
     df = pd.DataFrame({"symbol": ["AAA"], "close": [1.0]})
     with pytest.raises(ValueError):
         dataset_summary(df)
 
-
 def test_quality_warnings_missing_columns():
     df = pd.DataFrame({"symbol": ["AAA"], "close": [1.0]})
     with pytest.raises(ValueError):
         quality_warnings(df)
-
 
 def test_quality_warnings_extra_checks():
     df = pd.DataFrame(
@@ -53,7 +48,6 @@ def test_quality_warnings_extra_checks():
         "na_close",
     }
 
-
 class _DummyWriter:
     def __init__(self, *args, **kwargs):
         self.book = SimpleNamespace(add_format=lambda *a, **k: None)
@@ -64,7 +58,6 @@ class _DummyWriter:
 
     def __exit__(self, _exc_type, _exc, _tb):
         return False
-
 
 def test_write_reports_xu100_pct_type(monkeypatch):
     monkeypatch.setattr(pd, "ExcelWriter", _DummyWriter)

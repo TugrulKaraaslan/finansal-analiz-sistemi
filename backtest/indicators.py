@@ -1,4 +1,3 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 from typing import Dict, List, Optional
@@ -10,7 +9,6 @@ import pandas as pd  # module-level; fonksiyon içi import yok
 from backtest.utils.names import canonicalize_columns
 
 logger = logging.getLogger(__name__)
-
 
 def _safe_alias(df2: pd.DataFrame, alias: str, base: str) -> bool:
     """Safely copy ``base`` column to ``alias`` without raising.
@@ -48,10 +46,8 @@ def _safe_alias(df2: pd.DataFrame, alias: str, base: str) -> bool:
     logger.warning("alias skipped (non-1d): alias=%s base=%s", alias, base)
     return False
 
-
 def _ema(series: pd.Series, length: int) -> pd.Series:
     return series.ewm(span=length, adjust=False).mean()
-
 
 def _rsi(series: pd.Series, length: int) -> pd.Series:
     delta = series.diff()
@@ -59,7 +55,6 @@ def _rsi(series: pd.Series, length: int) -> pd.Series:
     loss = -delta.clip(upper=0).ewm(alpha=1 / length, adjust=False).mean()
     rs = gain / loss
     return 100 - (100 / (1 + rs))
-
 
 def _stoch_rsi(
     series: pd.Series, rsi_len: int, stoch_len: int, k: int, d: int
@@ -72,7 +67,6 @@ def _stoch_rsi(
     k_line = stoch.rolling(k, min_periods=k).mean() * 100
     d_line = k_line.rolling(d, min_periods=d).mean()
     return k_line, d_line
-
 
 def compute_indicators(
     df: pd.DataFrame,
@@ -99,13 +93,13 @@ def compute_indicators(
         DataFrame containing the original data along with computed indicators.
     """
     if not isinstance(df, pd.DataFrame):
-        raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
+        raise TypeError("df must be a DataFrame")
     if params is not None and not isinstance(params, dict):
-        raise TypeError("params must be a dict or None")  # TİP DÜZELTİLDİ
+        raise TypeError("params must be a dict or None")
     if params is None:
-        params = {}  # TİP DÜZELTİLDİ
+        params = {}
     if df.empty:
-        return df.copy()  # TİP DÜZELTİLDİ
+        return df.copy()
     supported_engines = {"builtin", "pandas_ta"}
     if engine not in supported_engines:
         raise ValueError(f"Unsupported engine: {engine}")
@@ -146,7 +140,7 @@ def compute_indicators(
         g = g.copy()
         ema_params = params.get("ema", [10, 20, 50])
         if isinstance(ema_params, (int, float)):
-            ema_params = [ema_params]  # TİP DÜZELTİLDİ
+            ema_params = [ema_params]
         logger.debug("EMA params: %s", ema_params)
         for p in ema_params:
             p_int = int(p)
@@ -159,7 +153,7 @@ def compute_indicators(
                 g[col] = _ema(g["close"], p_int)
         rsi_params = params.get("rsi", [14])
         if isinstance(rsi_params, (int, float)):
-            rsi_params = [rsi_params]  # TİP DÜZELTİLDİ
+            rsi_params = [rsi_params]
         logger.debug("RSI params: %s", rsi_params)
         for p in rsi_params:
             p_int = int(p)
@@ -193,12 +187,12 @@ def compute_indicators(
         macd_params = params.get("macd", [])
         if macd_params:
             if isinstance(macd_params, (int, float)):
-                macd_params = [macd_params]  # TİP DÜZELTİLDİ
+                macd_params = [macd_params]
             macd_params = list(macd_params)
             if len(macd_params) < 3:
                 raise ValueError(
                     "macd params must have at least three values",
-                )  # TİP DÜZELTİLDİ
+                )
             fast, slow, sig = map(int, macd_params[:3])
             if fast <= 0 or slow <= 0 or sig <= 0:
                 raise ValueError("macd params must be positive")
@@ -280,7 +274,6 @@ def compute_indicators(
     logger.info("aliases added=%s skipped=%s", alias_added, alias_skipped)
     return df2
 
-
 def _ensure_adx_stochrsi(df):
     try:
         import pandas_ta as ta
@@ -316,7 +309,6 @@ def _ensure_adx_stochrsi(df):
         df["stochrsi_d_keser_stochrsi_k_yukari"] = up
         df["stochrsi_d_keser_stochrsi_k_asagi"] = down
     return df
-
 
 if "_compute_indicators_wrapped" not in globals():
     _orig_compute_indicators = compute_indicators

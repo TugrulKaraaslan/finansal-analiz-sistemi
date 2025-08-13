@@ -1,16 +1,14 @@
-# DÜZENLENDİ – SYNTAX TEMİZLİĞİ
 from __future__ import annotations
 
 import pandas as pd
 
-
 def normalize(df: pd.DataFrame) -> pd.DataFrame:
     if not isinstance(df, pd.DataFrame):
-        raise TypeError("df must be a DataFrame")  # TİP DÜZELTİLDİ
+        raise TypeError("df must be a DataFrame")
     need = ["symbol", "date", "open", "high", "low", "close", "volume"]
     for n in need:
         if n not in df.columns:
-            raise ValueError(f"Eksik zorunlu kolon: {n}")  # TİP DÜZELTİLDİ
+            raise ValueError(f"Eksik zorunlu kolon: {n}")
     df = df.copy()
     df["symbol"] = df["symbol"].astype(str).str.upper().str.strip()
     df["date"] = pd.to_datetime(df["date"]).dt.normalize()
