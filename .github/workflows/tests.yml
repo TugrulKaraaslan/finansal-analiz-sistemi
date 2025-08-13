@@ -19,6 +19,6 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all:
       - name: Show versions
-        run: pip freeze | sed -n '1,120p'
+        run: pip freeze | grep -Ei 'pandas(-ta)?|numpy|pandera|PyYAML' || true
       - name: Run tests
         run: pytest -q
