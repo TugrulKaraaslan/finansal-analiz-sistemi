@@ -84,7 +84,6 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(cli, "write_reports", lambda *args, **kwargs: {})
     monkeypatch.setattr(cli, "dataset_summary", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "quality_warnings", lambda df: pd.DataFrame())
-    monkeypatch.setattr(cli, "info", lambda msg: None)
     cli.scan_range.callback("cfg.yml", None, None, None, None)
 
 def test_scan_day_empty(monkeypatch):
@@ -140,7 +139,6 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(cli, "write_reports", lambda *args, **kwargs: {})
     monkeypatch.setattr(cli, "dataset_summary", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "quality_warnings", lambda df: pd.DataFrame())
-    monkeypatch.setattr(cli, "info", lambda msg: None)
     cli.scan_day.callback("cfg.yml", "2024-01-02", None, None)
 
 def test_scan_range_missing_excel(monkeypatch):
