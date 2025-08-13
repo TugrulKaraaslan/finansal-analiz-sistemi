@@ -14,7 +14,9 @@ def test_indicator_calculator_outputs():
     ema = ic.ema_13(df['close'])
     adx = ic.adx_14(df['high'], df['low'], df['close'])
 
-    expected_sma = pd.Series([np.nan, np.nan, np.nan, np.nan, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0])
+    expected_sma = pd.Series(
+        [np.nan, np.nan, np.nan, np.nan, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0]
+    )
     pd.testing.assert_series_equal(sma, expected_sma, check_names=False)
 
     expected_ema = pd.Series([
@@ -31,12 +33,19 @@ def test_indicator_calculator_outputs():
     ])
     np.testing.assert_allclose(ema.values, expected_ema.values, rtol=1e-6, atol=1e-6)
 
-    close = pd.Series([44,47,52,48,44,46,50,49,48,47,49,53,54,56,58,57,55], dtype=float)
+    close = pd.Series(
+        [44, 47, 52, 48, 44, 46, 50, 49, 48, 47, 49, 53, 54, 56, 58, 57, 55],
+        dtype=float,
+    )
     rsi = ic.rsi_14(close)
     expected_rsi = pd.Series(
         [np.nan]*14 + [84.577233, 82.142390, 77.346463]
     )
-    pd.testing.assert_series_equal(rsi.reset_index(drop=True), expected_rsi, check_names=False)
+    pd.testing.assert_series_equal(
+        rsi.reset_index(drop=True),
+        expected_rsi,
+        check_names=False,
+    )
 
     assert adx.isna().all()
 
