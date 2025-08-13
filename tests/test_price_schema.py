@@ -1,5 +1,6 @@
-import pandas as pd
 from types import SimpleNamespace
+
+import pandas as pd
 
 from backtest.data_loader import read_excels_long
 

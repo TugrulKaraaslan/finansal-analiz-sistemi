@@ -25,7 +25,9 @@ def test_read_excels_long_cache_speed(tmp_path):
     _make_excels(tmp_path, 6)
     cfg = SimpleNamespace(
         data=SimpleNamespace(
-            excel_dir=tmp_path, enable_cache=None, cache_parquet_path=tmp_path / "cache.parquet"
+            excel_dir=tmp_path,
+            enable_cache=None,
+            cache_parquet_path=tmp_path / "cache.parquet",
         )
     )
     start = time.perf_counter()

@@ -9,12 +9,14 @@ import pandas as pd
 
 from utils.paths import resolve_path
 
+
 def _ensure_dir(path: Optional[str | Path]):
     if not path:
         return
     p = resolve_path(path)
     target = p if not p.suffix else p.parent
     target.mkdir(parents=True, exist_ok=True)
+
 
 def write_reports(
     trades_all: pd.DataFrame,
@@ -55,9 +57,7 @@ def write_reports(
     }
     missing = req_cols.difference(trades_all.columns)
     if missing:
-        raise ValueError(
-            f"trades_all missing columns: {', '.join(sorted(missing))}"
-        )
+        raise ValueError(f"trades_all missing columns: {', '.join(sorted(missing))}")
     if "Reason" not in trades_all.columns:
         trades_all["Reason"] = pd.NA
     n_cols = trades_all.shape[1]
@@ -68,15 +68,11 @@ def write_reports(
     if validation_summary is not None and not isinstance(
         validation_summary, pd.DataFrame
     ):
-        raise TypeError(
-            "validation_summary must be a DataFrame or None"
-        )
+        raise TypeError("validation_summary must be a DataFrame or None")
     if validation_issues is not None and not isinstance(
         validation_issues, pd.DataFrame
     ):
-        raise TypeError(
-            "validation_issues must be a DataFrame or None"
-        )
+        raise TypeError("validation_issues must be a DataFrame or None")
 
     if dates is None:
         dates = tuple()
@@ -93,9 +89,7 @@ def write_reports(
         out_xlsx_path = resolve_path(out_xlsx)
         _ensure_dir(out_xlsx_path)
         try:
-            writer = pd.ExcelWriter(
-                out_xlsx_path, engine="xlsxwriter"
-            )
+            writer = pd.ExcelWriter(out_xlsx_path, engine="xlsxwriter")
         except Exception as exc:
             raise RuntimeError(f"Excel yazılamadı: {out_xlsx_path}") from exc
         else:
@@ -118,13 +112,9 @@ def write_reports(
                     if isinstance(xu100_pct, pd.Series):
                         xu100_series = xu100_pct.astype(float)
                     elif isinstance(xu100_pct, Mapping):
-                        xu100_series = pd.Series(
-                            dict(xu100_pct), dtype=float
-                        )
+                        xu100_series = pd.Series(dict(xu100_pct), dtype=float)
                     else:
-                        raise TypeError(
-                            "xu100_pct must be a mapping or Series"
-                        )
+                        raise TypeError("xu100_pct must be a mapping or Series")
                     cols = [
                         c
                         for c in summary_wide.columns

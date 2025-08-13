@@ -18,9 +18,9 @@ def set_name_normalization(mode: str) -> None:
 def _base_norm(s: str) -> str:
     s = s.strip().lower()
     s = s.replace("%", " percent ")
-    s = re.sub(r"[^\w]+", "_", s)               # harf/rakam/altçizgi dışını altçizgi
-    s = re.sub(r"(?<=[a-z])(?=\d)", "_", s)     # harf-sayı sınırına _
-    s = re.sub(r"_+", "_", s).strip("_")        # fazlalıkları temizle
+    s = re.sub(r"[^\w]+", "_", s)  # harf/rakam/altçizgi dışını altçizgi
+    s = re.sub(r"(?<=[a-z])(?=\d)", "_", s)  # harf-sayı sınırına _
+    s = re.sub(r"_+", "_", s).strip("_")  # fazlalıkları temizle
     return s
 
 
@@ -32,42 +32,61 @@ def _alias_key(s: str) -> str:
 # Bilinen alias eşlemeleri (key -> canonical). Key oluşturulurken _ kaldırılır.
 ALIAS: Dict[str, str] = {
     # EMA/SMA
-    "ema5": "ema_5", "ema05": "ema_5", "ema_5": "ema_5",
-    "ema10": "ema_10", "ema_10": "ema_10",
-    "ema20": "ema_20", "ema_20": "ema_20",
-    "ema50": "ema_50", "ema_50": "ema_50",
-    "ema100": "ema_100", "ema_100": "ema_100",
-    "ema200": "ema_200", "ema_200": "ema_200",
-
-    "sma5": "sma_5", "sma05": "sma_5", "sma_5": "sma_5",
-    "sma10": "sma_10", "sma_10": "sma_10",
-    "sma20": "sma_20", "sma_20": "sma_20",
-    "sma50": "sma_50", "sma_50": "sma_50",
-    "sma100": "sma_100", "sma_100": "sma_100",
-    "sma200": "sma_200", "sma_200": "sma_200",
-
+    "ema5": "ema_5",
+    "ema05": "ema_5",
+    "ema_5": "ema_5",
+    "ema10": "ema_10",
+    "ema_10": "ema_10",
+    "ema20": "ema_20",
+    "ema_20": "ema_20",
+    "ema50": "ema_50",
+    "ema_50": "ema_50",
+    "ema100": "ema_100",
+    "ema_100": "ema_100",
+    "ema200": "ema_200",
+    "ema_200": "ema_200",
+    "sma5": "sma_5",
+    "sma05": "sma_5",
+    "sma_5": "sma_5",
+    "sma10": "sma_10",
+    "sma_10": "sma_10",
+    "sma20": "sma_20",
+    "sma_20": "sma_20",
+    "sma50": "sma_50",
+    "sma_50": "sma_50",
+    "sma100": "sma_100",
+    "sma_100": "sma_100",
+    "sma200": "sma_200",
+    "sma_200": "sma_200",
     # RSI/ADX/DM+/DM-
-    "rsi14": "rsi_14", "rsi_14": "rsi_14",
-    "adx14": "adx_14", "adx_14": "adx_14",
-    "dmp14": "dmp_14", "dmp_14": "dmp_14",
-    "dmn14": "dmn_14", "dmn_14": "dmn_14",
-
+    "rsi14": "rsi_14",
+    "rsi_14": "rsi_14",
+    "adx14": "adx_14",
+    "adx_14": "adx_14",
+    "dmp14": "dmp_14",
+    "dmp_14": "dmp_14",
+    "dmn14": "dmn_14",
+    "dmn_14": "dmn_14",
     # Momentum / ROC
-    "momentum10": "momentum_10", "momentum_10": "momentum_10",
-    "mom10": "momentum_10", "roc10": "roc_10", "roc_10": "roc_10",
-
+    "momentum10": "momentum_10",
+    "momentum_10": "momentum_10",
+    "mom10": "momentum_10",
+    "roc10": "roc_10",
+    "roc_10": "roc_10",
     # StochRSI
-    "stochrsik": "stochrsi_k", "stochrsi_k": "stochrsi_k",
-    "stochrsid": "stochrsi_d", "stochrsi_d": "stochrsi_d",
-    "stochrsik141433": "stochrsi_k", "stochrsid141433": "stochrsi_d",
-
+    "stochrsik": "stochrsi_k",
+    "stochrsi_k": "stochrsi_k",
+    "stochrsid": "stochrsi_d",
+    "stochrsi_d": "stochrsi_d",
+    "stochrsik141433": "stochrsi_k",
+    "stochrsid141433": "stochrsi_d",
     # Williams %R
     "williamspercentr14": "williams_percent_r_14",
     "williams_percent_r_14": "williams_percent_r_14",
     "williamsr14": "williams_percent_r_14",
-
     # MACD
-    "macd12269": "macd_12_26_9", "macd_12_26_9": "macd_12_26_9",
+    "macd12269": "macd_12_26_9",
+    "macd_12_26_9": "macd_12_26_9",
     "macdsignal12269": "macd_signal_12_26_9",
     "macdhist12269": "macd_hist_12_26_9",
 }

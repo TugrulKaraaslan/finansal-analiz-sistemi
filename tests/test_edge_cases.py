@@ -5,12 +5,14 @@ from backtest.normalizer import normalize
 from backtest.screener import run_screener
 from backtest.validator import quality_warnings
 
+
 def test_normalize_type_and_missing_columns():
     with pytest.raises(TypeError):
         normalize([])  # not a DataFrame
     df_missing = pd.DataFrame({"symbol": ["AAA"], "close": [1.0]})
     with pytest.raises(ValueError):
         normalize(df_missing)
+
 
 def test_quality_warnings_no_issues():
     df = pd.DataFrame(
@@ -24,6 +26,7 @@ def test_quality_warnings_no_issues():
     assert isinstance(df.loc[0, "date"], pd.Timestamp)
     assert list(res.columns) == ["symbol", "date", "issue", "value"]
     assert res.empty
+
 
 def test_run_screener_no_hits():
     df_ind = pd.DataFrame(

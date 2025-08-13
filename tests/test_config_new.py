@@ -1,18 +1,18 @@
-from pathlib import Path
 import tempfile
 import textwrap
+from pathlib import Path
 
 import pytest
 
 from backtest.config import load_config
 
+
 def _write_cfg(text: str) -> Path:
-    with tempfile.NamedTemporaryFile(
-        "w", delete=False, encoding="utf-8"
-    ) as tmp:
+    with tempfile.NamedTemporaryFile("w", delete=False, encoding="utf-8") as tmp:
         tmp.write(text)
         tmp.flush()
         return Path(tmp.name)
+
 
 def test_load_config_independent_defaults():
     cfg_text = textwrap.dedent(
@@ -35,10 +35,12 @@ def test_load_config_independent_defaults():
     assert cfg2.calendar.holidays_source == "none"
     assert 99 not in cfg2.indicators.params["ema"]
 
+
 def test_load_config_invalid_yaml():
     path = _write_cfg("- just\n- a\n- list\n")
     with pytest.raises(TypeError):
         load_config(path)
+
 
 def test_load_config_relative_paths(tmp_path):
     cfg_text = textwrap.dedent(

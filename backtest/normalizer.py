@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+
 def normalize(df: pd.DataFrame) -> pd.DataFrame:
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a DataFrame")

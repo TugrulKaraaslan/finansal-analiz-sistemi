@@ -4,6 +4,7 @@ import re
 import unicodedata
 from typing import Optional
 
+
 def normalize_key(s: Optional[str]) -> str:
     if s is None:
         return ""

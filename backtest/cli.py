@@ -24,9 +24,11 @@ from .screener import run_screener
 from .utils.names import set_name_normalization
 from .validator import dataset_summary, quality_warnings
 
+
 @click.group()
 def cli():
     pass
+
 
 def _run_scan(cfg) -> None:
     """Common execution for scan commands.
@@ -52,9 +54,7 @@ def _run_scan(cfg) -> None:
         tdays = None
         df = add_next_close(df)
     logger.info("Göstergeler hesaplanıyor...")
-    df_ind = compute_indicators(
-        df, cfg.indicators.params, engine=cfg.indicators.engine
-    )
+    df_ind = compute_indicators(df, cfg.indicators.params, engine=cfg.indicators.engine)
     logger.info("Filtre CSV okunuyor...")
     try:
         filters_df = load_filters_csv(cfg.data.filters_csv)
@@ -126,16 +126,16 @@ def _run_scan(cfg) -> None:
     )
     if not trades_all.empty:
         pivot = (
-            trades_all.groupby(["FilterCode", "Side", "Date"])["ReturnPct"].mean().unstack(
-                fill_value=float("nan")
-            )
+            trades_all.groupby(["FilterCode", "Side", "Date"])["ReturnPct"]
+            .mean()
+            .unstack(fill_value=float("nan"))
         )
         pivot = pivot.reindex(columns=days)
         pivot["Ortalama"] = pivot.mean(axis=1)
         winrate = (
-            trades_all.groupby(["FilterCode", "Side", "Date"])["Win"].mean().unstack(
-                fill_value=float("nan")
-            )
+            trades_all.groupby(["FilterCode", "Side", "Date"])["Win"]
+            .mean()
+            .unstack(fill_value=float("nan"))
         )
         winrate = winrate.reindex(columns=days)
         winrate["Ortalama"] = winrate.mean(axis=1)
@@ -185,6 +185,7 @@ def _run_scan(cfg) -> None:
     if outputs.get("csv"):
         logger.info(f"CSV klasörü: {outputs['csv'][0].parent}")
 
+
 @cli.command("scan-range")
 @click.option("--config", "config_path", required=True, help="YAML config yolu")
 @click.option("--start", "start_date", required=False, default=None, help="YYYY-MM-DD")
@@ -222,6 +223,7 @@ def scan_range(
     cfg.project.run_mode = "range"
     _run_scan(cfg)
 
+
 @cli.command("scan-day")
 @click.option("--config", "config_path", required=True)
 @click.option("--date", "date_str", required=True, help="YYYY-MM-DD")
@@ -240,6 +242,7 @@ def scan_day(config_path, date_str, holding_period, transaction_cost):
     if transaction_cost is not None:
         cfg.project.transaction_cost = transaction_cost
     _run_scan(cfg)
+
 
 if __name__ == "__main__":
     cli()

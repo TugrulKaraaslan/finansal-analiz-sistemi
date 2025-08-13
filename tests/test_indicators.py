@@ -1,4 +1,5 @@
 import logging
+
 import pandas as pd
 
 from backtest.indicators import _safe_alias, compute_indicators
