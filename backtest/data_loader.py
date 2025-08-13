@@ -283,7 +283,11 @@ def read_excels_long(
                             df.columns = [normalize_key(c) for c in df.columns]
                         if "date" not in df.columns:
                             if verbose:
-                                print(f"[SKIP] {fpath}:{sheet} 'date' bulunamadı.")
+                                logger.info(
+                                    "[SKIP] {}:{} 'date' bulunamadı.",
+                                    fpath,
+                                    sheet,
+                                )
                             continue
 
                         parse_kwargs: Dict[str, Any] = {"errors": "coerce"}
@@ -308,16 +312,21 @@ def read_excels_long(
                         records.append(df.copy())
                     except Exception as e:
                         if verbose:
-                            print(f"[WARN] Sheet işlenemedi: {fpath}:{sheet} -> {e}")
+                            logger.warning(
+                                "[WARN] Sheet işlenemedi: {}:{} -> {}",
+                                fpath,
+                                sheet,
+                                e,
+                            )
                         continue
         except Exception as e:
             if verbose:
-                print(f"[WARN] Excel açılamadı: {fpath} -> {e}")
+                logger.warning("[WARN] Excel açılamadı: {} -> {}", fpath, e)
             continue
 
     if not records:
         warnings.warn("Hiçbir sheet/çalışma sayfasından veri toplanamadı.")
-        # return an empty DataFrame with expected columns so downstream code doesn't fail
+        # downstream code expects these columns even when dataset is empty
         cols = ["date", "open", "high", "low", "close", "volume", "symbol"]
         return pd.DataFrame(columns=cols)
 
