@@ -28,16 +28,6 @@ Veri dosyalarındaki ve filtre ifadelerindeki tüm sütun isimleri otomatik olar
 `ema-20` yazsa bile sistem bunu `ema_20` olarak yorumlar. Bu sayede veri
 kaynakları ve filtreler arasında tutarlılık sağlanır.
 
-Desteklenen varyantların kanonik karşılıklarını görmek veya `filters.csv`
-dosyasındaki sorguları düzeltmek için:
-
-```bash
-python tools/audit_names.py --write-fixes
-```
-
-Bu komut örnek veri dosyasındaki ham → kanonik sütun adlarını ve filtrelerdeki
-isim dönüşümlerini raporlar; `filters_fixed.csv` dosyasını üretir.
-
 İsteğe bağlı olarak testleri çalıştırmak için:
 
 ```python
