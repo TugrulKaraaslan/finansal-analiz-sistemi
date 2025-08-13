@@ -48,6 +48,7 @@ Aşağıdaki tablo bazı sık kullanılan indikatör kolonlarını ve bunlara il
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt -c constraints.txt --only-binary=:all:
+pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all:  # test/geliştirici ortamı
 ```
 
 Python 3.10–3.12 sürümleri desteklenir; 3.13 henüz destek dışıdır.
@@ -63,8 +64,8 @@ python -m backtest.cli scan-day --config examples/example_config.yaml --date 202
 !python -m backtest.cli scan-day --config config/colab_config.yaml --date 2024-01-02
 ```
 
-> Not: Filtre CSV doğrulaması için [Pandera](https://pandera.readthedocs.io/) gereklidir. 
-> `pip install pandera` komutuyla kurulabilir.
+> Not: Filtre CSV doğrulaması için [Pandera](https://pandera.readthedocs.io/) gerekir.
+> Geliştiriciler `requirements_dev.txt` ile kurulmuş olur.
 
 ### Config Şeması Örneği
 
@@ -133,6 +134,7 @@ SCAN 2024-01-02: 24 satır, ort. %1.2
 ```
 ## Test Çalıştırma (isteğe bağlı)
 ```bash
+pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all:
 pytest -q
 ```
 

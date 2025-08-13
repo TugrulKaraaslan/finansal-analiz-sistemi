@@ -37,6 +37,7 @@ isim dönüşümlerini raporlar; `filters_fixed.csv` dosyasını üretir.
 
 İsteğe bağlı olarak testleri çalıştırmak için:
 
-```bash
-pytest -q
+```python
+%pip install -q -r requirements_dev.txt -c constraints.txt --only-binary=:all:
+!pytest -q
 ```
