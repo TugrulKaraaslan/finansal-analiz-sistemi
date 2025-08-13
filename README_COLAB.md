@@ -13,6 +13,17 @@ Aşağıdaki hücreler Colab ortamında projeyi kurar, ortamı doğrular ve örn
 !mkdir -p raporlar
 ```
 
+## Colab Kurtarma Hücresi
+
+Bağımlılık çakışması yaşandığında bu hücreyi çalıştırın. Uyumsuz NumPy sürümü
+ve hatalı `pandas_ta` kaldırılır, uyumlu sürümler yeniden kurulup tüm
+uyumsuzluklar giderilir.
+
+```python
+!pip uninstall -y numpy pandas_ta
+!pip install numpy<2.0.0 pandas_ta --no-cache-dir
+```
+
 ## Ortam Doğrulama
 
 ```python
