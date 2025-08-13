@@ -38,8 +38,6 @@ benchmark:
   xu100_csv_path: ""
 
 report:
-  excel: true
-  csv: true
   percent_format: "0.00%"
   daily_sheet_prefix: "SCAN_"
   summary_sheet_name: "SUMMARY"

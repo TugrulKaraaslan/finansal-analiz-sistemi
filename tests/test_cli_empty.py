@@ -19,7 +19,6 @@ def _cfg():
             holding_period=1,
             transaction_cost=0.0,
             raise_on_error=False,
-            strict_filters=False,
         ),
         data=SimpleNamespace(filters_csv="dummy.csv"),
         calendar=SimpleNamespace(
@@ -57,8 +56,11 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(
         cli, "compute_indicators", lambda df, params, engine=None: df
     )
-    filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]})
+    filters_df = pd.DataFrame(
+        {"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]}
+    )
     monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
+
     def _run_screener(df, filters, d, strict=None, raise_on_error=None):
         assert raise_on_error is False
         assert strict is True
@@ -111,8 +113,11 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(
         cli, "compute_indicators", lambda df, params, engine=None: df
     )
-    filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]})
+    filters_df = pd.DataFrame(
+        {"FilterCode": ["F1"], "PythonQuery": ["close>0"], "Group": ["G"]}
+    )
     monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
+
     def _run_screener(df, filters, d, strict=None, raise_on_error=None):
         assert raise_on_error is False
         assert strict is True

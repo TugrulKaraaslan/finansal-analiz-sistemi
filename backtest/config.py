@@ -20,7 +20,6 @@ class ProjectCfg(BaseModel):
     holding_period: int = 1
     transaction_cost: float = 0.0
     raise_on_error: bool = False
-    strict_filters: bool = False
 
 
 class DataCfg(BaseModel):
@@ -60,8 +59,6 @@ class BenchmarkCfg(BaseModel):
 
 
 class ReportCfg(BaseModel):
-    excel: bool = True
-    csv: bool = True
     percent_format: str = "0.00%"
     daily_sheet_prefix: str = "SCAN_"
     summary_sheet_name: str = "SUMMARY"
@@ -109,9 +106,15 @@ def load_config(path: str | Path) -> RootCfg:
     for req_key in ("excel_dir", "filters_csv"):
         if not data.get(req_key):
             raise ValueError(
-                f"config.data.{req_key} zorunlu; örnek için examples/example_config.yaml"
+                f"config.data.{req_key} zorunlu; "
+                "örnek için examples/example_config.yaml"
             )
-    for k in ["excel_dir", "filters_csv", "cache_parquet_path", "corporate_actions_csv"]:
+    for k in [
+        "excel_dir",
+        "filters_csv",
+        "cache_parquet_path",
+        "corporate_actions_csv",
+    ]:
         v = data.get(k)
         if v:
             data[k] = _join(v, allow_cwd=(k == "filters_csv"))  # PATH DÜZENLENDİ
