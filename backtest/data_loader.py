@@ -18,8 +18,9 @@ def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
             continue
         try:
             p_res = resolve_path(p)
-        except OSError:
-            # path is invalid or cannot be resolved, try next candidate
+        except (OSError, TypeError):
+            # path is invalid, cannot be resolved, or of unsupported type
+            # continue with next candidate instead of raising an exception
             continue
         if p_res.exists():
             return p_res
