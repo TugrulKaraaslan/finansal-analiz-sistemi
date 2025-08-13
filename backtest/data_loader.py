@@ -31,23 +31,23 @@ def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
 def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
     if cfg is None:
         return None
-    try:
-        cand = _first_existing(
-            getattr(getattr(cfg, "data", None), "excel_dir", None),
-            getattr(getattr(cfg, "data", None), "path", None),
-            getattr(cfg, "data_path", None),
-        )
-        if cand:
-            return resolve_path(cand)
-    except Exception:
-        pass
-    try:
-        d = cfg.get("data", {}) if isinstance(cfg, dict) else {}
+
+    cand = _first_existing(
+        getattr(getattr(cfg, "data", None), "excel_dir", None),
+        getattr(getattr(cfg, "data", None), "path", None),
+        getattr(cfg, "data_path", None),
+    )
+
+    if not cand and isinstance(cfg, dict):
+        d = cfg.get("data", {})
         cand = _first_existing(d.get("excel_dir"), d.get("path"), cfg.get("data_path"))
-        if cand:
+
+    if cand:
+        try:
             return resolve_path(cand)
-    except Exception:
-        pass
+        except OSError:
+            return None
+
     return None
 
 
@@ -208,18 +208,10 @@ def read_excels_long(
         excel_dir = _guess_excel_dir_from_cfg(cfg_or_path)
         enable_cache = None
         cache_path = None
-        try:
-            enable_cache = getattr(
-                getattr(cfg_or_path, "data", None), "enable_cache", None
-            )
-            cache_path = getattr(
-                getattr(cfg_or_path, "data", None), "cache_parquet_path", None
-            )
-            price_schema = getattr(
-                getattr(cfg_or_path, "data", None), "price_schema", None
-            )
-        except Exception:
-            pass
+        data_cfg = getattr(cfg_or_path, "data", None)
+        enable_cache = getattr(data_cfg, "enable_cache", None)
+        cache_path = getattr(data_cfg, "cache_parquet_path", None)
+        price_schema = getattr(data_cfg, "price_schema", None)
         if enable_cache is None and isinstance(cfg_or_path, dict):
             d = cfg_or_path.get("data", {})
             enable_cache = d.get("enable_cache", None)
