@@ -103,7 +103,7 @@ def _run_scan(cfg) -> None:
             df_ind,
             filters_df,
             d,
-            strict=getattr(cfg.project, "stop_on_filter_error", False),
+            stop_on_filter_error=getattr(cfg.project, "stop_on_filter_error", False),
             raise_on_error=cfg.project.raise_on_error,
         )
         trades = run_1g_returns(

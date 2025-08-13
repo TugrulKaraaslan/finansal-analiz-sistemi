@@ -158,7 +158,12 @@ def test_run_screener_side_validation():
     bad = filters_df.copy()
     bad["Side"] = ["foo"]
     with pytest.raises(ValueError):
-        run_screener(df_ind, bad, pd.Timestamp("2024-01-02"))
+        run_screener(
+            df_ind,
+            bad,
+            pd.Timestamp("2024-01-02"),
+            stop_on_filter_error=True,
+        )
 
 
 def test_run_screener_duplicate_filter_code():

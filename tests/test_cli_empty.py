@@ -58,9 +58,9 @@ def test_scan_range_empty(monkeypatch):
     )
     monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
 
-    def _run_screener(df, filters, d, strict=None, raise_on_error=None):
+    def _run_screener(df, filters, d, stop_on_filter_error=None, raise_on_error=None):
         assert raise_on_error is False
-        assert strict is False
+        assert stop_on_filter_error is False
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
 
     monkeypatch.setattr(cli, "run_screener", _run_screener)
@@ -112,9 +112,9 @@ def test_scan_day_empty(monkeypatch):
     )
     monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
 
-    def _run_screener(df, filters, d, strict=None, raise_on_error=None):
+    def _run_screener(df, filters, d, stop_on_filter_error=None, raise_on_error=None):
         assert raise_on_error is False
-        assert strict is False
+        assert stop_on_filter_error is False
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
 
     monkeypatch.setattr(cli, "run_screener", _run_screener)

@@ -44,7 +44,12 @@ def test_run_screener_skips_unsafe(caplog):
         }
     )
     logger.add(caplog.handler, level="WARNING")
-    res = run_screener(df_ind, filters, pd.Timestamp("2024-01-02"), strict=False)
+    res = run_screener(
+        df_ind,
+        filters,
+        pd.Timestamp("2024-01-02"),
+        stop_on_filter_error=False,
+    )
     assert res["FilterCode"].tolist() == ["SAFE"]
     assert isinstance(res.loc[0, "Date"], pd.Timestamp)
     assert "unsafe expression" in caplog.text
@@ -69,7 +74,12 @@ def test_run_screener_missing_columns_raises():
         }
     )
     with pytest.raises(ValueError):
-        run_screener(df_ind, filters, pd.Timestamp("2024-01-02"), strict=True)
+        run_screener(
+            df_ind,
+            filters,
+            pd.Timestamp("2024-01-02"),
+            stop_on_filter_error=True,
+        )
 
 
 def test_run_screener_skips_missing_columns_relaxed(caplog):
@@ -93,10 +103,15 @@ def test_run_screener_skips_missing_columns_relaxed(caplog):
         }
     )
     logger.add(caplog.handler, level="WARNING")
-    res = run_screener(df_ind, filters, pd.Timestamp("2024-01-02"), strict=False)
+    res = run_screener(
+        df_ind,
+        filters,
+        pd.Timestamp("2024-01-02"),
+        stop_on_filter_error=False,
+    )
     assert res["FilterCode"].tolist() == ["GOOD"]
     assert isinstance(res.loc[0, "Date"], pd.Timestamp)
-    assert "Filter skipped due to missing columns" in caplog.text
+    assert "skip filter: missing column" in caplog.text
 
 
 def test_run_screener_raises_on_filter_error_default():

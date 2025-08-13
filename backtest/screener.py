@@ -20,7 +20,7 @@ def run_screener(
     df_ind: pd.DataFrame,
     filters_df: pd.DataFrame,
     date,
-    strict: bool = True,
+    stop_on_filter_error: bool = False,
     raise_on_error: bool = True,
 ) -> pd.DataFrame:
     """Run the screener filters for a given date.
@@ -33,10 +33,10 @@ def run_screener(
         DataFrame describing the filter expressions.
     date : datetime-like
         The date to evaluate the filters on.
-    strict : bool, optional
-        If ``True`` (default), any filter referencing missing columns raises a
-        :class:`ValueError`. When ``False`` such filters are skipped with a
-        warning.
+    stop_on_filter_error : bool, optional
+        If ``True``, any filter referencing missing columns raises a
+        :class:`ValueError`. When ``False`` (default) such filters are skipped
+        with a warning.
     raise_on_error : bool, optional
         Controls behaviour when a filter's expression fails to evaluate.
         When ``True`` (default) a :class:`RuntimeError` is raised
@@ -123,7 +123,7 @@ def run_screener(
             side_norm = str(side).strip().lower()
             if side_norm not in {"long", "short"}:
                 msg = f"Filter {code!r} has invalid Side {side!r}"
-                if strict:
+                if stop_on_filter_error:
                     logger.error("Filter invalid Side", code=code, side=side)
                     raise ValueError(msg)
                 logger.warning(
@@ -133,7 +133,7 @@ def run_screener(
         sq = SafeQuery(expr)
         if not sq.is_safe:
             msg = f"Filter {code!r} unsafe expression: {sq.error}"
-            if strict:
+            if stop_on_filter_error:
                 logger.error(
                     "Filter unsafe expression", code=code, expr=expr, reason=sq.error
                 )
@@ -148,18 +148,15 @@ def run_screener(
         missing_cols = sq.names.difference(d.columns)
         if missing_cols:
             msg = f"Filter {code!r} missing columns: {sorted(missing_cols)}"
-            if strict:
+            if stop_on_filter_error:
                 logger.error(
                     "Filter missing columns",
                     code=code,
                     missing=sorted(missing_cols),
                 )
                 raise ValueError(msg)
-            logger.warning(
-                "Filter skipped due to missing columns",
-                code=code,
-                missing=sorted(missing_cols),
-            )
+            missing = ", ".join(sorted(missing_cols))
+            logger.warning("skip filter: missing column {}", missing, code=code)
             continue
         valids.append((code, grp, side_norm, sq))
     out_frames = []
