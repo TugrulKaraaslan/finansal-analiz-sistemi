@@ -12,6 +12,7 @@ from backtest.utils import normalize_key
 from backtest.utils.names import canonicalize_columns
 from utils.paths import resolve_path
 
+
 def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
     for p in paths:
         if not p:
@@ -25,6 +26,7 @@ def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
         if p_res.exists():
             return p_res
     return None
+
 
 def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
     if cfg is None:
@@ -47,6 +49,7 @@ def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
             return None
 
     return None
+
 
 COL_ALIASES: Dict[str, str] = {
     "date": "date",
@@ -79,7 +82,10 @@ COL_ALIASES: Dict[str, str] = {
     "kapanis_fiyat": "close",
 }
 
-def normalize_columns(df: pd.DataFrame, price_schema: Optional[Dict[str, Iterable[str] | str]] = None) -> pd.DataFrame:
+
+def normalize_columns(
+    df: pd.DataFrame, price_schema: Optional[Dict[str, Iterable[str] | str]] = None
+) -> pd.DataFrame:
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a DataFrame")
     mapping = COL_ALIASES.copy()
@@ -104,6 +110,7 @@ def normalize_columns(df: pd.DataFrame, price_schema: Optional[Dict[str, Iterabl
     result = df.drop(columns=drops).rename(columns=rename_map)
     return result
 
+
 def validate_columns(df: pd.DataFrame, required: Iterable[str]) -> pd.DataFrame:
     """Ensure that ``df`` contains all columns in ``required``.
 
@@ -126,10 +133,9 @@ def validate_columns(df: pd.DataFrame, required: Iterable[str]) -> pd.DataFrame:
     """
     missing = set(required).difference(df.columns)
     if missing:
-        raise ValueError(
-            f"Missing required columns: {', '.join(sorted(missing))}"
-        )
+        raise ValueError(f"Missing required columns: {', '.join(sorted(missing))}")
     return df
+
 
 def apply_corporate_actions(
     df: pd.DataFrame, csv_path: Optional[Union[str, Path]] = None
@@ -166,8 +172,8 @@ def apply_corporate_actions(
         return df
     df = df.sort_values(["symbol", "date"])
     adj = adj.sort_values(["symbol", "date"])
-    adj["cum_factor"] = (
-        adj.groupby("symbol")["factor"].transform(lambda x: x[::-1].cumprod()[::-1])
+    adj["cum_factor"] = adj.groupby("symbol")["factor"].transform(
+        lambda x: x[::-1].cumprod()[::-1]
     )
     merged = pd.merge_asof(
         df,
@@ -178,12 +184,15 @@ def apply_corporate_actions(
         allow_exact_matches=False,
     )
     merged["cum_factor"] = merged["cum_factor"].fillna(1.0)
-    merged.loc[:, price_cols] = merged.loc[:, price_cols].mul(merged["cum_factor"], axis=0)
+    merged.loc[:, price_cols] = merged.loc[:, price_cols].mul(
+        merged["cum_factor"], axis=0
+    )
     if "volume" in merged.columns:
         merged["volume"] = merged["volume"].div(merged["cum_factor"])
     merged = merged.drop(columns=["cum_factor"])
     # benchmark note: vectorized version ~5x faster on 10k rows vs loop
     return merged
+
 
 def read_excels_long(
     cfg_or_path: Union[str, Path, Any],
@@ -232,15 +241,11 @@ def read_excels_long(
                 try:
                     return pd.read_parquet(cache_file)
                 except Exception as e:  # engine missing or wrong format
-                    logger.warning(
-                        "Önbellek okunamadı: {} -> {}", cache_path, e
-                    )
+                    logger.warning("Önbellek okunamadı: {} -> {}", cache_path, e)
                     try:
                         return pd.read_pickle(cache_file)
                     except Exception as e2:
-                        logger.warning(
-                            "Önbellek okunamadı: {} -> {}", cache_path, e2
-                        )
+                        logger.warning("Önbellek okunamadı: {} -> {}", cache_path, e2)
         except Exception as e:
             logger.warning("Önbellek okunamadı: {} -> {}", cache_path, e)
 
@@ -348,18 +353,20 @@ def read_excels_long(
             try:
                 full.to_parquet(cache_file, index=False)
             except Exception as e:
-                logger.warning(
-                    "Önbelleğe yazılamadı: {} -> {}", cache_path, e
-                )
+                logger.warning("Önbelleğe yazılamadı: {} -> {}", cache_path, e)
                 try:
                     full.to_pickle(cache_file)
                 except Exception as e2:  # pragma: no cover - logging
-                    logger.warning(
-                        "Önbelleğe yazılamadı: {} -> {}", cache_path, e2
-                    )
+                    logger.warning("Önbelleğe yazılamadı: {} -> {}", cache_path, e2)
         except Exception as e:  # pragma: no cover - logging
             logger.warning("Önbelleğe yazılamadı: {} -> {}", cache_path, e)
 
     return full
 
-__all__ = ["read_excels_long", "normalize_columns", "apply_corporate_actions", "validate_columns"]
+
+__all__ = [
+    "read_excels_long",
+    "normalize_columns",
+    "apply_corporate_actions",
+    "validate_columns",
+]

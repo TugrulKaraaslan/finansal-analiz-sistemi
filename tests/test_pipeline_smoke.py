@@ -5,6 +5,7 @@ import pandas as pd
 from backtest.backtester import run_1g_returns
 from backtest.screener import run_screener
 
+
 def test_pipeline_smoke():
     df = pd.DataFrame(
         {
@@ -31,6 +32,7 @@ def test_pipeline_smoke():
     out = run_1g_returns(df, sigs)
     assert not out.empty
     assert isinstance(out.loc[0, "Date"], pd.Timestamp)
+
 
 def test_pipeline_no_signals():
     df = pd.DataFrame(

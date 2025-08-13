@@ -10,6 +10,7 @@ from backtest.utils.names import canonicalize_columns
 
 logger = logging.getLogger(__name__)
 
+
 def _safe_alias(df2: pd.DataFrame, alias: str, base: str) -> bool:
     """Safely copy ``base`` column to ``alias`` without raising.
 
@@ -46,8 +47,10 @@ def _safe_alias(df2: pd.DataFrame, alias: str, base: str) -> bool:
     logger.warning("alias skipped (non-1d): alias=%s base=%s", alias, base)
     return False
 
+
 def _ema(series: pd.Series, length: int) -> pd.Series:
     return series.ewm(span=length, adjust=False).mean()
+
 
 def _rsi(series: pd.Series, length: int) -> pd.Series:
     delta = series.diff()
@@ -55,6 +58,7 @@ def _rsi(series: pd.Series, length: int) -> pd.Series:
     loss = -delta.clip(upper=0).ewm(alpha=1 / length, adjust=False).mean()
     rs = gain / loss
     return 100 - (100 / (1 + rs))
+
 
 def _stoch_rsi(
     series: pd.Series, rsi_len: int, stoch_len: int, k: int, d: int
@@ -67,6 +71,7 @@ def _stoch_rsi(
     k_line = stoch.rolling(k, min_periods=k).mean() * 100
     d_line = k_line.rolling(d, min_periods=d).mean()
     return k_line, d_line
+
 
 def compute_indicators(
     df: pd.DataFrame,
@@ -110,7 +115,12 @@ def compute_indicators(
     df = df.copy()
     df = df.sort_values(["symbol", "date"])
     rv_preexisting = bool(
-        {"RELATIVE_VOLUME", "relative_volume", "hacim_goreli", "HACIM_GORELI"}.intersection(df.columns)
+        {
+            "RELATIVE_VOLUME",
+            "relative_volume",
+            "hacim_goreli",
+            "HACIM_GORELI",
+        }.intersection(df.columns)
     )
 
     use_pandas_ta = engine == "pandas_ta"
@@ -274,6 +284,7 @@ def compute_indicators(
     logger.info("aliases added=%s skipped=%s", alias_added, alias_skipped)
     return df2
 
+
 def _ensure_adx_stochrsi(df):
     try:
         import pandas_ta as ta
@@ -309,6 +320,7 @@ def _ensure_adx_stochrsi(df):
         df["stochrsi_d_keser_stochrsi_k_yukari"] = up
         df["stochrsi_d_keser_stochrsi_k_asagi"] = down
     return df
+
 
 if "_compute_indicators_wrapped" not in globals():
     _orig_compute_indicators = compute_indicators

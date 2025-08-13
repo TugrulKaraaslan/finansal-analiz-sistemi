@@ -8,6 +8,7 @@ import warnings
 
 from utils.paths import resolve_path
 
+
 def add_next_close(df: pd.DataFrame) -> pd.DataFrame:
     """Price-driven next bar (symbol-based)."""
     if not isinstance(df, pd.DataFrame):
@@ -15,13 +16,12 @@ def add_next_close(df: pd.DataFrame) -> pd.DataFrame:
     req = {"symbol", "date", "close"}
     missing = req.difference(df.columns)
     if missing:
-        raise ValueError(
-            f"Eksik kolon(lar): {', '.join(sorted(missing))}"
-        )
+        raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")
     df = df.copy().sort_values(["symbol", "date"])
     df["next_date"] = df.groupby("symbol")["date"].shift(-1)
     df["next_close"] = df.groupby("symbol")["close"].shift(-1)
     return df
+
 
 def load_holidays_csv(path: str | Path) -> Set[pd.Timestamp]:
     """Read holiday CSV with a 'date' column (case-insens.),
@@ -44,8 +44,10 @@ def load_holidays_csv(path: str | Path) -> Set[pd.Timestamp]:
     h[c_date] = pd.to_datetime(h[c_date]).dt.normalize()
     return set(h[c_date].unique())
 
+
 def is_weekend(ts: pd.Timestamp) -> bool:
     return ts.weekday() >= 5  # 5=Sat,6=Sun
+
 
 def build_trading_days(
     df: pd.DataFrame, holidays: Optional[Iterable[pd.Timestamp]] = None
@@ -71,13 +73,12 @@ def build_trading_days(
         try:
             hol = set(pd.to_datetime(hol_iter).normalize())
         except Exception as e:  # pragma: no cover - defensive
-            raise ValueError(
-                "holidays contains non-date values"
-            ) from e
+            raise ValueError("holidays contains non-date values") from e
     else:
         hol = set()
     trade = [d for d in all_days if (not is_weekend(d)) and (d.normalize() not in hol)]
     return pd.DatetimeIndex(trade)
+
 
 def check_missing_trading_days(
     df: pd.DataFrame,
@@ -100,12 +101,15 @@ def check_missing_trading_days(
     missing = pd.DatetimeIndex([d for d in trading_days if d not in actual])
 
     if len(missing) > 0:
-        msg = "Missing trading days: " + ", ".join(d.strftime("%Y-%m-%d") for d in missing)
+        msg = "Missing trading days: " + ", ".join(
+            d.strftime("%Y-%m-%d") for d in missing
+        )
         if raise_error:
             raise ValueError(msg)
         else:  # pragma: no cover - warning path
             warnings.warn(msg)
     return missing
+
 
 def check_missing_trading_days_by_symbol(
     df: pd.DataFrame,
@@ -141,6 +145,7 @@ def check_missing_trading_days_by_symbol(
             warnings.warn(msg)
     return missing
 
+
 def add_next_close_calendar(
     df: pd.DataFrame, trading_days: pd.DatetimeIndex
 ) -> pd.DataFrame:
@@ -153,9 +158,7 @@ def add_next_close_calendar(
     req = {"symbol", "date", "close"}
     missing = req.difference(df.columns)
     if missing:
-        raise ValueError(
-            f"Eksik kolon(lar): {', '.join(sorted(missing))}"
-        )
+        raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")
     if not isinstance(trading_days, pd.DatetimeIndex):
         raise TypeError("trading_days must be a DatetimeIndex")
     df = df.copy().sort_values(["symbol", "date"])

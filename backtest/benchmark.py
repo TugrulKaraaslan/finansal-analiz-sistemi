@@ -7,6 +7,7 @@ import pandas as pd
 
 from utils.paths import resolve_path
 
+
 def _read_csv_any(path: str | Path) -> pd.DataFrame:
     """Read CSV with fallback separator/decimal handling."""
     p = resolve_path(path)
@@ -24,6 +25,7 @@ def _read_csv_any(path: str | Path) -> pd.DataFrame:
     except Exception as e:  # SPECIFIC EXCEPTIONS
         raise FileNotFoundError(f"CSV okunamadı: {p}") from e
     import csv
+
     try:
         dialect = csv.Sniffer().sniff(sample, delimiters=";,")
         sep = dialect.delimiter
@@ -34,6 +36,7 @@ def _read_csv_any(path: str | Path) -> pd.DataFrame:
         return pd.read_csv(p, sep=sep, decimal=dec, encoding="utf-8")
     except Exception as e:
         raise RuntimeError(f"CSV parse edilemedi: {p}") from e
+
 
 def load_xu100_pct(csv_path: str | Path) -> pd.Series:
     if not isinstance(csv_path, (str, Path)):
@@ -65,7 +68,9 @@ def load_xu100_pct(csv_path: str | Path) -> pd.Series:
         # fallback: second column (df has >=2 columns here)
         close_col = list(df.columns)[1]
     # parse date tolerant
-    df[c_date] = pd.to_datetime(df[c_date], errors="coerce", dayfirst=True).dt.normalize()
+    df[c_date] = pd.to_datetime(
+        df[c_date], errors="coerce", dayfirst=True
+    ).dt.normalize()
     df[close_col] = pd.to_numeric(df[close_col], errors="coerce")
     df = df.dropna(subset=[c_date, close_col]).sort_values(c_date)
     pct = df[close_col].pct_change(1) * 100.0

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+
 def test_summary_and_winrate():
     trades = pd.DataFrame(
         {
