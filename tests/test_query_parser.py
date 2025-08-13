@@ -10,6 +10,14 @@ def test_safequery_basic():
     assert q.is_safe
 
 
+def test_safequery_supports_not_operator():
+    df = pd.DataFrame({"close": [1, -1]})
+    q = SafeQuery("not (close > 0)")
+    assert q.is_safe
+    out = q.filter(df)
+    assert out["close"].tolist() == [-1]
+
+
 def test_safequery_rejects_calls_and_attributes():
     assert not SafeQuery("__import__('os').system('echo 1')").is_safe
     assert not SafeQuery("df.__class__").is_safe

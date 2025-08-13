@@ -26,7 +26,7 @@ class SafeQuery:
     """
 
     # characters permitted inside a query expression
-    _ALLOWED_CHARS: Set[str] = set("()&|><=+-/*.%[], '") | set(
+    _ALLOWED_CHARS: Set[str] = set("()&|><=+-/*.%[], '~") | set(
         string.ascii_letters + string.digits + "_\""
     )
     _ALLOWED_FUNCS: Set[str] = {
