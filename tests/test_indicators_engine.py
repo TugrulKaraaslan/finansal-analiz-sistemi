@@ -48,6 +48,7 @@ def test_pandas_ta_fallback(monkeypatch):
         return real_import(name, *args, **kwargs)
 
     monkeypatch.setattr(builtins, "__import__", fake_import)
+    monkeypatch.setattr("backtest.indicators.ta", None, raising=False)
     df = _sample_df()
     res = compute_indicators(df, params={}, engine="pandas_ta")
     res2 = compute_indicators(df, params={}, engine="builtin")
