@@ -3,9 +3,9 @@ def test_imports():
     import pandas as pd
 
     try:
-        import pandas_ta
+        import pandas_ta  # noqa: F401
     except ModuleNotFoundError:
-        pandas_ta = None
+        pass
 
     import backtest
     from backtest import indicators, screener, data_loader
