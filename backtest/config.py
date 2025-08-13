@@ -19,6 +19,7 @@ class ProjectCfg(BaseModel):
     holding_period: int = 1
     transaction_cost: float = 0.0
     raise_on_error: bool = False
+    stop_on_filter_error: bool = False
 
 
 class DataCfg(BaseModel):
@@ -46,7 +47,7 @@ class CalendarCfg(BaseModel):
 
 
 class IndicatorsCfg(BaseModel):
-    engine: str = "pandas_ta"  # pandas_ta | ta_lib
+    engine: str = "pandas_ta"  # pandas_ta | builtin | none
     params: Dict[str, List[int]] = Field(
         default_factory=lambda: {"rsi": [14], "ema": [10, 20, 50], "macd": [12, 26, 9]}
     )

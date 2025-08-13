@@ -17,11 +17,12 @@ from .calendars import (
 )
 from .config import load_config
 from .data_loader import apply_corporate_actions, read_excels_long
+from .crossovers import generate_crossovers
 from .indicators import compute_indicators
 from .normalizer import normalize
 from .reporter import write_reports
 from .screener import run_screener
-from .utils.names import set_name_normalization
+from .utils.names import canonicalize_columns, set_name_normalization
 from .validator import dataset_summary, quality_warnings
 
 
@@ -54,7 +55,13 @@ def _run_scan(cfg) -> None:
         tdays = None
         df = add_next_close(df)
     logger.info("Göstergeler hesaplanıyor...")
-    df_ind = compute_indicators(df, cfg.indicators.params, engine=cfg.indicators.engine)
+    if cfg.indicators.engine == "none":
+        df_ind = canonicalize_columns(df.copy())
+    else:
+        df_ind = compute_indicators(
+            df, cfg.indicators.params, engine=cfg.indicators.engine
+        )
+    df_ind = generate_crossovers(df_ind)
     logger.info("Filtre CSV okunuyor...")
     try:
         filters_df = load_filters_csv(cfg.data.filters_csv)
@@ -96,7 +103,7 @@ def _run_scan(cfg) -> None:
             df_ind,
             filters_df,
             d,
-            strict=True,
+            strict=getattr(cfg.project, "stop_on_filter_error", False),
             raise_on_error=cfg.project.raise_on_error,
         )
         trades = run_1g_returns(
