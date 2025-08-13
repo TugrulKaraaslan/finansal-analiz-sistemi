@@ -19,6 +19,8 @@ Aşağıdaki hücre Colab ortamında projeyi kurar ve örnek bir tarama çalış
 !ls -la raporlar | head
 ```
 
+> Excel okuma/yazma için gerekli `openpyxl` ve `XlsxWriter` paketleri `requirements_colab.txt` içinde yer alır.
+
 ## İsim normalizasyonu
 
 Veri dosyalarındaki ve filtre ifadelerindeki tüm sütun isimleri otomatik olarak

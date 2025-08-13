@@ -53,6 +53,8 @@ pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all: --no-
 
 Python 3.10–3.12 sürümleri desteklenir; 3.13 henüz destek dışıdır.
 
+Excel dosyalarını okuyup yazmak için gerekli `openpyxl` ve `XlsxWriter` paketleri de bu gereksinimlerle kurulur.
+
 ```bash
 python -m backtest.cli scan-day --config examples/example_config.yaml --date 2024-01-02
 ```
