@@ -235,7 +235,7 @@ def read_excels_long(
         enable_cache = len(excel_files) > 5
         if enable_cache:
             logger.info(
-                "Cache enabled automatically for %d Excel files", len(excel_files)
+                "Cache enabled automatically for {} Excel files", len(excel_files)
             )
     if enable_cache and not cache_path:
         cache_path = excel_dir / "cache.parquet" if excel_dir else None
@@ -244,9 +244,20 @@ def read_excels_long(
         try:
             cache_file = resolve_path(cache_path)
             if cache_file.exists():
-                return pd.read_parquet(cache_file)
+                try:
+                    return pd.read_parquet(cache_file)
+                except Exception as e:  # engine missing or wrong format
+                    logger.warning(
+                        "Önbellek okunamadı: {} -> {}", cache_path, e
+                    )
+                    try:
+                        return pd.read_pickle(cache_file)
+                    except Exception as e2:
+                        logger.warning(
+                            "Önbellek okunamadı: {} -> {}", cache_path, e2
+                        )
         except Exception as e:
-            logger.warning("Önbellek okunamadı: %s -> %s", cache_path, e)
+            logger.warning("Önbellek okunamadı: {} -> {}", cache_path, e)
 
     if not excel_dir or not excel_dir.exists():
         raise FileNotFoundError(f"Excel klasörü bulunamadı: {excel_dir}")
@@ -340,9 +351,20 @@ def read_excels_long(
         try:
             cache_file = resolve_path(cache_path)
             cache_file.parent.mkdir(parents=True, exist_ok=True)
-            full.to_parquet(cache_file, index=False)
+            try:
+                full.to_parquet(cache_file, index=False)
+            except Exception as e:
+                logger.warning(
+                    "Önbelleğe yazılamadı: {} -> {}", cache_path, e
+                )
+                try:
+                    full.to_pickle(cache_file)
+                except Exception as e2:  # pragma: no cover - logging
+                    logger.warning(
+                        "Önbelleğe yazılamadı: {} -> {}", cache_path, e2
+                    )
         except Exception as e:  # pragma: no cover - logging
-            logger.warning("Önbelleğe yazılamadı: %s -> %s", cache_path, e)
+            logger.warning("Önbelleğe yazılamadı: {} -> {}", cache_path, e)
 
     return full
 
