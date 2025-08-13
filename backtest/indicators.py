@@ -10,6 +10,11 @@ from backtest.utils.names import canonicalize_columns
 
 logger = logging.getLogger(__name__)
 
+try:  # pragma: no cover - optional dependency
+    import pandas_ta as ta  # type: ignore
+except ImportError:  # pragma: no cover
+    ta = None  # type: ignore
+
 
 def _safe_alias(df2: pd.DataFrame, alias: str, base: str) -> bool:
     """Safely copy ``base`` column to ``alias`` without raising.
@@ -90,13 +95,14 @@ def compute_indicators(
         Mapping of indicator names to parameter lists. Supported keys include
         ``ema``, ``rsi`` and ``macd``.
     engine : str, default "builtin"
-        Indicator engine to use; either ``"builtin"`` or ``"pandas_ta"``.
+        Indicator engine to use; either ``"builtin"``, ``"pandas_ta"`` or ``"none"``.
 
     Returns
     -------
     pandas.DataFrame
         DataFrame containing the original data along with computed indicators.
     """
+    global ta
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a DataFrame")
     if params is not None and not isinstance(params, dict):
@@ -105,9 +111,11 @@ def compute_indicators(
         params = {}
     if df.empty:
         return df.copy()
-    supported_engines = {"builtin", "pandas_ta"}
+    supported_engines = {"builtin", "pandas_ta", "none"}
     if engine not in supported_engines:
         raise ValueError(f"Unsupported engine: {engine}")
+    if engine == "none":
+        return canonicalize_columns(df.copy())
     req = {"symbol", "date", "close", "volume"}
     missing = req.difference(df.columns)
     if missing:
@@ -123,13 +131,12 @@ def compute_indicators(
         }.intersection(df.columns)
     )
 
-    use_pandas_ta = engine == "pandas_ta"
-    ta = None
+    use_pandas_ta = engine == "pandas_ta" and ta is not None
+    if engine == "pandas_ta" and ta is None:
+        logger.warning("pandas_ta bulunamadı, builtin hesaplamalara dönülüyor")
     if use_pandas_ta:
         try:  # pragma: no cover - optional dependency
             from importlib.metadata import version
-
-            import pandas_ta as ta
             from packaging.version import Version
 
             np_major = int(np.__version__.split(".")[0])
@@ -287,9 +294,7 @@ def compute_indicators(
 
 
 def _ensure_adx_stochrsi(df):
-    try:
-        import pandas_ta as ta
-    except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    if ta is None:
         return df
 
     if {"high", "low", "close"}.issubset(df.columns):
@@ -327,7 +332,10 @@ if "_compute_indicators_wrapped" not in globals():
     _orig_compute_indicators = compute_indicators
 
     def compute_indicators(*args, **kwargs):  # type: ignore
+        engine = kwargs.get("engine", "builtin")
         df = _orig_compute_indicators(*args, **kwargs)
-        return _ensure_adx_stochrsi(df)
+        if engine != "none":
+            df = _ensure_adx_stochrsi(df)
+        return df
 
     _compute_indicators_wrapped = True

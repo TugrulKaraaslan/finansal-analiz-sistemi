@@ -48,3 +48,19 @@ def test_duplicate_columns_dropped(caplog):
         res = compute_indicators(df, params={}, engine="builtin")
     assert res.columns.tolist().count("change_1d_percent") == 1
     assert "duplicate columns dropped" in caplog.text
+
+
+def test_pandas_ta_missing(monkeypatch, caplog):
+    df = pd.DataFrame(
+        {
+            "symbol": ["AAA"] * 3,
+            "date": pd.date_range("2024-01-01", periods=3, freq="D"),
+            "close": [1, 2, 3],
+            "volume": [1, 2, 3],
+        }
+    )
+    monkeypatch.setattr("backtest.indicators.ta", None, raising=False)
+    with caplog.at_level(logging.WARNING, logger="backtest.indicators"):
+        res = compute_indicators(df, params={}, engine="pandas_ta")
+    assert "pandas_ta bulunamadı" in caplog.text
+    assert "EMA_10" in res.columns
