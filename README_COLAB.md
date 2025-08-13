@@ -20,6 +20,7 @@ Aşağıdaki hücre Colab ortamında projeyi kurar ve örnek bir tarama çalış
 ```
 
 > Excel okuma/yazma için gerekli `openpyxl` ve `XlsxWriter` paketleri `requirements_colab.txt` içinde yer alır.
+> Spacy, fastai ve fastdownload bağımlılıkları kaldırılmıştır.
 
 ## İsim normalizasyonu
 

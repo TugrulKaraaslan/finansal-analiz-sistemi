@@ -55,6 +55,8 @@ Python 3.10–3.12 sürümleri desteklenir; 3.13 henüz destek dışıdır.
 
 Excel dosyalarını okuyup yazmak için gerekli `openpyxl` ve `XlsxWriter` paketleri de bu gereksinimlerle kurulur.
 
+Spacy, fastai ve fastdownload bağımlılıkları kaldırılmış olup kurulmasına gerek yoktur.
+
 ```bash
 python -m backtest.cli scan-day --config examples/example_config.yaml --date 2024-01-02
 ```
@@ -174,6 +176,7 @@ pytest -q
 5. **Raporlama:** Çıktıları `backtest.reporter.write_reports` veya `backtest.report.write_report` aracılığıyla Excel/CSV olarak kaydedin.
 
 ## Sürüm Notları
+- 1.2.0: spacy, fastai ve fastdownload bağımlılıkları kaldırıldı.
 - 1.1.0: Colab desteği ve yeni README.
 - 1.0.0: İlk yayımlanan sürüm.
 
