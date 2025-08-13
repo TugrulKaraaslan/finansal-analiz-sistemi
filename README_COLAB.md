@@ -6,7 +6,7 @@ Aşağıdaki hücre Colab ortamında projeyi kurar ve örnek bir tarama çalış
 # pip kurulumu
 %pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
 # Uygun wheel bulunamazsa veya pandas_ta uyumsuzluğu olursa:
-%pip install "numpy<2.0" "pandas<2.2" pandas-ta==0.3.14b0
+%pip install "numpy<2.0.0" "pandas<2.2" pandas-ta==0.3.14b0
 
 %cd /content/finansal-analiz-sistemi
 %env PYTHONPATH=/content/finansal-analiz-sistemi
