@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import re
 import warnings
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
-from typing import Iterable, Mapping, Optional
+from typing import Iterable, Mapping, Optional, Literal
 
 import pandas as pd
 
@@ -16,6 +17,27 @@ def _ensure_dir(path: Optional[str | Path]):
     p = resolve_path(path)
     target = p if not p.suffix else p.parent
     target.mkdir(parents=True, exist_ok=True)
+
+
+def _sanitize_filename(name: str) -> str:
+    """Remove characters that are invalid in file names."""
+    return re.sub(r'[<>:"/\\|?*]', "_", name)
+
+
+def _handle_overwrite(path: Path, policy: Literal["replace", "fail", "timestamp"]):
+    """Return a safe path according to overwrite policy."""
+    if policy not in {"replace", "fail", "timestamp"}:
+        raise ValueError("invalid overwrite policy")
+    if policy == "replace":
+        return path
+    if policy == "fail":
+        if path.exists():
+            raise FileExistsError(path)
+        return path
+    if path.exists():
+        stamp = datetime.now().strftime("%H%M%S")
+        return path.with_name(f"{path.stem}_{stamp}{path.suffix}")
+    return path
 
 
 def write_reports(
@@ -31,6 +53,13 @@ def write_reports(
     summary_winrate: Optional[pd.DataFrame] = None,
     validation_summary: Optional[pd.DataFrame] = None,
     validation_issues: Optional[pd.DataFrame] = None,
+    *,
+    per_day_output: bool = False,
+    csv_also: bool = True,
+    overwrite: Literal["replace", "fail", "timestamp"] = "replace",
+    filename_pattern: str = "{date}.xlsx",
+    csv_filename_pattern: str = "{date}.csv",
+    separate_dir_for_range: bool = False,
 ):
     """Write daily/summary and optional sheets and return output paths.
     - SUMMARY: ReturnPct ortalamaları (sayısal 0.00 -> yüzde puan)
@@ -41,8 +70,8 @@ def write_reports(
     Returns
     -------
     dict
-        Mapping of produced files. Keys are ``excel`` for the workbook and
-        ``csv`` for a list of CSV exports (if requested).
+        Mapping of produced files. Keys are ``excel`` for the workbook or list
+        of workbooks and ``csv`` for a list of CSV exports (if requested).
     """
     if not isinstance(trades_all, pd.DataFrame):
         raise TypeError("trades_all must be a DataFrame")
@@ -83,6 +112,46 @@ def write_reports(
     else:
         raise TypeError("dates must be iterable or date-like")
     outputs: dict[str, Path | list[Path]] = {}
+    if per_day_output:
+        if not out_xlsx:
+            raise ValueError("out_xlsx directory required for per_day_output")
+        base_dir = resolve_path(out_xlsx)
+        base_dir.mkdir(parents=True, exist_ok=True)
+        if separate_dir_for_range and dates:
+            start = pd.to_datetime(dates[0]).date()
+            end = pd.to_datetime(dates[-1]).date()
+            base_dir = base_dir / f"{start}_{end}"
+            base_dir.mkdir(parents=True, exist_ok=True)
+        excel_paths: list[Path] = []
+        csv_paths: list[Path] = []
+        for d in dates:
+            day_ts = pd.to_datetime(d).normalize()
+            day_df = trades_all[trades_all["Date"] == day_ts].copy()
+            day_df = day_df.sort_values(["FilterCode", "Symbol"])
+            day_str = str(day_ts.date())
+            fname = _sanitize_filename(filename_pattern.format(date=day_str))
+            xlsx_path = _handle_overwrite(base_dir / fname, overwrite)
+            writer = pd.ExcelWriter(xlsx_path, engine="xlsxwriter")
+            with writer:
+                day_df.to_excel(writer, sheet_name="SCAN", index=False)
+                summary_df = pd.DataFrame(
+                    {
+                        "N_TRADES": [len(day_df)],
+                        "MEAN_RET": [day_df["ReturnPct"].mean()],
+                        "HIT_RATIO": [day_df["Win"].mean()],
+                    }
+                )
+                summary_df.to_excel(writer, sheet_name="SUMMARY", index=False)
+            excel_paths.append(xlsx_path)
+            if csv_also:
+                csv_name = _sanitize_filename(csv_filename_pattern.format(date=day_str))
+                csv_path = _handle_overwrite(base_dir / csv_name, overwrite)
+                day_df.to_csv(csv_path, index=False, encoding="utf-8")
+                csv_paths.append(csv_path)
+        outputs["excel"] = excel_paths
+        if csv_paths:
+            outputs["csv"] = csv_paths
+        return outputs
     if summary_wide is None:
         summary_wide = pd.DataFrame()
     if out_xlsx:
@@ -194,7 +263,7 @@ def write_reports(
             else:
                 warnings.warn(f"Excel yazılamadı: {out_xlsx_path}")
 
-    if out_csv_dir:
+    if out_csv_dir and csv_also:
         out_csv_path = resolve_path(out_csv_dir)
         out_csv_path.mkdir(parents=True, exist_ok=True)
         csv_paths: list[Path] = []
