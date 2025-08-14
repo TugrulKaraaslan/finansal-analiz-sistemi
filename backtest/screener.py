@@ -2,11 +2,30 @@ from __future__ import annotations
 
 import re
 import warnings
+import operator
 
+import numpy as np
 import pandas as pd
 from loguru import logger
 
 from backtest.query_parser import SafeQuery
+
+
+def _to_series(x):
+    import pandas as pd
+
+    if isinstance(x, pd.DataFrame):
+        if x.shape[1] == 1:
+            return x.iloc[:, 0]
+        return x.any(axis=1)
+    return x
+
+
+def _align_series(a, b):
+    if not hasattr(a, "index") or not hasattr(b, "index"):
+        return a, b
+    idx = a.index.intersection(b.index)
+    return a.reindex(idx), b.reindex(idx)
 
 
 def _to_pandas_ops(expr: str) -> str:
@@ -14,6 +33,148 @@ def _to_pandas_ops(expr: str) -> str:
     expr = re.sub(r"\bOR\b", "|", expr, flags=re.I)
     expr = re.sub(r"\bNOT\b", "~", expr, flags=re.I)
     return expr
+
+
+class _SeriesWrapper:
+    __array_priority__ = 1000
+
+    def __init__(self, data):
+        self.data = _to_series(data)
+
+    # --- comparison and boolean ops ---
+    def _binary(self, other, op):
+        other_val = getattr(other, "data", other)
+        other_val = _to_series(other_val)
+        a, b = _align_series(self.data, other_val)
+        res = op(a, b)
+        return _SeriesWrapper(res)
+
+    def __and__(self, other):
+        return self._binary(other, operator.and_)
+
+    def __rand__(self, other):
+        return self.__and__(other)
+
+    def __or__(self, other):
+        return self._binary(other, operator.or_)
+
+    def __ror__(self, other):
+        return self.__or__(other)
+
+    def __gt__(self, other):
+        return self._binary(other, operator.gt)
+
+    def __ge__(self, other):
+        return self._binary(other, operator.ge)
+
+    def __lt__(self, other):
+        return self._binary(other, operator.lt)
+
+    def __le__(self, other):
+        return self._binary(other, operator.le)
+
+    def __eq__(self, other):  # noqa: D401
+        return self._binary(other, operator.eq)
+
+    def __ne__(self, other):  # noqa: D401
+        return self._binary(other, operator.ne)
+
+    # --- arithmetic ops ---
+    def __add__(self, other):
+        return self._binary(other, operator.add)
+
+    def __radd__(self, other):
+        return _SeriesWrapper(other).__add__(self)
+
+    def __sub__(self, other):
+        return self._binary(other, operator.sub)
+
+    def __rsub__(self, other):
+        return _SeriesWrapper(other).__sub__(self)
+
+    def __mul__(self, other):
+        return self._binary(other, operator.mul)
+
+    def __rmul__(self, other):
+        return _SeriesWrapper(other).__mul__(self)
+
+    def __truediv__(self, other):
+        return self._binary(other, operator.truediv)
+
+    def __rtruediv__(self, other):
+        return _SeriesWrapper(other).__truediv__(self)
+
+    def __floordiv__(self, other):
+        return self._binary(other, operator.floordiv)
+
+    def __rfloordiv__(self, other):
+        return _SeriesWrapper(other).__floordiv__(self)
+
+    def __pow__(self, other):
+        return self._binary(other, operator.pow)
+
+    def __rpow__(self, other):
+        return _SeriesWrapper(other).__pow__(self)
+
+    def __neg__(self):
+        return _SeriesWrapper(-self.data)
+
+    def __pos__(self):
+        return self
+
+    def __invert__(self):
+        return _SeriesWrapper(~_to_series(self.data))
+
+    def __abs__(self):
+        return _SeriesWrapper(abs(self.data))
+
+    # --- attribute access ---
+    def __getattr__(self, name):
+        attr = getattr(self.data, name)
+        if callable(attr):
+            def wrapped(*args, **kwargs):
+                args = [getattr(a, "data", a) for a in args]
+                kwargs = {k: getattr(v, "data", v) for k, v in kwargs.items()}
+                res = attr(*args, **kwargs)
+                return _SeriesWrapper(res)
+
+            return wrapped
+        return _SeriesWrapper(attr)
+
+    def unwrap(self):
+        return _to_series(self.data)
+
+
+def _wrap_func(func):
+    def inner(*args, **kwargs):
+        args = [getattr(a, "data", a) for a in args]
+        kwargs = {k: getattr(v, "data", v) for k, v in kwargs.items()}
+        res = func(*args, **kwargs)
+        return _SeriesWrapper(res)
+
+    return inner
+
+
+def _eval_expr(df: pd.DataFrame, expr: str) -> pd.Series:
+    env = {name: _SeriesWrapper(df[name]) for name in df.columns}
+    env.update(
+        {
+            "abs": _wrap_func(abs),
+            "max": _wrap_func(np.maximum),
+            "min": _wrap_func(np.minimum),
+            "log": _wrap_func(np.log),
+            "exp": _wrap_func(np.exp),
+            "floor": _wrap_func(np.floor),
+            "ceil": _wrap_func(np.ceil),
+        }
+    )
+    result = eval(expr, {"__builtins__": {}}, env)
+    if isinstance(result, _SeriesWrapper):
+        result = result.unwrap()
+    result = _to_series(result)
+    if not pd.api.types.is_bool_dtype(result):
+        raise ValueError("Query expression must evaluate to a boolean mask")
+    return result
 
 
 def run_screener(
@@ -162,7 +323,10 @@ def run_screener(
     out_frames = []
     for code, grp, side_norm, sq in valids:
         try:
-            filtered = sq.filter(d)
+            mask = _eval_expr(d, sq.expr)
+            mask = _to_series(mask)
+            mask = mask.reindex(d.index)
+            filtered = d[mask]
         except Exception as err:
             if raise_on_error:
                 raise RuntimeError(f"Filter {code!r} failed: {err}") from err
