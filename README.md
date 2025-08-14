@@ -43,6 +43,17 @@ Aşağıdaki tablo bazı sık kullanılan indikatör kolonlarını ve bunlara il
 | EMA20_50 | `ema_20_keser_ema_50_yukari` | Trend | long |
 | RSI30_SHORT | `rsi_14_keser_30p0_asagi` | Momentum | short |
 
+## BIST'e Göre Oranlı Özet
+
+Filtre performansları BIST100'e göre şu metriklerle özetlenir:
+
+| FİLTRE | MEAN_RET | BIST_MEAN_RET | ALPHA_RET | HIT_RATIO | N_TRADES |
+| -----: | --------: | --------------: | ---------: | ---------: | --------: |
+|    T21 |    0.0124 |          0.0080 |     0.0044 |       0.61 |        57 |
+|    T24 |    0.0102 |          0.0091 |     0.0011 |       0.54 |        49 |
+
+`ALPHA_RET = MEAN_RET - BIST_MEAN_RET`
+
 ## Kurulum ve Çalıştırma
 ### Yerel
 ```bash

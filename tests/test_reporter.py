@@ -178,5 +178,5 @@ def test_write_reports_includes_trade_count(tmp_path):
         out_xlsx=out_xlsx,
     )
     df = pd.read_excel(out_xlsx, sheet_name="SUMMARY")
-    assert "TradeCount" in df.columns
-    assert set(df["TradeCount"]) == {1}
+    assert "N_TRADES" in df.columns
+    assert set(df["N_TRADES"]) == {1}
