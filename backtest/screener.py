@@ -132,6 +132,7 @@ class _SeriesWrapper:
     def __getattr__(self, name):
         attr = getattr(self.data, name)
         if callable(attr):
+
             def wrapped(*args, **kwargs):
                 args = [getattr(a, "data", a) for a in args]
                 kwargs = {k: getattr(v, "data", v) for k, v in kwargs.items()}
