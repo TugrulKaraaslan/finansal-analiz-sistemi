@@ -9,7 +9,7 @@ import pandas as pd
 from loguru import logger
 
 from backtest.utils import normalize_key
-from backtest.utils.names import canonicalize_columns
+from backtest.naming import normalize_columns as _normalize_columns
 from utils.paths import resolve_path
 
 
@@ -51,64 +51,27 @@ def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
     return None
 
 
-COL_ALIASES: Dict[str, str] = {
-    "date": "date",
-    "tarih": "date",
-    "tarihi": "date",
-    "open": "open",
-    "acilis": "open",
-    "açilis": "open",
-    "açilis_fiyati": "open",
-    "açilis_fiyati_": "open",
-    "high": "high",
-    "yuksek": "high",
-    "yüksek": "high",
-    "low": "low",
-    "dusuk": "low",
-    "düşük": "low",
-    "close": "close",
-    "kapanis": "close",
-    "kapanış": "close",
-    "son": "close",
-    "son_fiyat": "close",
-    "adj_close": "close",
-    "volume": "volume",
-    "hacim": "volume",
-    "islem_hacmi": "volume",
-    "işlem_hacmi": "volume",
-    "adet": "volume",
-    "lot": "volume",
-    "kapanis_fiyati": "close",
-    "kapanis_fiyat": "close",
-}
-
-
 def normalize_columns(
     df: pd.DataFrame, price_schema: Optional[Dict[str, Iterable[str] | str]] = None
 ) -> pd.DataFrame:
-    if not isinstance(df, pd.DataFrame):
-        raise TypeError("df must be a DataFrame")
-    mapping = COL_ALIASES.copy()
-    if price_schema:
-        for std, aliases in price_schema.items():
-            if isinstance(aliases, str):
-                aliases = [aliases]
-            for a in aliases:
-                mapping[normalize_key(a).strip("_")] = std
+    """Wrapper around :func:`backtest.naming.normalize_columns`.
 
-    rename_map: Dict[str, str] = {}
-    seen: Dict[str, str] = {}
-    drops: List[str] = []
-    for c in df.columns:
-        key = normalize_key(c).strip("_")
-        std = mapping.get(key, key)
-        if std in seen:
-            drops.append(c)
-            continue
-        rename_map[c] = std
-        seen[std] = c
-    result = df.drop(columns=drops).rename(columns=rename_map)
-    return result
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Input DataFrame.
+    price_schema : dict, optional
+        Extra alias mappings where keys are canonical names and values are
+        alias strings or lists of strings.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with normalized column names.
+    """
+
+    normed, _ = _normalize_columns(df, extra_aliases=price_schema)
+    return normed
 
 
 def validate_columns(df: pd.DataFrame, required: Iterable[str]) -> pd.DataFrame:
@@ -284,7 +247,6 @@ def read_excels_long(
                         if df is None or df.empty:
                             continue
                         df = normalize_columns(df, price_schema=price_schema)
-                        df = canonicalize_columns(df)
                         if "date" not in df.columns:
                             df.columns = [normalize_key(c) for c in df.columns]
                         if "date" not in df.columns:
@@ -343,7 +305,7 @@ def read_excels_long(
     if "close" in full.columns:
         full = full.dropna(subset=["close"])
 
-    full = canonicalize_columns(full)
+    full = normalize_columns(full)
     validate_columns(full, ["date", "open", "high", "low", "close", "volume", "symbol"])
 
     if enable_cache and cache_path:

@@ -10,7 +10,7 @@ from typing import Set, Tuple
 import numpy as np
 import pandas as pd
 
-from backtest.utils.names import canonicalize_filter_token
+from backtest.naming import normalize_name
 
 
 class SafeQuery:
@@ -58,7 +58,7 @@ class SafeQuery:
             def visit_Name(self, node):
                 if node.id in SafeQuery._ALLOWED_FUNCS:
                     return node
-                node.id = canonicalize_filter_token(node.id)
+                node.id = normalize_name(node.id)
                 return node
 
         tree = ast.parse(expr_tr, mode="eval")
@@ -69,7 +69,7 @@ class SafeQuery:
         self.expr = expr_tr
         ok, names, err = self._validate(expr_tr)
         self.is_safe = ok
-        self.names = {canonicalize_filter_token(n) for n in names}
+        self.names = {normalize_name(n) for n in names}
         self.error = err
 
     @classmethod

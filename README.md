@@ -24,6 +24,23 @@ Aşağıdaki tablo bazı sık kullanılan indikatör kolonlarını ve bunlara il
 | `macd_line`, `macd_signal` | MACD göstergesi ana ve sinyal çizgisi | `macd_line > macd_signal` |
 | `stochrsi_k`, `stochrsi_d` | Stokastik RSI çizgileri | `stochrsi_k_keser_stochrsi_d_yukari` |
 
+## İsimlendirme Standardı
+Tüm iç kolon ve alan adları `snake_case` biçiminde tutulur: yalnızca küçük
+harf, rakam ve altçizgi (`[a-z0-9_]+`). Örnek kanonik adlar: `open`, `high`,
+`low`, `close`, `volume`, `ema_20`, `rsi_14`.
+
+## Alias Davranışı
+Eski veya farklı yazımlara ait varyasyonlar geniş bir eşleme tablosu ile
+kanonik adlara dönüştürülür. Pandera tabanlı `validate_columns_schema`
+yardımıyla iki çalışma modu bulunur:
+
+- **`strict_fail`**: eşleşmeyen kolonlar hata olarak raporlanır.
+- **`auto_fix`**: bilinen alias'lar düzeltilir, tanınmayanlar atlanarak
+  döndürülen listede bildirilir.
+
+Filtre ifadeleri de aynı normalizasyon katmanından geçtiği için sorgularda
+`EMA20` yazmak `ema_20` kolonunu kullanır.
+
 ## Filtre CSV Açıklaması
 - Satırlar `;` ile ayrılır.
 - Kolonlar:
