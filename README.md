@@ -118,7 +118,32 @@ data:
 
 `data.excel_dir` ve `data.filters_csv` alanları eksikse komut satırında
 `config.data.* zorunlu; örnek için examples/example_config.yaml` şeklinde
-bir hata mesajı gösterilir.
+
+## Log Standardı
+
+Varsayılan log dizini `loglar/` olarak belirlenmiştir. Her çalışma
+`run_YYYYMMDD-HHMMSS` şeklinde adlandırılan alt klasöre loglarını yazar:
+
+```
+loglar/
+  run_20250307-093015/
+    summary.txt
+    stages.jsonl
+```
+
+`summary.txt` kısa insan okunur özetler içerir. Ayrıntılı bilgiler ise
+JSON Lines biçimindeki `stages.jsonl` dosyasına yazılır:
+
+```json
+{"ts":"2025-03-07T09:30:15.120Z","stage":"load_data","elapsed_ms":215,"rows":48290}
+```
+
+Hatalar `ERROR` seviyesinde loglanır ve aynı klasörde `stage.err` olarak
+stacktrace ile saklanır. Önceki `logs/` dizini tespit edilirse köke
+`migration.txt` bırakılır ve konsola uyarı basılır.
+
+`purge_old_logs(days=7)` fonksiyonu çalıştırıldığında 7 günden eski
+`run_*` klasörleri otomatik olarak silinir.
 
 ### Gösterge Motoru (Politika Kilidi)
 
