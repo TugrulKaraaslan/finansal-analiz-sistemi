@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import logging
 import click
 import pandas as pd
-from loguru import logger
 
 from io_filters import load_filters_csv
 from utils.paths import resolve_path
@@ -24,11 +24,18 @@ from .reporter import write_reports
 from .screener import run_screener
 from .utils.names import canonicalize_columns, set_name_normalization
 from .validator import dataset_summary, quality_warnings
+from .logging_utils import setup_logger, Timer
 
 
 @click.group()
-def cli():
-    pass
+@click.option("--log-level", default="INFO", help="Log level: DEBUG/INFO/WARN/ERROR")
+@click.option("--run-id", default=None, help="Custom run id for log filename")
+@click.pass_context
+def cli(ctx, log_level: str, run_id: str | None):
+    logfile = setup_logger(run_id=run_id, level=log_level)
+    ctx.ensure_object(dict)
+    ctx.obj["logfile"] = logfile
+    logging.info("CLI initialized")
 
 
 def _run_scan(cfg) -> None:
@@ -37,11 +44,12 @@ def _run_scan(cfg) -> None:
     The filters CSV must provide ``FilterCode`` and ``PythonQuery`` columns and
     may include an optional ``Group`` column.
     """
-    logger.info("Excelleri okuyor...")
+    logging.info("Excelleri okuyor...")
     try:
-        df = read_excels_long(cfg)
+        with Timer("read_excels_long"):
+            df = read_excels_long(cfg)
     except (FileNotFoundError, RuntimeError, ImportError) as exc:
-        logger.error(str(exc))
+        logging.error(str(exc))
         raise click.ClickException(str(exc))
     df = apply_corporate_actions(df, getattr(cfg.data, "corporate_actions_csv", None))
     df = normalize(df)
@@ -54,23 +62,25 @@ def _run_scan(cfg) -> None:
     else:
         tdays = None
         df = add_next_close(df)
-    logger.info("Göstergeler hesaplanıyor...")
-    if cfg.indicators.engine == "none":
-        df_ind = canonicalize_columns(df.copy())
-    else:
-        df_ind = compute_indicators(
-            df, cfg.indicators.params, engine=cfg.indicators.engine
-        )
+    logging.info("Göstergeler hesaplanıyor...")
+    with Timer("compute_indicators"):
+        if cfg.indicators.engine == "none":
+            df_ind = canonicalize_columns(df.copy())
+        else:
+            df_ind = compute_indicators(
+                df, cfg.indicators.params, engine=cfg.indicators.engine
+            )
     df_ind = generate_crossovers(df_ind)
-    logger.info("Filtre CSV okunuyor...")
+    logging.info("Filtre CSV okunuyor...")
     try:
-        filters_df = load_filters_csv(cfg.data.filters_csv)
+        with Timer("load_filters_csv"):
+            filters_df = load_filters_csv(cfg.data.filters_csv)
     except FileNotFoundError as exc:
-        logger.error(str(exc))
+        logging.error(str(exc))
         raise click.ClickException(str(exc))
     if filters_df.empty:
         msg = "Filtre CSV boş veya bulunamadı, işlem yapılmadı."
-        logger.error(msg)
+        logging.error(msg)
         raise click.ClickException(msg)
 
     all_days = sorted(pd.to_datetime(df_ind["date"]).dt.normalize().unique())
@@ -80,7 +90,7 @@ def _run_scan(cfg) -> None:
     else:
         if not all_days:
             msg = "Taranacak tarih bulunamadı, veri seti boş."
-            logger.error(msg)
+            logging.error(msg)
             raise click.ClickException(msg)
         start = (
             pd.to_datetime(cfg.project.start_date).normalize()
@@ -97,22 +107,24 @@ def _run_scan(cfg) -> None:
         days = [d for d in all_days if start <= d <= end]
     all_trades = []
     if len(days) > 1:
-        logger.info(f"{len(days)} gün taranacak...")
+        logging.info(f"{len(days)} gün taranacak...")
     for d in days:
-        sigs = run_screener(
-            df_ind,
-            filters_df,
-            d,
-            stop_on_filter_error=getattr(cfg.project, "stop_on_filter_error", False),
-            raise_on_error=cfg.project.raise_on_error,
-        )
-        trades = run_1g_returns(
-            df_ind,
-            sigs,
-            cfg.project.holding_period,
-            cfg.project.transaction_cost,
-            trading_days=tdays,
-        )
+        with Timer(f"run_screener {d.date()}"):
+            sigs = run_screener(
+                df_ind,
+                filters_df,
+                d,
+                stop_on_filter_error=getattr(cfg.project, "stop_on_filter_error", False),
+                raise_on_error=cfg.project.raise_on_error,
+            )
+        with Timer(f"run_1g_returns {d.date()}"):
+            trades = run_1g_returns(
+                df_ind,
+                sigs,
+                cfg.project.holding_period,
+                cfg.project.transaction_cost,
+                trading_days=tdays,
+            )
         all_trades.append(trades)
     trades_all = (
         pd.concat(all_trades, ignore_index=True)
@@ -171,26 +183,27 @@ def _run_scan(cfg) -> None:
     else:
         out_xlsx = out_dir / f"{days[0].date()}_{days[-1].date()}_1G_BIST100.xlsx"
         out_csv_dir = out_dir / "csv"
-    logger.info("Raporlar yazılıyor...")
+    logging.info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
     val_iss = quality_warnings(df)
-    outputs = write_reports(
-        trades_all,
-        days,
-        pivot,
-        xu100_pct,
-        out_xlsx=out_xlsx,
-        out_csv_dir=out_csv_dir,
-        validation_summary=val_sum,
-        validation_issues=val_iss,
-        summary_winrate=winrate,
-        daily_sheet_prefix=cfg.report.daily_sheet_prefix,
-        summary_sheet_name=cfg.report.summary_sheet_name,
-        percent_fmt=cfg.report.percent_format,
-    )
-    logger.info(f"Bitti. Çıktı: {outputs.get('excel')}")
+    with Timer("write_reports"):
+        outputs = write_reports(
+            trades_all,
+            days,
+            pivot,
+            xu100_pct,
+            out_xlsx=out_xlsx,
+            out_csv_dir=out_csv_dir,
+            validation_summary=val_sum,
+            validation_issues=val_iss,
+            summary_winrate=winrate,
+            daily_sheet_prefix=cfg.report.daily_sheet_prefix,
+            summary_sheet_name=cfg.report.summary_sheet_name,
+            percent_fmt=cfg.report.percent_format,
+        )
+    logging.info(f"Bitti. Çıktı: {outputs.get('excel')}")
     if outputs.get("csv"):
-        logger.info(f"CSV klasörü: {outputs['csv'][0].parent}")
+        logging.info(f"CSV klasörü: {outputs['csv'][0].parent}")
 
 
 @cli.command("scan-range")
@@ -217,7 +230,7 @@ def scan_range(
     try:
         cfg = load_config(config_path)
     except Exception as exc:  # kullanıcı dostu mesaj
-        logger.error(str(exc))
+        logging.error(str(exc))
         raise click.ClickException(str(exc))
     if start_date:
         cfg.project.start_date = start_date
@@ -228,7 +241,11 @@ def scan_range(
     if transaction_cost is not None:
         cfg.project.transaction_cost = transaction_cost
     cfg.project.run_mode = "range"
-    _run_scan(cfg)
+    try:
+        _run_scan(cfg)
+    except Exception:
+        logging.exception("scan_range failed")
+        raise
 
 
 @cli.command("scan-day")
@@ -240,7 +257,7 @@ def scan_day(config_path, date_str, holding_period, transaction_cost):
     try:
         cfg = load_config(config_path)
     except Exception as exc:  # kullanıcı dostu mesaj
-        logger.error(str(exc))
+        logging.error(str(exc))
         raise click.ClickException(str(exc))
     cfg.project.single_date = date_str
     cfg.project.run_mode = "single"
@@ -248,8 +265,16 @@ def scan_day(config_path, date_str, holding_period, transaction_cost):
         cfg.project.holding_period = holding_period
     if transaction_cost is not None:
         cfg.project.transaction_cost = transaction_cost
-    _run_scan(cfg)
+    try:
+        _run_scan(cfg)
+    except Exception:
+        logging.exception("scan_day failed")
+        raise
 
 
 if __name__ == "__main__":
-    cli()
+    try:
+        cli()
+    except SystemExit as exc:
+        logging.exception("SystemExit: %s", exc)
+        raise
