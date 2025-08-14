@@ -36,7 +36,10 @@ def _add_bist_columns(
     """
 
     if summary_wide is None or summary_wide.empty:
-        return summary_wide if summary_wide is not None else pd.DataFrame(), pd.DataFrame()
+        return (
+            summary_wide if summary_wide is not None else pd.DataFrame(),
+            pd.DataFrame(),
+        )
 
     day_cols = [c for c in summary_wide.columns if c not in {"Ortalama", "TradeCount"}]
     sw = summary_wide[day_cols].copy()
@@ -52,9 +55,9 @@ def _add_bist_columns(
     if xu100_pct is not None:
         bist_series = pd.Series(dict(xu100_pct), dtype=float).reindex(day_cols)
         mask = sw.notna() & bist_series.notna()
-        result["BIST_MEAN_RET"] = (
-            mask.astype(float) * bist_series
-        ).sum(axis=1) / mask.sum(axis=1)
+        result["BIST_MEAN_RET"] = (mask.astype(float) * bist_series).sum(
+            axis=1
+        ) / mask.sum(axis=1)
     else:
         result["BIST_MEAN_RET"] = float("nan")
 
@@ -73,7 +76,9 @@ def _add_bist_columns(
             row["BIST_MEAN_RET"],
         )
 
-    result = result.drop(columns=[c for c in ["Ortalama", "TradeCount"] if c in result.columns])
+    result = result.drop(
+        columns=[c for c in ["Ortalama", "TradeCount"] if c in result.columns]
+    )
 
     metric_cols = [
         "MEAN_RET",
@@ -257,9 +262,7 @@ def write_reports(
                 summary_wide.to_excel(writer, sheet_name=summary_sheet_name)
 
                 if with_bist_ratio_summary and not bist_ratio_summary.empty:
-                    bist_ratio_summary.to_excel(
-                        writer, sheet_name="BIST_RATIO_SUMMARY"
-                    )
+                    bist_ratio_summary.to_excel(writer, sheet_name="BIST_RATIO_SUMMARY")
 
                 if summary_winrate is not None and not summary_winrate.empty:
                     summary_winrate.to_excel(
@@ -287,7 +290,10 @@ def write_reports(
                     )
                     bist = (
                         pd.DataFrame(
-                            [[xu100_series.get(c, float("nan")) for c in day_cols] + [avg]],
+                            [
+                                [xu100_series.get(c, float("nan")) for c in day_cols]
+                                + [avg]
+                            ],
                             index=["BIST"],
                             columns=day_cols + ["MEAN_RET"],
                         )

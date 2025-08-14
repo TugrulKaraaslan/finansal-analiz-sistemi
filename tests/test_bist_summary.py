@@ -12,7 +12,14 @@ def _basic_trades():
             "FilterCode": ["F1", "F1", "F1", "F1", "F2", "F2"],
             "Symbol": ["A", "A", "A", "A", "B", "B"],
             "Date": pd.to_datetime(
-                ["2024-01-01", "2024-01-02", "2024-01-03", "2024-01-03", "2024-01-01", "2024-01-02"]
+                [
+                    "2024-01-01",
+                    "2024-01-02",
+                    "2024-01-03",
+                    "2024-01-03",
+                    "2024-01-01",
+                    "2024-01-02",
+                ]
             ),
             "EntryClose": [1, 1, 1, 1, 1, 1],
             "ExitClose": [1, 1, 1, 1, 1, 1],
@@ -27,11 +34,17 @@ def _basic_trades():
 def test_summary_contains_bist_columns(tmp_path):
     trades = _basic_trades()
     summary = (
-        trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack(fill_value=float("nan"))
+        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
+        .mean()
+        .unstack(fill_value=float("nan"))
     )
     trade_counts = trades.groupby(["FilterCode"])["Symbol"].count()
     summary = summary.assign(TradeCount=trade_counts)
-    xu = {pd.Timestamp("2024-01-01"): 1.0, pd.Timestamp("2024-01-02"): -0.5, pd.Timestamp("2024-01-03"): 0.5}
+    xu = {
+        pd.Timestamp("2024-01-01"): 1.0,
+        pd.Timestamp("2024-01-02"): -0.5,
+        pd.Timestamp("2024-01-03"): 0.5,
+    }
     out_xlsx = tmp_path / "out.xlsx"
     write_reports(trades, trades["Date"].unique(), summary, xu, out_xlsx=out_xlsx)
     df = pd.read_excel(out_xlsx, sheet_name="SUMMARY")
@@ -43,11 +56,16 @@ def test_summary_contains_bist_columns(tmp_path):
 def test_alpha_computation_alignment(tmp_path):
     trades = _basic_trades()
     summary = (
-        trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack(fill_value=float("nan"))
+        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
+        .mean()
+        .unstack(fill_value=float("nan"))
     )
     trade_counts = trades.groupby(["FilterCode"])["Symbol"].count()
     summary = summary.assign(TradeCount=trade_counts)
-    xu = {pd.Timestamp("2024-01-01"): 1.0, pd.Timestamp("2024-01-03"): 0.5}  # missing second day
+    xu = {
+        pd.Timestamp("2024-01-01"): 1.0,
+        pd.Timestamp("2024-01-03"): 0.5,
+    }  # missing second day
     out_xlsx = tmp_path / "out.xlsx"
     write_reports(trades, trades["Date"].unique(), summary, xu, out_xlsx=out_xlsx)
     df = pd.read_excel(out_xlsx, sheet_name="SUMMARY")
@@ -59,11 +77,17 @@ def test_alpha_computation_alignment(tmp_path):
 def test_optional_bist_ratio_sheet(tmp_path):
     trades = _basic_trades()
     summary = (
-        trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack(fill_value=float("nan"))
+        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
+        .mean()
+        .unstack(fill_value=float("nan"))
     )
     trade_counts = trades.groupby(["FilterCode"])["Symbol"].count()
     summary = summary.assign(TradeCount=trade_counts)
-    xu = {pd.Timestamp("2024-01-01"): 1.0, pd.Timestamp("2024-01-02"): -0.5, pd.Timestamp("2024-01-03"): 0.5}
+    xu = {
+        pd.Timestamp("2024-01-01"): 1.0,
+        pd.Timestamp("2024-01-02"): -0.5,
+        pd.Timestamp("2024-01-03"): 0.5,
+    }
     out_xlsx = tmp_path / "out.xlsx"
     write_reports(
         trades,
@@ -91,11 +115,17 @@ def test_optional_bist_ratio_sheet(tmp_path):
 def test_sorting_and_values(tmp_path):
     trades = _basic_trades()
     summary = (
-        trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack(fill_value=float("nan"))
+        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
+        .mean()
+        .unstack(fill_value=float("nan"))
     )
     trade_counts = trades.groupby(["FilterCode"])["Symbol"].count()
     summary = summary.assign(TradeCount=trade_counts)
-    xu = {pd.Timestamp("2024-01-01"): 1.0, pd.Timestamp("2024-01-02"): -0.5, pd.Timestamp("2024-01-03"): 0.5}
+    xu = {
+        pd.Timestamp("2024-01-01"): 1.0,
+        pd.Timestamp("2024-01-02"): -0.5,
+        pd.Timestamp("2024-01-03"): 0.5,
+    }
     out_xlsx = tmp_path / "out.xlsx"
     write_reports(
         trades,
