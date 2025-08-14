@@ -4,9 +4,7 @@ Aşağıdaki hücreler Colab ortamında projeyi kurar, ortamı doğrular ve örn
 
 ```python
 # pip kurulumu
-%pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
-# Uygun wheel bulunamazsa veya pandas_ta uyumsuzluğu olursa:
-%pip install "numpy<2.0.0" "pandas<2.2" pandas-ta==0.3.14b0
+%pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all:
 
 %cd /content/finansal-analiz-sistemi
 %env PYTHONPATH=/content/finansal-analiz-sistemi
@@ -25,17 +23,6 @@ setup_logger()
 ```
 
 > `tee -a` komutu hem ekrana hem dosyaya yazdırır.
-
-## Colab Kurtarma Hücresi
-
-Bağımlılık çakışması yaşandığında bu hücreyi çalıştırın. Uyumsuz NumPy sürümü
-ve hatalı `pandas_ta` kaldırılır, uyumlu sürümler yeniden kurulup tüm
-uyumsuzluklar giderilir.
-
-```python
-!pip uninstall -y numpy pandas_ta
-!pip install numpy<2.0.0 pandas_ta --no-cache-dir
-```
 
 ## Ortam Doğrulama
 
@@ -66,6 +53,6 @@ kaynakları ve filtreler arasında tutarlılık sağlanır.
 İsteğe bağlı olarak testleri çalıştırmak için:
 
 ```python
-%pip install -q -r requirements_dev.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
+%pip install -q -r requirements_dev.txt -c constraints.txt --only-binary=:all:
 !pytest -q
 ```

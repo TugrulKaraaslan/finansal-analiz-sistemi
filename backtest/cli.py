@@ -22,7 +22,7 @@ from .indicators import compute_indicators
 from .normalizer import normalize
 from .reporter import write_reports
 from .screener import run_screener
-from .utils.names import canonicalize_columns, set_name_normalization
+from .utils.names import set_name_normalization
 from .validator import dataset_summary, quality_warnings
 from .logging_utils import setup_logger, Timer
 
@@ -64,12 +64,9 @@ def _run_scan(cfg) -> None:
         df = add_next_close(df)
     logging.info("Göstergeler hesaplanıyor...")
     with Timer("compute_indicators"):
-        if cfg.indicators.engine == "none":
-            df_ind = canonicalize_columns(df.copy())
-        else:
-            df_ind = compute_indicators(
-                df, cfg.indicators.params, engine=cfg.indicators.engine
-            )
+        df_ind = compute_indicators(
+            df, cfg.indicators.params, engine=cfg.indicators.engine
+        )
     df_ind = generate_crossovers(df_ind)
     logging.info("Filtre CSV okunuyor...")
     try:

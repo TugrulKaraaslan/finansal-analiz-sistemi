@@ -3,339 +3,40 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional
 
-import numpy as np
-import pandas as pd  # module-level; fonksiyon içi import yok
-
-from backtest.utils.names import canonicalize_columns
+import pandas as pd
 
 logger = logging.getLogger(__name__)
-
-try:  # pragma: no cover - optional dependency
-    import pandas_ta as ta  # type: ignore
-except ImportError:  # pragma: no cover
-    ta = None  # type: ignore
-
-
-def _safe_alias(df2: pd.DataFrame, alias: str, base: str) -> bool:
-    """Safely copy ``base`` column to ``alias`` without raising.
-
-    Parameters
-    ----------
-    df2 : pandas.DataFrame
-        Target frame to mutate.
-    alias : str
-        New column name.
-    base : str
-        Existing column name to copy from.
-
-    Returns
-    -------
-    bool
-        True if alias added, False otherwise.
-    """
-    if base not in df2.columns:
-        logger.debug("base missing for alias: %s -> %s", alias, base)
-        return False
-    if alias in df2.columns:
-        logger.debug("alias exists, skipping overwrite: %s", alias)
-        return False
-    val = df2[base]
-    if isinstance(val, pd.DataFrame):
-        if base in val.columns:
-            val = val[base]
-        else:
-            val = val.iloc[:, -1]
-    if isinstance(val, pd.Series):
-        df2[alias] = val
-        logger.debug("alias set: %s from base=%s", alias, base)
-        return True
-    logger.warning("alias skipped (non-1d): alias=%s base=%s", alias, base)
-    return False
-
-
-def _ema(series: pd.Series, length: int) -> pd.Series:
-    return series.ewm(span=length, adjust=False).mean()
-
-
-def _rsi(series: pd.Series, length: int) -> pd.Series:
-    delta = series.diff()
-    gain = delta.clip(lower=0).ewm(alpha=1 / length, adjust=False).mean()
-    loss = -delta.clip(upper=0).ewm(alpha=1 / length, adjust=False).mean()
-    rs = gain / loss
-    return 100 - (100 / (1 + rs))
-
-
-def _stoch_rsi(
-    series: pd.Series, rsi_len: int, stoch_len: int, k: int, d: int
-) -> tuple[pd.Series, pd.Series]:
-    rsi = _rsi(series, rsi_len)
-    min_rsi = rsi.rolling(stoch_len, min_periods=stoch_len).min()
-    max_rsi = rsi.rolling(stoch_len, min_periods=stoch_len).max()
-    range_rsi = (max_rsi - min_rsi).replace(0, np.nan)
-    stoch = (rsi - min_rsi) / range_rsi
-    k_line = stoch.rolling(k, min_periods=k).mean() * 100
-    d_line = k_line.rolling(d, min_periods=d).mean()
-    return k_line, d_line
 
 
 def compute_indicators(
     df: pd.DataFrame,
     params: Optional[Dict[str, List[int]]] = None,
     *,
-    engine: str = "builtin",
+    engine: str = "none",
 ) -> pd.DataFrame:
-    """Compute technical indicators for price data.
+    """Return the input DataFrame without computing indicators.
 
     Parameters
     ----------
     df : pandas.DataFrame
-        Input price data with at least ``symbol``, ``date``, ``close`` and
-        ``volume`` columns.
+        Input price data.
     params : dict, optional
-        Mapping of indicator names to parameter lists. Supported keys include
-        ``ema``, ``rsi`` and ``macd``.
-    engine : str, default "builtin"
-        Indicator engine to use; either ``"builtin"``, ``"pandas_ta"`` or ``"none"``.
+        Unused placeholder for compatibility.
+    engine : str, default "none"
+        Must always be ``"none"``. Any other value raises ``ValueError``.
 
     Returns
     -------
     pandas.DataFrame
-        DataFrame containing the original data along with computed indicators.
+        The original DataFrame (no copy).
     """
-    global ta
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a DataFrame")
     if params is not None and not isinstance(params, dict):
         raise TypeError("params must be a dict or None")
-    if params is None:
-        params = {}
-    if df.empty:
-        return df.copy()
-    supported_engines = {"builtin", "pandas_ta", "none"}
-    if engine not in supported_engines:
-        raise ValueError(f"Unsupported engine: {engine}")
-    if engine == "none":
-        return canonicalize_columns(df.copy())
-    req = {"symbol", "date", "close", "volume"}
-    missing = req.difference(df.columns)
-    if missing:
-        raise ValueError(f"Eksik kolon(lar): {', '.join(sorted(missing))}")
-    df = df.copy()
-    df = df.sort_values(["symbol", "date"])
-    rv_preexisting = bool(
-        {
-            "RELATIVE_VOLUME",
-            "relative_volume",
-            "hacim_goreli",
-            "HACIM_GORELI",
-        }.intersection(df.columns)
-    )
-
-    use_pandas_ta = engine == "pandas_ta" and ta is not None
-    if engine == "pandas_ta" and ta is None:
-        logger.warning("pandas_ta bulunamadı, builtin hesaplamalara dönülüyor")
-    if use_pandas_ta:
-        try:  # pragma: no cover - optional dependency
-            from importlib.metadata import version
-            from packaging.version import Version
-
-            np_major = int(np.__version__.split(".")[0])
-            ta_ver = Version(version("pandas_ta"))
-            if np_major >= 2 and ta_ver < Version("0.3.14b0"):
-                raise RuntimeError("pandas_ta numpy>=2 ile uyumsuz")
-        except Exception as exc:  # pragma: no cover
-            logger.warning(
-                "pandas_ta kullanılamadı (%s), builtin hesaplamalara dönülüyor", exc
-            )
-            use_pandas_ta = False
-            ta = None
-    logger.info(
-        "compute_indicators using engine=%s",
-        "pandas_ta" if use_pandas_ta else "builtin",
-    )
-    out_frames = []
-    for sym, g in df.groupby("symbol", group_keys=False):
-        g = g.copy()
-        ema_params = params.get("ema", [10, 20, 50])
-        if isinstance(ema_params, (int, float)):
-            ema_params = [ema_params]
-        logger.debug("EMA params: %s", ema_params)
-        for p in ema_params:
-            p_int = int(p)
-            if p_int <= 0:
-                raise ValueError("EMA period must be positive")
-            col = f"EMA_{p_int}"
-            if use_pandas_ta and ta is not None:
-                g[col] = ta.ema(g["close"], length=p_int)
-            else:
-                g[col] = _ema(g["close"], p_int)
-        rsi_params = params.get("rsi", [14])
-        if isinstance(rsi_params, (int, float)):
-            rsi_params = [rsi_params]
-        logger.debug("RSI params: %s", rsi_params)
-        for p in rsi_params:
-            p_int = int(p)
-            if p_int <= 0:
-                raise ValueError("RSI period must be positive")
-            col = f"RSI_{p_int}"
-            if use_pandas_ta and ta is not None:
-                g[col] = ta.rsi(g["close"], length=p_int)
-            else:
-                g[col] = _rsi(g["close"], p_int)
-        stoch_params = params.get("stochrsi", [14, 14, 3, 3])
-        if isinstance(stoch_params, (int, float)):
-            stoch_params = [stoch_params]
-        stoch_params = list(stoch_params)
-        if len(stoch_params) < 4:
-            stoch_params = [14, 14, 3, 3]
-        rsi_len, stoch_len, k, d_ = map(int, stoch_params[:4])
-        if rsi_len <= 0 or stoch_len <= 0 or k <= 0 or d_ <= 0:
-            raise ValueError("stochrsi params must be positive")
-        if use_pandas_ta and ta is not None:
-            stoch = ta.stochrsi(
-                g["close"], length=stoch_len, rsi_length=rsi_len, k=k, d=d_
-            )
-            if stoch is not None and not stoch.empty:
-                g[f"STOCHRSIk_{rsi_len}_{stoch_len}_{k}_{d_}"] = stoch.iloc[:, 0]
-                g[f"STOCHRSId_{rsi_len}_{stoch_len}_{k}_{d_}"] = stoch.iloc[:, 1]
-        else:
-            k_line, d_line = _stoch_rsi(g["close"], rsi_len, stoch_len, k, d_)
-            g[f"STOCHRSIk_{rsi_len}_{stoch_len}_{k}_{d_}"] = k_line
-            g[f"STOCHRSId_{rsi_len}_{stoch_len}_{k}_{d_}"] = d_line
-        macd_params = params.get("macd", [])
-        if macd_params:
-            if isinstance(macd_params, (int, float)):
-                macd_params = [macd_params]
-            macd_params = list(macd_params)
-            if len(macd_params) < 3:
-                raise ValueError(
-                    "macd params must have at least three values",
-                )
-            fast, slow, sig = map(int, macd_params[:3])
-            if fast <= 0 or slow <= 0 or sig <= 0:
-                raise ValueError("macd params must be positive")
-            logger.debug("MACD params: %s", macd_params[:3])
-            if use_pandas_ta and ta is not None:
-                macd = ta.macd(g["close"], fast=fast, slow=slow, signal=sig)
-                if macd is not None and not macd.empty:
-                    macd_cols = macd.columns.tolist()
-                    g[f"MACD_{fast}_{slow}_{sig}"] = macd[macd_cols[0]]
-                    g[f"MACD_{fast}_{slow}_{sig}_SIGNAL"] = macd[macd_cols[1]]
-                    g[f"MACD_{fast}_{slow}_{sig}_HIST"] = macd[macd_cols[2]]
-            else:
-                ema_fast = _ema(g["close"], fast)
-                ema_slow = _ema(g["close"], slow)
-                macd_line = ema_fast - ema_slow
-                signal_line = _ema(macd_line, sig)
-                hist = macd_line - signal_line
-                g[f"MACD_{fast}_{slow}_{sig}"] = macd_line
-                g[f"MACD_{fast}_{slow}_{sig}_SIGNAL"] = signal_line
-                g[f"MACD_{fast}_{slow}_{sig}_HIST"] = hist
-        g["CHANGE_1D_PERCENT"] = g["close"].pct_change(1) * 100.0
-        g["CHANGE_5D_PERCENT"] = g["close"].pct_change(5) * 100.0
-        rv_cols = {"RELATIVE_VOLUME", "relative_volume", "hacim_goreli", "HACIM_GORELI"}
-        if rv_cols.intersection(g.columns):
-            logger.debug("using existing relative volume for %s", sym)
-        else:
-            vol_mean = g["volume"].rolling(20, min_periods=1).mean().replace(0, np.nan)
-            g["RELATIVE_VOLUME"] = (g["volume"] / vol_mean).fillna(0)
-        out_frames.append(g)
-    df2 = pd.concat(out_frames, ignore_index=True)
-    df2 = canonicalize_columns(df2)
-    dups = df2.columns[df2.columns.duplicated(keep="last")].tolist()
-    if dups:
-        logger.info("duplicate columns dropped: %s", dups)
-    df2 = df2.loc[:, ~df2.columns.duplicated(keep="last")]
-
-    preferred_names = {"relative_volume", "hacim_goreli"}
-    skip_alias_bases: set[str] = set()
-    if rv_preexisting:
-        for name in preferred_names:
-            if name in df2.columns:
-                logger.debug("using existing column for volume-relative: %s", name)
-                skip_alias_bases.add(name)
-
-    alias_added = 0
-    alias_skipped = 0
-
-    turkish_alias = {
-        "degisim_1g_yuzde": "change_1d_percent",
-        "degisim_5g_yuzde": "change_1w_percent",
-        "hacim_goreli": "relative_volume",
-    }
-    for alias, base in turkish_alias.items():
-        if base in skip_alias_bases:
-            continue
-        if _safe_alias(df2, alias, base):
-            alias_added += 1
-        else:
-            alias_skipped += 1
-    upper_alias = {
-        "ema_10": "EMA_10",
-        "ema_20": "EMA_20",
-        "ema_50": "EMA_50",
-        "rsi_14": "RSI_14",
-        "stochrsi_k": "STOCHRSIk_14_14_3_3",
-        "stochrsi_d": "STOCHRSId_14_14_3_3",
-        "macd_12_26_9_hist": "MACD_12_26_9_HIST",
-        "change_1d_percent": "CHANGE_1D_PERCENT",
-        "change_1w_percent": "CHANGE_5D_PERCENT",
-        "relative_volume": "RELATIVE_VOLUME",
-    }
-    for base, up in upper_alias.items():
-        if base in skip_alias_bases:
-            continue
-        if _safe_alias(df2, up, base):
-            alias_added += 1
-        else:
-            alias_skipped += 1
-    logger.info("aliases added=%s skipped=%s", alias_added, alias_skipped)
-    return df2
-
-
-def _ensure_adx_stochrsi(df):
-    if ta is None:
-        return df
-
-    if {"high", "low", "close"}.issubset(df.columns):
-        adx = ta.adx(high=df["high"], low=df["low"], close=df["close"], length=14)
-        if adx is not None:
-            df[adx.columns] = adx
-    if "close" in df.columns:
-        stochrsi = ta.stochrsi(close=df["close"], length=14, rsi_length=14, k=3, d=3)
-        if stochrsi is not None:
-            df[stochrsi.columns] = stochrsi
-    rename_map = {
-        "ADX_14": "adx_14",
-        "DMP_14": "dmp_14",
-        "DMN_14": "dmn_14",
-        "STOCHRSIk_14_14_3_3": "stochrsi_k",
-        "STOCHRSId_14_14_3_3": "stochrsi_d",
-    }
-    r = {k: v for k, v in rename_map.items() if k in df.columns and v not in df.columns}
-    if r:
-        df.rename(columns=r, inplace=True)
-
-    def _cross(a, b):
-        up = (a.shift(1) <= b.shift(1)) & (a > b)
-        down = (a.shift(1) >= b.shift(1)) & (a < b)
-        return up.astype(int), down.astype(int)
-
-    if "stochrsi_d" in df.columns and "stochrsi_k" in df.columns:
-        up, down = _cross(df["stochrsi_d"], df["stochrsi_k"])
-        df["stochrsi_d_keser_stochrsi_k_yukari"] = up
-        df["stochrsi_d_keser_stochrsi_k_asagi"] = down
+    if engine != "none":
+        raise ValueError(
+            "Gösterge hesaplaması politika gereği devre dışı (engine='none')."
+        )
+    logger.info("indicators: engine=none (policy lock), no computation")
     return df
-
-
-if "_compute_indicators_wrapped" not in globals():
-    _orig_compute_indicators = compute_indicators
-
-    def compute_indicators(*args, **kwargs):  # type: ignore
-        engine = kwargs.get("engine", "builtin")
-        df = _orig_compute_indicators(*args, **kwargs)
-        if engine != "none":
-            df = _ensure_adx_stochrsi(df)
-        return df
-
-    _compute_indicators_wrapped = True

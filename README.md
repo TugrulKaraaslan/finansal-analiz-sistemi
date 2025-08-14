@@ -68,9 +68,7 @@ python -m backtest.cli scan-day --config examples/example_config.yaml --date 202
 ```
 ### Google Colab
 ```python
-!pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
-# Uygun wheel bulunamazsa veya pandas_ta uyumsuzluğu olursa:
-!pip install "numpy<2.0" "pandas<2.2" pandas-ta==0.3.14b0
+!pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all:
 !python tools/verify_env.py
 !python -m backtest.cli scan-day --config config/colab_config.yaml --date 2024-01-02
 ```
@@ -94,32 +92,23 @@ data:
 `config.data.* zorunlu; örnek için examples/example_config.yaml` şeklinde
 bir hata mesajı gösterilir.
 
-### Gösterge Motoru Davranışı
+### Gösterge Motoru (Politika Kilidi)
 
-- Varsayılan olarak `pandas_ta` yüklüyse ve NumPy sürümüyle uyumluysa
-  göstergeler bu motor ile hesaplanır.
-- `pandas_ta` eksik veya NumPy 2 ile uyumsuzsa otomatik olarak yerleşik
-  hesaplamalara dönülür. Konsolda örnek mesaj:
+- Sistem hiçbir koşulda gösterge hesaplamaz; tüm indikatör kolonları veriyle
+  birlikte gelmelidir.
+- `compute_indicators` fonksiyonu yalnızca gelen DataFrame'i aynen döndürür ve
+  bilgi amaçlı şu satırı loglar:
 
   ```
-  compute_indicators using engine=builtin
+  indicators: engine=none (policy lock), no computation
   ```
 
-### Var Olan Kolonların Korunması
-
-- Mevcut bir kolon üzerine yazılmaz; `relative_volume` ya da
-  `hacim_goreli` veride zaten varsa yeniden hesaplanmaz ve alias üretilmez.
-- Çoklu kolon → tek kolon kopyalama hataları engellenir; uygun olmayan
-  durumlar `alias skipped` uyarısı ile geçilir.
-- `pd.concat` sonrası oluşan mükerrer kolon adları tekilleştirilir ve
-  logda listelenir.
+- Daha önce `pandas_ta` gibi kütüphanelerle yapılan hesaplamalar artık desteklenmez;
+  göstergeleri veri hazırlama hattında üretmeniz gerekir.
 
 ### Hazır Gösterge Kolonları ve Kesişimler
 
-- Veride indikatör kolonları önceden hesaplanmışsa `indicators.engine: "none"`
-  ayarıyla hesaplama adımı tamamen atlanır.
-- Sistem, tanımlı kolonlardan otomatik olarak kesişim alanları üretir; örn.
-  `sma_10_keser_sma_50_yukari` veya `adx_14_keser_20p0_asagi`.
+- Kesişim alanları mevcut kolonlardan üretilir; yeniden hesaplama yapılmaz.
 - Eksik kaynak kolonlar işlem akışını durdurmaz, sadece uyarı logu bırakılır.
 
 Örnek config parçası:
@@ -177,7 +166,8 @@ pytest -q
 
 ## Backtest Akış Rehberi
 1. **Veri Yükleme:** `backtest.data_loader.read_excels_long` ile Excel fiyat dosyalarını okuyun. Gerekirse `backtest.calendars.add_next_close_calendar` ile işlem günlerine göre `next_date` ve `next_close` alanlarını ekleyin.
-2. **İndikatör Hesabı:** `backtest.indicators.compute_indicators` fonksiyonu varsayılan olarak yerleşik (`builtin`) hesaplayıcıyı kullanır ve RSI, MACD, StochRSI gibi temel göstergeleri üretir. `pandas_ta` kütüphanesini kurup `engine="pandas_ta"` parametresini geçerseniz, kütüphane mevcutsa otomatik olarak kullanılacak; değilse yerleşik yöntemlere geri dönecektir.
+2. **Gösterge Adımı:** `backtest.indicators.compute_indicators` artık hiçbir hesaplama yapmaz;
+   verideki hazır indikatör kolonları aynen korunur.
 3. **Filtreleme:** `backtest.screener.run_screener` fonksiyonunu kullanarak `filters.csv` içindeki sorguları çalıştırın. Varsayılan olarak eksik kolona sahip filtreler atlanır; hatada durmak için `stop_on_filter_error=True` parametresini kullanabilirsiniz. Filtre ifadelerinde kullanılabilen güvenli fonksiyonlar: `isin`, `notna`, `str`, `contains`, `abs`, `rolling`, `shift`, `mean`, `max`, `min`, `std`, `median`, `log`, `exp`, `floor`, `ceil`.
 4. **Getiri Hesabı:** Filtre sonuçlarını `backtest.backtester.run_1g_returns` fonksiyonuna vererek T+N getirilerini hesaplayın. Tatil ve hafta sonu hatalarını önlemek için `trading_days` parametresine işlem günlerini geçin.
 5. **Raporlama:** Çıktıları `backtest.reporter.write_reports` veya `backtest.report.write_report` aracılığıyla Excel/CSV olarak kaydedin.

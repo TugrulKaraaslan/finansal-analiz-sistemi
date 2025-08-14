@@ -51,7 +51,7 @@ def test_cli_scan_range_integration(tmp_path):
               holidays_csv_path: ""
 
             indicators:
-              engine: "builtin"
+              engine: "none"
               params: {{}}
 
             benchmark:
@@ -120,7 +120,7 @@ def test_cli_scan_missing_column(tmp_path):
               holidays_csv_path: ""
 
             indicators:
-              engine: "builtin"
+              engine: "none"
               params: {{}}
 
             benchmark:

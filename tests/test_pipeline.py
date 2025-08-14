@@ -18,9 +18,10 @@ def test_pipeline_end_to_end():
             "high": [10.0, 11.0, 12.0],
             "low": [10.0, 11.0, 12.0],
             "volume": [100, 120, 130],
+            "rsi_2": [40.0, 60.0, 70.0],
         }
     )
-    df = compute_indicators(raw, {"rsi": [2]})
+    df = compute_indicators(raw)
     filters = pd.DataFrame({"FilterCode": ["T1"], "PythonQuery": ["(RSI_2 > 50)"]})
     sigs = run_screener(df, filters, "2024-01-02")
     out = run_1g_returns(df, sigs)

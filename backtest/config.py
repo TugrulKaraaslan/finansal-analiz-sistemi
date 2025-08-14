@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Literal
 
 import yaml
 from pydantic import BaseModel, Field
@@ -47,7 +47,7 @@ class CalendarCfg(BaseModel):
 
 
 class IndicatorsCfg(BaseModel):
-    engine: str = "pandas_ta"  # pandas_ta | builtin | none
+    engine: Literal["none"] = "none"
     params: Dict[str, List[int]] = Field(
         default_factory=lambda: {"rsi": [14], "ema": [10, 20, 50], "macd": [12, 26, 9]}
     )
@@ -124,10 +124,18 @@ def load_config(path: str | Path) -> RootCfg:
     bench = cfg.get("benchmark", {}) if isinstance(cfg, dict) else {}
     if isinstance(bench, dict) and bench.get("xu100_csv_path"):
         bench["xu100_csv_path"] = _join(bench.get("xu100_csv_path"))
-    cfg["project"], cfg["data"], cfg["calendar"], cfg["benchmark"] = (
+    indicators = cfg.get("indicators", {}) if isinstance(cfg, dict) else {}
+    eng = indicators.get("engine")
+    if eng is not None and eng != "none":
+        raise ValueError(
+            "indicators.engine politika gereği devre dışı (engine='none')."
+        )
+    indicators["engine"] = "none"
+    cfg["project"], cfg["data"], cfg["calendar"], cfg["benchmark"], cfg["indicators"] = (
         proj,
         data,
         cal,
         bench,
+        indicators,
     )
     return RootCfg(**cfg)
