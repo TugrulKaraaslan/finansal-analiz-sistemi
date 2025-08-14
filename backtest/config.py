@@ -62,6 +62,7 @@ class ReportCfg(BaseModel):
     percent_format: str = "0.00%"
     daily_sheet_prefix: str = "SCAN_"
     summary_sheet_name: str = "SUMMARY"
+    with_bist_ratio_summary: bool = False
 
 
 class RootCfg(BaseModel):

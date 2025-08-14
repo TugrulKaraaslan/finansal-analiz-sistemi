@@ -202,6 +202,9 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
             daily_sheet_prefix=cfg.report.daily_sheet_prefix,
             summary_sheet_name=cfg.report.summary_sheet_name,
             percent_fmt=cfg.report.percent_format,
+            with_bist_ratio_summary=getattr(
+                cfg.report, "with_bist_ratio_summary", False
+            ),
             per_day_output=per_day_output,
             csv_also=csv_also,
         )

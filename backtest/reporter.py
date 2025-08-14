@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import logging
 import warnings
 from datetime import date, datetime
 from pathlib import Path
@@ -9,6 +10,88 @@ from typing import Iterable, Mapping, Optional, Literal
 import pandas as pd
 
 from utils.paths import resolve_path
+
+
+logger = logging.getLogger("summary_bist")
+
+
+def _add_bist_columns(
+    summary_wide: pd.DataFrame, xu100_pct: Optional[Mapping]
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Return summary with BIST-relative metrics and a compact sheet.
+
+    Parameters
+    ----------
+    summary_wide : pd.DataFrame
+        Wide table with daily returns. May contain ``Ortalama`` and
+        ``TradeCount`` columns which will be replaced by new metric names.
+    xu100_pct : Mapping or None
+        Mapping of date -> BIST100 daily return percentage.
+
+    Returns
+    -------
+    (summary_wide, ratio_summary)
+        ``summary_wide`` augmented with metric columns and ``ratio_summary``
+        containing only metric columns sorted by ``ALPHA_RET``.
+    """
+
+    if summary_wide is None or summary_wide.empty:
+        return (
+            summary_wide if summary_wide is not None else pd.DataFrame(),
+            pd.DataFrame(),
+        )
+
+    day_cols = [c for c in summary_wide.columns if c not in {"Ortalama", "TradeCount"}]
+    sw = summary_wide[day_cols].copy()
+    result = summary_wide.copy()
+
+    result["MEAN_RET"] = sw.mean(axis=1)
+    result["HIT_RATIO"] = (sw > 0).sum(axis=1) / sw.count(axis=1)
+    if "TradeCount" in result.columns:
+        result["N_TRADES"] = result["TradeCount"]
+    else:
+        result["N_TRADES"] = pd.NA
+
+    if xu100_pct is not None:
+        bist_series = pd.Series(dict(xu100_pct), dtype=float).reindex(day_cols)
+        mask = sw.notna() & bist_series.notna()
+        result["BIST_MEAN_RET"] = (mask.astype(float) * bist_series).sum(
+            axis=1
+        ) / mask.sum(axis=1)
+    else:
+        result["BIST_MEAN_RET"] = float("nan")
+
+    result["ALPHA_RET"] = result["MEAN_RET"] - result["BIST_MEAN_RET"]
+
+    # logging per filter/side
+    for idx, row in result.iterrows():
+        n_days = sw.loc[idx].count()
+        miss = len(day_cols) - n_days
+        logger.info(
+            "filter=%s days=%d missing=%d mean=%.6f bist_mean=%.6f",
+            idx,
+            n_days,
+            miss,
+            row["MEAN_RET"],
+            row["BIST_MEAN_RET"],
+        )
+
+    result = result.drop(
+        columns=[c for c in ["Ortalama", "TradeCount"] if c in result.columns]
+    )
+
+    metric_cols = [
+        "MEAN_RET",
+        "BIST_MEAN_RET",
+        "ALPHA_RET",
+        "HIT_RATIO",
+        "N_TRADES",
+    ]
+    ordered = [c for c in day_cols if c not in metric_cols] + metric_cols
+    result = result[ordered]
+
+    ratio_summary = result[metric_cols].sort_values("ALPHA_RET", ascending=False)
+    return result, ratio_summary
 
 
 def _ensure_dir(path: Optional[str | Path]):
@@ -53,6 +136,7 @@ def write_reports(
     summary_winrate: Optional[pd.DataFrame] = None,
     validation_summary: Optional[pd.DataFrame] = None,
     validation_issues: Optional[pd.DataFrame] = None,
+    with_bist_ratio_summary: bool = False,
     *,
     per_day_output: bool = False,
     csv_also: bool = True,
@@ -154,6 +238,11 @@ def write_reports(
         return outputs
     if summary_wide is None:
         summary_wide = pd.DataFrame()
+        bist_ratio_summary = pd.DataFrame()
+    else:
+        summary_wide, bist_ratio_summary = _add_bist_columns(summary_wide, xu100_pct)
+
+    metric_cols = ["MEAN_RET", "BIST_MEAN_RET", "ALPHA_RET", "HIT_RATIO", "N_TRADES"]
     if out_xlsx:
         out_xlsx_path = resolve_path(out_xlsx)
         _ensure_dir(out_xlsx_path)
@@ -172,11 +261,15 @@ def write_reports(
 
                 summary_wide.to_excel(writer, sheet_name=summary_sheet_name)
 
+                if with_bist_ratio_summary and not bist_ratio_summary.empty:
+                    bist_ratio_summary.to_excel(writer, sheet_name="BIST_RATIO_SUMMARY")
+
                 if summary_winrate is not None and not summary_winrate.empty:
                     summary_winrate.to_excel(
                         writer, sheet_name=f"{summary_sheet_name}_WINRATE"
                     )
 
+                day_cols = [c for c in summary_wide.columns if c not in metric_cols]
                 if xu100_pct is not None:
                     if isinstance(xu100_pct, pd.Series):
                         xu100_series = xu100_pct.astype(float)
@@ -184,16 +277,11 @@ def write_reports(
                         xu100_series = pd.Series(dict(xu100_pct), dtype=float)
                     else:
                         raise TypeError("xu100_pct must be a mapping or Series")
-                    cols = [
-                        c
-                        for c in summary_wide.columns
-                        if c not in {"Ortalama", "TradeCount"}
-                    ]
-                    if set(cols).issubset(set(xu100_series.index)):
-                        diff = summary_wide.copy()
-                        for c in cols:
+                    if set(day_cols).issubset(set(xu100_series.index)):
+                        diff = summary_wide[day_cols].copy()
+                        for c in day_cols:
                             diff[c] = diff[c] - float(xu100_series.get(c, float("nan")))
-                        diff["Ortalama"] = diff[cols].mean(axis=1)
+                        diff["MEAN_RET"] = diff.mean(axis=1)
                         diff.to_excel(writer, sheet_name=f"{summary_sheet_name}_DIFF")
                     avg = (
                         float(xu100_series.mean())
@@ -202,11 +290,14 @@ def write_reports(
                     )
                     bist = (
                         pd.DataFrame(
-                            [[xu100_series.get(c, float("nan")) for c in cols] + [avg]],
+                            [
+                                [xu100_series.get(c, float("nan")) for c in day_cols]
+                                + [avg]
+                            ],
                             index=["BIST"],
-                            columns=cols + ["Ortalama"],
+                            columns=day_cols + ["MEAN_RET"],
                         )
-                        if cols
+                        if day_cols
                         else pd.DataFrame()
                     )
                     if not bist.empty:
