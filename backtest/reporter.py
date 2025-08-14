@@ -144,9 +144,7 @@ def write_reports(
                 summary_df.to_excel(writer, sheet_name="SUMMARY", index=False)
             excel_paths.append(xlsx_path)
             if csv_also:
-                csv_name = _sanitize_filename(
-                    csv_filename_pattern.format(date=day_str)
-                )
+                csv_name = _sanitize_filename(csv_filename_pattern.format(date=day_str))
                 csv_path = _handle_overwrite(base_dir / csv_name, overwrite)
                 day_df.to_csv(csv_path, index=False, encoding="utf-8")
                 csv_paths.append(csv_path)

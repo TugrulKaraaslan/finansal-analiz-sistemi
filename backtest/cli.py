@@ -222,7 +222,9 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     type=click.Choice(["off", "smart", "strict"]),
     default="smart",
 )
-@click.option("--per-day-output", is_flag=True, default=False, help="Günlük dosya çıktısı")
+@click.option(
+    "--per-day-output", is_flag=True, default=False, help="Günlük dosya çıktısı"
+)
 @click.option("--csv-also/--no-csv", default=True, help="CSV de yaz")
 def scan_range(
     config_path,

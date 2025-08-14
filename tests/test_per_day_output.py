@@ -3,6 +3,7 @@ import pytest
 
 from backtest.reporter import write_reports
 
+
 def _sample_trades():
     dates = pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"])
     return pd.DataFrame(
@@ -18,6 +19,7 @@ def _sample_trades():
             "Reason": [pd.NA, pd.NA, pd.NA],
         }
     )
+
 
 def test_per_day_creates_files(tmp_path):
     trades = _sample_trades()
@@ -36,6 +38,7 @@ def test_per_day_creates_files(tmp_path):
         assert (tmp_path / f"{d.date()}.xlsx").exists()
         assert (tmp_path / f"{d.date()}.csv").exists()
 
+
 def test_per_day_empty_day(tmp_path):
     trades = _sample_trades().iloc[:1]
     dates = pd.to_datetime(["2024-01-01", "2024-01-02"])
@@ -51,6 +54,7 @@ def test_per_day_empty_day(tmp_path):
     assert path.exists()
     df = pd.read_excel(path, sheet_name="SUMMARY")
     assert int(df["N_TRADES"].iloc[0]) == 0
+
 
 def test_overwrite_policies(tmp_path):
     trades = _sample_trades().iloc[:1]
