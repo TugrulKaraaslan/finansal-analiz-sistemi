@@ -131,7 +131,13 @@ def load_config(path: str | Path) -> RootCfg:
             "indicators.engine politika gereği devre dışı (engine='none')."
         )
     indicators["engine"] = "none"
-    cfg["project"], cfg["data"], cfg["calendar"], cfg["benchmark"], cfg["indicators"] = (
+    (
+        cfg["project"],
+        cfg["data"],
+        cfg["calendar"],
+        cfg["benchmark"],
+        cfg["indicators"],
+    ) = (
         proj,
         data,
         cal,

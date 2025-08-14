@@ -21,7 +21,9 @@ data:
   excel_dir: "{tmp_path}"
   filters_csv: "{tmp_path}/f.csv"
 """
-    (tmp_path / "f.csv").write_text("FilterCode;PythonQuery\nF;close>0\n", encoding="utf-8")
+    (tmp_path / "f.csv").write_text(
+        "FilterCode;PythonQuery\nF;close>0\n", encoding="utf-8"
+    )
     cfg_path = tmp_path / "cfg.yaml"
     cfg_path.write_text(cfg_txt, encoding="utf-8")
     cfg = load_config(cfg_path)
