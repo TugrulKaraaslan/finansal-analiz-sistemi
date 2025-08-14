@@ -190,6 +190,22 @@ CSV istemiyorsanız `--no-csv` bayrağını ekleyin.
 ```
 SCAN 2024-01-02: 24 satır, ort. %1.2
 ```
+
+## Ön Kontrol (Preflight)
+
+Tarama başlamadan önce belirtilen klasör ve tarih aralığı için dosya varlığı
+kontrol edilir. Eksik dosyalar raporlanır ve sık yapılan hatalar için öneriler
+sunulur. Gerekirse `--no-preflight` ile kontrolü atlayabilir ya da
+`--case-insensitive` bayrağıyla dosya adlarında küçük/büyük harf farkını yok
+sayabilirsiniz.
+
+Örnek çıktı:
+
+```
+preflight: scanned=4, found=3, missing=1, dir=Veri, pattern={date}.xlsx
+Eksik dosyalar: 2025-03-10
+Öneri: Klasörü 'veri/' altında buldum. Config'te 'excel_dir: veri' yapmayı dener misin?
+```
 ## Test Çalıştırma (isteğe bağlı)
 ```bash
 pip install -r requirements_dev.txt -c constraints.txt --only-binary=:all: --no-binary=pandas-ta
