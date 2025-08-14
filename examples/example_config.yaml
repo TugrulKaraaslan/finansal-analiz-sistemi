@@ -28,7 +28,7 @@ calendar:
   holidays_csv_path: ""      # ör: examples/holidays_tr.csv
 
 indicators:
-  engine: "pandas_ta"  # pandas_ta | builtin | none
+  engine: "none"
   params:
     rsi: [14]
     ema: [10,20,50]
