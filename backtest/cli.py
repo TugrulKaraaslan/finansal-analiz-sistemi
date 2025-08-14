@@ -38,7 +38,7 @@ def cli(ctx, log_level: str, run_id: str | None):
     logging.info("CLI initialized")
 
 
-def _run_scan(cfg) -> None:
+def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> None:
     """Common execution for scan commands.
 
     The filters CSV must provide ``FilterCode`` and ``PythonQuery`` columns and
@@ -176,7 +176,10 @@ def _run_scan(cfg) -> None:
         }
     out_dir = resolve_path(cfg.project.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    if len(days) == 1:
+    if per_day_output:
+        out_xlsx = out_dir
+        out_csv_dir = None
+    elif len(days) == 1:
         out_xlsx = out_dir / f"SCAN_{days[0].date()}.xlsx"
         out_csv_dir = None
     else:
@@ -199,6 +202,8 @@ def _run_scan(cfg) -> None:
             daily_sheet_prefix=cfg.report.daily_sheet_prefix,
             summary_sheet_name=cfg.report.summary_sheet_name,
             percent_fmt=cfg.report.percent_format,
+            per_day_output=per_day_output,
+            csv_also=csv_also,
         )
     logging.info(f"Bitti. Çıktı: {outputs.get('excel')}")
     if outputs.get("csv"):
@@ -217,6 +222,8 @@ def _run_scan(cfg) -> None:
     type=click.Choice(["off", "smart", "strict"]),
     default="smart",
 )
+@click.option("--per-day-output", is_flag=True, default=False, help="Günlük dosya çıktısı")
+@click.option("--csv-also/--no-csv", default=True, help="CSV de yaz")
 def scan_range(
     config_path,
     start_date,
@@ -224,6 +231,8 @@ def scan_range(
     holding_period,
     transaction_cost,
     name_normalization="smart",
+    per_day_output=False,
+    csv_also=True,
 ):
     set_name_normalization(name_normalization)
     try:
@@ -241,7 +250,7 @@ def scan_range(
         cfg.project.transaction_cost = transaction_cost
     cfg.project.run_mode = "range"
     try:
-        _run_scan(cfg)
+        _run_scan(cfg, per_day_output=per_day_output, csv_also=csv_also)
     except Exception:
         logging.exception("scan_range failed")
         raise

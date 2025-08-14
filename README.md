@@ -140,6 +140,18 @@ python -m backtest.cli scan-range \
   --transaction-cost 0.0005
 ```
 
+Gün başına Excel (ve varsayılan olarak CSV) üretmek için:
+
+```bash
+python -m backtest.cli scan-range \
+  --config examples/example_config.yaml \
+  --start 2025-03-07 \
+  --end   2025-03-11 \
+  --per-day-output
+```
+
+CSV istemiyorsanız `--no-csv` bayrağını ekleyin.
+
 ## Çıktı Açıklaması
 - Excel: `raporlar/{start}_{end}_1G_BIST100.xlsx`
 - Sheet'ler:
