@@ -28,6 +28,10 @@ class DataCfg(BaseModel):
     enable_cache: bool = False
     cache_parquet_path: Optional[str] = None
     corporate_actions_csv: Optional[str] = None
+    filename_pattern: str = "{date}.xlsx"
+    date_format: str = "%Y-%m-%d"
+    case_sensitive: bool = True
+    suggestions: bool = True
     price_schema: Dict[str, List[str]] = Field(
         default_factory=lambda: {
             "date": ["Tarih", "Date", "tarih"],

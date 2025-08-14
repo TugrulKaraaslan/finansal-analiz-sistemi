@@ -19,7 +19,13 @@ def _cfg():
             transaction_cost=0.0,
             raise_on_error=False,
         ),
-        data=SimpleNamespace(filters_csv="dummy.csv"),
+        data=SimpleNamespace(
+            filters_csv="dummy.csv",
+            excel_dir=".",
+            filename_pattern="{date}.xlsx",
+            date_format="%Y-%m-%d",
+            case_sensitive=True,
+        ),
         calendar=SimpleNamespace(
             tplus1_mode="price", holidays_source="none", holidays_csv_path=None
         ),
