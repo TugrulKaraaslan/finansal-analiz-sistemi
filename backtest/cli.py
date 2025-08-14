@@ -3,9 +3,11 @@ from __future__ import annotations
 import logging
 import click
 import pandas as pd
+from datetime import timedelta
 
 from io_filters import load_filters_csv
 from utils.paths import resolve_path
+from .io.preflight import preflight
 
 from .backtester import run_1g_returns
 from .benchmark import load_xu100_pct
@@ -229,6 +231,8 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     "--per-day-output", is_flag=True, default=False, help="Günlük dosya çıktısı"
 )
 @click.option("--csv-also/--no-csv", default=True, help="CSV de yaz")
+@click.option("--no-preflight", is_flag=True, default=False, help="Preflight kontrolünü atla")
+@click.option("--case-insensitive", is_flag=True, default=False, help="Dosya adlarında küçük/büyük harf farkını yok say")
 def scan_range(
     config_path,
     start_date,
@@ -238,6 +242,8 @@ def scan_range(
     name_normalization="smart",
     per_day_output=False,
     csv_also=True,
+    no_preflight=False,
+    case_insensitive=False,
 ):
     set_name_normalization(name_normalization)
     try:
@@ -254,6 +260,25 @@ def scan_range(
     if transaction_cost is not None:
         cfg.project.transaction_cost = transaction_cost
     cfg.project.run_mode = "range"
+    if case_insensitive:
+        cfg.data.case_sensitive = False
+    if not no_preflight and cfg.project.start_date and cfg.project.end_date:
+        start = pd.to_datetime(cfg.project.start_date).date()
+        end = pd.to_datetime(cfg.project.end_date).date()
+        days = [start + timedelta(days=i) for i in range((end - start).days + 1)]
+        rep = preflight(
+            cfg.data.excel_dir,
+            days,
+            cfg.data.filename_pattern,
+            date_format=cfg.data.date_format,
+            case_sensitive=cfg.data.case_sensitive,
+        )
+        if rep.errors:
+            raise click.ClickException("; ".join(rep.errors))
+        for msg in rep.warnings:
+            logging.warning(msg)
+        for msg in rep.suggestions:
+            logging.info(msg)
     try:
         _run_scan(cfg, per_day_output=per_day_output, csv_also=csv_also)
     except Exception:
@@ -266,7 +291,9 @@ def scan_range(
 @click.option("--date", "date_str", required=True, help="YYYY-MM-DD")
 @click.option("--holding-period", default=None, type=int)
 @click.option("--transaction-cost", default=None, type=float)
-def scan_day(config_path, date_str, holding_period, transaction_cost):
+@click.option("--no-preflight", is_flag=True, default=False, help="Preflight kontrolünü atla")
+@click.option("--case-insensitive", is_flag=True, default=False, help="Dosya adlarında küçük/büyük harf farkını yok say")
+def scan_day(config_path, date_str, holding_period, transaction_cost, no_preflight, case_insensitive):
     try:
         cfg = load_config(config_path)
     except Exception as exc:  # kullanıcı dostu mesaj
@@ -278,6 +305,23 @@ def scan_day(config_path, date_str, holding_period, transaction_cost):
         cfg.project.holding_period = holding_period
     if transaction_cost is not None:
         cfg.project.transaction_cost = transaction_cost
+    if case_insensitive:
+        cfg.data.case_sensitive = False
+    if not no_preflight:
+        d = pd.to_datetime(date_str).date()
+        rep = preflight(
+            cfg.data.excel_dir,
+            [d],
+            cfg.data.filename_pattern,
+            date_format=cfg.data.date_format,
+            case_sensitive=cfg.data.case_sensitive,
+        )
+        if rep.errors:
+            raise click.ClickException("; ".join(rep.errors))
+        for msg in rep.warnings:
+            logging.warning(msg)
+        for msg in rep.suggestions:
+            logging.info(msg)
     try:
         _run_scan(cfg)
     except Exception:
