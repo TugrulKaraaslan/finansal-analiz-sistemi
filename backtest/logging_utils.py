@@ -29,7 +29,9 @@ _DEF_FMT = "%(asctime)s | %(levelname)-7s | %(name)s | %(message)s"
 _def_handler = None
 
 
-def setup_logger(run_id: str | None = None, level: str = _DEF_LEVEL, log_dir: str = "logs") -> str:
+def setup_logger(
+    run_id: str | None = None, level: str = _DEF_LEVEL, log_dir: str = "logs"
+) -> str:
     global _def_handler
     os.makedirs(log_dir, exist_ok=True)
     stamp = run_id or datetime.now().strftime("%Y%m%d_%H%M%S")
