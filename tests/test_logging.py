@@ -70,4 +70,3 @@ def test_migration_warning(tmp_path, caplog, monkeypatch):
         setup_logger(run_id="t4")
     assert "legacy logs/ directory detected" in caplog.text
     assert Path("logs/migration.txt").exists()
-

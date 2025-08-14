@@ -196,4 +196,3 @@ def purge_old_logs(days: int = 7, log_dir: str = "loglar") -> list[str]:
         except Exception:  # pragma: no cover - best effort
             pass
     return removed
-
