@@ -209,3 +209,8 @@ def test_safequery_allows_math_funcs():
     assert q.is_safe
     out = q.filter(df)
     assert out["x"].tolist() == [1.0, 2.0, 3.0]
+
+
+def test_filter_parser_normalization():
+    q = SafeQuery("EMA20 > Close")
+    assert q.names == {"ema_20", "close"}
