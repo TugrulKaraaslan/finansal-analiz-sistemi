@@ -84,11 +84,11 @@ def preflight(
             continue
         report.missing_dates.append(d)
         # suggestions based on near matches
-        near = (
-            get_close_matches(expected if case_sensitive else expected.lower(),
-                               list(files_in_dir.keys() if case_sensitive else lower_map.keys()),
-                               n=3,
-                               cutoff=0.6)
+        near = get_close_matches(
+            expected if case_sensitive else expected.lower(),
+            list(files_in_dir.keys() if case_sensitive else lower_map.keys()),
+            n=3,
+            cutoff=0.6,
         )
         for n in near:
             # if case insensitive, 'n' may be lower-case key

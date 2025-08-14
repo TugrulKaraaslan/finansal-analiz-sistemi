@@ -71,11 +71,17 @@ project:
 data:
   excel_dir: {}  # missing
   filters_csv: {}
-""".format(tmp_path / "missing", tmp_path / "filters.csv"),
+""".format(
+            tmp_path / "missing", tmp_path / "filters.csv"
+        ),
         encoding="utf-8",
     )
-    (tmp_path / "filters.csv").write_text("FilterCode,PythonQuery\nF1,close > 0\n", encoding="utf-8")
+    (tmp_path / "filters.csv").write_text(
+        "FilterCode,PythonQuery\nF1,close > 0\n", encoding="utf-8"
+    )
     runner = CliRunner()
-    result = runner.invoke(cli.scan_day, ["--config", str(cfg_path), "--date", "2025-03-07"])
+    result = runner.invoke(
+        cli.scan_day, ["--config", str(cfg_path), "--date", "2025-03-07"]
+    )
     assert result.exit_code != 0
     assert "Excel klasörü" in result.output

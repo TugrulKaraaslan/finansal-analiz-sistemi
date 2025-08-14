@@ -231,8 +231,15 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     "--per-day-output", is_flag=True, default=False, help="Günlük dosya çıktısı"
 )
 @click.option("--csv-also/--no-csv", default=True, help="CSV de yaz")
-@click.option("--no-preflight", is_flag=True, default=False, help="Preflight kontrolünü atla")
-@click.option("--case-insensitive", is_flag=True, default=False, help="Dosya adlarında küçük/büyük harf farkını yok say")
+@click.option(
+    "--no-preflight", is_flag=True, default=False, help="Preflight kontrolünü atla"
+)
+@click.option(
+    "--case-insensitive",
+    is_flag=True,
+    default=False,
+    help="Dosya adlarında küçük/büyük harf farkını yok say",
+)
 def scan_range(
     config_path,
     start_date,
@@ -291,9 +298,23 @@ def scan_range(
 @click.option("--date", "date_str", required=True, help="YYYY-MM-DD")
 @click.option("--holding-period", default=None, type=int)
 @click.option("--transaction-cost", default=None, type=float)
-@click.option("--no-preflight", is_flag=True, default=False, help="Preflight kontrolünü atla")
-@click.option("--case-insensitive", is_flag=True, default=False, help="Dosya adlarında küçük/büyük harf farkını yok say")
-def scan_day(config_path, date_str, holding_period, transaction_cost, no_preflight, case_insensitive):
+@click.option(
+    "--no-preflight", is_flag=True, default=False, help="Preflight kontrolünü atla"
+)
+@click.option(
+    "--case-insensitive",
+    is_flag=True,
+    default=False,
+    help="Dosya adlarında küçük/büyük harf farkını yok say",
+)
+def scan_day(
+    config_path,
+    date_str,
+    holding_period,
+    transaction_cost,
+    no_preflight,
+    case_insensitive,
+):
     try:
         cfg = load_config(config_path)
     except Exception as exc:  # kullanıcı dostu mesaj
