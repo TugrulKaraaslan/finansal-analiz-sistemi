@@ -358,5 +358,11 @@ if __name__ == "__main__":
     try:
         cli()
     except SystemExit as exc:
-        logging.exception("SystemExit: %s", exc)
+        code = getattr(exc, "code", 1)
+        if code == 0:
+            logging.info("Program başarıyla tamamlandı.")
+        else:
+            logging.error(
+                "Program %s kodu ile hata vererek sonlandı.", code
+            )
         raise
