@@ -277,6 +277,7 @@ def run_screener(
     if sides is None:
         sides = [None] * len(filters_df)
     valids = []
+    missing_cols_total: set[str] = set()
     for code, expr, grp, side in zip(
         filters_df["FilterCode"], filters_df["expr"], groups, sides
     ):
@@ -317,10 +318,16 @@ def run_screener(
                     missing=sorted(missing_cols),
                 )
                 raise ValueError(msg)
+            for col in sorted(missing_cols):
+                if col not in missing_cols_total:
+                    logger.warning("missing_column:{}", col)
+                    missing_cols_total.add(col)
             missing = ", ".join(sorted(missing_cols))
             logger.warning("skip filter: missing column {}", missing, code=code)
             continue
         valids.append((code, grp, side_norm, sq))
+    if missing_cols_total:
+        logger.info("missing_column_total: {}", len(missing_cols_total))
     out_frames = []
     for code, grp, side_norm, sq in valids:
         try:

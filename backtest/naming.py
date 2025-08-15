@@ -35,10 +35,33 @@ _ALIAS_PAIRS: Dict[str, List[str]] = {
     "adx_14": ["ADX14", "ADX_14"],
     "dmp_14": ["positivedirectionalindicator_14"],
     "dmn_14": ["negativedirectionalindicator_14"],
-    "stoch_k": ["STOCHK", "STOCH_k", "stochK"],
-    "stoch_d": ["STOCHD", "stochD"],
-    "stochrsi_k": ["STOCHRSIk", "STOCHRSI_k"],
-    "stochrsi_d": ["STOCHRSId", "STOCHRSI_d"],
+    "stoch_k": ["STOCHK", "STOCH_k", "stochK", "stoch %k", "stoch%k"],
+    "stoch_d": ["STOCHD", "stochD", "stoch %d", "stoch%d"],
+    "stochrsi_k": ["STOCHRSIk", "STOCHRSI_k", "stochrsi %k", "stochrsi%k"],
+    "stochrsi_d": ["STOCHRSId", "STOCHRSI_d", "stochrsi %d", "stochrsi%d"],
+    "macd_line": ["MACD", "MACD_12_26_9", "MACD 12,26,9", "macd12269", "macd 12 26 9"],
+    "macd_signal": [
+        "MACDS",
+        "MACDS_12_26_9",
+        "MACD_SIGNAL",
+        "MACD Signal",
+        "macds 12,26,9",
+    ],
+    "bbm": ["BOLLINGER", "BOLLINGER_M", "Bollinger", "Bollinger_M", "bb_m"],
+    "bbu": [
+        "BOLLINGER_UPPER",
+        "Bollinger_Upper",
+        "BOLLINGERHIGH",
+        "bb_u",
+        "bb_upper",
+    ],
+    "bbl": [
+        "BOLLINGER_LOWER",
+        "Bollinger_Lower",
+        "BOLLINGERLOW",
+        "bb_l",
+        "bb_lower",
+    ],
 }
 
 

@@ -38,5 +38,6 @@ def compute_indicators(
         raise ValueError(
             "Gösterge hesaplaması politika gereği devre dışı (engine='none')."
         )
-    logger.info("indicators: engine=none (policy lock), no computation")
+    logger.info("indicators: using-from-data")
+    logger.info("indicators: engine=none (using-from-data)")
     return df

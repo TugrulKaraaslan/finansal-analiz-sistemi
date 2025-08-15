@@ -243,7 +243,14 @@ def read_excels_long(
             with pd.ExcelFile(fpath, engine=engine_to_use) as xls:
                 for sheet in xls.sheet_names:
                     try:
-                        df = xls.parse(sheet_name=sheet, header=0)
+                        try:
+                            df = xls.parse(
+                                sheet_name=sheet,
+                                header=0,
+                                dtype_backend="numpy_nullable",
+                            )
+                        except TypeError:
+                            df = xls.parse(sheet_name=sheet, header=0)
                         if df is None or df.empty:
                             continue
                         df = normalize_columns(df, price_schema=price_schema)
