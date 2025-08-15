@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 
 _DEFAULT_PATH = Path("/content/finansal-analiz-sistemi/data/BIST100.xlsx")
 if not _DEFAULT_PATH.exists():
-    _DEFAULT_PATH = (
-        Path(__file__).resolve().parent.parent / "data" / "BIST100.xlsx"
-    )
+    _DEFAULT_PATH = Path(__file__).resolve().parent.parent / "data" / "BIST100.xlsx"
 
 
 def _read_csv_any(path: str | Path) -> pd.DataFrame:
@@ -117,7 +115,9 @@ def load_xu100_pct(csv_path: str | Path | None = None) -> pd.Series:
         logger.warning(msg)
         return pd.Series(dtype=float)
 
-    df[date_col] = pd.to_datetime(df[date_col], errors="coerce", dayfirst=True).dt.normalize()
+    df[date_col] = pd.to_datetime(
+        df[date_col], errors="coerce", dayfirst=True
+    ).dt.normalize()
     df[value_col] = pd.to_numeric(df[value_col], errors="coerce")
     df = df.dropna(subset=[date_col, value_col]).sort_values(date_col)
     pct = df[value_col].pct_change(1) * 100.0

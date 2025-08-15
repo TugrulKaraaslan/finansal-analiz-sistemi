@@ -11,4 +11,3 @@ def test_alias_handling(tmp_path):
     series = load_xu100_pct(xlsx)
     assert len(series) == 2
     assert series.iloc[1] == pytest.approx(10.0)
-

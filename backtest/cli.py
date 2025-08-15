@@ -169,11 +169,15 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
         pivot = pd.DataFrame(columns=[*days, "Ortalama", "TradeCount"])
         winrate = pd.DataFrame(columns=[*days, "Ortalama"])
     s = load_xu100_pct()
-    xu100_pct = {
-        d: float(s.get(d, float("nan")))
-        for d in pivot.columns
-        if d not in {"Ortalama", "TradeCount"}
-    } if not s.empty else {}
+    xu100_pct = (
+        {
+            d: float(s.get(d, float("nan")))
+            for d in pivot.columns
+            if d not in {"Ortalama", "TradeCount"}
+        }
+        if not s.empty
+        else {}
+    )
     out_dir = resolve_path(cfg.project.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     if per_day_output:
