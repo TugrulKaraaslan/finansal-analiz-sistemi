@@ -362,7 +362,5 @@ if __name__ == "__main__":
         if code == 0:
             logging.info("Program başarıyla tamamlandı.")
         else:
-            logging.error(
-                "Program %s kodu ile hata vererek sonlandı.", code
-            )
+            logging.error("Program %s kodu ile hata vererek sonlandı.", code)
         raise
