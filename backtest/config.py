@@ -89,9 +89,13 @@ def load_config(path: str | Path) -> RootCfg:
         raise TypeError("Config içeriği sözlük olmalı")
     data_section = cfg.get("data", {})
     if "excel_dir" in data_section:
-        data_section["excel_dir"] = str(resolve_under_root(p, data_section["excel_dir"]))
+        data_section["excel_dir"] = str(
+            resolve_under_root(p, data_section["excel_dir"])
+        )
     if "filters_csv" in data_section:
-        data_section["filters_csv"] = str(resolve_under_root(p, data_section["filters_csv"]))
+        data_section["filters_csv"] = str(
+            resolve_under_root(p, data_section["filters_csv"])
+        )
     cfg["data"] = data_section
     base = p.parent
 
