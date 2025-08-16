@@ -63,10 +63,10 @@ def test_purge_old_logs(tmp_path, monkeypatch):
     assert new_run.exists()
 
 
-def test_migration_warning(tmp_path, caplog, monkeypatch):
+def test_legacy_logs_dir_ignored(tmp_path, caplog, monkeypatch):
     monkeypatch.chdir(tmp_path)
     Path("logs").mkdir()
     with caplog.at_level(logging.WARNING):
         setup_logger(run_id="t4")
-    assert "legacy logs/ directory detected" in caplog.text
-    assert Path("logs/migration.txt").exists()
+    assert "legacy logs/ directory detected" not in caplog.text
+    assert not Path("logs/migration.txt").exists()

@@ -138,17 +138,6 @@ def setup_logger(
     base = Path(log_dir)
     base.mkdir(parents=True, exist_ok=True)
 
-    legacy_dir = Path("logs")
-    legacy_exists = legacy_dir.exists() and legacy_dir.is_dir() and legacy_dir != base
-    if legacy_exists:
-        try:
-            (legacy_dir / "migration.txt").write_text(
-                "Log dizini 'loglar/' olarak değişti.\n",
-                encoding="utf-8",
-            )
-        except Exception:  # pragma: no cover - best effort
-            pass
-
     stamp = run_id or datetime.now().strftime("%Y%m%d-%H%M%S")
     run_dir = base / f"run_{stamp}"
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -172,8 +161,6 @@ def setup_logger(
     root.addHandler(_def_handler)
 
     logging.info("Log dir: %s", run_dir)
-    if legacy_exists:
-        logging.warning("legacy logs/ directory detected; please migrate to loglar/")
 
     _RUN_DIR = run_dir
     return str(logfile)

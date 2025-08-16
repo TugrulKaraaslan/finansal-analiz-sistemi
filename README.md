@@ -139,8 +139,7 @@ JSON Lines biçimindeki `stages.jsonl` dosyasına yazılır:
 ```
 
 Hatalar `ERROR` seviyesinde loglanır ve aynı klasörde `stage.err` olarak
-stacktrace ile saklanır. Önceki `logs/` dizini tespit edilirse köke
-`migration.txt` bırakılır ve konsola uyarı basılır.
+stacktrace ile saklanır.
 
 `purge_old_logs(days=7)` fonksiyonu çalıştırıldığında 7 günden eski
 `run_*` klasörleri otomatik olarak silinir.
