@@ -1,0 +1,34 @@
+project:
+  out_dir: "raporlar"
+  logs_dir: "loglar"
+  run_mode: "range"
+  holding_period: 1
+  transaction_cost: 0.0
+  stop_on_filter_error: false
+
+data:
+  excel_dir: "/content/finansal-analiz-sistemi/Veri"
+  filters_csv: "/content/finansal-analiz-sistemi/filters.csv"
+  enable_cache: false
+  cache_parquet_path: "cache"
+
+calendar:
+  tplus1_mode: "calendar"
+  holiday_csv: ""
+
+benchmark:
+  xu100_source: "none"
+  xu100_csv_path: ""
+
+report:
+  with_bist_ratio_summary: true
+  include_hit_ratio: true
+  excel_engine: "xlsxwriter"
+
+range:
+  start_date: "2022-01-03"
+  end_date:   "2025-04-18"
+
+single:
+  date: "2025-03-07"
+
