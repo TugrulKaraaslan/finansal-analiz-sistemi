@@ -195,7 +195,9 @@ def read_excels_long(
     if enable_cache is None:
         enable_cache = len(excel_files) > 5
         if enable_cache:
-            logger.info("Cache enabled automatically for {} Excel files", len(excel_files))
+            logger.info(
+                "Cache enabled automatically for {} Excel files", len(excel_files)
+            )
     if enable_cache and not cache_path:
         cache_path = excel_dir / "cache.parquet" if excel_dir else None
 
@@ -232,12 +234,16 @@ def read_excels_long(
         elif importlib.util.find_spec("xlrd"):
             engine_to_use = "xlrd"
         else:
-            raise ImportError("Excel okumak için 'openpyxl' veya 'xlrd' paketleri gerekli")
+            raise ImportError(
+                "Excel okumak için 'openpyxl' veya 'xlrd' paketleri gerekli"
+            )
     elif engine == "openpyxl" and not importlib.util.find_spec("openpyxl"):
         if importlib.util.find_spec("xlrd"):
             engine_to_use = "xlrd"
         else:
-            raise ImportError("'openpyxl' bulunamadı ve alternatif Excel motoru saptanamadı")
+            raise ImportError(
+                "'openpyxl' bulunamadı ve alternatif Excel motoru saptanamadı"
+            )
     else:
         engine_to_use = engine
 
@@ -264,11 +270,18 @@ def read_excels_long(
         if enable_cache and cache_dir:
             cache_file = cache_dir / (fpath.stem + ".parquet")
             try:
-                if cache_file.exists() and cache_file.stat().st_mtime >= fpath.stat().st_mtime:
+                if (
+                    cache_file.exists()
+                    and cache_file.stat().st_mtime >= fpath.stat().st_mtime
+                ):
                     t0 = time.perf_counter()
                     df_cached = pd.read_parquet(cache_file)
                     if verbose:
-                        logger.info("Cache'den okundu: {} ({:.2f}s)", cache_file, time.perf_counter() - t0)
+                        logger.info(
+                            "Cache'den okundu: {} ({:.2f}s)",
+                            cache_file,
+                            time.perf_counter() - t0,
+                        )
                     return df_cached
             except Exception as e:
                 logger.warning("Cache okunamadı: {} -> {}", cache_file, e)
@@ -302,7 +315,9 @@ def read_excels_long(
                             df.columns = [normalize_key(c) for c in df.columns]
                         if "date" not in df.columns:
                             if verbose:
-                                logger.info("[SKIP] {}:{} 'date' bulunamadı.", fpath, sheet)
+                                logger.info(
+                                    "[SKIP] {}:{} 'date' bulunamadı.", fpath, sheet
+                                )
                             continue
                         parse_kwargs: Dict[str, Any] = {"errors": "coerce"}
                         if date_format:
@@ -311,7 +326,11 @@ def read_excels_long(
                             parse_kwargs["dayfirst"] = dayfirst
                         df["date"] = pd.to_datetime(df["date"], **parse_kwargs)
                         df = df.dropna(subset=["date"])
-                        keep = [c for c in ["open", "high", "low", "close", "volume"] if c in df.columns]
+                        keep = [
+                            c
+                            for c in ["open", "high", "low", "close", "volume"]
+                            if c in df.columns
+                        ]
                         for c in keep:
                             df[c] = pd.to_numeric(df[c], errors="coerce")
                         df = df.dropna(subset=keep)
@@ -320,7 +339,9 @@ def read_excels_long(
                         records_local.append(df.copy())
                     except Exception as e:
                         if verbose:
-                            logger.warning("[WARN] Sheet işlenemedi: {}:{} -> {}", fpath, sheet, e)
+                            logger.warning(
+                                "[WARN] Sheet işlenemedi: {}:{} -> {}", fpath, sheet, e
+                            )
                         continue
         except Exception as e:
             if verbose:
@@ -337,7 +358,9 @@ def read_excels_long(
             except Exception as e:
                 logger.warning("Önbelleğe yazılamadı: {} -> {}", cache_file, e)
         if verbose:
-            logger.info("Excel'den okundu: {} ({:.2f}s)", fpath, time.perf_counter() - t0)
+            logger.info(
+                "Excel'den okundu: {} ({:.2f}s)", fpath, time.perf_counter() - t0
+            )
         return df_out
 
     max_workers = min(32, os.cpu_count() or 1)
@@ -369,7 +392,9 @@ def read_excels_long(
                 try:
                     full.to_pickle(aggregated_cache)
                 except Exception as e2:  # pragma: no cover - logging
-                    logger.warning("Önbelleğe yazılamadı: {} -> {}", aggregated_cache, e2)
+                    logger.warning(
+                        "Önbelleğe yazılamadı: {} -> {}", aggregated_cache, e2
+                    )
         except Exception as e:  # pragma: no cover - logging
             logger.warning("Önbelleğe yazılamadı: {} -> {}", aggregated_cache, e)
 
