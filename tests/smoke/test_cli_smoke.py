@@ -47,6 +47,7 @@ def test_cli_smoke(tmp_path: Path):
         "--date",
         "2025-03-07",
     ]
-    r = subprocess.run(cmd, cwd=str(root), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    r = subprocess.run(
+        cmd, cwd=str(root), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     assert r.returncode in (0, 1)
-
