@@ -9,6 +9,13 @@ import pandas as pd
 from loguru import logger
 
 from backtest.query_parser import SafeQuery
+from backtest.columns import canonical_map
+from backtest.cross import (
+    cross_up as _cross_up,
+    cross_down as _cross_down,
+    cross_over_level as _cross_over_level,
+    cross_under_level as _cross_under_level,
+)
 
 
 def _to_series(x):
@@ -160,6 +167,10 @@ def _eval_expr(df: pd.DataFrame, expr: str) -> pd.Series:
     env = {name: _SeriesWrapper(df[name]) for name in df.columns}
     env.update(
         {
+            "CROSSUP": lambda a, b: _cross_up(df, a, b),
+            "CROSSDOWN": lambda a, b: _cross_down(df, a, b),
+            "CROSSOVER": lambda a, level: _cross_over_level(df, a, level),
+            "CROSSUNDER": lambda a, level: _cross_under_level(df, a, level),
             "abs": _wrap_func(abs),
             "max": _wrap_func(np.maximum),
             "min": _wrap_func(np.minimum),
@@ -232,6 +243,12 @@ def run_screener(
         logger.error("filters_df is empty")
         raise ValueError("filters_df is empty")
 
+    df_ind = df_ind.copy()
+    colmap = canonical_map(df_ind.columns)
+    for canon, original in colmap.items():
+        if canon != original and canon not in df_ind.columns:
+            df_ind[canon] = df_ind[original]
+
     req_df = {"symbol", "date", "open", "high", "low", "close", "volume"}
     missing_df = req_df.difference(df_ind.columns)
     if missing_df:
@@ -243,7 +260,6 @@ def run_screener(
         logger.error(msg)
         raise ValueError(msg)
 
-    df_ind = df_ind.copy()
     df_ind["date"] = pd.to_datetime(df_ind["date"]).dt.normalize()
 
     def _empty_output() -> pd.DataFrame:
