@@ -16,12 +16,17 @@ data:
 calendar:
   tplus1_mode: price
 
-indicators:
-  engine: none
-  params: {}
+  indicators:
+    engine: none
+    params: {}
 
-benchmark:
-  xu100_source: none
+  benchmark:
+    source: none
+    excel_path: ""
+    excel_sheet: BIST
+    csv_path: ""
+    column_date: date
+    column_close: close
 
 report:
   percent_format: "0.00%"

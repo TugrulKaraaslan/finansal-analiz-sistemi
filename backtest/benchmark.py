@@ -1,125 +1,67 @@
 from __future__ import annotations
 
 import logging
-import warnings
 from pathlib import Path
 
 import pandas as pd
-
-from utils.paths import resolve_path
 
 
 logger = logging.getLogger(__name__)
 
 
-_DEFAULT_PATH = Path("/content/finansal-analiz-sistemi/data/BIST100.xlsx")
-if not _DEFAULT_PATH.exists():
-    _DEFAULT_PATH = Path(__file__).resolve().parent.parent / "data" / "BIST100.xlsx"
+class BenchmarkLoader:
+    """Load benchmark price data according to configuration."""
 
+    def __init__(self, cfg: dict):
+        self.cfg = cfg
 
-def _read_csv_any(path: str | Path) -> pd.DataFrame:
-    """Read CSV with fallback separator/decimal handling."""
-    p = resolve_path(path)
-    if not p.exists():
-        raise FileNotFoundError(f"CSV bulunamadı: {p}")
-    try:
-        df = pd.read_csv(p, encoding="utf-8")
-        if df.shape[1] > 1:
-            return df
-    except Exception:
-        pass
-    try:
-        with p.open("r", encoding="utf-8") as f:
-            sample = f.read(2048)
-    except Exception as e:  # SPECIFIC EXCEPTIONS
-        raise FileNotFoundError(f"CSV okunamadı: {p}") from e
-    import csv
+    def load(self) -> pd.DataFrame | None:
+        """Return normalized ``date``/``close`` benchmark data or ``None``.
 
-    try:
-        dialect = csv.Sniffer().sniff(sample, delimiters=";,")
-        sep = dialect.delimiter
-    except Exception:
-        sep = ","
-    dec = "," if sep == ";" else "."
-    try:
-        return pd.read_csv(p, sep=sep, decimal=dec, encoding="utf-8")
-    except Exception as e:
-        raise RuntimeError(f"CSV parse edilemedi: {p}") from e
+        The loader supports three sources controlled by ``cfg['source']``:
 
+        ``none``
+            Benchmark disabled; return ``None`` without logging.
+        ``excel``
+            Read from :func:`pandas.read_excel` using ``excel_path`` and
+            ``excel_sheet``.
+        ``csv``
+            Read from :func:`pandas.read_csv` using ``csv_path``.
+        """
 
-def load_xu100_pct(csv_path: str | Path | None = None) -> pd.Series:
-    """Load BIST100 benchmark returns.
-
-    Parameters
-    ----------
-    csv_path : str | Path | None, optional
-        Optional path to the benchmark file.  If not provided the function
-        uses a statically defined repository path.
-
-    Returns
-    -------
-    pd.Series
-        Daily percentage returns. Empty on failure.
-    """
-
-    path = Path(csv_path) if csv_path is not None else _DEFAULT_PATH
-    try:
-        if path.suffix.lower() == ".csv":
-            df = _read_csv_any(path)
-        elif path.suffix.lower() in {".xlsx", ".xls"}:
-            df = pd.read_excel(path)
-        elif path.suffix.lower() == ".parquet":
-            df = pd.read_parquet(path)
+        src = (self.cfg.get("source") or "none").lower()
+        if src == "none":
+            return None
+        if src == "excel":
+            path = Path(self.cfg.get("excel_path", ""))
+            sheet = self.cfg.get("excel_sheet", "BIST")
+            if not path.exists():
+                raise FileNotFoundError(f"benchmark excel not found: {path}")
+            df = pd.read_excel(path, sheet_name=sheet)
+        elif src == "csv":
+            path = Path(self.cfg.get("csv_path", ""))
+            if not path.exists():
+                raise FileNotFoundError(f"benchmark csv not found: {path}")
+            df = pd.read_csv(path)
         else:
-            raise FileNotFoundError
-    except Exception:
-        msg = f"BIST benchmark dosyası okunamadı: {path}"
-        warnings.warn(msg)
-        logger.warning(msg)
-        return pd.Series(dtype=float)
+            raise ValueError(f"unknown benchmark source: {src}")
 
-    if df.empty or df.shape[1] < 2:
-        warnings.warn(f"Boş CSV: {path}")
-        logger.warning("Boş CSV: %s", path)
-        return pd.Series(dtype=float)
-
-    cols = {c.lower().strip(): c for c in df.columns}
-    # alias mapping for benchmark column
-    for alias in ["bist", "bist100"]:
-        if alias in cols:
-            df = df.rename(columns={cols[alias]: "bist"})
-            cols = {c.lower().strip(): c for c in df.columns}
-            break
-
-    date_col = cols.get("date") or cols.get("tarih") or list(df.columns)[0]
-    value_col = "bist" if "bist" in df.columns else None
-    if value_col is None:
-        cand = (
-            "close",
-            "kapanış",
-            "kapanis",
-            "adjclose",
-            "adj_close",
-            "kapanis_tl",
-            "fiyat",
+        date_col = self.cfg.get("column_date", "date")
+        close_col = self.cfg.get("column_close", "close")
+        df = df[[date_col, close_col]].rename(
+            columns={date_col: "date", close_col: "close"}
         )
-        for k in cand:
-            if k in cols:
-                value_col = cols[k]
-                break
-    if value_col is None and len(df.columns) > 1:
-        value_col = list(df.columns)[1]
-    if value_col is None:
-        msg = f"BIST kolon bulunamadı: {path}"
-        warnings.warn(msg)
-        logger.warning(msg)
-        return pd.Series(dtype=float)
+        df["date"] = pd.to_datetime(df["date"]).dt.date
+        df = df.sort_values("date").dropna()
+        if df.empty:
+            raise ValueError("benchmark data empty")
+        logger.info(
+            "benchmark loaded rows=%d first=%s last=%s",
+            len(df),
+            df["date"].iloc[0],
+            df["date"].iloc[-1],
+        )
+        return df
 
-    df[date_col] = pd.to_datetime(
-        df[date_col], errors="coerce", dayfirst=True
-    ).dt.normalize()
-    df[value_col] = pd.to_numeric(df[value_col], errors="coerce")
-    df = df.dropna(subset=[date_col, value_col]).sort_values(date_col)
-    pct = df[value_col].pct_change(1) * 100.0
-    pct.index = df[date_col]
-    return pct
+
+__all__ = ["BenchmarkLoader"]

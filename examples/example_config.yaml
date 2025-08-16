@@ -34,9 +34,13 @@ indicators:
     ema: [10,20,50]
     macd: [12,26,9]
 
-benchmark:
-  xu100_source: "none"
-  xu100_csv_path: ""
+  benchmark:
+    source: "none"
+    excel_path: ""
+    excel_sheet: "BIST"
+    csv_path: ""
+    column_date: "date"
+    column_close: "close"
 
 report:
   percent_format: "0.00%"

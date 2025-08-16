@@ -10,7 +10,7 @@ from utils.paths import resolve_path
 from .io.preflight import preflight
 
 from .backtester import run_1g_returns
-from .benchmark import load_xu100_pct
+from .benchmark import BenchmarkLoader
 from .calendars import (
     add_next_close,
     add_next_close_calendar,
@@ -168,16 +168,26 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     else:
         pivot = pd.DataFrame(columns=[*days, "Ortalama", "TradeCount"])
         winrate = pd.DataFrame(columns=[*days, "Ortalama"])
-    s = load_xu100_pct()
-    xu100_pct = (
-        {
-            d: float(s.get(d, float("nan")))
-            for d in pivot.columns
-            if d not in {"Ortalama", "TradeCount"}
-        }
-        if not s.empty
-        else {}
-    )
+    bm_cfg = getattr(cfg, "benchmark", None)
+    xu100_pct = None
+    if bm_cfg is not None:
+        cfg_dict = (
+            bm_cfg.model_dump()
+            if hasattr(bm_cfg, "model_dump")
+            else bm_cfg.dict()
+            if hasattr(bm_cfg, "dict")
+            else vars(bm_cfg)
+            if hasattr(bm_cfg, "__dict__")
+            else bm_cfg
+        )
+        try:
+            bench_df = BenchmarkLoader(cfg_dict).load()
+        except (FileNotFoundError, ValueError) as exc:
+            logging.error(str(exc))
+            raise click.ClickException(str(exc))
+        if bench_df is not None:
+            s = bench_df.set_index("date")["close"].pct_change() * 100.0
+            xu100_pct = {pd.Timestamp(d): float(v) for d, v in s.dropna().items()}
     out_dir = resolve_path(cfg.project.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     if per_day_output:

@@ -30,7 +30,14 @@ def test_cli_smoke(tmp_path: Path):
             "cache_parquet_path": "cache",
         },
         "calendar": {"tplus1_mode": "calendar", "holiday_csv": ""},
-        "benchmark": {"xu100_source": "none", "xu100_csv_path": ""},
+        "benchmark": {
+            "source": "none",
+            "excel_path": "",
+            "excel_sheet": "BIST",
+            "csv_path": "",
+            "column_date": "date",
+            "column_close": "close",
+        },
         "report": {
             "with_bist_ratio_summary": True,
             "include_hit_ratio": True,

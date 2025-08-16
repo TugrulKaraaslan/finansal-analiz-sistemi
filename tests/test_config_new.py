@@ -45,15 +45,16 @@ def test_load_config_invalid_yaml():
 def test_load_config_relative_paths(tmp_path):
     cfg_text = textwrap.dedent(
         """
-        project:
-          out_dir: out
-        data:
-          excel_dir: data
-          filters_csv: filters.csv
-        calendar:
-          holidays_csv_path: hol.csv
-        benchmark:
-          xu100_csv_path: xu.csv
+          project:
+            out_dir: out
+          data:
+            excel_dir: data
+            filters_csv: filters.csv
+          calendar:
+            holidays_csv_path: hol.csv
+          benchmark:
+            excel_path: bist.xlsx
+            csv_path: xu.csv
         """
     )
     cfg_file = tmp_path / "cfg.yaml"
@@ -64,4 +65,5 @@ def test_load_config_relative_paths(tmp_path):
     assert cfg.data.excel_dir == str(base / "data")
     assert cfg.data.filters_csv == str(base / "filters.csv")
     assert cfg.calendar.holidays_csv_path == str(base / "hol.csv")
-    assert cfg.benchmark.xu100_csv_path == str(base / "xu.csv")
+    assert cfg.benchmark.excel_path == str(base / "bist.xlsx")
+    assert cfg.benchmark.csv_path == str(base / "xu.csv")
