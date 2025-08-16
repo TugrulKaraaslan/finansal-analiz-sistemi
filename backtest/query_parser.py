@@ -47,6 +47,10 @@ class SafeQuery:
         "exp",
         "floor",
         "ceil",
+        "CROSSUP",
+        "CROSSDOWN",
+        "CROSSOVER",
+        "CROSSUNDER",
     }
 
     def __init__(self, expr: str):
