@@ -8,6 +8,7 @@ import yaml
 from pydantic import BaseModel, Field
 
 from utils.paths import resolve_path
+from .paths import resolve_under_root
 
 
 class ProjectCfg(BaseModel):
@@ -86,6 +87,12 @@ def load_config(path: str | Path) -> RootCfg:
         cfg = yaml.safe_load(f)
     if not isinstance(cfg, dict):
         raise TypeError("Config içeriği sözlük olmalı")
+    data_section = cfg.get("data", {})
+    if "excel_dir" in data_section:
+        data_section["excel_dir"] = str(resolve_under_root(p, data_section["excel_dir"]))
+    if "filters_csv" in data_section:
+        data_section["filters_csv"] = str(resolve_under_root(p, data_section["filters_csv"]))
+    cfg["data"] = data_section
     base = p.parent
 
     def _join(v: Optional[str], *, allow_cwd: bool = False) -> Optional[str]:
