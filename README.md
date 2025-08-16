@@ -38,6 +38,29 @@ python -m backtest.cli scan-range --config config/colab_config.yaml --start 2022
 
 > `--config` **zorunludur**. Pozisyonel argüman **DEĞİLDİR**.
 
+## Rapor ve Log Dizini
+
+Komutlar çalıştığında çıktı dosyaları `raporlar/` klasörüne, loglar ise her çalıştırma için ayrı bir alt klasör oluşturularak `loglar/` içine yazılır.
+
+```
+raporlar/
+    SCAN_2025-03-07.xlsx
+loglar/
+    run_20250101-120000/
+        summary.txt
+        stages.jsonl
+```
+
+Colab veya uzak bir ortamda sonuçları indirmenin kolay yolu:
+
+```bash
+zip -r raporlar.zip raporlar
+zip -r loglar.zip loglar
+zip -r reports_logs.zip raporlar loglar  # ikisi birden
+```
+
+Bu dosyaları `drive.mount` ile Google Drive'a kopyalayabilir veya tarayıcıdan indirebilirsin.
+
 ## Sık Karşılaşılan Hatalar
 
 * **ModuleNotFoundError: pandera/loguru** → `pip install -r requirements.txt`
