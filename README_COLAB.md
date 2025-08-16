@@ -17,9 +17,9 @@ Aşağıdaki hücreler Colab ortamında projeyi kurar, ortamı doğrular ve örn
 import logging
 from backtest.logging_utils import setup_logger
 setup_logger()
-!echo "Kurulum başlıyor" | tee -a logs/colab_shell.log
-!pip install -r requirements_colab.txt 2>&1 | tee -a logs/colab_shell.log
-!pytest -q 2>&1 | tee -a logs/colab_shell.log
+!echo "Kurulum başlıyor" | tee -a loglar/colab_shell.log
+!pip install -r requirements_colab.txt 2>&1 | tee -a loglar/colab_shell.log
+!pytest -q 2>&1 | tee -a loglar/colab_shell.log
 ```
 
 > `tee -a` komutu hem ekrana hem dosyaya yazdırır.
