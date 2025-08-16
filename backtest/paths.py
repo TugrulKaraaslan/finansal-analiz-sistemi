@@ -19,4 +19,3 @@ def resolve_under_root(config_path: str | Path, maybe_path: str | Path) -> Path:
 
 
 __all__ = ["project_root_from_config", "resolve_under_root"]
-
