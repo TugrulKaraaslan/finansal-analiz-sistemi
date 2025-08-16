@@ -30,7 +30,14 @@ def _cfg():
             tplus1_mode="price", holidays_source="none", holidays_csv_path=None
         ),
         indicators=SimpleNamespace(params={}, engine="none"),
-        benchmark=SimpleNamespace(xu100_source="none", xu100_csv_path=None),
+        benchmark=SimpleNamespace(
+            source="none",
+            excel_path="",
+            excel_sheet="BIST",
+            csv_path="",
+            column_date="date",
+            column_close="close",
+        ),
         report=SimpleNamespace(
             daily_sheet_prefix="SCAN_",
             summary_sheet_name="SUMMARY",

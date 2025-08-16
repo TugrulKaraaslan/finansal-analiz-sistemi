@@ -46,9 +46,13 @@ calendar:
   tplus1_mode: "calendar"
   holiday_csv: ""
 
-benchmark:
-  xu100_source: "none"
-  xu100_csv_path: ""
+  benchmark:
+    source: "none"
+    excel_path: ""
+    excel_sheet: "BIST"
+    csv_path: ""
+    column_date: "date"
+    column_close: "close"
 
 report:
   with_bist_ratio_summary: true
@@ -59,9 +63,11 @@ range:
   start_date: "2022-01-03"
   end_date:   "2025-04-18"
 
-single:
-  date: "2025-03-07"
-```
+  single:
+    date: "2025-03-07"
+  ```
+
+  > `benchmark.source` "excel" ise `excel_path`'i mutlak yazmayı ve dosyanın ilk sheet adının **BIST** olduğundan emin olmayı unutma.
 
 ### Hücre 4 — Tarihi kolay değiştirme (opsiyonel)
 

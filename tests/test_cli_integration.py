@@ -55,8 +55,12 @@ def test_cli_scan_range_integration(tmp_path):
               params: {{}}
 
             benchmark:
-              xu100_source: "none"
-              xu100_csv_path: ""
+              source: "none"
+              excel_path: ""
+              excel_sheet: "BIST"
+              csv_path: ""
+              column_date: "date"
+              column_close: "close"
 
             report:
               percent_format: "0.00%"
@@ -123,9 +127,13 @@ def test_cli_scan_missing_column(tmp_path):
               engine: "none"
               params: {{}}
 
-            benchmark:
-              xu100_source: "none"
-              xu100_csv_path: ""
+              benchmark:
+                source: "none"
+                excel_path: ""
+                excel_sheet: "BIST"
+                csv_path: ""
+                column_date: "date"
+                column_close: "close"
 
             report:
               percent_format: "0.00%"

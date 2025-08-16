@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Literal
 
 import yaml
 from pydantic import BaseModel, Field
+import warnings
 
 from utils.paths import resolve_path
 from .paths import resolve_under_root
@@ -59,8 +60,12 @@ class IndicatorsCfg(BaseModel):
 
 
 class BenchmarkCfg(BaseModel):
-    xu100_source: str = "none"  # csv | none
-    xu100_csv_path: Optional[str] = None
+    source: str = "none"  # none | excel | csv
+    excel_path: str = ""
+    excel_sheet: str = "BIST"
+    csv_path: str = ""
+    column_date: str = "date"
+    column_close: str = "close"
 
 
 class ReportCfg(BaseModel):
@@ -138,8 +143,22 @@ def load_config(path: str | Path) -> RootCfg:
     if isinstance(cal, dict) and cal.get("holidays_csv_path"):
         cal["holidays_csv_path"] = _join(cal.get("holidays_csv_path"))
     bench = cfg.get("benchmark", {}) if isinstance(cfg, dict) else {}
-    if isinstance(bench, dict) and bench.get("xu100_csv_path"):
-        bench["xu100_csv_path"] = _join(bench.get("xu100_csv_path"))
+    if isinstance(bench, dict):
+        if "xu100_source" in bench and "source" not in bench:
+            warnings.warn(
+                "benchmark.xu100_source deprecated; use benchmark.source",
+                DeprecationWarning,
+            )
+            bench["source"] = bench.pop("xu100_source")
+        if "xu100_csv_path" in bench and "csv_path" not in bench:
+            warnings.warn(
+                "benchmark.xu100_csv_path deprecated; use benchmark.csv_path",
+                DeprecationWarning,
+            )
+            bench["csv_path"] = bench.pop("xu100_csv_path")
+        for k in ("excel_path", "csv_path"):
+            if bench.get(k):
+                bench[k] = str(resolve_under_root(p, bench[k]))
     indicators = cfg.get("indicators", {}) if isinstance(cfg, dict) else {}
     eng = indicators.get("engine")
     if eng is not None and eng != "none":

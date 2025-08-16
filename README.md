@@ -26,6 +26,25 @@ EXAMPLE_01; (rsi_14 > 50) & (ema_20 > ema_50)
 
 Varsayılan örnek: `config/colab_config.yaml.example` (aşağıda). Kendi çalıştırman için bunu `config/colab_config.yaml` olarak kopyala ve tarihleri düzenle.
 
+## Benchmark (opsiyonel)
+
+Benchmarkt kaynağı config'te şu şekilde tanımlanır:
+
+```yaml
+benchmark:
+  source: "excel"
+  excel_path: "/content/finansal-analiz-sistemi/Veri/Bist 100 Tarihsel Veriler1.xlsx"
+  excel_sheet: "BIST"
+  column_date: "date"
+  column_close: "close"
+```
+
+Komut örneği:
+
+```bash
+python -m backtest.cli scan-day --config config/colab_config.yaml --date 2025-03-07
+```
+
 ## CLI Kullanımı (tek doğru biçim)
 
 ```bash
