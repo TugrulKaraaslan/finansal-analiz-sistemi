@@ -187,10 +187,7 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
             raise click.ClickException(str(exc))
         if bench_df is not None:
             s = bench_df.set_index("date")["close"].pct_change() * 100.0
-            xu100_pct = {
-                pd.Timestamp(d): float(v)
-                for d, v in s.dropna().items()
-            }
+            xu100_pct = {pd.Timestamp(d): float(v) for d, v in s.dropna().items()}
     out_dir = resolve_path(cfg.project.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     if per_day_output:

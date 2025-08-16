@@ -48,7 +48,9 @@ class BenchmarkLoader:
 
         date_col = self.cfg.get("column_date", "date")
         close_col = self.cfg.get("column_close", "close")
-        df = df[[date_col, close_col]].rename(columns={date_col: "date", close_col: "close"})
+        df = df[[date_col, close_col]].rename(
+            columns={date_col: "date", close_col: "close"}
+        )
         df["date"] = pd.to_datetime(df["date"]).dt.date
         df = df.sort_values("date").dropna()
         if df.empty:
@@ -63,4 +65,3 @@ class BenchmarkLoader:
 
 
 __all__ = ["BenchmarkLoader"]
-
