@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import importlib.util
+import os
+import time
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Union
 
@@ -164,6 +167,7 @@ def read_excels_long(
     engine: str = "auto",
     verbose: bool = False,
 ) -> pd.DataFrame:
+    start_all = time.perf_counter()
     price_schema = None
     if isinstance(cfg_or_path, (str, Path)):
         excel_dir = resolve_path(cfg_or_path)
@@ -191,16 +195,16 @@ def read_excels_long(
     if enable_cache is None:
         enable_cache = len(excel_files) > 5
         if enable_cache:
-            logger.info(
-                "Cache enabled automatically for {} Excel files", len(excel_files)
-            )
+            logger.info("Cache enabled automatically for {} Excel files", len(excel_files))
     if enable_cache and not cache_path:
         cache_path = excel_dir / "cache.parquet" if excel_dir else None
 
+    aggregated_cache: Optional[Path] = None
+    cache_dir: Optional[Path] = None
     if enable_cache and cache_path:
         try:
             cache_file = resolve_path(cache_path)
-            if cache_file.exists():
+            if cache_file.exists() and cache_file.is_file():
                 try:
                     return pd.read_parquet(cache_file)
                 except Exception as e:  # engine missing or wrong format
@@ -209,13 +213,16 @@ def read_excels_long(
                         return pd.read_pickle(cache_file)
                     except Exception as e2:
                         logger.warning("Önbellek okunamadı: {} -> {}", cache_path, e2)
+            aggregated_cache = cache_file if cache_file.suffix else None
+            if cache_file and cache_file.is_dir():
+                cache_dir = cache_file
         except Exception as e:
             logger.warning("Önbellek okunamadı: {} -> {}", cache_path, e)
+    if enable_cache and not cache_dir and excel_dir:
+        cache_dir = excel_dir / ".cache"
 
     if not excel_dir or not excel_dir.exists():
         raise FileNotFoundError(f"Excel klasörü bulunamadı: {excel_dir}")
-
-    records: List[pd.DataFrame] = []
     if not excel_files:
         raise RuntimeError(f"'{excel_dir}' altında .xlsx bulunamadı.")
 
@@ -225,20 +232,49 @@ def read_excels_long(
         elif importlib.util.find_spec("xlrd"):
             engine_to_use = "xlrd"
         else:
-            raise ImportError(
-                "Excel okumak için 'openpyxl' veya 'xlrd' paketleri gerekli"
-            )
+            raise ImportError("Excel okumak için 'openpyxl' veya 'xlrd' paketleri gerekli")
     elif engine == "openpyxl" and not importlib.util.find_spec("openpyxl"):
         if importlib.util.find_spec("xlrd"):
             engine_to_use = "xlrd"
         else:
-            raise ImportError(
-                "'openpyxl' bulunamadı ve alternatif Excel motoru saptanamadı"
-            )
+            raise ImportError("'openpyxl' bulunamadı ve alternatif Excel motoru saptanamadı")
     else:
         engine_to_use = engine
 
-    for fpath in excel_files:
+    col_aliases: Dict[str, List[str]] = {
+        "date": ["date"],
+        "open": ["open"],
+        "high": ["high"],
+        "low": ["low"],
+        "close": ["close"],
+        "volume": ["volume"],
+    }
+    if price_schema:
+        for k, v in price_schema.items():
+            if isinstance(v, str):
+                col_aliases.setdefault(k, []).append(v)
+            else:
+                col_aliases.setdefault(k, []).extend(list(v))
+    usecols = list({c for cols in col_aliases.values() for c in cols})
+    usecols_set = set(usecols)
+    usecols_filter = (lambda c: c in usecols_set) if usecols_set else None
+
+    def _process_file(fpath: Path) -> pd.DataFrame:
+        cache_file = None
+        if enable_cache and cache_dir:
+            cache_file = cache_dir / (fpath.stem + ".parquet")
+            try:
+                if cache_file.exists() and cache_file.stat().st_mtime >= fpath.stat().st_mtime:
+                    t0 = time.perf_counter()
+                    df_cached = pd.read_parquet(cache_file)
+                    if verbose:
+                        logger.info("Cache'den okundu: {} ({:.2f}s)", cache_file, time.perf_counter() - t0)
+                    return df_cached
+            except Exception as e:
+                logger.warning("Cache okunamadı: {} -> {}", cache_file, e)
+
+        t0 = time.perf_counter()
+        records_local: List[pd.DataFrame] = []
         try:
             with pd.ExcelFile(fpath, engine=engine_to_use) as xls:
                 for sheet in xls.sheet_names:
@@ -247,10 +283,18 @@ def read_excels_long(
                             df = xls.parse(
                                 sheet_name=sheet,
                                 header=0,
+                                usecols=usecols_filter,
                                 dtype_backend="numpy_nullable",
                             )
                         except TypeError:
-                            df = xls.parse(sheet_name=sheet, header=0)
+                            try:
+                                df = xls.parse(
+                                    sheet_name=sheet,
+                                    header=0,
+                                    usecols=usecols_filter,
+                                )
+                            except TypeError:
+                                df = xls.parse(sheet_name=sheet, header=0)
                         if df is None or df.empty:
                             continue
                         df = normalize_columns(df, price_schema=price_schema)
@@ -258,13 +302,8 @@ def read_excels_long(
                             df.columns = [normalize_key(c) for c in df.columns]
                         if "date" not in df.columns:
                             if verbose:
-                                logger.info(
-                                    "[SKIP] {}:{} 'date' bulunamadı.",
-                                    fpath,
-                                    sheet,
-                                )
+                                logger.info("[SKIP] {}:{} 'date' bulunamadı.", fpath, sheet)
                             continue
-
                         parse_kwargs: Dict[str, Any] = {"errors": "coerce"}
                         if date_format:
                             parse_kwargs["format"] = date_format
@@ -272,42 +311,47 @@ def read_excels_long(
                             parse_kwargs["dayfirst"] = dayfirst
                         df["date"] = pd.to_datetime(df["date"], **parse_kwargs)
                         df = df.dropna(subset=["date"])
-
-                        keep = [
-                            c
-                            for c in ["open", "high", "low", "close", "volume"]
-                            if c in df.columns
-                        ]
+                        keep = [c for c in ["open", "high", "low", "close", "volume"] if c in df.columns]
                         for c in keep:
                             df[c] = pd.to_numeric(df[c], errors="coerce")
                         df = df.dropna(subset=keep)
                         df = df[(df[keep] >= 0).all(axis=1)]
-
                         df["symbol"] = str(sheet).strip().upper()
-                        records.append(df.copy())
+                        records_local.append(df.copy())
                     except Exception as e:
                         if verbose:
-                            logger.warning(
-                                "[WARN] Sheet işlenemedi: {}:{} -> {}",
-                                fpath,
-                                sheet,
-                                e,
-                            )
+                            logger.warning("[WARN] Sheet işlenemedi: {}:{} -> {}", fpath, sheet, e)
                         continue
         except Exception as e:
             if verbose:
                 logger.warning("[WARN] Excel açılamadı: {} -> {}", fpath, e)
-            continue
+            return pd.DataFrame()
+        if not records_local:
+            return pd.DataFrame()
+        df_out = pd.concat(records_local, ignore_index=True)
+        if enable_cache and cache_file is not None:
+            try:
+                cache_dir.mkdir(parents=True, exist_ok=True)
+                df_out.to_parquet(cache_file, index=False)
+                logger.info("Parquet'e dönüştürüldü: {}", cache_file)
+            except Exception as e:
+                logger.warning("Önbelleğe yazılamadı: {} -> {}", cache_file, e)
+        if verbose:
+            logger.info("Excel'den okundu: {} ({:.2f}s)", fpath, time.perf_counter() - t0)
+        return df_out
 
+    max_workers = min(32, os.cpu_count() or 1)
+    with ThreadPoolExecutor(max_workers=max_workers) as exc:
+        records = list(exc.map(_process_file, excel_files))
+
+    records = [r for r in records if not r.empty]
     if not records:
         warnings.warn("Hiçbir sheet/çalışma sayfasından veri toplanamadı.")
-        # downstream code expects these columns even when dataset is empty
         cols = ["date", "open", "high", "low", "close", "volume", "symbol"]
         return pd.DataFrame(columns=cols)
 
     full = pd.concat(records, ignore_index=True)
     full = full.sort_values(["symbol", "date"], kind="mergesort").reset_index(drop=True)
-    # remove duplicate symbol/date combinations that may appear across sheets/files
     full.drop_duplicates(["symbol", "date"], inplace=True)
     if "close" in full.columns:
         full = full.dropna(subset=["close"])
@@ -315,21 +359,22 @@ def read_excels_long(
     full = normalize_columns(full)
     validate_columns(full, ["date", "open", "high", "low", "close", "volume", "symbol"])
 
-    if enable_cache and cache_path:
+    if enable_cache and aggregated_cache:
         try:
-            cache_file = resolve_path(cache_path)
-            cache_file.parent.mkdir(parents=True, exist_ok=True)
+            aggregated_cache.parent.mkdir(parents=True, exist_ok=True)
             try:
-                full.to_parquet(cache_file, index=False)
+                full.to_parquet(aggregated_cache, index=False)
             except Exception as e:
-                logger.warning("Önbelleğe yazılamadı: {} -> {}", cache_path, e)
+                logger.warning("Önbelleğe yazılamadı: {} -> {}", aggregated_cache, e)
                 try:
-                    full.to_pickle(cache_file)
+                    full.to_pickle(aggregated_cache)
                 except Exception as e2:  # pragma: no cover - logging
-                    logger.warning("Önbelleğe yazılamadı: {} -> {}", cache_path, e2)
+                    logger.warning("Önbelleğe yazılamadı: {} -> {}", aggregated_cache, e2)
         except Exception as e:  # pragma: no cover - logging
-            logger.warning("Önbelleğe yazılamadı: {} -> {}", cache_path, e)
+            logger.warning("Önbelleğe yazılamadı: {} -> {}", aggregated_cache, e)
 
+    if verbose:
+        logger.info("Toplam süre: {:.2f}s", time.perf_counter() - start_all)
     return full
 
 
