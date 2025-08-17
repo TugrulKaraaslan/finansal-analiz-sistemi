@@ -1,4 +1,4 @@
-﻿FilterCode,PythonQuery
+﻿FilterCode;PythonQuery
 T2;(relative_volume > 1.0) and (change_1w_percent < 15.0) and (RSI_14 > 50) and (RSI_14 < 65) and (ADX_14 > 30) and (ADX_14 < 60) and (STOCHRSIk_14_14_3_3 < 20.0) and CROSSDOWN(STOCHRSId_14_14_3_3, STOCHRSIk_14_14_3_3)
 T3;(relative_volume > 1.5) and (RSI_14 > 50.0) and (MOM_10 > 1.0) and (SMA_5 < close) and (SMA_10 < close) and (SMA_200 < close)
 T5;(relative_volume > 1.3) and (RSI_14 > 55.0) and (EMA_5 < close) and (EMA_20 < EMA_5) and (EMA_50 < EMA_20) and (CCI_20_0.015 > 100.0) and (VWMA_20 < close) and (ITS_9 < IKS_26)
