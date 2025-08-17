@@ -2,20 +2,13 @@ from __future__ import annotations
 
 import re
 import warnings
-import operator
 
 import numpy as np
 import pandas as pd
 from loguru import logger
 
-from backtest.query_parser import SafeQuery
-from backtest.columns import canonical_map
-from backtest.cross import (
-    cross_up as _cross_up,
-    cross_down as _cross_down,
-    cross_over_level as _cross_over_level,
-    cross_under_level as _cross_under_level,
-)
+from backtest.columns import canonical_map, canonicalize, ALIASES
+from .eval_env import build_env
 
 
 def _to_series(x):
@@ -28,161 +21,32 @@ def _to_series(x):
     return x
 
 
-def _align_series(a, b):
-    if not hasattr(a, "index") or not hasattr(b, "index"):
-        return a, b
-    idx = a.index.intersection(b.index)
-    return a.reindex(idx), b.reindex(idx)
-
-
 def _to_pandas_ops(expr: str) -> str:
     expr = re.sub(r"\bAND\b", "&", expr, flags=re.I)
     expr = re.sub(r"\bOR\b", "|", expr, flags=re.I)
     expr = re.sub(r"\bNOT\b", "~", expr, flags=re.I)
+    expr = re.sub(
+        r"\b([A-Za-z_]\w*)\b",
+        lambda m: ALIASES.get(canonicalize(m.group(1)), canonicalize(m.group(1))),
+        expr,
+    )
     return expr
 
 
-class _SeriesWrapper:
-    __array_priority__ = 1000
-
-    def __init__(self, data):
-        self.data = _to_series(data)
-
-    # --- comparison and boolean ops ---
-    def _binary(self, other, op):
-        other_val = getattr(other, "data", other)
-        other_val = _to_series(other_val)
-        a, b = _align_series(self.data, other_val)
-        res = op(a, b)
-        return _SeriesWrapper(res)
-
-    def __and__(self, other):
-        return self._binary(other, operator.and_)
-
-    def __rand__(self, other):
-        return self.__and__(other)
-
-    def __or__(self, other):
-        return self._binary(other, operator.or_)
-
-    def __ror__(self, other):
-        return self.__or__(other)
-
-    def __gt__(self, other):
-        return self._binary(other, operator.gt)
-
-    def __ge__(self, other):
-        return self._binary(other, operator.ge)
-
-    def __lt__(self, other):
-        return self._binary(other, operator.lt)
-
-    def __le__(self, other):
-        return self._binary(other, operator.le)
-
-    def __eq__(self, other):  # noqa: D401
-        return self._binary(other, operator.eq)
-
-    def __ne__(self, other):  # noqa: D401
-        return self._binary(other, operator.ne)
-
-    # --- arithmetic ops ---
-    def __add__(self, other):
-        return self._binary(other, operator.add)
-
-    def __radd__(self, other):
-        return _SeriesWrapper(other).__add__(self)
-
-    def __sub__(self, other):
-        return self._binary(other, operator.sub)
-
-    def __rsub__(self, other):
-        return _SeriesWrapper(other).__sub__(self)
-
-    def __mul__(self, other):
-        return self._binary(other, operator.mul)
-
-    def __rmul__(self, other):
-        return _SeriesWrapper(other).__mul__(self)
-
-    def __truediv__(self, other):
-        return self._binary(other, operator.truediv)
-
-    def __rtruediv__(self, other):
-        return _SeriesWrapper(other).__truediv__(self)
-
-    def __floordiv__(self, other):
-        return self._binary(other, operator.floordiv)
-
-    def __rfloordiv__(self, other):
-        return _SeriesWrapper(other).__floordiv__(self)
-
-    def __pow__(self, other):
-        return self._binary(other, operator.pow)
-
-    def __rpow__(self, other):
-        return _SeriesWrapper(other).__pow__(self)
-
-    def __neg__(self):
-        return _SeriesWrapper(-self.data)
-
-    def __pos__(self):
-        return self
-
-    def __invert__(self):
-        return _SeriesWrapper(~_to_series(self.data))
-
-    def __abs__(self):
-        return _SeriesWrapper(abs(self.data))
-
-    # --- attribute access ---
-    def __getattr__(self, name):
-        attr = getattr(self.data, name)
-        if callable(attr):
-
-            def wrapped(*args, **kwargs):
-                args = [getattr(a, "data", a) for a in args]
-                kwargs = {k: getattr(v, "data", v) for k, v in kwargs.items()}
-                res = attr(*args, **kwargs)
-                return _SeriesWrapper(res)
-
-            return wrapped
-        return _SeriesWrapper(attr)
-
-    def unwrap(self):
-        return _to_series(self.data)
-
-
-def _wrap_func(func):
-    def inner(*args, **kwargs):
-        args = [getattr(a, "data", a) for a in args]
-        kwargs = {k: getattr(v, "data", v) for k, v in kwargs.items()}
-        res = func(*args, **kwargs)
-        return _SeriesWrapper(res)
-
-    return inner
-
-
 def _eval_expr(df: pd.DataFrame, expr: str) -> pd.Series:
-    env = {name: _SeriesWrapper(df[name]) for name in df.columns}
+    env = build_env(df)
     env.update(
         {
-            "CROSSUP": lambda a, b: _cross_up(df, a, b),
-            "CROSSDOWN": lambda a, b: _cross_down(df, a, b),
-            "CROSSOVER": lambda a, level: _cross_over_level(df, a, level),
-            "CROSSUNDER": lambda a, level: _cross_under_level(df, a, level),
-            "abs": _wrap_func(abs),
-            "max": _wrap_func(np.maximum),
-            "min": _wrap_func(np.minimum),
-            "log": _wrap_func(np.log),
-            "exp": _wrap_func(np.exp),
-            "floor": _wrap_func(np.floor),
-            "ceil": _wrap_func(np.ceil),
+            "abs": np.abs,
+            "max": np.maximum,
+            "min": np.minimum,
+            "log": np.log,
+            "exp": np.exp,
+            "floor": np.floor,
+            "ceil": np.ceil,
         }
     )
     result = eval(expr, {"__builtins__": {}}, env)
-    if isinstance(result, _SeriesWrapper):
-        result = result.unwrap()
     result = _to_series(result)
     if not pd.api.types.is_bool_dtype(result):
         raise ValueError("Query expression must evaluate to a boolean mask")
@@ -196,46 +60,10 @@ def run_screener(
     stop_on_filter_error: bool = False,
     raise_on_error: bool = True,
 ) -> pd.DataFrame:
-    """Run the screener filters for a given date.
-
-    Parameters
-    ----------
-    df_ind : pd.DataFrame
-        Indicator data with at least ``symbol`` and ``date`` columns.
-    filters_df : pd.DataFrame
-        DataFrame describing the filter expressions.
-    date : datetime-like
-        The date to evaluate the filters on.
-    stop_on_filter_error : bool, optional
-        If ``True``, any filter referencing missing columns raises a
-        :class:`ValueError`. When ``False`` (default) such filters are skipped
-        with a warning.
-    raise_on_error : bool, optional
-        Controls behaviour when a filter's expression fails to evaluate.
-        When ``True`` (default) a :class:`RuntimeError` is raised
-        immediately.  When ``False`` the error is logged and a warning is
-        emitted, allowing processing to continue.
-
-    Returns
-    -------
-    pd.DataFrame
-        Resulting matches for each filter.
-    """
-    logger.debug(
-        "run_screener start - data rows: {rows_df}, "
-        "filter rows: {rows_filters}, date: {day}",
-        rows_df=len(df_ind) if isinstance(df_ind, pd.DataFrame) else "?",
-        rows_filters=len(filters_df) if isinstance(filters_df, pd.DataFrame) else "?",
-        day=date,
-    )
-
     if not isinstance(df_ind, pd.DataFrame):
-        logger.error("df_ind must be a DataFrame")
         raise TypeError("df_ind must be a DataFrame")
     if not isinstance(filters_df, pd.DataFrame):
-        logger.error("filters_df must be a DataFrame")
         raise TypeError("filters_df must be a DataFrame")
-
     if df_ind.empty:
         logger.error("df_ind is empty")
         raise ValueError("df_ind is empty")
@@ -292,7 +120,7 @@ def run_screener(
     sides = filters_df.get("Side")
     if sides is None:
         sides = [None] * len(filters_df)
-    valids = []
+    out_frames = []
     missing_cols_total: set[str] = set()
     for code, expr, grp, side in zip(
         filters_df["FilterCode"], filters_df["expr"], groups, sides
@@ -309,48 +137,32 @@ def run_screener(
                     "Filter skipped due to invalid Side", code=code, side=side
                 )
                 continue
-        sq = SafeQuery(expr)
-        if not sq.is_safe:
-            msg = f"Filter {code!r} unsafe expression: {sq.error}"
+        try:
+            mask = _eval_expr(d, expr)
+            mask = _to_series(mask).reindex(d.index)
+            filtered = d[mask]
+        except (KeyError, NameError) as err:
+            col = str(err).strip("'")
+            if col not in missing_cols_total:
+                logger.warning("missing_column:{}", col)
+                missing_cols_total.add(col)
+            logger.warning("skip filter: missing column {}", col, code=code)
+            if stop_on_filter_error:
+                raise ValueError(f"Filter {code!r} missing column {col}") from err
+            continue
+        except SyntaxError as err:
             if stop_on_filter_error:
                 logger.error(
-                    "Filter unsafe expression", code=code, expr=expr, reason=sq.error
+                    "Filter unsafe expression", code=code, expr=expr, reason=err
                 )
-                raise ValueError(msg)
+                raise ValueError(f"Filter {code!r} unsafe expression: {err}") from err
             logger.warning(
                 "Filter skipped due to unsafe expression",
                 code=code,
                 expr=expr,
-                reason=sq.error,
+                reason=err,
             )
             continue
-        missing_cols = sq.names.difference(d.columns)
-        if missing_cols:
-            msg = f"Filter {code!r} missing columns: {sorted(missing_cols)}"
-            if stop_on_filter_error:
-                logger.error(
-                    "Filter missing columns",
-                    code=code,
-                    missing=sorted(missing_cols),
-                )
-                raise ValueError(msg)
-            for col in sorted(missing_cols):
-                if col not in missing_cols_total:
-                    logger.warning("missing_column:{}", col)
-                    missing_cols_total.add(col)
-            missing = ", ".join(sorted(missing_cols))
-            logger.warning("skip filter: missing column {}", missing, code=code)
-            continue
-        valids.append((code, grp, side_norm, sq))
-    if missing_cols_total:
-        logger.info("missing_column_total: {}", len(missing_cols_total))
-    out_frames = []
-    for code, grp, side_norm, sq in valids:
-        try:
-            mask = _eval_expr(d, sq.expr)
-            mask = _to_series(mask)
-            mask = mask.reindex(d.index)
-            filtered = d[mask]
         except Exception as err:
             if raise_on_error:
                 raise RuntimeError(f"Filter {code!r} failed: {err}") from err
@@ -367,6 +179,8 @@ def run_screener(
             tmp["Side"] = side_norm
         tmp["Date"] = day
         out_frames.append(tmp)
+    if missing_cols_total:
+        logger.info("missing_column_total: {}", len(missing_cols_total))
     if not out_frames:
         logger.debug("run_screener end - no hits")
         return _empty_output()
