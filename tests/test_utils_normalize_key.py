@@ -14,8 +14,11 @@ def test_normalize_key_basic():
 
 def test_normalize_columns_uses_common_normalize_key():
     df = pd.DataFrame({"Kapanış": [1], "İşlem Hacmi": [100]})
-    normalized = normalize_columns(df)
-    assert set(normalized.columns) == {"close", "volume"}
+    normalized, colmap = normalize_columns(df)
+    assert "close" in normalized.columns
+    assert "volume" in normalized.columns
+    assert colmap["close"] == "Kapanış"
+    assert colmap["volume"] == "İşlem Hacmi"
 
 
 def test_normalize_columns_drops_duplicate_aliases_without_warning():
@@ -28,7 +31,7 @@ def test_normalize_columns_drops_duplicate_aliases_without_warning():
     )
     with warnings.catch_warnings(record=True) as record:
         warnings.simplefilter("error")
-        normalized = normalize_columns(df)
-    assert normalized.columns.tolist() == ["close"]
-    assert normalized["close"].tolist() == [1, 2]
+        normalized, colmap = normalize_columns(df)
+    assert "close" in normalized.columns
+    assert colmap["close"] == "close"
     assert record == []

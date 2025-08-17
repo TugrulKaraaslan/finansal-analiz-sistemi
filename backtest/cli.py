@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
+
 import click
 import pandas as pd
 from datetime import timedelta
@@ -27,6 +29,7 @@ from .screener import run_screener
 from .utils.names import set_name_normalization
 from .validator import dataset_summary, quality_warnings
 from .logging_utils import setup_logger, Timer
+from .filters_compile import compile_filters
 
 
 @click.group()
@@ -70,10 +73,17 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
             df, cfg.indicators.params, engine=cfg.indicators.engine
         )
     df_ind = generate_crossovers(df_ind)
-    logging.info("Filtre CSV okunuyor...")
+    logging.info("Filtre CSV derleniyor...")
+    src = Path(cfg.data.filters_csv)
     try:
+        if src.exists():
+            compile_filters(src, src.with_name("filters_compiled.csv"))
+            load_path = src.with_name("filters_compiled.csv")
+        else:
+            load_path = src
+        logging.info("Filtre CSV okunuyor...")
         with Timer("load_filters_csv"):
-            filters_df = load_filters_csv(cfg.data.filters_csv)
+            filters_df = load_filters_csv(load_path)
     except FileNotFoundError as exc:
         logging.error(str(exc))
         raise click.ClickException(str(exc))
