@@ -12,7 +12,7 @@ import pandas as pd
 from loguru import logger
 
 from backtest.utils import normalize_key
-from backtest.naming import normalize_columns as _normalize_columns
+from .columns import canonical_map, canonicalize
 from utils.paths import resolve_path
 
 
@@ -56,25 +56,42 @@ def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
 
 def normalize_columns(
     df: pd.DataFrame, price_schema: Optional[Dict[str, Iterable[str] | str]] = None
-) -> pd.DataFrame:
-    """Wrapper around :func:`backtest.naming.normalize_columns`.
+) -> tuple[pd.DataFrame, Dict[str, str]]:
+    """Add canonical column aliases to *df* and return mapping.
 
     Parameters
     ----------
     df : pandas.DataFrame
-        Input DataFrame.
+        Input DataFrame whose columns may contain Turkish characters or
+        different naming conventions.
     price_schema : dict, optional
-        Extra alias mappings where keys are canonical names and values are
-        alias strings or lists of strings.
+        Ignored parameter for backward compatibility.
 
     Returns
     -------
-    pandas.DataFrame
-        DataFrame with normalized column names.
+    tuple
+        ``(df, colmap)`` where ``colmap`` maps canonical names to original
+        column names.
     """
 
-    normed, _ = _normalize_columns(df, extra_aliases=price_schema)
-    return normed
+    colmap = canonical_map(df.columns)
+    if price_schema:
+        for canon, aliases in price_schema.items():
+            if isinstance(aliases, str):
+                aliases = [aliases]
+            canon_can = canonicalize(canon)
+            for al in aliases:
+                al_can = canonicalize(al)
+                for col in df.columns:
+                    if canonicalize(col) == al_can:
+                        colmap.setdefault(canon_can, col)
+                        if canon_can not in df.columns:
+                            df[canon_can] = df[col]
+                        break
+    for canon, orig in colmap.items():
+        if canon not in df.columns:
+            df[canon] = df[orig]
+    return df, colmap
 
 
 def validate_columns(df: pd.DataFrame, required: Iterable[str]) -> pd.DataFrame:
@@ -310,7 +327,7 @@ def read_excels_long(
                                 df = xls.parse(sheet_name=sheet, header=0)
                         if df is None or df.empty:
                             continue
-                        df = normalize_columns(df, price_schema=price_schema)
+                        df, _ = normalize_columns(df, price_schema=price_schema)
                         if "date" not in df.columns:
                             df.columns = [normalize_key(c) for c in df.columns]
                         if "date" not in df.columns:
@@ -379,7 +396,7 @@ def read_excels_long(
     if "close" in full.columns:
         full = full.dropna(subset=["close"])
 
-    full = normalize_columns(full)
+    full, _ = normalize_columns(full)
     validate_columns(full, ["date", "open", "high", "low", "close", "volume", "symbol"])
 
     if enable_cache and aggregated_cache:
