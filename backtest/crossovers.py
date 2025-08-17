@@ -1,29 +1,14 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
 import pandas as pd
 
 from backtest.naming import normalize_name
+from .cross import cross_up, cross_down, cross_over, cross_under
 
 logger = logging.getLogger(__name__)
-
-
-def _ensure_series(val: Union[pd.Series, float, int], index) -> pd.Series:
-    if isinstance(val, pd.Series):
-        return val
-    return pd.Series(val, index=index)
-
-
-def cross_up(a: pd.Series, b: Union[pd.Series, float, int]) -> pd.Series:
-    b_series = _ensure_series(b, a.index)
-    return (a.shift(1) <= b_series.shift(1)) & (a > b_series)
-
-
-def cross_down(a: pd.Series, b: Union[pd.Series, float, int]) -> pd.Series:
-    b_series = _ensure_series(b, a.index)
-    return (a.shift(1) >= b_series.shift(1)) & (a < b_series)
 
 
 SERIES_SERIES_CROSSOVERS: List[Tuple[str, str, str, str]] = [
@@ -51,15 +36,12 @@ def generate_crossovers(df: pd.DataFrame) -> pd.DataFrame:
         if a_c not in out.columns:
             logger.warning("skip crossover: missing column(s) %s", a_c)
             continue
-        val_series = _ensure_series(val, out.index)
-        out[up] = cross_up(out[a_c], val_series)
-        out[down] = cross_down(out[a_c], val_series)
+        out[up] = cross_over(out[a_c], val)
+        out[down] = cross_under(out[a_c], val)
     return out
 
 
 __all__ = [
-    "cross_up",
-    "cross_down",
     "generate_crossovers",
     "SERIES_SERIES_CROSSOVERS",
     "SERIES_VALUE_CROSSOVERS",
