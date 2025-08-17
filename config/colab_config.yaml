@@ -1,0 +1,37 @@
+project:
+  out_dir: "/content/finansal-analiz-sistemi/raporlar"
+  logs_dir: "/content/finansal-analiz-sistemi/loglar"
+  run_mode: "range"
+  holding_period: 1
+  transaction_cost: 0.0
+  stop_on_filter_error: false
+
+data:
+  excel_dir: "/content/finansal-analiz-sistemi/Veri"
+  filters_csv: "/content/finansal-analiz-sistemi/filters.csv"
+  enable_cache: false
+  cache_parquet_path: "/content/finansal-analiz-sistemi/cache"
+
+calendar:
+  tplus1_mode: "calendar"
+  holiday_csv: ""
+
+benchmark:
+  source: "excel"
+  excel_path: "/content/finansal-analiz-sistemi/Veri/Bist 100 Tarihsel Veriler1.xlsx"
+  excel_sheet: "BIST"
+  csv_path: ""
+  column_date: "date"
+  column_close: "close"
+
+report:
+  with_bist_ratio_summary: true
+  include_hit_ratio: true
+  excel_engine: "xlsxwriter"
+
+range:
+  start_date: "2022-01-03"
+  end_date: "2025-04-18"
+
+single:
+  date: "2025-03-07"
