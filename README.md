@@ -33,7 +33,7 @@ Benchmarkt kaynağı config'te şu şekilde tanımlanır:
 ```yaml
 benchmark:
   source: "excel"
-  excel_path: "/content/finansal-analiz-sistemi/Veri/Bist 100 Tarihsel Veriler1.xlsx"
+  excel_path: "/content/finansal-analiz-sistemi/Veri/BIST.xlsx"
   excel_sheet: "BIST"
   column_date: "date"
   column_close: "close"
