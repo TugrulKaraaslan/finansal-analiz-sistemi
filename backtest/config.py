@@ -76,6 +76,7 @@ class ReportCfg(BaseModel):
 
 
 class RootCfg(BaseModel):
+    preflight: bool = True
     project: ProjectCfg
     data: DataCfg
     calendar: CalendarCfg = Field(default_factory=CalendarCfg)

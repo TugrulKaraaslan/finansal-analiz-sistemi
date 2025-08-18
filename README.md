@@ -57,6 +57,24 @@ python -m backtest.cli scan-range --config config/colab_config.yaml --start 2022
 
 > `--config` **zorunludur**. Pozisyonel argüman **DEĞİLDİR**.
 
+## Test ve Preflight Kontrolü
+
+Kod değişikliklerinden sonra hızlı bir kontrol için aşağıdaki testi çalıştır:
+
+```bash
+pytest tests/smoke/test_loader_and_preflight.py -q
+```
+
+Preflight doğrulamasını atlamak için CLI'da `--no-preflight` bayrağını veya
+config dosyasında `preflight: false` ayarını kullanabilirsin:
+
+```bash
+python -m backtest.cli scan-range \
+  --config config_scan.yml \
+  --no-preflight \
+  --start 2024-01-02 --end 2024-01-05
+```
+
 ## Rapor ve Log Dizini
 
 Komutlar çalıştığında çıktı dosyaları `raporlar/` klasörüne, loglar ise her çalıştırma için ayrı bir alt klasör oluşturularak `loglar/` içine yazılır.
