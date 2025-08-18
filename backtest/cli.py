@@ -184,11 +184,11 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
         cfg_dict = (
             bm_cfg.model_dump()
             if hasattr(bm_cfg, "model_dump")
-            else bm_cfg.dict()
-            if hasattr(bm_cfg, "dict")
-            else vars(bm_cfg)
-            if hasattr(bm_cfg, "__dict__")
-            else bm_cfg
+            else (
+                bm_cfg.dict()
+                if hasattr(bm_cfg, "dict")
+                else vars(bm_cfg) if hasattr(bm_cfg, "__dict__") else bm_cfg
+            )
         )
         try:
             bench_df = BenchmarkLoader(cfg_dict).load()
