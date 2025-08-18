@@ -6,20 +6,24 @@ from backtest import cli
 
 
 def test_duplicate_columns_collapsed():
-    df = pd.DataFrame({
-        "BBM_20_2.0": [1, 2, 3],
-        "BBM_20_2.1": [1, 2, 3],
-    })
+    df = pd.DataFrame(
+        {
+            "BBM_20_2.0": [1, 2, 3],
+            "BBM_20_2.1": [1, 2, 3],
+        }
+    )
     out = canonicalize_columns(df)
     assert "BBM_20_2" in out.columns
     assert list(out.columns).count("BBM_20_2") == 1
 
 
 def test_alias_columns():
-    df = pd.DataFrame({
-        "CCI_20_0": [1, 2],
-        "PSARl_0": [3, 4],
-    })
+    df = pd.DataFrame(
+        {
+            "CCI_20_0": [1, 2],
+            "PSARl_0": [3, 4],
+        }
+    )
     out = canonicalize_columns(df)
     assert "CCI_20_0.015" in out.columns
     assert "PSARl_0.02_0.2" in out.columns
@@ -60,10 +64,12 @@ data:\n  excel_dir: {excel_dir}\n  filters_csv: {filters}\n"""
 
     def _pf(*a, **k):
         called["flag"] = True
+
         class Dummy:
             warnings = ["Eksik dosyalar: ..."]
             errors = []
             suggestions = []
+
         return Dummy()
 
     monkeypatch.setattr(cli, "preflight", _pf)
