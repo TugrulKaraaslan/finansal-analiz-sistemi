@@ -1,3 +1,4 @@
+preflight: false
 project:
   out_dir: raporlar
   run_mode: range

@@ -254,7 +254,10 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
 )
 @click.option("--csv-also/--no-csv", default=True, help="CSV de yaz")
 @click.option(
-    "--no-preflight", is_flag=True, default=False, help="Preflight kontrolünü atla"
+    "--no-preflight",
+    is_flag=True,
+    default=False,
+    help="Preflight kontrolünü atla (veya config'te preflight: false)",
 )
 @click.option(
     "--case-insensitive",
@@ -292,7 +295,8 @@ def scan_range(
     cfg.project.run_mode = "range"
     if case_insensitive:
         cfg.data.case_sensitive = False
-    if not no_preflight and cfg.project.start_date and cfg.project.end_date:
+    skip_preflight = no_preflight or not getattr(cfg, "preflight", True)
+    if not skip_preflight and cfg.project.start_date and cfg.project.end_date:
         start = pd.to_datetime(cfg.project.start_date).date()
         end = pd.to_datetime(cfg.project.end_date).date()
         days = [start + timedelta(days=i) for i in range((end - start).days + 1)]
@@ -322,7 +326,10 @@ def scan_range(
 @click.option("--holding-period", default=None, type=int)
 @click.option("--transaction-cost", default=None, type=float)
 @click.option(
-    "--no-preflight", is_flag=True, default=False, help="Preflight kontrolünü atla"
+    "--no-preflight",
+    is_flag=True,
+    default=False,
+    help="Preflight kontrolünü atla (veya config'te preflight: false)",
 )
 @click.option(
     "--case-insensitive",
@@ -352,7 +359,8 @@ def scan_day(
         cfg.project.transaction_cost = transaction_cost
     if case_insensitive:
         cfg.data.case_sensitive = False
-    if not no_preflight:
+    skip_preflight = no_preflight or not getattr(cfg, "preflight", True)
+    if not skip_preflight:
         d = pd.to_datetime(date_str).date()
         rep = preflight(
             cfg.data.excel_dir,

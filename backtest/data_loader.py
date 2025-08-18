@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import importlib.util
+import logging
 import os
+import re
 import time
 import warnings
 from concurrent.futures import ThreadPoolExecutor
@@ -120,6 +122,62 @@ def validate_columns(df: pd.DataFrame, required: Iterable[str]) -> pd.DataFrame:
     return df
 
 
+def canonicalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Normalize DataFrame column names and handle duplicates.
+
+    The function removes trailing numeric copy suffixes (``.1`` etc.), applies
+    alias mappings for known indicator names and drops or renames duplicate
+    columns. All transformations are logged at ``INFO`` level.
+    """
+
+    rename_map: Dict[str, str] = {}
+    for col in df.columns:
+        new = re.sub(r"\.\d+$", "", str(col))
+        new = re.sub(r"[^0-9A-Za-z_.]+", "_", new).strip("_")
+        new = re.sub(r"__+", "_", new)
+        upper = new.upper()
+        if upper == "CCI_20_0":
+            new = "CCI_20_0.015"
+        elif upper == "PSARL_0":
+            new = "PSARl_0.02_0.2"
+        elif upper.startswith("BBM_20_2"):
+            new = "BBM_20_2"
+        elif upper.startswith("BBU_20_2"):
+            new = "BBU_20_2"
+        rename_map[col] = new
+        if new != col:
+            logging.info("Column '%s' renamed to '%s'", col, new)
+
+    df = df.rename(columns=rename_map)
+
+    seen_series: Dict[str, pd.Series] = {}
+    i = 0
+    while i < df.shape[1]:
+        col = df.columns[i]
+        if col not in seen_series:
+            seen_series[col] = df.iloc[:, i]
+            i += 1
+            continue
+        first_series = seen_series[col]
+        curr_series = df.iloc[:, i]
+        if first_series.equals(curr_series):
+            logging.info("Dropping duplicate column '%s'", col)
+            df = df.iloc[:, [j for j in range(df.shape[1]) if j != i]]
+            continue
+        new_name = f"{col}_alt"
+        j = 1
+        while new_name in df.columns:
+            j += 1
+            new_name = f"{col}_alt{j}"
+        logging.info(
+            "Column '%s' conflicts with existing; renamed to '%s'", col, new_name
+        )
+        df = df.rename(columns={df.columns[i]: new_name})
+        seen_series[new_name] = df.iloc[:, i]
+        i += 1
+    return df
+
+
 def apply_corporate_actions(
     df: pd.DataFrame, csv_path: Optional[Union[str, Path]] = None
 ) -> pd.DataFrame:
@@ -179,8 +237,6 @@ def apply_corporate_actions(
 
 def read_excels_long(
     cfg_or_path: Union[str, Path, Any],
-    dayfirst: bool = False,
-    date_format: Optional[str] = "%Y-%m-%d",
     engine: str = "auto",
     verbose: bool = False,
 ) -> pd.DataFrame:
@@ -264,24 +320,6 @@ def read_excels_long(
     else:
         engine_to_use = engine
 
-    col_aliases: Dict[str, List[str]] = {
-        "date": ["date"],
-        "open": ["open"],
-        "high": ["high"],
-        "low": ["low"],
-        "close": ["close"],
-        "volume": ["volume"],
-    }
-    if price_schema:
-        for k, v in price_schema.items():
-            if isinstance(v, str):
-                col_aliases.setdefault(k, []).append(v)
-            else:
-                col_aliases.setdefault(k, []).extend(list(v))
-    usecols = list({c for cols in col_aliases.values() for c in cols})
-    usecols_set = set(usecols)
-    usecols_filter = (lambda c: c in usecols_set) if usecols_set else None
-
     def _process_file(fpath: Path) -> pd.DataFrame:
         cache_file = None
         if enable_cache and cache_dir:
@@ -313,18 +351,10 @@ def read_excels_long(
                             df = xls.parse(
                                 sheet_name=sheet,
                                 header=0,
-                                usecols=usecols_filter,
                                 dtype_backend="numpy_nullable",
                             )
                         except TypeError:
-                            try:
-                                df = xls.parse(
-                                    sheet_name=sheet,
-                                    header=0,
-                                    usecols=usecols_filter,
-                                )
-                            except TypeError:
-                                df = xls.parse(sheet_name=sheet, header=0)
+                            df = xls.parse(sheet_name=sheet, header=0)
                         if df is None or df.empty:
                             continue
                         df, _ = normalize_columns(df, price_schema=price_schema)
@@ -336,12 +366,12 @@ def read_excels_long(
                                     "[SKIP] {}:{} 'date' bulunamadı.", fpath, sheet
                                 )
                             continue
-                        parse_kwargs: Dict[str, Any] = {"errors": "coerce"}
-                        if date_format:
-                            parse_kwargs["format"] = date_format
-                        else:
-                            parse_kwargs["dayfirst"] = dayfirst
-                        df["date"] = pd.to_datetime(df["date"], **parse_kwargs)
+                        df["date"] = pd.to_datetime(
+                            df["date"].astype(str).str[:10],
+                            format="%Y-%m-%d",
+                            errors="coerce",
+                            dayfirst=False,
+                        )
                         df = df.dropna(subset=["date"])
                         keep = [
                             c
@@ -397,6 +427,7 @@ def read_excels_long(
         full = full.dropna(subset=["close"])
 
     full, _ = normalize_columns(full)
+    full = canonicalize_columns(full)
     validate_columns(full, ["date", "open", "high", "low", "close", "volume", "symbol"])
 
     if enable_cache and aggregated_cache:
@@ -425,4 +456,5 @@ __all__ = [
     "normalize_columns",
     "apply_corporate_actions",
     "validate_columns",
+    "canonicalize_columns",
 ]
