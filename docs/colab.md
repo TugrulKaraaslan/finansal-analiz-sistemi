@@ -46,13 +46,13 @@ calendar:
   tplus1_mode: "calendar"
   holiday_csv: ""
 
-  benchmark:
-    source: "none"
-    excel_path: ""
-    excel_sheet: "BIST"
-    csv_path: ""
-    column_date: "date"
-    column_close: "close"
+    benchmark:
+      source: "excel"
+      excel_path: "/content/finansal-analiz-sistemi/Veri/BIST.xlsx"
+      excel_sheet: "BIST"
+      csv_path: ""
+      column_date: "date"
+      column_close: "close"
 
 report:
   with_bist_ratio_summary: true

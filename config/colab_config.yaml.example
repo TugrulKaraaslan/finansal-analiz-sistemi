@@ -16,13 +16,13 @@ calendar:
   tplus1_mode: "calendar"
   holiday_csv: ""
 
-  benchmark:
-    source: "none"       # none | excel | csv
-    excel_path: ""       # source=excel ise: /content/.../Veri/Bist 100 Tarihsel Veriler1.xlsx
-    excel_sheet: "BIST"  # 1. sheet adı
-    csv_path: ""         # source=csv ise yol
-    column_date: "date"  # tarih kolonu
-    column_close: "close"# kapanış kolonu
+    benchmark:
+      source: "none"       # none | excel | csv
+      excel_path: ""       # source=excel ise: /content/.../Veri/BIST.xlsx
+      excel_sheet: "BIST"  # 1. sheet adı
+      csv_path: ""         # source=csv ise yol
+      column_date: "date"  # tarih kolonu
+      column_close: "close"# kapanış kolonu
 
 report:
   with_bist_ratio_summary: true
