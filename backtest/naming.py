@@ -32,13 +32,42 @@ _ALIAS_PAIRS: Dict[str, List[str]] = {
     "ema_10": ["EMA10", "EMA_10", "ema10"],
     "sma_50": ["SMA50", "SMA_50", "sma50"],
     "rsi_14": ["RSI14", "RSI_14", "rsi14"],
-    "adx_14": ["ADX14", "ADX_14"],
-    "dmp_14": ["positivedirectionalindicator_14"],
-    "dmn_14": ["negativedirectionalindicator_14"],
-    "stoch_k": ["STOCHK", "STOCH_k", "stochK", "stoch %k", "stoch%k"],
-    "stoch_d": ["STOCHD", "stochD", "stoch %d", "stoch%d"],
-    "stochrsi_k": ["STOCHRSIk", "STOCHRSI_k", "stochrsi %k", "stochrsi%k"],
-    "stochrsi_d": ["STOCHRSId", "STOCHRSI_d", "stochrsi %d", "stochrsi%d"],
+    "adx_14": ["ADX14", "ADX_14", "ADX_14.1"],
+    "dmp_14": ["positivedirectionalindicator_14", "DMP_14.1"],
+    "dmn_14": ["negativedirectionalindicator_14", "DMN_14.1"],
+    "stoch_k": [
+        "STOCHK",
+        "STOCH_k",
+        "stochK",
+        "stoch %k",
+        "stoch%k",
+        "STOCHk_14_3_3",
+        "STOCHk_14_3_3.1",
+    ],
+    "stoch_d": [
+        "STOCHD",
+        "stochD",
+        "stoch %d",
+        "stoch%d",
+        "STOCHd_14_3_3",
+        "STOCHd_14_3_3.1",
+    ],
+    "stochrsi_k": [
+        "STOCHRSIk",
+        "STOCHRSI_k",
+        "stochrsi %k",
+        "stochrsi%k",
+        "STOCHRSIk_14_14_3_3",
+        "STOCHRSIk_14_14_3_3.1",
+    ],
+    "stochrsi_d": [
+        "STOCHRSId",
+        "STOCHRSI_d",
+        "stochrsi %d",
+        "stochrsi%d",
+        "STOCHRSId_14_14_3_3",
+        "STOCHRSId_14_14_3_3.1",
+    ],
     "macd_line": ["MACD", "MACD_12_26_9", "MACD 12,26,9", "macd12269", "macd 12 26 9"],
     "macd_signal": [
         "MACDS",
@@ -62,6 +91,25 @@ _ALIAS_PAIRS: Dict[str, List[str]] = {
         "bb_l",
         "bb_lower",
     ],
+    # extended mappings for new dataset columns
+    "weighted_avg": ["agirlikli_ortalama"],
+    "quantity": ["miktar"],
+    # Bollinger band variants with decimal parameters
+    "bbm_20_2": ["BBM_20_2.0", "BBM_20_2.0.1", "BBM_20_2.0.2"],
+    "bbu_20_2": ["BBU_20_2.0", "BBU_20_2.0.1"],
+    # MACD duplicates
+    "macd_12_26_9": ["MACD_12_26_9.1"],
+    "macds_12_26_9": ["MACDs_12_26_9.1"],
+    # Ichimoku components
+    "ichimoku_conversionline": ["ITS_9", "ITS_9.1"],
+    "ichimoku_baseline": ["IKS_26", "IKS_26.1"],
+    "ichimoku_leadingspana": ["ISA_9", "ISA_9.1"],
+    "ichimoku_leadingspanb": ["ISB_26", "ISB_26.1"],
+    # ADX and directionals with duplicate suffixes
+    "aroonu_14": ["AROONU_14.1"],
+    "aroond_14": ["AROOND_14.1"],
+    # weekly change column
+    "change_1w_percent": ["change_1_w_percent"],
 }
 
 
@@ -101,7 +149,7 @@ _CANONICAL_PATTERNS = [
     re.compile(r"^atr_\d+$"),
     re.compile(r"^bb[uml]_\d+_\d+$"),
     re.compile(r"^cci_\d+_[0-9_]+$"),
-    re.compile(r"^change_\d+[hdw]_percent$"),
+    re.compile(r"^change_\d+_[hdw]_percent$"),
     re.compile(r"^classicpivots_\d+[hd]_p$"),
     re.compile(r"^cmf_\d+$"),
     re.compile(r"^dcm_\d+_\d+$"),

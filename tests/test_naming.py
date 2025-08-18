@@ -12,6 +12,10 @@ def test_alias_normalization_basic():
         "EMA20": "ema_20",
         "CLOSE": "close",
         "RSI14": "rsi_14",
+        "ITS_9": "ichimoku_conversionline",
+        "STOCHk_14_3_3.1": "stoch_k",
+        "MACD_12_26_9.1": "macd_12_26_9",
+        "change_1_w_percent": "change_1w_percent",
     }
     for raw, want in pairs.items():
         assert normalize_name(raw) == want
