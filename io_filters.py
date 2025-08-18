@@ -15,6 +15,20 @@ from utils.paths import resolve_path
 REQUIRED_COLUMNS = {"FilterCode", "PythonQuery"}
 
 
+def read_filters_smart(path: str | Path) -> pd.DataFrame:
+    """Read ``filters.csv`` with strict delimiter but allow fallback detection.
+
+    Primarily attempts to read using semicolon delimiter and UTF-8 encoding. If
+    that fails (e.g., old files using commas), a second attempt with delimiter
+    inference is made using the Python engine.
+    """
+
+    try:
+        return pd.read_csv(path, sep=";", encoding="utf-8")
+    except Exception:
+        return pd.read_csv(path, sep=None, engine="python", encoding="utf-8")
+
+
 def load_filters_csv(path: str | Path) -> pd.DataFrame:
     """Load filters from CSV with validation and basic normalization.
 
@@ -38,7 +52,7 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
     if not p.exists():
         raise FileNotFoundError(f"Filters CSV bulunamadı: {p}")
     try:
-        df = pd.read_csv(p, encoding="utf-8", sep=None, engine="python")
+        df = read_filters_smart(p)
     except Exception as exc:
         raise RuntimeError(f"Filters CSV parse edilemedi: {p}") from exc
 
@@ -60,4 +74,4 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
     return df
 
 
-__all__ = ["load_filters_csv"]
+__all__ = ["load_filters_csv", "read_filters_smart"]
