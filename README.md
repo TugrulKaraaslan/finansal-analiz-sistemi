@@ -10,6 +10,12 @@ pip install -r requirements.txt
 python -m backtest.cli --help
 ```
 
+## Testleri Çalıştırma
+
+```bash
+pytest -q
+```
+
 ## Veri ve Filtre Dosyaları
 
 * **Excel klasörü**: `Veri/` (proje kökünde)
