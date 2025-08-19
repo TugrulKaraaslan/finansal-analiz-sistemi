@@ -24,7 +24,7 @@ def test_scan_range_help_shows_options() -> None:
         env=env,
     )
     assert "--report-alias" in result.stdout
-    assert "--filters-path" in result.stdout
+    assert "--filters-csv" in result.stdout
 
 
 def test_scan_range_dry_run(tmp_path: Path) -> None:
