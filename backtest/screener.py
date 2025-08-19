@@ -3,54 +3,22 @@ from __future__ import annotations
 import re
 import warnings
 
-import numpy as np
 import pandas as pd
 from loguru import logger
 
-from backtest.columns import canonical_map, canonicalize, ALIASES
-from .eval_env import build_env
-
-
-def _to_series(x):
-    import pandas as pd
-
-    if isinstance(x, pd.DataFrame):
-        if x.shape[1] == 1:
-            return x.iloc[:, 0]
-        return x.any(axis=1)
-    return x
+from backtest.columns import canonical_map
+from .expr import evaluate
 
 
 def _to_pandas_ops(expr: str) -> str:
     expr = re.sub(r"\bAND\b", "&", expr, flags=re.I)
     expr = re.sub(r"\bOR\b", "|", expr, flags=re.I)
     expr = re.sub(r"\bNOT\b", "~", expr, flags=re.I)
-    expr = re.sub(
-        r"\b([A-Za-z_]\w*)\b",
-        lambda m: ALIASES.get(canonicalize(m.group(1)), canonicalize(m.group(1))),
-        expr,
-    )
     return expr
 
 
 def _eval_expr(df: pd.DataFrame, expr: str) -> pd.Series:
-    env = build_env(df)
-    env.update(
-        {
-            "abs": np.abs,
-            "max": np.maximum,
-            "min": np.minimum,
-            "log": np.log,
-            "exp": np.exp,
-            "floor": np.floor,
-            "ceil": np.ceil,
-        }
-    )
-    result = eval(expr, {"__builtins__": {}}, env)
-    result = _to_series(result)
-    if not pd.api.types.is_bool_dtype(result):
-        raise ValueError("Query expression must evaluate to a boolean mask")
-    return result
+    return evaluate(df, expr)
 
 
 def run_screener(
@@ -139,7 +107,7 @@ def run_screener(
                 continue
         try:
             mask = _eval_expr(d, expr)
-            mask = _to_series(mask).reindex(d.index)
+            mask = mask.reindex(d.index)
             filtered = d[mask]
         except (KeyError, NameError) as err:
             col = str(err).strip("'")
