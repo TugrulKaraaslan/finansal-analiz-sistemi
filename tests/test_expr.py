@@ -36,4 +36,3 @@ def test_intraday_column_skipped(caplog):
     mask = evaluate(df, "change_1h_percent > 0")
     assert mask.tolist() == [True, True, True]
     assert "intraday filtre çıkarıldı" in caplog.text
-
