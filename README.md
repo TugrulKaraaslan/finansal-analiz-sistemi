@@ -63,6 +63,8 @@ Kod değişikliklerinden sonra hızlı bir kontrol için aşağıdaki testi çal
 
 ```bash
 pytest tests/smoke/test_loader_and_preflight.py -q
+pytest tests/e2e/test_scan_range.py -q
+pytest tests/smoke/test_cli_entrypoints.py -q
 ```
 
 Preflight doğrulamasını atlamak için CLI'da `--no-preflight` bayrağını veya
@@ -85,6 +87,9 @@ python -m backtest.cli scan-range --config config_scan.yml \
   --filters-path config/filters.csv \
   --reports-dir raporlar/
 ```
+
+Örnek tarama çok-gün bir Excel üzerinde çalışır, isteğe bağlı olarak preflight
+kontrolü atlanabilir ve `alias_uyumsuzluklar.csv` dosyasına alias raporu yazılır.
 
 ## Rapor ve Log Dizini
 
