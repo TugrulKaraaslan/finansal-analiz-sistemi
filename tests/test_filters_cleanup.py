@@ -69,22 +69,10 @@ def test_intraday_cleanup(sample_filters_csv):
 
 def test_alias_conversion(sample_filters_csv):
     df_clean, _ = clean_filters(sample_filters_csv)
-    assert (
-        df_clean.loc[df_clean["id"] == 1, "expr"].iloc[0]
-        == "CCI_20_0.015 > 0"
-    )
-    assert (
-        df_clean.loc[df_clean["id"] == 2, "expr"].iloc[0]
-        == "PSARl_0.02_0.2 < close"
-    )
-    assert (
-        df_clean.loc[df_clean["id"] == 3, "expr"].iloc[0]
-        == "BBM_20_2 CROSSUP close"
-    )
-    assert (
-        df_clean.loc[df_clean["id"] == 4, "expr"].iloc[0]
-        == "BBU_20_2 > BBM_20_2"
-    )
+    assert df_clean.loc[df_clean["id"] == 1, "expr"].iloc[0] == "CCI_20_0.015 > 0"
+    assert df_clean.loc[df_clean["id"] == 2, "expr"].iloc[0] == "PSARl_0.02_0.2 < close"
+    assert df_clean.loc[df_clean["id"] == 3, "expr"].iloc[0] == "BBM_20_2 CROSSUP close"
+    assert df_clean.loc[df_clean["id"] == 4, "expr"].iloc[0] == "BBU_20_2 > BBM_20_2"
 
 
 def test_reporting(sample_filters_csv):
@@ -121,4 +109,3 @@ def test_cli_reports(tmp_path, monkeypatch, sample_filters_csv):
     assert result.exit_code == 0
     assert (tmp_path / "alias_uyumsuzluklar.csv").exists()
     assert (tmp_path / "filters_intraday_disabled.csv").exists()
-

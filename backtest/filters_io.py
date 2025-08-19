@@ -32,4 +32,3 @@ def save_csv(df: pd.DataFrame, path: str) -> None:
 
 
 __all__ = ["load_filters", "save_csv"]
-

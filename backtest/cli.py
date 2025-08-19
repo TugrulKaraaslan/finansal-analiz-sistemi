@@ -311,9 +311,7 @@ def scan_range(
         save_csv(report_df, reports_dir_path / "alias_uyumsuzluklar.csv")
         intraday_df = report_df[report_df["status"] == "intraday_removed"]
         if not intraday_df.empty:
-            save_csv(
-                intraday_df, reports_dir_path / "filters_intraday_disabled.csv"
-            )
+            save_csv(intraday_df, reports_dir_path / "filters_intraday_disabled.csv")
         aliased = (report_df["status"] == "aliased").sum()
         removed = (report_df["status"] == "intraday_removed").sum()
         click.echo(
