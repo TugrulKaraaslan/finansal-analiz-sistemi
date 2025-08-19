@@ -75,6 +75,17 @@ python -m backtest.cli scan-range \
   --start 2024-01-02 --end 2024-01-05
 ```
 
+## Filtre Alias Raporu
+
+Filtre dosyasını temizlemek ve alias uyumsuzluklarını raporlamak için yeni bayraklar kullanılır:
+
+```bash
+python -m backtest.cli scan-range --config config_scan.yml \
+  --no-preflight --report-alias \
+  --filters-path config/filters.csv \
+  --reports-dir raporlar/
+```
+
 ## Rapor ve Log Dizini
 
 Komutlar çalıştığında çıktı dosyaları `raporlar/` klasörüne, loglar ise her çalıştırma için ayrı bir alt klasör oluşturularak `loglar/` içine yazılır.
