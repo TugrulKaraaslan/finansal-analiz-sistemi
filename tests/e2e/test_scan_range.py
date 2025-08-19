@@ -1,12 +1,18 @@
 from __future__ import annotations
 
-import pandas as pd
-from click.testing import CliRunner
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
-from backtest import cli as bt_cli
-from tests._utils.synth_data import make_price_frame
+import pandas as pd
+from click.testing import CliRunner
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))
+
+from backtest import cli as bt_cli  # noqa: E402
+from tests._utils.synth_data import make_price_frame  # noqa: E402
 
 
 def test_scan_range_creates_alias_report(tmp_path: Path) -> None:

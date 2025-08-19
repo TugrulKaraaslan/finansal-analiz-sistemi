@@ -9,8 +9,13 @@ from unittest.mock import patch
 
 import pandas as pd
 from click.testing import CliRunner
-from tests._utils.synth_data import make_price_frame
-from backtest import cli as bt_cli
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))
+
+from tests._utils.synth_data import make_price_frame  # noqa: E402
+from backtest import cli as bt_cli  # noqa: E402
 
 
 def test_scan_range_help_shows_options() -> None:
