@@ -129,7 +129,7 @@ def test_run_screener_raises_on_filter_error_default():
     filters = pd.DataFrame(
         {
             "FilterCode": ["BAD"],
-            "PythonQuery": ["1/0 > 0"],
+            "PythonQuery": ["CROSSUP(close, 'a')"],
         }
     )
     with pytest.raises(RuntimeError):
@@ -151,7 +151,7 @@ def test_run_screener_warns_on_filter_error_disabled():
     filters = pd.DataFrame(
         {
             "FilterCode": ["GOOD", "BAD"],
-            "PythonQuery": ["close > 0", "1/0 > 0"],
+            "PythonQuery": ["close > 0", "CROSSUP(close, 'a')"],
         }
     )
     with pytest.warns(UserWarning) as w:
