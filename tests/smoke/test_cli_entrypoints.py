@@ -87,4 +87,3 @@ def test_scan_range_dry_run(tmp_path: Path) -> None:
         timeout=10,
     )
     assert result.returncode == 0
-
