@@ -240,7 +240,13 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
 
 
 @cli.command("scan-range")
-@click.option("--config", "config_path", required=True, help="YAML config yolu")
+@click.option(
+    "--config",
+    "config_path",
+    default="config_scan.yml",
+    show_default=True,
+    help="YAML config yolu (CLI argümanı > varsayılan). Mutlak veya göreli yol",
+)
 @click.option("--start", "start_date", required=False, default=None, help="YYYY-MM-DD")
 @click.option("--end", "end_date", required=False, default=None, help="YYYY-MM-DD")
 @click.option("--holding-period", default=None, type=int)
@@ -267,7 +273,15 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     default=False,
     help="Dosya adlarında küçük/büyük harf farkını yok say",
 )
-@click.option("--filters-path", default="filters.csv", help="Filters CSV path")
+@click.option(
+    "--filters-csv",
+    "filters_csv",
+    default=None,
+    help=(
+        "Filters CSV yolu. Öncelik: CLI argümanı > YAML config > varsayılan 'filters.csv'. "
+        "Mutlak veya göreli yol"
+    ),
+)
 @click.option(
     "--reports-dir",
     default="raporlar/",
@@ -291,18 +305,19 @@ def scan_range(
     *,
     no_preflight=False,
     case_insensitive=False,
-    filters_path="filters.csv",
+    filters_csv=None,
     reports_dir="raporlar/",
     report_alias=False,
 ):
     set_name_normalization(name_normalization)
     try:
-        cfg = load_config(config_path)
+        cfg_path = Path(config_path).expanduser().resolve()
+        cfg = load_config(cfg_path)
     except Exception as exc:  # kullanıcı dostu mesaj
         logging.error(str(exc))
         raise click.ClickException(str(exc))
-    if filters_path:
-        cfg.data.filters_csv = filters_path
+    fc = filters_csv or getattr(cfg.data, "filters_csv", None) or "filters.csv"
+    cfg.data.filters_csv = str(Path(fc).expanduser().resolve())
     if report_alias:
         filters_df = load_filters(cfg.data.filters_csv)
         df_clean, report_df = clean_filters(filters_df)
@@ -357,10 +372,25 @@ def scan_range(
 
 
 @cli.command("scan-day")
-@click.option("--config", "config_path", required=True)
+@click.option(
+    "--config",
+    "config_path",
+    default="config_scan.yml",
+    show_default=True,
+    help="YAML config yolu (CLI argümanı > varsayılan). Mutlak veya göreli yol",
+)
 @click.option("--date", "date_str", required=True, help="YYYY-MM-DD")
 @click.option("--holding-period", default=None, type=int)
 @click.option("--transaction-cost", default=None, type=float)
+@click.option(
+    "--filters-csv",
+    "filters_csv",
+    default=None,
+    help=(
+        "Filters CSV yolu. Öncelik: CLI argümanı > YAML config > varsayılan 'filters.csv'. "
+        "Mutlak veya göreli yol"
+    ),
+)
 @click.option(
     "--no-preflight",
     is_flag=True,
@@ -379,14 +409,18 @@ def scan_day(
     holding_period,
     transaction_cost,
     *,
+    filters_csv=None,
     no_preflight=False,
     case_insensitive=False,
 ):
     try:
-        cfg = load_config(config_path)
+        cfg_path = Path(config_path).expanduser().resolve()
+        cfg = load_config(cfg_path)
     except Exception as exc:  # kullanıcı dostu mesaj
         logging.error(str(exc))
         raise click.ClickException(str(exc))
+    fc = filters_csv or getattr(cfg.data, "filters_csv", None) or "filters.csv"
+    cfg.data.filters_csv = str(Path(fc).expanduser().resolve())
     cfg.project.single_date = date_str
     cfg.project.run_mode = "single"
     if holding_period is not None:

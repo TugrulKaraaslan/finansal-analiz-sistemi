@@ -100,7 +100,7 @@ report:
                 str(cfg_path),
                 "--no-preflight",
                 "--report-alias",
-                "--filters-path",
+                "--filters-csv",
                 str(filters_csv),
                 "--reports-dir",
                 str(tmp_path),
