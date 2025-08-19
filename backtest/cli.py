@@ -30,6 +30,8 @@ from .utils.names import set_name_normalization
 from .validator import dataset_summary, quality_warnings
 from .logging_utils import setup_logger, Timer
 from .filters_compile import compile_filters
+from .filters_cleanup import clean_filters
+from .filters_io import load_filters, save_csv
 
 
 @click.group()
@@ -265,6 +267,18 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     default=False,
     help="Dosya adlarında küçük/büyük harf farkını yok say",
 )
+@click.option("--filters-path", default="filters.csv", help="Filters CSV path")
+@click.option(
+    "--reports-dir",
+    default="raporlar/",
+    help="Directory for generated reports",
+)
+@click.option(
+    "--report-alias",
+    is_flag=True,
+    default=False,
+    help="Generate alias mismatch report",
+)
 def scan_range(
     config_path,
     start_date,
@@ -277,6 +291,9 @@ def scan_range(
     *,
     no_preflight=False,
     case_insensitive=False,
+    filters_path="filters.csv",
+    reports_dir="raporlar/",
+    report_alias=False,
 ):
     set_name_normalization(name_normalization)
     try:
@@ -284,6 +301,27 @@ def scan_range(
     except Exception as exc:  # kullanıcı dostu mesaj
         logging.error(str(exc))
         raise click.ClickException(str(exc))
+    if filters_path:
+        cfg.data.filters_csv = filters_path
+    if report_alias:
+        filters_df = load_filters(cfg.data.filters_csv)
+        df_clean, report_df = clean_filters(filters_df)
+        reports_dir_path = Path(reports_dir)
+        reports_dir_path.mkdir(parents=True, exist_ok=True)
+        save_csv(report_df, reports_dir_path / "alias_uyumsuzluklar.csv")
+        intraday_df = report_df[report_df["status"] == "intraday_removed"]
+        if not intraday_df.empty:
+            save_csv(
+                intraday_df, reports_dir_path / "filters_intraday_disabled.csv"
+            )
+        aliased = (report_df["status"] == "aliased").sum()
+        removed = (report_df["status"] == "intraday_removed").sum()
+        click.echo(
+            f"alias matched: {aliased}, intraday removed: {removed}",
+            err=False,
+        )
+        # Use cleaned filters for subsequent processing
+        save_csv(df_clean, cfg.data.filters_csv)
     if start_date:
         cfg.project.start_date = start_date
     if end_date:
