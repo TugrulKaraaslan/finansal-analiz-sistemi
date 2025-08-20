@@ -6,14 +6,14 @@ Bu proje, BIST verileri üzerinde filtre bazlı tarama yaparak raporlar üretir.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
-pip install -r requirements.txt
+make colab-setup
 python -m backtest.cli --help
 ```
 
 ## Testleri Çalıştırma
 
 ```bash
-pytest -q
+make tests
 ```
 
 ## Veri ve Filtre Dosyaları
