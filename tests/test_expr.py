@@ -16,6 +16,12 @@ def test_crossdown():
     assert mask.tolist() == [False, False, True]
 
 
+def test_cross_up_alias():
+    df = pd.DataFrame({"a": [1, 2, 3], "b": [3, 2, 1]})
+    mask = evaluate(df, "cross_up(a, b)")
+    assert mask.tolist() == [False, False, True]
+
+
 def test_operators_series_series():
     df = pd.DataFrame({"ema_10": [1, 3, 2], "close": [2, 1, 2]})
     mask = evaluate(df, "EMA_10 > close")

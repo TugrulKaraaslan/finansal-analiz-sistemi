@@ -211,6 +211,14 @@ def test_safequery_allows_math_funcs():
     assert out["x"].tolist() == [1.0, 2.0, 3.0]
 
 
+def test_safequery_allows_cross_up():
+    df = pd.DataFrame({"a": [1, 2, 3], "b": [3, 2, 1]})
+    q = SafeQuery("cross_up(a, b)")
+    assert q.is_safe
+    mask = q.get_mask(df)
+    assert mask.tolist() == [False, False, True]
+
+
 def test_filter_parser_normalization():
     q = SafeQuery("EMA20 > Close")
     assert q.names == {"ema_20", "close"}

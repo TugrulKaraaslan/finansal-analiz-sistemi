@@ -14,6 +14,8 @@ from .cross import cross_down, cross_up
 ALLOWED_FUNCS: Dict[str, Callable[[pd.Series, pd.Series], pd.Series]] = {
     "CROSSUP": cross_up,
     "CROSSDOWN": cross_down,
+    "CROSS_UP": cross_up,
+    "CROSS_DOWN": cross_down,
 }
 
 COMPARATORS: Dict[type, Callable[[Any, Any], Any]] = {

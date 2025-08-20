@@ -25,7 +25,10 @@ def read_filters_smart(path: str | Path) -> pd.DataFrame:
     """
 
     try:
-        return pd.read_csv(path, sep=";", encoding="utf-8")
+        df = pd.read_csv(path, sep=";", encoding="utf-8")
+        if {"FilterCode", "PythonQuery"}.issubset(df.columns):
+            return df
+        raise ValueError("incorrect delimiter")
     except Exception:
         return pd.read_csv(path, sep=None, engine="python", encoding="utf-8")
 
