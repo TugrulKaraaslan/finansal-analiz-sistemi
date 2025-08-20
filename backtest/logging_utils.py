@@ -28,6 +28,8 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any, Callable
 
+from loguru import logger
+
 __all__ = ["Timer", "setup_logger", "purge_old_logs"]
 
 
@@ -61,7 +63,7 @@ class Timer:
     def __enter__(self) -> "Timer":  # pragma: no cover - trivial
         self.t0 = time.perf_counter()
         self.start = datetime.now(timezone.utc)
-        logging.info("▶️  start: %s", self.stage)
+        logger.info("▶️  start: {}", self.stage)
         return self
 
     def __exit__(self, exc_type, exc, tb) -> bool:
@@ -81,7 +83,7 @@ class Timer:
         stages_path = _RUN_DIR / "stages.jsonl" if _RUN_DIR else None
 
         if exc_type:
-            logging.exception("❌ fail: %s in %d ms", self.stage, dt_ms)
+            logger.exception("❌ fail: {} in {} ms", self.stage, dt_ms)
             record["level"] = "ERROR"
             if _RUN_DIR:
                 err_file = _RUN_DIR / f"{self.stage}.err"
@@ -90,10 +92,12 @@ class Timer:
 
                     traceback.print_exception(exc_type, exc, tb, file=fh)
         else:
-            logging.info("✅ done: %s in %d ms", self.stage, dt_ms)
+            logger.info("✅ done: {} in {} ms", self.stage, dt_ms)
             record["level"] = "INFO"
 
-        if stages_path:
+        self.elapsed_ms = dt_ms
+
+        if stages_path and stages_path.parent.exists():
             with stages_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps(record, ensure_ascii=False) + "\n")
 
@@ -160,7 +164,11 @@ def setup_logger(
     _def_handler.setFormatter(logging.Formatter(_DEF_FMT))
     root.addHandler(_def_handler)
 
-    logging.info("Log dir: %s", run_dir)
+    logger.remove()
+    logger.add(sys.stdout, format=_DEF_FMT, level=level)
+    logger.add(logfile, format=_DEF_FMT, level=level, rotation="5 MB", retention=2)
+
+    logger.info("Log dir: {}", run_dir)
 
     _RUN_DIR = run_dir
     return str(logfile)

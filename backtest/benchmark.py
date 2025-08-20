@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-import logging
 from pathlib import Path
 
 import pandas as pd
-
-
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class BenchmarkLoader:
@@ -36,12 +33,22 @@ class BenchmarkLoader:
             path = Path(self.cfg.get("excel_path", ""))
             sheet = self.cfg.get("excel_sheet", "BIST")
             if not path.exists():
-                raise FileNotFoundError(f"benchmark excel not found: {path}")
+                msg = (
+                    f"benchmark excel not found: {path}. "
+                    "Config'te 'benchmark.excel_path' ayarını kontrol edin."
+                )
+                logger.error(msg)
+                raise FileNotFoundError(msg)
             df = pd.read_excel(path, sheet_name=sheet)
         elif src == "csv":
             path = Path(self.cfg.get("csv_path", ""))
             if not path.exists():
-                raise FileNotFoundError(f"benchmark csv not found: {path}")
+                msg = (
+                    f"benchmark csv not found: {path}. "
+                    "Config'te 'benchmark.csv_path' ayarını kontrol edin."
+                )
+                logger.error(msg)
+                raise FileNotFoundError(msg)
             df = pd.read_csv(path)
         else:
             raise ValueError(f"unknown benchmark source: {src}")
@@ -56,7 +63,7 @@ class BenchmarkLoader:
         if df.empty:
             raise ValueError("benchmark data empty")
         logger.info(
-            "benchmark loaded rows=%d first=%s last=%s",
+            "benchmark loaded rows={} first={} last={}",
             len(df),
             df["date"].iloc[0],
             df["date"].iloc[-1],

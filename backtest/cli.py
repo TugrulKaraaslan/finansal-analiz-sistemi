@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import logging
 from pathlib import Path
 
 import click
 import pandas as pd
 from datetime import timedelta
+from loguru import logger
 
 from io_filters import load_filters_csv
 from utils.paths import resolve_path
@@ -42,7 +42,7 @@ def cli(ctx, log_level: str, run_id: str | None):
     logfile = setup_logger(run_id=run_id, level=log_level)
     ctx.ensure_object(dict)
     ctx.obj["logfile"] = logfile
-    logging.info("CLI initialized")
+    logger.info("CLI initialized")
 
 
 def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> None:
@@ -51,12 +51,11 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     The filters CSV must provide ``FilterCode`` and ``PythonQuery`` columns and
     may include an optional ``Group`` column.
     """
-    logging.info("Excelleri okuyor...")
     try:
-        with Timer("read_excels_long"):
+        with Timer("yükleme"):
             df = read_excels_long(cfg)
     except (FileNotFoundError, RuntimeError, ImportError) as exc:
-        logging.error(str(exc))
+        logger.error(str(exc))
         raise click.ClickException(str(exc))
     df = apply_corporate_actions(df, getattr(cfg.data, "corporate_actions_csv", None))
     df = normalize(df)
@@ -69,29 +68,27 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     else:
         tdays = None
         df = add_next_close(df)
-    logging.info("Göstergeler hesaplanıyor...")
+    logger.info("Göstergeler hesaplanıyor...")
     with Timer("compute_indicators"):
         df_ind = compute_indicators(
             df, cfg.indicators.params, engine=cfg.indicators.engine
         )
     df_ind = generate_crossovers(df_ind)
-    logging.info("Filtre CSV derleniyor...")
+    logger.info("Filtreler hazırlanıyor...")
     src = Path(cfg.data.filters_csv)
+    load_path = src
     try:
-        if src.exists():
-            compile_filters(src, src.with_name("filters_compiled.csv"))
-            load_path = src.with_name("filters_compiled.csv")
-        else:
-            load_path = src
-        logging.info("Filtre CSV okunuyor...")
-        with Timer("load_filters_csv"):
+        with Timer("filtre"):
+            if src.exists():
+                compile_filters(src, src.with_name("filters_compiled.csv"))
+                load_path = src.with_name("filters_compiled.csv")
             filters_df = load_filters_csv(load_path)
     except FileNotFoundError as exc:
-        logging.error(str(exc))
+        logger.error(str(exc))
         raise click.ClickException(str(exc))
     if filters_df.empty:
         msg = "Filtre CSV boş veya bulunamadı, işlem yapılmadı."
-        logging.error(msg)
+        logger.error(msg)
         raise click.ClickException(msg)
 
     all_days = sorted(pd.to_datetime(df_ind["date"]).dt.normalize().unique())
@@ -101,7 +98,7 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     else:
         if not all_days:
             msg = "Taranacak tarih bulunamadı, veri seti boş."
-            logging.error(msg)
+            logger.error(msg)
             raise click.ClickException(msg)
         start = (
             pd.to_datetime(cfg.project.start_date).normalize()
@@ -118,27 +115,28 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
         days = [d for d in all_days if start <= d <= end]
     all_trades = []
     if len(days) > 1:
-        logging.info(f"{len(days)} gün taranacak...")
-    for d in days:
-        with Timer(f"run_screener {d.date()}"):
-            sigs = run_screener(
-                df_ind,
-                filters_df,
-                d,
-                stop_on_filter_error=getattr(
-                    cfg.project, "stop_on_filter_error", False
-                ),
-                raise_on_error=cfg.project.raise_on_error,
-            )
-        with Timer(f"run_1g_returns {d.date()}"):
-            trades = run_1g_returns(
-                df_ind,
-                sigs,
-                cfg.project.holding_period,
-                cfg.project.transaction_cost,
-                trading_days=tdays,
-            )
-        all_trades.append(trades)
+        logger.info(f"{len(days)} gün taranacak...")
+    with Timer("getiri"):
+        for d in days:
+            with Timer(f"run_screener {d.date()}"):
+                sigs = run_screener(
+                    df_ind,
+                    filters_df,
+                    d,
+                    stop_on_filter_error=getattr(
+                        cfg.project, "stop_on_filter_error", False
+                    ),
+                    raise_on_error=cfg.project.raise_on_error,
+                )
+            with Timer(f"run_1g_returns {d.date()}"):
+                trades = run_1g_returns(
+                    df_ind,
+                    sigs,
+                    cfg.project.holding_period,
+                    cfg.project.transaction_cost,
+                    trading_days=tdays,
+                )
+            all_trades.append(trades)
     trades_all = (
         pd.concat(all_trades, ignore_index=True)
         if all_trades
@@ -195,7 +193,7 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
         try:
             bench_df = BenchmarkLoader(cfg_dict).load()
         except (FileNotFoundError, ValueError) as exc:
-            logging.error(str(exc))
+            logger.error(str(exc))
             raise click.ClickException(str(exc))
         if bench_df is not None:
             s = bench_df.set_index("date")["close"].pct_change() * 100.0
@@ -211,10 +209,10 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     else:
         out_xlsx = out_dir / f"{days[0].date()}_{days[-1].date()}_1G_BIST100.xlsx"
         out_csv_dir = out_dir / "csv"
-    logging.info("Raporlar yazılıyor...")
+    logger.info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
     val_iss = quality_warnings(df)
-    with Timer("write_reports"):
+    with Timer("rapor"):
         outputs = write_reports(
             trades_all,
             days,
@@ -234,9 +232,12 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
             per_day_output=per_day_output,
             csv_also=csv_also,
         )
-    logging.info(f"Bitti. Çıktı: {outputs.get('excel')}")
+    logger.info(f"Bitti. Çıktı: {outputs.get('excel')}")
     if outputs.get("csv"):
-        logging.info(f"CSV klasörü: {outputs['csv'][0].parent}")
+        logger.info(f"CSV klasörü: {outputs['csv'][0].parent}")
+    with Timer("cleanup"):
+        if load_path.name == "filters_compiled.csv" and load_path.exists():
+            load_path.unlink(missing_ok=True)
 
 
 @cli.command("scan-range")
@@ -314,7 +315,7 @@ def scan_range(
         cfg_path = Path(config_path).expanduser().resolve()
         cfg = load_config(cfg_path)
     except Exception as exc:  # kullanıcı dostu mesaj
-        logging.error(str(exc))
+        logger.error(str(exc))
         raise click.ClickException(str(exc))
     fc = filters_csv or getattr(cfg.data, "filters_csv", None) or "filters.csv"
     cfg.data.filters_csv = str(Path(fc).expanduser().resolve())
@@ -361,13 +362,15 @@ def scan_range(
         if rep.errors:
             raise click.ClickException("; ".join(rep.errors))
         for msg in rep.warnings:
-            logging.warning(msg)
+            logger.warning(msg)
         for msg in rep.suggestions:
-            logging.info(msg)
+            logger.info(msg)
     try:
-        _run_scan(cfg, per_day_output=per_day_output, csv_also=csv_also)
+        with Timer("toplam") as t:
+            _run_scan(cfg, per_day_output=per_day_output, csv_also=csv_also)
+        logger.info("Toplam süre: {} ms", t.elapsed_ms)
     except Exception:
-        logging.exception("scan_range failed")
+        logger.exception("scan_range failed")
         raise
 
 
@@ -417,7 +420,7 @@ def scan_day(
         cfg_path = Path(config_path).expanduser().resolve()
         cfg = load_config(cfg_path)
     except Exception as exc:  # kullanıcı dostu mesaj
-        logging.error(str(exc))
+        logger.error(str(exc))
         raise click.ClickException(str(exc))
     fc = filters_csv or getattr(cfg.data, "filters_csv", None) or "filters.csv"
     cfg.data.filters_csv = str(Path(fc).expanduser().resolve())
@@ -442,13 +445,15 @@ def scan_day(
         if rep.errors:
             raise click.ClickException("; ".join(rep.errors))
         for msg in rep.warnings:
-            logging.warning(msg)
+            logger.warning(msg)
         for msg in rep.suggestions:
-            logging.info(msg)
+            logger.info(msg)
     try:
-        _run_scan(cfg)
+        with Timer("toplam") as t:
+            _run_scan(cfg)
+        logger.info("Toplam süre: {} ms", t.elapsed_ms)
     except Exception:
-        logging.exception("scan_day failed")
+        logger.exception("scan_day failed")
         raise
 
 
@@ -458,7 +463,7 @@ if __name__ == "__main__":
     except SystemExit as exc:
         code = getattr(exc, "code", 1)
         if code == 0:
-            logging.info("Program başarıyla tamamlandı.")
+            logger.info("Program başarıyla tamamlandı.")
         else:
-            logging.error("Program %s kodu ile hata vererek sonlandı.", code)
+            logger.error("Program %s kodu ile hata vererek sonlandı.", code)
         raise

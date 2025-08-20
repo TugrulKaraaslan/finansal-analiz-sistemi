@@ -1,6 +1,8 @@
 import pandas as pd
 import pytest
 
+from loguru import logger
+
 from backtest.benchmark import BenchmarkLoader
 
 
@@ -16,6 +18,7 @@ def test_load_excel(tmp_path, caplog):
         "column_close": "close",
     }
     with caplog.at_level("INFO"):
+        logger.add(caplog.handler, level="INFO")
         loaded = BenchmarkLoader(cfg).load()
     assert list(loaded.columns) == ["date", "close"]
     assert len(loaded) == 2
