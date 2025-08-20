@@ -1,22 +1,26 @@
 import pytest
+from pathlib import Path
 
 from io_filters import load_filters_csv
 
 
+DATA_DIR = Path(__file__).resolve().parent / "data"
+
+
 def test_load_filters_ok():
-    df = load_filters_csv("tests/data/filters_valid.csv")
+    df = load_filters_csv(DATA_DIR / "filters_valid.csv")
     assert list(df.columns) == ["FilterCode", "PythonQuery", "Group"]
     assert len(df) == 2
 
 
 def test_load_filters_empty_query():
     with pytest.raises(RuntimeError):
-        load_filters_csv("tests/data/filters_empty.csv")
+        load_filters_csv(DATA_DIR / "filters_empty.csv")
 
 
 def test_load_filters_missing_column():
     with pytest.raises(RuntimeError):
-        load_filters_csv("tests/data/filters_missing_col.csv")
+        load_filters_csv(DATA_DIR / "filters_missing_col.csv")
 
 
 def test_load_filters_semicolon(tmp_path):

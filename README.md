@@ -10,10 +10,10 @@ make colab-setup
 python -m backtest.cli --help
 ```
 
-## Testleri Çalıştırma
+## Testler Nasıl Çalıştırılır?
 
 ```bash
-make tests
+pytest -q
 ```
 
 ## Veri ve Filtre Dosyaları
