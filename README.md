@@ -10,6 +10,13 @@ make colab-setup
 python -m backtest.cli --help
 ```
 
+## Hızlı Başlangıç (Colab)
+
+```python
+!python notebooks/00_colab_bootstrap.py
+```
+
+
 ## Testler Nasıl Çalıştırılır?
 
 ```bash
