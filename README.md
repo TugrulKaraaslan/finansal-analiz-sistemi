@@ -61,7 +61,22 @@ python -m backtest.cli scan-day --config config/colab_config.yaml --date 2025-03
 python -m backtest.cli scan-range --config config/colab_config.yaml --start 2022-01-03 --end 2025-04-18
 ```
 
-> `--config` **zorunludur**. Pozisyonel argüman **DEĞİLDİR**.
+> `--config` opsiyoneldir (varsayılan: `config_scan.yml`). Pozisyonel argüman **DEĞİLDİR**.
+
+## Yol Öncelik Sırası
+
+`--config` ve `--filters-csv` gibi yol argümanları şu öncelik sırasıyla değerlendirilir:
+
+1. CLI argümanı
+2. YAML config içeriği
+3. Kod içi varsayılan (`config_scan.yml`, `filters.csv`)
+
+Hem mutlak hem göreli yollar desteklenir ve dahili olarak `Path(...).expanduser().resolve()` ile gerçek yola çevrilir.
+
+```bash
+python -m backtest.cli scan-range --filters-csv my/filters.csv
+```
+Yukarıdaki komutta `my/filters.csv` kullanılır; YAML veya varsayılan yol yok sayılır.
 
 ## Test ve Preflight Kontrolü
 
@@ -90,7 +105,7 @@ Filtre dosyasını temizlemek ve alias uyumsuzluklarını raporlamak için yeni 
 ```bash
 python -m backtest.cli scan-range --config config_scan.yml \
   --no-preflight --report-alias \
-  --filters-path config/filters.csv \
+  --filters-csv config/filters.csv \
   --reports-dir raporlar/
 ```
 
