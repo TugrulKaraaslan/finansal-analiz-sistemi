@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Iterable, Optional, Set
 
 import pandas as pd
+from loguru import logger
 
 from utils.paths import resolve_path
 
@@ -30,7 +31,12 @@ def load_holidays_csv(path: str | Path) -> Set[pd.Timestamp]:
         raise TypeError("path must be a string or Path")
     p = resolve_path(path)
     if not p.exists():
-        raise FileNotFoundError(f"Tatil CSV bulunamadı: {p}")
+        msg = (
+            f"Tatil CSV bulunamadı: {p}. "
+            "Config'te 'calendar.holidays_csv_path' ayarını kontrol edin."
+        )
+        logger.error(msg)
+        raise FileNotFoundError(msg)
     try:
         h = pd.read_csv(p, encoding="utf-8")
     except Exception as e:

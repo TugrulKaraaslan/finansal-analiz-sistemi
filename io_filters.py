@@ -9,6 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
+from loguru import logger
 
 from utils.paths import resolve_path
 
@@ -50,7 +51,13 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
 
     p = resolve_path(path)
     if not p.exists():
-        raise FileNotFoundError(f"Filters CSV bulunamadı: {p}")
+        msg = (
+            f"Filters CSV bulunamadı: {p}. "
+            "'--filters-csv' ile yol belirtin veya "
+            "config'te 'data.filters_csv' ayarını kontrol edin."
+        )
+        logger.error(msg)
+        raise FileNotFoundError(msg)
     try:
         df = read_filters_smart(p)
     except Exception as exc:

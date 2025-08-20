@@ -297,7 +297,13 @@ def read_excels_long(
         cache_dir = excel_dir / ".cache"
 
     if not excel_dir or not excel_dir.exists():
-        raise FileNotFoundError(f"Excel klasörü bulunamadı: {excel_dir}")
+        msg = (
+            f"Excel klasörü bulunamadı: {excel_dir}. "
+            "Config'te 'data.excel_dir' yolunu kontrol edin "
+            "veya '--excel-dir' ile belirtin."
+        )
+        logger.error(msg)
+        raise FileNotFoundError(msg)
     if not excel_files:
         raise RuntimeError(f"'{excel_dir}' altında .xlsx bulunamadı.")
 

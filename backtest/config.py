@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Literal
 import yaml
 from pydantic import BaseModel, Field
 import warnings
+from loguru import logger
 
 from utils.paths import resolve_path
 from .paths import resolve_under_root
@@ -88,7 +89,12 @@ class RootCfg(BaseModel):
 def load_config(path: str | Path) -> RootCfg:
     p = resolve_path(path)
     if not p.exists():
-        raise FileNotFoundError(f"Config bulunamadı: {p}")
+        msg = (
+            f"Config bulunamadı: {p}. "
+            "'--config' ile yol belirtin veya config şablonunu kontrol edin."
+        )
+        logger.error(msg)
+        raise FileNotFoundError(msg)
     with p.open("r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     if not isinstance(cfg, dict):
