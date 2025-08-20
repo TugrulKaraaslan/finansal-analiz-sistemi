@@ -15,3 +15,5 @@ classifiers = [
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-q -ra"
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
