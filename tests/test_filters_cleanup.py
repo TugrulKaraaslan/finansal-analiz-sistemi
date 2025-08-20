@@ -100,7 +100,7 @@ def test_cli_reports(tmp_path, monkeypatch, sample_filters_csv):
             "dummy.yml",
             "--no-preflight",
             "--report-alias",
-            "--filters-path",
+            "--filters-csv",
             str(filters_path),
             "--reports-dir",
             str(tmp_path),

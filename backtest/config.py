@@ -26,7 +26,7 @@ class ProjectCfg(BaseModel):
 
 class DataCfg(BaseModel):
     excel_dir: str
-    filters_csv: str
+    filters_csv: str = "filters.csv"
     enable_cache: bool = False
     cache_parquet_path: Optional[str] = None
     corporate_actions_csv: Optional[str] = None
@@ -125,7 +125,7 @@ def load_config(path: str | Path) -> RootCfg:
     if isinstance(proj, dict) and proj.get("out_dir"):
         proj["out_dir"] = _join(proj.get("out_dir"))
     data = cfg.get("data", {}) if isinstance(cfg, dict) else {}
-    for req_key in ("excel_dir", "filters_csv"):
+    for req_key in ("excel_dir",):
         if not data.get(req_key):
             raise ValueError(
                 f"config.data.{req_key} zorunlu; "
