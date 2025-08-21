@@ -14,8 +14,7 @@ def test_read_excels_long_no_valid_sheets(tmp_path):
         # empty sheet
         pd.DataFrame().to_excel(writer, sheet_name="Empty", index=False)
         # sheet missing required 'date' column
-        pd.DataFrame({"close": [1]}).to_excel(
-            writer, sheet_name="NoDate", index=False)
+        pd.DataFrame({"close": [1]}).to_excel(writer, sheet_name="NoDate", index=False)
 
     df = read_excels_long(tmp_path)
     expected = ["date", "open", "high", "low", "close", "volume", "symbol"]

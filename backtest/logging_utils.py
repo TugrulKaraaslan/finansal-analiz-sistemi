@@ -160,15 +160,13 @@ def setup_logger(
     # file (rotating)
     if _def_handler:
         root.removeHandler(_def_handler)
-    _def_handler = RotatingFileHandler(
-        logfile, maxBytes=5_000_000, backupCount=2)
+    _def_handler = RotatingFileHandler(logfile, maxBytes=5_000_000, backupCount=2)
     _def_handler.setFormatter(logging.Formatter(_DEF_FMT))
     root.addHandler(_def_handler)
 
     logger.remove()
     logger.add(sys.stdout, format=_DEF_FMT, level=level)
-    logger.add(logfile, format=_DEF_FMT, level=level,
-               rotation="5 MB", retention=2)
+    logger.add(logfile, format=_DEF_FMT, level=level, rotation="5 MB", retention=2)
 
     logger.info("Log dir: {}", run_dir)
 
@@ -187,10 +185,7 @@ def purge_old_logs(days: int = 7, log_dir: str = "loglar") -> list[str]:
     removed: list[str] = []
     for d in base.glob("run_*"):
         try:
-            if (
-                d.is_dir()
-                and datetime.fromtimestamp(d.stat().st_mtime) < cutoff
-            ):
+            if d.is_dir() and datetime.fromtimestamp(d.stat().st_mtime) < cutoff:
                 shutil.rmtree(d, ignore_errors=True)
                 removed.append(str(d))
         except Exception:  # pragma: no cover - best effort

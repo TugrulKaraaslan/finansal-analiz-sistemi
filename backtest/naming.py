@@ -167,8 +167,7 @@ _CANONICAL_PATTERNS = [
     re.compile(r"^cmf_\d+$"),
     re.compile(r"^dcm_\d+_\d+$"),
     re.compile(r"^hma_\d+$"),
-    re.compile(
-        r"^ichimoku_(?:baseline|conversionline|leadingspana|leadingspanb)$"),
+    re.compile(r"^ichimoku_(?:baseline|conversionline|leadingspana|leadingspanb)$"),
     re.compile(r"^macd_\d+_\d+_\d+$"),
     re.compile(r"^macds_\d+_\d+_\d+$"),
     re.compile(r"^mfi_\d+$"),
@@ -193,8 +192,7 @@ def _is_known_canonical(name: str) -> bool:
     return any(p.fullmatch(name) for p in _CANONICAL_PATTERNS)
 
 
-def _normalize_with_status(
-    name: str, alias_map: Dict[str, str]) -> Tuple[str, bool]:
+def _normalize_with_status(name: str, alias_map: Dict[str, str]) -> Tuple[str, bool]:
     base = _base_norm(name)
     key = _alias_key(name)
     result = alias_map.get(key, base)

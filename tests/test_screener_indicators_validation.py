@@ -16,8 +16,7 @@ def test_compute_indicators_invalid_inputs():
 def test_run_screener_invalid_inputs():
     filters_df = pd.DataFrame({"FilterCode": [], "PythonQuery": []})
     df_ind = pd.DataFrame(
-        {"symbol": [], "open": [], "high": [],
-            "low": [], "close": [], "volume": []}
+        {"symbol": [], "open": [], "high": [], "low": [], "close": [], "volume": []}
     )
     with pytest.raises(TypeError):
         run_screener([], filters_df, pd.Timestamp("2024-01-02"))
@@ -47,8 +46,7 @@ def test_run_screener_empty_dataset_logs(caplog):
     df_empty = pd.DataFrame(
         columns=["symbol", "date", "open", "high", "low", "close", "volume"]
     )
-    filters_df = pd.DataFrame(
-        {"FilterCode": ["F1"], "PythonQuery": ["close > 1"]})
+    filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 1"]})
     logger.add(caplog.handler, level="ERROR")
     with pytest.raises(ValueError):
         run_screener(df_empty, filters_df, pd.Timestamp("2024-01-02"))
@@ -89,8 +87,7 @@ def test_run_screener_logs_missing_df_columns(caplog):
             "volume": [100],
         }
     )
-    filters_df = pd.DataFrame(
-        {"FilterCode": ["F1"], "PythonQuery": ["close > 1"]})
+    filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 1"]})
     logger.add(caplog.handler, level="ERROR")
     with pytest.raises(ValueError):
         run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
@@ -132,8 +129,7 @@ def test_run_screener_outputs_timestamp_dates():
             "volume": [100],
         }
     )
-    filters_df = pd.DataFrame(
-        {"FilterCode": ["F1"], "PythonQuery": ["close > 0"]})
+    filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 0"]})
     res = run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
     assert isinstance(res.loc[0, "Date"], pd.Timestamp)
 

@@ -82,8 +82,7 @@ def build_trading_days(
             raise ValueError("holidays contains non-date values") from e
     else:
         hol = set()
-    trade = [d for d in all_days if (
-        not is_weekend(d)) and (d.normalize() not in hol)]
+    trade = [d for d in all_days if (not is_weekend(d)) and (d.normalize() not in hol)]
     return pd.DatetimeIndex(trade)
 
 

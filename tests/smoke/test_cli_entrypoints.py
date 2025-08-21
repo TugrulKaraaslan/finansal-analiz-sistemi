@@ -31,8 +31,7 @@ def test_scan_range_dry_run(tmp_path: Path) -> None:
     df = make_price_frame(1)
     df.to_excel(tmp_path / "AAA.xlsx", index=False)
     filters_csv = tmp_path / "filters.csv"
-    filters_csv.write_text(
-        "FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8")
+    filters_csv.write_text("FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8")
     cfg_path = tmp_path / "cfg.yml"
     cfg_path.write_text(
         textwrap.dedent(

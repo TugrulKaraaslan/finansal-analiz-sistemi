@@ -8,9 +8,7 @@ from backtest.config import load_config
 
 
 def _write_cfg(text: str) -> Path:
-    with tempfile.NamedTemporaryFile(
-        "w", delete=False, encoding="utf-8"
-    ) as tmp:
+    with tempfile.NamedTemporaryFile("w", delete=False, encoding="utf-8") as tmp:
         tmp.write(text)
         tmp.flush()
         return Path(tmp.name)

@@ -35,8 +35,7 @@ from .filters_io import load_filters, save_csv
 
 
 @click.group()
-@click.option("--log-level", default="INFO",
-              help="Log level: DEBUG/INFO/WARN/ERROR")
+@click.option("--log-level", default="INFO", help="Log level: DEBUG/INFO/WARN/ERROR")
 @click.option("--run-id", default=None, help="Custom run id for log filename")
 @click.pass_context
 def cli(ctx, log_level: str, run_id: str | None):
@@ -46,8 +45,7 @@ def cli(ctx, log_level: str, run_id: str | None):
     logger.info("CLI initialized")
 
 
-def _run_scan(cfg, *, per_day_output: bool = False,
-              csv_also: bool = True) -> None:
+def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> None:
     """Common execution for scan commands.
 
     The filters CSV must provide ``FilterCode`` and ``PythonQuery`` columns and
@@ -59,15 +57,11 @@ def _run_scan(cfg, *, per_day_output: bool = False,
     except (FileNotFoundError, RuntimeError, ImportError) as exc:
         logger.error(str(exc))
         raise click.ClickException(str(exc))
-    df = apply_corporate_actions(df, getattr(
-        cfg.data, "corporate_actions_csv", None))
+    df = apply_corporate_actions(df, getattr(cfg.data, "corporate_actions_csv", None))
     df = normalize(df)
     if cfg.calendar.tplus1_mode == "calendar":
         holidays = None
-        if (
-            cfg.calendar.holidays_source == "csv"
-            and cfg.calendar.holidays_csv_path
-        ):
+        if cfg.calendar.holidays_source == "csv" and cfg.calendar.holidays_csv_path:
             holidays = load_holidays_csv(cfg.calendar.holidays_csv_path)
         tdays = build_trading_days(df, holidays)
         df = add_next_close_calendar(df, tdays)
@@ -203,8 +197,7 @@ def _run_scan(cfg, *, per_day_output: bool = False,
             raise click.ClickException(str(exc))
         if bench_df is not None:
             s = bench_df.set_index("date")["close"].pct_change() * 100.0
-            xu100_pct = {pd.Timestamp(d): float(v)
-                                      for d, v in s.dropna().items()}
+            xu100_pct = {pd.Timestamp(d): float(v) for d, v in s.dropna().items()}
     out_dir = resolve_path(cfg.project.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     if per_day_output:
@@ -214,8 +207,7 @@ def _run_scan(cfg, *, per_day_output: bool = False,
         out_xlsx = out_dir / f"SCAN_{days[0].date()}.xlsx"
         out_csv_dir = None
     else:
-        out_xlsx = out_dir / \
-            f"{days[0].date()}_{days[-1].date()}_1G_BIST100.xlsx"
+        out_xlsx = out_dir / f"{days[0].date()}_{days[-1].date()}_1G_BIST100.xlsx"
         out_csv_dir = out_dir / "csv"
     logger.info("Raporlar yazılıyor...")
     val_sum = dataset_summary(df)
@@ -254,17 +246,10 @@ def _run_scan(cfg, *, per_day_output: bool = False,
     "config_path",
     default="config_scan.yml",
     show_default=True,
-    help=(
-        "YAML config yolu (CLI argümanı > varsayılan). "
-        "Mutlak veya göreli yol"
-    ),
+    help=("YAML config yolu (CLI argümanı > varsayılan). " "Mutlak veya göreli yol"),
 )
-@click.option(
-    "--start", "start_date", required=False, default=None, help="YYYY-MM-DD"
-)
-@click.option(
-    "--end", "end_date", required=False, default=None, help="YYYY-MM-DD"
-)
+@click.option("--start", "start_date", required=False, default=None, help="YYYY-MM-DD")
+@click.option("--end", "end_date", required=False, default=None, help="YYYY-MM-DD")
 @click.option("--holding-period", default=None, type=int)
 @click.option("--transaction-cost", default=None, type=float)
 @click.option(
@@ -345,8 +330,7 @@ def scan_range(
         save_csv(report_df, reports_dir_path / "alias_uyumsuzluklar.csv")
         intraday_df = report_df[report_df["status"] == "intraday_removed"]
         if not intraday_df.empty:
-            save_csv(intraday_df, reports_dir_path / \
-                     "filters_intraday_disabled.csv")
+            save_csv(intraday_df, reports_dir_path / "filters_intraday_disabled.csv")
         aliased = (report_df["status"] == "aliased").sum()
         removed = (report_df["status"] == "intraday_removed").sum()
         click.echo(
@@ -370,8 +354,7 @@ def scan_range(
     if not skip_preflight and cfg.project.start_date and cfg.project.end_date:
         start = pd.to_datetime(cfg.project.start_date).date()
         end = pd.to_datetime(cfg.project.end_date).date()
-        days = [start + timedelta(days=i)
-                                  for i in range((end - start).days + 1)]
+        days = [start + timedelta(days=i) for i in range((end - start).days + 1)]
         rep = preflight(
             cfg.data.excel_dir,
             days,
@@ -400,10 +383,7 @@ def scan_range(
     "config_path",
     default="config_scan.yml",
     show_default=True,
-    help=(
-        "YAML config yolu (CLI argümanı > varsayılan). "
-        "Mutlak veya göreli yol"
-    ),
+    help=("YAML config yolu (CLI argümanı > varsayılan). " "Mutlak veya göreli yol"),
 )
 @click.option("--date", "date_str", required=True, help="YYYY-MM-DD")
 @click.option("--holding-period", default=None, type=int)

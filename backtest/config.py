@@ -56,8 +56,7 @@ class CalendarCfg(BaseModel):
 class IndicatorsCfg(BaseModel):
     engine: Literal["none"] = "none"
     params: Dict[str, List[int]] = Field(
-        default_factory=lambda: {"rsi": [14], "ema": [
-            10, 20, 50], "macd": [12, 26, 9]}
+        default_factory=lambda: {"rsi": [14], "ema": [10, 20, 50], "macd": [12, 26, 9]}
     )
 
 

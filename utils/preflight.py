@@ -18,12 +18,10 @@ def smart_parse_dates(series: pd.Series) -> pd.Series:
 
     # Identify ISO ``YYYY-MM-DD`` strings
     iso_mask = series.str.fullmatch(r"\d{4}-\d{2}-\d{2}")
-    iso = pd.to_datetime(series.where(iso_mask),
-                         errors="coerce", format="%Y-%m-%d")
+    iso = pd.to_datetime(series.where(iso_mask), errors="coerce", format="%Y-%m-%d")
 
     # Remaining values are treated as day-first (Turkish style)
-    local = pd.to_datetime(series.where(~iso_mask),
-                           errors="coerce", dayfirst=True)
+    local = pd.to_datetime(series.where(~iso_mask), errors="coerce", dayfirst=True)
 
     return iso.combine_first(local)
 

@@ -12,8 +12,7 @@ from backtest.calendars import (
 def test_add_next_close_invalid_inputs():
     with pytest.raises(TypeError):
         add_next_close([])
-    df_missing = pd.DataFrame(
-        {"symbol": ["A"], "date": [pd.Timestamp("2020-01-01")]})
+    df_missing = pd.DataFrame({"symbol": ["A"], "date": [pd.Timestamp("2020-01-01")]})
     with pytest.raises(ValueError):
         add_next_close(df_missing)
 
@@ -27,8 +26,7 @@ def test_add_next_close_calendar_invalid_inputs():
     with pytest.raises(TypeError):
         add_next_close_calendar(df, ["2020-01-02"])
     with pytest.raises(ValueError):
-        add_next_close_calendar(
-            df.drop(columns=["close"]), pd.DatetimeIndex([]))
+        add_next_close_calendar(df.drop(columns=["close"]), pd.DatetimeIndex([]))
 
 
 def test_build_trading_days_invalid_holidays():

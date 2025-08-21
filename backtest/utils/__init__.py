@@ -28,8 +28,7 @@ def normalize_key(s: Optional[str]) -> str:
         }
     )
     s = s.translate(table)
-    s = unicodedata.normalize("NFKD", s).encode(
-        "ascii", "ignore").decode("ascii")
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
     s = s.lower()
     s = re.sub(r"[^a-z0-9]+", "_", s)
     return s.strip("_")

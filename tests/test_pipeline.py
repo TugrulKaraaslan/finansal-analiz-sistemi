@@ -22,8 +22,7 @@ def test_pipeline_end_to_end():
         }
     )
     df = compute_indicators(raw)
-    filters = pd.DataFrame(
-        {"FilterCode": ["T1"], "PythonQuery": ["(RSI_2 > 50)"]})
+    filters = pd.DataFrame({"FilterCode": ["T1"], "PythonQuery": ["(RSI_2 > 50)"]})
     sigs = run_screener(df, filters, "2024-01-02")
     out = run_1g_returns(df, sigs)
     assert list(out.columns) == [

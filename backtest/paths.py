@@ -10,9 +10,7 @@ def project_root_from_config(config_path: str | Path) -> Path:
     )
 
 
-def resolve_under_root(
-    config_path: str | Path,
-     maybe_path: str | Path) -> Path:
+def resolve_under_root(config_path: str | Path, maybe_path: str | Path) -> Path:
     p = Path(maybe_path)
     if p.is_absolute():
         return p

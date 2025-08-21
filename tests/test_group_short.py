@@ -51,8 +51,7 @@ def test_run_1g_returns_handles_short_and_group():
     long_ret = (11.0 / 10.0 - 1.0) * 100.0
     short_ret = ((10.0 - 11.0) / 10.0) * 100.0
     assert (
-        pytest.approx(out[out["Side"] == "long"]
-                      ["ReturnPct"].iloc[0], 0.01) == long_ret
+        pytest.approx(out[out["Side"] == "long"]["ReturnPct"].iloc[0], 0.01) == long_ret
     )
     assert (
         pytest.approx(out[out["Side"] == "short"]["ReturnPct"].iloc[0], 0.01)

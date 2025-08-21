@@ -7,8 +7,7 @@ from backtest.benchmark import BenchmarkLoader
 
 
 def test_load_excel(tmp_path, caplog):
-    df = pd.DataFrame(
-        {"date": ["2024-01-01", "2024-01-02"], "close": [100, 110]})
+    df = pd.DataFrame({"date": ["2024-01-01", "2024-01-02"], "close": [100, 110]})
     path = tmp_path / "bist.xlsx"
     df.to_excel(path, sheet_name="BIST", index=False)
     cfg = {

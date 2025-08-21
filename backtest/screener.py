@@ -81,8 +81,7 @@ def run_screener(
         dup_codes = filters_df.loc[dups, "FilterCode"].tolist()
         raise ValueError(f"Duplicate FilterCode detected: {dup_codes}")
     filters_df["FilterCode"] = filters_df["FilterCode"].astype(str).str.strip()
-    filters_df["expr"] = filters_df["PythonQuery"].astype(
-        str).map(_to_pandas_ops)
+    filters_df["expr"] = filters_df["PythonQuery"].astype(str).map(_to_pandas_ops)
     groups = filters_df.get("Group")
     if groups is None:
         groups = [None] * len(filters_df)
@@ -117,18 +116,14 @@ def run_screener(
                 missing_cols_total.add(col)
             logger.warning("skip filter: missing column {}", col, code=code)
             if stop_on_filter_error:
-                raise ValueError(
-                    f"Filter {code!r} missing column {col}") from err
+                raise ValueError(f"Filter {code!r} missing column {col}") from err
             continue
         except SyntaxError as err:
             if stop_on_filter_error:
                 logger.error(
-    "Filter unsafe expression",
-    code=code,
-    expr=expr,
-     reason=err )
-                raise ValueError(
-                    f"Filter {code!r} unsafe expression: {err}") from err
+                    "Filter unsafe expression", code=code, expr=expr, reason=err
+                )
+                raise ValueError(f"Filter {code!r} unsafe expression: {err}") from err
             logger.warning(
                 "Filter skipped due to unsafe expression",
                 code=code,
@@ -168,6 +163,5 @@ def run_screener(
         cols.append("Side")
     cols.append("Date")
     out = out[cols]
-    logger.debug(
-        "run_screener end - produced {rows_out} rows", rows_out=len(out))
+    logger.debug("run_screener end - produced {rows_out} rows", rows_out=len(out))
     return out

@@ -103,8 +103,7 @@ def test_write_reports_raises_on_excel_error(monkeypatch, tmp_path):
         }
     )
     summary = (
-        trades.groupby(["FilterCode", "Side", "Date"])[
-                       "ReturnPct"].mean().unstack()
+        trades.groupby(["FilterCode", "Side", "Date"])["ReturnPct"].mean().unstack()
     )
 
     def _bad_writer(*args, **kwargs):
@@ -135,8 +134,7 @@ def test_write_reports_warns_if_file_missing(monkeypatch, tmp_path):
         }
     )
     summary = (
-        trades.groupby(["FilterCode", "Side", "Date"])[
-                       "ReturnPct"].mean().unstack()
+        trades.groupby(["FilterCode", "Side", "Date"])["ReturnPct"].mean().unstack()
     )
     out_xlsx = tmp_path / "out.xlsx"
     real_exists = pathlib.Path.exists
@@ -148,8 +146,7 @@ def test_write_reports_warns_if_file_missing(monkeypatch, tmp_path):
 
     monkeypatch.setattr(pathlib.Path, "exists", fake_exists)
     with pytest.warns(UserWarning):
-        write_reports(trades, [pd.Timestamp("2024-01-01")],
-                      summary, out_xlsx=out_xlsx)
+        write_reports(trades, [pd.Timestamp("2024-01-01")], summary, out_xlsx=out_xlsx)
 
 
 def test_write_reports_includes_trade_count(tmp_path):

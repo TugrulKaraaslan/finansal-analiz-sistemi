@@ -25,7 +25,5 @@ def test_read_excels_long_negative_and_nan(tmp_path):
 
     out = read_excels_long(tmp_path)
     assert len(out) == 2
-    assert out[["open", "high", "low", "close", "volume"]
-        ].isna().sum().sum() == 0
-    assert not (out[["open", "high", "low", "close", "volume"]]
-                < 0).any().any()
+    assert out[["open", "high", "low", "close", "volume"]].isna().sum().sum() == 0
+    assert not (out[["open", "high", "low", "close", "volume"]] < 0).any().any()

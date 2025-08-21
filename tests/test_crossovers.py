@@ -14,10 +14,8 @@ def test_generate_crossovers_series_and_value():
         }
     )
     res = generate_crossovers(df)
-    assert list(res["sma_10_keser_sma_50_yukari"]) == [
-                False, True, False, True]
-    assert list(res["sma_10_keser_sma_50_asagi"]) == [
-                False, False, True, False]
+    assert list(res["sma_10_keser_sma_50_yukari"]) == [False, True, False, True]
+    assert list(res["sma_10_keser_sma_50_asagi"]) == [False, False, True, False]
     assert list(res["adx_14_keser_20p0_yukari"]) == [False, True, False, True]
     assert list(res["adx_14_keser_20p0_asagi"]) == [False, False, True, False]
 
