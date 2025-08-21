@@ -34,13 +34,13 @@ indicators:
     ema: [10,20,50]
     macd: [12,26,9]
 
-  benchmark:
-    source: "none"
-    excel_path: ""
-    excel_sheet: "BIST"
-    csv_path: ""
-    column_date: "date"
-    column_close: "close"
+benchmark:
+  source: "none"
+  excel_path: ""
+  excel_sheet: "BIST"
+  csv_path: ""
+  column_date: "date"
+  column_close: "close"
 
 report:
   percent_format: "0.00%"
