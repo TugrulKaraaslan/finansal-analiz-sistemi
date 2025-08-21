@@ -46,9 +46,15 @@ def test_summary_contains_bist_columns(tmp_path):
         pd.Timestamp("2024-01-03"): 0.5,
     }
     out_xlsx = tmp_path / "out.xlsx"
-    write_reports(trades, trades["Date"].unique(), summary, xu, out_xlsx=out_xlsx)
+    write_reports(trades, trades["Date"].unique(),
+                  summary, xu, out_xlsx=out_xlsx)
     df = pd.read_excel(out_xlsx, sheet_name="SUMMARY")
-    for col in ["MEAN_RET", "BIST_MEAN_RET", "ALPHA_RET", "HIT_RATIO", "N_TRADES"]:
+    for col in [
+    "MEAN_RET",
+    "BIST_MEAN_RET",
+    "ALPHA_RET",
+    "HIT_RATIO",
+     "N_TRADES"]:
         assert col in df.columns
         assert df[col].dtype.kind in "fi"
 
@@ -67,7 +73,8 @@ def test_alpha_computation_alignment(tmp_path):
         pd.Timestamp("2024-01-03"): 0.5,
     }  # missing second day
     out_xlsx = tmp_path / "out.xlsx"
-    write_reports(trades, trades["Date"].unique(), summary, xu, out_xlsx=out_xlsx)
+    write_reports(trades, trades["Date"].unique(),
+                  summary, xu, out_xlsx=out_xlsx)
     df = pd.read_excel(out_xlsx, sheet_name="SUMMARY")
     f1 = df[df["FilterCode"] == "F1"].iloc[0]
     assert np.isclose(f1["BIST_MEAN_RET"], (1.0 + 0.5) / 2)

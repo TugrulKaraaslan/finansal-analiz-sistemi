@@ -40,7 +40,8 @@ def test_run_screener_no_hits():
             "volume": [100],
         }
     )
-    filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 2"]})
+    filters_df = pd.DataFrame(
+        {"FilterCode": ["F1"], "PythonQuery": ["close > 2"]})
     res = run_screener(df_ind, filters_df, pd.Timestamp("2024-01-02"))
     assert isinstance(df_ind.loc[0, "date"], pd.Timestamp)
     assert list(res.columns) == ["FilterCode", "Symbol", "Date"]

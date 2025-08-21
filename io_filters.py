@@ -36,8 +36,8 @@ def read_filters_smart(path: str | Path) -> pd.DataFrame:
 def load_filters_csv(path: str | Path) -> pd.DataFrame:
     """Load filters from CSV with validation and basic normalization.
 
-    The CSV must define ``FilterCode`` and ``PythonQuery`` columns. ``Group`` is
-    optional and ignored if absent.
+    The CSV must define ``FilterCode`` and ``PythonQuery`` columns.
+    ``Group`` is optional and ignored if absent.
 
     Parameters
     ----------

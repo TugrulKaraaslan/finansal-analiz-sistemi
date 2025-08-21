@@ -17,11 +17,14 @@ def test_apply_corporate_actions(tmp_path):
         }
     )
     csv = tmp_path / "actions.csv"
-    csv.write_text("symbol,date,factor\nAAA,2024-01-02,0.5\n", encoding="utf-8")
+    csv.write_text("symbol,date,factor\nAAA,2024-01-02,0.5\n",
+                   encoding="utf-8")
     adj = apply_corporate_actions(df, csv)
     first = adj.loc[adj["date"] == pd.Timestamp("2024-01-01"), "close"].iloc[0]
-    second = adj.loc[adj["date"] == pd.Timestamp("2024-01-02"), "close"].iloc[0]
-    vol_first = adj.loc[adj["date"] == pd.Timestamp("2024-01-01"), "volume"].iloc[0]
+    second = adj.loc[adj["date"] == pd.Timestamp(
+        "2024-01-02"), "close"].iloc[0]
+    vol_first = adj.loc[adj["date"] == pd.Timestamp(
+        "2024-01-01"), "volume"].iloc[0]
     assert first == 5.0
     assert second == 20.0
     assert vol_first == 200
@@ -32,13 +35,16 @@ def _apply_loop(df, adj):
     df["date"] = pd.to_datetime(df["date"]).dt.normalize()
     adj = adj.copy()
     adj["date"] = pd.to_datetime(adj["date"]).dt.normalize()
-    price_cols = [c for c in ["open", "high", "low", "close"] if c in df.columns]
+    price_cols = [c for c in ["open", "high",
+        "low", "close"] if c in df.columns]
     for sym, grp in adj.groupby("symbol"):
         for _, row in grp.sort_values("date").iterrows():
             mask = (df["symbol"] == sym) & (df["date"] < row["date"])
-            df.loc[mask, price_cols] = df.loc[mask, price_cols] * float(row["factor"])
+            df.loc[mask, price_cols] = df.loc[mask,
+                price_cols] * float(row["factor"])
             if "volume" in df.columns:
-                df.loc[mask, "volume"] = df.loc[mask, "volume"] / float(row["factor"])
+                df.loc[mask, "volume"] = df.loc[mask,
+                    "volume"] / float(row["factor"])
     return df
 
 
@@ -81,6 +87,7 @@ def test_apply_corporate_actions_invalid_factor(tmp_path, factor):
         }
     )
     csv = tmp_path / "actions.csv"
-    csv.write_text(f"symbol,date,factor\nAAA,2024-01-02,{factor}\n", encoding="utf-8")
+    csv.write_text(
+        f"symbol,date,factor\nAAA,2024-01-02,{factor}\n", encoding="utf-8")
     with pytest.raises(ValueError):
         apply_corporate_actions(df, csv)

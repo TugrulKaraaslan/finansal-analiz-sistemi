@@ -27,8 +27,10 @@ def dataset_summary(df: pd.DataFrame) -> pd.DataFrame:
     na_close = df["close"].isna().groupby(df["symbol"]).sum()
     grp = df.groupby("symbol")
     out = grp.agg(
-        rows=("date", "size"), first_date=("date", "min"), last_date=("date", "max")
-    ).reset_index()
+    rows=(
+        "date", "size"), first_date=(
+            "date", "min"), last_date=(
+                "date", "max") ).reset_index()
     out["na_close"] = out["symbol"].map(na_close).fillna(0).astype(int)
     out["dup_symbol_date"] = out["symbol"].map(dup).fillna(0).astype(int)
     return out.sort_values("symbol").reset_index(drop=True)

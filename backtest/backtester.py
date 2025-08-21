@@ -23,7 +23,8 @@ class TradeSide(Enum):
     def from_value(cls, value: str) -> "TradeSide":
         try:
             return cls(value.lower())
-        except Exception as exc:  # pragma: no cover - explicit ValueError below
+        except Exception as exc:
+            # pragma: no cover - explicit ValueError below
             raise ValueError(f"Geçersiz Side değeri: {value!r}") from exc
 
 
@@ -59,10 +60,14 @@ def run_1g_returns(
     """
 
     logger.debug(
-        "run_1g_returns start - base rows: {rows_base}, signals rows: {rows_sig}",
-        rows_base=len(df_with_next) if isinstance(df_with_next, pd.DataFrame) else "?",
-        rows_sig=len(signals) if isinstance(signals, pd.DataFrame) else "?",
-    )
+    "run_1g_returns start - base rows: {rows_base}, signals rows: {rows_sig}",
+    rows_base=len(df_with_next) if isinstance(
+        df_with_next,
+        pd.DataFrame) else "?",
+        rows_sig=len(signals) if isinstance(
+            signals,
+            pd.DataFrame) else "?",
+             )
 
     if not isinstance(df_with_next, pd.DataFrame):
         logger.error("df_with_next must be a DataFrame")
@@ -169,7 +174,8 @@ def run_1g_returns(
                 ReturnPct=pd.NA,
                 Win=pd.NA,
             )
-            invalid_side["Date"] = pd.to_datetime(invalid_side["Date"]).dt.normalize()
+            invalid_side["Date"] = pd.to_datetime(
+                invalid_side["Date"]).dt.normalize()
             signals = signals.loc[valid_mask].copy()
             sides = sides.loc[valid_mask]
             if signals.empty:
@@ -207,27 +213,33 @@ def run_1g_returns(
     before = len(base)
     base = base.drop_duplicates(["symbol", "date"])
     if len(base) != before:
-        logger.warning("dropped {n} duplicate price rows", n=before - len(base))
+        logger.warning(
+            "dropped {n} duplicate price rows", n=before - len(base))
 
     signals = signals.copy()
     signals["Date"] = pd.to_datetime(signals["Date"]).dt.normalize()
     before_sig = len(signals)
     signals = signals.drop_duplicates()
     if len(signals) != before_sig:
-        logger.warning("dropped {n} duplicate signal rows", n=before_sig - len(signals))
-    if trading_days is not None and not isinstance(trading_days, pd.DatetimeIndex):
+        logger.warning("dropped {n} duplicate signal rows",
+                       n=before_sig - len(signals))
+    if trading_days is not None and not isinstance(
+        trading_days, pd.DatetimeIndex):
         raise TypeError("trading_days must be a DatetimeIndex")
 
     merged = signals.merge(
-        base, left_on=["Symbol", "Date"], right_on=["symbol", "date"], how="left"
-    )
+    base, left_on=[
+        "Symbol", "Date"], right_on=[
+            "symbol", "date"], how="left" )
     merged.rename(columns={"close": "EntryClose"}, inplace=True)
     merged = merged.drop(columns=["symbol", "date"])
 
     if has_next and holding_period == 1:
         merged.rename(
-            columns={"next_date": "ExitDate", "next_close": "ExitClose"}, inplace=True
-        )
+    columns={
+        "next_date": "ExitDate",
+        "next_close": "ExitClose"},
+         inplace=True )
     else:
         if trading_days is not None:
             td = pd.DatetimeIndex(trading_days).normalize()
@@ -243,9 +255,11 @@ def run_1g_returns(
             exit_base = base.drop(
                 columns=["next_date", "next_close"], errors="ignore"
             ).rename(
-                columns={"symbol": "Symbol", "date": "ExitDate", "close": "ExitClose"}
+                columns={"symbol": "Symbol",
+                    "date": "ExitDate", "close": "ExitClose"}
             )
-            merged = merged.merge(exit_base, on=["Symbol", "ExitDate"], how="left")
+            merged = merged.merge(
+                exit_base, on=["Symbol", "ExitDate"], how="left")
         else:
             next_lookup = base.set_index(["symbol", "date"])["next_date"]
             close_lookup = base.set_index(["symbol", "date"])["close"]
@@ -341,5 +355,6 @@ def run_1g_returns(
         out = frames[0]
     else:
         out = pd.concat(frames, ignore_index=True)
-    logger.debug("run_1g_returns end - produced {rows_out} rows", rows_out=len(out))
+    logger.debug(
+        "run_1g_returns end - produced {rows_out} rows", rows_out=len(out))
     return out

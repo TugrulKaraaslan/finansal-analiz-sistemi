@@ -44,7 +44,8 @@ def test_error_logging(tmp_path, monkeypatch):
     run_dir = _run_dir_from_logfile(logfile)
     err_file = run_dir / "boom.err"
     assert err_file.exists()
-    stage_line = json.loads((run_dir / "stages.jsonl").read_text().splitlines()[0])
+    stage_line = json.loads(
+        (run_dir / "stages.jsonl").read_text().splitlines()[0])
     assert stage_line["level"] == "ERROR"
 
 

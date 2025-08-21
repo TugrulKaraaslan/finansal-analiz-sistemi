@@ -12,7 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 SERIES_SERIES_CROSSOVERS: List[Tuple[str, str, str, str]] = [
-    ("sma_10", "sma_50", "sma_10_keser_sma_50_yukari", "sma_10_keser_sma_50_asagi"),
+    (
+        "sma_10",
+        "sma_50",
+        "sma_10_keser_sma_50_yukari",
+        "sma_10_keser_sma_50_asagi",
+    ),
 ]
 
 SERIES_VALUE_CROSSOVERS: List[Tuple[str, float, str, str]] = [
@@ -27,7 +32,8 @@ def generate_crossovers(df: pd.DataFrame) -> pd.DataFrame:
         b_c = normalize_name(b)
         if a_c not in out.columns or b_c not in out.columns:
             missing = [x for x in (a_c, b_c) if x not in out.columns]
-            logger.warning("skip crossover: missing column(s) %s", ", ".join(missing))
+            logger.warning(
+                "skip crossover: missing column(s) %s", ", ".join(missing))
             continue
         out[up] = cross_up(out[a_c], out[b_c])
         out[down] = cross_down(out[a_c], out[b_c])

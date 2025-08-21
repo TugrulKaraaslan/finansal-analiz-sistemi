@@ -90,7 +90,8 @@ class SafeQuery:
         """Return (is_safe, names, error_message) for *expr*."""
         names: Set[str] = set()
         # quick character check
-        invalid = next((ch for ch in expr if ch not in cls._ALLOWED_CHARS), None)
+        invalid = next(
+            (ch for ch in expr if ch not in cls._ALLOWED_CHARS), None)
         if invalid is not None:
             return False, names, f"invalid character {invalid!r}"
         try:
@@ -105,10 +106,18 @@ class SafeQuery:
                 func = node.func
                 if isinstance(func, ast.Attribute):
                     if func.attr not in cls._ALLOWED_FUNCS:
-                        return False, names, f"function '{func.attr}' not allowed"
+                        return (
+                            False,
+                            names,
+                            f"function '{func.attr}' not allowed",
+                        )
                 elif isinstance(func, ast.Name):
                     if func.id not in cls._ALLOWED_FUNCS:
-                        return False, names, f"function '{func.id}' not allowed"
+                        return (
+                            False,
+                            names,
+                            f"function '{func.id}' not allowed",
+                        )
                 else:
                     return False, names, "invalid function call"
             elif isinstance(node, ast.Attribute):
@@ -143,14 +152,17 @@ class SafeQuery:
                 "cross_down": lambda a, b: cross_down(a, b),
             }
         )
-        mask = pd.eval(self.expr, engine="python", parser="pandas", local_dict=env)
+        mask = pd.eval(self.expr, engine="python",
+                       parser="pandas", local_dict=env)
         if not pd.api.types.is_bool_dtype(mask):
-            raise ValueError("Query expression must evaluate to a boolean mask")
+            raise ValueError(
+                "Query expression must evaluate to a boolean mask")
         return mask
 
     def filter(self, df: pd.DataFrame) -> pd.DataFrame:
         """Return rows from *df* matching the query expression."""
         mask = self.get_mask(df)
         if not pd.api.types.is_bool_dtype(mask):
-            raise ValueError("Query expression must evaluate to a boolean mask")
+            raise ValueError(
+                "Query expression must evaluate to a boolean mask")
         return df[mask]

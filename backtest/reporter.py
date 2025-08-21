@@ -41,7 +41,8 @@ def _add_bist_columns(
             pd.DataFrame(),
         )
 
-    day_cols = [c for c in summary_wide.columns if c not in {"Ortalama", "TradeCount"}]
+    day_cols = [c for c in summary_wide.columns if c not in {
+        "Ortalama", "TradeCount"}]
     sw = summary_wide[day_cols].copy()
     result = summary_wide.copy()
 
@@ -90,7 +91,8 @@ def _add_bist_columns(
     ordered = [c for c in day_cols if c not in metric_cols] + metric_cols
     result = result[ordered]
 
-    ratio_summary = result[metric_cols].sort_values("ALPHA_RET", ascending=False)
+    ratio_summary = result[metric_cols].sort_values(
+        "ALPHA_RET", ascending=False)
     return result, ratio_summary
 
 
@@ -107,7 +109,8 @@ def _sanitize_filename(name: str) -> str:
     return re.sub(r'[<>:"/\\|?*]', "_", name)
 
 
-def _handle_overwrite(path: Path, policy: Literal["replace", "fail", "timestamp"]):
+def _handle_overwrite(
+    path: Path, policy: Literal["replace", "fail", "timestamp"]):
     """Return a safe path according to overwrite policy."""
     if policy not in {"replace", "fail", "timestamp"}:
         raise ValueError("invalid overwrite policy")
@@ -170,13 +173,15 @@ def write_reports(
     }
     missing = req_cols.difference(trades_all.columns)
     if missing:
-        raise ValueError(f"trades_all missing columns: {', '.join(sorted(missing))}")
+        raise ValueError(
+            f"trades_all missing columns: {', '.join(sorted(missing))}")
     if "Reason" not in trades_all.columns:
         trades_all["Reason"] = pd.NA
     n_cols = trades_all.shape[1]
     if summary_wide is not None and not isinstance(summary_wide, pd.DataFrame):
         raise TypeError("summary_wide must be a DataFrame or None")
-    if summary_winrate is not None and not isinstance(summary_winrate, pd.DataFrame):
+    if summary_winrate is not None and not isinstance(
+        summary_winrate, pd.DataFrame):
         raise TypeError("summary_winrate must be a DataFrame or None")
     if validation_summary is not None and not isinstance(
         validation_summary, pd.DataFrame
@@ -228,7 +233,8 @@ def write_reports(
                 summary_df.to_excel(writer, sheet_name="SUMMARY", index=False)
             excel_paths.append(xlsx_path)
             if csv_also:
-                csv_name = _sanitize_filename(csv_filename_pattern.format(date=day_str))
+                csv_name = _sanitize_filename(
+                    csv_filename_pattern.format(date=day_str))
                 csv_path = _handle_overwrite(base_dir / csv_name, overwrite)
                 day_df.to_csv(csv_path, index=False, encoding="utf-8")
                 csv_paths.append(csv_path)
@@ -240,9 +246,11 @@ def write_reports(
         summary_wide = pd.DataFrame()
         bist_ratio_summary = pd.DataFrame()
     else:
-        summary_wide, bist_ratio_summary = _add_bist_columns(summary_wide, xu100_pct)
+        summary_wide, bist_ratio_summary = _add_bist_columns(
+            summary_wide, xu100_pct)
 
-    metric_cols = ["MEAN_RET", "BIST_MEAN_RET", "ALPHA_RET", "HIT_RATIO", "N_TRADES"]
+    metric_cols = ["MEAN_RET", "BIST_MEAN_RET",
+        "ALPHA_RET", "HIT_RATIO", "N_TRADES"]
     if out_xlsx:
         out_xlsx_path = resolve_path(out_xlsx)
         _ensure_dir(out_xlsx_path)
@@ -262,27 +270,32 @@ def write_reports(
                 summary_wide.to_excel(writer, sheet_name=summary_sheet_name)
 
                 if with_bist_ratio_summary and not bist_ratio_summary.empty:
-                    bist_ratio_summary.to_excel(writer, sheet_name="BIST_RATIO_SUMMARY")
+                    bist_ratio_summary.to_excel(
+                        writer, sheet_name="BIST_RATIO_SUMMARY")
 
                 if summary_winrate is not None and not summary_winrate.empty:
                     summary_winrate.to_excel(
                         writer, sheet_name=f"{summary_sheet_name}_WINRATE"
                     )
 
-                day_cols = [c for c in summary_wide.columns if c not in metric_cols]
+                day_cols = [
+                    c for c in summary_wide.columns if c not in metric_cols]
                 if xu100_pct is not None:
                     if isinstance(xu100_pct, pd.Series):
                         xu100_series = xu100_pct.astype(float)
                     elif isinstance(xu100_pct, Mapping):
                         xu100_series = pd.Series(dict(xu100_pct), dtype=float)
                     else:
-                        raise TypeError("xu100_pct must be a mapping or Series")
+                        raise TypeError(
+                            "xu100_pct must be a mapping or Series")
                     if set(day_cols).issubset(set(xu100_series.index)):
                         diff = summary_wide[day_cols].copy()
                         for c in day_cols:
-                            diff[c] = diff[c] - float(xu100_series.get(c, float("nan")))
+                            diff[c] = diff[c] - \
+                                float(xu100_series.get(c, float("nan")))
                         diff["MEAN_RET"] = diff.mean(axis=1)
-                        diff.to_excel(writer, sheet_name=f"{summary_sheet_name}_DIFF")
+                        diff.to_excel(
+                            writer, sheet_name=f"{summary_sheet_name}_DIFF")
                     avg = (
                         float(xu100_series.mean())
                         if not xu100_series.empty
@@ -291,7 +304,8 @@ def write_reports(
                     bist = (
                         pd.DataFrame(
                             [
-                                [xu100_series.get(c, float("nan")) for c in day_cols]
+                                [xu100_series.get(c, float("nan"))
+                                                  for c in day_cols]
                                 + [avg]
                             ],
                             index=["BIST"],
@@ -304,11 +318,17 @@ def write_reports(
                         bist.to_excel(writer, sheet_name="BIST")
 
                 # Optional validation
-                if validation_summary is not None and not validation_summary.empty:
+                if (
+                    validation_summary is not None
+                    and not validation_summary.empty
+                ):
                     validation_summary.to_excel(
                         writer, sheet_name="VALIDATION_SUMMARY", index=False
                     )
-                if validation_issues is not None and not validation_issues.empty:
+                if (
+                    validation_issues is not None
+                    and not validation_issues.empty
+                ):
                     validation_issues.to_excel(
                         writer, sheet_name="VALIDATION_ISSUES", index=False
                     )

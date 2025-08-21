@@ -10,7 +10,9 @@ def _base_df():
             "symbol": ["AAA", "AAA"],
             "date": pd.to_datetime(["2024-01-01", "2024-01-02"]).normalize(),
             "close": [1.0, 1.1],
-            "next_date": pd.to_datetime(["2024-01-02", "2024-01-03"]).normalize(),
+            "next_date": pd.to_datetime(
+                ["2024-01-02", "2024-01-03"]
+            ).normalize(),
             "next_close": [1.1, 1.2],
         }
     )

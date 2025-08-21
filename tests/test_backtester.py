@@ -39,7 +39,10 @@ def test_run_1g_returns_drops_duplicates():
         {
             "FilterCode": ["T1", "T1"],
             "Symbol": ["AAA", "AAA"],
-            "Date": [pd.to_datetime("2024-01-05"), pd.to_datetime("2024-01-05")],
+            "Date": [
+                pd.to_datetime("2024-01-05"),
+                pd.to_datetime("2024-01-05"),
+            ],
         }
     )
     out = run_1g_returns(df, sigs)
@@ -100,7 +103,10 @@ def test_run_1g_returns_ignores_out_of_bounds_signals():
         {
             "FilterCode": ["T1", "T1"],
             "Symbol": ["AAA", "AAA"],
-            "Date": [pd.to_datetime("2024-01-01"), pd.to_datetime("2024-01-03")],
+            "Date": [
+                pd.to_datetime("2024-01-01"),
+                pd.to_datetime("2024-01-03"),
+            ],
         }
     )
     out = run_1g_returns(df, sigs)

@@ -111,7 +111,8 @@ def test_scan_day_no_preflight(monkeypatch):
 
     monkeypatch.setattr(cli, "preflight", _pf)
     monkeypatch.setattr(cli, "_run_scan", lambda cfg: None)
-    cli.scan_day.callback("cfg.yml", "2025-03-07", None, None, no_preflight=True)
+    cli.scan_day.callback("cfg.yml", "2025-03-07",
+                          None, None, no_preflight=True)
     assert not called
 
 

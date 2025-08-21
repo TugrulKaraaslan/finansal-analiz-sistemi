@@ -13,7 +13,14 @@ import pandera as pa
 _ALIAS_PAIRS: Dict[str, List[str]] = {
     # price series
     "date": ["tarih", "tarihi"],
-    "open": ["open", "acilis", "açılış", "açilis", "açilis_fiyati", "açilis_fiyati_"],
+    "open": [
+        "open",
+        "acilis",
+        "açılış",
+        "açilis",
+        "açilis_fiyati",
+        "açilis_fiyati_",
+    ],
     "high": ["high", "yuksek", "yüksek"],
     "low": ["low", "dusuk", "düşük"],
     "close": [
@@ -68,7 +75,13 @@ _ALIAS_PAIRS: Dict[str, List[str]] = {
         "STOCHRSId_14_14_3_3",
         "STOCHRSId_14_14_3_3.1",
     ],
-    "macd_line": ["MACD", "MACD_12_26_9", "MACD 12,26,9", "macd12269", "macd 12 26 9"],
+    "macd_line": [
+        "MACD",
+        "MACD_12_26_9",
+        "MACD 12,26,9",
+        "macd12269",
+        "macd 12 26 9",
+    ],
     "macd_signal": [
         "MACDS",
         "MACDS_12_26_9",
@@ -154,7 +167,8 @@ _CANONICAL_PATTERNS = [
     re.compile(r"^cmf_\d+$"),
     re.compile(r"^dcm_\d+_\d+$"),
     re.compile(r"^hma_\d+$"),
-    re.compile(r"^ichimoku_(?:baseline|conversionline|leadingspana|leadingspanb)$"),
+    re.compile(
+        r"^ichimoku_(?:baseline|conversionline|leadingspana|leadingspanb)$"),
     re.compile(r"^macd_\d+_\d+_\d+$"),
     re.compile(r"^macds_\d+_\d+_\d+$"),
     re.compile(r"^mfi_\d+$"),
@@ -179,7 +193,8 @@ def _is_known_canonical(name: str) -> bool:
     return any(p.fullmatch(name) for p in _CANONICAL_PATTERNS)
 
 
-def _normalize_with_status(name: str, alias_map: Dict[str, str]) -> Tuple[str, bool]:
+def _normalize_with_status(
+    name: str, alias_map: Dict[str, str]) -> Tuple[str, bool]:
     base = _base_norm(name)
     key = _alias_key(name)
     result = alias_map.get(key, base)

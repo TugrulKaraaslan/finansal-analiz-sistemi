@@ -82,7 +82,8 @@ def build_trading_days(
             raise ValueError("holidays contains non-date values") from e
     else:
         hol = set()
-    trade = [d for d in all_days if (not is_weekend(d)) and (d.normalize() not in hol)]
+    trade = [d for d in all_days if (
+        not is_weekend(d)) and (d.normalize() not in hol)]
     return pd.DatetimeIndex(trade)
 
 
@@ -94,9 +95,9 @@ def check_missing_trading_days(
 ) -> pd.DatetimeIndex:
     """Compare actual data dates with expected trading days.
 
-    If any trading days are missing from the DataFrame, either raise ``ValueError``
-    or emit a ``UserWarning`` depending on ``raise_error``. Returns the missing
-    days as a ``DatetimeIndex``.
+    If any trading days are missing from the DataFrame, either raise
+    ``ValueError`` or emit a ``UserWarning`` depending on ``raise_error``.
+    Returns the missing days as a ``DatetimeIndex``.
     """
 
     if not isinstance(df, pd.DataFrame):
@@ -155,9 +156,9 @@ def check_missing_trading_days_by_symbol(
 def add_next_close_calendar(
     df: pd.DataFrame, trading_days: pd.DatetimeIndex
 ) -> pd.DataFrame:
-    """Calendar-driven next business day: next_date = next trading day (global).
-    next_close is taken from symbol's close at that date; if missing,
-    remains NaN (no trade possible).
+    """Calendar-driven next business day: next_date = next trading day
+    (global). next_close is taken from symbol's close at that date; if
+    missing, remains NaN (no trade possible).
     """
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a DataFrame")

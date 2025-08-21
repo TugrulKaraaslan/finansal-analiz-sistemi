@@ -53,9 +53,11 @@ def test_filters_csv_cli_overrides_yaml(tmp_path):
     )
     df.to_excel(tmp_path / "AAA.xlsx", index=False)
     filters_yaml = tmp_path / "yaml.csv"
-    filters_yaml.write_text("FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8")
+    filters_yaml.write_text(
+        "FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8")
     filters_cli = tmp_path / "cli.csv"
-    filters_cli.write_text("FilterCode;PythonQuery\nF2;close > 0\n", encoding="utf-8")
+    filters_cli.write_text(
+        "FilterCode;PythonQuery\nF2;close > 0\n", encoding="utf-8")
 
     cfg_yaml = _write_cfg(tmp_path, filters_yaml)
     runner = CliRunner()

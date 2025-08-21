@@ -70,29 +70,34 @@ def test_scan_range_empty(monkeypatch):
     )
     monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
 
-    def _run_screener(df, filters, d, stop_on_filter_error=None, raise_on_error=None):
+    def _run_screener(
+    df,
+    filters,
+    d,
+    stop_on_filter_error=None,
+     raise_on_error=None):
         assert raise_on_error is False
         assert stop_on_filter_error is False
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
 
     monkeypatch.setattr(cli, "run_screener", _run_screener)
-    monkeypatch.setattr(
-        cli,
-        "run_1g_returns",
-        lambda df, sigs, holding_period, transaction_cost, **kwargs: pd.DataFrame(
-            columns=[
-                "FilterCode",
-                "Symbol",
-                "Date",
-                "EntryClose",
-                "ExitClose",
-                "Side",
-                "ReturnPct",
-                "Win",
-                "Reason",
-            ]
-        ),
-    )
+    monkeypatch.setattr( cli,
+    "run_1g_returns",
+    lambda df,
+    sigs,
+    holding_period,
+    transaction_cost,
+    **kwargs: pd.DataFrame( columns=[ "FilterCode",
+    "Symbol",
+    "Date",
+    "EntryClose",
+    "ExitClose",
+    "Side",
+    "ReturnPct",
+    "Win",
+    "Reason",
+    ] ),
+     )
     monkeypatch.setattr(cli, "write_reports", lambda *args, **kwargs: {})
     monkeypatch.setattr(cli, "dataset_summary", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "quality_warnings", lambda df: pd.DataFrame())
@@ -123,29 +128,34 @@ def test_scan_day_empty(monkeypatch):
     )
     monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters_df)
 
-    def _run_screener(df, filters, d, stop_on_filter_error=None, raise_on_error=None):
+    def _run_screener(
+    df,
+    filters,
+    d,
+    stop_on_filter_error=None,
+     raise_on_error=None):
         assert raise_on_error is False
         assert stop_on_filter_error is False
         return pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
 
     monkeypatch.setattr(cli, "run_screener", _run_screener)
-    monkeypatch.setattr(
-        cli,
-        "run_1g_returns",
-        lambda df, sigs, holding_period, transaction_cost, **kwargs: pd.DataFrame(
-            columns=[
-                "FilterCode",
-                "Symbol",
-                "Date",
-                "EntryClose",
-                "ExitClose",
-                "Side",
-                "ReturnPct",
-                "Win",
-                "Reason",
-            ]
-        ),
-    )
+    monkeypatch.setattr( cli,
+    "run_1g_returns",
+    lambda df,
+    sigs,
+    holding_period,
+    transaction_cost,
+    **kwargs: pd.DataFrame( columns=[ "FilterCode",
+    "Symbol",
+    "Date",
+    "EntryClose",
+    "ExitClose",
+    "Side",
+    "ReturnPct",
+    "Win",
+    "Reason",
+    ] ),
+     )
     monkeypatch.setattr(cli, "write_reports", lambda *args, **kwargs: {})
     monkeypatch.setattr(cli, "dataset_summary", lambda df: pd.DataFrame())
     monkeypatch.setattr(cli, "quality_warnings", lambda df: pd.DataFrame())

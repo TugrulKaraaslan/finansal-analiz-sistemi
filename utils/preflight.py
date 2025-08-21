@@ -6,7 +6,8 @@ TARGET_DATE = "2025-03-07"
 
 
 def smart_parse_dates(series: pd.Series) -> pd.Series:
-    """Safely parse date strings in ISO (YYYY-MM-DD) or Turkish (DD.MM.YYYY) format.
+    """Safely parse date strings in ISO (YYYY-MM-DD) or Turkish
+    (DD.MM.YYYY) format.
 
     The function automatically detects ISO formatted strings and parses them
     using the fixed ``%Y-%m-%d`` pattern. Remaining values are parsed with
@@ -17,10 +18,12 @@ def smart_parse_dates(series: pd.Series) -> pd.Series:
 
     # Identify ISO ``YYYY-MM-DD`` strings
     iso_mask = series.str.fullmatch(r"\d{4}-\d{2}-\d{2}")
-    iso = pd.to_datetime(series.where(iso_mask), errors="coerce", format="%Y-%m-%d")
+    iso = pd.to_datetime(series.where(iso_mask),
+                         errors="coerce", format="%Y-%m-%d")
 
     # Remaining values are treated as day-first (Turkish style)
-    local = pd.to_datetime(series.where(~iso_mask), errors="coerce", dayfirst=True)
+    local = pd.to_datetime(series.where(~iso_mask),
+                           errors="coerce", dayfirst=True)
 
     return iso.combine_first(local)
 
@@ -57,7 +60,10 @@ def preflight_check(df: pd.DataFrame, target_date: str = TARGET_DATE) -> dict:
     canon_cols = {canonical(c) for c in df.columns}
     missing = [c for c in REQUIRED_COLUMNS if c not in canon_cols]
 
-    return {"rows_on_target": int(mask.sum()), "missing_required_cols": missing}
+    return {
+        "rows_on_target": int(mask.sum()),
+        "missing_required_cols": missing,
+    }
 
 
 __all__ = [

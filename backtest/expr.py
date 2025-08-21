@@ -76,9 +76,13 @@ def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
             left = _eval(node.left)
             right = _eval(node.right)
             if isinstance(node.op, ast.BitAnd):
-                return _ensure_series(left, df.index) & _ensure_series(right, df.index)
+                return _ensure_series(
+    left, df.index) & _ensure_series(
+        right, df.index)
             if isinstance(node.op, ast.BitOr):
-                return _ensure_series(left, df.index) | _ensure_series(right, df.index)
+                return _ensure_series(
+    left, df.index) | _ensure_series(
+        right, df.index)
             raise SyntaxError("Unsupported binary operator")
         if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Invert):
             return ~_ensure_series(_eval(node.operand), df.index)

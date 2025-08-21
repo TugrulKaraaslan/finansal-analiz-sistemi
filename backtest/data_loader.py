@@ -45,7 +45,8 @@ def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
 
     if not cand and isinstance(cfg, dict):
         d = cfg.get("data", {})
-        cand = _first_existing(d.get("excel_dir"), d.get("path"), cfg.get("data_path"))
+        cand = _first_existing(d.get("excel_dir"), d.get(
+            "path"), cfg.get("data_path"))
 
     if cand:
         try:
@@ -57,7 +58,8 @@ def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
 
 
 def normalize_columns(
-    df: pd.DataFrame, price_schema: Optional[Dict[str, Iterable[str] | str]] = None
+    df: pd.DataFrame,
+    price_schema: Optional[Dict[str, Iterable[str] | str]] = None,
 ) -> tuple[pd.DataFrame, Dict[str, str]]:
     """Add canonical column aliases to *df* and return mapping.
 
@@ -96,7 +98,9 @@ def normalize_columns(
     return df, colmap
 
 
-def validate_columns(df: pd.DataFrame, required: Iterable[str]) -> pd.DataFrame:
+def validate_columns(
+    df: pd.DataFrame,
+     required: Iterable[str]) -> pd.DataFrame:
     """Ensure that ``df`` contains all columns in ``required``.
 
     Parameters
@@ -118,7 +122,8 @@ def validate_columns(df: pd.DataFrame, required: Iterable[str]) -> pd.DataFrame:
     """
     missing = set(required).difference(df.columns)
     if missing:
-        raise ValueError(f"Missing required columns: {', '.join(sorted(missing))}")
+        raise ValueError(
+            f"Missing required columns: {', '.join(sorted(missing))}")
     return df
 
 
@@ -170,8 +175,9 @@ def canonicalize_columns(df: pd.DataFrame) -> pd.DataFrame:
             j += 1
             new_name = f"{col}_alt{j}"
         logging.info(
-            "Column '%s' conflicts with existing; renamed to '%s'", col, new_name
-        )
+    "Column '%s' conflicts with existing; renamed to '%s'",
+    col,
+     new_name )
         df = df.rename(columns={df.columns[i]: new_name})
         seen_series[new_name] = df.iloc[:, i]
         i += 1
@@ -208,7 +214,8 @@ def apply_corporate_actions(
     adj["date"] = pd.to_datetime(adj["date"]).dt.normalize()
     df = df.copy()
     df["date"] = pd.to_datetime(df["date"]).dt.normalize()
-    price_cols = [c for c in ["open", "high", "low", "close"] if c in df.columns]
+    price_cols = [c for c in ["open", "high",
+        "low", "close"] if c in df.columns]
     if not price_cols:
         return df
     df = df.sort_values(["symbol", "date"])
@@ -269,7 +276,8 @@ def read_excels_long(
         enable_cache = len(excel_files) > 5
         if enable_cache:
             logger.info(
-                "Cache enabled automatically for {} Excel files", len(excel_files)
+                "Cache enabled automatically for {} Excel files", len(
+                    excel_files)
             )
     if enable_cache and not cache_path:
         cache_path = excel_dir / "cache.parquet" if excel_dir else None
@@ -283,11 +291,13 @@ def read_excels_long(
                 try:
                     return pd.read_parquet(cache_file)
                 except Exception as e:  # engine missing or wrong format
-                    logger.warning("Önbellek okunamadı: {} -> {}", cache_path, e)
+                    logger.warning(
+                        "Önbellek okunamadı: {} -> {}", cache_path, e)
                     try:
                         return pd.read_pickle(cache_file)
                     except Exception as e2:
-                        logger.warning("Önbellek okunamadı: {} -> {}", cache_path, e2)
+                        logger.warning(
+                            "Önbellek okunamadı: {} -> {}", cache_path, e2)
             aggregated_cache = cache_file if cache_file.suffix else None
             if cache_file and cache_file.is_dir():
                 cache_dir = cache_file
@@ -363,14 +373,14 @@ def read_excels_long(
                             df = xls.parse(sheet_name=sheet, header=0)
                         if df is None or df.empty:
                             continue
-                        df, _ = normalize_columns(df, price_schema=price_schema)
+                        df, _ = normalize_columns(
+                            df, price_schema=price_schema)
                         if "date" not in df.columns:
                             df.columns = [normalize_key(c) for c in df.columns]
                         if "date" not in df.columns:
                             if verbose:
                                 logger.info(
-                                    "[SKIP] {}:{} 'date' bulunamadı.", fpath, sheet
-                                )
+     "[SKIP] {}:{} 'date' bulunamadı.", fpath, sheet )
                             continue
                         df["date"] = pd.to_datetime(
                             df["date"].astype(str).str[:10],
@@ -393,8 +403,7 @@ def read_excels_long(
                     except Exception as e:
                         if verbose:
                             logger.warning(
-                                "[WARN] Sheet işlenemedi: {}:{} -> {}", fpath, sheet, e
-                            )
+     "[WARN] Sheet işlenemedi: {}:{} -> {}", fpath, sheet, e )
                         continue
         except Exception as e:
             if verbose:
@@ -412,7 +421,8 @@ def read_excels_long(
                 logger.warning("Önbelleğe yazılamadı: {} -> {}", cache_file, e)
         if verbose:
             logger.info(
-                "Excel'den okundu: {} ({:.2f}s)", fpath, time.perf_counter() - t0
+                "Excel'den okundu: {} ({:.2f}s)", fpath, time.perf_counter(
+                ) - t0
             )
         return df_out
 
@@ -427,14 +437,16 @@ def read_excels_long(
         return pd.DataFrame(columns=cols)
 
     full = pd.concat(records, ignore_index=True)
-    full = full.sort_values(["symbol", "date"], kind="mergesort").reset_index(drop=True)
+    full = full.sort_values(
+        ["symbol", "date"], kind="mergesort").reset_index(drop=True)
     full.drop_duplicates(["symbol", "date"], inplace=True)
     if "close" in full.columns:
         full = full.dropna(subset=["close"])
 
     full, _ = normalize_columns(full)
     full = canonicalize_columns(full)
-    validate_columns(full, ["date", "open", "high", "low", "close", "volume", "symbol"])
+    validate_columns(full, ["date", "open", "high",
+                     "low", "close", "volume", "symbol"])
 
     if enable_cache and aggregated_cache:
         try:
@@ -442,7 +454,8 @@ def read_excels_long(
             try:
                 full.to_parquet(aggregated_cache, index=False)
             except Exception as e:
-                logger.warning("Önbelleğe yazılamadı: {} -> {}", aggregated_cache, e)
+                logger.warning("Önbelleğe yazılamadı: {} -> {}",
+                               aggregated_cache, e)
                 try:
                     full.to_pickle(aggregated_cache)
                 except Exception as e2:  # pragma: no cover - logging
@@ -450,7 +463,8 @@ def read_excels_long(
                         "Önbelleğe yazılamadı: {} -> {}", aggregated_cache, e2
                     )
         except Exception as e:  # pragma: no cover - logging
-            logger.warning("Önbelleğe yazılamadı: {} -> {}", aggregated_cache, e)
+            logger.warning("Önbelleğe yazılamadı: {} -> {}",
+                           aggregated_cache, e)
 
     if verbose:
         logger.info("Toplam süre: {:.2f}s", time.perf_counter() - start_all)
