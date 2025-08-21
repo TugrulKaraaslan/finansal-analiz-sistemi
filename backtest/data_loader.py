@@ -57,7 +57,8 @@ def _guess_excel_dir_from_cfg(cfg: Any) -> Optional[Path]:
 
 
 def normalize_columns(
-    df: pd.DataFrame, price_schema: Optional[Dict[str, Iterable[str] | str]] = None
+    df: pd.DataFrame,
+    price_schema: Optional[Dict[str, Iterable[str] | str]] = None,
 ) -> tuple[pd.DataFrame, Dict[str, str]]:
     """Add canonical column aliases to *df* and return mapping.
 

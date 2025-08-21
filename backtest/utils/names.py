@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from __future__ import annotations
-
 import pandas as pd
 
-from backtest.naming import normalize_columns as _normalize_columns, normalize_name
+from backtest.naming import (
+    normalize_columns as _normalize_columns,
+    normalize_name,
+)
 
 
 def canonical_name(name: str) -> str:

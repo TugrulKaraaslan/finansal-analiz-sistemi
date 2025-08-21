@@ -12,7 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 SERIES_SERIES_CROSSOVERS: List[Tuple[str, str, str, str]] = [
-    ("sma_10", "sma_50", "sma_10_keser_sma_50_yukari", "sma_10_keser_sma_50_asagi"),
+    (
+        "sma_10",
+        "sma_50",
+        "sma_10_keser_sma_50_yukari",
+        "sma_10_keser_sma_50_asagi",
+    ),
 ]
 
 SERIES_VALUE_CROSSOVERS: List[Tuple[str, float, str, str]] = [

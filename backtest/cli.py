@@ -246,7 +246,7 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     "config_path",
     default="config_scan.yml",
     show_default=True,
-    help="YAML config yolu (CLI argümanı > varsayılan). Mutlak veya göreli yol",
+    help=("YAML config yolu (CLI argümanı > varsayılan). " "Mutlak veya göreli yol"),
 )
 @click.option("--start", "start_date", required=False, default=None, help="YYYY-MM-DD")
 @click.option("--end", "end_date", required=False, default=None, help="YYYY-MM-DD")
@@ -259,7 +259,10 @@ def _run_scan(cfg, *, per_day_output: bool = False, csv_also: bool = True) -> No
     default="smart",
 )
 @click.option(
-    "--per-day-output", is_flag=True, default=False, help="Günlük dosya çıktısı"
+    "--per-day-output",
+    is_flag=True,
+    default=False,
+    help="Günlük dosya çıktısı",
 )
 @click.option("--csv-also/--no-csv", default=True, help="CSV de yaz")
 @click.option(
@@ -380,7 +383,7 @@ def scan_range(
     "config_path",
     default="config_scan.yml",
     show_default=True,
-    help="YAML config yolu (CLI argümanı > varsayılan). Mutlak veya göreli yol",
+    help=("YAML config yolu (CLI argümanı > varsayılan). " "Mutlak veya göreli yol"),
 )
 @click.option("--date", "date_str", required=True, help="YYYY-MM-DD")
 @click.option("--holding-period", default=None, type=int)

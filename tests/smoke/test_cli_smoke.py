@@ -9,7 +9,7 @@ def test_cli_smoke(tmp_path: Path):
     root = tmp_path / "proj"
     (root / "Veri").mkdir(parents=True)
     (root / "filters.csv").write_text(
-        "FilterCode;PythonQuery\nEXAMPLE_01; (rsi_14 > 50) & (ema_20 > ema_50)\n",
+        "FilterCode;PythonQuery\n" "EXAMPLE_01; (rsi_14 > 50) & (ema_20 > ema_50)\n",
         encoding="utf-8",
     )
     (root / "config").mkdir()

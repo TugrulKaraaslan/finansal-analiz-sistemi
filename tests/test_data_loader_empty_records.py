@@ -7,7 +7,8 @@ from backtest.data_loader import apply_corporate_actions, read_excels_long
 
 
 def test_read_excels_long_no_valid_sheets(tmp_path):
-    # Create an Excel file with an empty sheet and a sheet without a date column
+    # Create an Excel file with an empty sheet and a sheet without a date
+    # column
     f = tmp_path / "dummy.xlsx"
     with pd.ExcelWriter(f) as writer:
         # empty sheet

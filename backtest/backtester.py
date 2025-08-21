@@ -23,7 +23,8 @@ class TradeSide(Enum):
     def from_value(cls, value: str) -> "TradeSide":
         try:
             return cls(value.lower())
-        except Exception as exc:  # pragma: no cover - explicit ValueError below
+        except Exception as exc:
+            # pragma: no cover - explicit ValueError below
             raise ValueError(f"Geçersiz Side değeri: {value!r}") from exc
 
 

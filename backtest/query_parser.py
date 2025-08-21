@@ -105,10 +105,18 @@ class SafeQuery:
                 func = node.func
                 if isinstance(func, ast.Attribute):
                     if func.attr not in cls._ALLOWED_FUNCS:
-                        return False, names, f"function '{func.attr}' not allowed"
+                        return (
+                            False,
+                            names,
+                            f"function '{func.attr}' not allowed",
+                        )
                 elif isinstance(func, ast.Name):
                     if func.id not in cls._ALLOWED_FUNCS:
-                        return False, names, f"function '{func.id}' not allowed"
+                        return (
+                            False,
+                            names,
+                            f"function '{func.id}' not allowed",
+                        )
                 else:
                     return False, names, "invalid function call"
             elif isinstance(node, ast.Attribute):

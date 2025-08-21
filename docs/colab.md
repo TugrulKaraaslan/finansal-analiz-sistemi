@@ -42,26 +42,26 @@ data:
   enable_cache: false
   cache_parquet_path: "cache"
 
-calendar:
-  tplus1_mode: "calendar"
-  holiday_csv: ""
+  calendar:
+    tplus1_mode: "calendar"
+    holiday_csv: ""
 
-    benchmark:
-      source: "excel"
-      excel_path: "/content/finansal-analiz-sistemi/Veri/BIST.xlsx"
-      excel_sheet: "BIST"
-      csv_path: ""
-      column_date: "date"
-      column_close: "close"
+  benchmark:
+    source: "excel"
+    excel_path: "/content/finansal-analiz-sistemi/Veri/BIST.xlsx"
+    excel_sheet: "BIST"
+    csv_path: ""
+    column_date: "date"
+    column_close: "close"
 
 report:
   with_bist_ratio_summary: true
   include_hit_ratio: true
   excel_engine: "xlsxwriter"
 
-range:
-  start_date: "2022-01-03"
-  end_date:   "2025-04-18"
+  range:
+    start_date: "2022-01-03"
+    end_date:   "2025-04-18"
 
   single:
     date: "2025-03-07"

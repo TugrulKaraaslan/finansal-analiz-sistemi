@@ -18,10 +18,15 @@ def canon_token(tok: str) -> str:
 def tr_to_funcs(expr: str) -> str:
     s = expr.replace("<>", "!=")
     s = P_UP.sub(
-        lambda m: f'CROSSUP("{canon_token(m.group(1))}","{canon_token(m.group(2))}")', s
+        lambda m: (
+            f'CROSSUP("{canon_token(m.group(1))}",' f'"{canon_token(m.group(2))}")'
+        ),
+        s,
     )
     s = P_DOWN.sub(
-        lambda m: f'CROSSDOWN("{canon_token(m.group(1))}","{canon_token(m.group(2))}")',
+        lambda m: (
+            f'CROSSDOWN("{canon_token(m.group(1))}",' f'"{canon_token(m.group(2))}")'
+        ),
         s,
     )
     s = P_LVL_UP.sub(
