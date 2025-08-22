@@ -4,7 +4,7 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from backtest.naming import normalize_name, validate_columns_schema
+from backtest.naming import normalize_name, validate_columns_schema, canonicalize_columns
 
 
 def test_alias_normalization_basic():
@@ -49,3 +49,14 @@ def test_auto_fix_mode():
     assert skipped == ["ema_2_o"]
     assert "close" in fixed.columns
     assert "ema_2_o" not in fixed.columns
+
+
+def test_canonicalize_columns_drops_duplicates():
+    df = pd.DataFrame(
+        {
+            "BBM_20_2": [1, 2, 3],
+            "bbm_20_2": [1, 2, 3],
+        }
+    )
+    out = canonicalize_columns(df)
+    assert list(out.columns) == ["bbm_20_2"]
