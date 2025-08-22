@@ -33,5 +33,6 @@ def test_checksum_determinism(tmp_path: Path):
     assert "2024-01-01.csv" in data and "2024-01-02.csv" in data
     # tek dosyanın manuel hash'i ile karşılaştır
     import hashlib
+
     h = hashlib.sha256(f1.read_bytes()).hexdigest()
     assert data["2024-01-01.csv"] == h

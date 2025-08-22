@@ -1,3 +1,4 @@
+# flake8: noqa
 from __future__ import annotations
 import argparse
 import os
@@ -18,6 +19,18 @@ from backtest.reporter import write_reports
 from backtest.validator import dataset_summary, quality_warnings
 from backtest.data_loader import read_excels_long as _read_excels_long
 from backtest.trace import RunContext, ArtifactWriter, list_output_files
+from backtest.summary import summarize_range
+
+__all__ = [
+    "normalize",
+    "add_next_close",
+    "load_filters_csv",
+    "run_screener",
+    "run_1g_returns",
+    "write_reports",
+    "dataset_summary",
+    "quality_warnings",
+]
 
 logger = logging.getLogger("backtest.cli")
 
@@ -33,6 +46,7 @@ def _ns_to_dict(x):
     if isinstance(x, list):
         return [_ns_to_dict(v) for v in x]
     return x
+
 
 # ---- Geri uyum: tests monkeypatch beklentileri ----
 
@@ -152,6 +166,21 @@ def build_parser() -> argparse.ArgumentParser:
     prange.add_argument("--out", "--reports-dir", dest="out", required=False)
     add_common(prange)
 
+    ps = sub.add_parser(
+        "summarize", help="Sinyallerden günlük özet ve BIST oranlı alpha üret"
+    )
+    ps.add_argument(
+        "--data", required=True, help="Parquet/CSV fiyat paneli (MultiIndex destekli)"
+    )
+    ps.add_argument("--signals", required=True, help="A6 günlük sinyal klasörü")
+    ps.add_argument(
+        "--benchmark",
+        required=True,
+        help="BIST benchmark dosyası (CSV/XLSX: date,close)",
+    )
+    ps.add_argument("--out", required=False, default="raporlar/ozet")
+    ps.add_argument("--horizon", type=int, default=1)
+
     return p
 
 
@@ -174,7 +203,7 @@ def main(argv=None):
     parser = build_parser()
     if argv is None:
         argv = sys.argv[1:]
-    if argv and argv[0] in {"dry-run", "scan-day", "scan-range"}:
+    if argv and argv[0] in {"dry-run", "scan-day", "scan-range", "summarize"}:
         cmd = argv[0]
         rest = argv[1:]
         pre: list[str] = []
@@ -248,6 +277,14 @@ def main(argv=None):
             "alias": args.alias,
             "out": args.out,
         }
+    elif args.cmd == "summarize":
+        inputs = {
+            "data": args.data,
+            "signals": args.signals,
+            "benchmark": args.benchmark,
+            "out": args.out,
+            "horizon": args.horizon,
+        }
 
     rc.write_env_snapshot()
     rc.write_config_snapshot(cfg_dict, inputs)
@@ -279,6 +316,21 @@ def main(argv=None):
         parser.error(
             f"the following arguments are required: {', '.join('--'+n for n in need)}"
         )
+
+    if args.cmd == "summarize":
+        if args.data.lower().endswith(".parquet"):
+            df = pd.read_parquet(args.data)
+        else:
+            df = pd.read_csv(args.data, parse_dates=True, index_col=0)
+        res = summarize_range(
+            df,
+            args.signals,
+            args.benchmark,
+            horizon=args.horizon,
+            write_dir=args.out,
+        )
+        print("Özet yazıldı:", res)
+        sys.exit(0)
 
     if args.data and str(args.data).lower().endswith(".parquet"):
         df = pd.read_parquet(args.data)

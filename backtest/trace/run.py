@@ -21,7 +21,9 @@ def new_run_id() -> str:
 
 def _git_short_hash() -> str | None:
     try:
-        out = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], stderr=subprocess.DEVNULL)
+        out = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"], stderr=subprocess.DEVNULL
+        )
         return out.decode().strip()
     except Exception:
         return None
@@ -31,11 +33,13 @@ def _package_versions() -> Dict[str, str]:
     vers: Dict[str, str] = {}
     try:
         import pandas as pd  # type: ignore
+
         vers["pandas"] = getattr(pd, "__version__", "?")
     except Exception:
         pass
     try:
         import numpy as np  # type: ignore
+
         vers["numpy"] = getattr(np, "__version__", "?")
     except Exception:
         pass
@@ -49,7 +53,9 @@ class RunContext:
     artifacts_dir: Path
 
     @classmethod
-    def create(cls, logs_root: str | os.PathLike, artifacts_root: str | os.PathLike) -> "RunContext":
+    def create(
+        cls, logs_root: str | os.PathLike, artifacts_root: str | os.PathLike
+    ) -> "RunContext":
         rid = new_run_id()
         logs_dir = Path(logs_root)
         arts_root = Path(artifacts_root)
@@ -71,9 +77,15 @@ class RunContext:
         LOGGER.info("env.json yazıldı: %s", p)
         return p
 
-    def write_config_snapshot(self, config: Dict[str, Any], inputs: Dict[str, Any]) -> None:
+    def write_config_snapshot(
+        self, config: Dict[str, Any], inputs: Dict[str, Any]
+    ) -> None:
         cfgp = self.artifacts_dir / "config.json"
         inpp = self.artifacts_dir / "inputs.json"
-        cfgp.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
-        inpp.write_text(json.dumps(inputs, ensure_ascii=False, indent=2), encoding="utf-8")
+        cfgp.write_text(
+            json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        inpp.write_text(
+            json.dumps(inputs, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
         LOGGER.info("config.json ve inputs.json yazıldı")

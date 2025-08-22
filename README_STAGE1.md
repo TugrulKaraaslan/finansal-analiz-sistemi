@@ -47,3 +47,8 @@
 - run_id tabanlı log ve artefakt altyapısı eklendi.
 - Artefaktlar: config/env/inputs snapshot ve günlük dosyaları için checksum.
 - Aynı girdilerle tekrar koşuda checksum sabit → deterministik doğrulama.
+
+## Stage1 İlerleme – A9 Tam
+- Tarama ortalamaları ve BİST oranlı özetler eklendi (H=1, eşit ağırlık).
+- Çıktılar: `raporlar/ozet/daily_summary.csv`, `filter_counts.csv`, `summary.md`.
+- CLI: `summarize --data panel.parquet --signals raporlar/gunluk --benchmark bist.csv --out raporlar/ozet`.
