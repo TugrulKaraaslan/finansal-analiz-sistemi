@@ -21,6 +21,7 @@ from backtest.data_loader import read_excels_long as _read_excels_long
 from backtest.trace import RunContext, ArtifactWriter, list_output_files
 from backtest.summary import summarize_range
 from backtest.reporting import build_excel_report
+from backtest.filters.normalize_expr import normalize_expr
 
 __all__ = [
     "normalize",
@@ -488,12 +489,34 @@ try:  # pragma: no cover - click opsiyonel
         except FileNotFoundError as e:  # pragma: no cover
             raise click.ClickException(str(e))
 
+    @click.command(name="lint-filters")
+    @click.option("--file", "file", required=True)
+    @click.option("--inplace", is_flag=True, default=False)
+    def lint_filters(file: str, inplace: bool = False) -> None:
+        df = pd.read_csv(file, sep=None, engine="python")
+        if "PythonQuery" not in df.columns:
+            raise click.ClickException("PythonQuery column missing")
+        norm = df["PythonQuery"].map(normalize_expr)
+        changed = norm != df["PythonQuery"]
+        if changed.any():
+            if inplace:
+                sep = ";" if ";" in Path(file).read_text().splitlines()[0] else ","
+                df["PythonQuery"] = norm
+                df.to_csv(file, sep=sep, index=False)
+            else:
+                for idx in df.index[changed]:
+                    click.echo(f"{idx}: {df.at[idx, 'PythonQuery']} -> {norm.iloc[idx]}")
+                raise SystemExit(1)
+        else:
+            click.echo("OK")
+
     @click.group()
     def cli() -> None:
         pass
 
     cli.add_command(scan_range)
     cli.add_command(scan_day)
+    cli.add_command(lint_filters)
 except Exception:  # pragma: no cover
     pass
 
