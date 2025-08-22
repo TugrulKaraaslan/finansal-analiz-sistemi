@@ -50,27 +50,30 @@ def normalize_expr(expr: str) -> str:
                 val = val.replace("stochrsid_", "stochrsi_d_")
             tok = tok._replace(string=val)
             out_tokens.append(tok)
-            # handle trailing .number fragments
+            # handle trailing decimal fragments
+            if (
+                i + 2 < len(tokens)
+                and tokens[i + 1].type == tokenize.NUMBER
+                and tokens[i + 1].string.startswith(".")
+                and "_" in tokens[i + 1].string
+                and tokens[i + 2].type == tokenize.NUMBER
+                and tokens[i + 2].string.startswith(".")
+            ):
+                tok = tok._replace(
+                    string=tok.string
+                    + tokens[i + 1].string
+                    + tokens[i + 2].string
+                )
+                out_tokens[-1] = tok
+                i += 3
+                continue
             if (
                 i + 1 < len(tokens)
                 and tokens[i + 1].type == tokenize.NUMBER
                 and tokens[i + 1].string.startswith(".")
             ):
-                j = i + 2
-                while j < len(tokens) and tokens[j].type in (
-                    tokenize.NL,
-                    tokenize.NEWLINE,
-                    tokenize.INDENT,
-                    tokenize.DEDENT,
-                ):
-                    j += 1
-                if (
-                    j < len(tokens)
-                    and tokens[j].type == tokenize.OP
-                    and tokens[j].string in _COMPARATORS
-                ):
-                    i += 2
-                    continue
+                i += 2
+                continue
         else:
             out_tokens.append(tok)
         i += 1
@@ -78,6 +81,8 @@ def normalize_expr(expr: str) -> str:
     normalised = tokenize.untokenize(out_tokens)
     normalised = _collapse_underscores(normalised)
     normalised = re.sub(r"\s+(?=[<>]=?|==|!=)", " ", normalised)
+    normalised = re.sub(r"\s+\)", ")", normalised)
+    normalised = re.sub(r"\s+,", ",", normalised)
     return normalised
 
 
