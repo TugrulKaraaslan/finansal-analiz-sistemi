@@ -20,6 +20,7 @@ from backtest.validator import dataset_summary, quality_warnings
 from backtest.data_loader import read_excels_long as _read_excels_long
 from backtest.trace import RunContext, ArtifactWriter, list_output_files
 from backtest.summary import summarize_range
+from backtest.reporting import build_excel_report
 
 __all__ = [
     "normalize",
@@ -181,6 +182,11 @@ def build_parser() -> argparse.ArgumentParser:
     ps.add_argument("--out", required=False, default="raporlar/ozet")
     ps.add_argument("--horizon", type=int, default=1)
 
+    pr = sub.add_parser("report-excel", help="A9 csv'lerinden summary.xlsx üret")
+    pr.add_argument("--daily", required=True, help="daily_summary.csv yolu")
+    pr.add_argument("--filter-counts", required=True, help="filter_counts.csv yolu")
+    pr.add_argument("--out", default="raporlar/ozet/summary.xlsx")
+
     return p
 
 
@@ -203,7 +209,13 @@ def main(argv=None):
     parser = build_parser()
     if argv is None:
         argv = sys.argv[1:]
-    if argv and argv[0] in {"dry-run", "scan-day", "scan-range", "summarize"}:
+    if argv and argv[0] in {
+        "dry-run",
+        "scan-day",
+        "scan-range",
+        "summarize",
+        "report-excel",
+    }:
         cmd = argv[0]
         rest = argv[1:]
         pre: list[str] = []
@@ -285,6 +297,12 @@ def main(argv=None):
             "out": args.out,
             "horizon": args.horizon,
         }
+    elif args.cmd == "report-excel":
+        inputs = {
+            "daily": args.daily,
+            "filter_counts": args.filter_counts,
+            "out": args.out,
+        }
 
     rc.write_env_snapshot()
     rc.write_config_snapshot(cfg_dict, inputs)
@@ -302,6 +320,11 @@ def main(argv=None):
         for err in rep.errors:
             print(f"❌ Satır {err['row']} | {err['code']} | {err['msg']}")
         sys.exit(1)
+
+    elif args.cmd == "report-excel":
+        path = build_excel_report(args.daily, args.filter_counts, out_xlsx=args.out)
+        print("Excel rapor yazıldı:", path)
+        sys.exit(0)
 
     need: list[str] = []
     if args.cmd == "scan-day":
