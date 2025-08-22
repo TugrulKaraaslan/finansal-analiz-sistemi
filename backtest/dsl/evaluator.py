@@ -18,14 +18,20 @@ _ARITH = {
     ast.Mod: op.mod,
 }
 _CMPOP = {
-    ast.Gt: op.gt, ast.Lt: op.lt, ast.GtE: op.ge, ast.LtE: op.le,
-    ast.Eq: op.eq, ast.NotEq: op.ne,
+    ast.Gt: op.gt,
+    ast.Lt: op.lt,
+    ast.GtE: op.ge,
+    ast.LtE: op.le,
+    ast.Eq: op.eq,
+    ast.NotEq: op.ne,
 }
+
 
 class SeriesContext:
     """İsim→seri/skaler sözlüğü sağlayan bağlam.
     Değer dönerken pandas.Series ya da skaler (int/float) dönebilir.
     """
+
     def __init__(self, values: Mapping[str, Any]):
         self.values = values
 
@@ -61,7 +67,11 @@ class Evaluator:
         if isinstance(node, ast.UnaryOp):
             operand = self._eval_node(node.operand)
             if isinstance(node.op, ast.Not):
-                return (~operand).fillna(False) if isinstance(operand, pd.Series) else (not operand)
+                return (
+                    (~operand).fillna(False)
+                    if isinstance(operand, pd.Series)
+                    else (not operand)
+                )
             if isinstance(node.op, ast.USub):
                 return -operand
             if isinstance(node.op, ast.UAdd):
@@ -76,7 +86,11 @@ class Evaluator:
                 vals = [self._eval_node(v) for v in node.values]
                 out = vals[0]
                 for v in vals[1:]:
-                    out = (out | v) if isinstance(out, pd.Series) else (bool(out) or bool(v))
+                    out = (
+                        (out | v)
+                        if isinstance(out, pd.Series)
+                        else (bool(out) or bool(v))
+                    )
                 return out
         if isinstance(node, ast.Compare):
             left = self._eval_node(node.left)
@@ -95,7 +109,7 @@ class Evaluator:
         if isinstance(node, ast.Constant):
             return node.value
         if isinstance(node, ast.Call):
-            func_name = getattr(node.func, 'id', None)
+            func_name = getattr(node.func, "id", None)
             if func_name not in FUNCTIONS:
                 raise DSLUnknownName(f"Tanımsız fonksiyon: {func_name}", code="DF003")
             fn = FUNCTIONS[func_name]

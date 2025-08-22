@@ -5,18 +5,28 @@ from .errors import DSLParseError, DSLForbiddenNode
 # Whitelist edilen node tipleri
 _ALLOWED_NODES = (
     ast.Expression,
-    ast.BoolOp, ast.UnaryOp, ast.BinOp,
+    ast.BoolOp,
+    ast.UnaryOp,
+    ast.BinOp,
     ast.Compare,
-    ast.Name, ast.Load,
+    ast.Name,
+    ast.Load,
     ast.Constant,
     ast.Call,
-    ast.And, ast.Or, ast.Not,
-    ast.Gt, ast.Lt, ast.GtE, ast.LtE, ast.Eq, ast.NotEq,
+    ast.And,
+    ast.Or,
+    ast.Not,
+    ast.Gt,
+    ast.Lt,
+    ast.GtE,
+    ast.LtE,
+    ast.Eq,
+    ast.NotEq,
 )
 _ALLOWED_BINOPS = (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Mod)
 _ALLOWED_UNARY = (ast.Not, ast.USub, ast.UAdd)
-_ALLOWED_CMPS   = (ast.Gt, ast.Lt, ast.GtE, ast.LtE, ast.Eq, ast.NotEq)
-_ALLOWED_BOOLOPS= (ast.And, ast.Or)
+_ALLOWED_CMPS = (ast.Gt, ast.Lt, ast.GtE, ast.LtE, ast.Eq, ast.NotEq)
+_ALLOWED_BOOLOPS = (ast.And, ast.Or)
 
 
 def _check_whitelist(node: ast.AST) -> None:
