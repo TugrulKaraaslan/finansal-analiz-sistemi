@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import os
 import re
 import tokenize
 
@@ -13,7 +14,7 @@ def _collapse_underscores(s: str) -> str:
     return re.sub(r"__+", "_", s)
 
 
-def normalize_expr(expr: str) -> str:
+def normalize_expr(expr: str, *, rewrite_cross: bool | None = None) -> str:
     """Normalise a filter expression string.
 
     * Convert logical operators ``and``/``or`` to ``&``/``|``
@@ -23,6 +24,9 @@ def normalize_expr(expr: str) -> str:
       before a comparison operator.
     * Collapse multiple underscores.
     """
+
+    if rewrite_cross is None:
+        rewrite_cross = os.getenv("CROSS_REWRITE") == "1"
 
     tokens = list(tokenize.generate_tokens(io.StringIO(expr).readline))
     out_tokens: list[tokenize.TokenInfo] = []
@@ -59,11 +63,9 @@ def normalize_expr(expr: str) -> str:
                 and tokens[i + 2].type == tokenize.NUMBER
                 and tokens[i + 2].string.startswith(".")
             ):
-                tok = tok._replace(
-                    string=tok.string
-                    + tokens[i + 1].string
-                    + tokens[i + 2].string
-                )
+                concat = tok.string + tokens[i + 1].string
+                concat += tokens[i + 2].string
+                tok = tok._replace(string=concat)
                 out_tokens[-1] = tok
                 i += 3
                 continue
@@ -83,6 +85,32 @@ def normalize_expr(expr: str) -> str:
     normalised = re.sub(r"\s+(?=[<>]=?|==|!=)", " ", normalised)
     normalised = re.sub(r"\s+\)", ")", normalised)
     normalised = re.sub(r"\s+,", ",", normalised)
+
+    if rewrite_cross:
+
+        def _rewrite_up(m: re.Match) -> str:
+            a = m.group(1).strip()
+            b = m.group(2).strip()
+            return f"(lag1__{a} <= lag1__{b}) & ({a} > {b})"
+
+        def _rewrite_down(m: re.Match) -> str:
+            a = m.group(1).strip()
+            b = m.group(2).strip()
+            return f"(lag1__{a} >= lag1__{b}) & ({a} < {b})"
+
+        normalised = re.sub(
+            r"crossup\(([^,]+),([^\)]+)\)",
+            _rewrite_up,
+            normalised,
+            flags=re.I,
+        )
+        normalised = re.sub(
+            r"crossdown\(([^,]+),([^\)]+)\)",
+            _rewrite_down,
+            normalised,
+            flags=re.I,
+        )
+
     return normalised
 
 
