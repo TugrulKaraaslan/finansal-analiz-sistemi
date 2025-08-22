@@ -52,3 +52,7 @@
 - Tarama ortalamaları ve BİST oranlı özetler eklendi (H=1, eşit ağırlık).
 - Çıktılar: `raporlar/ozet/daily_summary.csv`, `filter_counts.csv`, `summary.md`.
 - CLI: `summarize --data panel.parquet --signals raporlar/gunluk --benchmark bist.csv --out raporlar/ozet`.
+
+## Stage1 İlerleme – A10 Tam
+- Excel çıktı katmanı eklendi: `summary.xlsx` (DAILY_SUMMARY, FILTER_COUNTS, KPI, PIVOT_FILTER_BY_DAY, README).
+- CLI: `report-excel --daily raporlar/ozet/daily_summary.csv --filter-counts raporlar/ozet/filter_counts.csv --out raporlar/ozet/summary.xlsx`.
