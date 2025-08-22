@@ -42,3 +42,8 @@
 - Eski testlere uyum için `scan_range/scan_day` click komutları ve `_run_scan`, `preflight`, `read_excels_long`, `compile_filters` sembolleri eklendi.
 - `--report-alias` ve `--no-preflight` bayrakları yardım çıktısına taşındı.
 - `load_config` artık attribute‑style nesne döndürüyor; legacy anahtarlar (`xu100_*`) destekleniyor.
+
+## Stage1 İlerleme – A8 Tam
+- run_id tabanlı log ve artefakt altyapısı eklendi.
+- Artefaktlar: config/env/inputs snapshot ve günlük dosyaları için checksum.
+- Aynı girdilerle tekrar koşuda checksum sabit → deterministik doğrulama.

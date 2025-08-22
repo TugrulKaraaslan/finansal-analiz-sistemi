@@ -17,8 +17,22 @@ from backtest.backtester import run_1g_returns
 from backtest.reporter import write_reports
 from backtest.validator import dataset_summary, quality_warnings
 from backtest.data_loader import read_excels_long as _read_excels_long
+from backtest.trace import RunContext, ArtifactWriter, list_output_files
 
 logger = logging.getLogger("backtest.cli")
+
+# setup_logging çağrısından sonra FileHandler eklemek için placeholder
+fh = None
+
+
+def _ns_to_dict(x):
+    if isinstance(x, NS):
+        return {k: _ns_to_dict(getattr(x, k)) for k in x.__dict__}
+    if isinstance(x, dict):
+        return {k: _ns_to_dict(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [_ns_to_dict(v) for v in x]
+    return x
 
 # ---- Geri uyum: tests monkeypatch beklentileri ----
 
@@ -178,19 +192,20 @@ def main(argv=None):
 
     cfg, flags = _load_and_prepare(args)
 
-    if args.cmd == "dry-run":
-        _file_exists_or_exit(args.filters)
-        if args.alias:
-            _file_exists_or_exit(args.alias)
-        from backtest.validation import validate_filters
-
-        rep = validate_filters(args.filters, args.alias)
-        if rep.ok():
-            print("✅ Uyum Tam")
-            sys.exit(0)
-        for err in rep.errors:
-            print(f"❌ Satır {err['row']} | {err['code']} | {err['msg']}")
-        sys.exit(1)
+    cfg_dict = _ns_to_dict(cfg)
+    rc = RunContext.create(
+        cfg_dict.get("paths", {}).get("logs", "logs"),
+        cfg_dict.get("paths", {}).get("artifacts", "artifacts"),
+    )
+    logger.info("run_id=%s", rc.run_id)
+    log_file = Path(cfg_dict.get("paths", {}).get("logs", "logs")) / f"{rc.run_id}.log"
+    global fh
+    fh = logging.FileHandler(log_file, encoding="utf-8")
+    fh.setLevel(logging.getLogger().level)
+    fh.setFormatter(
+        logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+    )
+    logging.getLogger().addHandler(fh)
 
     if args.config:
         if args.cmd == "scan-day":
@@ -212,6 +227,44 @@ def main(argv=None):
             args.end = args.end or getattr(cfg.project, "end_date", None)
             args.filters = args.filters or getattr(cfg.data, "filters_csv", None)
             args.out = args.out or getattr(cfg.project, "out_dir", None)
+
+    inputs = {}
+    if args.cmd == "dry-run":
+        inputs = {"filters": args.filters, "alias": args.alias}
+    elif args.cmd == "scan-day":
+        inputs = {
+            "data": args.data,
+            "date": args.date,
+            "filters": args.filters,
+            "alias": args.alias,
+            "out": args.out,
+        }
+    elif args.cmd == "scan-range":
+        inputs = {
+            "data": args.data,
+            "start": args.start,
+            "end": args.end,
+            "filters": args.filters,
+            "alias": args.alias,
+            "out": args.out,
+        }
+
+    rc.write_env_snapshot()
+    rc.write_config_snapshot(cfg_dict, inputs)
+
+    if args.cmd == "dry-run":
+        _file_exists_or_exit(args.filters)
+        if args.alias:
+            _file_exists_or_exit(args.alias)
+        from backtest.validation import validate_filters
+
+        rep = validate_filters(args.filters, args.alias)
+        if rep.ok():
+            print("✅ Uyum Tam")
+            sys.exit(0)
+        for err in rep.errors:
+            print(f"❌ Satır {err['row']} | {err['code']} | {err['msg']}")
+        sys.exit(1)
 
     need: list[str] = []
     if args.cmd == "scan-day":
@@ -251,6 +304,13 @@ def main(argv=None):
         from backtest.batch.io import OutputWriter
 
         OutputWriter(args.out).write_day(args.date, rows)
+        if args.cmd in ("scan-day", "scan-range") and flags.write_outputs:
+            out_root = args.out or cfg_dict.get("paths", {}).get(
+                "outputs", "raporlar/gunluk"
+            )
+            files = list_output_files(out_root)
+            ArtifactWriter(rc.artifacts_dir).write_checksums(files)
+            logger.info("checksums.json yazıldı: %d dosya", len(files))
         sys.exit(0)
 
     if args.cmd == "scan-range":
@@ -259,6 +319,13 @@ def main(argv=None):
         run_scan_range(
             df, args.start, args.end, filters_df, out_dir=args.out, alias_csv=args.alias
         )
+        if args.cmd in ("scan-day", "scan-range") and flags.write_outputs:
+            out_root = args.out or cfg_dict.get("paths", {}).get(
+                "outputs", "raporlar/gunluk"
+            )
+            files = list_output_files(out_root)
+            ArtifactWriter(rc.artifacts_dir).write_checksums(files)
+            logger.info("checksums.json yazıldı: %d dosya", len(files))
         sys.exit(0)
 
 
