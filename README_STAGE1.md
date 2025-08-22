@@ -25,3 +25,10 @@
 - Aynı gösterge bir kez hesaplanıyor (cache).
 - Modüller: `backtest/precompute/*`
 - Test: `tests/test_precompute.py`
+
+## Stage1 İlerleme – A6 Tam
+- Günlük batch döngüsü eklendi.
+- CLI alt komutları: `scan-day`, `scan-range`.
+- Çıktılar: `raporlar/gunluk/YYYY-MM-DD.csv` (date,symbol,filter_code).
+- Modüller: `backtest/batch/*`
+- Test: `tests/test_batch_runner.py`

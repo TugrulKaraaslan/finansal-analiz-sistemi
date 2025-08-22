@@ -34,6 +34,7 @@ from .filters_compile import compile_filters
 from .filters_cleanup import clean_filters
 from .filters_io import load_filters, save_csv
 from backtest.validation import validate_filters
+from backtest.batch import run_scan_range, run_scan_day
 
 
 @click.group()
@@ -462,25 +463,73 @@ def scan_day(
         raise
 
 
-if __name__ == "__main__":
-    import sys
+def main():
+    p = argparse.ArgumentParser()
+    sub = p.add_subparsers(dest="cmd", required=True)
 
-    if "--dry-run" in sys.argv:
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--filters", type=str, required=True)
-        parser.add_argument("--alias", type=str, default=None)
-        parser.add_argument("--dry-run", action="store_true")
-        args = parser.parse_args()
+    # dry-run (A4)
+    pr = sub.add_parser("dry-run")
+    pr.add_argument("--filters", required=True)
+    pr.add_argument("--alias", default=None)
+
+    # scan-day
+    pd_day = sub.add_parser("scan-day")
+    pd_day.add_argument("--data", required=True, help="Parquet/CSV fiyat verisi")
+    pd_day.add_argument("--date", required=True)
+    pd_day.add_argument("--filters", required=True)
+    pd_day.add_argument("--alias", default=None)
+    pd_day.add_argument("--out", required=True)
+
+    # scan-range
+    prange = sub.add_parser("scan-range")
+    prange.add_argument("--data", required=True)
+    prange.add_argument("--start", required=True)
+    prange.add_argument("--end", required=True)
+    prange.add_argument("--filters", required=True)
+    prange.add_argument("--alias", default=None)
+    prange.add_argument("--out", required=True)
+
+    args = p.parse_args()
+
+    if args.cmd == "dry-run":
         rep = validate_filters(args.filters, args.alias)
         if rep.ok():
             print("✅ Uyum Tam")
-            sys.exit(0)
         else:
             for err in rep.errors:
                 print(f"❌ Satır {err['row']} | {err['code']} | {err['msg']}")
             for warn in rep.warnings:
                 print(f"⚠️ Satır {warn['row']} | {warn['code']} | {warn['msg']}")
-            sys.exit(1)
+            exit(1)
+
+    elif args.cmd == "scan-day":
+        # veri yükleme (Parquet tercih; CSV fallback)
+        if args.data.lower().endswith(".parquet"):
+            df = pd.read_parquet(args.data)
+        else:
+            df = pd.read_csv(args.data, parse_dates=True, index_col=0)
+        filters_df = pd.read_csv(args.filters)
+        rows = run_scan_day(df, args.date, filters_df, alias_csv=args.alias)
+        from backtest.batch.io import OutputWriter
+
+        OutputWriter(args.out).write_day(args.date, rows)
+
+    elif args.cmd == "scan-range":
+        if args.data.lower().endswith(".parquet"):
+            df = pd.read_parquet(args.data)
+        else:
+            df = pd.read_csv(args.data, parse_dates=True, index_col=0)
+        filters_df = pd.read_csv(args.filters)
+        run_scan_range(
+            df, args.start, args.end, filters_df, out_dir=args.out, alias_csv=args.alias
+        )
+
+
+if __name__ == "__main__":
+    import sys
+
+    if (len(sys.argv) > 1 and sys.argv[1] == "dry-run") or ("--data" in sys.argv):
+        main()
     else:
         try:
             cli()
