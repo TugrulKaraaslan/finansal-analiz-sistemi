@@ -1,6 +1,8 @@
 from __future__ import annotations
 import pandas as pd
 from backtest.cross import cross_up, cross_down
+from backtest.filters.normalize_expr import normalize_expr
+from backtest.pipeline.precompute import precompute_needed
 
 
 def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
@@ -12,12 +14,13 @@ def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
     vectorised ``cross_up``/``cross_down`` helpers. This keeps the computation
     fully vectorised without resorting to ``apply`` or explicit loops.
     """
+    expr = normalize_expr(expr)
+    df = precompute_needed(df, [expr])
     if "cross_up" in expr or "cross_down" in expr:
         env = {c: df[c] for c in df.columns}
         env.update({"cross_up": cross_up, "cross_down": cross_down})
-        safe_expr = expr.replace(" and ", " & ").replace(" or ", " | ")
         try:
-            return eval(safe_expr, {"__builtins__": {}}, env)
+            return eval(expr, {"__builtins__": {}}, env)
         except Exception as e:
             raise ValueError(f"filter evaluation failed: {e}") from e
     try:

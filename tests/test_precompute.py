@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from backtest.precompute import Precomputer
+from backtest.pipeline.precompute import precompute_needed
 
 idx = pd.date_range("2024-01-01", periods=50, freq="B")
 
@@ -44,3 +45,13 @@ def test_cache_prevents_recompute():
     out2 = pc.precompute(out1, {"ema_20"})
     # cache çalıştığı için ikinci sefer hata/yeniden hesaplama olmamalı
     assert "ema_20" in out2.columns
+
+
+def test_precompute_stochrsi_mom_roc():
+    df = _df()
+    exprs = ["stochrsi_k_14_14_3_3 > 0.8", "mom_10 > 0", "roc_12 > 0"]
+    df = precompute_needed(df, exprs)
+    assert "stochrsi_k_14_14_3_3" in df.columns
+    assert "stochrsi_d_14_14_3_3" in df.columns
+    assert "mom_10" in df.columns
+    assert "roc_12" in df.columns

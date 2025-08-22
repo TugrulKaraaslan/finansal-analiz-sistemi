@@ -6,6 +6,8 @@ import sys
 import types
 from types import SimpleNamespace
 
+import pandas as pd
+import pytest
 from click.testing import CliRunner
 
 fake_pa = types.ModuleType("pandera")
@@ -16,6 +18,8 @@ sys.modules.setdefault("pandera", fake_pa)
 
 from backtest.io.preflight import preflight  # noqa: E402
 from backtest import cli  # noqa: E402
+from backtest.preflight import check_unknown_series, UnknownSeriesError
+from backtest.filters.normalize_expr import normalize_expr
 
 
 def _touch(path: Path) -> None:
@@ -143,3 +147,12 @@ def test_scan_day_case_insensitive(tmp_path, monkeypatch):
         ["--config", "cfg.yml", "--date", "2025-03-07", "--case-insensitive"],
     )
     assert result.exit_code == 0
+
+
+def test_unknown_series_detection():
+    df = pd.DataFrame({"close": [1, 2, 3]})
+    exprs = ["stochrsik_14_14_3_3 > 0.8"]
+    with pytest.raises(UnknownSeriesError) as exc:
+        check_unknown_series(df, exprs)
+    assert "FR001" in str(exc.value)
+    assert "stochrsi_k_14_14_3_3" in str(exc.value)
