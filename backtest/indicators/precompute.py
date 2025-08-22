@@ -36,8 +36,8 @@ def precompute_for_chunk(
         out["ema_20"] = out["close"].ewm(span=20).mean()
     if "rsi" in indicators:
         delta = out["close"].diff()
-        up = delta.clip(lower=0).ewm(alpha=1/14).mean()
-        down = -delta.clip(upper=0).ewm(alpha=1/14).mean()
+        up = delta.clip(lower=0).ewm(alpha=1 / 14).mean()
+        down = -delta.clip(upper=0).ewm(alpha=1 / 14).mean()
         rs = up / down
         out["rsi_14"] = 100 - (100 / (1 + rs))
     if cache_dir:

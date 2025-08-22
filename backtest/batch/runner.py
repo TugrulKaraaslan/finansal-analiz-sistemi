@@ -7,7 +7,10 @@ import logging
 
 from backtest.normalize import normalize_dataframe
 from backtest.filters.engine import evaluate
-from backtest.indicators.precompute import collect_required_indicators, precompute_for_chunk
+from backtest.indicators.precompute import (
+    collect_required_indicators,
+    precompute_for_chunk,
+)
 from backtest.batch.scheduler import trading_days
 from backtest.batch.io import OutputWriter
 
@@ -50,7 +53,9 @@ def run_scan_day(
     """Generate signals for a single day."""
     multi_symbol = isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2
     indicators = collect_required_indicators(filters_df)
-    return _process_chunk((df.copy(), filters_df, indicators, day, alias_csv, multi_symbol))
+    return _process_chunk(
+        (df.copy(), filters_df, indicators, day, alias_csv, multi_symbol)
+    )
 
 
 def run_scan_range(
@@ -85,7 +90,16 @@ def run_scan_range(
                 df_chunk = df.loc[:, pd.IndexSlice[chunk_syms, :]].copy()
             else:
                 df_chunk = df.copy()
-            tasks.append((df_chunk, filters_df, indicators, str(day.date()), alias_csv, multi_symbol))
+            tasks.append(
+                (
+                    df_chunk,
+                    filters_df,
+                    indicators,
+                    str(day.date()),
+                    alias_csv,
+                    multi_symbol,
+                )
+            )
         if workers > 1:
             with ProcessPoolExecutor(max_workers=workers) as ex:
                 results = ex.map(_process_chunk, tasks)
