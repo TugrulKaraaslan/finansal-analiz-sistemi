@@ -32,3 +32,8 @@
 - Çıktılar: `raporlar/gunluk/YYYY-MM-DD.csv` (date,symbol,filter_code).
 - Modüller: `backtest/batch/*`
 - Test: `tests/test_batch_runner.py`
+
+## Stage1 İlerleme – A7 Tam
+- CLI sertleştirildi: güvenli varsayılanlar, anlamlı hata kodları.
+- Feature flags: `dry_run`, `filters_enabled`, `write_outputs`.
+- Config dosyası ve log seviyesi desteği eklendi.

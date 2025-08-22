@@ -1,0 +1,12 @@
+# Stage1 A7 config örneği
+cli:
+  log_level: INFO
+  default_data_path: data/panel.parquet
+flags:
+  dry_run: true
+  filters_enabled: true
+  write_outputs: true
+paths:
+  outputs: raporlar/gunluk
+  logs: logs
+  artifacts: artifacts
