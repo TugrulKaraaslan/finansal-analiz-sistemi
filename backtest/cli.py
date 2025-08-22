@@ -33,7 +33,9 @@ def build_parser() -> argparse.ArgumentParser:
     def add_common(sp):
         sp.add_argument("--filters", required=True)
         sp.add_argument("--alias", default=None)
-        sp.add_argument("--filters-off", action="store_true", help="Filtre uygulamasını kapat")
+        sp.add_argument(
+            "--filters-off", action="store_true", help="Filtre uygulamasını kapat"
+        )
         sp.add_argument("--no-write", action="store_true", help="Dosya yazma kapalı")
 
     pd_day = sub.add_parser("scan-day", help="Tek gün tarama")
@@ -102,18 +104,26 @@ def main(argv=None):
     if args.cmd == "scan-day":
         rows = run_scan_day(df, args.date, filters_df, alias_csv=args.alias)
         if not flags.write_outputs:
-            print("ℹ️ CL003: --no-write aktif; dosya yazımı yok. Sinyal adedi:", len(rows))
+            print(
+                "ℹ️ CL003: --no-write aktif; dosya yazımı yok. Sinyal adedi:", len(rows)
+            )
             sys.exit(0)
         from backtest.batch.io import OutputWriter
+
         out = OutputWriter(cfg["paths"]["outputs"] if not args.out else args.out)
         out.write_day(args.date, rows)
         sys.exit(0)
 
     if args.cmd == "scan-range":
         if not flags.filters_enabled:
-            logger.warning("filters_enabled=false → sadece veri/indikatör hazırlığı yapılır")
+            logger.warning(
+                "filters_enabled=false → sadece veri/indikatör hazırlığı yapılır"
+            )
         run_scan_range(
-            df, args.start, args.end, filters_df,
+            df,
+            args.start,
+            args.end,
+            filters_df,
             out_dir=(cfg["paths"]["outputs"] if not args.out else args.out),
             alias_csv=args.alias,
         )
