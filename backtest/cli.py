@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import click
@@ -32,6 +33,7 @@ from .logging_utils import setup_logger, Timer
 from .filters_compile import compile_filters
 from .filters_cleanup import clean_filters
 from .filters_io import load_filters, save_csv
+from backtest.validation import validate_filters
 
 
 @click.group()
@@ -461,12 +463,30 @@ def scan_day(
 
 
 if __name__ == "__main__":
-    try:
-        cli()
-    except SystemExit as exc:
-        code = getattr(exc, "code", 1)
-        if code == 0:
-            logger.info("Program başarıyla tamamlandı.")
+    import sys
+    if "--dry-run" in sys.argv:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--filters", type=str, required=True)
+        parser.add_argument("--alias", type=str, default=None)
+        parser.add_argument("--dry-run", action="store_true")
+        args = parser.parse_args()
+        rep = validate_filters(args.filters, args.alias)
+        if rep.ok():
+            print("✅ Uyum Tam")
+            sys.exit(0)
         else:
-            logger.error("Program %s kodu ile hata vererek sonlandı.", code)
-        raise
+            for err in rep.errors:
+                print(f"❌ Satır {err['row']} | {err['code']} | {err['msg']}")
+            for warn in rep.warnings:
+                print(f"⚠️ Satır {warn['row']} | {warn['code']} | {warn['msg']}")
+            sys.exit(1)
+    else:
+        try:
+            cli()
+        except SystemExit as exc:
+            code = getattr(exc, "code", 1)
+            if code == 0:
+                logger.info("Program başarıyla tamamlandı.")
+            else:
+                logger.error("Program %s kodu ile hata vererek sonlandı.", code)
+            raise

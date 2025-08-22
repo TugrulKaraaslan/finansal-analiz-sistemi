@@ -13,3 +13,8 @@
 - Politikalar: strict (hata), prefer_first (drop), suffix (rename _dupN).
 - Modüller: `backtest/normalize/*`
 - Test: `tests/test_normalize_df.py`
+
+## Stage1 İlerleme – A4 Tam
+- Dry‑Run doğrulama eklendi.
+- CLI: `--dry-run` seçeneği filters.csv için fail-fast kontrol yapar.
+- Rapor: satır, hata kodu, mesaj.
