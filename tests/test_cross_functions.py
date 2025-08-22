@@ -15,9 +15,9 @@ def test_crossup_crossdown(rewrite, monkeypatch):
     df_up = pd.DataFrame({"a": [1, 2, 3, 2], "b": [3, 2, 1, 2]})
     res_up = evaluate(df_up.copy(), "crossup(a, b)")
     expected_up = cross_up(df_up["a"], df_up["b"])
-    pd.testing.assert_series_equal(res_up, expected_up)
+    pd.testing.assert_series_equal(res_up, expected_up, check_names=False)
 
     df_down = pd.DataFrame({"a": [3, 2, 1, 2], "b": [1, 2, 3, 2]})
     res_down = evaluate(df_down.copy(), "crossdown(a, b)")
     expected_down = cross_down(df_down["a"], df_down["b"])
-    pd.testing.assert_series_equal(res_down, expected_down)
+    pd.testing.assert_series_equal(res_down, expected_down, check_names=False)

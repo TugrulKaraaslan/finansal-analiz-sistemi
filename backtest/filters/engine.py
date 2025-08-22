@@ -1,39 +1,35 @@
 from __future__ import annotations
 
-import re
-
 import pandas as pd
 
-from backtest.cross import cross_up, cross_down
 from backtest.filters.normalize_expr import normalize_expr
+from backtest.filters.deps import collect_series
+from backtest.filters.functions import make_crossup, make_crossdown
 from backtest.pipeline.precompute import precompute_needed
 
 
 def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
     """Evaluate a boolean filter expression on ``df``.
 
-    Rather than relying on ``DataFrame.eval`` (which only allows a restricted
-    set of functions), the expression is evaluated using Python's ``eval`` with
-    a sandboxed environment containing Series objects from ``df`` and the
-    vectorised ``cross_up``/``cross_down`` helpers. This keeps the computation
-    fully vectorised without resorting to ``apply`` or explicit loops.
+    The expression may contain logical operators ``and``/``or`` and
+    ``CROSSUP``/``CROSSDOWN`` macros. These macros are expanded into temporary
+    columns prior to evaluation so that ``DataFrame.eval`` can be used without
+    direct function calls.
     """
-    norm = normalize_expr(expr)
-    df = precompute_needed(df, [expr])
-    if re.search(r"cross_?(?:up|down)", norm, re.I):
-        env = {c: df[c] for c in df.columns}
-        env.update(
-            {
-                "cross_up": cross_up,
-                "cross_down": cross_down,
-                "crossup": cross_up,
-                "crossdown": cross_down,
-            }
-        )
-        try:
-            return eval(norm, {"__builtins__": {}}, env)
-        except Exception as e:
-            raise ValueError(f"filter evaluation failed: {e}") from e
+
+    norm, macros = normalize_expr(expr)
+    series = collect_series(expr)
+    df = precompute_needed(df, series)
+
+    for kind, a, b in macros:
+        name = f"__{kind}__{a}__{b}"
+        if name not in df.columns:
+            if kind == "crossup":
+                df[name] = make_crossup(df[a], df[b])
+            else:
+                df[name] = make_crossdown(df[a], df[b])
+        norm = norm.replace(f"{kind.upper()}({a},{b})", name)
+
     try:
         return df.eval(norm, engine="python")
     except Exception as e:

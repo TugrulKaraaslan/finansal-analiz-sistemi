@@ -47,4 +47,15 @@ def ensure_roc(df: pd.DataFrame, n: int) -> pd.DataFrame:
     return df
 
 
-__all__ = ["ensure_stochrsi", "ensure_mom", "ensure_roc"]
+def ensure_cci(df: pd.DataFrame, n: int) -> pd.DataFrame:
+    col = f"cci_{n}"
+    if col in df.columns:
+        return df
+    tp = (df["high"] + df["low"] + df["close"]) / 3
+    sma = tp.rolling(n).mean()
+    md = (tp - sma).abs().rolling(n).mean()
+    df[col] = (tp - sma) / (0.015 * md)
+    return df
+
+
+__all__ = ["ensure_stochrsi", "ensure_mom", "ensure_roc", "ensure_cci"]

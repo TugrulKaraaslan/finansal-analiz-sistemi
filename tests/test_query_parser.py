@@ -213,7 +213,7 @@ def test_safequery_allows_math_funcs():
 
 def test_safequery_allows_cross_up():
     df = pd.DataFrame({"a": [1, 2, 3], "b": [3, 2, 1]})
-    q = SafeQuery("cross_up(a, b)")
+    q = SafeQuery("CROSSUP(a, b)")
     assert q.is_safe
     mask = q.get_mask(df)
     assert mask.tolist() == [False, False, True]

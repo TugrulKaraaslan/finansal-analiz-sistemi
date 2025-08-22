@@ -1,32 +1,29 @@
 from __future__ import annotations
 
 import io
-import os
 import re
 import tokenize
+from typing import List, Tuple
 
 
 _LOGICAL = {"and": "&", "or": "|"}
-_COMPARATORS = {"<", ">", "<=", ">=", "==", "!="}
 
 
 def _collapse_underscores(s: str) -> str:
     return re.sub(r"__+", "_", s)
 
 
-def normalize_expr(expr: str, *, rewrite_cross: bool | None = None) -> str:
+def normalize_expr(expr: str) -> Tuple[str, List[Tuple[str, str, str]]]:
     """Normalise a filter expression string.
 
     * Convert logical operators ``and``/``or`` to ``&``/``|``
       while preserving string literals.
-    * Fix common StochRSI token typos.
+    * Fix common StochRSI token typos and ``cci_*_0`` tokens.
     * Remove stray decimal fragments like ``name .015`` that may appear
       before a comparison operator.
     * Collapse multiple underscores.
+    * Detect CROSSUP/CROSSDOWN macros and return them separately.
     """
-
-    if rewrite_cross is None:
-        rewrite_cross = os.getenv("CROSS_REWRITE") == "1"
 
     tokens = list(tokenize.generate_tokens(io.StringIO(expr).readline))
     out_tokens: list[tokenize.TokenInfo] = []
@@ -81,37 +78,47 @@ def normalize_expr(expr: str, *, rewrite_cross: bool | None = None) -> str:
         i += 1
 
     normalised = tokenize.untokenize(out_tokens)
+    # alias fixes
+    normalised = re.sub(r"cci_(\d+)_0", r"cci_\1", normalised, flags=re.I)
     normalised = _collapse_underscores(normalised)
     normalised = re.sub(r"\s+(?=[<>]=?|==|!=)", " ", normalised)
     normalised = re.sub(r"\s+\)", ")", normalised)
     normalised = re.sub(r"\s+,", ",", normalised)
 
-    if rewrite_cross:
+    # Turkish macro forms
+    normalised = re.sub(
+        r"([A-Za-z0-9_]+)_keser_([A-Za-z0-9_]+)_yukari",
+        r"CROSSUP(\1,\2)",
+        normalised,
+        flags=re.I,
+    )
+    normalised = re.sub(
+        r"([A-Za-z0-9_]+)_keser_([A-Za-z0-9_]+)_asagi",
+        r"CROSSDOWN(\1,\2)",
+        normalised,
+        flags=re.I,
+    )
+    normalised = re.sub(r"cross_?up\(", "CROSSUP(", normalised, flags=re.I)
+    normalised = re.sub(r"cross_?down\(", "CROSSDOWN(", normalised, flags=re.I)
 
-        def _rewrite_up(m: re.Match) -> str:
-            a = m.group(1).strip()
-            b = m.group(2).strip()
-            return f"(lag1__{a} <= lag1__{b}) & ({a} > {b})"
+    macros: List[Tuple[str, str, str]] = []
 
-        def _rewrite_down(m: re.Match) -> str:
-            a = m.group(1).strip()
-            b = m.group(2).strip()
-            return f"(lag1__{a} >= lag1__{b}) & ({a} < {b})"
+    def _macro_repl(m: re.Match) -> str:
+        kind = m.group(1).lower()
+        a = _collapse_underscores(m.group(2).strip().lower())
+        b = _collapse_underscores(m.group(3).strip().lower())
+        full = f"cross{kind}"
+        macros.append((full, a, b))
+        return f"CROSS{kind.upper()}({a},{b})"
 
-        normalised = re.sub(
-            r"crossup\(([^,]+),([^\)]+)\)",
-            _rewrite_up,
-            normalised,
-            flags=re.I,
-        )
-        normalised = re.sub(
-            r"crossdown\(([^,]+),([^\)]+)\)",
-            _rewrite_down,
-            normalised,
-            flags=re.I,
-        )
+    normalised = re.sub(
+        r"CROSS(UP|DOWN)\(([^,]+),([^\)]+)\)",
+        _macro_repl,
+        normalised,
+        flags=re.I,
+    )
 
-    return normalised
+    return normalised, macros
 
 
 __all__ = ["normalize_expr"]
