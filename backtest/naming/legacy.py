@@ -119,8 +119,8 @@ _ALIAS_PAIRS: Dict[str, List[str]] = {
     "ichimoku_leadingspana": ["ISA_9", "ISA_9.1"],
     "ichimoku_leadingspanb": ["ISB_26", "ISB_26.1"],
     # ADX and directionals with duplicate suffixes
-    "aroonu_14": ["AROONU_14.1"],
-    "aroond_14": ["AROOND_14.1"],
+    "aroon_up_14": ["aroonu_14", "AROONU_14.1", "aroonu_14_1"],
+    "aroon_down_14": ["aroond_14", "AROOND_14.1", "aroond_14_1"],
     # weekly change column
     "change_1w_percent": ["change_1_w_percent"],
 }
@@ -177,8 +177,8 @@ _CANONICAL_PATTERNS = [
     re.compile(r"^vwap_[a-z]+$"),
     re.compile(r"^vwma_\d+$"),
     re.compile(r"^willr_\d+$"),
-    re.compile(r"^aroond_\d+$"),
-    re.compile(r"^aroonu_\d+$"),
+    re.compile(r"^aroon_down_\d+$"),
+    re.compile(r"^aroon_up_\d+$"),
 ]
 
 

@@ -25,8 +25,8 @@ def test_alias_columns():
         }
     )
     out = canonicalize_columns(df)
-    assert "CCI_20_0.015" in out.columns
-    assert "PSARl_0.02_0.2" in out.columns
+    assert "CCI_20" in out.columns
+    assert "PSARL_0_02_0_2" in out.columns
 
 
 def test_relative_volume_preserved(tmp_path):

@@ -5,13 +5,15 @@ import re
 import pandas as pd
 
 ALIAS_MAP: dict[str, str] = {
-    r"^CCI_20_0$": "CCI_20_0.015",
-    r"^PSARL_0$": "PSARl_0.02_0.2",
+    r"^CCI_20_0$": "CCI_20",
+    r"^PSARL_0$": "PSARL_0_02_0_2",
     r"^BBM_20_2.*$": "BBM_20_2",
     r"^BBU_20_2.*$": "BBU_20_2",
+    r"^AROONU_(\d+)$": r"AROON_UP_\1",
+    r"^AROOND_(\d+)$": r"AROON_DOWN_\1",
 }
 
-_TOKEN_RE = re.compile(r"[A-Za-z0-9_.]+")
+_TOKEN_RE = re.compile(r"[A-Za-z0-9_.-]+")
 
 
 def normalize_symbol(name: str) -> str:
