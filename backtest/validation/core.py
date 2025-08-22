@@ -25,21 +25,21 @@ def validate_filters(csv_path: str, alias_csv: str | None = None) -> ValidationR
 
         # FilterCode boş/tekrarlı
         if not code:
-            report.add_error(i+2, "VC001", "FilterCode boş")
+            report.add_error(i + 2, "VC001", "FilterCode boş")
         if code in seen_codes:
-            report.add_error(i+2, "VC001", f"FilterCode tekrarı: {code}")
+            report.add_error(i + 2, "VC001", f"FilterCode tekrarı: {code}")
         seen_codes.add(code)
 
         # PythonQuery boş
         if not expr or expr.lower() == "nan":
-            report.add_error(i+2, "VC002", "PythonQuery boş")
+            report.add_error(i + 2, "VC002", "PythonQuery boş")
             continue
 
         # DSL parse kontrolü
         try:
             tree = parse_expression(expr)
         except DSLError as e:
-            report.add_error(i+2, e.code or "DF001", f"DSL hatası: {e}")
+            report.add_error(i + 2, e.code or "DF001", f"DSL hatası: {e}")
             continue
 
         # AST içindeki isimleri çıkar
@@ -47,8 +47,9 @@ def validate_filters(csv_path: str, alias_csv: str | None = None) -> ValidationR
         for name in names:
             norm = normalize_indicator_token(name, alias_map)
             if norm not in CANONICAL_SET:
-                report.add_error(i+2, "VF001", f"Bilinmeyen seri adı: {name}")
+                report.add_error(i + 2, "VF001", f"Bilinmeyen seri adı: {name}")
 
     return report
+
 
 __all__ = ["validate_filters", "ValidationError", "ValidationReport"]

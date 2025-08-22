@@ -464,6 +464,7 @@ def scan_day(
 
 if __name__ == "__main__":
     import sys
+
     if "--dry-run" in sys.argv:
         parser = argparse.ArgumentParser()
         parser.add_argument("--filters", type=str, required=True)

@@ -8,6 +8,7 @@ from .errors import PrecomputeError
 # regex: rsi_14, ema_50, sma_20, macd_12_26_9, bbh_20_2
 _SIMPLE_RE = re.compile(r"^(?P<name>[a-z]+)_([0-9_]+)$")
 
+
 class Precomputer:
     def __init__(self):
         self.cache: Set[str] = set()
@@ -21,7 +22,9 @@ class Precomputer:
                 out = self._compute_one(out, ind)
                 self.cache.add(ind)
             except Exception as e:
-                raise PrecomputeError(f"Gösterge hesaplanamadı: {ind} | {e}", code="PC001")
+                raise PrecomputeError(
+                    f"Gösterge hesaplanamadı: {ind} | {e}", code="PC001"
+                )
         return out
 
     def _compute_one(self, df: pd.DataFrame, ind: str) -> pd.DataFrame:
@@ -39,13 +42,19 @@ class Precomputer:
             df[ind] = ta.wma(df["close"], length=length)
         elif ind.startswith("adx_"):
             length = int(ind.split("_")[1])
-            df[ind] = ta.adx(df["high"], df["low"], df["close"], length=length)["ADX_"+str(length)]
+            df[ind] = ta.adx(df["high"], df["low"], df["close"], length=length)[
+                "ADX_" + str(length)
+            ]
         elif ind.startswith("dmp_"):
             length = int(ind.split("_")[1])
-            df[ind] = ta.adx(df["high"], df["low"], df["close"], length=length)["DMP_"+str(length)]
+            df[ind] = ta.adx(df["high"], df["low"], df["close"], length=length)[
+                "DMP_" + str(length)
+            ]
         elif ind.startswith("dmn_"):
             length = int(ind.split("_")[1])
-            df[ind] = ta.adx(df["high"], df["low"], df["close"], length=length)["DMN_"+str(length)]
+            df[ind] = ta.adx(df["high"], df["low"], df["close"], length=length)[
+                "DMN_" + str(length)
+            ]
         elif ind.startswith("macd_"):
             parts = ind.split("_")[1:]
             if len(parts) != 3:
@@ -58,7 +67,9 @@ class Precomputer:
         elif ind.startswith("bbh_") or ind.startswith("bbm_") or ind.startswith("bbl_"):
             parts = ind.split("_")[1:]
             if len(parts) != 2:
-                raise PrecomputeError(f"bollinger parametre hatası: {ind}", code="PC002")
+                raise PrecomputeError(
+                    f"bollinger parametre hatası: {ind}", code="PC002"
+                )
             length, mult = map(int, parts)
             bb = ta.bbands(df["close"], length=length, std=mult)
             df[f"bbl_{length}_{mult}"] = bb[f"BBL_{length}_{mult}.0"]

@@ -4,15 +4,20 @@ from backtest.precompute import Precomputer
 
 idx = pd.date_range("2024-01-01", periods=50, freq="B")
 
+
 def _df():
     np.random.seed(0)
-    return pd.DataFrame({
-        "open": np.random.rand(len(idx))*100,
-        "high": np.random.rand(len(idx))*100,
-        "low": np.random.rand(len(idx))*100,
-        "close": np.random.rand(len(idx))*100,
-        "volume": np.random.randint(1000,5000,len(idx))
-    }, index=idx)
+    return pd.DataFrame(
+        {
+            "open": np.random.rand(len(idx)) * 100,
+            "high": np.random.rand(len(idx)) * 100,
+            "low": np.random.rand(len(idx)) * 100,
+            "close": np.random.rand(len(idx)) * 100,
+            "volume": np.random.randint(1000, 5000, len(idx)),
+        },
+        index=idx,
+    )
+
 
 def test_rsi_and_ema():
     df = _df()
@@ -20,6 +25,7 @@ def test_rsi_and_ema():
     out = pc.precompute(df, {"rsi_14", "ema_20"})
     assert "rsi_14" in out.columns
     assert "ema_20" in out.columns
+
 
 def test_macd_and_bbands():
     df = _df()
