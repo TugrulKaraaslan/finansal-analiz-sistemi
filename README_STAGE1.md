@@ -56,3 +56,12 @@
 ## Stage1 İlerleme – A10 Tam
 - Excel çıktı katmanı eklendi: `summary.xlsx` (DAILY_SUMMARY, FILTER_COUNTS, KPI, PIVOT_FILTER_BY_DAY, README).
 - CLI: `report-excel --daily raporlar/ozet/daily_summary.csv --filter-counts raporlar/ozet/filter_counts.csv --out raporlar/ozet/summary.xlsx`.
+
+## Stage1 İlerleme – A11 Tam
+- Parquet panel ve sembol-chunk okuma eklendi.
+- Tek hesap prensibi: indikatörler chunk bazında bir defa hesaplanıyor.
+- Opsiyonel paralellik: `--workers` ile hisse bazlı fan-out.
+- CLI örnek:
+  ```bash
+  python -m backtest.cli scan-range --config config.yaml --parquet-cache cache/panel.parquet --chunk-size 20 --workers 4
+  ```

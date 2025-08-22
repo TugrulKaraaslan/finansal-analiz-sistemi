@@ -1,33 +1,46 @@
 from __future__ import annotations
-import ast
-from typing import Iterable, Dict, Set
 import pandas as pd
+from typing import Iterable, List, Tuple
+from concurrent.futures import ProcessPoolExecutor
+from time import perf_counter
+import logging
 
 from backtest.normalize import normalize_dataframe
-from backtest.validation import validate_filters
-from backtest.dsl import Evaluator, SeriesContext, FUNCTIONS
-from backtest.precompute import Precomputer
+from backtest.filters.engine import evaluate
+from backtest.indicators.precompute import (
+    collect_required_indicators,
+    precompute_for_chunk,
+)
 from backtest.batch.scheduler import trading_days
 from backtest.batch.io import OutputWriter
 
-
-# Yardımcı: DSL içindeki Name'leri çıkar
-class _NameVisitor(ast.NodeVisitor):
-    def __init__(self):
-        self.names: Set[str] = set()
-
-    def visit_Name(self, node: ast.Name):
-        self.names.add(node.id)
+logger = logging.getLogger(__name__)
 
 
-def _extract_series_names(expr: str) -> Set[str]:
-    try:
-        tree = ast.parse(expr, mode="eval")
-    except SyntaxError:
-        return set()
-    vis = _NameVisitor()
-    vis.visit(tree)
-    return vis.names
+def _process_chunk(args):
+    df_chunk, filters_df, indicators, day, alias_csv, multi_symbol = args
+    df_chunk, _ = normalize_dataframe(df_chunk, alias_csv, policy="prefer_first")
+    df_chunk = precompute_for_chunk(df_chunk, indicators)
+    d = pd.to_datetime(day)
+    rows: List[Tuple[str, str]] = []
+    if multi_symbol:
+        symbols = sorted({c[0] for c in df_chunk.columns})
+        for sym in symbols:
+            sub = df_chunk.xs(sym, axis=1, level=0)
+            for _, r in filters_df.iterrows():
+                code = str(r["FilterCode"]).strip()
+                expr = str(r["PythonQuery"]).strip()
+                mask = evaluate(sub, expr)
+                if bool(mask.loc[d]):
+                    rows.append((sym, code))
+    else:
+        for _, r in filters_df.iterrows():
+            code = str(r["FilterCode"]).strip()
+            expr = str(r["PythonQuery"]).strip()
+            mask = evaluate(df_chunk, expr)
+            if bool(mask.loc[d]):
+                rows.append(("SYMBOL", code))
+    return rows
 
 
 def run_scan_day(
@@ -36,75 +49,13 @@ def run_scan_day(
     filters_df: pd.DataFrame,
     *,
     alias_csv: str | None = None,
-) -> list[tuple[str, str]]:
-    """Tek bir gün için sinyal üret.
-    Dönüş: [(symbol, filter_code), ...]
-    Beklenti: df index=DatetimeIndex, kolonlar kanonik isimlerden oluşur (sembol çoklu ise MultiIndex kolon: (symbol, field)).
-    Stage1 basitlik: df, tek sembol için de çalışır; çoklu sembol için column MultiIndex beklenir: top level=symbol, second level=field
-    """
-    rows: list[tuple[str, str]] = []
-
-    # Çoklu sembol mü tek sembol mü algıla
+) -> List[Tuple[str, str]]:
+    """Generate signals for a single day."""
     multi_symbol = isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2
-    symbols: Iterable[str]
-    if multi_symbol:
-        symbols = sorted({c[0] for c in df.columns.unique()})
-
-    else:
-        symbols = ["SYMBOL"]  # tek sembol placeholder
-
-    # Günlük slice
-    d = pd.to_datetime(day)
-    if d not in df.index:
-        return rows
-
-    # Filtrelerde geçen indikatör isimlerini topla
-    indicators_needed: Set[str] = set()
-    for _, r in filters_df.iterrows():
-        expr = str(r["PythonQuery"]) if "PythonQuery" in r else ""
-        for name in _extract_series_names(expr):
-            if name in FUNCTIONS:
-                continue
-            if name not in ("open", "high", "low", "close", "volume", "vwap_d"):
-                indicators_needed.add(name)
-
-    # Ön hesaplayıcıyı sembol bazında uygula
-    pc = Precomputer()
-
-    if multi_symbol:
-        # her sembol için alanları al, göstergeleri ekle
-        frames: dict[str, pd.DataFrame] = {}
-        for sym in symbols:
-            sub = df.xs(sym, axis=1, level=0).copy()
-            sub, _ = normalize_dataframe(sub, alias_csv, policy="prefer_first")
-            sub = pc.precompute(sub, indicators_needed)
-            sub = sub.apply(pd.to_numeric, errors="coerce")
-            frames[sym] = sub
-        # değerlendirme: her filtre için maske ve sinyal
-        for _, r in filters_df.iterrows():
-            code = str(r["FilterCode"]).strip()
-            expr = str(r["PythonQuery"]).strip()
-            for sym in symbols:
-                ctx = SeriesContext(frames[sym].iloc[:])
-                ev = Evaluator(ctx)
-                mask = ev.eval(expr)
-                if bool(mask.loc[d]):
-                    rows.append((sym, code))
-    else:
-        # tek sembol
-        sub, _ = normalize_dataframe(df.copy(), alias_csv, policy="prefer_first")
-        sub = pc.precompute(sub, indicators_needed)
-        sub = sub.apply(pd.to_numeric, errors="coerce")
-        for _, r in filters_df.iterrows():
-            code = str(r["FilterCode"]).strip()
-            expr = str(r["PythonQuery"]).strip()
-            ctx = SeriesContext(sub.iloc[:])
-            ev = Evaluator(ctx)
-            mask = ev.eval(expr)
-            if bool(mask.loc[d]):
-                rows.append(("SYMBOL", code))
-
-    return rows
+    indicators = collect_required_indicators(filters_df)
+    return _process_chunk(
+        (df.copy(), filters_df, indicators, day, alias_csv, multi_symbol)
+    )
 
 
 def run_scan_range(
@@ -115,15 +66,51 @@ def run_scan_range(
     *,
     out_dir: str,
     alias_csv: str | None = None,
+    parquet_cache: str | None = None,
+    ind_cache: str | None = None,
+    chunk_size: int = 20,
+    workers: int = 1,
 ) -> None:
-    # Dry-run: geçerlilik
-    # Not: validate_filters CSV dosya yoluyla çalışır; burada DataFrame verildiği için kullanıcıdan paths alınır (CLI tarafında yapılır)
+    """Run scans for a date range with optional symbol chunking and parallelism."""
     writer = OutputWriter(out_dir)
-
     days = trading_days(df.index, start, end)
     if len(days) == 0:
         raise RuntimeError("BR002: tarih aralığı veriyle kesişmiyor")
 
+    multi_symbol = isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2
+    symbols = sorted({c[0] for c in df.columns}) if multi_symbol else ["SYMBOL"]
+    chunks = [symbols[i : i + chunk_size] for i in range(0, len(symbols), chunk_size)]
+    indicators = collect_required_indicators(filters_df)
+
     for day in days:
-        rows = run_scan_day(df, str(day.date()), filters_df, alias_csv=alias_csv)
+        t0 = perf_counter()
+        tasks = []
+        for chunk_syms in chunks:
+            if multi_symbol:
+                df_chunk = df.loc[:, pd.IndexSlice[chunk_syms, :]].copy()
+            else:
+                df_chunk = df.copy()
+            tasks.append(
+                (
+                    df_chunk,
+                    filters_df,
+                    indicators,
+                    str(day.date()),
+                    alias_csv,
+                    multi_symbol,
+                )
+            )
+        if workers > 1:
+            with ProcessPoolExecutor(max_workers=workers) as ex:
+                results = ex.map(_process_chunk, tasks)
+        else:
+            results = map(_process_chunk, tasks)
+        rows: List[Tuple[str, str]] = []
+        for r in results:
+            rows.extend(r)
         writer.write_day(day, rows)
+        logger.info(
+            "DAY %s: IO+INDICATORS+FILTERS+WRITE took %.3fs",
+            day,
+            perf_counter() - t0,
+        )
