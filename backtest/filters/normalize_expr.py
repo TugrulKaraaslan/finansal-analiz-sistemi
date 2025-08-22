@@ -57,9 +57,18 @@ def normalize_expr(expr: str) -> str:
                 and tokens[i + 1].string.startswith(".")
             ):
                 j = i + 2
-                while j < len(tokens) and tokens[j].type in (tokenize.NL, tokenize.NEWLINE, tokenize.INDENT, tokenize.DEDENT):
+                while j < len(tokens) and tokens[j].type in (
+                    tokenize.NL,
+                    tokenize.NEWLINE,
+                    tokenize.INDENT,
+                    tokenize.DEDENT,
+                ):
                     j += 1
-                if j < len(tokens) and tokens[j].type == tokenize.OP and tokens[j].string in _COMPARATORS:
+                if (
+                    j < len(tokens)
+                    and tokens[j].type == tokenize.OP
+                    and tokens[j].string in _COMPARATORS
+                ):
                     i += 2
                     continue
         else:

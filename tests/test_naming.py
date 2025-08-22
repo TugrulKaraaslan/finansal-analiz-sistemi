@@ -4,7 +4,11 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from backtest.naming import normalize_name, validate_columns_schema, canonicalize_columns
+from backtest.naming import (
+    normalize_name,
+    validate_columns_schema,
+    canonicalize_columns,
+)
 
 
 def test_alias_normalization_basic():
