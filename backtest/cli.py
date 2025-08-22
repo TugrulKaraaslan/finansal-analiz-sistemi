@@ -511,6 +511,7 @@ def main():
         filters_df = pd.read_csv(args.filters)
         rows = run_scan_day(df, args.date, filters_df, alias_csv=args.alias)
         from backtest.batch.io import OutputWriter
+
         OutputWriter(args.out).write_day(args.date, rows)
 
     elif args.cmd == "scan-range":
@@ -519,7 +520,9 @@ def main():
         else:
             df = pd.read_csv(args.data, parse_dates=True, index_col=0)
         filters_df = pd.read_csv(args.filters)
-        run_scan_range(df, args.start, args.end, filters_df, out_dir=args.out, alias_csv=args.alias)
+        run_scan_range(
+            df, args.start, args.end, filters_df, out_dir=args.out, alias_csv=args.alias
+        )
 
 
 if __name__ == "__main__":

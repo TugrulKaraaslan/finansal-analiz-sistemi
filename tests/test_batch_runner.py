@@ -10,23 +10,28 @@ idx = pd.date_range("2024-01-01", periods=5, freq="B")
 
 def _df_single():
     np.random.seed(0)
-    return pd.DataFrame({
-        "open": [9,10,11,10,12],
-        "high": [10,11,12,11,13],
-        "low":  [8, 9, 10, 9, 11],
-        "close":[10,10,11,10,12],
-        "volume":[100,110,120,130,140]
-    }, index=idx)
+    return pd.DataFrame(
+        {
+            "open": [9, 10, 11, 10, 12],
+            "high": [10, 11, 12, 11, 13],
+            "low": [8, 9, 10, 9, 11],
+            "close": [10, 10, 11, 10, 12],
+            "volume": [100, 110, 120, 130, 140],
+        },
+        index=idx,
+    )
 
 
 def _filters_df():
-    return pd.DataFrame({
-        "FilterCode": ["F1","F2"],
-        "PythonQuery": [
-            "cross_up(close, ema_20)",
-            "close > 10 and volume > 100",
-        ],
-    })
+    return pd.DataFrame(
+        {
+            "FilterCode": ["F1", "F2"],
+            "PythonQuery": [
+                "cross_up(close, ema_20)",
+                "close > 10 and volume > 100",
+            ],
+        }
+    )
 
 
 def test_run_scan_day_outputs_rows():
@@ -41,7 +46,9 @@ def test_run_scan_range_writes_files(tmp_path: Path):
     df = _df_single()
     filters_df = _filters_df()
     out_dir = tmp_path / "gunluk"
-    run_scan_range(df, str(idx[0].date()), str(idx[-1].date()), filters_df, out_dir=str(out_dir))
+    run_scan_range(
+        df, str(idx[0].date()), str(idx[-1].date()), filters_df, out_dir=str(out_dir)
+    )
     # 5 gün dosyası
     files = list(out_dir.glob("*.csv"))
     assert len(files) == 5

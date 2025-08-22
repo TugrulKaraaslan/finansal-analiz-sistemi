@@ -10,10 +10,12 @@ from backtest.precompute import Precomputer
 from backtest.batch.scheduler import trading_days
 from backtest.batch.io import OutputWriter
 
+
 # Yardımcı: DSL içindeki Name'leri çıkar
 class _NameVisitor(ast.NodeVisitor):
     def __init__(self):
         self.names: Set[str] = set()
+
     def visit_Name(self, node: ast.Name):
         self.names.add(node.id)
 
@@ -23,11 +25,18 @@ def _extract_series_names(expr: str) -> Set[str]:
         tree = ast.parse(expr, mode="eval")
     except SyntaxError:
         return set()
-    vis = _NameVisitor(); vis.visit(tree)
+    vis = _NameVisitor()
+    vis.visit(tree)
     return vis.names
 
 
-def run_scan_day(df: pd.DataFrame, day: str, filters_df: pd.DataFrame, *, alias_csv: str | None = None) -> list[tuple[str, str]]:
+def run_scan_day(
+    df: pd.DataFrame,
+    day: str,
+    filters_df: pd.DataFrame,
+    *,
+    alias_csv: str | None = None,
+) -> list[tuple[str, str]]:
     """Tek bir gün için sinyal üret.
     Dönüş: [(symbol, filter_code), ...]
     Beklenti: df index=DatetimeIndex, kolonlar kanonik isimlerden oluşur (sembol çoklu ise MultiIndex kolon: (symbol, field)).
@@ -40,7 +49,7 @@ def run_scan_day(df: pd.DataFrame, day: str, filters_df: pd.DataFrame, *, alias_
     symbols: Iterable[str]
     if multi_symbol:
         symbols = sorted({c[0] for c in df.columns.unique()})
-        
+
     else:
         symbols = ["SYMBOL"]  # tek sembol placeholder
 
@@ -98,7 +107,15 @@ def run_scan_day(df: pd.DataFrame, day: str, filters_df: pd.DataFrame, *, alias_
     return rows
 
 
-def run_scan_range(df: pd.DataFrame, start: str, end: str, filters_df: pd.DataFrame, *, out_dir: str, alias_csv: str | None = None) -> None:
+def run_scan_range(
+    df: pd.DataFrame,
+    start: str,
+    end: str,
+    filters_df: pd.DataFrame,
+    *,
+    out_dir: str,
+    alias_csv: str | None = None,
+) -> None:
     # Dry-run: geçerlilik
     # Not: validate_filters CSV dosya yoluyla çalışır; burada DataFrame verildiği için kullanıcıdan paths alınır (CLI tarafında yapılır)
     writer = OutputWriter(out_dir)
