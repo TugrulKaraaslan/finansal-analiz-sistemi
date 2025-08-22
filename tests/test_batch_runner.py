@@ -27,7 +27,7 @@ def _filters_df():
         {
             "FilterCode": ["F1", "F2"],
             "PythonQuery": [
-                "cross_up(close, ema_20)",
+                "CROSSUP(close, ema_20)",
                 "close > 10 and volume > 100",
             ],
         }

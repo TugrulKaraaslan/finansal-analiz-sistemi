@@ -27,7 +27,7 @@ def lint_file(path: str | Path, inplace: bool = False) -> int:
     if "PythonQuery" not in df.columns:
         raise SystemExit("PythonQuery column missing")
 
-    norm = df["PythonQuery"].map(normalize_expr)
+    norm = df["PythonQuery"].map(lambda s: normalize_expr(s)[0])
     changed = norm != df["PythonQuery"]
     n_changed = int(changed.sum())
     if n_changed and not inplace:
