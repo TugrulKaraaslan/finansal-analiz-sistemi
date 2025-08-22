@@ -41,3 +41,6 @@ def compute_indicators(
     logger.info("indicators: using-from-data")
     logger.info("indicators: engine=none (using-from-data)")
     return df
+
+
+__all__ = ["compute_indicators"]
