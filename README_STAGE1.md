@@ -32,3 +32,13 @@
 - Çıktılar: `raporlar/gunluk/YYYY-MM-DD.csv` (date,symbol,filter_code).
 - Modüller: `backtest/batch/*`
 - Test: `tests/test_batch_runner.py`
+
+## Stage1 İlerleme – A7 Tam
+- CLI sertleştirildi: güvenli varsayılanlar, anlamlı hata kodları.
+- Feature flags: `dry_run`, `filters_enabled`, `write_outputs`.
+- Config dosyası ve log seviyesi desteği eklendi.
+
+### A7 Hotfix (Compatibility)
+- Eski testlere uyum için `scan_range/scan_day` click komutları ve `_run_scan`, `preflight`, `read_excels_long`, `compile_filters` sembolleri eklendi.
+- `--report-alias` ve `--no-preflight` bayrakları yardım çıktısına taşındı.
+- `load_config` artık attribute‑style nesne döndürüyor; legacy anahtarlar (`xu100_*`) destekleniyor.
