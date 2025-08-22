@@ -78,6 +78,10 @@ def normalize_expr(expr: str) -> Tuple[str, List[Tuple[str, str, str]]]:
         i += 1
 
     normalised = tokenize.untokenize(out_tokens)
+    normalised = re.sub(r"\bpsarl_0\.0?2_0\.2\b", "psarl_0_02_0_2", normalised, flags=re.I)
+    normalised = re.sub(r"(?<![A-Za-z0-9_])_(100|80|70|50)\b", r"-\1", normalised)
+    normalised = re.sub(r"\s=\s=", " == ", normalised)
+    normalised = re.sub(r"\s*==\s*", " == ", normalised)
     # alias fixes
     normalised = re.sub(r"cci_(\d+)_0", r"cci_\1", normalised, flags=re.I)
     normalised = _collapse_underscores(normalised)

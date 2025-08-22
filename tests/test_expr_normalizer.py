@@ -19,3 +19,18 @@ def test_stochrsi_typos():
 def test_string_literals_preserved():
     expr = 'col == "a and b" or flag'
     assert normalize_expr(expr)[0] == 'col == "a and b" | flag'
+
+
+def test_psarl_dotted_to_underscored():
+    s, _ = normalize_expr("psarl_0.02_0.2 < close")
+    assert s == "psarl_0_02_0_2 < close"
+
+
+def test_willr_negative_levels():
+    s, _ = normalize_expr("willr_14 > _100 and crossup(willr_14, _80)")
+    assert s == "willr_14 > -100 & CROSSUP(willr_14,-80)"
+
+
+def test_space_eq_fixed():
+    s, _ = normalize_expr("aroon_up_14 = = 100")
+    assert s == "aroon_up_14 == 100"

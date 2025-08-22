@@ -48,8 +48,10 @@ ALIASES: Dict[str, str] = {
     "negativedirectionalindicator_14": "dmn_14",
     "dmp_14_1": "dmp_14",
     "dmn_14_1": "dmn_14",
-    "aroonu_14_1": "aroonu_14",
-    "aroond_14_1": "aroond_14",
+    "aroonu_14": "aroon_up_14",
+    "aroond_14": "aroon_down_14",
+    "aroonu_14_1": "aroon_up_14",
+    "aroond_14_1": "aroon_down_14",
     # Stoch
     "stochk_14_3_3": "stoch_k",
     "stochk_14_3_3_1": "stoch_k",

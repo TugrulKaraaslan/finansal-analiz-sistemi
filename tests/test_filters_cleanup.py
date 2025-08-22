@@ -69,8 +69,8 @@ def test_intraday_cleanup(sample_filters_csv):
 
 def test_alias_conversion(sample_filters_csv):
     df_clean, _ = clean_filters(sample_filters_csv)
-    assert df_clean.loc[df_clean["id"] == 1, "expr"].iloc[0] == "CCI_20_0.015 > 0"
-    assert df_clean.loc[df_clean["id"] == 2, "expr"].iloc[0] == "PSARl_0.02_0.2 < close"
+    assert df_clean.loc[df_clean["id"] == 1, "expr"].iloc[0] == "CCI_20 > 0"
+    assert df_clean.loc[df_clean["id"] == 2, "expr"].iloc[0] == "PSARL_0_02_0_2 < close"
     assert df_clean.loc[df_clean["id"] == 3, "expr"].iloc[0] == "BBM_20_2 CROSSUP close"
     assert df_clean.loc[df_clean["id"] == 4, "expr"].iloc[0] == "BBU_20_2 > BBM_20_2"
 
@@ -79,7 +79,7 @@ def test_reporting(sample_filters_csv):
     _, report = clean_filters(sample_filters_csv)
     aliased = report[report["status"] == "aliased"]
     assert set(aliased["original"]) == {"CCI_20_0", "PSARl_0"}
-    assert set(aliased["new_symbol"]) == {"CCI_20_0.015", "PSARl_0.02_0.2"}
+    assert set(aliased["new_symbol"]) == {"CCI_20", "PSARL_0_02_0_2"}
     intraday = report[report["status"] == "intraday_removed"]
     assert intraday["id"].tolist() == [5]
 

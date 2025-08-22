@@ -25,6 +25,10 @@ def test_alias_normalization_basic():
         assert normalize_name(raw) == want
 
 
+def test_aroon_alias_to_canonical():
+    assert normalize_name("aroonu_14") == "aroon_up_14"
+
+
 def test_snake_case_enforcement():
     assert normalize_name("ema20") == "ema_20"
     with pytest.raises(ValueError):

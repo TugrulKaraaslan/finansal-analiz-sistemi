@@ -138,13 +138,17 @@ def canonicalize_columns(df: pd.DataFrame) -> pd.DataFrame:
         new = re.sub(r"__+", "_", new)
         upper = new.upper()
         if upper == "CCI_20_0":
-            new = "CCI_20_0.015"
+            new = "CCI_20"
         elif upper == "PSARL_0":
-            new = "PSARl_0.02_0.2"
+            new = "PSARL_0_02_0_2"
         elif upper.startswith("BBM_20_2"):
             new = "BBM_20_2"
         elif upper.startswith("BBU_20_2"):
             new = "BBU_20_2"
+        elif upper.startswith("AROONU_"):
+            new = re.sub(r"AROONU_(\d+)", r"AROON_UP_\1", upper)
+        elif upper.startswith("AROOND_"):
+            new = re.sub(r"AROOND_(\d+)", r"AROON_DOWN_\1", upper)
         rename_map[col] = new
         if new != col:
             logging.info("Column '%s' renamed to '%s'", col, new)
