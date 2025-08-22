@@ -6,6 +6,7 @@ from .core import (
     apply_mapping,
     normalize_dataframe,
 )
+
 __all__ = [
     "NormalizeError",
     "CollisionError",

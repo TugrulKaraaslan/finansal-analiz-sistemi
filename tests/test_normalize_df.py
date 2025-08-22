@@ -7,15 +7,17 @@ ALIAS = "data/alias_mapping.csv"
 
 
 def _df():
-    return pd.DataFrame({
-        "Open": [1,2],
-        "Adj Close": [10,11],
-        "Close": [10,11],
-        "Close.1": [10,11],
-        "VOL": [100,110],
-        "RSI_14": [55,45],
-        "Custom Field": [0,1],
-    })
+    return pd.DataFrame(
+        {
+            "Open": [1, 2],
+            "Adj Close": [10, 11],
+            "Close": [10, 11],
+            "Close.1": [10, 11],
+            "VOL": [100, 110],
+            "RSI_14": [55, 45],
+            "Custom Field": [0, 1],
+        }
+    )
 
 
 def test_strict_collision_raises():

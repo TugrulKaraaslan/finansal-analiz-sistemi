@@ -16,7 +16,12 @@ def _canonicalize(name: str, alias_map: dict | None) -> str:
     return normalize_indicator_token(name, alias_map)
 
 
-def build_column_mapping(columns: Iterable[str], alias_csv: str | None = None, *, policy: BuildPolicy = "strict") -> Tuple[Dict[str, str], NormalizeReport]:
+def build_column_mapping(
+    columns: Iterable[str],
+    alias_csv: str | None = None,
+    *,
+    policy: BuildPolicy = "strict",
+) -> Tuple[Dict[str, str], NormalizeReport]:
     """
     Girdi kolonları için alias→kanonik + snake_case mapping üret.
     Çakışma stratejisi `policy` ile belirlenir.
@@ -49,7 +54,9 @@ def build_column_mapping(columns: Iterable[str], alias_csv: str | None = None, *
         # çakışma var
         if policy == "strict":
             report.add_collision(canon, originals)
-            raise CollisionError(f"Kanonik isim çakışması: {canon} <- {originals}", code="VN001")
+            raise CollisionError(
+                f"Kanonik isim çakışması: {canon} <- {originals}", code="VN001"
+            )
         elif policy == "prefer_first":
             # ilkini tut, diğerlerini drop listesine ekle
             for dup in originals[1:]:
@@ -68,14 +75,18 @@ def build_column_mapping(columns: Iterable[str], alias_csv: str | None = None, *
     return mapping, report
 
 
-def apply_mapping(df: pd.DataFrame, mapping: Dict[str, str], *, drop: Iterable[str] | None = None) -> pd.DataFrame:
+def apply_mapping(
+    df: pd.DataFrame, mapping: Dict[str, str], *, drop: Iterable[str] | None = None
+) -> pd.DataFrame:
     new_df = df.copy()
     if drop:
         new_df = new_df.drop(columns=list(drop), errors="ignore")
     return new_df.rename(columns=mapping)
 
 
-def normalize_dataframe(df: pd.DataFrame, alias_csv: str | None = None, *, policy: BuildPolicy = "strict") -> Tuple[pd.DataFrame, NormalizeReport]:
+def normalize_dataframe(
+    df: pd.DataFrame, alias_csv: str | None = None, *, policy: BuildPolicy = "strict"
+) -> Tuple[pd.DataFrame, NormalizeReport]:
     mapping, report = build_column_mapping(df.columns, alias_csv, policy=policy)
     # prefer_first ise drop listesi uygulanır; suffix ise rename listesi zaten mapping'te
     drop_cols = report.dropped if report.dropped else None
