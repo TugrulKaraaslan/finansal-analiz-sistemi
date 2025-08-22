@@ -1,4 +1,9 @@
-from backtest.naming import to_snake, load_alias_map, normalize_indicator_token, CANONICAL_SET
+from backtest.naming import (
+    to_snake,
+    load_alias_map,
+    normalize_indicator_token,
+    CANONICAL_SET,
+)
 from pathlib import Path
 
 ALIAS_CSV = Path("data/alias_mapping.csv")
@@ -7,7 +12,9 @@ ALIAS_CSV = Path("data/alias_mapping.csv")
 def test_to_snake_basic():
     assert to_snake("Adj Close") == "adj_close"
     assert to_snake("RSI_14") == "rsi_14"
-    assert to_snake("Ağırlıklı Ortalama") == "a_girlikli_ortalama"  # dil sapması normalize edilir
+    assert (
+        to_snake("Ağırlıklı Ortalama") == "a_girlikli_ortalama"
+    )  # dil sapması normalize edilir
 
 
 def test_alias_load_and_resolve():
@@ -25,5 +32,24 @@ def test_normalize_indicator_token_with_alias():
 
 def test_canonical_presence():
     # kritik kanonikler mevcut mu?
-    required = {"open","high","low","close","volume","vwap_d","rsi_14","ema_50","bbl_20_2","bbh_20_2","macd_12_26_9","macd_signal_12_26_9","macd_hist_12_26_9","adx_14","dmp_14","dmn_14","aroon_up_14","aroon_down_14"}
+    required = {
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "vwap_d",
+        "rsi_14",
+        "ema_50",
+        "bbl_20_2",
+        "bbh_20_2",
+        "macd_12_26_9",
+        "macd_signal_12_26_9",
+        "macd_hist_12_26_9",
+        "adx_14",
+        "dmp_14",
+        "dmn_14",
+        "aroon_up_14",
+        "aroon_down_14",
+    }
     assert required.issubset(CANONICAL_SET)

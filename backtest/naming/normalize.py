@@ -9,14 +9,22 @@ _SNAKE_RE2 = re.compile(r"_{2,}")
 
 def to_snake(s: str) -> str:
     s = s.strip()
-    translit = str.maketrans({
-        "ı": "i", "İ": "I",
-        "ğ": "_g", "Ğ": "_G",
-        "ş": "s", "Ş": "S",
-        "ö": "o", "Ö": "O",
-        "ü": "u", "Ü": "U",
-        "ç": "c", "Ç": "C",
-    })
+    translit = str.maketrans(
+        {
+            "ı": "i",
+            "İ": "I",
+            "ğ": "_g",
+            "Ğ": "_G",
+            "ş": "s",
+            "Ş": "S",
+            "ö": "o",
+            "Ö": "O",
+            "ü": "u",
+            "Ü": "U",
+            "ç": "c",
+            "Ç": "C",
+        }
+    )
     s = s.translate(translit)
     s = _SNAKE_RE1.sub("_", s)
     s = _SNAKE_RE2.sub("_", s)
@@ -24,7 +32,9 @@ def to_snake(s: str) -> str:
     return s.lower()
 
 
-def normalize_indicator_token(token: str, alias_map: Dict[str, str] | None = None) -> str:
+def normalize_indicator_token(
+    token: str, alias_map: Dict[str, str] | None = None
+) -> str:
     # 1) alias çöz; 2) snake; 3) kanonik set kontrolü gerekirse üst katmanda yapılır
     raw = token
     if alias_map and raw in alias_map:
@@ -33,7 +43,9 @@ def normalize_indicator_token(token: str, alias_map: Dict[str, str] | None = Non
     return norm
 
 
-def normalize_dataframe_columns(columns: Iterable[str], alias_map: Dict[str, str] | None = None) -> Dict[str, str]:
+def normalize_dataframe_columns(
+    columns: Iterable[str], alias_map: Dict[str, str] | None = None
+) -> Dict[str, str]:
     """Girdi kolon adlarını kanonik/snake_case'e map eder.
     Dönüş: {orijinal: yeni_ad}
     Not: Çakışmayı üst katman kontrol edecek (ör. A4 dry-run'da).

@@ -6,6 +6,7 @@ from .normalize import (
     normalize_dataframe_columns,
 )
 from .legacy import *  # noqa: F401,F403
+
 __all__ = [
     "CANONICAL_BASE",
     "CANONICAL_SET",
