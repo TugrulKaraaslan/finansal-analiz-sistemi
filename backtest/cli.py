@@ -42,7 +42,9 @@ def preflight(cfg):  # tests monkeypatch ediyor
 
     if getattr(cfg.project, "single_date", None):
         dates = [pd.to_datetime(cfg.project.single_date).date()]
-    elif getattr(cfg.project, "start_date", None) and getattr(cfg.project, "end_date", None):
+    elif getattr(cfg.project, "start_date", None) and getattr(
+        cfg.project, "end_date", None
+    ):
         s = pd.to_datetime(cfg.project.start_date).date()
         e = pd.to_datetime(cfg.project.end_date).date()
         dates = pd.date_range(s, e).date
@@ -54,16 +56,30 @@ def preflight(cfg):  # tests monkeypatch ediyor
             case_sensitive=getattr(cfg.data, "case_sensitive", True),
         )
     else:
-        return NS(errors=[], warnings=[], suggestions=[], missing_dates=[], found_files=[], searched_dir=Path(cfg.data.excel_dir), glob_pattern=cfg.data.filename_pattern)
+        return NS(
+            errors=[],
+            warnings=[],
+            suggestions=[],
+            missing_dates=[],
+            found_files=[],
+            searched_dir=Path(cfg.data.excel_dir),
+            glob_pattern=cfg.data.filename_pattern,
+        )
 
 
 def _run_scan(cfg):  # tests monkeypatch ediyor
-    src = cfg if getattr(cfg.data, "price_schema", None) else getattr(cfg.data, "excel_dir", "")
+    src = (
+        cfg
+        if getattr(cfg.data, "price_schema", None)
+        else getattr(cfg.data, "excel_dir", "")
+    )
     try:
         read_excels_long(src)
     except ValueError:
         pass
-    day = getattr(cfg.project, "single_date", None) or getattr(cfg.project, "start_date", None)
+    day = getattr(cfg.project, "single_date", None) or getattr(
+        cfg.project, "start_date", None
+    )
     out_dir = Path(getattr(cfg.project, "out_dir", "."))
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / f"SCAN_{day}.xlsx").write_text("", encoding="utf-8")
@@ -96,10 +112,20 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--data", required=False, help="Parquet/CSV fiyat verisi")
         sp.add_argument("--filters", "--filters-csv", dest="filters", required=False)
         sp.add_argument("--alias", default=None)
-        sp.add_argument("--filters-off", action="store_true", help="Filtre uygulamasını kapat")
+        sp.add_argument(
+            "--filters-off", action="store_true", help="Filtre uygulamasını kapat"
+        )
         sp.add_argument("--no-write", action="store_true", help="Dosya yazma kapalı")
-        sp.add_argument("--report-alias", action="store_true", help="Alias raporu üret (uyumluluk bayrağı)")
-        sp.add_argument("--no-preflight", action="store_true", help="Ön kontrolleri atla (uyumluluk)")
+        sp.add_argument(
+            "--report-alias",
+            action="store_true",
+            help="Alias raporu üret (uyumluluk bayrağı)",
+        )
+        sp.add_argument(
+            "--no-preflight",
+            action="store_true",
+            help="Ön kontrolleri atla (uyumluluk)",
+        )
 
     pd_day = sub.add_parser("scan-day", help="Tek gün tarama")
     pd_day.add_argument("--date", required=False)
@@ -118,7 +144,12 @@ def build_parser() -> argparse.ArgumentParser:
 def _load_and_prepare(args) -> tuple[NS, Flags]:
     cfg = load_config(args.config) if args.config else None
     if cfg is None:
-        cfg = NS(project=NS(out_dir="raporlar/gunluk"), data=NS(), calendar=NS(), indicators=NS(engine="none"))
+        cfg = NS(
+            project=NS(out_dir="raporlar/gunluk"),
+            data=NS(),
+            calendar=NS(),
+            indicators=NS(engine="none"),
+        )
     cfg = merge_cli_overrides(cfg, log_level=args.log_level)
     setup_logging(getattr(getattr(cfg, "cli", NS()), "log_level", "INFO"))
     flags = Flags.from_dict({})
@@ -152,6 +183,7 @@ def main(argv=None):
         if args.alias:
             _file_exists_or_exit(args.alias)
         from backtest.validation import validate_filters
+
         rep = validate_filters(args.filters, args.alias)
         if rep.ok():
             print("✅ Uyum Tam")
@@ -162,12 +194,20 @@ def main(argv=None):
 
     if args.config:
         if args.cmd == "scan-day":
-            args.data = args.data or getattr(cfg.data, "excel_dir", None) or getattr(cfg.data, "cache_parquet_path", None)
+            args.data = (
+                args.data
+                or getattr(cfg.data, "excel_dir", None)
+                or getattr(cfg.data, "cache_parquet_path", None)
+            )
             args.date = args.date or getattr(cfg.project, "single_date", None)
             args.filters = args.filters or getattr(cfg.data, "filters_csv", None)
             args.out = args.out or getattr(cfg.project, "out_dir", None)
         elif args.cmd == "scan-range":
-            args.data = args.data or getattr(cfg.data, "excel_dir", None) or getattr(cfg.data, "cache_parquet_path", None)
+            args.data = (
+                args.data
+                or getattr(cfg.data, "excel_dir", None)
+                or getattr(cfg.data, "cache_parquet_path", None)
+            )
             args.start = args.start or getattr(cfg.project, "start_date", None)
             args.end = args.end or getattr(cfg.project, "end_date", None)
             args.filters = args.filters or getattr(cfg.data, "filters_csv", None)
@@ -183,7 +223,9 @@ def main(argv=None):
             if not getattr(args, k, None):
                 need.append(k)
     if need:
-        parser.error(f"the following arguments are required: {', '.join('--'+n for n in need)}")
+        parser.error(
+            f"the following arguments are required: {', '.join('--'+n for n in need)}"
+        )
 
     if args.data and str(args.data).lower().endswith(".parquet"):
         df = pd.read_parquet(args.data)
@@ -207,13 +249,16 @@ def main(argv=None):
             print("ℹ️ --no-write aktif; dosya yazımı yok. Sinyal:", len(rows))
             sys.exit(0)
         from backtest.batch.io import OutputWriter
+
         OutputWriter(args.out).write_day(args.date, rows)
         sys.exit(0)
 
     if args.cmd == "scan-range":
         if args.no_preflight:
             logger.info("--no-preflight aktif")
-        run_scan_range(df, args.start, args.end, filters_df, out_dir=args.out, alias_csv=args.alias)
+        run_scan_range(
+            df, args.start, args.end, filters_df, out_dir=args.out, alias_csv=args.alias
+        )
         sys.exit(0)
 
 
@@ -313,4 +358,3 @@ except Exception:  # pragma: no cover
 
 if __name__ == "__main__":
     main()
-
