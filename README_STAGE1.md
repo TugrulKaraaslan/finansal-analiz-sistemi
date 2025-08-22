@@ -18,3 +18,10 @@
 - Dry‑Run doğrulama eklendi.
 - CLI: `--dry-run` seçeneği filters.csv için fail-fast kontrol yapar.
 - Rapor: satır, hata kodu, mesaj.
+
+## Stage1 İlerleme – A5 Tam
+- Ön hesaplayıcı eklendi.
+- Gösterge hesaplamaları DataFrame’e önceden ekleniyor.
+- Aynı gösterge bir kez hesaplanıyor (cache).
+- Modüller: `backtest/precompute/*`
+- Test: `tests/test_precompute.py`

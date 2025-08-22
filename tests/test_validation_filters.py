@@ -9,6 +9,7 @@ F2,
 F1,close > 10
 """
 
+
 def test_validation_detects_errors():
     with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
         f.write(CSV_CONTENT)

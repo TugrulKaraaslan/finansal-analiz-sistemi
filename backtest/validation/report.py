@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Dict
 
+
 @dataclass
 class ValidationReport:
     errors: List[dict] = field(default_factory=list)
