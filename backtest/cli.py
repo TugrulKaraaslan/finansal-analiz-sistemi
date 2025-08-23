@@ -466,12 +466,10 @@ def main(argv=None):
         cfg = SignalMetricConfig(horizon_days=args.horizon_days, threshold_bps=args.threshold_bps, price_col=args.price_col)
         outdir = Path('artifacts/metrics'); outdir.mkdir(parents=True, exist_ok=True)
         try:
-            import pandas as pd
             if args.signals_csv and Path(args.signals_csv).exists():
                 sdf = pd.read_csv(args.signals_csv)
             else:
-                from backtest.data_loader import read_excels_long
-                df = read_excels_long(args.start, args.end)
+                df = read_excels_long(args.start)
                 sdf = df
             sig_cols = [c for c in args.signal_cols if c in sdf.columns]
             if cfg.price_col in sdf.columns and sig_cols:
@@ -480,7 +478,6 @@ def main(argv=None):
         except Exception as _:
             pass
         try:
-            import pandas as pd
             if Path(args.equity_csv).exists():
                 eq = pd.read_csv(args.equity_csv)
                 from backtest.eval.metrics import equity_metrics
