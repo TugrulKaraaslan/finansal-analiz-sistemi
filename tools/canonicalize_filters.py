@@ -23,7 +23,7 @@ def canonicalize_expr(expr: str) -> str:
 
 src = Path(sys.argv[1] if len(sys.argv) > 1 else "filters.csv")
 dst = Path(sys.argv[2] if len(sys.argv) > 2 else "filters_canonical.csv")
-rows = list(csv.DictReader(open(src, encoding="utf-8")))
+rows = list(csv.DictReader(open(src, encoding="utf-8"), delimiter=";"))
 for r in rows:
     r["PythonQuery"] = canonicalize_expr(r.get("PythonQuery", ""))
 with open(dst, "w", encoding="utf-8", newline="") as f:

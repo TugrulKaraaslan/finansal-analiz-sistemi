@@ -30,10 +30,10 @@ jobs:
       # Fixtures + golden verification + quality + preflight + test
       - run: make fixtures
       - run: make validate
+      - run: make preflight
       - run: make golden-verify
       - run: make quality
       - run: make risk-smoke
-      - run: make preflight
       - run: make test
 
       - run: make report

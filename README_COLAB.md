@@ -1,5 +1,7 @@
 # Google Colab Hızlı Başlangıç
 
+> Bu dosya **yalnızca Google Colab** içindir; buradaki `/content/...` yolları Colab'a özeldir.
+
 Aşağıdaki hücreler Colab ortamında projeyi kurar, ortamı doğrular ve örnek bir tarama çalıştırır:
 
 ```python

@@ -119,7 +119,8 @@ Tasarım notu: Bu PR yalnız iskelet sağlar; metrik/portföy sonuçlarını top
 python -m backtest.cli eval-metrics --start 2025-03-07 --end 2025-03-11 \
   --horizon-days 5 --threshold-bps 50 --signal-cols entry_long exit_long
 
-# Çıktılar
+# Çıktılar: signal_metrics.json, portfolio_metrics.json ve risk_metrics.json
+# (Sharpe, Sortino, MaxDD, Turnover)
 tree artifacts/metrics
 ```
 
@@ -252,25 +253,18 @@ python -m backtest.cli scan-range \
   --start 2024-01-02 --end 2024-01-05
 ```
 
-## Filtre İfadeleri ve Alias'lar
+## Filtre İfadeleri
 
- Filtre motoru DataFrame kolonlarını bire bir kullanır ve her kolonun
- lower-case kopyasını otomatik olarak sağlar. `filters.csv` araştırma dosyasıdır;
- araçlar **asla** bu dosyayı düzenlemez. Legacy isimler için aşağıdaki
- alias haritası tanımlıdır. Alias politikası preflight/engine içinde
- uygulanır; bu alias'lar tanınır ve kabul edilir, tanımsız isimler ise
- hata üretir.
+Filtre motoru DataFrame kolonlarını bire bir kullanır ve her kolonun
+lower-case kopyasını otomatik olarak sağlar. Çalışma zamanı **yalnızca
+kanonik** isimleri kabul eder; tanımsız veya alias kolonlar preflight
+sırasında **hata** üretir.
 
-Detaylar için [docs/ALIAS_POLICY.md](docs/ALIAS_POLICY.md) ve kanonik kolon listesi için [docs/canonical_names.md](docs/canonical_names.md) dosyalarına bakın.
-
-* `its_9` → `ichimoku_conversionline`
-* `iks_26` → `ichimoku_baseline`
-* `macd_12_26_9` → `macd_line`
-* `macds_12_26_9` → `macd_signal`
-* `bbm_20 2` → `bbm_20_2` (benzer şekilde `bbu_20 2` ve `bbl_20 2`)
-
-Alias içeren dosyaları kanonik hale getirmek için `tools/canonicalize_filters.py`
-aracını kullanabilirsiniz.
+Araştırma amaçlı hazırlanan `filters.csv` dosyası araçlar tarafından
+değiştirilmez. Eğer dosyada legacy alias'lar bulunuyorsa, çalıştırmadan önce
+`tools/canonicalize_filters.py` ile kanonik hale getirmeniz önerilir.
+Kanonik kolon listesi için [docs/canonical_names.md](docs/canonical_names.md)
+dosyasına bakabilirsiniz.
 
 ## Filtre Alias Raporu
 
