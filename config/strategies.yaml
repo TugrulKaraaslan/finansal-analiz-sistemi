@@ -1,0 +1,11 @@
+strategies:
+  - id: strat_a
+    filters: ["T1"]
+    params: {risk_per_trade_bps: 50}
+  - id: strat_b
+    filters: ["T2"]
+    params: {risk_per_trade_bps: 35}
+constraints:
+  maxdd_pct: 25
+  max_turnover_pct: 600
+  max_trades: 1200

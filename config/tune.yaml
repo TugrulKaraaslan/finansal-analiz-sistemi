@@ -1,0 +1,15 @@
+strategy:
+  id: strat_a
+  base_filters: ["T1"]
+  space:
+    risk_per_trade_bps: {grid: [25, 35, 50]}
+    atr_mult: {randint: {low: 1, high: 4}}
+cv:
+  kind: walk-forward
+  folds: 3
+  embargo_days: 0
+constraints:
+  maxdd_pct: 25
+  max_turnover_pct: 600
+objective: sharpe
+seed: 42

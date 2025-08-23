@@ -263,6 +263,20 @@ def build_parser() -> argparse.ArgumentParser:
     cv.add_argument("--portfolio", default="config/portfolio.yaml")
     cv.add_argument("--costs", default="config/costs.yaml")
     cv.add_argument("--export-json-schema", action="store_true")
+    cmp = sub.add_parser("compare-strategies", help="Run multiple strategies on same data")
+    cmp.add_argument("--start", required=True)
+    cmp.add_argument("--end", required=True)
+    cmp.add_argument("--space", required=True, help="YAML strategy definitions")
+
+    tune = sub.add_parser("tune-strategy", help="Hyper-parameter tuning for a single strategy")
+    tune.add_argument("--start", required=True)
+    tune.add_argument("--end", required=True)
+    tune.add_argument("--space", required=True, help="YAML search space")
+    tune.add_argument("--cv", default="walk-forward")
+    tune.add_argument("--search", choices=["grid", "random"], default="grid")
+    tune.add_argument("--max-iters", type=int, default=10)
+    tune.add_argument("--seed", type=int, default=None)
+
 
     return p
 
@@ -308,6 +322,14 @@ def main(argv=None):
                 i += 1
         argv = pre + [cmd] + post
     args = parser.parse_args(argv)
+    if args.cmd == "compare-strategies":
+        from backtest.strategy.cli import compare_strategies_cli
+        compare_strategies_cli(args)
+        return
+    if args.cmd == "tune-strategy":
+        from backtest.strategy.cli import tune_strategy_cli
+        tune_strategy_cli(args)
+        return
     if args.cmd == "guardrails":
         outdir = Path(getattr(args, "out_dir", "artifacts/guardrails"))
         outdir.mkdir(parents=True, exist_ok=True)

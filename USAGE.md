@@ -151,3 +151,21 @@ python -m backtest.cli guardrails
 
 Çıktılar `artifacts/guardrails/` altında `summary.json` ve `violations.csv` olarak üretilir.
 
+## Strateji Karşılaştırma ve Tuning
+
+### Stratejileri Karşılaştırma
+
+```bash
+python -m backtest.cli compare-strategies --start 2025-01-01 --end 2025-01-10 --space config/strategies.yaml
+```
+
+Bu komut listelenen stratejileri aynı veri döneminde koşturur ve sonuçları `artifacts/compare/` altında `results.csv` ve `summary.html` olarak kaydeder.
+
+### Strateji Tuning
+
+```bash
+python -m backtest.cli tune-strategy --start 2025-01-01 --end 2025-01-20 --space config/tune.yaml --search grid --max-iters 5 --seed 42
+```
+
+Belirtilen parametre uzayında zaman serisi çapraz doğrulaması ile en iyi konfigürasyon bulunur. Çıktılar `artifacts/tune/` dizinine yazılır.
+
