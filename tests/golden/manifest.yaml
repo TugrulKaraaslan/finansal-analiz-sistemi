@@ -1,0 +1,6 @@
+files:
+  - perf_notes.md
+pick_latest:
+  - path: loglar
+    pattern: "*"
+    count: 2
