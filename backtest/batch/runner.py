@@ -3,7 +3,6 @@ import pandas as pd
 from typing import List, Tuple
 from concurrent.futures import ProcessPoolExecutor
 from time import perf_counter
-import logging
 
 from backtest.normalize import normalize_dataframe
 from backtest.filters.engine import evaluate
@@ -13,8 +12,9 @@ from backtest.indicators.precompute import (
 )
 from backtest.batch.scheduler import trading_days
 from backtest.batch.io import OutputWriter
+from backtest.logging_conf import get_logger, log_with
 
-logger = logging.getLogger(__name__)
+log = get_logger("runner")
 
 
 def _process_chunk(args):
@@ -29,24 +29,28 @@ def _process_chunk(args):
         symbols = sorted({c[0] for c in df_chunk.columns})
         for sym in symbols:
             sub = df_chunk.xs(sym, axis=1, level=0)
-            for _, r in filters_df.iterrows():
-                code = str(r["FilterCode"]).strip()
-                expr = str(r["PythonQuery"]).strip()
+            for i, r in enumerate(filters_df.itertuples(index=False)):
+                code = str(r.FilterCode).strip()
+                expr = str(r.PythonQuery).strip()
+                log_with(log, "DEBUG", "evaluate", expr=expr, chunk_idx=i, symbol=sym)
                 try:
                     mask = evaluate(sub, expr)
                 except Exception as e:
+                    log.exception("evaluate failed", extra={"extra_fields": {"expr": expr}})
                     raise ValueError(
                         f"Filter evaluation failed: {expr} → {e}"
                     ) from e  # noqa: E501
                 if bool(mask.loc[d]):
                     rows.append((sym, code))
     else:
-        for _, r in filters_df.iterrows():
-            code = str(r["FilterCode"]).strip()
-            expr = str(r["PythonQuery"]).strip()
+        for i, r in enumerate(filters_df.itertuples(index=False)):
+            code = str(r.FilterCode).strip()
+            expr = str(r.PythonQuery).strip()
+            log_with(log, "DEBUG", "evaluate", expr=expr, chunk_idx=i)
             try:
                 mask = evaluate(df_chunk, expr)
             except Exception as e:
+                log.exception("evaluate failed", extra={"extra_fields": {"expr": expr}})
                 raise ValueError(
                     f"Filter evaluation failed: {expr} → {e}"
                 ) from e  # noqa: E501
@@ -131,7 +135,7 @@ def run_scan_range(
         for r in results:
             rows.extend(r)
         writer.write_day(day, rows)
-        logger.info(
+        log.info(
             "DAY %s: IO+INDICATORS+FILTERS+WRITE took %.3fs",
             day,
             perf_counter() - t0,
