@@ -162,6 +162,7 @@ def build_parser() -> argparse.ArgumentParser:
             "--filters-off", action="store_true", help="Filtre uygulamasını kapat"
         )
         sp.add_argument("--no-write", action="store_true", help="Dosya yazma kapalı")
+        sp.add_argument("--costs", default=None, help="Maliyet config yolu")
         sp.add_argument(
             "--report-alias",
             action="store_true",
@@ -247,6 +248,11 @@ def main(argv=None):
                 i += 1
         argv = pre + [cmd] + post
     args = parser.parse_args(argv)
+    if getattr(args, "costs", None):
+        os.environ["COSTS_CFG"] = args.costs
+    else:
+        args.costs = "config/costs.yaml"
+        os.environ["COSTS_CFG"] = args.costs
 
     cfg, flags = _load_and_prepare(args)
 
@@ -296,6 +302,7 @@ def main(argv=None):
             "filters": args.filters,
             "alias": args.alias,
             "out": args.out,
+            "costs": args.costs,
         }
     elif args.cmd == "scan-range":
         inputs = {
@@ -305,6 +312,7 @@ def main(argv=None):
             "filters": args.filters,
             "alias": args.alias,
             "out": args.out,
+            "costs": args.costs,
         }
     elif args.cmd == "summarize":
         inputs = {

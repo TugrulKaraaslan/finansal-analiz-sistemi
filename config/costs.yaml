@@ -1,0 +1,31 @@
+enabled: true
+currency: TRY
+rounding:
+  cash_decimals: 2   # nakit yuvarlama
+
+commission:
+  model: fixed_bps   # fixed_bps | per_share_flat | none
+  bps: 5             # 5 bps = %0.05
+  min_cash: 0.0      # trade başına min ücret (opsiyonel)
+
+taxes:
+  bps: 0             # 0 ise kapalı
+
+spread:
+  model: half_spread # half_spread | fixed_bps | none
+  default_spread_bps: 7  # veri yoksa kullanılacak
+
+slippage:
+  model: atr_linear  # atr_linear | fixed_bps | none
+  bps_per_1x_atr: 10 # ATR/Close oranı 1x ise eklenecek bps
+
+apply:
+  price_col: fill_price     # işlem gerçekleşme fiyatı kolonu
+  qty_col:   quantity       # adet
+  side_col:  side           # 'BUY' / 'SELL'
+  date_col:  date           # datetime
+  id_col:    trade_id
+
+report:
+  write_breakdown: true
+  output_dir: artifacts/costs
