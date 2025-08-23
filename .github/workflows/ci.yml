@@ -30,3 +30,11 @@ jobs:
       - run: PREFLIGHT_ALIAS_MODE=allow PREFLIGHT_ALLOW_UNKNOWN=1 make preflight
       - run: make test
 
+      - run: make report
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-report
+          path: |
+            artifacts/report
+            artifacts/profiles/pyinstrument_scan.html

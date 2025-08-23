@@ -52,6 +52,15 @@ make profile
 make mem
 ```
 
+## Sonuç Dashboard’u
+
+```bash
+make report
+# Çıktı: artifacts/report/index.html (yerelde dosyayı tarayıcıda aç)
+```
+
+CI koşuları sonunda rapor `html-report` artefaktı olarak yüklenir; Actions sekmesinden indirip `index.html` dosyasını açabilirsiniz.
+
 ## Walk-Forward / Time-Series CV
 
 ```bash
