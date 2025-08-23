@@ -44,8 +44,8 @@ perf-report: bench bench-cli profile mem
 
 .PHONY: logs
 logs:
-@echo "Log dosyaları: artifacts/logs/"
-@ls -1 artifacts/logs || true
+	@echo "Log dosyaları: artifacts/logs/"
+	@ls -1 artifacts/logs || true
 
 .PHONY: quality
 quality:
