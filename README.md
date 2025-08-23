@@ -2,11 +2,14 @@
 
 Bu proje, BIST verileri üzerinde filtre bazlı tarama yaparak raporlar üretir.
 
+Kullanım için [USAGE.md](USAGE.md), sık sorular için [FAQ.md](FAQ.md) ve hata çözümü için [TROUBLESHOOT.md](TROUBLESHOOT.md) dosyalarına bakın.
+
 ## Hızlı Başlangıç (Lokal)
 
 ```bash
 python -m venv .venv && source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
-make colab-setup
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 python -m backtest.cli --help
 ```
 
@@ -22,9 +25,13 @@ python -m backtest.cli --help
 ```bash
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
-make fixtures preflight test
+make fixtures
+make preflight
+make test
 # Golden güncelleme gerektiğinde:
 make golden
+# Hepsini bir arada çalıştırmak için:
+make check
 ```
 
 ## Veri ve Filtre Dosyaları
@@ -118,6 +125,8 @@ Filtre motoru DataFrame kolonlarını bire bir kullanır ve her kolonun
 lower-case kopyasını otomatik olarak sağlar. Legacy isimler için aşağıdaki
 alias haritası geçerlidir; bu alias'lar kullanıldığında uyarı verilir ve
 değerlendirme kanonik isimler üzerinden yapılır:
+
+Detaylar için [docs/ALIAS_POLICY.md](docs/ALIAS_POLICY.md) ve kanonik kolon listesi için [docs/canonical_names.md](docs/canonical_names.md) dosyalarına bakın.
 
 * `its_9` → `ichimoku_conversionline`
 * `iks_26` → `ichimoku_baseline`
