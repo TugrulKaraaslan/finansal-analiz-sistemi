@@ -25,6 +25,7 @@ jobs:
 
       # Fixtures + golden verification + quality + preflight + test
       - run: make fixtures
+      - run: make config-validate
       - run: make golden-verify
       - run: make quality
       - run: PREFLIGHT_ALIAS_MODE=allow PREFLIGHT_ALLOW_UNKNOWN=1 make preflight

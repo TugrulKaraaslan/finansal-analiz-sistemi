@@ -1,0 +1,24 @@
+enabled: true
+currency: TRY
+rounding_cash_decimals: 2
+commission:
+  model: fixed_bps
+  bps: 5.0
+  min_cash: 0.0
+taxes:
+  bps: 0.0
+spread:
+  model: half_spread
+  default_spread_bps: 7.0
+slippage:
+  model: atr_linear
+  bps_per_1x_atr: 10.0
+apply:
+  price_col: fill_price
+  qty_col: quantity
+  side_col: side
+  date_col: date
+  id_col: trade_id
+report:
+  write_breakdown: true
+  output_dir: artifacts/costs
