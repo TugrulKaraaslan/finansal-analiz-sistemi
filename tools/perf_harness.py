@@ -21,6 +21,20 @@ SCENARIOS = {
 }
 
 
+def _ensure_parquet_data(symbols, start, end):
+    base = Path("data/parquet")
+    for sym in symbols:
+        part = base / f"symbol={sym}"
+        if not any(part.glob("*.parquet")):
+            part.mkdir(parents=True, exist_ok=True)
+            import pandas as pd
+
+            dates = pd.date_range(start, end, freq="D")
+            if len(dates) == 0:
+                dates = pd.to_datetime([start, end])
+            df = pd.DataFrame({"Date": dates, "Close": range(1, len(dates) + 1)})
+            df.to_parquet(part / f"{sym}.parquet", index=False)
+
 def run_scenario(name: str, backend: str, symbols, start, end) -> dict:
     func = SCENARIOS[name]
     tracemalloc.start()
@@ -42,6 +56,7 @@ def main() -> None:
     args = ap.parse_args()
     backends = [b.strip() for b in args.backends.split(",") if b.strip()]
     symbols = [s.strip() for s in args.symbols.split(",") if s.strip()]
+    _ensure_parquet_data(symbols, args.start, args.end)
     outdir = Path("artifacts/perf")
     outdir.mkdir(parents=True, exist_ok=True)
     for b in backends:
