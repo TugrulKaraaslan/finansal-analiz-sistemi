@@ -24,6 +24,8 @@ from backtest.reporting import build_excel_report
 from backtest.filters.normalize_expr import normalize_expr
 from backtest.filters.preflight import validate_filters as preflight_validate_filters
 from backtest.paths import EXCEL_DIR
+from backtest.portfolio.engine import PortfolioParams
+from backtest.portfolio.simulator import PortfolioSim
 
 __all__ = [
     "normalize",
@@ -205,6 +207,12 @@ def build_parser() -> argparse.ArgumentParser:
     pr.add_argument("--filter-counts", required=True, help="filter_counts.csv yolu")
     pr.add_argument("--out", default="raporlar/ozet/summary.xlsx")
 
+    psim = sub.add_parser("portfolio-sim", help="Portföy simülasyonu")
+    psim.add_argument("--portfolio", default="config/portfolio.yaml")
+    psim.add_argument("--costs", default="config/costs.yaml")
+    psim.add_argument("--start", required=False)
+    psim.add_argument("--end", required=False)
+
     return p
 
 
@@ -233,6 +241,7 @@ def main(argv=None):
         "scan-range",
         "summarize",
         "report-excel",
+        "portfolio-sim",
     }:
         cmd = argv[0]
         rest = argv[1:]
@@ -291,6 +300,9 @@ def main(argv=None):
             args.end = args.end or getattr(cfg.project, "end_date", None)
             args.filters = args.filters or getattr(cfg.data, "filters_csv", None)
             args.out = args.out or getattr(cfg.project, "out_dir", None)
+        elif args.cmd == "portfolio-sim":
+            args.start = args.start or getattr(cfg.project, "start_date", None)
+            args.end = args.end or getattr(cfg.project, "end_date", None)
 
     inputs = {}
     if args.cmd == "dry-run":
@@ -328,6 +340,13 @@ def main(argv=None):
             "filter_counts": args.filter_counts,
             "out": args.out,
         }
+    elif args.cmd == "portfolio-sim":
+        inputs = {
+            "portfolio": args.portfolio,
+            "start": args.start,
+            "end": args.end,
+            "costs": args.costs,
+        }
 
     rc.write_env_snapshot()
     rc.write_config_snapshot(cfg_dict, inputs)
@@ -360,6 +379,10 @@ def main(argv=None):
         for k in ("data", "start", "end", "out"):
             if not getattr(args, k, None):
                 need.append(k)
+    if args.cmd == "portfolio-sim":
+        for k in ("start", "end"):
+            if not getattr(args, k, None):
+                need.append(k)
     if need:
         parser.error(
             f"the following arguments are required: {', '.join('--'+n for n in need)}"
@@ -378,6 +401,39 @@ def main(argv=None):
             write_dir=args.out,
         )
         print("Özet yazıldı:", res)
+        sys.exit(0)
+
+    if args.cmd == "portfolio-sim":
+        p = PortfolioParams.from_yaml(
+            Path(getattr(args, "portfolio", "config/portfolio.yaml"))
+        )
+        sim = PortfolioSim(p, Path(getattr(args, "costs", "config/costs.yaml")))
+        start = pd.to_datetime(args.start)
+        end = pd.to_datetime(args.end)
+        dates = pd.date_range(start, end, freq="D")
+        sig = pd.DataFrame(
+            {
+                "date": dates,
+                "symbol": "AAA",
+                "entry_long": [1] + [0] * (len(dates) - 1),
+                "exit_long": [0, 1] + [0] * (len(dates) - 2),
+            }
+        )
+        mkt = pd.DataFrame(
+            {
+                "date": dates,
+                "symbol": "AAA",
+                "close": [100 + i for i in range(len(dates))],
+                "high": [101 + i for i in range(len(dates))],
+                "low": [99 + i for i in range(len(dates))],
+            }
+        )
+        for d in dates:
+            sd = sig[sig["date"] == d]
+            md = mkt[mkt["date"] == d]
+            sim.step(d.strftime("%Y-%m-%d"), sd, md)
+        sim.finalize(Path(p.out_dir))
+        print("Portfolio simulation completed")
         sys.exit(0)
 
     if args.data and str(args.data).lower().endswith(".parquet"):
