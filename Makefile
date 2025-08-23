@@ -84,11 +84,4 @@ metrics:
 
 .PHONY: risk-smoke
 risk-smoke:
-	python - <<'PY'
-from backtest.risk.guards import RiskEngine
-import pandas as pd
-engine = RiskEngine({"enabled": True, "exposure": {"per_symbol_max_pct": 0.1}})
-orders = pd.DataFrame({"fill_price":[100], "quantity":[200]})
-dec = engine.decide({"equity":1e6}, orders, None, equity=1e6, symbol_exposure=0)
-print(dec.final_action)
-PY
+	python -c "from backtest.risk.guards import RiskEngine; import pandas as pd; engine = RiskEngine({'enabled': True, 'exposure': {'per_symbol_max_pct': 0.1}}); orders = pd.DataFrame({'fill_price':[100], 'quantity':[200]}); dec = engine.decide({'equity':1e6}, orders, None, equity=1e6, symbol_exposure=0); print(dec.final_action)"
