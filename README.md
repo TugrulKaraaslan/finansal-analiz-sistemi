@@ -1,6 +1,11 @@
 # Finansal Analiz Sistemi
 
+![tests](https://img.shields.io/github/actions/workflow/status/TugrulKaraaslan/finansal-analiz-sistemi/ci.yml?branch=main)
+![python](https://img.shields.io/badge/python-3.11-blue)
+![release](https://img.shields.io/badge/release-A12-success)
+
 Bu proje, BIST verileri üzerinde filtre bazlı tarama yaparak raporlar üretir.
+Son sürüm: [A12](CHANGELOG.md#A12--2025-08-23) (2025-08-23).
 
 Kullanım için [USAGE.md](USAGE.md), sık sorular için [FAQ.md](FAQ.md) ve hata çözümü için [TROUBLESHOOT.md](TROUBLESHOOT.md) dosyalarına bakın.
 
