@@ -18,6 +18,8 @@ from backtest.backtester import run_1g_returns
 from backtest.reporter import write_reports
 from backtest.validator import dataset_summary, quality_warnings
 from backtest.data_loader import read_excels_long as _read_excels_long
+from backtest.eval.metrics import SignalMetricConfig
+from backtest.eval.report import compute_signal_report, save_json
 from backtest.trace import RunContext, ArtifactWriter, list_output_files
 from backtest.summary import summarize_range
 from backtest.reporting import build_excel_report
@@ -219,6 +221,16 @@ def build_parser() -> argparse.ArgumentParser:
     psim.add_argument("--start", required=False)
     psim.add_argument("--end", required=False)
 
+    seval = sub.add_parser('eval-metrics', help='Hesaplanmış sinyal ve/veya portföy artefaktlarından metrik üretir')
+    seval.add_argument('--start', required=True)
+    seval.add_argument('--end', required=True)
+    seval.add_argument('--price-col', default='close')
+    seval.add_argument('--horizon-days', type=int, default=5)
+    seval.add_argument('--threshold-bps', type=float, default=50)
+    seval.add_argument('--signal-cols', nargs='*', default=['entry_long'])
+    seval.add_argument('--signals-csv', help='opsiyonel: sinyal DataFrame CSV yolu (date-indexli)')
+    seval.add_argument('--equity-csv', default='artifacts/portfolio/daily_equity.csv')
+
     cv = sub.add_parser(
         "config-validate", help="Validate YAML configs and export JSON schemas"
     )
@@ -255,6 +267,7 @@ def main(argv=None):
         "summarize",
         "report-excel",
         "portfolio-sim",
+        "eval-metrics",
     }:
         cmd = argv[0]
         rest = argv[1:]
@@ -377,6 +390,13 @@ def main(argv=None):
             "out": args.out,
             "costs": args.costs,
         }
+    elif args.cmd == "eval-metrics":
+        inputs = {
+            "start": args.start,
+            "end": args.end,
+            "signals_csv": args.signals_csv,
+            "equity_csv": args.equity_csv,
+        }
     elif args.cmd == "summarize":
         inputs = {
             "data": args.data,
@@ -441,6 +461,35 @@ def main(argv=None):
         parser.error(
             f"the following arguments are required: {', '.join('--'+n for n in need)}"
         )
+
+    if args.cmd == 'eval-metrics':
+        cfg = SignalMetricConfig(horizon_days=args.horizon_days, threshold_bps=args.threshold_bps, price_col=args.price_col)
+        outdir = Path('artifacts/metrics'); outdir.mkdir(parents=True, exist_ok=True)
+        try:
+            import pandas as pd
+            if args.signals_csv and Path(args.signals_csv).exists():
+                sdf = pd.read_csv(args.signals_csv)
+            else:
+                from backtest.data_loader import read_excels_long
+                df = read_excels_long(args.start, args.end)
+                sdf = df
+            sig_cols = [c for c in args.signal_cols if c in sdf.columns]
+            if cfg.price_col in sdf.columns and sig_cols:
+                rep = compute_signal_report(sdf, sig_cols, cfg)
+                save_json(rep, outdir/'signal_metrics.json')
+        except Exception as _:
+            pass
+        try:
+            import pandas as pd
+            if Path(args.equity_csv).exists():
+                eq = pd.read_csv(args.equity_csv)
+                from backtest.eval.metrics import equity_metrics
+                em = equity_metrics(eq)
+                save_json(em, outdir/'portfolio_metrics.json')
+        except Exception as _:
+            pass
+        print('metrics written to artifacts/metrics (varsa)')
+        sys.exit(0)
 
     if args.cmd == "summarize":
         if args.data.lower().endswith(".parquet"):

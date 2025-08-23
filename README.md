@@ -112,6 +112,17 @@ make walk-forward
 
 Tasarım notu: Bu PR yalnız iskelet sağlar; metrik/portföy sonuçlarını toplama PR-13’te detaylandırılır.
 
+## Değerlendirme Metrikleri
+
+```bash
+# Sinyal + portföy metrikleri (mevcut artefaktları kullanarak)
+python -m backtest.cli eval-metrics --start 2025-03-07 --end 2025-03-11 \
+  --horizon-days 5 --threshold-bps 50 --signal-cols entry_long exit_long
+
+# Çıktılar
+tree artifacts/metrics
+```
+
 ## Portfolio Engine
 
 Portföy motoru, sinyallerden gelen giriş/çıkışlara göre pozisyon boyutlarını hesaplar ve temel limitleri uygular. Üç farklı boyutlama modu desteklenir:
