@@ -28,7 +28,12 @@ from backtest.filters.preflight import validate_filters as preflight_validate_fi
 from backtest.paths import EXCEL_DIR
 from backtest.portfolio.engine import PortfolioParams
 from backtest.portfolio.simulator import PortfolioSim
-from backtest.config.schema import ColabConfig, CostsConfig, PortfolioConfig, export_json_schema
+from backtest.config.schema import (
+    ColabConfig,
+    CostsConfig,
+    PortfolioConfig,
+    export_json_schema,
+)
 
 __all__ = [
     "normalize",
@@ -41,7 +46,7 @@ __all__ = [
     "quality_warnings",
 ]
 
-from backtest.logging_conf import get_logger, log_with, set_fold_id, ensure_run_id
+from backtest.logging_conf import get_logger, log_with, ensure_run_id
 
 log = get_logger("cli")
 run_id = ensure_run_id()
@@ -218,18 +223,24 @@ def build_parser() -> argparse.ArgumentParser:
     psim = sub.add_parser("portfolio-sim", help="Portföy simülasyonu")
     psim.add_argument("--portfolio", default="config/portfolio.yaml")
     psim.add_argument("--costs", default="config/costs.yaml")
+    psim.add_argument("--risk", default=None)
     psim.add_argument("--start", required=False)
     psim.add_argument("--end", required=False)
 
-    seval = sub.add_parser('eval-metrics', help='Hesaplanmış sinyal ve/veya portföy artefaktlarından metrik üretir')
-    seval.add_argument('--start', required=True)
-    seval.add_argument('--end', required=True)
-    seval.add_argument('--price-col', default='close')
-    seval.add_argument('--horizon-days', type=int, default=5)
-    seval.add_argument('--threshold-bps', type=float, default=50)
-    seval.add_argument('--signal-cols', nargs='*', default=['entry_long'])
-    seval.add_argument('--signals-csv', help='opsiyonel: sinyal DataFrame CSV yolu (date-indexli)')
-    seval.add_argument('--equity-csv', default='artifacts/portfolio/daily_equity.csv')
+    seval = sub.add_parser(
+        "eval-metrics",
+        help="Hesaplanmış sinyal ve/veya portföy artefaktlarından metrik üretir",
+    )
+    seval.add_argument("--start", required=True)
+    seval.add_argument("--end", required=True)
+    seval.add_argument("--price-col", default="close")
+    seval.add_argument("--horizon-days", type=int, default=5)
+    seval.add_argument("--threshold-bps", type=float, default=50)
+    seval.add_argument("--signal-cols", nargs="*", default=["entry_long"])
+    seval.add_argument(
+        "--signals-csv", help="opsiyonel: sinyal DataFrame CSV yolu (date-indexli)"
+    )
+    seval.add_argument("--equity-csv", default="artifacts/portfolio/daily_equity.csv")
 
     cv = sub.add_parser(
         "config-validate", help="Validate YAML configs and export JSON schemas"
@@ -299,9 +310,7 @@ def main(argv=None):
                     )
                     if hasattr(PortfolioConfig, "model_validate_yaml")
                     else PortfolioConfig(
-                        **__import__("yaml").safe_load(
-                            Path(args.portfolio).read_text()
-                        )
+                        **__import__("yaml").safe_load(Path(args.portfolio).read_text())
                     )
                 )
                 print(f"OK: {args.portfolio}")
@@ -417,6 +426,7 @@ def main(argv=None):
             "start": args.start,
             "end": args.end,
             "costs": args.costs,
+            "risk": args.risk,
         }
     if inputs:
         fields = {k: str(v) for k, v in inputs.items() if v is not None}
@@ -462,9 +472,14 @@ def main(argv=None):
             f"the following arguments are required: {', '.join('--'+n for n in need)}"
         )
 
-    if args.cmd == 'eval-metrics':
-        cfg = SignalMetricConfig(horizon_days=args.horizon_days, threshold_bps=args.threshold_bps, price_col=args.price_col)
-        outdir = Path('artifacts/metrics'); outdir.mkdir(parents=True, exist_ok=True)
+    if args.cmd == "eval-metrics":
+        cfg = SignalMetricConfig(
+            horizon_days=args.horizon_days,
+            threshold_bps=args.threshold_bps,
+            price_col=args.price_col,
+        )
+        outdir = Path("artifacts/metrics")
+        outdir.mkdir(parents=True, exist_ok=True)
         try:
             if args.signals_csv and Path(args.signals_csv).exists():
                 sdf = pd.read_csv(args.signals_csv)
@@ -474,18 +489,19 @@ def main(argv=None):
             sig_cols = [c for c in args.signal_cols if c in sdf.columns]
             if cfg.price_col in sdf.columns and sig_cols:
                 rep = compute_signal_report(sdf, sig_cols, cfg)
-                save_json(rep, outdir/'signal_metrics.json')
-        except Exception as _:
+                save_json(rep, outdir / "signal_metrics.json")
+        except Exception:
             pass
         try:
             if Path(args.equity_csv).exists():
                 eq = pd.read_csv(args.equity_csv)
                 from backtest.eval.metrics import equity_metrics
+
                 em = equity_metrics(eq)
-                save_json(em, outdir/'portfolio_metrics.json')
-        except Exception as _:
+                save_json(em, outdir / "portfolio_metrics.json")
+        except Exception:
             pass
-        print('metrics written to artifacts/metrics (varsa)')
+        print("metrics written to artifacts/metrics (varsa)")
         sys.exit(0)
 
     if args.cmd == "summarize":
@@ -507,7 +523,11 @@ def main(argv=None):
         p = PortfolioParams.from_yaml(
             Path(getattr(args, "portfolio", "config/portfolio.yaml"))
         )
-        sim = PortfolioSim(p, Path(getattr(args, "costs", "config/costs.yaml")))
+        sim = PortfolioSim(
+            p,
+            Path(getattr(args, "costs", "config/costs.yaml")),
+            Path(getattr(args, "risk", "config/risk.yaml")),
+        )
         start = pd.to_datetime(args.start)
         end = pd.to_datetime(args.end)
         dates = pd.date_range(start, end, freq="D")
