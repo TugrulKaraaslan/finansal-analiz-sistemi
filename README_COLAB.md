@@ -54,6 +54,6 @@ kaynakları ve filtreler arasında tutarlılık sağlanır.
 İsteğe bağlı olarak testleri çalıştırmak için:
 
 ```python
-%pip install -q -r requirements_dev.txt -c constraints.txt --only-binary=:all:
+%pip install -q -r requirements-dev.txt -c constraints.txt --only-binary=:all:
 !pytest -q
 ```

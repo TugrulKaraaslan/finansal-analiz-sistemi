@@ -1,4 +1,0 @@
--r requirements.txt
-pytest>=7,<9
-pandera>=0.18,<0.20
-pandas-ta==0.3.14b0

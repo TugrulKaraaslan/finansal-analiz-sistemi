@@ -21,8 +21,10 @@ python -m backtest.cli --help
 
 ```bash
 pip install -r requirements.txt
-pip install pytest hypothesis openpyxl pyyaml
-pytest -q
+pip install -r requirements-dev.txt
+make fixtures preflight test
+# Golden güncelleme gerektiğinde:
+make golden
 ```
 
 ## Veri ve Filtre Dosyaları
