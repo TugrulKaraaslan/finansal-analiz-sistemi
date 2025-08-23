@@ -1,39 +1,102 @@
 from __future__ import annotations
 
+from typing import Mapping
+import re
 import pandas as pd
 
-from backtest.filters.normalize_expr import normalize_expr
-from backtest.filters.deps import collect_series
-from backtest.filters.functions import make_crossup, make_crossdown
-from backtest.pipeline.precompute import precompute_needed
+from backtest.cross import (
+    cross_up as _cross_up,
+    cross_down as _cross_down,
+    cross_over,
+    cross_under,
+)
+
+# 1) Tek doğru isim standardı – kabul edilen legacy alias'lar
+ALIAS: dict[str, str] = {
+    # Ichimoku
+    "its_9": "ichimoku_conversionline",
+    "iks_26": "ichimoku_baseline",
+    # MACD
+    "macd_12_26_9": "macd_line",
+    "macds_12_26_9": "macd_signal",
+    # Bollinger – boşluk hataları
+    "bbm_20 2": "bbm_20_2",
+    "bbu_20 2": "bbu_20_2",
+    "bbl_20 2": "bbl_20_2",
+}
+
+DEPRECATED = set(ALIAS.keys())
+
+
+def cross_up(a: pd.Series, b: pd.Series | float | int) -> pd.Series:
+    if isinstance(b, pd.Series):
+        out = _cross_up(a, b)
+    else:
+        out = cross_over(a, b)
+    out.iloc[-1] = False
+    return out.fillna(False)
+
+
+def cross_down(a: pd.Series, b: pd.Series | float | int) -> pd.Series:
+    if isinstance(b, pd.Series):
+        if b.nunique() == 1:
+            level = b.iloc[0]
+            out = (a.shift(1) > level) & (a <= level)
+        else:
+            out = _cross_down(a, b)
+    else:
+        out = (a.shift(1) > b) & (a <= b)
+    out.iloc[-1] = False
+    return out.fillna(False)
+
+
+def _build_locals(df: pd.DataFrame) -> dict[str, pd.Series]:
+    env = {c: df[c] for c in df.columns}
+    for c in list(df.columns):
+        lc = c.lower()
+        if lc not in env:
+            env[lc] = df[c]
+    for k, v in ALIAS.items():
+        if v in df.columns:
+            env[k] = df[v]
+    env.update(
+        {
+            "cross_up": cross_up,
+            "cross_down": cross_down,
+            "crossup": cross_up,
+            "crossdown": cross_down,
+            "CROSSUP": cross_up,
+            "CROSSDOWN": cross_down,
+        }
+    )
+    return env
+
+
+def _validate_tokens(expr: str, locals_map: Mapping[str, object]):
+    bad_alias: list[str] = []
+    undefined: list[str] = []
+    for tok in re.findall(r"[A-Za-z_][A-Za-z0-9_]*", expr):
+        if tok in {"and", "or", "not"}:
+            continue
+        if tok in DEPRECATED:
+            bad_alias.append(f"'{tok}' yerine '{ALIAS[tok]}' kullan")
+        elif tok not in locals_map:
+            undefined.append(tok)
+    # spaced aliases
+    for k in DEPRECATED:
+        if " " in k and k in expr:
+            bad_alias.append(f"'{k}' yerine '{ALIAS[k]}' kullan")
+    if bad_alias:
+        import warnings
+        warnings.warn("; ".join(sorted(set(bad_alias))))
+    if undefined:
+        raise NameError(f"Bilinmeyen değişkenler: {', '.join(sorted(set(undefined)))}")
 
 
 def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
-    """Evaluate a boolean filter expression on ``df``.
-
-    The expression may contain logical operators ``and``/``or`` and
-    ``CROSSUP``/``CROSSDOWN`` macros. These macros are expanded into temporary
-    columns prior to evaluation so that ``DataFrame.eval`` can be used without
-    direct function calls.
-    """
-
-    norm, macros = normalize_expr(expr)
-    series = collect_series(expr)
-    df = precompute_needed(df, series)
-
-    for kind, a, b in macros:
-        name = f"__{kind}__{a}__{b}"
-        if name not in df.columns:
-            if kind == "crossup":
-                df[name] = make_crossup(df[a], df[b])
-            else:
-                df[name] = make_crossdown(df[a], df[b])
-        norm = norm.replace(f"{kind.upper()}({a},{b})", name)
-
-    try:
-        return df.eval(norm, engine="python")
-    except Exception as e:
-        raise ValueError(f"filter evaluation failed: {e}") from e
+    locals_map = _build_locals(df)
+    _validate_tokens(expr, locals_map)
+    return pd.eval(expr, engine="python", local_dict=locals_map)
 
 
-__all__ = ["evaluate"]
+__all__ = ["evaluate", "cross_up", "cross_down"]

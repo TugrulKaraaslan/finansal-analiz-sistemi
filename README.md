@@ -28,12 +28,15 @@ pytest -q
 * **Excel klasörü**: `Veri/` (proje kökünde)
 * **filters.csv**: proje kökünde, ayracı `;`, başlıklar: `FilterCode;PythonQuery`
 
-Örnek ilk satır:
+Örnek satırlar:
 
 ```
 FilterCode;PythonQuery
-EXAMPLE_01; (rsi_14 > 50) & (ema_20 > ema_50)
+EX1; ichimoku_conversionline > ichimoku_baseline
+EX2; macd_line > macd_signal
 ```
+
+Excel klasör yolu config dosyasından okunur; CLI'da `--excel-dir` parametresi bulunmaz.
 
 ## Config Dosyası
 
@@ -65,7 +68,7 @@ python -m backtest.cli scan-day --config config/colab_config.yaml --date 2025-03
 python -m backtest.cli scan-day --config config/colab_config.yaml --date 2025-03-07
 
 # Tarih aralığı
-python -m backtest.cli scan-range --config config/colab_config.yaml --start 2022-01-03 --end 2025-04-18
+python -m backtest.cli scan-range --config config/colab_config.yaml --start 2025-03-07 --end 2025-03-11
 ```
 
 > `--config` opsiyoneldir (varsayılan: `config_scan.yml`). Pozisyonel argüman **DEĞİLDİR**.

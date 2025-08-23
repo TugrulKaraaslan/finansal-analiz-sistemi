@@ -30,14 +30,20 @@ def _process_chunk(args):
             for _, r in filters_df.iterrows():
                 code = str(r["FilterCode"]).strip()
                 expr = str(r["PythonQuery"]).strip()
-                mask = evaluate(sub, expr)
+                try:
+                    mask = evaluate(sub, expr)
+                except Exception as e:
+                    raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e
                 if bool(mask.loc[d]):
                     rows.append((sym, code))
     else:
         for _, r in filters_df.iterrows():
             code = str(r["FilterCode"]).strip()
             expr = str(r["PythonQuery"]).strip()
-            mask = evaluate(df_chunk, expr)
+            try:
+                mask = evaluate(df_chunk, expr)
+            except Exception as e:
+                raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e
             if bool(mask.loc[d]):
                 rows.append(("SYMBOL", code))
     return rows
