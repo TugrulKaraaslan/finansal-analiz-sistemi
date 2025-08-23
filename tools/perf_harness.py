@@ -5,6 +5,13 @@ import json
 import time
 import tracemalloc
 from pathlib import Path
+import sys
+
+# Allow running as a script without installing the package by
+# ensuring the project root is on ``sys.path`` before imports.
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from backtest.data.loader import load_prices
 
