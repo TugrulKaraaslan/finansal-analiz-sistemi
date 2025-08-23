@@ -1,4 +1,4 @@
-.PHONY: fixtures preflight test golden golden-verify lint check dev
+.PHONY: fixtures preflight test golden golden-verify lint check dev bench bench-cli profile mem perf-report
 actions = fixtures preflight lint test golden-verify
 
 fixtures:
@@ -24,3 +24,17 @@ check:
 dev:
 	pip install -r requirements.txt || true
 	pip install -r requirements-dev.txt
+
+bench:
+	pytest -q -k perf --benchmark-only
+
+bench-cli:
+	python tools/benchmark_scan.py
+
+profile:
+	python tools/profile_pyinstrument.py
+
+mem:
+	python tools/memory_snapshot.py
+
+perf-report: bench bench-cli profile mem

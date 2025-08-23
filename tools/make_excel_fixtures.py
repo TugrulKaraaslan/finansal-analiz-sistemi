@@ -29,6 +29,7 @@ df = pd.DataFrame({
 
 # AAA.xlsx (sheet adı AAA)
 df.to_excel(EXCEL_DIR / "data" / "AAA.xlsx", sheet_name="AAA", index=False)
+df.to_excel(EXCEL_DIR / "AAA.xlsx", sheet_name="AAA", index=False)
 
 # BIST benchmark (opsiyonel ama eksik uyarısı yaşanmaması için ekle)
 bist = pd.DataFrame({

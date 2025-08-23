@@ -1,0 +1,3 @@
+FilterCode,PythonQuery
+B1, macd_line > macd_signal
+B2,"cross_up(bbm_20_2, bbl_20_2)"

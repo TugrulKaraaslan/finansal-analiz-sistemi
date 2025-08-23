@@ -8,7 +8,7 @@ project:
 
 data:
   excel_dir: "/content/finansal-analiz-sistemi/Veri"
-  filters_csv: "/content/finansal-analiz-sistemi/filters.csv"
+  filters_csv: "/content/finansal-analiz-sistemi/filters_bench.csv"
   enable_cache: false
   cache_parquet_path: "/content/finansal-analiz-sistemi/cache"
 
