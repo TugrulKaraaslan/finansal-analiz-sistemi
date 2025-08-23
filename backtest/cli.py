@@ -26,6 +26,7 @@ from backtest.filters.preflight import validate_filters as preflight_validate_fi
 from backtest.paths import EXCEL_DIR
 from backtest.portfolio.engine import PortfolioParams
 from backtest.portfolio.simulator import PortfolioSim
+from backtest.config.schema import ColabConfig, CostsConfig, PortfolioConfig, export_json_schema
 
 __all__ = [
     "normalize",
@@ -218,6 +219,14 @@ def build_parser() -> argparse.ArgumentParser:
     psim.add_argument("--start", required=False)
     psim.add_argument("--end", required=False)
 
+    cv = sub.add_parser(
+        "config-validate", help="Validate YAML configs and export JSON schemas"
+    )
+    cv.add_argument("--config", default="config/colab_config.yaml")
+    cv.add_argument("--portfolio", default="config/portfolio.yaml")
+    cv.add_argument("--costs", default="config/costs.yaml")
+    cv.add_argument("--export-json-schema", action="store_true")
+
     return p
 
 
@@ -261,6 +270,44 @@ def main(argv=None):
                 i += 1
         argv = pre + [cmd] + post
     args = parser.parse_args(argv)
+    if args.cmd == "config-validate":
+        ok = True
+        try:
+            c = ColabConfig.from_yaml_with_env(Path(args.config))
+            print(f"OK: {args.config} (excel_dir={c.data.excel_dir})")
+        except Exception as e:
+            ok = False
+            print(f"FAIL: {args.config} → {e}")
+        try:
+            if Path(args.portfolio).exists():
+                p = (
+                    PortfolioConfig.model_validate_yaml(
+                        Path(args.portfolio).read_text()
+                    )
+                    if hasattr(PortfolioConfig, "model_validate_yaml")
+                    else PortfolioConfig(
+                        **__import__("yaml").safe_load(
+                            Path(args.portfolio).read_text()
+                        )
+                    )
+                )
+                print(f"OK: {args.portfolio}")
+        except Exception as e:
+            ok = False
+            print(f"FAIL: {args.portfolio} → {e}")
+        try:
+            if Path(args.costs).exists():
+                k = CostsConfig(
+                    **__import__("yaml").safe_load(Path(args.costs).read_text())
+                )
+                print(f"OK: {args.costs}")
+        except Exception as e:
+            ok = False
+            print(f"FAIL: {args.costs} → {e}")
+        if args.export_json_schema:
+            export_json_schema(Path("artifacts/schema"))
+            print("schemas → artifacts/schema/*.schema.json")
+        raise SystemExit(0 if ok else 2)
     if getattr(args, "costs", None):
         os.environ["COSTS_CFG"] = args.costs
     else:

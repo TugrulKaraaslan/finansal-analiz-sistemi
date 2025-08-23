@@ -39,6 +39,14 @@ make golden
 make check
 ```
 
+## Konfig Şeması & Doğrulama
+
+```bash
+# Doğrulama + JSON Schema üretimi
+make config-validate
+# Çıkış: artifacts/schema/*.schema.json
+```
+
 ## Log Ayarları
 
 - `LOG_LEVEL` = DEBUG|INFO|WARNING|ERROR (default: INFO)

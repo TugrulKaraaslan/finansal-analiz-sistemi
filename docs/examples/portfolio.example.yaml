@@ -1,0 +1,24 @@
+enabled: true
+base_currency: TRY
+initial_equity: 1000000
+sizing:
+  mode: risk_per_trade
+  risk_per_trade_bps: 50
+  stop_model: atr_multiple
+  atr_period: 14
+  atr_mult: 2.0
+constraints:
+  max_positions: 10
+  max_position_pct: 0.2
+  max_gross_exposure: 1.0
+  allow_short: false
+  lot_size: 1
+  min_qty: 1
+  round_qty: floor
+pricing:
+  execution_price: close
+  price_col: close
+report:
+  output_dir: artifacts/portfolio
+  write_trades: true
+  write_daily: true

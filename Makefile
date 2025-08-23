@@ -42,9 +42,13 @@ mem:
 
 perf-report: bench bench-cli profile mem
 
+.PHONY: config-validate
+config-validate:
+	EXCEL_DIR=veri_guncel_fix python -m backtest.cli config-validate --export-json-schema
+
 .PHONY: logs
 logs:
-	@echo "Log dosyaları: artifacts/logs/"
+@echo "Log dosyaları: artifacts/logs/"
 	@ls -1 artifacts/logs || true
 
 .PHONY: quality
