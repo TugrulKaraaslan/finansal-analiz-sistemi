@@ -1,10 +1,14 @@
-name: Tests
+name: tests
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   tests:
@@ -14,20 +18,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: python -m pip install --upgrade pip setuptools wheel -c constraints.txt
+
+      # Kurulum
       - run: pip install -r requirements.txt || true
       - run: pip install -r requirements-dev.txt
-      - run: python tools/make_excel_fixtures.py
-      - run: python - <<'PY'
-from backtest.paths import EXCEL_DIR
-from backtest.filters.preflight import validate_filters
-from pathlib import Path
-validate_filters(Path('filters.csv') if Path('filters.csv').exists() else Path('config/filters.csv'), EXCEL_DIR)
-print('preflight passed')
-PY
-      - name: Verify environment
-        run: python tools/verify_env.py
-      - name: Show versions
-        run: pip freeze | grep -Ei 'pandas(-ta)?|numpy|pandera|PyYAML' || true
-      - name: Run tests
-        run: pytest -q
+
+      # Fixtures + preflight + test
+      - run: make fixtures
+      - run: PREFLIGHT_FAIL_ON_ALIAS=1 PREFLIGHT_ALLOW_UNKNOWN=1 make preflight
+      - run: make test
+
