@@ -4,3 +4,8 @@ __pycache__/
 raporlar/
 loglar/*
 !loglar/.gitkeep
+# Excel binaries
+*.xlsx
+veri_guncel_fix/**
+!veri_guncel_fix/.gitkeep
+!veri_guncel_fix/data/.gitkeep
