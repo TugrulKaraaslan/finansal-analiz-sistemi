@@ -1,14 +1,15 @@
 from __future__ import annotations
 from types import SimpleNamespace as NS
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 import copy
 import logging
 import warnings
 
 try:
     import yaml
-except Exception:  # pragma: no cover - yaml yoksa minik parser yerine hata verelim
+except Exception:  # pragma: no cover
+    # yaml yoksa minik parser yerine hata verelim
     yaml = None
 
 logger = logging.getLogger(__name__)
@@ -53,6 +54,7 @@ _DEFAULT = {
         "daily_sheet_prefix": "SCAN_",
         "summary_sheet_name": "SUMMARY",
     },
+    "preflight": True,
 }
 
 
@@ -108,7 +110,8 @@ def _expand_paths(doc: dict, base: Path) -> dict:
     if doc.get("data", {}).get("filters_csv"):
         doc["data"]["filters_csv"] = _norm(doc["data"]["filters_csv"])
     if doc.get("data", {}).get("cache_parquet_path"):
-        doc["data"]["cache_parquet_path"] = _norm(doc["data"]["cache_parquet_path"])
+        cpp = doc["data"]["cache_parquet_path"]
+        doc["data"]["cache_parquet_path"] = _norm(cpp)
     if doc.get("calendar", {}).get("holidays_csv_path"):
         doc["calendar"]["holidays_csv_path"] = _norm(
             doc["calendar"]["holidays_csv_path"]

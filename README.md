@@ -100,8 +100,8 @@ pytest tests/e2e/test_scan_range.py -q
 pytest tests/smoke/test_cli_entrypoints.py -q
 ```
 
-Preflight doğrulamasını atlamak için CLI'da `--no-preflight` bayrağını veya
-config dosyasında `preflight: false` ayarını kullanabilirsin:
+Preflight doğrulaması varsayılan olarak açıktır. İstersen CLI'da `--no-preflight`
+bayrağını veya config dosyasında `preflight: false` ayarını kullanabilirsin:
 
 ```bash
 python -m backtest.cli scan-range \
@@ -136,6 +136,14 @@ python -m backtest.cli scan-range --config config_scan.yml \
 
 Örnek tarama çok-gün bir Excel üzerinde çalışır, isteğe bağlı olarak preflight
 kontrolü atlanabilir ve `alias_uyumsuzluklar.csv` dosyasına alias raporu yazılır.
+
+## Filtre Kanonikleştirme Aracı
+
+`filters.csv` içindeki legacy alias'ları kanonik isimlere dönüştürmek için:
+
+```bash
+python tools/canonicalize_filters.py filters.csv filters_canonical.csv
+```
 
 ## Rapor ve Log Dizini
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Mapping
 import re
+import warnings
 import pandas as pd
 
 from backtest.cross import (
@@ -72,23 +73,16 @@ def _build_locals(df: pd.DataFrame) -> dict[str, pd.Series]:
 
 
 def _validate_tokens(expr: str, locals_map: Mapping[str, object]):
-    bad_alias: list[str] = []
     undefined: list[str] = []
     scan_expr = expr
     for alias, canon in ALIAS.items():
-        if alias in expr:
-            bad_alias.append(f"'{alias}' yerine '{canon}' kullan")
-            if " " in alias:
-                scan_expr = scan_expr.replace(alias, canon)
+        if " " in alias and alias in scan_expr:
+            scan_expr = scan_expr.replace(alias, canon)
     for tok in re.findall(r"[A-Za-z_][A-Za-z0-9_]*", scan_expr):
         if tok in {"and", "or", "not"}:
             continue
         if tok not in locals_map and tok not in ALIAS.values():
             undefined.append(tok)
-    if bad_alias:
-        import warnings
-
-        warnings.warn("; ".join(sorted(set(bad_alias))))
     if undefined:
         unknown = ", ".join(sorted(set(undefined)))
         raise NameError(f"Bilinmeyen değişkenler: {unknown}")
@@ -96,6 +90,10 @@ def _validate_tokens(expr: str, locals_map: Mapping[str, object]):
 
 def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
     locals_map = _build_locals(df)
+    for k, v in ALIAS.items():
+        if k in (expr or ""):
+            msg = f"legacy alias used: {k} -> {v}; evaluated with canonical"
+            warnings.warn(msg)
     _validate_tokens(expr, locals_map)
     canon_expr = expr
     for a, c in ALIAS.items():
@@ -103,7 +101,7 @@ def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
     try:
         return pd.eval(canon_expr, engine="python", local_dict=locals_map)
     except Exception as e:  # pragma: no cover - defensive
-        raise type(e)(f"{expr} → {e}") from e
+        raise ValueError(f"evaluate failed: {expr} → {e}") from e
 
 
 __all__ = ["evaluate", "cross_up", "cross_down"]

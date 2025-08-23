@@ -22,7 +22,8 @@ from backtest.trace import RunContext, ArtifactWriter, list_output_files
 from backtest.summary import summarize_range
 from backtest.reporting import build_excel_report
 from backtest.filters.normalize_expr import normalize_expr
-from pathlib import Path
+from backtest.filters.preflight import validate_filters as preflight_validate_filters
+from backtest.paths import EXCEL_DIR
 
 __all__ = [
     "normalize",
@@ -406,7 +407,10 @@ def main(argv=None):
         sys.exit(0)
 
     if args.cmd == "scan-range":
-        if args.no_preflight:
+        preflight_enabled = getattr(cfg, "preflight", True) and not args.no_preflight
+        if preflight_enabled:
+            preflight_validate_filters(filters_path, EXCEL_DIR)
+        elif args.no_preflight:
             logger.info("--no-preflight aktif")
         run_scan_range(
             df, args.start, args.end, filters_df, out_dir=args.out, alias_csv=args.alias
@@ -521,7 +525,9 @@ try:  # pragma: no cover - click opsiyonel
                 df.to_csv(file, sep=sep, index=False)
             else:
                 for idx in df.index[changed]:
-                    click.echo(f"{idx}: {df.at[idx, 'PythonQuery']} -> {norm.iloc[idx]}")
+                    click.echo(
+                        f"{idx}: {df.at[idx, 'PythonQuery']} -> {norm.iloc[idx]}"
+                    )
                 raise SystemExit(1)
         else:
             click.echo("OK")

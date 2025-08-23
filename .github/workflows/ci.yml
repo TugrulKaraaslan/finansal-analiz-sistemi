@@ -21,6 +21,13 @@ jobs:
       - run: pip install openpyxl
       - run: pip install hypothesis
       - run: python tools/make_excel_fixtures.py
+      - run: python - <<'PY'
+from backtest.paths import EXCEL_DIR
+from backtest.filters.preflight import validate_filters
+from pathlib import Path
+validate_filters(Path('filters.csv') if Path('filters.csv').exists() else Path('config/filters.csv'), EXCEL_DIR)
+print('preflight passed')
+PY
       - name: Verify environment
         run: python tools/verify_env.py
       - name: Show versions
