@@ -20,6 +20,8 @@ python -m backtest.cli --help
 ## Testler Nasıl Çalıştırılır?
 
 ```bash
+pip install -r requirements.txt
+pip install pytest hypothesis openpyxl pyyaml
 pytest -q
 ```
 
