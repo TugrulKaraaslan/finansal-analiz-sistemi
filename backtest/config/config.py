@@ -55,7 +55,6 @@ _DEFAULT = {
         "summary_sheet_name": "SUMMARY",
     },
     "preflight": True,
-    "allow_alias": False,
 }
 
 
