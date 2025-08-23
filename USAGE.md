@@ -59,3 +59,16 @@ make golden
 # CI’de hata aldıysanız (out-of-date)
 make golden && git add tests/golden/checksums.json && git commit -m "update golden checksums"
 ```
+
+## Veri Kalitesi Sözleşmeleri
+
+```bash
+# Sözleşme kontrolü (lokalde)
+make quality
+# Rapor → artifacts/quality/report.json
+```
+
+Kuralları ve toleransları değiştirmek için `contracts/data_quality.yaml`
+dosyasını düzenleyin. Şema ve mantık ihlalleri aracı başarısız kılar; tolerans
+aşımları yalnızca uyarı üretir.
+

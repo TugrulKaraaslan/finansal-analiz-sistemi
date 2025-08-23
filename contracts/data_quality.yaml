@@ -1,0 +1,27 @@
+# Zorunlu kolonlar ve tipler
+required_columns:
+  date: datetime64[ns]
+  open: float64
+  high: float64
+  low: float64
+  close: float64
+  volume: float64
+
+# Mantıksal kurallar (hepsi opsiyonel, sağlanırsa doğrulanır)
+rules:
+  date_unique: true            # aynı tarihten birden fazla olmasın
+  date_sorted_asc: true        # tarih artan
+  non_negative_volume: true    # volume >= 0
+  ohlc_bounds: true            # low <= min(open,close,high) & high >= max(...)
+  no_full_nan_rows: true       # satırın tamamı NaN olmasın
+
+# Toleranslar (yüzde olarak)
+tolerances:
+  max_nan_ratio_per_column: 0.02    # %2
+  max_duplicate_ratio: 0.0
+
+# Hangi dosyalar taranacak (boş ise EXCEL_DIR altındaki tüm .xlsx)
+include:
+  - "**/*.xlsx"
+exclude:
+  - "**/~$*.xlsx"     # geçici dosyaları dışla
