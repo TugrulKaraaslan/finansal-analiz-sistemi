@@ -108,6 +108,19 @@ python -m backtest.cli scan-range \
   --start 2024-01-02 --end 2024-01-05
 ```
 
+## Filtre İfadeleri ve Alias'lar
+
+Filtre motoru DataFrame kolonlarını bire bir kullanır ve her kolonun
+lower-case kopyasını otomatik olarak sağlar. Legacy isimler için aşağıdaki
+alias haritası geçerlidir; bu alias'lar kullanıldığında uyarı verilir ve
+değerlendirme kanonik isimler üzerinden yapılır:
+
+* `its_9` → `ichimoku_conversionline`
+* `iks_26` → `ichimoku_baseline`
+* `macd_12_26_9` → `macd_line`
+* `macds_12_26_9` → `macd_signal`
+* `bbm_20 2` → `bbm_20_2` (benzer şekilde `bbu_20 2` ve `bbl_20 2`)
+
 ## Filtre Alias Raporu
 
 Filtre dosyasını temizlemek ve alias uyumsuzluklarını raporlamak için yeni bayraklar kullanılır:
