@@ -34,7 +34,10 @@ def _process_chunk(args):
                     mask = evaluate(sub, expr)
                 except Exception as e:
                     raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e
-                if bool(mask.loc[d]):
+                val = mask.loc[d]
+                if isinstance(val, pd.Series):
+                    val = val.iloc[0]
+                if bool(val):
                     rows.append((sym, code))
     else:
         for _, r in filters_df.iterrows():
@@ -44,7 +47,10 @@ def _process_chunk(args):
                 mask = evaluate(df_chunk, expr)
             except Exception as e:
                 raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e
-            if bool(mask.loc[d]):
+            val = mask.loc[d]
+            if isinstance(val, pd.Series):
+                val = val.iloc[0]
+            if bool(val):
                 rows.append(("SYMBOL", code))
     return rows
 

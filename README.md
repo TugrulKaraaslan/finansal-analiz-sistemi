@@ -20,13 +20,14 @@ python -m backtest.cli --help
 ## Testler Nasıl Çalıştırılır?
 
 ```bash
+python tools/lint_filters.py
 pytest -q
 ```
 
 ## Veri ve Filtre Dosyaları
 
 * **Excel klasörü**: `Veri/` (proje kökünde)
-* **filters.csv**: proje kökünde, ayracı `;`, başlıklar: `FilterCode;PythonQuery`
+* **filters.csv**: önce CLI argümanı, sonra proje kökü (`./filters.csv`), en son `config/filters.csv` aranır
 
 Örnek satırlar:
 
@@ -37,6 +38,11 @@ EX2; macd_line > macd_signal
 ```
 
 Excel klasör yolu config dosyasından okunur; CLI'da `--excel-dir` parametresi bulunmaz.
+
+Alias serbestliği **yoktur**; yalnızca aşağıdaki legacy eşlemeler desteklenir:
+`its_9→ichimoku_conversionline`, `iks_26→ichimoku_baseline`,
+`macd_12_26_9→macd_line`, `macds_12_26_9→macd_signal`,
+`bbm/bbu/bbl_20 2→bbm/bbu/bbl_20_2`.
 
 ## Config Dosyası
 
