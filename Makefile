@@ -38,3 +38,7 @@ mem:
 	python tools/memory_snapshot.py
 
 perf-report: bench bench-cli profile mem
+
+.PHONY: quality
+quality:
+	python tools/validate_data_quality.py

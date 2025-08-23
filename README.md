@@ -66,6 +66,18 @@ make golden
 make golden && git add tests/golden/checksums.json && git commit -m "update golden checksums"
 ```
 
+## Veri Kalitesi Sözleşmeleri
+
+```bash
+# Sözleşme kontrolü (lokalde)
+make quality
+# Rapor → artifacts/quality/report.json
+```
+
+Kurallar ve tolerans değerleri `contracts/data_quality.yaml` dosyasından
+güncellenebilir. Şema ihlalleri ve mantıksal hatalar kritik kabul edilir ve
+araç çıkış kodunu sıfırdan farklı yapar; tolerans aşımı uyarı olarak raporlanır.
+
 ## Veri ve Filtre Dosyaları
 
 * **Excel klasörü**: `Veri/` (proje kökünde)
