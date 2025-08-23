@@ -69,6 +69,24 @@ make walk-forward
 
 Tasarım notu: Bu PR yalnız iskelet sağlar; metrik/portföy sonuçlarını toplama PR-13’te detaylandırılır.
 
+## Portfolio Engine
+
+Portföy motoru, sinyallerden gelen giriş/çıkışlara göre pozisyon boyutlarını hesaplar ve temel limitleri uygular. Üç farklı boyutlama modu desteklenir:
+
+- `risk_per_trade`: ATR tabanlı veya yüzdesel stop mesafesi ile özsermayenin belirli bir bps'i riske atılır.
+- `fixed_fraction`: Özsermayenin sabit bir yüzdesi pozisyona ayrılır.
+- `target_weight`: Sinyal hedef ağırlık belirtiyorsa doğrudan notional hesaplanır.
+
+`config/portfolio.yaml` içindeki limitler (max_positions, max_position_pct, max_gross_exposure, lot_size vb.) kontrol edilir. `config/costs.yaml` mevcutsa maliyetler `apply_costs` ile işlemlere eklenir.
+
+CLI'dan basit bir simülasyon örneği:
+
+```bash
+python -m backtest.cli portfolio-sim --config config/colab_config.yaml --portfolio config/portfolio.yaml --start 2025-03-07 --end 2025-03-09
+```
+
+Çıktılar `artifacts/portfolio/` altında `trades.csv` ve `daily_equity.csv` olarak yazılır.
+
 ## Golden Güncelleme
 
 ```bash

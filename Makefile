@@ -47,3 +47,7 @@ quality:
 .PHONY: walk-forward
 walk-forward:
 	python tools/walk_forward_eval.py
+
+.PHONY: portfolio-sim
+portfolio-sim:
+	python -m backtest.cli portfolio-sim --config config/colab_config.yaml --portfolio config/portfolio.yaml --start 2025-03-07 --end 2025-03-09

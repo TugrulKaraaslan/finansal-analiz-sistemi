@@ -1,0 +1,29 @@
+enabled: true
+base_currency: TRY
+initial_equity: 1_000_000
+
+sizing:
+  mode: risk_per_trade   # risk_per_trade | fixed_fraction | target_weight
+  risk_per_trade_bps: 50 # özsermayenin bps’i (0.50%)
+  stop_model: atr_multiple  # atr_multiple | percent
+  atr_period: 14
+  atr_mult: 2.0
+  fixed_fraction: 0.1    # mode=fixed_fraction ise özsermayenin %10’u
+
+constraints:
+  max_positions: 10
+  max_position_pct: 0.2   # tek poz / özsermaye
+  max_gross_exposure: 1.0 # long+short toplamı / özsermaye
+  allow_short: false
+  lot_size: 1
+  min_qty: 1
+  round_qty: floor        # floor|round|ceil
+
+pricing:
+  execution_price: close  # close|open|custom_column
+  price_col: close        # custom column kullanırsan
+
+report:
+  output_dir: artifacts/portfolio
+  write_trades: true
+  write_daily: true
