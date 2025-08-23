@@ -168,6 +168,11 @@ def build_parser() -> argparse.ArgumentParser:
             help="Alias raporu üret (uyumluluk bayrağı)",
         )
         sp.add_argument(
+            "--allow-alias",
+            action="store_true",
+            help="Legacy alias kullanımına izin ver",
+        )
+        sp.add_argument(
             "--no-preflight",
             action="store_true",
             help="Ön kontrolleri atla (uyumluluk)",
@@ -296,6 +301,7 @@ def main(argv=None):
             "filters": args.filters,
             "alias": args.alias,
             "out": args.out,
+            "allow_alias": args.allow_alias,
         }
     elif args.cmd == "scan-range":
         inputs = {
@@ -305,6 +311,7 @@ def main(argv=None):
             "filters": args.filters,
             "alias": args.alias,
             "out": args.out,
+            "allow_alias": args.allow_alias,
         }
     elif args.cmd == "summarize":
         inputs = {
@@ -409,7 +416,10 @@ def main(argv=None):
     if args.cmd == "scan-range":
         preflight_enabled = getattr(cfg, "preflight", True) and not args.no_preflight
         if preflight_enabled:
-            preflight_validate_filters(filters_path, EXCEL_DIR)
+            fail_on_alias = not (args.allow_alias or getattr(cfg, "allow_alias", False))
+            preflight_validate_filters(
+                filters_path, EXCEL_DIR, fail_on_alias=fail_on_alias
+            )
         elif args.no_preflight:
             logger.info("--no-preflight aktif")
         run_scan_range(

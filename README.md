@@ -121,10 +121,13 @@ python -m backtest.cli scan-range \
 
 ## Filtre İfadeleri ve Alias'lar
 
-Filtre motoru DataFrame kolonlarını bire bir kullanır ve her kolonun
-lower-case kopyasını otomatik olarak sağlar. Legacy isimler için aşağıdaki
-alias haritası geçerlidir; bu alias'lar kullanıldığında uyarı verilir ve
-değerlendirme kanonik isimler üzerinden yapılır:
+ Filtre motoru DataFrame kolonlarını bire bir kullanır ve her kolonun
+ lower-case kopyasını otomatik olarak sağlar. Legacy isimler için aşağıdaki
+ alias haritası tanımlıdır. Preflight aşamasında alias kullanımı varsayılan
+ olarak **hatadır**. Lokal geliştirmede geçici olarak izin vermek için CLI'da
+ `--allow-alias` bayrağı veya YAML config'te `allow_alias: true` anahtarı
+ kullanılabilir. CI'da bu seçenekler geçersizdir; alias'lar mutlaka
+ kanonik isimlere dönüştürülmelidir:
 
 Detaylar için [docs/ALIAS_POLICY.md](docs/ALIAS_POLICY.md) ve kanonik kolon listesi için [docs/canonical_names.md](docs/canonical_names.md) dosyalarına bakın.
 
@@ -133,6 +136,9 @@ Detaylar için [docs/ALIAS_POLICY.md](docs/ALIAS_POLICY.md) ve kanonik kolon lis
 * `macd_12_26_9` → `macd_line`
 * `macds_12_26_9` → `macd_signal`
 * `bbm_20 2` → `bbm_20_2` (benzer şekilde `bbu_20 2` ve `bbl_20 2`)
+
+Alias içeren dosyaları kanonik hale getirmek için `tools/canonicalize_filters.py`
+aracını kullanabilirsiniz.
 
 ## Filtre Alias Raporu
 

@@ -25,6 +25,17 @@ jobs:
 
       # Fixtures + preflight + test
       - run: make fixtures
-      - run: PREFLIGHT_FAIL_ON_ALIAS=1 PREFLIGHT_ALLOW_UNKNOWN=1 make preflight
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          from backtest.paths import EXCEL_DIR
+          from backtest.filters.preflight import validate_filters
+          validate_filters(
+              Path('filters.csv') if Path('filters.csv').exists() else Path('config/filters.csv'),
+              EXCEL_DIR,
+              fail_on_alias=True,
+          )
+          print('preflight (fail_on_alias=True) passed')
+          PY
       - run: make test
 
