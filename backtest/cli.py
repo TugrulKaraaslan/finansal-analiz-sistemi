@@ -300,7 +300,35 @@ def build_parser() -> argparse.ArgumentParser:
     ctp.add_argument("--excel-dir", required=True)
     ctp.add_argument("--out", required=True, help="Parquet çıkış klasörü")
 
+    fr = sub.add_parser("fetch-range", help="Veri aralığı indir")
+    fr.add_argument("--symbols", required=True)
+    fr.add_argument("--start", required=True)
+    fr.add_argument("--end", required=True)
+    fr.add_argument("--provider", default="stub")
+    fr.add_argument("--directory", default="data")
 
+    fl = sub.add_parser("fetch-latest", help="TTL ile en son veriyi indir")
+    fl.add_argument("--symbols", required=True)
+    fl.add_argument("--ttl-hours", type=int, default=6)
+    fl.add_argument("--provider", default="stub")
+    fl.add_argument("--directory", default="data")
+
+    rc_cmd = sub.add_parser("refresh-cache", help="Önbelleği yenile")
+    rc_cmd.add_argument("--ttl-hours", type=int, default=0)
+    rc_cmd.add_argument("--provider", default="stub")
+    rc_cmd.add_argument("--directory", default="data")
+
+    vc_cmd = sub.add_parser("vacuum-cache", help="Eski parçaları temizle")
+    vc_cmd.add_argument("--older-than-days", type=int, default=365)
+    vc_cmd.add_argument("--provider", default="stub")
+    vc_cmd.add_argument("--directory", default="data")
+
+    ic_cmd = sub.add_parser("integrity-check", help="Parquet bütünlüğünü kontrol et")
+    ic_cmd.add_argument("--symbols", required=True)
+    ic_cmd.add_argument("--provider", default="stub")
+    ic_cmd.add_argument("--directory", default="data")
+
+    
     return p
 
 
@@ -345,6 +373,44 @@ def main(argv=None):
                 i += 1
         argv = pre + [cmd] + post
     args = parser.parse_args(argv)
+    if args.cmd in {
+        "fetch-range",
+        "fetch-latest",
+        "refresh-cache",
+        "vacuum-cache",
+        "integrity-check",
+    }:
+        from backtest.downloader.core import DataDownloader
+        from backtest.downloader.providers.local_csv import LocalCSVProvider
+        from backtest.downloader.providers.local_excel import LocalExcelProvider
+        from backtest.downloader.providers.stub import StubProvider
+
+        def _make_dl(name: str, directory: str) -> DataDownloader:
+            if name == "stub":
+                prov = StubProvider()
+            elif name == "local-csv":
+                prov = LocalCSVProvider(directory)
+            elif name == "local-excel":
+                prov = LocalExcelProvider(directory)
+            elif name == "http-csv":
+                from backtest.downloader.providers.http_csv import HttpCSVProvider  # pragma: no cover
+                prov = HttpCSVProvider()
+            else:  # pragma: no cover
+                raise SystemExit(f"unknown provider: {name}")
+            return DataDownloader(prov)
+
+        dl = _make_dl(args.provider, args.directory)
+        if args.cmd == "fetch-range":
+            dl.fetch_range(args.symbols.split(","), args.start, args.end)
+        elif args.cmd == "fetch-latest":
+            dl.fetch_latest(args.symbols.split(","), args.ttl_hours)
+        elif args.cmd == "refresh-cache":
+            dl.refresh_cache(args.ttl_hours)
+        elif args.cmd == "vacuum-cache":
+            dl.vacuum_cache(args.older_than_days)
+        elif args.cmd == "integrity-check":
+            dl.integrity_check(args.symbols.split(","))
+        return
     if args.cmd == "compare-strategies":
         from backtest.strategy.cli import compare_strategies_cli
         compare_strategies_cli(args)
@@ -822,62 +888,6 @@ try:  # pragma: no cover - click opsiyonel
         else:
             click.echo("OK")
 
-    from backtest.downloader.core import DataDownloader
-    from backtest.downloader.providers.local_csv import LocalCSVProvider
-    from backtest.downloader.providers.stub import StubProvider
-
-    def _make_downloader(provider: str, directory: str) -> DataDownloader:
-        if provider == "stub":
-            prov = StubProvider()
-        elif provider == "local-csv":
-            prov = LocalCSVProvider(directory)
-        else:  # pragma: no cover - guard for future providers
-            raise click.ClickException(f"unknown provider: {provider}")
-        return DataDownloader(prov)
-
-    @click.command(name="fetch-range")
-    @click.option("--symbols", required=True)
-    @click.option("--start", required=True)
-    @click.option("--end", required=True)
-    @click.option("--provider", default="stub")
-    @click.option("--directory", default="data")
-    def fetch_range_cmd(symbols: str, start: str, end: str, provider: str, directory: str) -> None:
-        dl = _make_downloader(provider, directory)
-        dl.fetch_range(symbols.split(","), start, end)
-
-    @click.command(name="fetch-latest")
-    @click.option("--symbols", required=True)
-    @click.option("--ttl-hours", default=6, type=int)
-    @click.option("--provider", default="stub")
-    @click.option("--directory", default="data")
-    def fetch_latest_cmd(symbols: str, ttl_hours: int, provider: str, directory: str) -> None:
-        dl = _make_downloader(provider, directory)
-        dl.fetch_latest(symbols.split(","), ttl_hours)
-
-    @click.command(name="refresh-cache")
-    @click.option("--ttl-hours", default=0, type=int)
-    @click.option("--provider", default="stub")
-    @click.option("--directory", default="data")
-    def refresh_cache_cmd(ttl_hours: int, provider: str, directory: str) -> None:
-        dl = _make_downloader(provider, directory)
-        dl.refresh_cache(ttl_hours)
-
-    @click.command(name="vacuum-cache")
-    @click.option("--older-than-days", default=365, type=int)
-    @click.option("--provider", default="stub")
-    @click.option("--directory", default="data")
-    def vacuum_cache_cmd(older_than_days: int, provider: str, directory: str) -> None:
-        dl = _make_downloader(provider, directory)
-        dl.vacuum_cache(older_than_days)
-
-    @click.command(name="integrity-check")
-    @click.option("--symbols", required=True)
-    @click.option("--provider", default="stub")
-    @click.option("--directory", default="data")
-    def integrity_check_cmd(symbols: str, provider: str, directory: str) -> None:
-        dl = _make_downloader(provider, directory)
-        dl.integrity_check(symbols.split(","))
-
     @click.group()
     def cli() -> None:
         pass
@@ -885,11 +895,6 @@ try:  # pragma: no cover - click opsiyonel
     cli.add_command(scan_range)
     cli.add_command(scan_day)
     cli.add_command(lint_filters)
-    cli.add_command(fetch_range_cmd)
-    cli.add_command(fetch_latest_cmd)
-    cli.add_command(refresh_cache_cmd)
-    cli.add_command(vacuum_cache_cmd)
-    cli.add_command(integrity_check_cmd)
 except Exception:  # pragma: no cover
     pass
 
