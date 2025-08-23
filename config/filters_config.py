@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from io_filters import read_filters_smart
+from io_filters import read_filters_csv
 
 # Path to the filters definition file relative to the repository root
 _FILTERS_CSV = Path(__file__).resolve().parent.parent / "filters.csv"
@@ -18,7 +18,7 @@ def _load_filter_codes() -> list[str]:
     """
     if not _FILTERS_CSV.exists():
         return []
-    df = read_filters_smart(_FILTERS_CSV)
+    df = read_filters_csv(_FILTERS_CSV)
     if "FilterCode" not in df.columns:
         raise ValueError("filters.csv missing 'FilterCode' column")
     return df["FilterCode"].dropna().astype(str).tolist()

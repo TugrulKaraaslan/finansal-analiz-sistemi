@@ -16,7 +16,7 @@ pip install -r requirements-dev.txt
 make fixtures
 ```
 
-Bu komut `veri_guncel_fix/` altındaki Excel dosyalarından test için küçük örnekler oluşturur.
+Bu komut `Veri/` altındaki Excel dosyalarından test için küçük örnekler oluşturur.
 
 ## 3. Preflight
 
@@ -24,7 +24,7 @@ Bu komut `veri_guncel_fix/` altındaki Excel dosyalarından test için küçük 
 make preflight
 ```
 
-Preflight, `filters.csv` içindeki token'ların Excel kolonlarıyla uyuştuğunu doğrular. Gerekirse CLI'da `--no-preflight` bayrağı veya YAML'da `preflight: false` ile atlanabilir.
+Preflight, `filters.csv` içindeki token'ların Excel kolonlarıyla uyuştuğunu doğrular. `filters.csv` dosyası `FilterCode;PythonQuery` başlıklarını ve `;` ayracını kullanmalıdır. Gerekirse CLI'da `--no-preflight` bayrağı veya YAML'da `preflight: false` ile atlanabilir.
 
 ## 4. Taramayı çalıştır
 
@@ -44,12 +44,12 @@ python -m backtest.cli scan-range --filters-csv config/filters.csv --start 2025-
 
 ## 5. Sonuçlar
 
-Çalışma tamamlandığında raporlar `raporlar/` dizinine, loglar `artifacts/logs/` dizinine yazılır.
+Çalışma tamamlandığında raporlar `raporlar/` dizinine, loglar `loglar/` dizinine yazılır.
 
 ### Log Ayarları
 - `LOG_LEVEL` = DEBUG|INFO|WARNING|ERROR (default: INFO)
 - `LOG_FORMAT` = json|plain (default: json)
-- `LOG_DIR` = artifacts/logs (default)
+- `LOG_DIR` = loglar (default)
 - `BACKTEST_RUN_ID` = aynı koşudaki tüm logları korele etmek için custom run id
 
 Örnek:

@@ -18,7 +18,7 @@ log = get_logger("wf")
 
 OUTDIR = Path("artifacts/wf")
 OUTDIR.mkdir(parents=True, exist_ok=True)
-ENV = dict(os.environ, EXCEL_DIR="veri_guncel_fix")
+ENV = dict(os.environ, EXCEL_DIR="Veri")
 
 # Basit CLI parametreleri (env veya default)
 start = os.getenv("WF_START", "2025-03-07")

@@ -86,7 +86,9 @@ def test_reporting(sample_filters_csv):
 
 def test_cli_reports(tmp_path, monkeypatch, sample_filters_csv):
     filters_path = tmp_path / "filters.csv"
-    sample_filters_csv.to_csv(filters_path, index=False)
+    sample_filters_csv.rename(columns={"id": "FilterCode", "expr": "PythonQuery"})[
+        ["FilterCode", "PythonQuery"]
+    ].to_csv(filters_path, sep=';', index=False)
     cfg = _cfg(tmp_path)
     cfg.data.filters_csv = str(filters_path)
     monkeypatch.setattr(cli, "load_config", lambda _: cfg)

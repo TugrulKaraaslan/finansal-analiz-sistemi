@@ -49,7 +49,12 @@ def main() -> None:
     df = pd.read_excel(sample)
     cols = set(df.columns)
 
-    fdf = pd.read_csv(filters_path, sep=None, engine="python")
+    fdf = pd.read_csv(
+        filters_path,
+        sep=";",
+        usecols=["FilterCode", "PythonQuery"],
+        dtype=str,
+    )
     ok = True
     for i, expr in enumerate(fdf.get("PythonQuery", [])):
         tokens = _tokenize(str(expr))

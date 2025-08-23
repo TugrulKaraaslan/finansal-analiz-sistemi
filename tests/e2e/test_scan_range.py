@@ -38,7 +38,7 @@ def test_scan_range_creates_alias_report(tmp_path: Path) -> None:
             ],
         }
     )
-    filters_df.to_csv(filters_csv, index=False)
+    filters_df.to_csv(filters_csv, sep=';', index=False)
 
     cfg_path = tmp_path / "config.yml"
     cfg_path.write_text(
@@ -85,7 +85,7 @@ report:
     )
 
     def _compile(src, dst):
-        df = pd.read_csv(src, sep=None, engine="python")
+        df = pd.read_csv(src, sep=';')
         df = df.rename(columns={"id": "FilterCode", "expr": "PythonQuery"})
         df = df[["FilterCode", "PythonQuery"]]
         df.to_csv(dst, sep=";", index=False)

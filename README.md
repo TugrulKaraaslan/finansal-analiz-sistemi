@@ -51,7 +51,7 @@ make config-validate
 
 - `LOG_LEVEL` = DEBUG|INFO|WARNING|ERROR (default: INFO)
 - `LOG_FORMAT` = json|plain (default: json)
-- `LOG_DIR` = artifacts/logs (default)
+- `LOG_DIR` = loglar (default)
 - `BACKTEST_RUN_ID` = aynı koşudaki tüm logları korele etmek için custom run id
 
 ```bash
@@ -170,14 +170,14 @@ araç çıkış kodunu sıfırdan farklı yapar; tolerans aşımı uyarı olarak
 ## Veri ve Filtre Dosyaları
 
 * **Excel klasörü**: `Veri/` (proje kökünde)
-* **filters.csv**: proje kökünde, ayracı `,` (otomatik algılama `;`'yi de kabul eder), başlıklar: `FilterCode,PythonQuery`
+* **filters.csv**: proje kökünde, ayracı `;`, başlıklar: `FilterCode;PythonQuery`
 
 Örnek satırlar:
 
 ```
-FilterCode,PythonQuery
-EX1, ichimoku_conversionline > ichimoku_baseline
-EX2, macd_line > macd_signal
+FilterCode;PythonQuery
+EX1; ichimoku_conversionline > ichimoku_baseline
+EX2; macd_line > macd_signal
 ```
 
 Excel klasör yolu config dosyasından okunur; CLI'da `--excel-dir` parametresi bulunmaz.
@@ -193,7 +193,7 @@ Benchmarkt kaynağı config'te şu şekilde tanımlanır:
 ```yaml
 benchmark:
   source: "excel"
-  excel_path: "/content/finansal-analiz-sistemi/Veri/BIST.xlsx"
+  excel_path: "Veri/BIST.xlsx"
   excel_sheet: "BIST"
   column_date: "date"
   column_close: "close"

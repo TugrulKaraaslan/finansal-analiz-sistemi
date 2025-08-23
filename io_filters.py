@@ -16,21 +16,20 @@ from utils.paths import resolve_path
 REQUIRED_COLUMNS = {"FilterCode", "PythonQuery"}
 
 
-def read_filters_smart(path: str | Path) -> pd.DataFrame:
-    """Read ``filters.csv`` with strict delimiter but allow fallback detection.
+def read_filters_csv(path: str | Path) -> pd.DataFrame:
+    """Read ``filters.csv`` using semicolon delimiter and strict schema."""
 
-    Primarily attempts to read using semicolon delimiter and UTF-8 encoding. If
-    that fails (e.g., old files using commas), a second attempt with delimiter
-    inference is made using the Python engine.
-    """
-
-    try:
-        df = pd.read_csv(path, sep=";", encoding="utf-8")
-        if {"FilterCode", "PythonQuery"}.issubset(df.columns):
-            return df
-        raise ValueError("incorrect delimiter")
-    except Exception:
-        return pd.read_csv(path, sep=None, engine="python", encoding="utf-8")
+    df = pd.read_csv(
+        path,
+        sep=";",
+        usecols=["FilterCode", "PythonQuery"],
+        dtype=str,
+        encoding="utf-8",
+    )
+    missing = REQUIRED_COLUMNS.difference(df.columns)
+    if missing:
+        raise ValueError("Eksik kolon(lar): " + ", ".join(sorted(missing)))
+    return df
 
 
 def load_filters_csv(path: str | Path) -> pd.DataFrame:
@@ -62,13 +61,17 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
         logger.error(msg)
         raise FileNotFoundError(msg)
     try:
-        df = read_filters_smart(p)
+        df = read_filters_csv(p)
+    except pd.errors.ParserError as exc:
+        raise RuntimeError(f"Filters CSV parse edilemedi: {p}") from exc
+    except ValueError:
+        raise
     except Exception as exc:
         raise RuntimeError(f"Filters CSV parse edilemedi: {p}") from exc
 
     missing = REQUIRED_COLUMNS.difference(df.columns)
     if missing:
-        raise RuntimeError("Eksik kolon(lar): " + ", ".join(sorted(missing)))
+        raise ValueError("Eksik kolon(lar): " + ", ".join(sorted(missing)))
 
     # basic normalization and emptiness checks
     df["FilterCode"] = df["FilterCode"].fillna("").astype(str).str.strip()
@@ -84,4 +87,4 @@ def load_filters_csv(path: str | Path) -> pd.DataFrame:
     return df
 
 
-__all__ = ["load_filters_csv", "read_filters_smart"]
+__all__ = ["load_filters_csv", "read_filters_csv"]
