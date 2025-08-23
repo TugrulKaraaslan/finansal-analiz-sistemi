@@ -42,3 +42,8 @@ perf-report: bench bench-cli profile mem
 .PHONY: quality
 quality:
 	python tools/validate_data_quality.py
+
+
+.PHONY: walk-forward
+walk-forward:
+	python tools/walk_forward_eval.py
