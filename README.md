@@ -34,6 +34,20 @@ make golden
 make check
 ```
 
+## Golden Güncelleme
+
+```bash
+# İlk kurulum (bir kere)
+pip install -r requirements-dev.txt
+pre-commit install
+
+# Manuel güncelleme
+make golden
+
+# CI’de hata aldıysanız (out-of-date)
+make golden && git add tests/golden/checksums.json && git commit -m "update golden checksums"
+```
+
 ## Veri ve Filtre Dosyaları
 
 * **Excel klasörü**: `Veri/` (proje kökünde)

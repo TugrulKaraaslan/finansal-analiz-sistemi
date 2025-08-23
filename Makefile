@@ -1,5 +1,5 @@
-.PHONY: fixtures preflight test golden lint check dev
-actions = fixtures preflight lint test
+.PHONY: fixtures preflight test golden golden-verify lint check dev
+actions = fixtures preflight lint test golden-verify
 
 fixtures:
 	python tools/make_excel_fixtures.py
@@ -11,6 +11,9 @@ test:
 
 golden:
 	python tools/update_golden_checksums.py
+
+golden-verify: golden
+	git diff --exit-code -- tests/golden/checksums.json || (echo "Golden checksums out-of-date. Run: make golden" && exit 1)
 
 lint:
 	python tools/lint_filters.py

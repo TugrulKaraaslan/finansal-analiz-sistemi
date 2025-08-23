@@ -18,3 +18,12 @@ repos:
         types: [python]
         additional_dependencies: [pyflakes==3.4.0]
         language_version: python3.11
+  - repo: local
+    hooks:
+      - id: golden-update
+        name: golden-update (update tests/golden/checksums.json)
+        entry: python tools/update_golden_checksums.py
+        language: system
+        pass_filenames: false
+        stages: [commit]
+        always_run: true
