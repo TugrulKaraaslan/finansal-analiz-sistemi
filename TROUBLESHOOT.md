@@ -19,3 +19,13 @@ python -m backtest.cli scan-range --filters-csv config/filters.csv
 
 ## Preflight Unknown tokens
 Preflight raporu bilinmeyen token'lar gösteriyorsa filtre ifadelerindeki kolon veya gösterge isimlerini kontrol edin. Preflight, `ema_20`, `rsi_14`, `stochd_14_3_3`, `psar...` gibi kanonik isimleri regex whitelist'iyle tanır. Bunun dışındakiler varsayılan olarak hataya yol açar; uyarıya çevirmek için `PREFLIGHT_ALLOW_UNKNOWN=1` ortam değişkenini kullanabilirsiniz. Alias kullanımının nasıl kanonikleştirildiği için [docs/ALIAS_POLICY.md](docs/ALIAS_POLICY.md) dosyasına bakın.
+
+## Preflight legacy alias uyarısı
+`its_9`, `macd_12_26_9`, `bbm_20 2` gibi legacy alias'lar preflight/engine
+tarafından tanınır ve varsayılan olarak kabul edilir. `filters.csv` araştırma
+dosyasıdır; araçlar **asla** bu dosyayı düzenlemez. Alias'ları kanonik
+isimlere dönüştürmek için:
+
+```bash
+python tools/canonicalize_filters.py filters.csv filters_canonical.csv
+```

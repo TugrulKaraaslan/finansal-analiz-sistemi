@@ -25,6 +25,6 @@ jobs:
 
       # Fixtures + preflight + test
       - run: make fixtures
-      - run: PREFLIGHT_FAIL_ON_ALIAS=1 PREFLIGHT_ALLOW_UNKNOWN=1 make preflight
+      - run: PREFLIGHT_ALIAS_MODE=allow PREFLIGHT_ALLOW_UNKNOWN=1 make preflight
       - run: make test
 

@@ -409,7 +409,7 @@ def main(argv=None):
     if args.cmd == "scan-range":
         preflight_enabled = getattr(cfg, "preflight", True) and not args.no_preflight
         if preflight_enabled:
-            preflight_validate_filters(filters_path, EXCEL_DIR)
+            preflight_validate_filters(filters_path, EXCEL_DIR, alias_mode="warn")
         elif args.no_preflight:
             logger.info("--no-preflight aktif")
         run_scan_range(
