@@ -72,3 +72,7 @@ report:
 # Istanbul takvimine göre dünü tarar
 daily:
 	python tools/daily_incremental.py
+
+.PHONY: metrics
+metrics:
+	python -m backtest.cli eval-metrics --start 2025-03-07 --end 2025-03-11 --horizon-days 5 --threshold-bps 50 --signal-cols entry_long exit_long
