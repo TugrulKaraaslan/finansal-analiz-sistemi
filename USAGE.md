@@ -72,3 +72,20 @@ Kuralları ve toleransları değiştirmek için `contracts/data_quality.yaml`
 dosyasını düzenleyin. Şema ve mantık ihlalleri aracı başarısız kılar; tolerans
 aşımları yalnızca uyarı üretir.
 
+## Walk-Forward / Time-Series CV
+
+```bash
+# Varsayılan kısa smoke
+make walk-forward
+
+# Parametrelerle
+WF_START=2025-03-01 \
+WF_END=2025-03-31 \
+WF_TRAIN_DAYS=10 \
+WF_TEST_DAYS=2 \
+WF_STEP_DAYS=2 \
+make walk-forward
+```
+
+Tasarım notu: Bu PR yalnız iskelet sağlar; metrik/portföy sonuçlarını toplama PR-13’te detaylandırılır.
+
