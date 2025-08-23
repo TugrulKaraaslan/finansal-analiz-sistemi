@@ -22,7 +22,6 @@ from backtest.trace import RunContext, ArtifactWriter, list_output_files
 from backtest.summary import summarize_range
 from backtest.reporting import build_excel_report
 from backtest.filters.normalize_expr import normalize_expr
-from pathlib import Path
 
 __all__ = [
     "normalize",
