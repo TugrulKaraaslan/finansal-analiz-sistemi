@@ -1,7 +1,21 @@
 # Troubleshoot
 
-## "xxx" is not a supported function
+## PermissionError: '/content'
+Colab'a özgü `/content` yolu yerel veya CI ortamında yazılabilir değildir. `paths.py` içindeki mantık gereği `EXCEL_DIR`'i ayarla ya da `CI=true` ortam değişkeni ile depo kökündeki `veri_guncel_fix/` dizini kullan.
 
-Bu hata, ifade içinde desteklenmeyen bir DSL fonksiyonu kullanıldığında görülür.
-Fonksiyon adını kontrol edin ve örneğin `crossup` veya `crossdown` gibi
-Desteklenen DSL fonksiyonlarını kullandığınızdan emin olun.
+## ModuleNotFoundError: hypothesis
+Testler sırasında `hypothesis` modülü bulunamazsa geliştirme bağımlılıklarını yükleyin:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+## filters.csv bulunamadı
+Filtre dosyası yol çözümü şu önceliği izler: CLI argümanı > YAML config > depo kökündeki `filters.csv`.
+
+```bash
+python -m backtest.cli scan-range --filters-csv config/filters.csv
+```
+
+## Preflight Unknown tokens
+Preflight raporu bilinmeyen token'lar gösteriyorsa filtre ifadelerindeki kolon adlarını kontrol edin. Alias kullanımının nasıl kanonikleştirildiği için [docs/ALIAS_POLICY.md](docs/ALIAS_POLICY.md) dosyasına bakın.
