@@ -55,3 +55,8 @@ portfolio-sim:
 .PHONY: report
 report:
 	python tools/build_html_report.py
+
+.PHONY: daily
+# Istanbul takvimine göre dünü tarar
+daily:
+	python tools/daily_incremental.py

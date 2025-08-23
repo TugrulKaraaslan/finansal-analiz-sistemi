@@ -115,3 +115,17 @@ python -m backtest.cli portfolio-sim --config config/colab_config.yaml --portfol
 
 Çıktılar `artifacts/portfolio/` klasörüne `trades.csv` ve `daily_equity.csv` olarak yazılır.
 
+
+## Günlük Artırımlı Çalıştırıcı
+
+```bash
+# Yerelde dünü çalıştır
+make daily
+# Başka günler için
+DAYS_BACK=2 make daily
+```
+
+CI kullanımı:
+- Settings → Secrets → Actions altına `DAILY_WEBHOOK_URL` (opsiyonel) ekle.
+- Actions sekmesinden `daily` workflow'unu **Run workflow** ile manuel tetikleyebilir, `days_back` girebilirsin.
+
