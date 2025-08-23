@@ -1,4 +1,4 @@
-.PHONY: fixtures preflight test golden golden-verify lint check dev bench bench-cli profile mem perf-report
+.PHONY: fixtures preflight test golden golden-verify lint check dev bench bench-cli profile mem perf-report guardrails
 	actions = fixtures preflight lint test golden-verify
 
 export LOG_LEVEL ?= INFO
@@ -8,6 +8,9 @@ fixtures:
 	python tools/make_excel_fixtures.py
 preflight:
 	python tools/preflight_run.py
+
+guardrails:
+	python -m backtest.cli guardrails
 
 test:
 	pytest -q

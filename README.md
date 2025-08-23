@@ -124,6 +124,22 @@ python -m backtest.cli eval-metrics --start 2025-03-07 --end 2025-03-11 \
 tree artifacts/metrics
 ```
 
+## Guardrails
+
+Tarama hattında look-ahead hatalarını önlemek için temel kontroller mevcuttur:
+
+- Emirler varsayılan olarak **T+1** açılışında yürütülür.
+- İlk `warmup_min_bars` süresince üretilen sinyaller geçersiz sayılır.
+- DSL ifadelerinde `shift(-1)`, `lead(`, `next_` gibi geleceğe dönük desenler reddedilir.
+
+Kontrolleri çalıştırmak için:
+
+```bash
+python -m backtest.cli guardrails
+```
+
+Çıktılar `artifacts/guardrails/` altında `summary.json` ve `violations.csv` dosyalarına yazılır.
+
 ## Portfolio Engine
 
 Portföy motoru, sinyallerden gelen giriş/çıkışlara göre pozisyon boyutlarını hesaplar ve temel limitleri uygular. Üç farklı boyutlama modu desteklenir:

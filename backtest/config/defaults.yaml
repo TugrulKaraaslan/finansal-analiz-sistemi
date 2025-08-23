@@ -1,0 +1,4 @@
+guardrails:
+  t_plus_one: true
+  warmup_min_bars: 200
+  deny_future_patterns: ["shift(-", "lead(", "next_", "t+"]
