@@ -3,3 +3,7 @@ hypothesis>=6.98
 openpyxl>=3.1
 pyyaml>=6
 pre-commit>=3.7
+
+pytest-benchmark>=4.0
+pyinstrument>=4.6
+memory-profiler>=0.61

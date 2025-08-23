@@ -39,6 +39,19 @@ make golden
 make check
 ```
 
+## Performance
+
+```bash
+# micro benchmarks
+make bench
+# CLI smoke bench
+make bench-cli
+# CPU profile (HTML rapor → artifacts/profiles/...)
+make profile
+# Memory snapshot (JSON)
+make mem
+```
+
 ## Golden Güncelleme
 
 ```bash

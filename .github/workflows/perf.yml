@@ -1,0 +1,28 @@
+name: perf
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 3 * * 1'  # haftalık pazartesi 03:00 UTC
+
+jobs:
+  perf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt || true
+      - run: pip install -r requirements-dev.txt
+      - run: make fixtures
+      - run: make bench
+      - run: make bench-cli
+      - run: make profile
+      - run: make mem
+      - uses: actions/upload-artifact@v4
+        with:
+          name: perf-artifacts
+          path: |
+            artifacts/bench
+            artifacts/profiles
+            artifacts/memory
