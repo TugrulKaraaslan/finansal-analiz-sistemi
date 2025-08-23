@@ -37,7 +37,7 @@ class JsonFormatter(logging.Formatter):
 
 _DEF_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 _DEF_FMT = os.getenv("LOG_FORMAT", "json").lower()  # json | plain
-_LOG_DIR = Path(os.getenv("LOG_DIR", "artifacts/logs"))
+_LOG_DIR = Path(os.getenv("LOG_DIR", "loglar"))
 _LOG_DIR.mkdir(parents=True, exist_ok=True)
 _LOG_FILE = _LOG_DIR / ("app-" + datetime.utcnow().strftime("%Y%m%d-%H%M%S") + ".jsonl")
 

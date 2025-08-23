@@ -71,11 +71,14 @@ def _ns_to_dict(x):
 
 
 def compile_filters(src: str, dst: str) -> None:
-    df = pd.read_csv(src, sep=None, engine="python")
+    df = pd.read_csv(src, sep=";", dtype=str)
     cols = {"id": "FilterCode", "expr": "PythonQuery"}
     df = df.rename(columns={k: v for k, v in cols.items() if k in df.columns})
-    if not {"FilterCode", "PythonQuery"}.issubset(df.columns):
-        raise ValueError("compile_filters: beklenen kolonlar yok")
+    missing = {"FilterCode", "PythonQuery"}.difference(df.columns)
+    if missing:
+        raise ValueError(
+            "compile_filters: beklenen kolonlar yok: " + ", ".join(sorted(missing))
+        )
     df = df[["FilterCode", "PythonQuery"]]
     df.to_csv(dst, sep=";", index=False)
 
@@ -339,12 +342,11 @@ def main(argv=None):
     cfg, flags = _load_and_prepare(args)
 
     cfg_dict = _ns_to_dict(cfg)
-    rc = RunContext.create(
-        cfg_dict.get("paths", {}).get("logs", "logs"),
-        cfg_dict.get("paths", {}).get("artifacts", "artifacts"),
-    )
+    log_root = cfg_dict.get("paths", {}).get("logs", os.getenv("LOG_DIR", "loglar"))
+    art_root = cfg_dict.get("paths", {}).get("artifacts", os.getenv("ARTIFACTS_DIR", "artifacts"))
+    rc = RunContext.create(log_root, art_root)
     logger.info("run_id=%s", rc.run_id)
-    log_file = Path(cfg_dict.get("paths", {}).get("logs", "logs")) / f"{rc.run_id}.log"
+    log_file = Path(log_root) / f"{rc.run_id}.log"
     global fh
     fh = logging.FileHandler(log_file, encoding="utf-8")
     fh.setLevel(logging.getLogger().level)
@@ -569,7 +571,17 @@ def main(argv=None):
         df = pd.DataFrame()
 
     filters_path = _resolve_filters_path(args.filters)
-    filters_df = pd.read_csv(filters_path, sep=None, engine="python")
+    try:
+        filters_df = pd.read_csv(
+            filters_path,
+            sep=";",
+            usecols=["FilterCode", "PythonQuery"],
+            dtype=str,
+        )
+    except ValueError as exc:
+        raise ValueError(
+            "filters.csv beklenen kolonlar: FilterCode;PythonQuery"
+        ) from exc
 
     if args.cmd == "scan-day":
         rows = run_scan_day(df, args.date, filters_df, alias_csv=args.alias)
@@ -641,7 +653,17 @@ try:  # pragma: no cover - click opsiyonel
         if report_alias and filters_csv and reports_dir:
             dst = Path(reports_dir) / "filters_compiled.csv"
             compile_filters(filters_csv, str(dst))
-            raw = pd.read_csv(filters_csv, sep=None, engine="python")
+            try:
+                raw = pd.read_csv(
+                    filters_csv,
+                    sep=";",
+                    usecols=["FilterCode", "PythonQuery"],
+                    dtype=str,
+                )
+            except ValueError as exc:
+                raise ValueError(
+                    "filters.csv beklenen kolonlar: FilterCode;PythonQuery"
+                ) from exc
             if "expr" not in raw.columns and "PythonQuery" in raw.columns:
                 raw = raw.rename(columns={"PythonQuery": "expr"})
             if "id" not in raw.columns and "FilterCode" in raw.columns:

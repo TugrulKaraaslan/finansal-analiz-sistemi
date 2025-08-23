@@ -9,7 +9,7 @@ DATA_DIR = Path(__file__).resolve().parent / "data"
 
 def test_load_filters_ok():
     df = load_filters_csv(DATA_DIR / "filters_valid.csv")
-    assert list(df.columns) == ["FilterCode", "PythonQuery", "Group"]
+    assert list(df.columns) == ["FilterCode", "PythonQuery"]
     assert len(df) == 2
 
 
@@ -19,7 +19,7 @@ def test_load_filters_empty_query():
 
 
 def test_load_filters_missing_column():
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         load_filters_csv(DATA_DIR / "filters_missing_col.csv")
 
 

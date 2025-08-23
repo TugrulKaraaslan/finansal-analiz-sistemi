@@ -13,6 +13,10 @@ concurrency:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      ARTIFACTS_DIR: artifacts
+      LOG_DIR: loglar
+      EXCEL_DIR: Veri
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -25,11 +29,11 @@ jobs:
 
       # Fixtures + golden verification + quality + preflight + test
       - run: make fixtures
-      - run: make config-validate
+      - run: make validate
       - run: make golden-verify
       - run: make quality
       - run: make risk-smoke
-      - run: PREFLIGHT_ALIAS_MODE=allow PREFLIGHT_ALLOW_UNKNOWN=1 make preflight
+      - run: make preflight
       - run: make test
 
       - run: make report
@@ -50,4 +54,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: logs-${{ github.run_id }}
-          path: artifacts/logs
+          path: loglar

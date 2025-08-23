@@ -23,7 +23,7 @@ def lint_file(path: str | Path, inplace: bool = False) -> int:
     if not path.exists():
         raise FileNotFoundError(path)
 
-    df = pd.read_csv(path, sep=None, engine="python")
+    df = pd.read_csv(path, sep=";", dtype=str)
     if "PythonQuery" not in df.columns:
         raise SystemExit("PythonQuery column missing")
 
@@ -36,9 +36,8 @@ def lint_file(path: str | Path, inplace: bool = False) -> int:
             new = norm.iloc[idx]
             print(f"{idx}: {old} -> {new}")
     if inplace and n_changed:
-        sep = ";" if ";" in path.read_text().splitlines()[0] else ","
         df["PythonQuery"] = norm
-        df.to_csv(path, sep=sep, index=False)
+        df.to_csv(path, sep=";", index=False)
     return n_changed
 
 

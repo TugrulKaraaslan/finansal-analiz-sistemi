@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-EXCEL_DIR = Path(os.getenv("EXCEL_DIR", "veri_guncel_fix"))
+EXCEL_DIR = Path(os.getenv("EXCEL_DIR", "Veri"))
 
 
 def project_root_from_config(config_path: str | Path) -> Path:

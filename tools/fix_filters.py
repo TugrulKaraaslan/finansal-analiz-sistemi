@@ -36,10 +36,10 @@ def main(argv=None) -> int:
     p.add_argument("--inplace", action="store_true")
     args = p.parse_args(argv)
     path = Path(args.file)
-    df = pd.read_csv(path)
+    df = pd.read_csv(path, sep=";", dtype=str)
     df["PythonQuery"] = df["PythonQuery"].map(fix_expr)
     if args.inplace:
-        df.to_csv(path, index=False)
+        df.to_csv(path, sep=";", index=False)
     else:
         df.to_csv(sys.stdout, index=False)
     return 0

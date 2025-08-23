@@ -53,7 +53,7 @@ def validate_filters(
     unknown: dict[str, set[str]] = {}
 
     with open(filters_csv, encoding="utf-8") as f:
-        rdr = csv.DictReader(f)
+        rdr = csv.DictReader(f, delimiter=";")
         for row in rdr:
             code = (row.get("FilterCode") or "").strip() or "<NO_CODE>"
             expr = (row.get("PythonQuery") or "").strip()

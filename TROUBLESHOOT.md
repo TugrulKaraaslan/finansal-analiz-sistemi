@@ -1,7 +1,7 @@
 # Troubleshoot
 
 ## PermissionError: '/content'
-Colab'a özgü `/content` yolu yerel veya CI ortamında yazılabilir değildir. `paths.py` içindeki mantık gereği `EXCEL_DIR`'i ayarla ya da `CI=true` ortam değişkeni ile depo kökündeki `veri_guncel_fix/` dizini kullan.
+Colab'a özgü `/content` yolu yerel veya CI ortamında yazılabilir değildir. `paths.py` içindeki mantık gereği `EXCEL_DIR`'i ayarla ya da `CI=true` ortam değişkeni ile depo kökündeki `Veri/` dizini kullan.
 
 ## ModuleNotFoundError: hypothesis
 Testler sırasında `hypothesis` modülü bulunamazsa geliştirme bağımlılıklarını yükleyin:
