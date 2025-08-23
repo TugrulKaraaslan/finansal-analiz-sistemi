@@ -8,7 +8,6 @@ from backtest.cross import (
     cross_up as _cross_up,
     cross_down as _cross_down,
     cross_over,
-    cross_under,
 )
 
 # 1) Tek doğru isim standardı – kabul edilen legacy alias'lar
@@ -75,28 +74,36 @@ def _build_locals(df: pd.DataFrame) -> dict[str, pd.Series]:
 def _validate_tokens(expr: str, locals_map: Mapping[str, object]):
     bad_alias: list[str] = []
     undefined: list[str] = []
-    for tok in re.findall(r"[A-Za-z_][A-Za-z0-9_]*", expr):
+    scan_expr = expr
+    for alias, canon in ALIAS.items():
+        if alias in expr:
+            bad_alias.append(f"'{alias}' yerine '{canon}' kullan")
+            if " " in alias:
+                scan_expr = scan_expr.replace(alias, canon)
+    for tok in re.findall(r"[A-Za-z_][A-Za-z0-9_]*", scan_expr):
         if tok in {"and", "or", "not"}:
             continue
-        if tok in DEPRECATED:
-            bad_alias.append(f"'{tok}' yerine '{ALIAS[tok]}' kullan")
-        elif tok not in locals_map:
+        if tok not in locals_map and tok not in ALIAS.values():
             undefined.append(tok)
-    # spaced aliases
-    for k in DEPRECATED:
-        if " " in k and k in expr:
-            bad_alias.append(f"'{k}' yerine '{ALIAS[k]}' kullan")
     if bad_alias:
         import warnings
+
         warnings.warn("; ".join(sorted(set(bad_alias))))
     if undefined:
-        raise NameError(f"Bilinmeyen değişkenler: {', '.join(sorted(set(undefined)))}")
+        unknown = ", ".join(sorted(set(undefined)))
+        raise NameError(f"Bilinmeyen değişkenler: {unknown}")
 
 
 def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
     locals_map = _build_locals(df)
     _validate_tokens(expr, locals_map)
-    return pd.eval(expr, engine="python", local_dict=locals_map)
+    canon_expr = expr
+    for a, c in ALIAS.items():
+        canon_expr = canon_expr.replace(a, c)
+    try:
+        return pd.eval(canon_expr, engine="python", local_dict=locals_map)
+    except Exception as e:  # pragma: no cover - defensive
+        raise type(e)(f"{expr} → {e}") from e
 
 
 __all__ = ["evaluate", "cross_up", "cross_down"]
