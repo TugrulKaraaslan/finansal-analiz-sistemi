@@ -124,6 +124,25 @@ def preflight(cfg):  # tests monkeypatch ediyor
         )
 
 
+def convert_to_parquet(excel_dir: str, out_dir: str) -> None:
+    """Read Excel files under *excel_dir* and write partitioned Parquet."""
+    excel_path = Path(excel_dir)
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    for xls in excel_path.glob("*.xlsx"):
+        symbol = xls.stem
+        df = pd.read_excel(xls, engine="openpyxl")
+        for c in df.select_dtypes(include=["datetime", "datetimetz"]).columns:
+            df[c] = pd.to_datetime(df[c]).dt.tz_localize(None)
+        for c in df.select_dtypes(include=["float", "int", "bool"]).columns:
+            df[c] = pd.to_numeric(df[c], errors="coerce")
+            if pd.api.types.is_integer_dtype(df[c]):
+                df[c] = df[c].astype("float64")
+        sym_dir = out / f"symbol={symbol}"
+        sym_dir.mkdir(parents=True, exist_ok=True)
+        df.to_parquet(sym_dir / f"{symbol}.parquet", index=False)
+
+
 def _run_scan(cfg):  # tests monkeypatch ediyor
     src = (
         cfg
@@ -277,6 +296,10 @@ def build_parser() -> argparse.ArgumentParser:
     tune.add_argument("--max-iters", type=int, default=10)
     tune.add_argument("--seed", type=int, default=None)
 
+    ctp = sub.add_parser("convert-to-parquet", help="Excel dosyalarını Parquet'e dönüştür")
+    ctp.add_argument("--excel-dir", required=True)
+    ctp.add_argument("--out", required=True, help="Parquet çıkış klasörü")
+
 
     return p
 
@@ -329,6 +352,9 @@ def main(argv=None):
     if args.cmd == "tune-strategy":
         from backtest.strategy.cli import tune_strategy_cli
         tune_strategy_cli(args)
+        return
+    if args.cmd == "convert-to-parquet":
+        convert_to_parquet(args.excel_dir, args.out)
         return
     if args.cmd == "guardrails":
         outdir = Path(getattr(args, "out_dir", "artifacts/guardrails"))
