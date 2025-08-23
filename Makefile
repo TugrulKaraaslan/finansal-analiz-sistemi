@@ -51,3 +51,7 @@ walk-forward:
 .PHONY: portfolio-sim
 portfolio-sim:
 	python -m backtest.cli portfolio-sim --config config/colab_config.yaml --portfolio config/portfolio.yaml --start 2025-03-07 --end 2025-03-09
+
+.PHONY: report
+report:
+	python tools/build_html_report.py

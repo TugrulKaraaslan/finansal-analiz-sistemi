@@ -8,3 +8,4 @@ pytest-benchmark>=4.0
 pyinstrument>=4.6
 memory-profiler>=0.61
 pandera>=0.20
+jinja2>=3.1
