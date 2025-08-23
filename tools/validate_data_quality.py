@@ -1,8 +1,8 @@
 from __future__ import annotations
 from pathlib import Path
 import json
-import re
 import sys
+import fnmatch
 
 import pandas as pd
 import pandera as pa
@@ -139,17 +139,18 @@ def should_include(p: Path) -> bool:
     inc = (
         any(
             Path(EXCEL_DIR, "").joinpath(p).match(pattern)
-            or re.fullmatch(pattern.replace("**/", ".*"), s)
+            or fnmatch.fnmatch(s, pattern)
             for pattern in includes
         )
         if includes
         else True
     )
-    exc = any(
-        Path(EXCEL_DIR, "").joinpath(p).match(pattern)
-        or re.fullmatch(pattern.replace("**/", ".*"), s)
-        for pattern in excludes
-    )
+
+    def _match(pattern: str) -> bool:
+        path = Path(EXCEL_DIR, "").joinpath(p)
+        return path.match(pattern) or fnmatch.fnmatch(s, pattern)
+
+    exc = any(_match(pattern) for pattern in excludes)
     return inc and not exc
 
 
