@@ -61,6 +61,20 @@ make report
 
 CI koşuları sonunda rapor `html-report` artefaktı olarak yüklenir; Actions sekmesinden indirip `index.html` dosyasını açabilirsiniz.
 
+## Günlük Artırımlı Çalıştırıcı
+
+```bash
+# Yerelde dünü çalıştır
+make daily
+# Başka günler için
+DAYS_BACK=2 make daily
+```
+
+CI kullanımı:
+- Settings → Secrets → Actions altına `DAILY_WEBHOOK_URL` (opsiyonel) ekle.
+- Actions sekmesinden `daily` workflow'unu **Run workflow** ile manuel tetikleyebilir, `days_back` girebilirsin.
+
+
 ## Walk-Forward / Time-Series CV
 
 ```bash

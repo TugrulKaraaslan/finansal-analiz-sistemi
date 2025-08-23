@@ -1,0 +1,41 @@
+name: daily
+on:
+  workflow_dispatch:
+    inputs:
+      days_back:
+        description: "Kaç gün geriden çalıştırılsın"
+        required: false
+        default: "1"
+  schedule:
+    - cron: '0 4 * * *'  # 07:00 (Istanbul, DST döneminde) ≈ 04:00 UTC
+
+jobs:
+  run-daily:
+    runs-on: ubuntu-latest
+    env:
+      BACKTEST_WORKDIR: ${{ github.workspace }}
+      ARTIFACTS_DIR: ${{ github.workspace }}/artifacts
+      EXCEL_DIR: ${{ github.workspace }}/veri_guncel_fix
+      CACHE_DIR: ${{ github.workspace }}/artifacts/cache
+      DAYS_BACK: ${{ inputs.days_back || '1' }}
+      CONFIG: config/colab_config.yaml
+      WEBHOOK_URL: ${{ secrets.DAILY_WEBHOOK_URL }}
+      MESSAGE_PREFIX: "[daily:${{ github.ref_name }}]"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt || true
+      - run: pip install -r requirements-dev.txt
+      - run: make fixtures
+      - run: make preflight
+      - run: python tools/daily_incremental.py
+      - run: make report || true
+      - name: Upload daily artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-${{ github.run_id }}
+          path: |
+            artifacts/daily
+            artifacts/report
