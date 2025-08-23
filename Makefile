@@ -1,6 +1,9 @@
 .PHONY: fixtures preflight test golden golden-verify lint check dev bench bench-cli profile mem perf-report
 actions = fixtures preflight lint test golden-verify
 
+export LOG_LEVEL ?= INFO
+export LOG_FORMAT ?= json
+
 fixtures:
 	python tools/make_excel_fixtures.py
 preflight:
@@ -38,6 +41,11 @@ mem:
 	python tools/memory_snapshot.py
 
 perf-report: bench bench-cli profile mem
+
+.PHONY: logs
+logs:
+	@echo "Log dosyaları: artifacts/logs/"
+	@ls -1 artifacts/logs || true
 
 .PHONY: quality
 quality:

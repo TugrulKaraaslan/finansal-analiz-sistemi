@@ -44,7 +44,19 @@ python -m backtest.cli scan-range --filters-csv config/filters.csv --start 2025-
 
 ## 5. Sonuçlar
 
-Çalışma tamamlandığında raporlar `raporlar/` dizinine, loglar `loglar/` dizinine yazılır.
+Çalışma tamamlandığında raporlar `raporlar/` dizinine, loglar `artifacts/logs/` dizinine yazılır.
+
+### Log Ayarları
+- `LOG_LEVEL` = DEBUG|INFO|WARNING|ERROR (default: INFO)
+- `LOG_FORMAT` = json|plain (default: json)
+- `LOG_DIR` = artifacts/logs (default)
+- `BACKTEST_RUN_ID` = aynı koşudaki tüm logları korele etmek için custom run id
+
+Örnek:
+```bash
+LOG_LEVEL=DEBUG BACKTEST_RUN_ID=A12-DEV1 \
+python -m backtest.cli scan-range --config config/colab_config.yaml --start 2025-03-07 --end 2025-03-09
+```
 
 ## Golden Güncelleme
 

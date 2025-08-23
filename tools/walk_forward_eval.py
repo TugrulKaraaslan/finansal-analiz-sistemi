@@ -12,6 +12,9 @@ from backtest.eval.walk_forward import (  # noqa: E402
     generate_folds,
     save_folds,
 )
+from backtest.logging_conf import set_fold_id, get_logger
+
+log = get_logger("wf")
 
 OUTDIR = Path("artifacts/wf")
 OUTDIR.mkdir(parents=True, exist_ok=True)
@@ -32,6 +35,8 @@ save_folds(folds, OUTDIR)
 results_path = OUTDIR / "results.jsonl"
 with results_path.open("w", encoding="utf-8") as w:
     for i, f in enumerate(folds):
+        set_fold_id(str(i))
+        log.info("wf fold", extra={"extra_fields": f})
         cmd = [
             sys.executable,
             "-m",

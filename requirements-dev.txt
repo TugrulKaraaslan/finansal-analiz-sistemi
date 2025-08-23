@@ -9,3 +9,4 @@ pyinstrument>=4.6
 memory-profiler>=0.61
 pandera>=0.20
 jinja2>=3.1
+json-logging>=1.3

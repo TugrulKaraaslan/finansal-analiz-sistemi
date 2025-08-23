@@ -8,7 +8,7 @@ from types import SimpleNamespace as NS
 from pathlib import Path
 import pandas as pd
 
-from backtest.config import load_config, merge_cli_overrides, Flags, setup_logging
+from backtest.config import load_config, merge_cli_overrides, Flags
 from backtest.batch import run_scan_range, run_scan_day
 from backtest.normalizer import normalize
 from backtest.calendars import add_next_close
@@ -38,7 +38,12 @@ __all__ = [
     "quality_warnings",
 ]
 
-logger = logging.getLogger("backtest.cli")
+from backtest.logging_conf import get_logger, log_with, set_fold_id, ensure_run_id
+
+log = get_logger("cli")
+run_id = ensure_run_id()
+log.info("CLI start", extra={"extra_fields": {"run_id": run_id, "cmd": "scan-range"}})
+logger = log
 
 # setup_logging çağrısından sonra FileHandler eklemek için placeholder
 fh = None
@@ -226,7 +231,6 @@ def _load_and_prepare(args) -> tuple[NS, Flags]:
             indicators=NS(engine="none"),
         )
     cfg = merge_cli_overrides(cfg, log_level=args.log_level)
-    setup_logging(getattr(getattr(cfg, "cli", NS()), "log_level", "INFO"))
     flags = Flags.from_dict({})
     return cfg, flags
 
@@ -347,6 +351,9 @@ def main(argv=None):
             "end": args.end,
             "costs": args.costs,
         }
+    if inputs:
+        fields = {k: str(v) for k, v in inputs.items() if v is not None}
+        log_with(log, "INFO", args.cmd, **fields)
 
     rc.write_env_snapshot()
     rc.write_config_snapshot(cfg_dict, inputs)

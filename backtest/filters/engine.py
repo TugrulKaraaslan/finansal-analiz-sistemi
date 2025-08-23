@@ -5,6 +5,9 @@ import re
 import warnings
 import pandas as pd
 
+from backtest.logging_conf import get_logger
+log = get_logger("engine")
+
 from backtest.cross import (
     cross_up as _cross_up,
     cross_down as _cross_down,
@@ -101,6 +104,7 @@ def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
     try:
         return pd.eval(canon_expr, engine="python", local_dict=locals_map)
     except Exception as e:  # pragma: no cover - defensive
+        log.exception("evaluate failed", extra={"extra_fields": {"expr": expr}})
         raise ValueError(f"evaluate failed: {expr} → {e}") from e
 
 
