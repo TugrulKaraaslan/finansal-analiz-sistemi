@@ -1,0 +1,31 @@
+enabled: true
+kill_switch_env: KILL_SWITCH   # env=1 ise tüm işlemleri engelle
+
+circuit_breakers:
+  max_intraday_dd_bps: 300     # −%3 … equity tabanlı
+  max_daily_trades: 200
+  halt_on_data_gaps: true      # market verisinde boşluk varsa block
+  volatility_halt:
+    atr_window: 14
+    atr_to_price_bps: 800      # ATR/Close %8 üstü → durdur
+
+exposure:
+  max_gross: 1.0               # long+short / equity
+  max_net: 0.8                 # |long−short| / equity
+  per_symbol_max_pct: 0.20     # tek sembol / equity
+
+cooldown:
+  after_consec_losses: 3
+  cool_minutes: 60
+
+position_limits:
+  lot_size: 1
+  min_qty: 1
+  min_cash_buffer_pct: 0.05
+
+report:
+  output_dir: artifacts/risk
+  write_json: true
+  write_last_decision: true
+
+dry_run: true                  # true: block etse de akışı bozma, sadece raporla (dev mod)

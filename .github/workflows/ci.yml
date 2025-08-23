@@ -28,6 +28,7 @@ jobs:
       - run: make config-validate
       - run: make golden-verify
       - run: make quality
+      - run: make risk-smoke
       - run: PREFLIGHT_ALIAS_MODE=allow PREFLIGHT_ALLOW_UNKNOWN=1 make preflight
       - run: make test
 
@@ -39,6 +40,12 @@ jobs:
           path: |
             artifacts/report
             artifacts/profiles/pyinstrument_scan.html
+      - name: Upload risk reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: risk-reports
+          path: artifacts/risk
+          if-no-files-found: ignore
       - name: Upload logs
         uses: actions/upload-artifact@v4
         with:
