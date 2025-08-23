@@ -18,6 +18,14 @@ make fixtures
 
 Bu komut `Veri/` altındaki Excel dosyalarından test için küçük örnekler oluşturur.
 
+### Excel'den Parquet'e dönüşüm
+
+```bash
+python -m backtest.cli convert-to-parquet --excel-dir Veri --out data/parquet
+```
+
+`config/data.yaml` dosyasındaki `backend` alanı ile `pandas` veya `polars` seçilebilir.
+
 ## 3. Preflight
 
 ```bash

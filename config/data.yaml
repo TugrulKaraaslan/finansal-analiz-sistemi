@@ -1,0 +1,4 @@
+data:
+  excel_dir: "Veri"
+  parquet_dir: "data/parquet"
+  backend: "polars"  # "pandas" | "polars"

@@ -36,6 +36,7 @@ jobs:
       - run: make guardrails
       - run: make risk-smoke
       - run: make test
+      - run: python tools/perf_harness.py --scenario scan-day --backends pandas,polars --start 2020-01-01 --end 2020-01-02 --symbols AAA
 
       - run: make report
       - name: Upload HTML report
