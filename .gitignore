@@ -6,7 +6,10 @@ loglar/*
 !loglar/.gitkeep
 artifacts/logs/*
 # genel artifacts çıktıları
-artifacts/
+artifacts/*
+!artifacts/guardrails/
+!artifacts/guardrails/summary.json
+!artifacts/guardrails/violations.csv
 # Excel binaries
 *.xlsx
 veri_guncel_fix/**

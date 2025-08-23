@@ -33,6 +33,7 @@ jobs:
       - run: make preflight
       - run: make golden-verify
       - run: make quality
+      - run: make guardrails
       - run: make risk-smoke
       - run: make test
 
