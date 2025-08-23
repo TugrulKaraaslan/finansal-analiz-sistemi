@@ -1,5 +1,7 @@
 # Usage
 
+> A12 sürümü (2025-08-23) yayınlandı. Ayrıntılar için [CHANGELOG](CHANGELOG.md).
+
 ## 1. Kurulum
 
 ```bash

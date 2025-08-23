@@ -1,0 +1,25 @@
+name: release
+on:
+  push:
+    tags: ["vA12"]
+
+jobs:
+  validate-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt || true
+      - run: pip install -r requirements-dev.txt
+      - run: make fixtures
+      - run: make golden-verify
+      - run: make preflight
+      - run: make test
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "A12 — 2025-08-23"
+          body_path: CHANGELOG.md
