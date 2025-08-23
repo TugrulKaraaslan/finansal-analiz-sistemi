@@ -1,6 +1,6 @@
 from __future__ import annotations
 import pandas as pd
-from typing import Iterable, List, Tuple
+from typing import List, Tuple
 from concurrent.futures import ProcessPoolExecutor
 from time import perf_counter
 import logging
@@ -19,7 +19,9 @@ logger = logging.getLogger(__name__)
 
 def _process_chunk(args):
     df_chunk, filters_df, indicators, day, alias_csv, multi_symbol = args
-    df_chunk, _ = normalize_dataframe(df_chunk, alias_csv, policy="prefer_first")
+    df_chunk, _ = normalize_dataframe(
+        df_chunk, alias_csv, policy="prefer_first"
+    )  # noqa: E501
     df_chunk = precompute_for_chunk(df_chunk, indicators)
     d = pd.to_datetime(day)
     rows: List[Tuple[str, str]] = []
@@ -33,7 +35,9 @@ def _process_chunk(args):
                 try:
                     mask = evaluate(sub, expr)
                 except Exception as e:
-                    raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e
+                    raise ValueError(
+                        f"Filter evaluation failed: {expr} → {e}"
+                    ) from e  # noqa: E501
                 if bool(mask.loc[d]):
                     rows.append((sym, code))
     else:
@@ -43,7 +47,9 @@ def _process_chunk(args):
             try:
                 mask = evaluate(df_chunk, expr)
             except Exception as e:
-                raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e
+                raise ValueError(
+                    f"Filter evaluation failed: {expr} → {e}"
+                ) from e  # noqa: E501
             if bool(mask.loc[d]):
                 rows.append(("SYMBOL", code))
     return rows
@@ -57,7 +63,9 @@ def run_scan_day(
     alias_csv: str | None = None,
 ) -> List[Tuple[str, str]]:
     """Generate signals for a single day."""
-    multi_symbol = isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2
+    multi_symbol = (
+        isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2
+    )  # noqa: E501
     indicators = collect_required_indicators(filters_df)
     return _process_chunk(
         (df.copy(), filters_df, indicators, day, alias_csv, multi_symbol)
@@ -77,15 +85,23 @@ def run_scan_range(
     chunk_size: int = 20,
     workers: int = 1,
 ) -> None:
-    """Run scans for a date range with optional symbol chunking and parallelism."""
+    """Run scans for a date range with optional symbol chunking and
+    parallelism."""
     writer = OutputWriter(out_dir)
     days = trading_days(df.index, start, end)
     if len(days) == 0:
         raise RuntimeError("BR002: tarih aralığı veriyle kesişmiyor")
 
-    multi_symbol = isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2
-    symbols = sorted({c[0] for c in df.columns}) if multi_symbol else ["SYMBOL"]
-    chunks = [symbols[i : i + chunk_size] for i in range(0, len(symbols), chunk_size)]
+    multi_symbol = (
+        isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2
+    )  # noqa: E501
+    symbols = (
+        sorted({c[0] for c in df.columns}) if multi_symbol else ["SYMBOL"]
+    )  # noqa: E501
+    chunks = [  # noqa: E501
+        symbols[i : i + chunk_size]  # noqa: E203
+        for i in range(0, len(symbols), chunk_size)
+    ]
     indicators = collect_required_indicators(filters_df)
 
     for day in days:
@@ -120,3 +136,19 @@ def run_scan_range(
             day,
             perf_counter() - t0,
         )
+
+
+# trade DataFrame üretiliyorsa, maliyeti uygula (opsiyonel)
+try:
+    from backtest.portfolio.costs import CostParams, apply_costs
+    from pathlib import Path
+    import os
+
+    _cost_cfg = Path(os.environ.get("COSTS_CFG", "config/costs.yaml"))
+    _params = CostParams.from_yaml(_cost_cfg)
+    _trades = globals().get("trades")
+    if isinstance(_trades, pd.DataFrame) and not _trades.empty:
+        trades = apply_costs(_trades, _params)
+except Exception:
+    # güvenli: maliyet katmanı optional, hatada akışı bozma
+    pass

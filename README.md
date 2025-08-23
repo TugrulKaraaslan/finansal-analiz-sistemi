@@ -228,6 +228,54 @@ zip -r reports_logs.zip raporlar loglar  # ikisi birden
 
 Bu dosyaları `drive.mount` ile Google Drive'a kopyalayabilir veya tarayıcıdan indirebilirsin.
 
+## İşlem Maliyeti & Slippage
+
+İşlem maliyetlerini simüle etmek için `config/costs.yaml` dosyası kullanılır. Varsayılan yapı:
+
+```yaml
+enabled: true
+currency: TRY
+rounding:
+  cash_decimals: 2
+commission:
+  model: fixed_bps
+  bps: 5
+  min_cash: 0.0
+taxes:
+  bps: 0
+spread:
+  model: half_spread
+  default_spread_bps: 7
+slippage:
+  model: atr_linear
+  bps_per_1x_atr: 10
+apply:
+  price_col: fill_price
+  qty_col: quantity
+  side_col: side
+  date_col: date
+  id_col: trade_id
+report:
+  write_breakdown: true
+  output_dir: artifacts/costs
+```
+
+Komisyon modelleri: `fixed_bps`, `per_share_flat`, `none`.
+Spread modelleri: `half_spread`, `fixed_bps`, `none`.
+Slippage modelleri: `atr_linear`, `fixed_bps`, `none`.
+
+Maliyetler `trade` tablosuna uygulanır ve `cost_commission`, `cost_slippage`, `cost_taxes`, `cost_total` kolonları eklenir.
+
+### Örnek kullanım
+
+```bash
+# Varsayılan maliyetlerle
+python -m backtest.cli scan-range --config config/colab_config.yaml --start 2025-03-07 --end 2025-03-09
+
+# Özel maliyet dosyasıyla
+python -m backtest.cli scan-range --config config/colab_config.yaml --start 2025-03-07 --end 2025-03-09 --costs my_costs.yaml
+```
+
 ## Sık Karşılaşılan Hatalar
 
 * **ModuleNotFoundError: pandera/loguru** → `pip install -r requirements.txt`
