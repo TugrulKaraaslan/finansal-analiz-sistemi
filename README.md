@@ -18,6 +18,18 @@ pip install -r requirements-dev.txt
 python -m backtest.cli --help
 ```
 
+## Veri İndirme CLI
+
+Veri indirme servisi sembol bazlı Parquet yazımı ve TTL cache yönetimi sunar.
+Temel komutlar:
+
+```bash
+python -m backtest.cli fetch-range --symbols DEMO --start 2024-01-01 --end 2024-01-10 --provider stub
+python -m backtest.cli fetch-latest --symbols DEMO --ttl-hours 6 --provider stub
+```
+
+Tüm komutlar yalnız `--start` / `--end` parametrelerini kabul eder ve sabit `/content` yolları kullanılmaz.
+
 ## Hızlı Başlangıç (Colab)
 
 ```python

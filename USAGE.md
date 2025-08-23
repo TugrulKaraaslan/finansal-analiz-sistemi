@@ -40,6 +40,15 @@ Preflight, `filters.csv` içindeki token'ların Excel kolonlarıyla uyuştuğunu
 python -m backtest.cli scan-range --config config_scan.yml --start 2025-03-07 --end 2025-03-11
 ```
 
+## Veri İndirme
+
+```bash
+python -m backtest.cli fetch-range --symbols DEMO --start 2024-01-01 --end 2024-01-05 --provider stub
+python -m backtest.cli fetch-latest --symbols DEMO --ttl-hours 6 --provider stub
+```
+
+Komutlar sadece `--start` / `--end` parametreleri alır ve sabit `/content` yolları içermez.
+
 ### Filtre dosyası yol çözümü
 
 Yol önceliği: CLI argümanı > YAML config > proje varsayılanı (`filters.csv`).

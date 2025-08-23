@@ -822,6 +822,62 @@ try:  # pragma: no cover - click opsiyonel
         else:
             click.echo("OK")
 
+    from backtest.downloader.core import DataDownloader
+    from backtest.downloader.providers.local_csv import LocalCSVProvider
+    from backtest.downloader.providers.stub import StubProvider
+
+    def _make_downloader(provider: str, directory: str) -> DataDownloader:
+        if provider == "stub":
+            prov = StubProvider()
+        elif provider == "local-csv":
+            prov = LocalCSVProvider(directory)
+        else:  # pragma: no cover - guard for future providers
+            raise click.ClickException(f"unknown provider: {provider}")
+        return DataDownloader(prov)
+
+    @click.command(name="fetch-range")
+    @click.option("--symbols", required=True)
+    @click.option("--start", required=True)
+    @click.option("--end", required=True)
+    @click.option("--provider", default="stub")
+    @click.option("--directory", default="data")
+    def fetch_range_cmd(symbols: str, start: str, end: str, provider: str, directory: str) -> None:
+        dl = _make_downloader(provider, directory)
+        dl.fetch_range(symbols.split(","), start, end)
+
+    @click.command(name="fetch-latest")
+    @click.option("--symbols", required=True)
+    @click.option("--ttl-hours", default=6, type=int)
+    @click.option("--provider", default="stub")
+    @click.option("--directory", default="data")
+    def fetch_latest_cmd(symbols: str, ttl_hours: int, provider: str, directory: str) -> None:
+        dl = _make_downloader(provider, directory)
+        dl.fetch_latest(symbols.split(","), ttl_hours)
+
+    @click.command(name="refresh-cache")
+    @click.option("--ttl-hours", default=0, type=int)
+    @click.option("--provider", default="stub")
+    @click.option("--directory", default="data")
+    def refresh_cache_cmd(ttl_hours: int, provider: str, directory: str) -> None:
+        dl = _make_downloader(provider, directory)
+        dl.refresh_cache(ttl_hours)
+
+    @click.command(name="vacuum-cache")
+    @click.option("--older-than-days", default=365, type=int)
+    @click.option("--provider", default="stub")
+    @click.option("--directory", default="data")
+    def vacuum_cache_cmd(older_than_days: int, provider: str, directory: str) -> None:
+        dl = _make_downloader(provider, directory)
+        dl.vacuum_cache(older_than_days)
+
+    @click.command(name="integrity-check")
+    @click.option("--symbols", required=True)
+    @click.option("--provider", default="stub")
+    @click.option("--directory", default="data")
+    def integrity_check_cmd(symbols: str, provider: str, directory: str) -> None:
+        dl = _make_downloader(provider, directory)
+        dl.integrity_check(symbols.split(","))
+
     @click.group()
     def cli() -> None:
         pass
@@ -829,6 +885,11 @@ try:  # pragma: no cover - click opsiyonel
     cli.add_command(scan_range)
     cli.add_command(scan_day)
     cli.add_command(lint_filters)
+    cli.add_command(fetch_range_cmd)
+    cli.add_command(fetch_latest_cmd)
+    cli.add_command(refresh_cache_cmd)
+    cli.add_command(vacuum_cache_cmd)
+    cli.add_command(integrity_check_cmd)
 except Exception:  # pragma: no cover
     pass
 

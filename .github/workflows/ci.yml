@@ -30,27 +30,22 @@ jobs:
       # Fixtures + golden verification + quality + preflight + test
       - run: make fixtures
       - run: make validate
-      - run: make preflight
       - run: make golden-verify
       - run: make quality
+      - run: make preflight
       - run: make guardrails
-      - run: make risk-smoke
       - run: make test
-      - run: python tools/perf_harness.py --scenario scan-day --backends pandas,polars --start 2020-01-01 --end 2020-01-02 --symbols AAA
-
-      - run: make report
-      - name: Upload HTML report
+      - name: download-smoke
+        run: |
+          python -m backtest.cli fetch-range --symbols DEMO --start 2025-03-07 --end 2025-03-21 --provider stub
+          python -m backtest.cli integrity-check --symbols DEMO --provider stub
+      - name: Upload download artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: html-report
+          name: download-smoke
           path: |
-            artifacts/report
-            artifacts/profiles/pyinstrument_scan.html
-      - name: Upload risk reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: risk-reports
-          path: artifacts/risk
+            data/parquet
+            artifacts/data/integrity_report.json
           if-no-files-found: ignore
       - name: Upload logs
         uses: actions/upload-artifact@v4

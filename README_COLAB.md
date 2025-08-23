@@ -59,3 +59,9 @@ kaynakları ve filtreler arasında tutarlılık sağlanır.
 %pip install -q -r requirements-dev.txt -c constraints.txt --only-binary=:all:
 !pytest -q
 ```
+
+## Veri İndirme Örneği
+
+```python
+!python -m backtest.cli fetch-range --symbols DEMO --start 2024-01-01 --end 2024-01-05 --provider stub
+```
