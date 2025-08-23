@@ -22,6 +22,7 @@ from backtest.trace import RunContext, ArtifactWriter, list_output_files
 from backtest.summary import summarize_range
 from backtest.reporting import build_excel_report
 from backtest.filters.normalize_expr import normalize_expr
+from pathlib import Path
 
 __all__ = [
     "normalize",
@@ -124,6 +125,20 @@ def _file_exists_or_exit(path: str, code: str = "CL002"):
         return
     print(f"❌ {code}: yol yok/erişilemedi → {path}")
     sys.exit(2)
+
+
+def _resolve_filters_path(cli_arg: str | None) -> Path:
+    candidates: list[Path] = []
+    if cli_arg:
+        candidates.append(Path(cli_arg))
+    candidates += [Path("filters.csv"), Path("config/filters.csv")]
+    for p in candidates:
+        if p.exists():
+            return p
+    cwd = Path(".").resolve()
+    raise FileNotFoundError(
+        f"filters.csv bulunamadı. Denenen yollar: {', '.join(map(str, candidates))}. Çalışma dizini: {cwd}"
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -329,11 +344,11 @@ def main(argv=None):
 
     need: list[str] = []
     if args.cmd == "scan-day":
-        for k in ("data", "date", "filters", "out"):
+        for k in ("data", "date", "out"):
             if not getattr(args, k, None):
                 need.append(k)
     if args.cmd == "scan-range":
-        for k in ("data", "start", "end", "filters", "out"):
+        for k in ("data", "start", "end", "out"):
             if not getattr(args, k, None):
                 need.append(k)
     if need:
@@ -368,7 +383,8 @@ def main(argv=None):
     else:
         df = pd.DataFrame()
 
-    filters_df = pd.read_csv(args.filters, sep=None, engine="python")
+    filters_path = _resolve_filters_path(args.filters)
+    filters_df = pd.read_csv(filters_path, sep=None, engine="python")
 
     if args.cmd == "scan-day":
         rows = run_scan_day(df, args.date, filters_df, alias_csv=args.alias)

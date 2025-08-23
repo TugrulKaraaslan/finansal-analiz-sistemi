@@ -41,6 +41,7 @@ setup_logger()
 ```
 
 > Excel okuma/yazma için gerekli `openpyxl` ve `XlsxWriter` paketleri `requirements_colab.txt` içinde yer alır.
+> Excel klasör yolu YAML config'ten okunur; CLI'da `--excel-dir` parametresi yoktur.
 > Spacy, fastai ve fastdownload bağımlılıkları kaldırılmıştır.
 
 ## İsim normalizasyonu
