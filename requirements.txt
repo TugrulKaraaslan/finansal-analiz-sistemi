@@ -7,6 +7,7 @@ loguru<0.8
 xlsxwriter<4
 typing-inspect<1
 pyarrow<22
+polars<2
 openpyxl<4
 tqdm<5
 python-dateutil<3
