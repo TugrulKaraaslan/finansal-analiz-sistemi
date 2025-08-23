@@ -20,6 +20,12 @@ from backtest.validator import dataset_summary, quality_warnings
 from backtest.data_loader import read_excels_long as _read_excels_long
 from backtest.eval.metrics import SignalMetricConfig
 from backtest.eval.report import compute_signal_report, save_json
+from backtest.metrics import (
+    max_drawdown as risk_max_drawdown,
+    sharpe_ratio,
+    sortino_ratio,
+    turnover,
+)
 from backtest.trace import RunContext, ArtifactWriter, list_output_files
 from backtest.summary import summarize_range
 from backtest.reporting import build_excel_report
@@ -244,6 +250,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--signals-csv", help="opsiyonel: sinyal DataFrame CSV yolu (date-indexli)"
     )
     seval.add_argument("--equity-csv", default="artifacts/portfolio/daily_equity.csv")
+    seval.add_argument("--weights-csv", default="artifacts/portfolio/weights.csv")
 
     cv = sub.add_parser(
         "config-validate", help="Validate YAML configs and export JSON schemas"
@@ -343,7 +350,9 @@ def main(argv=None):
 
     cfg_dict = _ns_to_dict(cfg)
     log_root = cfg_dict.get("paths", {}).get("logs", os.getenv("LOG_DIR", "loglar"))
-    art_root = cfg_dict.get("paths", {}).get("artifacts", os.getenv("ARTIFACTS_DIR", "artifacts"))
+    art_root = cfg_dict.get("paths", {}).get(
+        "artifacts", os.getenv("ARTIFACTS_DIR", "artifacts")
+    )
     rc = RunContext.create(log_root, art_root)
     logger.info("run_id=%s", rc.run_id)
     log_file = Path(log_root) / f"{rc.run_id}.log"
@@ -407,6 +416,7 @@ def main(argv=None):
             "end": args.end,
             "signals_csv": args.signals_csv,
             "equity_csv": args.equity_csv,
+            "weights_csv": args.weights_csv,
         }
     elif args.cmd == "summarize":
         inputs = {
@@ -501,6 +511,21 @@ def main(argv=None):
 
                 em = equity_metrics(eq)
                 save_json(em, outdir / "portfolio_metrics.json")
+
+                eq_series = eq.set_index(pd.to_datetime(eq["date"]))["equity"]
+                r = eq_series.pct_change().dropna()
+                risk = {
+                    "sharpe": sharpe_ratio(r),
+                    "sortino": sortino_ratio(r),
+                    "max_drawdown": risk_max_drawdown(eq_series),
+                }
+                w_path = Path(args.weights_csv)
+                if w_path.exists():
+                    wdf = pd.read_csv(w_path)
+                    if "date" in wdf.columns:
+                        wdf = wdf.drop(columns=["date"])
+                    risk["turnover"] = turnover(wdf)
+                save_json(risk, outdir / "risk_metrics.json")
         except Exception:
             pass
         print("metrics written to artifacts/metrics (varsa)")

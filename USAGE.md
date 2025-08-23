@@ -24,7 +24,7 @@ Bu komut `Veri/` altındaki Excel dosyalarından test için küçük örnekler o
 make preflight
 ```
 
-Preflight, `filters.csv` içindeki token'ların Excel kolonlarıyla uyuştuğunu doğrular. `filters.csv` dosyası `FilterCode;PythonQuery` başlıklarını ve `;` ayracını kullanmalıdır. Gerekirse CLI'da `--no-preflight` bayrağı veya YAML'da `preflight: false` ile atlanabilir.
+Preflight, `filters.csv` içindeki token'ların Excel kolonlarıyla uyuştuğunu doğrular ve alias/unknown isimleri **reddeder**. `filters.csv` dosyası `FilterCode;PythonQuery` başlıklarını ve `;` ayracını kullanmalıdır. Gerekirse CLI'da `--no-preflight` bayrağı veya YAML'da `preflight: false` ile atlanabilir. Alias içeren dosyaları kanonikleştirmek için `tools/canonicalize_filters.py` kullanılabilir.
 
 ## 4. Taramayı çalıştır
 
