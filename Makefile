@@ -4,7 +4,7 @@ actions = fixtures preflight lint test
 fixtures:
 	python tools/make_excel_fixtures.py
 preflight:
-	python -c "from backtest.paths import EXCEL_DIR; from backtest.filters.preflight import validate_filters; from pathlib import Path; validate_filters(Path('filters.csv') if Path('filters.csv').exists() else Path('config/filters.csv'), EXCEL_DIR); print('preflight passed')"
+	python tools/preflight_run.py
 
 test:
 	pytest -q

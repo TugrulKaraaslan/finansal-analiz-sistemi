@@ -16,6 +16,24 @@ ALIAS = {
 }
 ALLOW_FUNCS = {"cross_up", "cross_down"}
 
+ALLOWED_PATTERNS = [
+    r"(?:ema|sma|wma|hma|vwma|dema|tema)_\d+",
+    r"rsi_\d+",
+    r"stoch[dk]_\d+_\d+_\d+",
+    r"stochrsi_[kd]_\d+_\d+_\d+_\d+",
+    r"bb[uml]_\d+_\d+",
+    r"atr_\d+",
+    r"macd_line", r"macd_signal",
+    r"change_\d+[dwm]_percent",
+    r"relative_volume",
+    r"psar.*",
+    r"sma\d*", r"ema\d*",
+]
+
+
+def _is_allowed_by_pattern(tok: str) -> bool:
+    return any(re.fullmatch(p, tok) for p in ALLOWED_PATTERNS)
+
 
 def _dataset_columns(excel_dir: Path) -> set[str]:
     xls = sorted([p for p in (excel_dir).rglob("*.xlsx")])
@@ -29,31 +47,43 @@ def _tokens(expr: str) -> list[str]:
     return re.findall(r"[A-Za-z_][A-Za-z0-9_]*", expr or "")
 
 
-def validate_filters(filters_csv: Path, excel_dir: Path) -> None:
+def validate_filters(
+    filters_csv: Path,
+    excel_dir: Path,
+    fail_on_alias: bool = True,
+    allow_unknown: bool = False,
+) -> None:
     cols = _dataset_columns(excel_dir)
     bad: dict[str, set[str]] = {}
     alias_used: dict[str, set[str]] = {}
+
     with open(filters_csv, encoding="utf-8") as f:
         rdr = csv.DictReader(f)
         for row in rdr:
             code = (row.get("FilterCode") or "").strip() or "<NO_CODE>"
             expr = (row.get("PythonQuery") or "").strip()
-            toks = _tokens(expr)
-            for t in toks:
+            for t in _tokens(expr):
                 if t in ALIAS:
                     alias_used.setdefault(code, set()).add(f"{t}->{ALIAS[t]}")
                     continue
-                if t in ALLOW_FUNCS:
+                if t in ALLOW_FUNCS or t in cols or _is_allowed_by_pattern(t):
                     continue
-                if t not in cols:
-                    bad.setdefault(code, set()).add(t)
+                bad.setdefault(code, set()).add(t)
 
     if alias_used:
-        for k, vs in alias_used.items():
-            msg = f"Preflight: legacy alias in {k}: {sorted(vs)}"
-            warnings.warn(msg)
+        lines = [f"{k}: {sorted(vs)}" for k, vs in alias_used.items()]
+        if fail_on_alias:
+            raise SystemExit(
+                "Preflight failed. Legacy aliases detected:\n  " + "\n  ".join(lines)
+            )
+        else:
+            for k, vs in alias_used.items():
+                warnings.warn(f"Preflight: legacy alias in {k}: {sorted(vs)}")
 
     if bad:
-        msgs = [f"{k}: {sorted(v)}" for k, v in bad.items()]
-        msg = "Preflight failed. Unknown tokens:\n  " + "\n  ".join(msgs)
-        raise SystemExit(msg)
+        lines = [f"{k}: {sorted(v)}" for k, v in bad.items()]
+        msg = "Preflight unknown tokens:\n  " + "\n  ".join(lines)
+        if allow_unknown:
+            warnings.warn(msg)
+        else:
+            raise SystemExit("Preflight failed. " + msg)
