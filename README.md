@@ -37,14 +37,14 @@ make check
 ## Veri ve Filtre Dosyaları
 
 * **Excel klasörü**: `Veri/` (proje kökünde)
-* **filters.csv**: proje kökünde, ayracı `;`, başlıklar: `FilterCode;PythonQuery`
+* **filters.csv**: proje kökünde, ayracı `,` (otomatik algılama `;`'yi de kabul eder), başlıklar: `FilterCode,PythonQuery`
 
 Örnek satırlar:
 
 ```
-FilterCode;PythonQuery
-EX1; ichimoku_conversionline > ichimoku_baseline
-EX2; macd_line > macd_signal
+FilterCode,PythonQuery
+EX1, ichimoku_conversionline > ichimoku_baseline
+EX2, macd_line > macd_signal
 ```
 
 Excel klasör yolu config dosyasından okunur; CLI'da `--excel-dir` parametresi bulunmaz.

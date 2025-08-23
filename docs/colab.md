@@ -20,7 +20,7 @@ print("OK: Kurulum bitti. Eğer NumPy/Pandas yükseldiyse Runtime → Restart ru
 !mkdir -p raporlar loglar config Veri cache
 from pathlib import Path
 if not Path("filters.csv").exists():
-    Path("filters.csv").write_text("FilterCode;PythonQuery\nEXAMPLE_01; (rsi_14 > 50) & (ema_20 > ema_50)\n", encoding="utf-8")
+    Path("filters.csv").write_text("FilterCode,PythonQuery\nEXAMPLE_01, (rsi_14 > 50) & (ema_20 > ema_50)\n", encoding="utf-8")
     print("⚠️ filters.csv örneği oluşturuldu. Kendi dosyanla değiştir.")
 ```
 
