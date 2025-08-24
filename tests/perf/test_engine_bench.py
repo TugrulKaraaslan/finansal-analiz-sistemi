@@ -4,6 +4,7 @@ import pytest
 from backtest.filters.engine import evaluate
 
 pytestmark = pytest.mark.perf
+pytest.importorskip("pytest_benchmark")
 
 @pytest.fixture
 def df():

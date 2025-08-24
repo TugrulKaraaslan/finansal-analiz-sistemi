@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
+from backtest.paths import DATA_DIR  # noqa: E402
 from backtest.eval.walk_forward import (  # noqa: E402
     WfParams,
     generate_folds,
@@ -18,7 +19,7 @@ log = get_logger("wf")
 
 OUTDIR = Path("artifacts/wf")
 OUTDIR.mkdir(parents=True, exist_ok=True)
-ENV = dict(os.environ, DATA_DIR="data")
+ENV = dict(os.environ, DATA_DIR=str(DATA_DIR))
 
 # Basit CLI parametreleri (env veya default)
 start = os.getenv("WF_START", "2025-03-07")

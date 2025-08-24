@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict
 
+from backtest.paths import ALIAS_PATH
+
 
 @dataclass(frozen=True)
 class AliasMap:
@@ -13,7 +15,7 @@ class AliasMap:
         return self.mapping.get(name, name)
 
 
-def load_alias_map(csv_path: str | Path) -> AliasMap:
+def load_alias_map(csv_path: str | Path = ALIAS_PATH) -> AliasMap:
     path = Path(csv_path)
     if not path.exists():
         raise FileNotFoundError(f"alias csv yok: {path}")

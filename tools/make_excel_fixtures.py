@@ -1,10 +1,16 @@
 from pathlib import Path
-import os
+import sys
 import numpy as np
 import pandas as pd
 
-EXCEL_DIR = Path(os.getenv("DATA_DIR", os.getenv("EXCEL_DIR", "data")))
-(EXCEL_DIR / "data").mkdir(parents=True, exist_ok=True)
+# Allow running directly via `python tools/make_excel_fixtures.py`
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from backtest.paths import EXCEL_DIR
+
+EXCEL_DIR.mkdir(parents=True, exist_ok=True)
 
 # Tarih aralığı: testlerin kullandığı aralıkları içersin
 dates = pd.date_range("2025-03-01", periods=12, freq="B")
@@ -28,7 +34,6 @@ df = pd.DataFrame({
 })
 
 # AAA.xlsx (sheet adı AAA)
-df.to_excel(EXCEL_DIR / "data" / "AAA.xlsx", sheet_name="AAA", index=False)
 df.to_excel(EXCEL_DIR / "AAA.xlsx", sheet_name="AAA", index=False)
 
 # BIST benchmark (opsiyonel ama eksik uyarısı yaşanmaması için ekle)

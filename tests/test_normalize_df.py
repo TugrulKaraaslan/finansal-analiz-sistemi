@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
-from pathlib import Path
 from backtest.normalize import build_column_mapping, normalize_dataframe, CollisionError
+from backtest.paths import ALIAS_PATH
 
-ALIAS = "data/alias_mapping.csv"
+ALIAS = str(ALIAS_PATH)
 
 
 def _df():

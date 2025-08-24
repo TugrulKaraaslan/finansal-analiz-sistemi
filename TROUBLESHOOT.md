@@ -29,3 +29,6 @@ isimlere dönüştürmek için:
 ```bash
 python tools/canonicalize_filters.py filters.csv filters_canonical.csv
 ```
+
+## Veri yolu nasıl değiştirilir?
+Varsayılan `data/` dizinini farklı bir konuma almak için `DATA_DIR` veya `EXCEL_DIR` ortam değişkenlerini ayarlayın.

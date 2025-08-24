@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, Sequence
 
+from backtest.paths import DATA_DIR
 from .backends import polars_backend, pandas_backend
 
 
@@ -12,7 +13,7 @@ def load_prices(
     end: str | None = None,
     cols: Iterable[str] | None = None,
     backend: str = "pandas",
-    parquet_dir: str | Path = "data/parquet",
+    parquet_dir: str | Path = DATA_DIR / "parquet",
 ):
     """Load price data for *symbols* between *start* and *end*.
 
@@ -27,7 +28,7 @@ def load_prices(
     backend : {"pandas", "polars"}
         Data backend to use.
     parquet_dir : str or Path
-        Root directory containing ``symbol=`` partitions.
+        Root directory containing ``symbol=`` partitions (default ``DATA_DIR/parquet``).
     """
     if backend == "polars":
         df = polars_backend.load_prices(parquet_dir, symbols, start, end, cols)

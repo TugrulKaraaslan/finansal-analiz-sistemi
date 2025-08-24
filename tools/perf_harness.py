@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from backtest.data.loader import load_prices
+from backtest.paths import DATA_DIR
 
 
 SCENARIOS = {
@@ -22,7 +23,7 @@ SCENARIOS = {
 
 
 def _ensure_parquet_data(symbols, start, end):
-    base = Path("data/parquet")
+    base = DATA_DIR / "parquet"
     for sym in symbols:
         part = base / f"symbol={sym}"
         if not any(part.glob("*.parquet")):

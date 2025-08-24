@@ -16,12 +16,12 @@ pip install -r requirements-dev.txt
 make fixtures
 ```
 
-Bu komut `data/` altındaki Excel dosyalarından test için küçük örnekler oluşturur.
+Bu komut `data/` altındaki Excel dosyalarından test için küçük örnekler oluşturur (tek veri kaynağı).
 
 ### Excel'den Parquet'e dönüşüm
 
 ```bash
-python -m backtest.cli convert-to-parquet --excel-dir data --out data/parquet
+python -m backtest.cli convert-to-parquet --out data/parquet
 ```
 
 `config/data.yaml` dosyasındaki `backend` alanı ile `pandas` veya `polars` seçilebilir.
@@ -48,6 +48,7 @@ python -m backtest.cli fetch-latest --symbols DEMO --ttl-hours 6 --provider stub
 ```
 
 Komutlar sadece `--start` / `--end` parametreleri alır ve veri `data/` altına yazılır.
+Haricî indirme varsayılan olarak kapalıdır; `--allow-download` veya `ALLOW_DOWNLOAD=1` kullanın.
 
 ### Filtre dosyası yol çözümü
 
