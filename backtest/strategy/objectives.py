@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from typing import Dict
 
+from .runner import Result
 
-def objective_primary(result: "Result") -> float:
+
+def objective_primary(result: Result) -> float:
     """Primary objective function.
 
     Currently the Sharpe ratio is used as the primary metric.
@@ -12,7 +14,7 @@ def objective_primary(result: "Result") -> float:
     return float(result.metrics.get("sharpe", 0.0))
 
 
-def objective_penalty(result: "Result", constraints: Dict[str, float]) -> float:
+def objective_penalty(result: Result, constraints: Dict[str, float]) -> float:
     """Penalty for violating constraints.
 
     Each constraint is a soft limit. When a metric exceeds the limit the
@@ -32,7 +34,7 @@ def objective_penalty(result: "Result", constraints: Dict[str, float]) -> float:
     return float(penalty)
 
 
-def score(result: "Result", constraints: Dict[str, float]) -> float:
+def score(result: Result, constraints: Dict[str, float]) -> float:
     """Combined score = primary - penalty."""
 
     return objective_primary(result) - objective_penalty(result, constraints)
