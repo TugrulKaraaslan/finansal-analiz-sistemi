@@ -17,7 +17,10 @@ logger = logging.getLogger("backtest")
 
 
 def _check_delimiter(path: Path) -> None:
-    first_line = path.read_text(encoding="utf-8").splitlines()[0]
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not lines:
+        raise ValueError("Filters CSV dosyası boş")
+    first_line = lines[0]
     if "," in first_line and ";" not in first_line:
         raise ValueError(
             "CSV delimiter ';' bekleniyor. Dosyayı ';' ile kaydedin: FilterCode;PythonQuery"

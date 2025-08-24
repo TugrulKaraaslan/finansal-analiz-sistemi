@@ -14,6 +14,13 @@ def test_load_filters_ok(tmp_path):
     assert len(rows) == 2
 
 
+def test_load_filters_empty_file(tmp_path):
+    p = tmp_path / "filters.csv"
+    p.write_text("", encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_filters_csv([p])
+
+
 def test_load_filters_empty_query():
     with pytest.raises(ValueError):
         load_filters_csv([DATA_DIR / "filters_empty.csv"])
