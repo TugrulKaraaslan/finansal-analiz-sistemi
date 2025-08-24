@@ -1,6 +1,3 @@
-import sys
-import types
-
 import pytest
 
 from backtest.cli import build_parser

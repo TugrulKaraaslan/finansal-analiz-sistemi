@@ -41,7 +41,7 @@ def main() -> None:
         Path(sys.argv[2]) if len(sys.argv) > 2 else Path("filters.csv")
     )
     # fmt: on
-    cfg = _load_cfg(cfg_path)
+    _load_cfg(cfg_path)
 
     excel_dir = EXCEL_DIR
     print(f"Using excel_dir={excel_dir}")
