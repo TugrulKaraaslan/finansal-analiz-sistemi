@@ -76,6 +76,9 @@ CSV delimiter ';' bekleniyor. Lütfen dosyayı ';' ile kaydedin.
 Virgüllü eski dosyaları dönüştürmek için `tools/migrate_filters_csv.py`
 aracını kullanabilirsiniz.
 
+`PythonQuery` sütunu boş bırakılamaz. Boş veya sadece boşluk içeren
+satırlar `ValueError` ile sonuçlanır.
+
 ## Offline Varsayılanı
 Harici indirme kapalıdır. İndirme yapmak için
 `--allow-download` bayrağı veya `ALLOW_DOWNLOAD=1` ortam değişkeni

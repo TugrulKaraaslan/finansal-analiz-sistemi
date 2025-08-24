@@ -1,4 +1,4 @@
 {
-  "loglar/app-20250824-140207.jsonl": "17375264bf8ded8831b930d176c6c75befc0ef071fc554ab8bcbb893d48a6d75",
-  "loglar/example_dry_run.log": "b46c24d82120eada20f3700dfd26155b069dac0c4c310faba9df591ce46cec60"
+  "loglar/example_dry_run.log": "b46c24d82120eada20f3700dfd26155b069dac0c4c310faba9df591ce46cec60",
+  "tests/golden/loglar/app-sample.jsonl": "bb0b390c8f18611d9837a6e7f85aa647ef0400d8916b45f2324de4588443f70e"
 }

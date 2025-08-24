@@ -21,34 +21,36 @@ def _check_delimiter(path: Path) -> None:
         )
 
 
-def read_filters_csv(path: Path | str) -> pd.DataFrame:
-    """Read filter definitions using strict ``;`` separated schema.
+def validate_filters_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Validate filter DataFrame ensuring strict schema and content."""
 
-    The CSV must contain exactly two columns ``FilterCode`` and
-    ``PythonQuery`` in that order. Rows are stripped and empty lines are
-    ignored. Duplicate codes raise ``ValueError``.
-    """
-
-    p = resolve_path(path)
-    _check_delimiter(p)
-    df = pd.read_csv(p, sep=";", dtype=str, encoding="utf-8")
     if list(df.columns) != REQUIRED_HEADER:
         raise ValueError(f"filters.csv kolonları {REQUIRED_HEADER!r} olmalı")
 
     df = df.dropna(how="all")
+
+    if df["FilterCode"].isna().any() or df["FilterCode"].astype(str).str.strip().eq("").any():
+        raise ValueError("FilterCode boş olamaz")
+    if df["PythonQuery"].isna().any() or df["PythonQuery"].astype(str).str.strip().eq("").any():
+        raise ValueError("PythonQuery boş olamaz")
+
     df["FilterCode"] = df["FilterCode"].astype(str).str.strip()
     df["PythonQuery"] = df["PythonQuery"].astype(str).str.strip()
-
-    if df["FilterCode"].eq("").any():
-        raise ValueError("FilterCode boş olamaz")
-    if df["PythonQuery"].eq("").any():
-        raise ValueError("PythonQuery boş olamaz")
 
     dups = df["FilterCode"][df["FilterCode"].duplicated()]
     if not dups.empty:
         dup_codes = ", ".join(sorted(dups.unique()))
         raise ValueError(f"Duplicate FilterCode detected: {dup_codes}")
     return df
+
+
+def read_filters_csv(path: Path | str) -> pd.DataFrame:
+    """Read filter definitions using strict ``;`` separated schema."""
+
+    p = resolve_path(path)
+    _check_delimiter(p)
+    df = pd.read_csv(p, sep=";", dtype=str, encoding="utf-8")
+    return validate_filters_df(df)
 
 
 def load_filters_csv(paths: list[Path | str]) -> list[dict]:
@@ -80,4 +82,4 @@ def load_filters_csv(paths: list[Path | str]) -> list[dict]:
     return all_rows
 
 
-__all__ = ["read_filters_csv", "load_filters_csv"]
+__all__ = ["read_filters_csv", "load_filters_csv", "validate_filters_df"]
