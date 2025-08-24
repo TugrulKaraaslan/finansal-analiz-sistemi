@@ -12,6 +12,10 @@ def test_normalize_key_basic():
     assert normalize_key("İşlem Hacmi") == "islem_hacmi"
 
 
+def test_normalize_key_nan():
+    assert normalize_key(float("nan")) == ""
+
+
 def test_normalize_columns_uses_common_normalize_key():
     df = pd.DataFrame({"Kapanış": [1], "İşlem Hacmi": [100]})
     normalized, colmap = normalize_columns(df)
