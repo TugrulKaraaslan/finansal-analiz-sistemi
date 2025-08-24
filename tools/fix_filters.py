@@ -9,12 +9,12 @@ from pathlib import Path
 import pandas as pd
 
 RE_PSAR = re.compile(r"\bpsarl_0\.02_0\.2\b", flags=re.IGNORECASE)
-RE_WILLR = re.compile(r"(?<![A-Za-z0-9_])_(100|80|70|50)\b", flags=re.IGNORECASE)
+RE_WILLR = re.compile(r"(?<![A-Za-z0-9_])_(100|80|70|50)\b", flags=re.IGNORECASE)  # noqa: E501
 RE_EQ = re.compile(r"\s=\s=")
 RE_CCI = re.compile(r"\bcci_(\d+)_0\b", flags=re.IGNORECASE)
 RE_AROONU = re.compile(r"\baroonu_(\d+)\b", flags=re.IGNORECASE)
 RE_AROOND = re.compile(r"\baroond_(\d+)\b", flags=re.IGNORECASE)
-RE_CLASSICP = re.compile(r"\s*&\s*[^&]*classicpivots_1h_p[^&]*", flags=re.IGNORECASE)
+RE_CLASSICP = re.compile(r"\s*&\s*[^&]*classicpivots_1h_p[^&]*", flags=re.IGNORECASE)  # noqa: E501
 
 
 def fix_expr(expr: str) -> str:
@@ -26,7 +26,7 @@ def fix_expr(expr: str) -> str:
     s = RE_CCI.sub(lambda m: f"cci_{m.group(1)}", s)
     s = RE_AROONU.sub(lambda m: f"aroon_up_{m.group(1)}", s)
     s = RE_AROOND.sub(lambda m: f"aroon_down_{m.group(1)}", s)
-    s = re.sub(r"change_1h_percent", "change_1d_percent", s, flags=re.IGNORECASE)
+    s = re.sub(r"change_1h_percent", "change_1d_percent", s, flags=re.IGNORECASE)  # noqa: E501
     s = RE_CLASSICP.sub("", s)
     s = re.sub(r"\s+", " ", s)
     return s.strip()
@@ -48,6 +48,4 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    import sys
-
     sys.exit(main())

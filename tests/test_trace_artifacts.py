@@ -1,11 +1,7 @@
 import json
-import os
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
-
-from backtest.trace import ArtifactWriter, RunContext, list_output_files, sha256_file
+from backtest.trace import ArtifactWriter, RunContext, list_output_files
 
 
 def test_run_context_and_artifacts(tmp_path: Path):
@@ -23,9 +19,15 @@ def test_checksum_determinism(tmp_path: Path):
     out = tmp_path / "gunluk"
     out.mkdir(parents=True, exist_ok=True)
     f1 = out / "2024-01-01.csv"
-    f1.write_text("date,symbol,filter_code\n2024-01-01,AAA,F1\n", encoding="utf-8")
+    f1.write_text(
+        "date,symbol,filter_code\n2024-01-01,AAA,F1\n",
+        encoding="utf-8",
+    )
     f2 = out / "2024-01-02.csv"
-    f2.write_text("date,symbol,filter_code\n2024-01-02,BBB,F2\n", encoding="utf-8")
+    f2.write_text(
+        "date,symbol,filter_code\n2024-01-02,BBB,F2\n",
+        encoding="utf-8",
+    )
 
     files = list_output_files(out)
     writer = ArtifactWriter(tmp_path / "artifacts_run")

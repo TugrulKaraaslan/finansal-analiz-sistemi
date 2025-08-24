@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 import yaml
 
@@ -7,7 +5,15 @@ from backtest.strategy import StrategyRegistry
 
 
 def test_load_from_yaml(tmp_path):
-    cfg = {"strategies": [{"id": "s1", "filters": ["T1"], "params": {"risk": 1}}]}
+    cfg = {
+        "strategies": [
+            {
+                "id": "s1",
+                "filters": ["T1"],
+                "params": {"risk": 1},
+            }
+        ]
+    }
     p = tmp_path / "s.yaml"
     p.write_text(yaml.safe_dump(cfg))
     reg, constraints = StrategyRegistry.load_from_file(p)

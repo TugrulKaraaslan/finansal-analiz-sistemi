@@ -17,9 +17,11 @@ fake_pa.Column = lambda *a, **k: None
 sys.modules.setdefault("pandera", fake_pa)
 
 from backtest import cli  # noqa: E402
-from backtest.filters.normalize_expr import normalize_expr
 from backtest.io.preflight import preflight  # noqa: E402
-from backtest.preflight import UnknownSeriesError, check_unknown_series
+from backtest.preflight import (  # noqa: E402
+    UnknownSeriesError,
+    check_unknown_series,
+)
 
 
 def _touch(path: Path) -> None:
@@ -84,7 +86,10 @@ data:
         "FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8"
     )
     runner = CliRunner()
-    result = runner.invoke(cli.scan_day, ["--config", str(cfg_path), "--date", "2025-03-07"])
+    result = runner.invoke(
+        cli.scan_day,
+        ["--config", str(cfg_path), "--date", "2025-03-07"],
+    )
     assert result.exit_code != 0
     assert "Excel klasörü" in result.output
 
@@ -113,7 +118,13 @@ def test_scan_day_no_preflight(monkeypatch):
 
     monkeypatch.setattr(cli, "preflight", _pf)
     monkeypatch.setattr(cli, "_run_scan", lambda cfg: None)
-    cli.scan_day.callback("cfg.yml", "2025-03-07", None, None, no_preflight=True)
+    cli.scan_day.callback(
+        "cfg.yml",
+        "2025-03-07",
+        None,
+        None,
+        no_preflight=True,
+    )
     assert not called
 
 

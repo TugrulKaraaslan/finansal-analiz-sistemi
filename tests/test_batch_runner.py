@@ -1,4 +1,3 @@
-import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -48,7 +47,13 @@ def test_run_scan_range_writes_files(tmp_path: Path):
     df = _df_single()
     filters_df = _filters_df()
     out_dir = tmp_path / "gunluk"
-    run_scan_range(df, str(idx[0].date()), str(idx[-1].date()), filters_df, out_dir=str(out_dir))
+    run_scan_range(
+        df,
+        str(idx[0].date()),
+        str(idx[-1].date()),
+        filters_df,
+        out_dir=str(out_dir),
+    )
     # 5 gün dosyası
     files = list(out_dir.glob("*.csv"))
     assert len(files) == 5

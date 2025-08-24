@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -33,7 +32,10 @@ def main():
         "stdout_tail": res.stdout[-500:],
         "stderr_tail": res.stderr[-500:],
     }
-    Path("artifacts/bench/scan_bench.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
+    Path("artifacts/bench/scan_bench.json").write_text(
+        json.dumps(out, indent=2),
+        encoding="utf-8",
+    )
     print(json.dumps(out, indent=2))
     sys.exit(res.returncode)
 
