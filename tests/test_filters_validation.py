@@ -21,6 +21,13 @@ def test_load_filters_empty_file(tmp_path):
         load_filters_csv([p])
 
 
+def test_load_filters_header_only(tmp_path):
+    p = tmp_path / "filters.csv"
+    p.write_text("FilterCode;PythonQuery\n", encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_filters_csv([p])
+
+
 def test_load_filters_empty_query():
     with pytest.raises(ValueError):
         load_filters_csv([DATA_DIR / "filters_empty.csv"])

@@ -35,6 +35,9 @@ def validate_filters_df(df: pd.DataFrame) -> pd.DataFrame:
 
     df = df.dropna(how="all")
 
+    if df.empty:
+        raise ValueError("En az bir filtre tanımı gerekli")
+
     if df["FilterCode"].isna().any() or df["FilterCode"].astype(str).str.strip().eq("").any():
         raise ValueError("FilterCode boş olamaz")
     if df["PythonQuery"].isna().any() or df["PythonQuery"].astype(str).str.strip().eq("").any():
