@@ -1,6 +1,12 @@
 from pathlib import Path
+import sys
 import numpy as np
 import pandas as pd
+
+# Allow running directly via `python tools/make_excel_fixtures.py`
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from backtest.paths import EXCEL_DIR
 
