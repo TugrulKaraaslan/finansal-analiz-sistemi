@@ -44,7 +44,6 @@ setup_logger()
 
 > Excel okuma/yazma için gerekli `openpyxl` ve `XlsxWriter` paketleri `requirements_colab.txt` içinde yer alır.
 > Tek veri kaynağı proje içindeki `data/` dizinidir; CLI'da `--excel-dir` parametresi yoktur.
-> Varsayılan akış haricî indirme yapmaz; indirme için `--allow-download` veya `ALLOW_DOWNLOAD=1` gerekir.
 > Spacy, fastai ve fastdownload bağımlılıkları kaldırılmıştır.
 
 ## İsim normalizasyonu

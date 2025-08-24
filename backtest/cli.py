@@ -29,7 +29,7 @@ from backtest.eval.metrics import SignalMetricConfig
 from backtest.eval.report import compute_signal_report, save_json
 from backtest.filters.normalize_expr import normalize_expr
 from backtest.filters.preflight import validate_filters as preflight_validate_filters
-from backtest.filters_compile import compile_expression, compile_filters
+from backtest.filters_compile import compile_filters
 from backtest.metrics import max_drawdown as risk_max_drawdown
 from backtest.metrics import (
     sharpe_ratio,
@@ -57,6 +57,7 @@ __all__ = [
     "write_reports",
     "dataset_summary",
     "quality_warnings",
+    "compile_filters",
 ]
 
 from backtest.logging_conf import ensure_run_id, get_logger, log_with
@@ -172,16 +173,8 @@ def _resolve_filters_path(cli_arg: str | None) -> Path:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    desc = (
-        "Stage1 CLI (varsayılan veri yolu: "
-        f"{DATA_DIR} (paths.py); dış veri indirme varsayılan olarak kapalı)"
-    )
+    desc = "Stage1 CLI (varsayılan veri yolu: " f"{DATA_DIR} (paths.py))"
     p = argparse.ArgumentParser(prog="backtest", description=desc)
-    p.add_argument(
-        "--allow-download",
-        action="store_true",
-        help="Harici indirmeye izin ver",
-    )
     p.add_argument("--config", default=None, help="YAML config (opsiyonel)")
     p.add_argument("--log-level", default=None, help="DEBUG/INFO/WARNING/ERROR")
 
@@ -374,29 +367,18 @@ def main(argv=None):
         from backtest.downloader.providers.local_excel import LocalExcelProvider
         from backtest.downloader.providers.stub import StubProvider
 
-        def _make_dl(name: str, directory: str, allow_download: bool) -> DataDownloader:
+        def _make_dl(name: str, directory: str) -> DataDownloader:
             if name == "stub":
                 prov = StubProvider()
             elif name == "local-csv":
                 prov = LocalCSVProvider(directory)
             elif name == "local-excel":
                 prov = LocalExcelProvider(directory)
-            elif name == "http-csv":
-                from backtest.downloader.providers.http_csv import (  # pragma: no cover
-                    HttpCSVProvider,
-                )
-
-                prov = HttpCSVProvider(allow_download=allow_download)
             else:  # pragma: no cover
                 raise SystemExit(f"unknown provider: {name}")
             return DataDownloader(prov)
 
-        allow_dl = args.allow_download or os.getenv("ALLOW_DOWNLOAD") == "1"
-        if args.provider == "http-csv" and not allow_dl:
-            raise RuntimeError(
-                "Downloads are disabled by default; use --allow-download or ALLOW_DOWNLOAD=1"
-            )
-        dl = _make_dl(args.provider, args.directory, allow_dl)
+        dl = _make_dl(args.provider, args.directory)
         if args.cmd == "fetch-range":
             dl.fetch_range(args.symbols.split(","), args.start, args.end)
         elif args.cmd == "fetch-latest":

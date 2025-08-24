@@ -6,10 +6,9 @@
 3. `DATA_DIR` veya `EXCEL_DIR` yanlış mı? → Evet: [Yol & Veri Sorunları](#yol-veri-sorunlari)
 4. `BIST.xlsx` ve `alias_mapping.csv` mevcut mu? → Hayır: [Yol & Veri Sorunları](#yol-veri-sorunlari)
 5. CLI argümanları eksik mi? → Evet: [CLI Hataları](#cli-hatalari)
-6. `RuntimeError: Downloads are disabled...` görüldü mü? → Evet: [İndirme/Network](#indirme-network)
-7. Excel/CSV okuma hatası mı alınıyor? → Evet: [Excel/CSV/Parquet Okuma Hataları](#excel-hatalari)
-8. Alias eşleşmesi başarısız mı? → Evet: [Alias & Sembol Eşleşmeleri](#alias-sembol)
-9. Hâlâ çözülemedi mi? → Logları kontrol et: [Günlükler & Log Seviyesi](#gunlukler-log-seviyesi)
+6. Excel/CSV okuma hatası mı alınıyor? → Evet: [Excel/CSV/Parquet Okuma Hataları](#excel-hatalari)
+7. Alias eşleşmesi başarısız mı? → Evet: [Alias & Sembol Eşleşmeleri](#alias-sembol)
+8. Hâlâ çözülemedi mi? → Logları kontrol et: [Günlükler & Log Seviyesi](#gunlukler-log-seviyesi)
 
 ### Komut örnekleri
 ```bash
@@ -37,7 +36,7 @@ python -m backtest.cli convert-to-parquet --out data_parquet
 
 ### `BIST.xlsx` veya `alias_mapping.csv` eksik
 - **Belirti/Mesaj**: `FileNotFoundError: 'data/BIST.xlsx'`
-- **Muhtemel Neden(ler)**: Örnek dosyalar taşınmış ya da indirilememiş.
+- **Muhtemel Neden(ler)**: Örnek dosyalar taşınmış.
 - **Çözüm Adımları**: Depo kökündeki `data/` dizinine uygun dosyaları kopyalayın.
 - **Doğrulama**:
   ```bash
@@ -56,19 +55,6 @@ python -m backtest.cli convert-to-parquet --out data_parquet
   ```bash
   echo $DATA_DIR; echo $EXCEL_DIR
   ```
-
-## İndirme/Network (Varsayılan Kapalı) <a id="indirme-network"></a>
-
-### `RuntimeError: Downloads are disabled` hatası
-- **Belirti/Mesaj**: `RuntimeError: Downloads are disabled by default; use --allow-download or ALLOW_DOWNLOAD=1`
-- **Muhtemel Neden(ler)**: Downloader komutuna izin verilmemiş.
-- **Çözüm Adımları**:
-  ```bash
-  python -m backtest.cli fetch-range --symbols AAA --start 2024-01-01 --end 2024-01-02 --allow-download
-  # veya
-  ALLOW_DOWNLOAD=1 python -m backtest.cli fetch-range --symbols AAA --start 2024-01-01 --end 2024-01-02
-  ```
-- **Doğrulama**: Komut hata vermeden tamamlanır; dosyalar `data/` altına iner.
 
 ## Excel/CSV/Parquet Okuma Hataları <a id="excel-hatalari"></a>
 
@@ -130,8 +116,8 @@ python -m backtest.cli convert-to-parquet --out data_parquet
 
 ### `pytest` ağ isteği deniyor
 - **Belirti/Mesaj**: Testler ağ erişimine çalışıyor.
-- **Muhtemel Neden(ler)**: Downloader komutları mock'lanmamış.
-- **Çözüm Adımları**: Test ortamında `ALLOW_DOWNLOAD=0` bırakın veya ilgili testi skip edin.
+- **Muhtemel Neden(ler)**: Testlerde ağ çağrıları engellenmemiş.
+- **Çözüm Adımları**: Ağ erişimini mock'layın veya ilgili testi skip edin.
 - **Doğrulama**:
   ```bash
   pytest -q

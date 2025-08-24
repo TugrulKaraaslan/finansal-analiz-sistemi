@@ -19,23 +19,7 @@ python -m backtest.cli --help
 ```
 
 Tek veri kaynağı depo kökündeki `data/` dizinidir.
-Varsayılan akış haricî indirme yapmaz; yalnızca `--allow-download` veya `ALLOW_DOWNLOAD=1` ile etkinleşir.
 
-## Opsiyonel Veri İndirme CLI
-
-Veri indirme servisi sembol bazlı Parquet yazımı ve TTL cache yönetimi sunar.
-Bu adımlar manuel olup normal akışın parçası değildir.
-Haricî indirime izin vermek için `--allow-download` bayrağı veya `ALLOW_DOWNLOAD=1` ortam değişkeni gerekir.
-Temel komutlar:
-
-```bash
-python -m backtest.cli fetch-range --symbols DEMO --start 2024-01-01 --end 2024-01-10 --provider stub
-python -m backtest.cli fetch-latest --symbols DEMO --ttl-hours 6 --provider stub
-# HTTP sağlayıcı örneği (indirme izni gerekir)
-python -m backtest.cli fetch-range --symbols DEMO --start 2024-01-01 --end 2024-01-10 --provider http-csv --allow-download
-```
-
-Tüm komutlar yalnız `--start` / `--end` parametrelerini kabul eder ve veri `data/` altına kaydedilir.
 
 ## Hızlı Başlangıç (Colab)
 
