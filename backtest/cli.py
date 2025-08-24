@@ -93,6 +93,13 @@ def preflight(cfg):  # tests monkeypatch ediyor
 
     if getattr(cfg.project, "single_date", None):
         dates = [pd.to_datetime(cfg.project.single_date).date()]
+        return _pf(
+            cfg.data.excel_dir,
+            dates,
+            cfg.data.filename_pattern,
+            date_format=getattr(cfg.data, "date_format", "%Y-%m-%d"),
+            case_sensitive=getattr(cfg.data, "case_sensitive", True),
+        )
     elif getattr(cfg.project, "start_date", None) and getattr(cfg.project, "end_date", None):
         s = pd.to_datetime(cfg.project.start_date).date()
         e = pd.to_datetime(cfg.project.end_date).date()
