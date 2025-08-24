@@ -8,35 +8,25 @@ from typing import Union
 
 
 def resolve_path(path: Union[str, os.PathLike, bytes]) -> Path:
-    """Expand user home (``~``) and environment variables safely.
+    """Resolve a path provided as ``str``, ``bytes`` or ``os.PathLike``.
 
-    ``os.fspath`` is used instead of a manual ``isinstance`` check so that
-    ``os.PathLike`` objects *and* ``bytes`` instances are accepted.  The
-    built-in ``os.fspath`` helper mirrors the behaviour of functions in the
-    standard library by converting any path-like object to a string (or raising
-    ``TypeError`` for unsupported types).
-
-    Parameters
-    ----------
-    path:
-        Raw path as string, ``bytes`` or ``os.PathLike``.
-
-    Returns
-    -------
-    pathlib.Path
-        Normalized path with user and environment variables expanded.
+    ``os.fspath`` mirrors the standard library behaviour and ensures a
+    :class:`TypeError` is raised for unsupported objects instead of silently
+    calling ``str()``.  ``bytes`` input is decoded with :func:`os.fsdecode` so
+    that environment and user expansions operate on text.
     """
 
     try:
         raw = os.fspath(path)
-    except TypeError as exc:
-        raise TypeError("path must be str, bytes or Path-like") from exc
+    except TypeError as exc:  # pragma: no cover - defensive programming
+        raise TypeError("path must be str, bytes or os.PathLike") from exc
 
-    # ``expandvars`` works on strings; ensure any ``bytes`` input is decoded
-    # using the file system encoding via ``os.fsdecode``.
+    # ``expandvars`` operates on strings only; ``fsdecode`` handles ``bytes``
+    # according to the OS file system encoding.
     raw_str = os.fsdecode(raw)
 
-    # Perform environment and user expansion before creating ``Path``
+    # Expand environment variables then ``~`` before normalising with
+    # :class:`pathlib.Path`.
     expanded = os.path.expandvars(raw_str)
     expanded = os.path.expanduser(expanded)
     return Path(expanded).resolve()

@@ -1,5 +1,7 @@
-from utils.paths import resolve_path
 import os
+import pytest
+
+from utils.paths import resolve_path
 
 
 def test_resolve_path_accepts_bytes(tmp_path):
@@ -11,9 +13,6 @@ def test_resolve_path_accepts_bytes(tmp_path):
 def test_resolve_path_type_error():
     class Foo:
         pass
-    try:
+
+    with pytest.raises(TypeError):
         resolve_path(Foo())
-    except TypeError:
-        pass
-    else:
-        assert False, "TypeError not raised"
