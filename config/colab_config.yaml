@@ -8,7 +8,7 @@ project:
 
 data:
   excel_dir: "../data"
-  filters_csv: "../filters_bench.csv"
+  filters_csv: "../filters.csv"
   enable_cache: false
   cache_parquet_path: "../cache"
 
