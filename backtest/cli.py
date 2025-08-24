@@ -11,6 +11,9 @@ from types import SimpleNamespace as NS
 
 import pandas as pd
 
+if __package__ is None or __package__ == "":
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from backtest.backtester import run_1g_returns
 from backtest.batch import run_scan_day, run_scan_range
 from backtest.calendars import add_next_close
