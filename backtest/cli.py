@@ -280,12 +280,16 @@ def build_parser() -> argparse.ArgumentParser:
     cv.add_argument("--portfolio", default="config/portfolio.yaml")
     cv.add_argument("--costs", default="config/costs.yaml")
     cv.add_argument("--export-json-schema", action="store_true")
-    cmp = sub.add_parser("compare-strategies", help="Run multiple strategies on same data")
+    cmp = sub.add_parser(
+        "compare-strategies", help="Run multiple strategies on same data"
+    )
     cmp.add_argument("--start", required=True)
     cmp.add_argument("--end", required=True)
     cmp.add_argument("--space", required=True, help="YAML strategy definitions")
 
-    tune = sub.add_parser("tune-strategy", help="Hyper-parameter tuning for a single strategy")
+    tune = sub.add_parser(
+        "tune-strategy", help="Hyper-parameter tuning for a single strategy"
+    )
     tune.add_argument("--start", required=True)
     tune.add_argument("--end", required=True)
     tune.add_argument("--space", required=True, help="YAML search space")
@@ -294,7 +298,9 @@ def build_parser() -> argparse.ArgumentParser:
     tune.add_argument("--max-iters", type=int, default=10)
     tune.add_argument("--seed", type=int, default=None)
 
-    ctp = sub.add_parser("convert-to-parquet", help="Excel dosyalarını Parquet'e dönüştür")
+    ctp = sub.add_parser(
+        "convert-to-parquet", help="Excel dosyalarını Parquet'e dönüştür"
+    )
     ctp.add_argument(
         "--excel-dir",
         required=False,
@@ -331,7 +337,6 @@ def build_parser() -> argparse.ArgumentParser:
     ic_cmd.add_argument("--provider", default="stub")
     ic_cmd.add_argument("--directory", default=str(DATA_DIR))
 
-    
     return p
 
 
@@ -396,7 +401,10 @@ def main(argv=None):
             elif name == "local-excel":
                 prov = LocalExcelProvider(directory)
             elif name == "http-csv":
-                from backtest.downloader.providers.http_csv import HttpCSVProvider  # pragma: no cover
+                from backtest.downloader.providers.http_csv import (
+                    HttpCSVProvider,
+                )  # pragma: no cover
+
                 prov = HttpCSVProvider(allow_download=allow_download)
             else:  # pragma: no cover
                 raise SystemExit(f"unknown provider: {name}")
@@ -421,10 +429,12 @@ def main(argv=None):
         return
     if args.cmd == "compare-strategies":
         from backtest.strategy.cli import compare_strategies_cli
+
         compare_strategies_cli(args)
         return
     if args.cmd == "tune-strategy":
         from backtest.strategy.cli import tune_strategy_cli
+
         tune_strategy_cli(args)
         return
     if args.cmd == "convert-to-parquet":
@@ -806,8 +816,9 @@ try:  # pragma: no cover - click opsiyonel
         if filters_csv:
             cfg.data.filters_csv = filters_csv
         if report_alias and filters_csv and reports_dir:
+            src = Path(filters_csv)
             dst = Path(reports_dir) / "filters_compiled.csv"
-            compile_filters(filters_csv, str(dst))
+            compile_filters(src, dst)
             try:
                 raw = pd.DataFrame(load_filters_csv([filters_csv]))
             except ValueError as exc:

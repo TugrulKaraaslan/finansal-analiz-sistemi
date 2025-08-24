@@ -1,19 +1,25 @@
-import pandas as pd
 import ast
-from pathlib import Path
-from typing import List
+
+import pandas as pd
 
 from backtest.dsl import parse_expression, DSLError
-from backtest.naming import CANONICAL_SET, load_alias_map, normalize_indicator_token
+from backtest.naming import (
+    CANONICAL_SET,
+    load_alias_map,
+    normalize_indicator_token,
+)
 from .errors import ValidationError
 from .report import ValidationReport
 
 
-def validate_filters(csv_path: str, alias_csv: str | None = None) -> ValidationReport:
-    df = pd.read_csv(csv_path)
+def validate_filters(
+    csv_path: str,
+    alias_csv: str | None = None,
+) -> ValidationReport:
+    df = pd.read_csv(csv_path, sep=";", dtype=str, encoding="utf-8")
     report = ValidationReport()
 
-    if "FilterCode" not in df.columns or "PythonQuery" not in df.columns:
+    if list(df.columns) != ["FilterCode", "PythonQuery"]:
         raise ValidationError("filters.csv hatalı başlık", code="VC999")
 
     seen_codes = set()
@@ -47,7 +53,11 @@ def validate_filters(csv_path: str, alias_csv: str | None = None) -> ValidationR
         for name in names:
             norm = normalize_indicator_token(name, alias_map)
             if norm not in CANONICAL_SET:
-                report.add_error(i + 2, "VF001", f"Bilinmeyen seri adı: {name}")
+                report.add_error(
+                    i + 2,
+                    "VF001",
+                    f"Bilinmeyen seri adı: {name}",
+                )
 
     return report
 

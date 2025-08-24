@@ -22,13 +22,6 @@ def test_scan_range_creates_alias_report(tmp_path: Path) -> None:
     filters_csv = tmp_path / "filters.csv"
     filters_df = pd.DataFrame(
         {
-            "id": [1, 2, 3, 4],
-            "expr": [
-                "EMA_10 > close",
-                "CROSSUP(EMA_10, close)",
-                "RSI_14 >= 5",
-                "BBM_20_2.0 < BBU_20_2.1",
-            ],
             "FilterCode": ["F1", "F2", "F3", "F4"],
             "PythonQuery": [
                 "EMA_10 > close",
@@ -38,7 +31,7 @@ def test_scan_range_creates_alias_report(tmp_path: Path) -> None:
             ],
         }
     )
-    filters_df.to_csv(filters_csv, sep=';', index=False)
+    filters_df.to_csv(filters_csv, sep=";", index=False)
 
     cfg_path = tmp_path / "config.yml"
     cfg_path.write_text(
@@ -85,9 +78,7 @@ report:
     )
 
     def _compile(src, dst):
-        df = pd.read_csv(src, sep=';')
-        df = df.rename(columns={"id": "FilterCode", "expr": "PythonQuery"})
-        df = df[["FilterCode", "PythonQuery"]]
+        df = pd.read_csv(src, sep=";")
         df.to_csv(dst, sep=";", index=False)
 
     runner = CliRunner()
