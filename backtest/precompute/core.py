@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, Set
+from typing import Set
 
 import pandas as pd
 import pandas_ta as ta

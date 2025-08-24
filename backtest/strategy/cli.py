@@ -11,7 +11,6 @@ import yaml
 from backtest.cv.timeseries import PurgedKFold, WalkForward, cross_validate
 
 from . import StrategyRegistry, StrategySpec, run_strategy
-from .objectives import score
 
 
 def compare_strategies_cli(args) -> None:

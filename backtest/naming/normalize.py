@@ -4,7 +4,6 @@ import re
 from typing import Dict, Iterable
 
 from .aliases import normalize_token
-from .canonical import CANONICAL_SET
 
 _SNAKE_RE1 = re.compile(r"[^0-9A-Za-z]+")
 _SNAKE_RE2 = re.compile(r"_{2,}")

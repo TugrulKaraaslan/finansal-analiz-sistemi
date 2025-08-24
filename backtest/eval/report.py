@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .metrics import SignalMetricConfig, equity_metrics, signal_metrics_for_filter
+from .metrics import SignalMetricConfig, signal_metrics_for_filter
 
 ART = Path("artifacts/metrics")
 

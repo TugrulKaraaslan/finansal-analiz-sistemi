@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
 
 import pytest
 
@@ -16,7 +15,6 @@ pytestmark = pytest.mark.skip(reason="relies on optional deps causing segfaults 
 
 
 def test_perf_harness_creates_files(tmp_path, monkeypatch):
-    outdir = tmp_path / "artifacts"
     monkeypatch.chdir(tmp_path)
     args = [
         "--scenario",
