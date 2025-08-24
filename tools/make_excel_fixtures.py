@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
-EXCEL_DIR = Path(os.getenv("EXCEL_DIR", "Veri"))
+EXCEL_DIR = Path(os.getenv("DATA_DIR", os.getenv("EXCEL_DIR", "data")))
 (EXCEL_DIR / "data").mkdir(parents=True, exist_ok=True)
 
 # Tarih aralığı: testlerin kullandığı aralıkları içersin

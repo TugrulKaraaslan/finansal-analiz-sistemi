@@ -40,7 +40,7 @@ class ColabConfig(BaseModel):
 
         raw = yaml.safe_load(Path(yaml_path).read_text())
         # ENV override (isteğe bağlı)
-        excel_env = os.getenv('EXCEL_DIR')
+        excel_env = os.getenv('DATA_DIR') or os.getenv('EXCEL_DIR')
         if excel_env:
             raw.setdefault('data', {})['excel_dir'] = excel_env
         return cls(**raw)

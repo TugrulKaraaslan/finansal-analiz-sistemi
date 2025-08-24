@@ -47,7 +47,7 @@ perf-report: bench bench-cli profile mem
 
 .PHONY: config-validate
 config-validate:
-EXCEL_DIR=Veri python -m backtest.cli config-validate --export-json-schema
+DATA_DIR=data python -m backtest.cli config-validate --export-json-schema
 
 .PHONY: validate
 validate: config-validate

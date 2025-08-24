@@ -1,4 +1,4 @@
 data:
-  excel_dir: "Veri"
+  excel_dir: "data"
   parquet_dir: "data/parquet"
   backend: "polars"  # "pandas" | "polars"

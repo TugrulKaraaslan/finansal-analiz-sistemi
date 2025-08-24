@@ -32,7 +32,7 @@ from backtest.summary import summarize_range
 from backtest.reporting import build_excel_report
 from backtest.filters.normalize_expr import normalize_expr
 from backtest.filters.preflight import validate_filters as preflight_validate_filters
-from backtest.paths import EXCEL_DIR
+from backtest.paths import DATA_DIR
 from backtest.portfolio.engine import PortfolioParams
 from backtest.portfolio.simulator import PortfolioSim
 from backtest.config.schema import (
@@ -187,7 +187,11 @@ def _resolve_filters_path(cli_arg: str | None) -> Path:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="backtest", description="Stage1 CLI")
+    desc = (
+        "Stage1 CLI (varsayılan veri yolu: "
+        f"{DATA_DIR}; dış veri indirme yok)"
+    )
+    p = argparse.ArgumentParser(prog="backtest", description=desc)
     p.add_argument("--config", default=None, help="YAML config (opsiyonel)")
     p.add_argument("--log-level", default=None, help="DEBUG/INFO/WARNING/ERROR")
 
@@ -755,7 +759,7 @@ def main(argv=None):
     if args.cmd == "scan-range":
         preflight_enabled = getattr(cfg, "preflight", True) and not args.no_preflight
         if preflight_enabled:
-            preflight_validate_filters(filters_path, EXCEL_DIR, alias_mode="warn")
+            preflight_validate_filters(filters_path, DATA_DIR, alias_mode="warn")
         elif args.no_preflight:
             logger.info("--no-preflight aktif")
         run_scan_range(

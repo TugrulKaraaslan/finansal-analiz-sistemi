@@ -43,7 +43,7 @@ setup_logger()
 ```
 
 > Excel okuma/yazma için gerekli `openpyxl` ve `XlsxWriter` paketleri `requirements_colab.txt` içinde yer alır.
-> Excel klasör yolu YAML config'ten okunur; CLI'da `--excel-dir` parametresi yoktur.
+> Varsayılan veri yolu proje içindeki `data/` dizinidir; CLI'da `--excel-dir` parametresi yoktur.
 > Spacy, fastai ve fastdownload bağımlılıkları kaldırılmıştır.
 
 ## İsim normalizasyonu
@@ -60,7 +60,7 @@ kaynakları ve filtreler arasında tutarlılık sağlanır.
 !pytest -q
 ```
 
-## Veri İndirme Örneği
+## Veri İndirme Örneği (opsiyonel)
 
 ```python
 !python -m backtest.cli fetch-range --symbols DEMO --start 2024-01-01 --end 2024-01-05 --provider stub

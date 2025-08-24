@@ -3,7 +3,7 @@ import os
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from backtest.paths import EXCEL_DIR  # noqa: E402
+from backtest.paths import DATA_DIR  # noqa: E402
 from backtest.filters.preflight import validate_filters  # noqa: E402
 
 filters = Path("filters.csv")
@@ -14,7 +14,7 @@ allow_unknown = os.getenv("PREFLIGHT_ALLOW_UNKNOWN", "0") == "1"
 
 validate_filters(
     filters,
-    EXCEL_DIR,
+    DATA_DIR,
     alias_mode=alias_mode,
     allow_unknown=allow_unknown,
 )

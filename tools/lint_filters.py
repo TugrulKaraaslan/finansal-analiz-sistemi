@@ -4,8 +4,8 @@ from __future__ import annotations
 
 This script loads the project configuration and determines the Excel
 directory used by tests. The location can be overridden via the
-``EXCEL_DIR`` environment variable which is useful in CI where fixtures are
-generated at runtime.
+``DATA_DIR`` (veya geriye dönük olarak ``EXCEL_DIR``) environment variable
+which is useful in CI where fixtures are generated at runtime.
 """
 
 from pathlib import Path
@@ -42,7 +42,9 @@ def main() -> None:
     cfg = _load_cfg(cfg_path)
 
     # mevcut cfg okuma mantığının üstüne ENV override ekle
-    excel_dir = Path(os.getenv("EXCEL_DIR", cfg["data"]["excel_dir"]))
+    excel_dir = Path(
+        os.getenv("DATA_DIR", os.getenv("EXCEL_DIR", cfg["data"]["excel_dir"]))
+    )
     print(f"Using excel_dir={excel_dir}")
 
     sample = next(excel_dir.rglob("*.xlsx"))
