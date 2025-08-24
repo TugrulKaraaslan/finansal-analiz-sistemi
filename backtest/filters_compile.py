@@ -8,9 +8,9 @@ callables that operate on a :class:`pandas.DataFrame` and return a boolean
 ``Series`` mask.
 
 All normalisation rules from ``backtest.filters.normalize_expr`` are applied
-by default and column/function aliases are canonicalised using the
-``alias_mapping.csv`` file.  The resulting callables evaluate expressions
-through ``backtest.filters.engine.evaluate``.
+by default and indicator/column aliases are resolved through
+``backtest.naming.aliases.normalize_token``.  The resulting callables evaluate
+expressions through ``backtest.filters.engine.evaluate``.
 """
 
 from typing import Callable, List
@@ -20,28 +20,19 @@ import pandas as pd
 
 from backtest.filters.engine import evaluate
 from backtest.filters.normalize_expr import normalize_expr
-from backtest.naming.alias_loader import load_alias_map
-from backtest.naming.normalize import normalize_indicator_token
-
-# Compile-time alias map loaded once; missing file falls back to empty mapping
-try:  # pragma: no cover - defensive
-    _ALIAS_MAP = load_alias_map().mapping
-except FileNotFoundError:  # pragma: no cover - env without alias file
-    _ALIAS_MAP = {}
+from backtest.naming.aliases import normalize_token
 
 _TOKEN_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
 
 def _canonicalise(expr: str) -> str:
-    """Replace indicator/column aliases with their canonical snake_case.
+    """Replace indicator/column aliases with their canonical snake_case."""
 
-    This is a simple token based replacer; it ignores string literals which
-    are not expected in Stage1 filter expressions.
-    """
+    expr = re.sub(r"(?<=\w)-(\s)*(?=\w)", "_", expr)
+    expr = re.sub(r"([A-Za-z_][A-Za-z0-9_]*)\s+(\d+)", r"\1_\2", expr)
 
     def repl(match: re.Match[str]) -> str:
-        tok = match.group(0)
-        return normalize_indicator_token(tok, _ALIAS_MAP)
+        return normalize_token(match.group(0))
 
     return _TOKEN_RE.sub(repl, expr)
 

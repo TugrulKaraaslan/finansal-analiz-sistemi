@@ -4,7 +4,7 @@ import re
 
 import pandas as pd
 
-ALIAS_MAP: dict[str, str] = {
+CLEANUP_MAP: dict[str, str] = {
     r"^CCI_20_0$": "CCI_20",
     r"^PSARL_0$": "PSARL_0_02_0_2",
     r"^BBM_20_2.*$": "BBM_20_2",
@@ -27,7 +27,7 @@ def normalize_symbol(name: str) -> str:
 def apply_alias(name: str) -> str:
     """Apply alias mapping to a normalized name."""
 
-    for pattern, repl in ALIAS_MAP.items():
+    for pattern, repl in CLEANUP_MAP.items():
         if re.fullmatch(pattern, name):
             return repl
     return name
@@ -104,7 +104,7 @@ def clean_filters(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 
 __all__ = [
-    "ALIAS_MAP",
+    "CLEANUP_MAP",
     "normalize_symbol",
     "apply_alias",
     "clean_filters",

@@ -42,6 +42,22 @@ Filtre ifadelerinde `cross_up(x,y)` ve `cross_down(x,y)` fonksiyonları
 kullanılır. Yazımı farklı olsa bile (`CROSSUP`, `crossOver`, `keser_yukari`
 vb.) ifadeler otomatik olarak bu kanonik küçük harf isimlere çevrilir.
 
+## İsimlendirme Standardı
+Tüm sütun ve gösterge adları **küçük harf + snake_case** biçimindedir.
+Parametreler alt çizgi ile eklenir; ondalık değerler `.` yerine `p` ile
+yazılır (`20.5` → `20p5`). Türkçe veya İngilizce eş anlamlı adlar tek
+kanonik isme dönüştürülür (`hacim`, `islem_hacmi`, `lot` → `volume`).
+
+| ham | kanonik |
+| --- | --- |
+| `SMA50` | `sma_50` |
+| `BBU_20_2.0` | `bbu_20_2` |
+| `hacim` | `volume` |
+| `bbm_20.5_2` | `bbm_20p5_2` |
+
+CSV dosyalarında kanonik isimleri kullanmanız önerilir; ancak ham girdiler
+de desteklenir ve otomatik olarak normalize edilir.
+
 ## Filtre derleme
 Programatik kullanımda filtre ifadelerini derlemek için
 `backtest.filters_compile` modülü kullanılabilir. İki temel fonksiyon vardır:

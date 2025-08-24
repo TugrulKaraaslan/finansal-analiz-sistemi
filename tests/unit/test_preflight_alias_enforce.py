@@ -11,7 +11,7 @@ def _setup(tmp_path: Path) -> tuple[Path, Path]:
     excel_dir.mkdir()
     df.to_excel(excel_dir / "sample.xlsx", index=False)
     filters_csv = tmp_path / "filters.csv"
-    content = "FilterCode;PythonQuery\nF1;its_9 > 0\n"
+    content = "FilterCode;PythonQuery\nF1;SMA50 > 0\n"
     filters_csv.write_text(content, encoding="utf-8")
     return filters_csv, excel_dir
 

@@ -13,9 +13,9 @@ def _df():
     )
 
 
-def test_alias_ichimoku():
+def test_alias_macd():
     df = _df()
-    s = evaluate(df, "its_9 > iks_26")
+    s = evaluate(df, "MACD_line > macd-signal")
     assert s.dtype == "bool"
 
 

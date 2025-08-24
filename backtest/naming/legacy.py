@@ -141,12 +141,12 @@ def _alias_key(s: str) -> str:
     return _base_norm(s).replace("_", "")
 
 
-ALIAS_MAP: Dict[str, str] = {}
+LEGACY_MAP: Dict[str, str] = {}
 for canon, aliases in _ALIAS_PAIRS.items():
     for alias in [canon] + aliases:
-        ALIAS_MAP[_alias_key(alias)] = canon
+        LEGACY_MAP[_alias_key(alias)] = canon
 
-CANONICAL_NAMES = set(ALIAS_MAP.values())
+CANONICAL_NAMES = set(LEGACY_MAP.values())
 
 _CANONICAL_PATTERNS = [
     re.compile(r"^ema_\d+$"),
@@ -201,7 +201,7 @@ def _normalize_with_status(name: str, alias_map: Dict[str, str]) -> Tuple[str, b
 
 
 def normalize_name(name: str) -> str:
-    result, _ = _normalize_with_status(name, ALIAS_MAP)
+    result, _ = _normalize_with_status(name, LEGACY_MAP)
     if not is_snake_case(result):
         raise ValueError(f"normalized name '{result}' is not snake_case")
     return result
@@ -213,7 +213,7 @@ def normalize_columns(
     *,
     strict: bool = False,
 ) -> Tuple[pd.DataFrame, List[str]]:
-    alias_map = ALIAS_MAP.copy()
+    alias_map = LEGACY_MAP.copy()
     if extra_aliases:
         for canon, aliases in extra_aliases.items():
             canon_norm = normalize_name(canon)
@@ -276,5 +276,5 @@ __all__ = [
     "validate_columns_schema",
     "is_snake_case",
     "normalize_token",
-    "ALIAS_MAP",
+    "LEGACY_MAP",
 ]

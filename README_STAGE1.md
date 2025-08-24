@@ -45,6 +45,22 @@ fonksiyonları kullanılır. `CROSSUP`, `CROSSDOWN`, `crossOver`, `crossUnder`
 ve Türkçe varyantlar gibi farklı yazımlar otomatik olarak bu kanonik
 fonksiyonlara dönüştürülür.
 
+## İsimlendirme Standardı
+Tüm gösterge ve sütun adları **küçük harf + snake_case** formatındadır.
+Parametreler alt çizgi ile ayrılır; ondalık parametreler `p` ile
+yazılır (`20.5` → `20p5`). Türkçe/İngilizce eş anlamlılar tek kanonik isme
+dönüşür (`hacim`, `islem_hacmi`, `lot` → `volume`).
+
+| ham | kanonik |
+| --- | --- |
+| `SMA50` | `sma_50` |
+| `BBU_20_2.0` | `bbu_20_2` |
+| `hacim` | `volume` |
+| `bbm_20.5_2` | `bbm_20p5_2` |
+
+CSV yazarken kanonik isimler tercih edilir; ham adlar da otomatik
+normalizasyon ile çalışır.
+
 ## Hızlı Başlangıç
 Aşağıdaki komutlar örnek verilerle çevrimdışı çalışır.
 

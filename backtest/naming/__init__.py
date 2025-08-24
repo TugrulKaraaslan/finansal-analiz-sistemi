@@ -5,6 +5,7 @@ from .normalize import (
     normalize_indicator_token,
     normalize_dataframe_columns,
 )
+from .aliases import normalize_token
 from .legacy import *  # noqa: F401,F403
 
 import pandas as pd
@@ -65,6 +66,7 @@ __all__ = [
     "load_alias_map",
     "to_snake",
     "normalize_indicator_token",
+    "normalize_token",
     "normalize_dataframe_columns",
     "canonicalize_columns",
 ]
