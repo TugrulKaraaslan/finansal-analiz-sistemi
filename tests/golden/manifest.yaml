@@ -3,4 +3,4 @@ files:
 pick_latest:
   - path: loglar
     pattern: "*"
-    count: 2
+    count: 1
