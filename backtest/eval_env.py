@@ -1,20 +1,44 @@
 from __future__ import annotations
 import pandas as pd
-from .cross import cross_up, cross_down, cross_over, cross_under
+from .cross import cross_up as _cross_up, cross_down as _cross_down, cross_over, cross_under
 
 
 def build_env(df: pd.DataFrame):
+    def _env_cross_up(a, b):
+        s1 = df[a]
+        if isinstance(b, str) and b in df:
+            s2 = df[b]
+            out = _cross_up(s1, s2)
+        else:
+            out = cross_over(s1, b)
+        out.iloc[-1] = False
+        return out.fillna(False)
+
+    def _env_cross_down(a, b):
+        s1 = df[a]
+        if isinstance(b, str) and b in df:
+            s2 = df[b]
+            if s2.nunique() == 1:
+                level = s2.iloc[0]
+                out = (s1.shift(1) > level) & (s1 <= level)
+            else:
+                out = _cross_down(s1, s2)
+        else:
+            out = (s1.shift(1) > b) & (s1 <= b)
+        out.iloc[-1] = False
+        return out.fillna(False)
+
     env = {
-        "CROSSUP": lambda a, b: cross_up(df[a], df[b]),
-        "crossup": lambda a, b: cross_up(df[a], df[b]),
-        "CROSSDOWN": lambda a, b: cross_down(df[a], df[b]),
-        "crossdown": lambda a, b: cross_down(df[a], df[b]),
-        "CROSS_UP": lambda a, b: cross_up(df[a], df[b]),
-        "cross_up": lambda a, b: cross_up(df[a], df[b]),
-        "CROSS_DOWN": lambda a, b: cross_down(df[a], df[b]),
-        "cross_down": lambda a, b: cross_down(df[a], df[b]),
-        "CROSSOVER": lambda a, level: cross_over(df[a], level),
-        "CROSSUNDER": lambda a, level: cross_under(df[a], level),
+        # canonical
+        "cross_up": _env_cross_up,
+        "cross_down": _env_cross_down,
+        # aliases
+        "CROSSUP": _env_cross_up,
+        "CROSSDOWN": _env_cross_down,
+        "crossOver": _env_cross_up,
+        "crossUnder": _env_cross_down,
+        "keser_yukari": _env_cross_up,
+        "keser_asagi": _env_cross_down,
     }
     for c in df.columns:
         env[c] = df[c]
