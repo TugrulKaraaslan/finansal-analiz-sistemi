@@ -1,10 +1,10 @@
 import os
-import sys
 import subprocess
-from pathlib import Path
+import sys
 import tempfile
 import textwrap
 from datetime import datetime
+from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -48,9 +48,7 @@ def main() -> None:
             )
             df.to_excel(tmp_path / "AAA.xlsx", index=False)
             filters_csv = tmp_path / "filters.csv"
-            filters_csv.write_text(
-                "FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8"
-            )
+            filters_csv.write_text("FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8")
             cfg_path = tmp_path / "cfg.yml"
             cfg_path.write_text(
                 textwrap.dedent(

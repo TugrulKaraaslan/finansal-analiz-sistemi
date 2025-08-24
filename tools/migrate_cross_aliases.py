@@ -14,8 +14,14 @@ import sys
 from pathlib import Path
 
 _ALIASES = [
-    (r"\b(CROSSUP|crossUp|CROSS_UP|crossOver|cross_over|keser_yukari|kesisim_yukari)\s*\(", "cross_up("),
-    (r"\b(CROSSDOWN|crossDown|CROSS_DOWN|crossUnder|cross_under|keser_asagi|kesisim_asagi)\s*\(", "cross_down("),
+    (
+        r"\b(CROSSUP|crossUp|CROSS_UP|crossOver|cross_over|keser_yukari|kesisim_yukari)\s*\(",
+        "cross_up(",
+    ),
+    (
+        r"\b(CROSSDOWN|crossDown|CROSS_DOWN|crossUnder|cross_under|keser_asagi|kesisim_asagi)\s*\(",
+        "cross_down(",
+    ),
 ]
 
 

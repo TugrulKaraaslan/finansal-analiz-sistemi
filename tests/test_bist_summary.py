@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from backtest.reporter import write_reports
 
@@ -34,9 +34,7 @@ def _basic_trades():
 def test_summary_contains_bist_columns(tmp_path):
     trades = _basic_trades()
     summary = (
-        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
-        .mean()
-        .unstack(fill_value=float("nan"))
+        trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack(fill_value=float("nan"))
     )
     trade_counts = trades.groupby(["FilterCode"])["Symbol"].count()
     summary = summary.assign(TradeCount=trade_counts)
@@ -56,9 +54,7 @@ def test_summary_contains_bist_columns(tmp_path):
 def test_alpha_computation_alignment(tmp_path):
     trades = _basic_trades()
     summary = (
-        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
-        .mean()
-        .unstack(fill_value=float("nan"))
+        trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack(fill_value=float("nan"))
     )
     trade_counts = trades.groupby(["FilterCode"])["Symbol"].count()
     summary = summary.assign(TradeCount=trade_counts)
@@ -77,9 +73,7 @@ def test_alpha_computation_alignment(tmp_path):
 def test_optional_bist_ratio_sheet(tmp_path):
     trades = _basic_trades()
     summary = (
-        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
-        .mean()
-        .unstack(fill_value=float("nan"))
+        trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack(fill_value=float("nan"))
     )
     trade_counts = trades.groupby(["FilterCode"])["Symbol"].count()
     summary = summary.assign(TradeCount=trade_counts)
@@ -115,9 +109,7 @@ def test_optional_bist_ratio_sheet(tmp_path):
 def test_sorting_and_values(tmp_path):
     trades = _basic_trades()
     summary = (
-        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
-        .mean()
-        .unstack(fill_value=float("nan"))
+        trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack(fill_value=float("nan"))
     )
     trade_counts = trades.groupby(["FilterCode"])["Symbol"].count()
     summary = summary.assign(TradeCount=trade_counts)

@@ -10,8 +10,12 @@ from typing import Set, Tuple
 import numpy as np
 import pandas as pd
 
-from backtest.naming import normalize_name
-from .cross import cross_up as _cross_up, cross_down as _cross_down, cross_over
+from backtest.filters.normalize_expr import normalize_expr
+from backtest.naming.aliases import normalize_token
+
+from .cross import cross_down as _cross_down
+from .cross import cross_over
+from .cross import cross_up as _cross_up
 
 
 def _cross_up_env(a: pd.Series, b: pd.Series | float | int) -> pd.Series:
@@ -70,26 +74,19 @@ class SafeQuery:
         "ceil",
         "cross_up",
         "cross_down",
-        "CROSSUP",
-        "CROSSDOWN",
-        "crossOver",
-        "crossUnder",
-        "cross_over",
-        "cross_under",
-        "keser_yukari",
-        "keser_asagi",
     }
 
     def __init__(self, expr: str):
         expr_tr = re.sub(r"\band\b", "&", expr, flags=re.I)
         expr_tr = re.sub(r"\bor\b", "|", expr_tr, flags=re.I)
         expr_tr = re.sub(r"\bnot\b", "~", expr_tr, flags=re.I)
+        expr_tr, _ = normalize_expr(expr_tr)
 
         class _Canon(ast.NodeTransformer):
             def visit_Name(self, node):
                 if node.id in SafeQuery._ALLOWED_FUNCS:
                     return node
-                node.id = normalize_name(node.id)
+                node.id = normalize_token(node.id)
                 return node
 
         tree = ast.parse(expr_tr, mode="eval")
@@ -100,7 +97,7 @@ class SafeQuery:
         self.expr = expr_tr
         ok, names, err = self._validate(expr_tr)
         self.is_safe = ok
-        self.names = {normalize_name(n) for n in names}
+        self.names = {normalize_token(n) for n in names}
         self.error = err
 
     @classmethod
@@ -155,18 +152,8 @@ class SafeQuery:
                 "exp": np.exp,
                 "floor": np.floor,
                 "ceil": np.ceil,
-                # canonical
                 "cross_up": _cross_up_env,
                 "cross_down": _cross_down_env,
-                # aliases
-                "CROSSUP": _cross_up_env,
-                "CROSSDOWN": _cross_down_env,
-                "crossOver": _cross_up_env,
-                "crossUnder": _cross_down_env,
-                "cross_over": _cross_up_env,
-                "cross_under": _cross_down_env,
-                "keser_yukari": _cross_up_env,
-                "keser_asagi": _cross_down_env,
             }
         )
         mask = pd.eval(self.expr, engine="python", parser="pandas", local_dict=env)

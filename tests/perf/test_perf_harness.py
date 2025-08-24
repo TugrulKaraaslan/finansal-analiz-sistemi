@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 from tools.perf_harness import main as perf_main
-import sys
 
 
 def test_perf_harness_creates_files(tmp_path, monkeypatch):
@@ -30,7 +30,7 @@ def test_perf_harness_creates_files(tmp_path, monkeypatch):
     pd.DataFrame({"Date": pd.date_range("2020-01-01", periods=2), "Close": [1.0, 2.0]}).to_parquet(
         data_dir / "AAA.parquet", index=False
     )
-    monkeypatch.setattr(sys, 'argv', ['perf_harness'] + args)
+    monkeypatch.setattr(sys, "argv", ["perf_harness"] + args)
     perf_main()
     files = list((tmp_path / "artifacts/perf").glob("*.json"))
     assert files, "perf harness should write json files"

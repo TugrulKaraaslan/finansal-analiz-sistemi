@@ -1,7 +1,8 @@
 from __future__ import annotations
-import os
+
 import json
 import logging
+import os
 import platform
 import subprocess
 from dataclasses import dataclass
@@ -77,15 +78,9 @@ class RunContext:
         LOGGER.info("env.json yazıldı: %s", p)
         return p
 
-    def write_config_snapshot(
-        self, config: Dict[str, Any], inputs: Dict[str, Any]
-    ) -> None:
+    def write_config_snapshot(self, config: Dict[str, Any], inputs: Dict[str, Any]) -> None:
         cfgp = self.artifacts_dir / "config.json"
         inpp = self.artifacts_dir / "inputs.json"
-        cfgp.write_text(
-            json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
-        inpp.write_text(
-            json.dumps(inputs, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        cfgp.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+        inpp.write_text(json.dumps(inputs, ensure_ascii=False, indent=2), encoding="utf-8")
         LOGGER.info("config.json ve inputs.json yazıldı")

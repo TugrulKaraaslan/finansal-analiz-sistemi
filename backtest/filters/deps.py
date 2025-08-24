@@ -29,7 +29,7 @@ def collect_series(expr: str | Iterable[str]) -> Set[str]:
 
 
 def collect_macros(expr: str | Iterable[str]) -> List[Tuple[str, str, str]]:
-    """Collect CROSSUP/CROSSDOWN macro calls from *expr*."""
+    """Collect cross_up/cross_down macro calls from *expr*."""
 
     if isinstance(expr, str):
         exprs = [expr]

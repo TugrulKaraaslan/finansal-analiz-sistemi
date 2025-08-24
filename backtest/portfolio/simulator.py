@@ -1,9 +1,13 @@
 from __future__ import annotations
+
 from pathlib import Path
+
 import pandas as pd
-from .engine import PortfolioParams, generate_orders
+
 from backtest.risk.apply import load_risk_cfg, run_risk
 from backtest.risk.guards import RiskEngine
+
+from .engine import PortfolioParams, generate_orders
 
 # costs entegrasyonu (opsiyonel)
 try:
@@ -23,14 +27,10 @@ class PortfolioSim:
         risk_cfg: Path | None = None,
     ):
         self.params = params
-        self.cost_params = (
-            CostParams.from_yaml(cost_cfg) if CostParams else None
-        )  # noqa: E501
+        self.cost_params = CostParams.from_yaml(cost_cfg) if CostParams else None  # noqa: E501
         self.risk_cfg = load_risk_cfg(risk_cfg or Path("config/risk.yaml"))
         self.risk_engine = (
-            RiskEngine(self.risk_cfg)
-            if self.risk_cfg.get("enabled", True)
-            else None  # noqa: E501
+            RiskEngine(self.risk_cfg) if self.risk_cfg.get("enabled", True) else None  # noqa: E501
         )
         self.equity = params.initial_equity
         self.positions = {}  # symbol -> qty
@@ -38,9 +38,7 @@ class PortfolioSim:
         self.daily = []
 
     def step(self, date, signals_day: pd.DataFrame, market_day: pd.DataFrame):
-        orders = generate_orders(
-            signals_day, market_day, self.params, self.equity
-        )  # noqa: E501
+        orders = generate_orders(signals_day, market_day, self.params, self.equity)  # noqa: E501
         if not orders.empty:
             trades = orders.copy()
             trades["fill_price"] = trades["price"]
@@ -82,10 +80,6 @@ class PortfolioSim:
     def finalize(self, outdir: Path):
         outdir.mkdir(parents=True, exist_ok=True)
         if self.trades:
-            pd.concat(self.trades, ignore_index=True).to_csv(
-                outdir / "trades.csv", index=False
-            )
+            pd.concat(self.trades, ignore_index=True).to_csv(outdir / "trades.csv", index=False)
         if self.daily:
-            pd.DataFrame(self.daily).to_csv(
-                outdir / "daily_equity.csv", index=False
-            )  # noqa: E501
+            pd.DataFrame(self.daily).to_csv(outdir / "daily_equity.csv", index=False)  # noqa: E501

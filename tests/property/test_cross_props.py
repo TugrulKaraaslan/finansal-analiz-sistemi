@@ -1,7 +1,8 @@
 import pandas as pd
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 
-from backtest.filters.engine import cross_up, cross_down
+from backtest.filters.engine import cross_down, cross_up
 
 
 @given(

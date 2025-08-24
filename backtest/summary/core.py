@@ -1,7 +1,10 @@
 from __future__ import annotations
-import pandas as pd
-import numpy as np
+
 from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
 from .benchmark import load_benchmark
 
 
@@ -45,11 +48,7 @@ def summarize_day(
 ) -> dict:
     day = pd.to_datetime(signals_day["date"].iloc[0]).normalize()
     # Borsa getirisi
-    b = (
-        bench.reindex(df_prices.index)
-        .pct_change(periods=horizon)
-        .shift(-horizon)  # noqa: E501
-    )
+    b = bench.reindex(df_prices.index).pct_change(periods=horizon).shift(-horizon)  # noqa: E501
     bist_ret = b.loc[day] if day in b.index else np.nan
 
     if signals_day.empty:
@@ -114,9 +113,7 @@ def summarize_range(
     filter_rows = []
     for d in days:
         day_df = all_signals[all_signals["date"] == d]
-        daily_rows.append(
-            summarize_day(df_prices, day_df, bench, horizon=horizon)
-        )  # noqa: E501
+        daily_rows.append(summarize_day(df_prices, day_df, bench, horizon=horizon))  # noqa: E501
         # filter counts
         fc = day_df.groupby("filter_code").size().reset_index(name="count")
         fc.insert(0, "date", pd.to_datetime(d).date())
@@ -147,10 +144,7 @@ def summarize_range(
                 f"**Ortalama alpha (H={horizon}):** {mean_alpha:.4%}\n"
             )
         else:
-            f.write(
-                f"**Gün sayısı:** {len(daily)}  \n"
-                "Alpha hesaplanamadı (coverage düşük).\n"
-            )
+            f.write(f"**Gün sayısı:** {len(daily)}  \n" "Alpha hesaplanamadı (coverage düşük).\n")
 
     return {
         "daily_path": str(p1),

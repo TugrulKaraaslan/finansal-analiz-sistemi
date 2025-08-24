@@ -6,7 +6,9 @@ from backtest.downloader.providers.stub import StubProvider
 
 def test_ttl_skip(tmp_path):
     prov = StubProvider()
-    dl = DataDownloader(prov, data_dir=tmp_path / "parquet", manifest_path=tmp_path / "manifest.json")
+    dl = DataDownloader(
+        prov, data_dir=tmp_path / "parquet", manifest_path=tmp_path / "manifest.json"
+    )
     now = datetime.utcnow()
     dl._manifest = {
         "AAA": {

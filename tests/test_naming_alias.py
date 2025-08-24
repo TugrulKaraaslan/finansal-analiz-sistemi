@@ -1,8 +1,8 @@
 from backtest.naming import (
-    to_snake,
+    CANONICAL_SET,
     load_alias_map,
     normalize_indicator_token,
-    CANONICAL_SET,
+    to_snake,
 )
 from backtest.paths import ALIAS_PATH
 
@@ -12,9 +12,7 @@ ALIAS_CSV = ALIAS_PATH
 def test_to_snake_basic():
     assert to_snake("Adj Close") == "adj_close"
     assert to_snake("RSI_14") == "rsi_14"
-    assert (
-        to_snake("Ağırlıklı Ortalama") == "a_girlikli_ortalama"
-    )  # dil sapması normalize edilir
+    assert to_snake("Ağırlıklı Ortalama") == "a_girlikli_ortalama"  # dil sapması normalize edilir
 
 
 def test_alias_load_and_resolve():

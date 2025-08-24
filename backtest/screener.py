@@ -90,9 +90,7 @@ def run_screener(
         sides = [None] * len(filters_df)
     out_frames = []
     missing_cols_total: set[str] = set()
-    for code, expr, grp, side in zip(
-        filters_df["FilterCode"], filters_df["expr"], groups, sides
-    ):
+    for code, expr, grp, side in zip(filters_df["FilterCode"], filters_df["expr"], groups, sides):
         side_norm = None
         if pd.notna(side) and str(side).strip():
             side_norm = str(side).strip().lower()
@@ -101,9 +99,7 @@ def run_screener(
                 if stop_on_filter_error:
                     logger.error("Filter invalid Side", code=code, side=side)
                     raise ValueError(msg)
-                logger.warning(
-                    "Filter skipped due to invalid Side", code=code, side=side
-                )
+                logger.warning("Filter skipped due to invalid Side", code=code, side=side)
                 continue
         try:
             mask = _eval_expr(d, expr)
@@ -120,9 +116,7 @@ def run_screener(
             continue
         except SyntaxError as err:
             if stop_on_filter_error:
-                logger.error(
-                    "Filter unsafe expression", code=code, expr=expr, reason=err
-                )
+                logger.error("Filter unsafe expression", code=code, expr=expr, reason=err)
                 raise ValueError(f"Filter {code!r} unsafe expression: {err}") from err
             logger.warning(
                 "Filter skipped due to unsafe expression",

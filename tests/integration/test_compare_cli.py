@@ -1,6 +1,7 @@
 import subprocess
 import sys
 from pathlib import Path
+
 import pandas as pd
 
 
@@ -34,4 +35,3 @@ def test_compare_cli(tmp_path):
         "trades",
     }
     assert expected_cols.issubset(df.columns)
-

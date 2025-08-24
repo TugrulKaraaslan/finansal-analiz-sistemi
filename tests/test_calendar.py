@@ -15,9 +15,7 @@ def test_next_close():
     df = pd.DataFrame(
         {
             "symbol": ["AAA", "AAA", "AAA"],
-            "date": pd.to_datetime(
-                ["2024-01-05", "2024-01-08", "2024-01-09"]
-            ).normalize(),
+            "date": pd.to_datetime(["2024-01-05", "2024-01-08", "2024-01-09"]).normalize(),
             "close": [10, 11, 11.5],
             "open": [0, 0, 0],
             "high": [0, 0, 0],
@@ -32,9 +30,7 @@ def test_next_close():
 
 
 def test_build_trading_days_single_holiday():
-    df = pd.DataFrame(
-        {"date": pd.to_datetime(["2024-01-01", "2024-01-03"]).normalize()}
-    )
+    df = pd.DataFrame({"date": pd.to_datetime(["2024-01-01", "2024-01-03"]).normalize()})
     tdays = build_trading_days(df, pd.Timestamp("2024-01-02"))
     assert pd.Timestamp("2024-01-02") not in tdays
     assert isinstance(tdays[0], pd.Timestamp)
@@ -71,16 +67,12 @@ def test_add_next_close_calendar_skips_weekend():
 
 
 def test_check_missing_trading_days_raise():
-    df = pd.DataFrame(
-        {"date": pd.to_datetime(["2024-01-01", "2024-01-03"]).normalize()}
-    )
+    df = pd.DataFrame({"date": pd.to_datetime(["2024-01-01", "2024-01-03"]).normalize()})
     with pytest.raises(ValueError):
         check_missing_trading_days(df)
 
 
 def test_check_missing_trading_days_warn():
-    df = pd.DataFrame(
-        {"date": pd.to_datetime(["2024-01-01", "2024-01-03"]).normalize()}
-    )
+    df = pd.DataFrame({"date": pd.to_datetime(["2024-01-01", "2024-01-03"]).normalize()})
     with pytest.warns(UserWarning):
         check_missing_trading_days(df, raise_error=False)

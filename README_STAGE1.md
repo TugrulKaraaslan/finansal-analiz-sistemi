@@ -95,7 +95,7 @@ kullanıldığından emin olun. Virgül ile kaydedilen dosyalar aşağıdaki hat
 üretir:
 
 ```
-CSV delimiter ';' bekleniyor. Lütfen dosyayı ';' ile kaydedin.
+CSV delimiter ';' bekleniyor. Dosyayı ';' ile kaydedin: FilterCode;PythonQuery
 ```
 
 Virgüllü eski dosyaları dönüştürmek için `tools/migrate_filters_csv.py`

@@ -7,6 +7,7 @@ backtests. All functions return ``float`` values and accept ``pandas`` inputs.
 from __future__ import annotations
 
 import math
+
 import pandas as pd
 
 

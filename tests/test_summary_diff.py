@@ -16,16 +16,10 @@ def test_summary_and_winrate():
         }
     )
     pivot = (
-        trades.groupby(["FilterCode", "Date"])["ReturnPct"]
-        .mean()
-        .unstack(fill_value=float("nan"))
+        trades.groupby(["FilterCode", "Date"])["ReturnPct"].mean().unstack(fill_value=float("nan"))
     )
     pivot["Ortalama"] = pivot.mean(axis=1)
-    winrate = (
-        trades.groupby(["FilterCode", "Date"])["Win"]
-        .mean()
-        .unstack(fill_value=float("nan"))
-    )
+    winrate = trades.groupby(["FilterCode", "Date"])["Win"].mean().unstack(fill_value=float("nan"))
     winrate["Ortalama"] = winrate.mean(axis=1)
     assert round(pivot.loc["T1"].mean(), 4) == round(pivot.loc["T1", "Ortalama"], 4)
     assert 0 <= winrate.min().min() <= 1 and 0 <= winrate.max().max() <= 1

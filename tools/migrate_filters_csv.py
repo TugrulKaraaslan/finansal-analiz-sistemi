@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """Convert comma-separated filter CSV to semicolon-separated format."""
 
 import csv

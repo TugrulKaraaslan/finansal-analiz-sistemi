@@ -3,9 +3,11 @@
 Currently only a very small subset of the intended functionality is
 implemented: signals are shifted by one bar to ensure T+1 execution.
 """
+
 from __future__ import annotations
 
 import pandas as pd
+
 from backtest.guardrails.no_lookahead import enforce_t_plus_one
 
 

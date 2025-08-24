@@ -19,7 +19,9 @@ def test_gaps_and_weekends(tmp_path):
         }
     )
     df.to_parquet(out_dir / "part-202401.parquet", index=False)
-    dl = DataDownloader(StubProvider(), data_dir=tmp_path / "out", manifest_path=tmp_path / "manifest.json")
+    dl = DataDownloader(
+        StubProvider(), data_dir=tmp_path / "out", manifest_path=tmp_path / "manifest.json"
+    )
     report = dl.integrity_check(["AAA"])
     issues = report["AAA"]["issues"]
     assert "gaps" in issues

@@ -1,13 +1,14 @@
 from __future__ import annotations
-from pathlib import Path
+
+import fnmatch
 import json
 import sys
-import fnmatch
+from pathlib import Path
 
 import pandas as pd
 import pandera as pa
-from pandera import Column, DataFrameSchema
 import yaml
+from pandera import Column, DataFrameSchema
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
@@ -42,10 +43,7 @@ def validate_df(df: pd.DataFrame) -> list[dict]:
         schema.validate(df, lazy=True)
     except pa.errors.SchemaErrors as e:
         for err in e.failure_cases.to_dict("records"):
-            reason = (
-                f"{err.get('check')} at {err.get('column')} "
-                f"-> {err.get('failure_case')}"
-            )
+            reason = f"{err.get('check')} at {err.get('column')} " f"-> {err.get('failure_case')}"
             problems.append({"type": "schema", "reason": reason})
 
     # date alanını üret
@@ -138,8 +136,7 @@ def should_include(p: Path) -> bool:
     s = str(p)
     inc = (
         any(
-            Path(DATA_DIR, "").joinpath(p).match(pattern)
-            or fnmatch.fnmatch(s, pattern)
+            Path(DATA_DIR, "").joinpath(p).match(pattern) or fnmatch.fnmatch(s, pattern)
             for pattern in includes
         )
         if includes
@@ -162,9 +159,7 @@ for f in files:
         # İlk sheet
         df = pd.ExcelFile(f).parse(0)
         probs = validate_df(df)
-        report["files"].append(
-            {"file": str(f.relative_to(DATA_DIR)), "problems": probs}
-        )
+        report["files"].append({"file": str(f.relative_to(DATA_DIR)), "problems": probs})
     except Exception as e:
         report["files"].append(
             {

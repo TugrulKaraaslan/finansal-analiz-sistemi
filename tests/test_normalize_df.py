@@ -1,6 +1,7 @@
-import pandas as pd
 import numpy as np
-from backtest.normalize import build_column_mapping, normalize_dataframe, CollisionError
+import pandas as pd
+
+from backtest.normalize import CollisionError, build_column_mapping, normalize_dataframe
 from backtest.paths import ALIAS_PATH
 
 ALIAS = str(ALIAS_PATH)

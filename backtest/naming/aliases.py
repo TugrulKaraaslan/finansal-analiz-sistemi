@@ -1,15 +1,24 @@
 from __future__ import annotations
+
 import re
 
 # 1) Düz alias haritası (tekilleştirme)
 ALIAS_MAP: dict[str, str] = {
     # temel OHLCV
-    "tarih": "date", "date": "date",
-    "kapanis": "close", "close": "close",
-    "acilis": "open",   "open": "open",
-    "yuksek": "high",   "high": "high",
-    "dusuk": "low",     "low": "low",
-    "hacim": "volume", "islem_hacmi": "volume", "lot": "volume", "volume": "volume",
+    "tarih": "date",
+    "date": "date",
+    "kapanis": "close",
+    "close": "close",
+    "acilis": "open",
+    "open": "open",
+    "yuksek": "high",
+    "high": "high",
+    "dusuk": "low",
+    "low": "low",
+    "hacim": "volume",
+    "islem_hacmi": "volume",
+    "lot": "volume",
+    "volume": "volume",
 }
 
 # 2) Desen bazlı alias (parametreli göstergeler)
@@ -34,14 +43,22 @@ PATTERN_ALIASES: list[tuple[re.Pattern[str], str]] = [
 _DECIMAL = re.compile(r"(?<=_)\d+\.\d+(?=(_|\b))")  # alt çizgiden sonra gelen ondalık parametreler
 _WS = re.compile(r"\s+")
 _DASH = re.compile(r"[-]+")
-_TURK = str.maketrans({
-    "ı": "i", "İ": "i",
-    "ç": "c", "Ç": "c",
-    "ğ": "g", "Ğ": "g",
-    "ö": "o", "Ö": "o",
-    "ş": "s", "Ş": "s",
-    "ü": "u", "Ü": "u",
-})
+_TURK = str.maketrans(
+    {
+        "ı": "i",
+        "İ": "i",
+        "ç": "c",
+        "Ç": "c",
+        "ğ": "g",
+        "Ğ": "g",
+        "ö": "o",
+        "Ö": "o",
+        "ş": "s",
+        "Ş": "s",
+        "ü": "u",
+        "Ü": "u",
+    }
+)
 
 
 def _decimals_to_p(s: str) -> str:
@@ -51,6 +68,8 @@ def _decimals_to_p(s: str) -> str:
 
 
 def normalize_token(name: str) -> str:
+    """Return the canonical ``snake_case`` form of *name*."""
+
     if not name:
         return name
     s = name.strip().translate(_TURK)
@@ -58,10 +77,8 @@ def normalize_token(name: str) -> str:
     s = _DASH.sub("_", s)
     s = s.replace("__", "_")
     s = s.lower()
-    # düz alias
     if s in ALIAS_MAP:
         s = ALIAS_MAP[s]
-    # desen alias
     for pat, repl in PATTERN_ALIASES:
         if pat.match(s):
             s = pat.sub(repl, s)

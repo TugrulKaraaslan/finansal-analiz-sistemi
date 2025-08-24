@@ -1,8 +1,9 @@
-import pandas as pd
 import numpy as np
-from backtest.precompute import Precomputer
-from backtest.pipeline.precompute import precompute_needed
+import pandas as pd
+
 from backtest.filters.deps import collect_series
+from backtest.pipeline.precompute import precompute_needed
+from backtest.precompute import Precomputer
 
 idx = pd.date_range("2024-01-01", periods=50, freq="B")
 

@@ -24,9 +24,10 @@ packages = [
 ]
 run([sys.executable, "-m", "pip", "install", "-q", *packages])
 
+import numpy as np  # noqa: E402
+
 # Verify installations
 import pandas as pd  # noqa: E402
-import numpy as np  # noqa: E402
 import pandas_ta  # noqa: E402
 
 print(pd.__version__)

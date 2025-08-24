@@ -1,5 +1,6 @@
-from backtest.risk.guards import RiskEngine
 import pandas as pd
+
+from backtest.risk.guards import RiskEngine
 
 
 def test_risk_smoke(tmp_path):
@@ -9,9 +10,7 @@ def test_risk_smoke(tmp_path):
         "report": {"output_dir": str(tmp_path), "write_json": True},
     }
     engine = RiskEngine(cfg)
-    orders = pd.DataFrame(
-        {"fill_price": [100.0, 101.0], "quantity": [100, 200]}
-    )  # noqa: E501
+    orders = pd.DataFrame({"fill_price": [100.0, 101.0], "quantity": [100, 200]})  # noqa: E501
     dec = engine.decide(  # noqa: E501
         {"equity": 1_000_000, "daily_trades": 2},
         orders,

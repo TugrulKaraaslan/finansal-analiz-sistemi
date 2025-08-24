@@ -1,19 +1,20 @@
 from __future__ import annotations
 
-from typing import Mapping
+import logging
 import re
+from typing import Mapping
+
 import pandas as pd
 
-from backtest.logging_conf import get_logger
-log = get_logger("engine")
-
+from backtest.cross import cross_down as _cross_down
 from backtest.cross import (
-    cross_up as _cross_up,
-    cross_down as _cross_down,
     cross_over,
 )
+from backtest.cross import cross_up as _cross_up
 from backtest.filters.normalize_expr import normalize_expr
 from backtest.naming.aliases import normalize_token
+
+log = logging.getLogger("backtest")
 
 _TOKEN_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
@@ -44,21 +45,7 @@ def _build_locals(df: pd.DataFrame) -> dict[str, pd.Series]:
     env = {}
     for c in df.columns:
         env[normalize_token(c)] = df[c]
-    env.update(
-        {
-            # canonical
-            "cross_up": cross_up,
-            "cross_down": cross_down,
-            # legacy aliases
-            "CROSSUP": cross_up,
-            "CROSSDOWN": cross_down,
-            "crossOver": cross_up,
-            "crossUnder": cross_down,
-            # optional Turkish aliases
-            "keser_yukari": cross_up,
-            "keser_asagi": cross_down,
-        }
-    )
+    env.update({"cross_up": cross_up, "cross_down": cross_down})
     return env
 
 
@@ -85,6 +72,8 @@ def _canonicalise_tokens(expr: str) -> str:
 
 
 def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
+    """Evaluate a normalised filter expression on *df*."""
+
     expr = normalize_expr(expr)[0]
     expr = _canonicalise_tokens(expr)
     locals_map = _build_locals(df)

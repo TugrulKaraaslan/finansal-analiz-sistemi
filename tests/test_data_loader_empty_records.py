@@ -30,9 +30,7 @@ def test_read_excels_long_no_valid_sheets(tmp_path):
 def test_read_excels_long_engine_missing(monkeypatch, tmp_path):
     f = tmp_path / "dummy.xlsx"
     with pd.ExcelWriter(f) as writer:
-        pd.DataFrame({"date": ["2024-01-01"], "close": [1]}).to_excel(
-            writer, index=False
-        )
+        pd.DataFrame({"date": ["2024-01-01"], "close": [1]}).to_excel(writer, index=False)
 
     def _no_engine(name):
         return None

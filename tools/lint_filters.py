@@ -8,11 +8,13 @@ directory used by tests. The location can be overridden via the
 which is useful in CI where fixtures are generated at runtime.
 """
 
-from pathlib import Path
-import sys
-import yaml
 import re
+import sys
+from pathlib import Path
+
 import pandas as pd
+import yaml
+
 from backtest.filters.engine import ALIAS
 from backtest.paths import EXCEL_DIR
 

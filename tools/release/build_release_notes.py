@@ -26,9 +26,7 @@ def main() -> None:
                 ["git", "log", f"{args.since_tag}..HEAD", "--oneline"],
                 text=True,
             )
-            bullets = "\n".join(
-                f"- {line.strip()}" for line in log.strip().splitlines()
-            )
+            bullets = "\n".join(f"- {line.strip()}" for line in log.strip().splitlines())
         except subprocess.CalledProcessError:
             bullets = ""
 

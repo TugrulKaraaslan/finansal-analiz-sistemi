@@ -5,10 +5,11 @@ from typing import List, Tuple
 
 import pandas as pd
 
-from backtest.naming import normalize_name
-from .cross import cross_up, cross_down, cross_over, cross_under
+from backtest.naming.aliases import normalize_token
 
-logger = logging.getLogger(__name__)
+from .cross import cross_down, cross_over, cross_under, cross_up
+
+logger = logging.getLogger("backtest")
 
 
 SERIES_SERIES_CROSSOVERS: List[Tuple[str, str, str, str]] = [
@@ -28,8 +29,8 @@ SERIES_VALUE_CROSSOVERS: List[Tuple[str, float, str, str]] = [
 def generate_crossovers(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
     for a, b, up, down in SERIES_SERIES_CROSSOVERS:
-        a_c = normalize_name(a)
-        b_c = normalize_name(b)
+        a_c = normalize_token(a)
+        b_c = normalize_token(b)
         if a_c not in out.columns or b_c not in out.columns:
             missing = [x for x in (a_c, b_c) if x not in out.columns]
             logger.warning("skip crossover: missing column(s) %s", ", ".join(missing))
@@ -37,7 +38,7 @@ def generate_crossovers(df: pd.DataFrame) -> pd.DataFrame:
         out[up] = cross_up(out[a_c], out[b_c])
         out[down] = cross_down(out[a_c], out[b_c])
     for a, val, up, down in SERIES_VALUE_CROSSOVERS:
-        a_c = normalize_name(a)
+        a_c = normalize_token(a)
         if a_c not in out.columns:
             logger.warning("skip crossover: missing column(s) %s", a_c)
             continue

@@ -3,9 +3,7 @@ from __future__ import annotations
 import pandas as pd
 
 
-def ensure_stochrsi(
-    df: pd.DataFrame, rsi_len: int, k: int, d: int, smooth: int
-) -> pd.DataFrame:
+def ensure_stochrsi(df: pd.DataFrame, rsi_len: int, k: int, d: int, smooth: int) -> pd.DataFrame:
     """Ensure StochRSI %K and %D columns exist on ``df``.
 
     The resulting column names follow the pattern

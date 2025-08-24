@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Any, Dict
+
 import numpy as np
 import pandas as pd
 
@@ -49,7 +50,9 @@ def _compute_metrics(returns: pd.Series, spec: StrategySpec) -> Dict[str, float]
     }
 
 
-def run_strategy(spec: StrategySpec, data: pd.DataFrame, exec_cfg: Dict[str, Any] | None = None) -> Result:
+def run_strategy(
+    spec: StrategySpec, data: pd.DataFrame, exec_cfg: Dict[str, Any] | None = None
+) -> Result:
     """Run a simple backtest strategy on provided returns data.
 
     Parameters

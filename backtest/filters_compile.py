@@ -13,8 +13,8 @@ by default and indicator/column aliases are resolved through
 expressions through ``backtest.filters.engine.evaluate``.
 """
 
-from typing import Callable, List
 import re
+from typing import Callable, List
 
 import pandas as pd
 
@@ -74,7 +74,9 @@ def compile_expression(expr: str, *, normalize: bool = True) -> Callable[[pd.Dat
     return _fn
 
 
-def compile_filters(exprs: List[str], *, normalize: bool = True) -> List[Callable[[pd.DataFrame], pd.Series]]:
+def compile_filters(
+    exprs: List[str], *, normalize: bool = True
+) -> List[Callable[[pd.DataFrame], pd.Series]]:
     """Compile multiple expressions to callables.
 
     Parameters
@@ -94,4 +96,3 @@ def compile_filters(exprs: List[str], *, normalize: bool = True) -> List[Callabl
 
 
 __all__ = ["compile_expression", "compile_filters"]
-

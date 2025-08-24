@@ -1,5 +1,6 @@
-from backtest.risk.guards import RiskEngine
 import pandas as pd
+
+from backtest.risk.guards import RiskEngine
 
 
 def test_kill_switch_blocks(monkeypatch):

@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-from pathlib import Path
-import json
 import itertools
+import json
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import yaml
 
+from backtest.cv.timeseries import PurgedKFold, WalkForward, cross_validate
+
 from . import StrategyRegistry, StrategySpec, run_strategy
 from .objectives import score
-from backtest.cv.timeseries import WalkForward, PurgedKFold, cross_validate
 
 
 def compare_strategies_cli(args) -> None:

@@ -97,9 +97,7 @@ def clean_filters(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
         df_clean.at[idx, "expr"] = _TOKEN_RE.sub(repl, expr)
 
-    report_df = pd.DataFrame(
-        report_rows, columns=["id", "original", "new_symbol", "status"]
-    )
+    report_df = pd.DataFrame(report_rows, columns=["id", "original", "new_symbol", "status"])
     return df_clean, report_df
 
 

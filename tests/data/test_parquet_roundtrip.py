@@ -1,17 +1,20 @@
 from __future__ import annotations
 
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 from backtest.cli import convert_to_parquet
 from backtest.data.loader import load_prices
 
 
 def test_parquet_roundtrip(tmp_path):
-    df = pd.DataFrame({
-        "Date": pd.date_range("2020-01-01", periods=3),
-        "Close": [1.0, 2.0, 3.0],
-    })
+    df = pd.DataFrame(
+        {
+            "Date": pd.date_range("2020-01-01", periods=3),
+            "Close": [1.0, 2.0, 3.0],
+        }
+    )
     excel_dir = tmp_path / "data"
     excel_dir.mkdir()
     df.to_excel(excel_dir / "AAA.xlsx", index=False)

@@ -2,12 +2,13 @@ import ast
 
 import pandas as pd
 
-from backtest.dsl import parse_expression, DSLError
+from backtest.dsl import DSLError, parse_expression
 from backtest.naming import (
     CANONICAL_SET,
     load_alias_map,
     normalize_indicator_token,
 )
+
 from .errors import ValidationError
 from .report import ValidationReport
 

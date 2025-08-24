@@ -51,9 +51,7 @@ def test_write_reports_returns_paths(tmp_path):
     assert outputs["excel"] == out_xlsx.resolve()
     assert out_xlsx.exists()
     csv_names = {p.name for p in outputs.get("csv", [])}
-    assert {"daily_trades.csv", "summary.csv", "summary_winrate.csv"}.issubset(
-        csv_names
-    )
+    assert {"daily_trades.csv", "summary.csv", "summary_winrate.csv"}.issubset(csv_names)
     for p in outputs.get("csv", []):
         assert p.exists()
 
@@ -102,9 +100,7 @@ def test_write_reports_raises_on_excel_error(monkeypatch, tmp_path):
             "Reason": [pd.NA],
         }
     )
-    summary = (
-        trades.groupby(["FilterCode", "Side", "Date"])["ReturnPct"].mean().unstack()
-    )
+    summary = trades.groupby(["FilterCode", "Side", "Date"])["ReturnPct"].mean().unstack()
 
     def _bad_writer(*args, **kwargs):
         raise OSError("fail")
@@ -133,9 +129,7 @@ def test_write_reports_warns_if_file_missing(monkeypatch, tmp_path):
             "Reason": [pd.NA],
         }
     )
-    summary = (
-        trades.groupby(["FilterCode", "Side", "Date"])["ReturnPct"].mean().unstack()
-    )
+    summary = trades.groupby(["FilterCode", "Side", "Date"])["ReturnPct"].mean().unstack()
     out_xlsx = tmp_path / "out.xlsx"
     real_exists = pathlib.Path.exists
 

@@ -1,9 +1,8 @@
 from pathlib import Path
-from pathlib import Path
+
 import pytest
 
 from io_filters import load_filters_csv
-
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
@@ -41,8 +40,6 @@ def test_load_filters_parse_error(tmp_path):
 
 def test_load_filters_duplicate_codes(tmp_path):
     csv_file = tmp_path / "filters.csv"
-    csv_file.write_text(
-        "FilterCode;PythonQuery\nF1;close>0\nF1;close>1\n", encoding="utf-8"
-    )
+    csv_file.write_text("FilterCode;PythonQuery\nF1;close>0\nF1;close>1\n", encoding="utf-8")
     with pytest.raises(ValueError):
         load_filters_csv([csv_file])

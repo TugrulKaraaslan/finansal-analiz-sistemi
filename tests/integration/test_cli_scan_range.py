@@ -1,4 +1,5 @@
 import pandas as pd
+
 import backtest.cli as cli
 
 
@@ -8,9 +9,7 @@ def test_cli_scan_range_smoke(monkeypatch, tmp_path):
 
     called = {}
 
-    def fake_run_scan_range(
-        df_arg, start, end, filters_df, out_dir=None, alias_csv=None
-    ):
+    def fake_run_scan_range(df_arg, start, end, filters_df, out_dir=None, alias_csv=None):
         called["ran"] = True
         assert start == "2025-03-07"
         assert end == "2025-03-09"

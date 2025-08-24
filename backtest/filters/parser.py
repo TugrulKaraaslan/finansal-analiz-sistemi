@@ -3,6 +3,7 @@
 The real project contains a more sophisticated parser; for the tests in
 this kata we only need to detect obvious future reference patterns.
 """
+
 from __future__ import annotations
 
 from backtest.guardrails.no_lookahead import detect_future_refs

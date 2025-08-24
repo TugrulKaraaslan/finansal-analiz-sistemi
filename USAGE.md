@@ -28,7 +28,7 @@ ayraç olarak yalnızca noktalı virgül (`;`) kullanılabilir. Excel'den kayded
 `CSV` biçiminde `;` ayırıcı seçilmelidir. Virgüllü dosyalar şu hatayı üretir:
 
 ```
-CSV delimiter ';' bekleniyor. Lütfen dosyayı ';' ile kaydedin.
+CSV delimiter ';' bekleniyor. Dosyayı ';' ile kaydedin: FilterCode;PythonQuery
 ```
 
 Eski virgüllü dosyaları dönüştürmek için `tools/migrate_filters_csv.py`

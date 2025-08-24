@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import csv
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,9 +27,7 @@ def load_alias_map(csv_path: str | Path = ALIAS_PATH) -> AliasMap:
             "alias",
             "canonical_name",
         }:
-            raise ValueError(
-                "alias_mapping.csv başlıkları 'alias,canonical_name' olmalı"
-            )
+            raise ValueError("alias_mapping.csv başlıkları 'alias,canonical_name' olmalı")
         for i, row in enumerate(reader, start=2):
             alias = row["alias"].strip()
             canonical = row["canonical_name"].strip()

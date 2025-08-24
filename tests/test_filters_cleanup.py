@@ -2,13 +2,11 @@ import io
 from types import SimpleNamespace
 
 import pandas as pd
+import pytest
 from click.testing import CliRunner
 
 from backtest import cli
 from backtest.filters_cleanup import clean_filters
-
-
-import pytest
 
 
 @pytest.fixture
@@ -88,7 +86,7 @@ def test_cli_reports(tmp_path, monkeypatch, sample_filters_csv):
     filters_path = tmp_path / "filters.csv"
     sample_filters_csv.rename(columns={"id": "FilterCode", "expr": "PythonQuery"})[
         ["FilterCode", "PythonQuery"]
-    ].to_csv(filters_path, sep=';', index=False)
+    ].to_csv(filters_path, sep=";", index=False)
     cfg = _cfg(tmp_path)
     cfg.data.filters_csv = str(filters_path)
     monkeypatch.setattr(cli, "load_config", lambda _: cfg)

@@ -10,6 +10,7 @@ from typing import Iterable
 import pandas as pd
 
 from backtest.paths import DATA_DIR, PROJECT_ROOT
+
 from .schema import CANON_COLS, normalize
 
 

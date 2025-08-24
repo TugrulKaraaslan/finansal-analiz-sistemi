@@ -133,9 +133,7 @@ def run_1g_returns(
 
     has_next = {"next_date", "next_close"}.issubset(df_with_next.columns)
     if not has_next:
-        missing_days = check_missing_trading_days_by_symbol(
-            df_with_next, raise_error=False
-        )
+        missing_days = check_missing_trading_days_by_symbol(df_with_next, raise_error=False)
         if missing_days:
             parts = []
             for sym, days in missing_days.items():
@@ -158,9 +156,7 @@ def run_1g_returns(
         invalid_side = pd.DataFrame()
         if invalid.any():
             bad_vals = sides[invalid].unique().tolist()
-            logger.warning(
-                "dropping rows with invalid Side values: {bad}", bad=bad_vals
-            )
+            logger.warning("dropping rows with invalid Side values: {bad}", bad=bad_vals)
             invalid_side = signals.loc[invalid].copy()
             invalid_side["Reason"] = "Invalid Side"
             invalid_side = invalid_side.assign(
@@ -226,9 +222,7 @@ def run_1g_returns(
     merged = merged.drop(columns=["symbol", "date"])
 
     if has_next and holding_period == 1:
-        merged.rename(
-            columns={"next_date": "ExitDate", "next_close": "ExitClose"}, inplace=True
-        )
+        merged.rename(columns={"next_date": "ExitDate", "next_close": "ExitClose"}, inplace=True)
     else:
         if trading_days is not None:
             td = pd.DatetimeIndex(trading_days).normalize()
@@ -241,9 +235,7 @@ def run_1g_returns(
                 return td[idx + holding_period]
 
             merged["ExitDate"] = merged["Date"].map(calc_exit)
-            exit_base = base.drop(
-                columns=["next_date", "next_close"], errors="ignore"
-            ).rename(
+            exit_base = base.drop(columns=["next_date", "next_close"], errors="ignore").rename(
                 columns={"symbol": "Symbol", "date": "ExitDate", "close": "ExitClose"}
             )
             merged = merged.merge(exit_base, on=["Symbol", "ExitDate"], how="left")
@@ -252,12 +244,12 @@ def run_1g_returns(
             close_lookup = base.set_index(["symbol", "date"])["close"]
             merged["ExitDate"] = merged["Date"]
             for _ in range(holding_period):
-                merged["ExitDate"] = pd.MultiIndex.from_frame(
-                    merged[["Symbol", "ExitDate"]]
-                ).map(next_lookup)
-            merged["ExitClose"] = pd.MultiIndex.from_frame(
-                merged[["Symbol", "ExitDate"]]
-            ).map(close_lookup)
+                merged["ExitDate"] = pd.MultiIndex.from_frame(merged[["Symbol", "ExitDate"]]).map(
+                    next_lookup
+                )
+            merged["ExitClose"] = pd.MultiIndex.from_frame(merged[["Symbol", "ExitDate"]]).map(
+                close_lookup
+            )
 
     invalid_entry = (merged["EntryClose"] <= 0) | merged["EntryClose"].isna()
     invalid_exit = (merged["ExitClose"] <= 0) | merged["ExitClose"].isna()

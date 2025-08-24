@@ -1,9 +1,10 @@
 from __future__ import annotations
-import re
-from typing import Iterable, Dict
-from .canonical import CANONICAL_SET
-from .aliases import normalize_token
 
+import re
+from typing import Dict, Iterable
+
+from .aliases import normalize_token
+from .canonical import CANONICAL_SET
 
 _SNAKE_RE1 = re.compile(r"[^0-9A-Za-z]+")
 _SNAKE_RE2 = re.compile(r"_{2,}")
@@ -34,9 +35,7 @@ def to_snake(s: str) -> str:
     return s.lower()
 
 
-def normalize_indicator_token(
-    token: str, alias_map: Dict[str, str] | None = None
-) -> str:
+def normalize_indicator_token(token: str, alias_map: Dict[str, str] | None = None) -> str:
     """Backward compatible wrapper over :func:`normalize_token`.
 
     ``alias_map`` entries (typically loaded from ``alias_mapping.csv``) take

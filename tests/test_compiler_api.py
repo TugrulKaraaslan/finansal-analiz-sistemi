@@ -46,9 +46,8 @@ def test_no_other_compile_defs() -> None:
     part2 = "def compile_" + "filters"
     pattern = part1 + "\\|" + part2
     cmd = (
-        f"grep -RIn \"{pattern}\" backtest tools tests | "
-        "grep -v \"backtest/filters_compile.py\" | grep -v \"tests/test_compiler_api.py\" || true"
+        f'grep -RIn "{pattern}" backtest tools tests | '
+        'grep -v "backtest/filters_compile.py" | grep -v "tests/test_compiler_api.py" || true'
     )
     proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     assert proc.stdout.strip() == ""
-

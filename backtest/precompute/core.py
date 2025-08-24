@@ -1,7 +1,8 @@
+import re
+from typing import Any, Dict, Set
+
 import pandas as pd
 import pandas_ta as ta
-import re
-from typing import Set, Dict, Any
 
 from .errors import PrecomputeError
 
@@ -22,9 +23,7 @@ class Precomputer:
                 out = self._compute_one(out, ind)
                 self.cache.add(ind)
             except Exception as e:
-                raise PrecomputeError(
-                    f"Gösterge hesaplanamadı: {ind} | {e}", code="PC001"
-                )
+                raise PrecomputeError(f"Gösterge hesaplanamadı: {ind} | {e}", code="PC001")
         return out
 
     def _compute_one(self, df: pd.DataFrame, ind: str) -> pd.DataFrame:
@@ -67,9 +66,7 @@ class Precomputer:
         elif ind.startswith("bbh_") or ind.startswith("bbm_") or ind.startswith("bbl_"):
             parts = ind.split("_")[1:]
             if len(parts) != 2:
-                raise PrecomputeError(
-                    f"bollinger parametre hatası: {ind}", code="PC002"
-                )
+                raise PrecomputeError(f"bollinger parametre hatası: {ind}", code="PC002")
             length, mult = map(int, parts)
             bb = ta.bbands(df["close"], length=length, std=mult)
             df[f"bbl_{length}_{mult}"] = bb[f"BBL_{length}_{mult}.0"]

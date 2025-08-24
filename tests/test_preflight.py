@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import date
-from pathlib import Path
 import sys
 import types
+from datetime import date
+from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
@@ -16,10 +16,10 @@ fake_pa.DataFrameSchema = lambda *a, **k: None
 fake_pa.Column = lambda *a, **k: None
 sys.modules.setdefault("pandera", fake_pa)
 
-from backtest.io.preflight import preflight  # noqa: E402
 from backtest import cli  # noqa: E402
-from backtest.preflight import check_unknown_series, UnknownSeriesError
 from backtest.filters.normalize_expr import normalize_expr
+from backtest.io.preflight import preflight  # noqa: E402
+from backtest.preflight import UnknownSeriesError, check_unknown_series
 
 
 def _touch(path: Path) -> None:
@@ -84,9 +84,7 @@ data:
         "FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8"
     )
     runner = CliRunner()
-    result = runner.invoke(
-        cli.scan_day, ["--config", str(cfg_path), "--date", "2025-03-07"]
-    )
+    result = runner.invoke(cli.scan_day, ["--config", str(cfg_path), "--date", "2025-03-07"])
     assert result.exit_code != 0
     assert "Excel klasörü" in result.output
 

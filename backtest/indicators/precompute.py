@@ -1,7 +1,9 @@
 from __future__ import annotations
-import pandas as pd
+
 from pathlib import Path
 from typing import Iterable
+
+import pandas as pd
 
 
 def collect_required_indicators(filters_df: pd.DataFrame) -> set[str]:

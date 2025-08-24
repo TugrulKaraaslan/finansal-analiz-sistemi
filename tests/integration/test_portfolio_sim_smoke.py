@@ -1,6 +1,7 @@
-from backtest.portfolio.simulator import PortfolioSim
-from backtest.portfolio.engine import PortfolioParams
 import pandas as pd
+
+from backtest.portfolio.engine import PortfolioParams
+from backtest.portfolio.simulator import PortfolioSim
 
 
 def test_simulator_smoke(tmp_path):

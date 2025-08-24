@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import ast
-from .errors import DSLParseError, DSLForbiddenNode
+
+from .errors import DSLForbiddenNode, DSLParseError
 
 # Whitelist edilen node tipleri
 _ALLOWED_NODES = (

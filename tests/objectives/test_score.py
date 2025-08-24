@@ -1,5 +1,5 @@
-from backtest.strategy.runner import Result
 from backtest.strategy.objectives import objective_penalty, score
+from backtest.strategy.runner import Result
 
 
 def test_penalty_and_score():

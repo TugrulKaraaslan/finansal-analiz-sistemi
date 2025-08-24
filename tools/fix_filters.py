@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import re
+
 import argparse
+import re
 import sys
 from pathlib import Path
+
 import pandas as pd
 
 RE_PSAR = re.compile(r"\bpsarl_0\.02_0\.2\b", flags=re.IGNORECASE)
@@ -44,6 +46,8 @@ def main(argv=None) -> int:
         df.to_csv(sys.stdout, index=False)
     return 0
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys
+
     sys.exit(main())

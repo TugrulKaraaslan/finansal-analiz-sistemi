@@ -1,4 +1,5 @@
 """Backend implementations for data loading."""
-from . import polars_backend, pandas_backend
+
+from . import pandas_backend, polars_backend
 
 __all__ = ["polars_backend", "pandas_backend"]

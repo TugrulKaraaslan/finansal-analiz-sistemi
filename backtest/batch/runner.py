@@ -1,27 +1,27 @@
 from __future__ import annotations
-import pandas as pd
-from typing import List, Tuple
+
 from concurrent.futures import ProcessPoolExecutor
 from time import perf_counter
+from typing import List, Tuple
 
-from backtest.normalize import normalize_dataframe
+import pandas as pd
+
+from backtest.batch.io import OutputWriter
+from backtest.batch.scheduler import trading_days
 from backtest.filters.engine import evaluate
 from backtest.indicators.precompute import (
     collect_required_indicators,
     precompute_for_chunk,
 )
-from backtest.batch.scheduler import trading_days
-from backtest.batch.io import OutputWriter
 from backtest.logging_conf import get_logger, log_with
+from backtest.normalize import normalize_dataframe
 
 log = get_logger("runner")
 
 
 def _process_chunk(args):
     df_chunk, filters_df, indicators, day, alias_csv, multi_symbol = args
-    df_chunk, _ = normalize_dataframe(
-        df_chunk, alias_csv, policy="prefer_first"
-    )  # noqa: E501
+    df_chunk, _ = normalize_dataframe(df_chunk, alias_csv, policy="prefer_first")  # noqa: E501
     df_chunk = precompute_for_chunk(df_chunk, indicators)
     d = pd.to_datetime(day)
     rows: List[Tuple[str, str]] = []
@@ -37,9 +37,7 @@ def _process_chunk(args):
                     mask = evaluate(sub, expr)
                 except Exception as e:
                     log.exception("evaluate failed", extra={"extra_fields": {"expr": expr}})
-                    raise ValueError(
-                        f"Filter evaluation failed: {expr} → {e}"
-                    ) from e  # noqa: E501
+                    raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e  # noqa: E501
                 if bool(mask.loc[d]):
                     rows.append((sym, code))
     else:
@@ -51,9 +49,7 @@ def _process_chunk(args):
                 mask = evaluate(df_chunk, expr)
             except Exception as e:
                 log.exception("evaluate failed", extra={"extra_fields": {"expr": expr}})
-                raise ValueError(
-                    f"Filter evaluation failed: {expr} → {e}"
-                ) from e  # noqa: E501
+                raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e  # noqa: E501
             if bool(mask.loc[d]):
                 rows.append(("SYMBOL", code))
     return rows
@@ -67,13 +63,9 @@ def run_scan_day(
     alias_csv: str | None = None,
 ) -> List[Tuple[str, str]]:
     """Generate signals for a single day."""
-    multi_symbol = (
-        isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2
-    )  # noqa: E501
+    multi_symbol = isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2  # noqa: E501
     indicators = collect_required_indicators(filters_df)
-    return _process_chunk(
-        (df.copy(), filters_df, indicators, day, alias_csv, multi_symbol)
-    )
+    return _process_chunk((df.copy(), filters_df, indicators, day, alias_csv, multi_symbol))
 
 
 def run_scan_range(
@@ -96,15 +88,10 @@ def run_scan_range(
     if len(days) == 0:
         raise RuntimeError("BR002: tarih aralığı veriyle kesişmiyor")
 
-    multi_symbol = (
-        isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2
-    )  # noqa: E501
-    symbols = (
-        sorted({c[0] for c in df.columns}) if multi_symbol else ["SYMBOL"]
-    )  # noqa: E501
+    multi_symbol = isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2  # noqa: E501
+    symbols = sorted({c[0] for c in df.columns}) if multi_symbol else ["SYMBOL"]  # noqa: E501
     chunks = [  # noqa: E501
-        symbols[i : i + chunk_size]  # noqa: E203
-        for i in range(0, len(symbols), chunk_size)
+        symbols[i : i + chunk_size] for i in range(0, len(symbols), chunk_size)  # noqa: E203
     ]
     indicators = collect_required_indicators(filters_df)
 
@@ -144,9 +131,10 @@ def run_scan_range(
 
 # trade DataFrame üretiliyorsa, maliyeti uygula (opsiyonel)
 try:
-    from backtest.portfolio.costs import CostParams, apply_costs
-    from pathlib import Path
     import os
+    from pathlib import Path
+
+    from backtest.portfolio.costs import CostParams, apply_costs
 
     _cost_cfg = Path(os.environ.get("COSTS_CFG", "config/costs.yaml"))
     _params = CostParams.from_yaml(_cost_cfg)
