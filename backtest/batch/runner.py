@@ -32,25 +32,48 @@ def _process_chunk(args):
             for i, r in enumerate(filters_df.itertuples(index=False)):
                 code = str(r.FilterCode).strip()
                 expr = str(r.PythonQuery).strip()
-                log_with(log, "DEBUG", "evaluate", expr=expr, chunk_idx=i, symbol=sym)
+                log_with(
+                    log,
+                    "DEBUG",
+                    "evaluate",
+                    expr=expr,
+                    chunk_idx=i,
+                    symbol=sym,
+                )
                 try:
                     mask = evaluate(sub, expr)
                 except Exception as e:
-                    log.exception("evaluate failed", extra={"extra_fields": {"expr": expr}})
+                    log.exception(
+                        "evaluate failed",
+                        extra={"extra_fields": {"expr": expr}},
+                    )
                     raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e  # noqa: E501
-                if bool(mask.loc[d]):
+                val = mask.loc[d]
+                ok = val.any() if isinstance(val, pd.Series) else bool(val)
+                if ok:
                     rows.append((sym, code))
     else:
         for i, r in enumerate(filters_df.itertuples(index=False)):
             code = str(r.FilterCode).strip()
             expr = str(r.PythonQuery).strip()
-            log_with(log, "DEBUG", "evaluate", expr=expr, chunk_idx=i)
+            log_with(
+                log,
+                "DEBUG",
+                "evaluate",
+                expr=expr,
+                chunk_idx=i,
+            )
             try:
                 mask = evaluate(df_chunk, expr)
             except Exception as e:
-                log.exception("evaluate failed", extra={"extra_fields": {"expr": expr}})
+                log.exception(
+                    "evaluate failed",
+                    extra={"extra_fields": {"expr": expr}},
+                )
                 raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e  # noqa: E501
-            if bool(mask.loc[d]):
+            val = mask.loc[d]
+            ok = val.any() if isinstance(val, pd.Series) else bool(val)
+            if ok:
                 rows.append(("SYMBOL", code))
     return rows
 
@@ -65,7 +88,16 @@ def run_scan_day(
     """Generate signals for a single day."""
     multi_symbol = isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2  # noqa: E501
     indicators = collect_required_indicators(filters_df)
-    return _process_chunk((df.copy(), filters_df, indicators, day, alias_csv, multi_symbol))
+    return _process_chunk(
+        (
+            df.copy(),
+            filters_df,
+            indicators,
+            day,
+            alias_csv,
+            multi_symbol,
+        )
+    )
 
 
 def run_scan_range(
@@ -90,8 +122,13 @@ def run_scan_range(
 
     multi_symbol = isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2  # noqa: E501
     symbols = sorted({c[0] for c in df.columns}) if multi_symbol else ["SYMBOL"]  # noqa: E501
-    chunks = [  # noqa: E501
-        symbols[i : i + chunk_size] for i in range(0, len(symbols), chunk_size)  # noqa: E203
+    chunks = [
+        symbols[i : i + chunk_size]  # noqa: E203
+        for i in range(
+            0,
+            len(symbols),
+            chunk_size,
+        )
     ]
     indicators = collect_required_indicators(filters_df)
 
