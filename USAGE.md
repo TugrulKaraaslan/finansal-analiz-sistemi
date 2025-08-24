@@ -42,6 +42,23 @@ Filtre ifadelerinde `cross_up(x,y)` ve `cross_down(x,y)` fonksiyonları
 kullanılır. Yazımı farklı olsa bile (`CROSSUP`, `crossOver`, `keser_yukari`
 vb.) ifadeler otomatik olarak bu kanonik küçük harf isimlere çevrilir.
 
+## Filtre derleme
+Programatik kullanımda filtre ifadelerini derlemek için
+`backtest.filters_compile` modülü kullanılabilir. İki temel fonksiyon vardır:
+`compile_expression` tek bir ifadeyi fonksiyona dönüştürür,
+`compile_filters` ise bir ifade listesini derler.
+
+```python
+from backtest.filters_compile import compile_expression, compile_filters
+import pandas as pd
+
+df = pd.DataFrame({"a": [1, 2, 3], "b": [0, 1, 2]})
+fn = compile_expression("CROSSUP(a,b)")
+mask = fn(df)  # bool Series döner
+
+funcs = compile_filters(["a > b", "b > a"])
+```
+
 ## Komut Başına Rehber
 ### dry-run
 **Amaç:** filters.csv dosyasının yapısını ve alias eşleşmelerini kontrol eder.

@@ -14,7 +14,7 @@ from backtest.batch import run_scan_range, run_scan_day
 from backtest.normalizer import normalize
 from backtest.calendars import add_next_close
 from io_filters import load_filters_csv, read_filters_csv
-from backtest.filters_compile import compile_filters
+from backtest.filters_compile import compile_expression, compile_filters
 from backtest.screener import run_screener
 from backtest.backtester import run_1g_returns
 from backtest.reporter import write_reports
@@ -816,9 +816,6 @@ try:  # pragma: no cover - click opsiyonel
         if filters_csv:
             cfg.data.filters_csv = filters_csv
         if report_alias and filters_csv and reports_dir:
-            src = Path(filters_csv)
-            dst = Path(reports_dir) / "filters_compiled.csv"
-            compile_filters(src, dst)
             try:
                 raw = pd.DataFrame(load_filters_csv([filters_csv]))
             except ValueError as exc:

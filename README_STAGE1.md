@@ -61,6 +61,15 @@ python -m backtest.cli scan-day \
   --date 2024-01-02 --out raporlar/gunluk
 ```
 
+```python
+from backtest.filters_compile import compile_expression
+import pandas as pd
+
+df = pd.DataFrame({"a": [1, 2, 3], "b": [0, 1, 2]})
+fn = compile_expression("CROSSUP(a,b)")
+print(fn(df))
+```
+
 ## Filtre CSV formatı
 
 `filters.csv` dosyası tam olarak iki kolondan oluşur:
