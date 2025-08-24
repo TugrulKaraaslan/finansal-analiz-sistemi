@@ -1,59 +1,106 @@
 from __future__ import annotations
-import csv
+
+"""Central filter compiler API.
+
+This module exposes two helpers, :func:`compile_expression` and
+:func:`compile_filters`, which transform the DSL used in filters into
+callables that operate on a :class:`pandas.DataFrame` and return a boolean
+``Series`` mask.
+
+All normalisation rules from ``backtest.filters.normalize_expr`` are applied
+by default and column/function aliases are canonicalised using the
+``alias_mapping.csv`` file.  The resulting callables evaluate expressions
+through ``backtest.filters.engine.evaluate``.
+"""
+
+from typing import Callable, List
 import re
-from pathlib import Path
-from .columns import ALIASES, canonicalize
 
-P_UP = re.compile(r"(\w+)_keser_(\w+)_yukari", re.I)
-P_DOWN = re.compile(r"(\w+)_keser_(\w+)_asagi", re.I)
-P_LVL_UP = re.compile(r"(\w+)_keser_([0-9]+(?:\.[0-9]+)?)_?yukari", re.I)
-P_LVL_DOWN = re.compile(r"(\w+)_keser_([0-9]+(?:\.[0-9]+)?)_?asagi", re.I)
+import pandas as pd
 
+from backtest.filters.engine import evaluate
+from backtest.filters.normalize_expr import normalize_expr
+from backtest.naming.alias_loader import load_alias_map
+from backtest.naming.normalize import normalize_indicator_token
 
-def canon_token(tok: str) -> str:
-    can = ALIASES.get(canonicalize(tok), canonicalize(tok))
-    return can
+# Compile-time alias map loaded once; missing file falls back to empty mapping
+try:  # pragma: no cover - defensive
+    _ALIAS_MAP = load_alias_map().mapping
+except FileNotFoundError:  # pragma: no cover - env without alias file
+    _ALIAS_MAP = {}
 
-
-def tr_to_funcs(expr: str) -> str:
-    s = expr.replace("<>", "!=")
-    s = P_UP.sub(
-        lambda m: (
-            f'CROSSUP("{canon_token(m.group(1))}",' f'"{canon_token(m.group(2))}")'
-        ),
-        s,
-    )
-    s = P_DOWN.sub(
-        lambda m: (
-            f'CROSSDOWN("{canon_token(m.group(1))}",' f'"{canon_token(m.group(2))}")'
-        ),
-        s,
-    )
-    s = P_LVL_UP.sub(
-        lambda m: f'CROSSOVER("{canon_token(m.group(1))}", {m.group(2)})', s
-    )
-    s = P_LVL_DOWN.sub(
-        lambda m: f'CROSSUNDER("{canon_token(m.group(1))}", {m.group(2)})', s
-    )
-    s = re.sub(
-        r"\b([A-Za-z_]\w*)\b",
-        lambda m: ALIASES.get(canonicalize(m.group(1)), canonicalize(m.group(1))),
-        s,
-    )
-    return s
+_TOKEN_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
 
-def compile_filters(src_csv: Path, dst_csv: Path) -> None:
-    rows = []
-    with src_csv.open(encoding="utf-8") as f:
-        r = csv.DictReader(f, delimiter=";")
-        for row in r:
-            row["PythonQuery"] = tr_to_funcs(row["PythonQuery"])
-            rows.append(row)
-    with dst_csv.open("w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["FilterCode", "PythonQuery"], delimiter=";")
-        w.writeheader()
-        w.writerows(rows)
+def _canonicalise(expr: str) -> str:
+    """Replace indicator/column aliases with their canonical snake_case.
+
+    This is a simple token based replacer; it ignores string literals which
+    are not expected in Stage1 filter expressions.
+    """
+
+    def repl(match: re.Match[str]) -> str:
+        tok = match.group(0)
+        return normalize_indicator_token(tok, _ALIAS_MAP)
+
+    return _TOKEN_RE.sub(repl, expr)
 
 
-__all__ = ["compile_filters", "tr_to_funcs"]
+def compile_expression(expr: str, *, normalize: bool = True) -> Callable[[pd.DataFrame], pd.Series]:
+    """Compile a single filter expression.
+
+    Parameters
+    ----------
+    expr:
+        Filter DSL/Python-like expression string.
+    normalize:
+        When ``True`` (default) ``normalize_expr`` is applied before
+        compilation.
+
+    Returns
+    -------
+    Callable[[pd.DataFrame], pd.Series]
+        A function that evaluates the expression on a dataframe and returns a
+        boolean mask.
+
+    Raises
+    ------
+    ValueError
+        If *expr* is empty or only whitespace.
+    """
+
+    if expr is None or not str(expr).strip():
+        raise ValueError("expression must be a non-empty string")
+
+    expr_str = str(expr).strip()
+    if normalize:
+        expr_str = normalize_expr(expr_str)[0]
+    expr_str = _canonicalise(expr_str)
+
+    def _fn(df: pd.DataFrame) -> pd.Series:
+        return evaluate(df, expr_str)
+
+    return _fn
+
+
+def compile_filters(exprs: List[str], *, normalize: bool = True) -> List[Callable[[pd.DataFrame], pd.Series]]:
+    """Compile multiple expressions to callables.
+
+    Parameters
+    ----------
+    exprs:
+        List of expression strings. Order is preserved in the returned list.
+    normalize:
+        Apply normalisation rules before compilation.
+
+    Returns
+    -------
+    list[Callable[[pd.DataFrame], pd.Series]]
+        List of compiled callables corresponding to *exprs*.
+    """
+
+    return [compile_expression(e, normalize=normalize) for e in exprs]
+
+
+__all__ = ["compile_expression", "compile_filters"]
+
