@@ -7,7 +7,7 @@ import pandas as pd
 from loguru import logger
 
 from backtest.columns import canonical_map
-from .expr import evaluate
+from backtest.filters.engine import evaluate
 
 
 def _to_pandas_ops(expr: str) -> str:

@@ -21,6 +21,11 @@
 | vacuum-cache | Eski parçaları sil | --older-than-days |
 | integrity-check | Parquet bütünlüğü kontrolü | --symbols |
 
+## Filtre DSL Notu
+Filtre ifadelerinde `cross_up(x,y)` ve `cross_down(x,y)` fonksiyonları
+kullanılır. Yazımı farklı olsa bile (`CROSSUP`, `crossOver`, `keser_yukari`
+vb.) ifadeler otomatik olarak bu kanonik küçük harf isimlere çevrilir.
+
 ## Komut Başına Rehber
 ### dry-run
 **Amaç:** filters.csv dosyasının yapısını ve alias eşleşmelerini kontrol eder.

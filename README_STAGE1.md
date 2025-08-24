@@ -39,6 +39,12 @@ DATA_DIR=/mnt/veri EXCEL_DIR=/mnt/excel \
 python -m backtest.cli convert-to-parquet --out /tmp/parquet
 ```
 
+## Filtre DSL Notu
+Filtre ifadelerinde `cross_up(x,y)` ve `cross_down(x,y)` isimli küçük harf
+fonksiyonları kullanılır. `CROSSUP`, `CROSSDOWN`, `crossOver`, `crossUnder`
+ve Türkçe varyantlar gibi farklı yazımlar otomatik olarak bu kanonik
+fonksiyonlara dönüştürülür.
+
 ## Hızlı Başlangıç
 Aşağıdaki komutlar örnek verilerle çevrimdışı çalışır.
 

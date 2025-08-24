@@ -13,6 +13,7 @@ from backtest.cross import (
     cross_down as _cross_down,
     cross_over,
 )
+from backtest.filters.normalize_expr import normalize_expr
 
 # 1) Tek doğru isim standardı – kabul edilen legacy alias'lar
 ALIAS: dict[str, str] = {
@@ -66,10 +67,12 @@ def _build_locals(df: pd.DataFrame) -> dict[str, pd.Series]:
         {
             "cross_up": cross_up,
             "cross_down": cross_down,
-            "crossup": cross_up,
-            "crossdown": cross_down,
             "CROSSUP": cross_up,
             "CROSSDOWN": cross_down,
+            "crossOver": cross_up,
+            "crossUnder": cross_down,
+            "crossup": cross_up,
+            "crossdown": cross_down,
         }
     )
     return env
@@ -92,6 +95,7 @@ def _validate_tokens(expr: str, locals_map: Mapping[str, object]):
 
 
 def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
+    expr = normalize_expr(expr)[0]
     locals_map = _build_locals(df)
     for k, v in ALIAS.items():
         if k in (expr or ""):
