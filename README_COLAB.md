@@ -36,8 +36,7 @@ setup_logger()
 
 ```python
 !python -m backtest.cli scan-range --config config/colab_config.yaml \
-  --start 2025-03-07 --end 2025-03-11 \
-  --holding-period 1 --transaction-cost 0.0005
+  --start 2025-03-07 --end 2025-03-11
 
 !ls -la raporlar | head
 ```

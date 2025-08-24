@@ -9,3 +9,7 @@ loguru
 tqdm
 click
 pydantic
+pandera
+pyyaml
+polars
+jinja2
