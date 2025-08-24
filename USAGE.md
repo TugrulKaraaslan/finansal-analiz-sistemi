@@ -1,189 +1,323 @@
-# Usage
+# USAGE
 
-> A12 sürümü (2025-08-23) yayınlandı. Ayrıntılar için [CHANGELOG](CHANGELOG.md).
+## Komut Listesi
+| Komut | Açıklama | Önemli Argümanlar |
+|-------|----------|-------------------|
+| dry-run | filters.csv doğrulama | --filters, --alias |
+| scan-day | Tek gün tarama | --date, --data, --filters |
+| scan-range | Tarih aralığı tarama | --start, --end, --data |
+| summarize | Sinyal özetleri ve BIST karşılaştırması | --data, --signals |
+| report-excel | CSV özetlerinden Excel rapor | --daily, --filter-counts |
+| portfolio-sim | Portföy simülasyonu | --portfolio, --costs |
+| eval-metrics | Sinyal/portföy metrikleri | --start, --end |
+| guardrails | Guardrail kontrolleri | --out-dir |
+| config-validate | YAML config doğrulama | --config, --portfolio |
+| compare-strategies | Strateji karşılaştırma | --start, --end, --space |
+| tune-strategy | Tek strateji tuning | --start, --end, --space |
+| convert-to-parquet | Excel'den Parquet üretimi | --excel-dir, --out |
+| fetch-range | Veri aralığı indir | --symbols, --start, --end |
+| fetch-latest | En son veriyi indir | --symbols, --ttl-hours |
+| refresh-cache | Önbelleği yenile | --ttl-hours |
+| vacuum-cache | Eski parçaları sil | --older-than-days |
+| integrity-check | Parquet bütünlüğü kontrolü | --symbols |
 
-## 1. Kurulum
+## Komut Başına Rehber
+### dry-run
+**Amaç:** filters.csv dosyasının yapısını ve alias eşleşmelerini kontrol eder.
 
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --filters | yol | zorunlu | Filtre dosyası |
+| --alias | yol | `data/alias_mapping.csv` | Alias eşlemesi |
+
+**Örnek**
 ```bash
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
+python -m backtest.cli dry-run --filters filters.csv
 ```
 
-## 2. Fixture üretimi
+### scan-day
+**Amaç:** Tek gün için filtre taraması çalıştırır.
 
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --date | YYYY-MM-DD | `None` | Hedef gün |
+| --data | yol | `None` | Fiyat verisi (Excel/CSV/Parquet) |
+| --filters | yol | `None` | Filtre tanımları |
+| --alias | yol | `data/alias_mapping.csv` | Alias eşlemesi |
+| --out | yol | `None` | Çıktı dizini |
+| --filters-off | flag | `False` | Filtreleri devre dışı bırak |
+| --no-write | flag | `False` | Dosya yazma |
+| --costs | yol | `None` | Maliyet config |
+| --report-alias | flag | `False` | Alias raporu |
+| --no-preflight | flag | `False` | Ön kontrolü atla |
+
+**Örnek**
 ```bash
-make fixtures
+python -m backtest.cli scan-day \
+  --data data/BIST.xlsx --filters filters.csv \
+  --date 2024-01-02 --out raporlar/gunluk
 ```
 
-Bu komut `data/` altındaki Excel dosyalarından test için küçük örnekler oluşturur (tek veri kaynağı).
+### scan-range
+**Amaç:** Tarih aralığı üzerinde tarama yapar.
 
-### Excel'den Parquet'e dönüşüm
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --start | YYYY-MM-DD | `None` | Başlangıç tarihi |
+| --end | YYYY-MM-DD | `None` | Bitiş tarihi |
+| --out | yol | `None` | Çıktı dizini |
+| (diğerleri) | | | `scan-day` ile aynı |
 
+**Örnek**
 ```bash
-python -m backtest.cli convert-to-parquet --out data/parquet
+python -m backtest.cli scan-range \
+  --data data/BIST.xlsx --filters filters.csv \
+  --start 2024-01-02 --end 2024-01-05
 ```
 
-`config/data.yaml` dosyasındaki `backend` alanı ile `pandas` veya `polars` seçilebilir.
+### summarize
+**Amaç:** Günlük sinyallerden BIST karşılaştırmalı özet üretir.
 
-## 3. Preflight
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --data | yol | zorunlu | Fiyat paneli |
+| --signals | yol | zorunlu | Günlük sinyal klasörü |
+| --benchmark | yol | `data/BIST.xlsx` | BIST kapanış serisi |
+| --out | yol | `raporlar/ozet` | Çıktı dizini |
+| --horizon | int | `1` | Gün ufku |
 
+**Örnek**
 ```bash
-make preflight
+python -m backtest.cli summarize \
+  --data data/panel.parquet --signals raporlar/gunluk
 ```
 
-Preflight, `filters.csv` içindeki token'ların Excel kolonlarıyla uyuştuğunu doğrular ve alias/unknown isimleri **reddeder**. `filters.csv` dosyası `FilterCode;PythonQuery` başlıklarını ve `;` ayracını kullanmalıdır. Gerekirse CLI'da `--no-preflight` bayrağı veya YAML'da `preflight: false` ile atlanabilir. Alias içeren dosyaları kanonikleştirmek için `tools/canonicalize_filters.py` kullanılabilir.
+### report-excel
+**Amaç:** CSV özetlerinden tek Excel raporu oluşturur.
 
-## 4. Taramayı çalıştır
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --daily | yol | zorunlu | daily_summary.csv |
+| --filter-counts | yol | zorunlu | filter_counts.csv |
+| --out | yol | `raporlar/ozet/summary.xlsx` | Çıktı dosyası |
 
+**Örnek**
 ```bash
-python -m backtest.cli scan-range --config config_scan.yml --start 2025-03-07 --end 2025-03-11
+python -m backtest.cli report-excel \
+  --daily raporlar/ozet/daily_summary.csv \
+  --filter-counts raporlar/ozet/filter_counts.csv
 ```
 
-## Veri İndirme (isteğe bağlı)
+### portfolio-sim
+**Amaç:** Basit portföy simülasyonu yapar.
 
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --portfolio | yol | `config/portfolio.yaml` | Portföy ayarları |
+| --costs | yol | `config/costs.yaml` | Maliyet ayarları |
+| --risk | yol | `None` | Risk config |
+| --start | YYYY-MM-DD | `None` | Başlangıç |
+| --end | YYYY-MM-DD | `None` | Bitiş |
+
+**Örnek**
 ```bash
-python -m backtest.cli fetch-range --symbols DEMO --start 2024-01-01 --end 2024-01-05 --provider stub
-python -m backtest.cli fetch-latest --symbols DEMO --ttl-hours 6 --provider stub
+python -m backtest.cli portfolio-sim \
+  --portfolio config/portfolio.yaml \
+  --start 2024-01-01 --end 2024-01-05
 ```
 
-Komutlar sadece `--start` / `--end` parametreleri alır ve veri `data/` altına yazılır.
-Haricî indirme varsayılan olarak kapalıdır; `--allow-download` veya `ALLOW_DOWNLOAD=1` kullanın.
+### eval-metrics
+**Amaç:** Sinyal ve portföy metriklerini hesaplar.
 
-### Filtre dosyası yol çözümü
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --start | YYYY-MM-DD | zorunlu | Başlangıç |
+| --end | YYYY-MM-DD | zorunlu | Bitiş |
+| --price-col | str | `close` | Fiyat kolonu |
+| --horizon-days | int | `5` | Ufuk |
+| --threshold-bps | float | `50` | Eşik |
+| --signal-cols | liste | `entry_long` | Sinyal kolonları |
+| --signals-csv | yol | `None` | Sinyal verisi |
+| --equity-csv | yol | `artifacts/portfolio/daily_equity.csv` | Özkaynak |
+| --weights-csv | yol | `artifacts/portfolio/weights.csv` | Ağırlıklar |
 
-Yol önceliği: CLI argümanı > YAML config > proje varsayılanı (`filters.csv`).
-
+**Örnek**
 ```bash
-python -m backtest.cli scan-range --filters-csv config/filters.csv --start 2025-03-07 --end 2025-03-11
+python -m backtest.cli eval-metrics --start 2024-01-01 --end 2024-01-05
 ```
 
-`--filters-csv my/filters.csv` kullanıldığında YAML içeriği yok sayılır ve belirtilen dosya kullanılır.
+### guardrails
+**Amaç:** Look-ahead gibi hataları yakalamak için kontrol çalıştırır.
 
-## 5. Sonuçlar
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --out-dir | yol | `artifacts/guardrails` | Çıktı klasörü |
 
-Çalışma tamamlandığında raporlar `raporlar/` dizinine, loglar `loglar/` dizinine yazılır.
-
-### Log Ayarları
-- `LOG_LEVEL` = DEBUG|INFO|WARNING|ERROR (default: INFO)
-- `LOG_FORMAT` = json|plain (default: json)
-- `LOG_DIR` = loglar (default)
-- `BACKTEST_RUN_ID` = aynı koşudaki tüm logları korele etmek için custom run id
-
-Örnek:
-```bash
-LOG_LEVEL=DEBUG BACKTEST_RUN_ID=A12-DEV1 \
-python -m backtest.cli scan-range --config config/colab_config.yaml --start 2025-03-07 --end 2025-03-09
-```
-
-## Golden Güncelleme
-
-```bash
-# İlk kurulum (bir kere)
-pip install -r requirements-dev.txt
-pre-commit install
-
-# Manuel güncelleme
-make golden
-
-# CI’de hata aldıysanız (out-of-date)
-make golden && git add tests/golden/checksums.json && git commit -m "update golden checksums"
-```
-
-## Veri Kalitesi Sözleşmeleri
-
-```bash
-# Sözleşme kontrolü (lokalde)
-make quality
-# Rapor → artifacts/quality/report.json
-```
-
-Kuralları ve toleransları değiştirmek için `contracts/data_quality.yaml`
-dosyasını düzenleyin. Şema ve mantık ihlalleri aracı başarısız kılar; tolerans
-aşımları yalnızca uyarı üretir.
-
-## Walk-Forward / Time-Series CV
-
-```bash
-# Varsayılan kısa smoke
-make walk-forward
-
-# Parametrelerle
-WF_START=2025-03-01 \
-WF_END=2025-03-31 \
-WF_TRAIN_DAYS=10 \
-WF_TEST_DAYS=2 \
-WF_STEP_DAYS=2 \
-make walk-forward
-```
-
-Tasarım notu: Bu PR yalnız iskelet sağlar; metrik/portföy sonuçlarını toplama PR-13’te detaylandırılır.
-
-## Portfolio Motoru
-
-Portföy motoru, sinyallerden pozisyon boyutları ve maliyetleri hesaplamak için kullanılır.
-
-### Boyutlama Modları
-
-- **risk_per_trade**: ATR tabanlı stop mesafesiyle her işlemde özsermayenin belirli bir bps'i riske edilir.
-- **fixed_fraction**: Özsermayenin sabit bir yüzdesi pozisyona ayrılır.
-- **target_weight**: Sinyal hedef ağırlık verirse doğrudan notional hesaplanır.
-
-### Limitler
-
-`config/portfolio.yaml` dosyasında max_positions, max_position_pct, max_gross_exposure, lot_size, min_qty gibi kısıtlar tanımlanır.
-
-### Maliyet Entegrasyonu
-
-`config/costs.yaml` mevcutsa `apply_costs` aracılığıyla komisyon, spread ve slippage maliyetleri uygulanır; yoksa maliyetler 0 kabul edilir.
-
-### CLI Örneği
-
-```bash
-python -m backtest.cli portfolio-sim --config config/colab_config.yaml --portfolio config/portfolio.yaml --start 2025-03-07 --end 2025-03-09
-```
-
-Çıktılar `artifacts/portfolio/` klasörüne `trades.csv` ve `daily_equity.csv` olarak yazılır.
-
-
-## Günlük Artırımlı Çalıştırıcı
-
-```bash
-# Yerelde dünü çalıştır
-make daily
-# Başka günler için
-DAYS_BACK=2 make daily
-```
-
-CI kullanımı:
-- Settings → Secrets → Actions altına `DAILY_WEBHOOK_URL` (opsiyonel) ekle.
-- Actions sekmesinden `daily` workflow'unu **Run workflow** ile manuel tetikleyebilir, `days_back` girebilirsin.
-
-## Guardrails
-
-Look-ahead hatalarını önleyen kontrolleri manuel tetiklemek için:
-
+**Örnek**
 ```bash
 python -m backtest.cli guardrails
 ```
 
-Çıktılar `artifacts/guardrails/` altında `summary.json` ve `violations.csv` olarak üretilir.
+### config-validate
+**Amaç:** Config dosyalarını şema ile doğrular.
 
-## Strateji Karşılaştırma ve Tuning
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --config | yol | `config/colab_config.yaml` | Ana config |
+| --portfolio | yol | `config/portfolio.yaml` | Portföy config |
+| --costs | yol | `config/costs.yaml` | Maliyet config |
+| --export-json-schema | flag | `False` | Şema export |
 
-### Stratejileri Karşılaştırma
-
+**Örnek**
 ```bash
-python -m backtest.cli compare-strategies --start 2025-01-01 --end 2025-01-10 --space config/strategies.yaml
+python -m backtest.cli config-validate
 ```
 
-Bu komut listelenen stratejileri aynı veri döneminde koşturur ve sonuçları `artifacts/compare/` altında `results.csv` ve `summary.html` olarak kaydeder.
+### compare-strategies
+**Amaç:** Aynı veri üzerinde birden fazla stratejiyi koşturur.
 
-### Strateji Tuning
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --start | YYYY-MM-DD | zorunlu | Başlangıç |
+| --end | YYYY-MM-DD | zorunlu | Bitiş |
+| --space | yol | zorunlu | Strateji tanımları |
 
+**Örnek**
 ```bash
-python -m backtest.cli tune-strategy --start 2025-01-01 --end 2025-01-20 --space config/tune.yaml --search grid --max-iters 5 --seed 42
+python -m backtest.cli compare-strategies \
+  --start 2024-01-01 --end 2024-01-05 --space config/strategies.yaml
 ```
 
-Belirtilen parametre uzayında zaman serisi çapraz doğrulaması ile en iyi konfigürasyon bulunur. Çıktılar `artifacts/tune/` dizinine yazılır.
+### tune-strategy
+**Amaç:** Tek strateji için hiper-parametre araması yapar.
 
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --start | YYYY-MM-DD | zorunlu | Başlangıç |
+| --end | YYYY-MM-DD | zorunlu | Bitiş |
+| --space | yol | zorunlu | Arama uzayı |
+| --cv | str | `walk-forward` | Çapraz doğrulama |
+| --search | str | `grid` | Arama türü |
+| --max-iters | int | `10` | Iterasyon |
+| --seed | int | `None` | Rastgelelik |
+
+**Örnek**
+```bash
+python -m backtest.cli tune-strategy \
+  --start 2024-01-01 --end 2024-01-05 --space config/tune.yaml
+```
+
+### convert-to-parquet
+**Amaç:** Excel kaynaklarından bölümlü Parquet üretir.
+
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --excel-dir | yol | `paths.EXCEL_DIR` | Excel kaynak klasörü |
+| --out | yol | zorunlu | Parquet çıkışı |
+
+**Örnek**
+```bash
+python -m backtest.cli convert-to-parquet --out data/parquet
+```
+
+### fetch-range
+**Amaç:** Belirli tarih aralığı için veri indirir.
+
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --symbols | liste | zorunlu | Semboller (virgül ile ayrılmış) |
+| --start | YYYY-MM-DD | zorunlu | Başlangıç |
+| --end | YYYY-MM-DD | zorunlu | Bitiş |
+| --provider | str | `stub` | Sağlayıcı |
+| --directory | yol | `data/` | Çıktı dizini |
+
+**Örnek**
+```bash
+python -m backtest.cli fetch-range \
+  --symbols DEMO --start 2024-01-01 --end 2024-01-05
+```
+
+### fetch-latest
+**Amaç:** TTL'e göre en güncel veriyi indirir.
+
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --symbols | liste | zorunlu | Semboller |
+| --ttl-hours | int | `6` | Geçerlilik süresi |
+| --provider | str | `stub` | Sağlayıcı |
+| --directory | yol | `data/` | Çıktı dizini |
+
+**Örnek**
+```bash
+python -m backtest.cli fetch-latest --symbols DEMO
+```
+
+### refresh-cache
+**Amaç:** Önbellekteki verileri günceller.
+
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --ttl-hours | int | `0` | Yenileme eşiği |
+| --provider | str | `stub` | Sağlayıcı |
+| --directory | yol | `data/` | Çıktı dizini |
+
+**Örnek**
+```bash
+python -m backtest.cli refresh-cache
+```
+
+### vacuum-cache
+**Amaç:** Eski parçaları temizler.
+
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --older-than-days | int | `365` | Yaş eşiği |
+| --provider | str | `stub` | Sağlayıcı |
+| --directory | yol | `data/` | Çıktı dizini |
+
+**Örnek**
+```bash
+python -m backtest.cli vacuum-cache
+```
+
+### integrity-check
+**Amaç:** Parquet parçalarının bütünlüğünü kontrol eder.
+
+| Flag | Tip | Varsayılan | Açıklama |
+|------|-----|------------|----------|
+| --symbols | liste | zorunlu | Semboller |
+| --provider | str | `stub` | Sağlayıcı |
+| --directory | yol | `data/` | Çıktı dizini |
+
+**Örnek**
+```bash
+python -m backtest.cli integrity-check --symbols DEMO
+```
+
+## Veri Yolu & ENV
+- `DATA_DIR`: Tüm verilerin kökü (`data/`).
+- `EXCEL_DIR`: Excel kaynak klasörü; varsayılan `DATA_DIR`.
+- `ALLOW_DOWNLOAD`: `1` ise HTTP tabanlı indirmeye izin verir.
+
+Örnek kullanım:
+```bash
+DATA_DIR=/mnt/veri ALLOW_DOWNLOAD=1 \
+python -m backtest.cli fetch-range --symbols DEMO --start 2024-01-01 --end 2024-01-05
+```
+
+## İndirme (Opsiyonel Manuel)
+`fetch-*` komutları ağ üzerinden veri çekebilir. Varsayılan olarak indirme
+yapılmaz; `--allow-download` veya `ALLOW_DOWNLOAD=1` kullanarak etkinleştirin.
+`stub`, `local-csv` ve `local-excel` sağlayıcıları çevrimdışıdır.
+
+## Sık Karşılaşılan Hatalar
+- Yol bulunamadı: `filters.csv` veya veri dosyaları için tam yol belirtin.
+- İzin reddedildi: İlgili dizinlerin yazma izni olduğundan emin olun.
+- Eksik argüman: CLI yardımını `-h` ile kontrol edin.
+ Daha fazla bilgi için [TROUBLESHOOT.md](TROUBLESHOOT.md) dosyasına bakın.
+
+## Ekler / İpuçları
+- Loglar varsayılan olarak `loglar/` klasörüne, artefaktlar `artifacts/`
+  altına yazılır.
+- Platformlar arası çalışırken Windows yol ayracı için çift ters bölü (
+  `\\`) kullanın.

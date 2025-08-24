@@ -1,67 +1,65 @@
-## Stage1 İlerleme – A1 Tamam
-- Kanonik isimler ve alias tablo eklendi.
-- Kod katmanı: `backtest/naming/*` (normalize & alias)
-- Bu katman A4 Dry-Run doğrulamada ve A5 ön-hesaplayıcıda yeniden kullanılacak.
+# README Stage 1
 
-## Stage1 İlerleme – A2 Tam
-- PythonQuery DSL eklendi: Güvenli AST whitelist, `cross_up/down` semantiği.
-- Modüller: `backtest/dsl/*`
-- Test: `tests/test_dsl_basic.py`
+## Proje Özeti
+Bu depo, finansal zaman serileri için temel tarama ve raporlama araçları
+sunar. Varsayılan tek veri kaynağı `data/` dizinidir ve tüm yol çözümleri
+`backtest/paths.py` içinden yapılır. Çevrimdışı çalışma varsayılandır;
+indirme işlemleri yalnızca manuel bayrak veya ortam değişkeni ile
+etkinleştirilebilir.
 
-## Stage1 İlerleme – A3 Tam
-- In‑memory normalize katmanı eklendi: alias→kanonik, snake_case, .1 kopya tespiti.
-- Politikalar: strict (hata), prefer_first (drop), suffix (rename _dupN).
-- Modüller: `backtest/normalize/*`
-- Test: `tests/test_normalize_df.py`
+## Kurulum
+- Python ≥3.10, <3.13 gerektirir.
+- Sanal ortam oluşturun ve bağımlılıkları yükleyin:
 
-## Stage1 İlerleme – A4 Tam
-- Dry‑Run doğrulama eklendi.
-- CLI: `--dry-run` seçeneği filters.csv için fail-fast kontrol yapar.
-- Rapor: satır, hata kodu, mesaj.
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-## Stage1 İlerleme – A5 Tam
-- Ön hesaplayıcı eklendi.
-- Gösterge hesaplamaları DataFrame’e önceden ekleniyor.
-- Aynı gösterge bir kez hesaplanıyor (cache).
-- Modüller: `backtest/precompute/*`
-- Test: `tests/test_precompute.py`
+İsteğe bağlı olarak proje kökünde düzenlenebilir kurulum yapabilirsiniz:
 
-## Stage1 İlerleme – A6 Tam
-- Günlük batch döngüsü eklendi.
-- CLI alt komutları: `scan-day`, `scan-range`.
-- Çıktılar: `raporlar/gunluk/YYYY-MM-DD.csv` (date,symbol,filter_code).
-- Modüller: `backtest/batch/*`
-- Test: `tests/test_batch_runner.py`
+```bash
+pip install -e .
+```
 
-## Stage1 İlerleme – A7 Tam
-- CLI sertleştirildi: güvenli varsayılanlar, anlamlı hata kodları.
-- Feature flags: `dry_run`, `filters_enabled`, `write_outputs`.
-- Config dosyası ve log seviyesi desteği eklendi.
+## Veri Dizini
+Tek veri yolu `data/` altındadır. Örnek dosyalar:
+- `data/BIST.xlsx`
+- `data/alias_mapping.csv`
 
-### A7 Hotfix (Compatibility)
-- Eski testlere uyum için `scan_range/scan_day` click komutları ve `_run_scan`, `preflight`, `read_excels_long`, `compile_filters` sembolleri eklendi.
-- `--report-alias` ve `--no-preflight` bayrakları yardım çıktısına taşındı.
-- `load_config` artık attribute‑style nesne döndürüyor; legacy anahtarlar (`xu100_*`) destekleniyor.
+Varsayılan yollar ortam değişkenleri ile değiştirilebilir:
+- `DATA_DIR` tüm verilerin temel dizinidir.
+- `EXCEL_DIR` Excel kaynaklarını gösterir; verilmezse `DATA_DIR`
+  kullanılır.
 
-## Stage1 İlerleme – A8 Tam
-- run_id tabanlı log ve artefakt altyapısı eklendi.
-- Artefaktlar: config/env/inputs snapshot ve günlük dosyaları için checksum.
-- Aynı girdilerle tekrar koşuda checksum sabit → deterministik doğrulama.
+Örnek override:
 
-## Stage1 İlerleme – A9 Tam
-- Tarama ortalamaları ve BİST oranlı özetler eklendi (H=1, eşit ağırlık).
-- Çıktılar: `raporlar/ozet/daily_summary.csv`, `filter_counts.csv`, `summary.md`.
-- CLI: `summarize --data panel.parquet --signals raporlar/gunluk --benchmark bist.csv --out raporlar/ozet`.
+```bash
+DATA_DIR=/mnt/veri EXCEL_DIR=/mnt/excel \
+python -m backtest.cli convert-to-parquet --out /tmp/parquet
+```
 
-## Stage1 İlerleme – A10 Tam
-- Excel çıktı katmanı eklendi: `summary.xlsx` (DAILY_SUMMARY, FILTER_COUNTS, KPI, PIVOT_FILTER_BY_DAY, README).
-- CLI: `report-excel --daily raporlar/ozet/daily_summary.csv --filter-counts raporlar/ozet/filter_counts.csv --out raporlar/ozet/summary.xlsx`.
+## Hızlı Başlangıç
+Aşağıdaki komutlar örnek verilerle çevrimdışı çalışır.
 
-## Stage1 İlerleme – A11 Tam
-- Parquet panel ve sembol-chunk okuma eklendi.
-- Tek hesap prensibi: indikatörler chunk bazında bir defa hesaplanıyor.
-- Opsiyonel paralellik: `--workers` ile hisse bazlı fan-out.
-- CLI örnek:
-  ```bash
-  python -m backtest.cli scan-range --config config.yaml --parquet-cache cache/panel.parquet --chunk-size 20 --workers 4
-  ```
+```bash
+# filters.csv dosyasını doğrula
+python -m backtest.cli dry-run --filters filters.csv
+
+# Excel dosyalarını Parquet'e çevir
+python -m backtest.cli convert-to-parquet --out data/parquet
+
+# Tek gün tarama yap
+python -m backtest.cli scan-day \
+  --data data/BIST.xlsx --filters filters.csv \
+  --date 2024-01-02 --out raporlar/gunluk
+```
+
+## Offline Varsayılanı
+Harici indirme kapalıdır. İndirme yapmak için
+`--allow-download` bayrağı veya `ALLOW_DOWNLOAD=1` ortam değişkeni
+kullanılmalıdır.
+
+## Sorun Giderme & Detaylı Kullanım
+Ek argümanlar, tüm alt komutlar ve ipuçları için
+[`USAGE.md`](USAGE.md) dosyasına bakın.
