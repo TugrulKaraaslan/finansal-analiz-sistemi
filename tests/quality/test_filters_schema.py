@@ -1,4 +1,3 @@
-import pandas as pd
 import pytest
 
 from io_filters import load_filters_csv, read_filters_csv

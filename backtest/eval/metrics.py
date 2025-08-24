@@ -63,10 +63,10 @@ def confusion_from_signals(
     y_true = y_true[valid]
     y_pred = y_pred[valid]
 
-    tp = int(((y_pred == True) & (y_true == True)).sum())
-    fp = int(((y_pred == True) & (y_true == False)).sum())
-    tn = int(((y_pred == False) & (y_true == False)).sum())
-    fn = int(((y_pred == False) & (y_true == True)).sum())
+    tp = int((y_pred & y_true).sum())
+    fp = int((y_pred & ~y_true).sum())
+    tn = int((~y_pred & ~y_true).sum())
+    fn = int((~y_pred & y_true).sum())
 
     detail = pd.DataFrame({"y_true": y_true, "y_pred": y_pred})
     return Confusion(tp, fp, tn, fn), detail

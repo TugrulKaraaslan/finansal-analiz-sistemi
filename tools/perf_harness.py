@@ -13,8 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from backtest.data.loader import load_prices
-from backtest.paths import DATA_DIR
+from backtest.data.loader import load_prices  # noqa: E402
+from backtest.paths import DATA_DIR  # noqa: E402
 
 SCENARIOS = {
     "scan-day": lambda symbols, start, end, backend: load_prices(

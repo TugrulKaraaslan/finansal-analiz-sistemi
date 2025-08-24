@@ -12,7 +12,7 @@ from backtest.eval.walk_forward import (  # noqa: E402
     generate_folds,
     save_folds,
 )
-from backtest.logging_conf import get_logger, set_fold_id
+from backtest.logging_conf import get_logger, set_fold_id  # noqa: E402
 from backtest.paths import DATA_DIR  # noqa: E402
 
 log = get_logger("wf")
