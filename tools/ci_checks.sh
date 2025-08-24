@@ -16,8 +16,7 @@ fi
 # 3. CLI yardım çıktısı kontrolü
 python -m backtest.cli --help >/dev/null 2>&1 || { echo "ERR: cli help failed" >&2; exit 1; }
 
-# 4. Pytest (offline)
-export ALLOW_DOWNLOAD=0
+# 4. Pytest
 pytest -q || { echo "ERR: pytest failed" >&2; exit 1; }
 
 # 5. Markdown hızlı denetim (opsiyonel, ağsız)

@@ -104,11 +104,6 @@ aracını kullanabilirsiniz.
 `PythonQuery` sütunu boş bırakılamaz. Boş veya sadece boşluk içeren
 satırlar `ValueError` ile sonuçlanır.
 
-## Offline Varsayılanı
-Harici indirme kapalıdır. İndirme yapmak için
-`--allow-download` bayrağı veya `ALLOW_DOWNLOAD=1` ortam değişkeni
-kullanılmalıdır.
-
 ## Sorun Giderme & Detaylı Kullanım
 Ek argümanlar, tüm alt komutlar ve ipuçları için
 [`USAGE.md`](USAGE.md) dosyasına bakın.

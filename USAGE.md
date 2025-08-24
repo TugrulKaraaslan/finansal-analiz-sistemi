@@ -351,19 +351,6 @@ python -m backtest.cli integrity-check --symbols DEMO
 ## Veri Yolu & ENV
 - `DATA_DIR`: Tüm verilerin kökü (`data/`).
 - `EXCEL_DIR`: Excel kaynak klasörü; varsayılan `DATA_DIR`.
-- `ALLOW_DOWNLOAD`: `1` ise HTTP tabanlı indirmeye izin verir.
-
-Örnek kullanım:
-```bash
-DATA_DIR=/mnt/veri ALLOW_DOWNLOAD=1 \
-python -m backtest.cli fetch-range --symbols DEMO --start 2024-01-01 --end 2024-01-05
-```
-
-## İndirme (Opsiyonel Manuel)
-`fetch-*` komutları ağ üzerinden veri çekebilir. Varsayılan olarak indirme
-yapılmaz; `--allow-download` veya `ALLOW_DOWNLOAD=1` kullanarak etkinleştirin.
-`stub`, `local-csv` ve `local-excel` sağlayıcıları çevrimdışıdır.
-
 ## Sık Karşılaşılan Hatalar
 - Yol bulunamadı: `filters.csv` veya veri dosyaları için tam yol belirtin.
 - İzin reddedildi: İlgili dizinlerin yazma izni olduğundan emin olun.
