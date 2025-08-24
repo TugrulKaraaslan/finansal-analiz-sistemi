@@ -8,6 +8,24 @@ from typing import List, Tuple
 
 _LOGICAL = {"and": "&", "or": "|"}
 
+# canonical function name mapping
+_FUNC_ALIASES = {
+    # cross up variations
+    "crossup": "cross_up",
+    "cross_up": "cross_up",
+    "crossover": "cross_up",
+    "cross_over": "cross_up",
+    "keser_yukari": "cross_up",
+    "kesisim_yukari": "cross_up",
+    # cross down variations
+    "crossdown": "cross_down",
+    "cross_down": "cross_down",
+    "crossunder": "cross_down",
+    "cross_under": "cross_down",
+    "keser_asagi": "cross_down",
+    "kesisim_asagi": "cross_down",
+}
+
 
 def _collapse_underscores(s: str) -> str:
     return re.sub(r"__+", "_", s)
@@ -22,7 +40,7 @@ def normalize_expr(expr: str) -> Tuple[str, List[Tuple[str, str, str]]]:
     * Remove stray decimal fragments like ``name .015`` that may appear
       before a comparison operator.
     * Collapse multiple underscores.
-    * Detect CROSSUP/CROSSDOWN macros and return them separately.
+    * Detect ``cross_up``/``cross_down`` macros and return them separately.
     """
 
     tokens = list(tokenize.generate_tokens(io.StringIO(expr).readline))
@@ -31,7 +49,7 @@ def normalize_expr(expr: str) -> Tuple[str, List[Tuple[str, str, str]]]:
     while i < len(tokens):
         tok = tokens[i]
         if tok.type == tokenize.NAME:
-            val = tok.string
+            val = tok.string.lower()
             # logical ops
             if val in _LOGICAL:
                 new_tok = tokenize.TokenInfo(
@@ -92,18 +110,20 @@ def normalize_expr(expr: str) -> Tuple[str, List[Tuple[str, str, str]]]:
     # Turkish macro forms
     normalised = re.sub(
         r"([A-Za-z0-9_]+)_keser_([A-Za-z0-9_]+)_yukari",
-        r"CROSSUP(\1,\2)",
+        r"cross_up(\1,\2)",
         normalised,
         flags=re.I,
     )
     normalised = re.sub(
         r"([A-Za-z0-9_]+)_keser_([A-Za-z0-9_]+)_asagi",
-        r"CROSSDOWN(\1,\2)",
+        r"cross_down(\1,\2)",
         normalised,
         flags=re.I,
     )
-    normalised = re.sub(r"cross_?up\(", "CROSSUP(", normalised, flags=re.I)
-    normalised = re.sub(r"cross_?down\(", "CROSSDOWN(", normalised, flags=re.I)
+
+    # normalize function aliases
+    for alias, canon in _FUNC_ALIASES.items():
+        normalised = re.sub(rf"\b{alias}\s*\(", f"{canon}(", normalised, flags=re.I)
 
     macros: List[Tuple[str, str, str]] = []
 
@@ -111,16 +131,19 @@ def normalize_expr(expr: str) -> Tuple[str, List[Tuple[str, str, str]]]:
         kind = m.group(1).lower()
         a = _collapse_underscores(m.group(2).strip().lower())
         b = _collapse_underscores(m.group(3).strip().lower())
-        full = f"cross{kind}"
+        full = f"cross_{kind}"
         macros.append((full, a, b))
-        return f"CROSS{kind.upper()}({a},{b})"
+        return f"cross_{kind}({a},{b})"
 
     normalised = re.sub(
-        r"CROSS(UP|DOWN)\(([^,]+),([^\)]+)\)",
+        r"cross_(up|down)\(([^,]+),([^\)]+)\)",
         _macro_repl,
         normalised,
         flags=re.I,
     )
+
+    normalised = normalised.strip()
+    normalised = re.sub(r"\s+", " ", normalised)
 
     return normalised, macros
 

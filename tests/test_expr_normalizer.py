@@ -28,7 +28,7 @@ def test_psarl_dotted_to_underscored():
 
 def test_willr_negative_levels():
     s, _ = normalize_expr("willr_14 > _100 and crossup(willr_14, _80)")
-    assert s == "willr_14 > -100 & CROSSUP(willr_14,-80)"
+    assert s == "willr_14 > -100 & cross_up(willr_14,-80)"
 
 
 def test_space_eq_fixed():

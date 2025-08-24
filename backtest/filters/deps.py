@@ -22,7 +22,7 @@ def collect_series(expr: str | Iterable[str]) -> Set[str]:
         for tok in tokenize.generate_tokens(io.StringIO(norm).readline):
             if tok.type == tokenize.NAME:
                 name = tok.string
-                if name in keyword.kwlist or name.upper() in {"CROSSUP", "CROSSDOWN"}:
+                if name in keyword.kwlist or name in {"cross_up", "cross_down"}:
                     continue
                 out.add(name)
     return out
