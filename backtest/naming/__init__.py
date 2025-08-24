@@ -5,7 +5,7 @@ import pandas as pd
 from .alias_loader import AliasMap, load_alias_map
 from .aliases import normalize_token
 from .canonical import CANONICAL_BASE, CANONICAL_SET
-from .legacy import *  # noqa: F401,F403
+from .legacy import normalize_name, validate_columns_schema
 from .normalize import (
     normalize_dataframe_columns,
     normalize_indicator_token,
@@ -70,4 +70,6 @@ __all__ = [
     "normalize_token",
     "normalize_dataframe_columns",
     "canonicalize_columns",
+    "normalize_name",
+    "validate_columns_schema",
 ]

@@ -4,7 +4,6 @@ import ast
 import operator as op
 from typing import Any, Mapping
 
-import numpy as np
 import pandas as pd
 
 from .errors import DSLBadArgs, DSLUnknownName

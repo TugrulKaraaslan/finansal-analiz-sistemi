@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 
 from .cross import cross_down as _cross_down
-from .cross import cross_over, cross_under
+from .cross import cross_over
 from .cross import cross_up as _cross_up
 
 
