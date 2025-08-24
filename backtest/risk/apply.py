@@ -1,8 +1,11 @@
 from __future__ import annotations
-from pathlib import Path
-import pandas as pd
+
 import os
+from pathlib import Path
+
+import pandas as pd
 import yaml
+
 from .guards import RiskEngine
 
 _DEF = {
@@ -57,9 +60,7 @@ def run_risk(
     if dec.final_action == "modify":
         mods = [r for r in dec.reasons if r.reason == "per_symbol_cap"]
         if mods:
-            ratio = abs(mods[-1].details["new"]) / max(
-                abs(mods[-1].details["old"]), 1e-9
-            )
+            ratio = abs(mods[-1].details["new"]) / max(abs(mods[-1].details["old"]), 1e-9)
             orders = orders.copy()
             orders["quantity"] = (orders["quantity"] * ratio).astype(int)
     return orders, dec.final_action

@@ -1,13 +1,13 @@
 from __future__ import annotations
-from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from pathlib import Path
-import math
-import pandas as pd
-import numpy as np
-import yaml
 from typing import Optional
+
+import numpy as np
+import pandas as pd
+import yaml
 
 
 @dataclass
@@ -114,19 +114,13 @@ def size_risk_per_trade(
         # default: %2 stop
         stop_dist = 0.02 * price
     qty_float = risk_cash / max(stop_dist, 1e-9)
-    return adjust_qty(
-        qty_float, params.lot_size, params.min_qty, params.round_qty
-    )  # noqa: E501
+    return adjust_qty(qty_float, params.lot_size, params.min_qty, params.round_qty)  # noqa: E501
 
 
-def size_fixed_fraction(
-    price: float, equity: float, params: PortfolioParams
-) -> int:  # noqa: E501
+def size_fixed_fraction(price: float, equity: float, params: PortfolioParams) -> int:  # noqa: E501
     cash = equity * params.fixed_fraction
     qty_float = cash / max(price, 1e-9)
-    return adjust_qty(
-        qty_float, params.lot_size, params.min_qty, params.round_qty
-    )  # noqa: E501
+    return adjust_qty(qty_float, params.lot_size, params.min_qty, params.round_qty)  # noqa: E501
 
 
 # Emir üretimi: sinyal DataFrame'i kolonları:
@@ -163,9 +157,7 @@ def generate_orders(
             side = "BUY" if notional > 0 else "SELL"
         elif bool(r.get("entry_long")):
             if params.mode == "risk_per_trade":
-                qty = size_risk_per_trade(
-                    price, equity, params, r.get("atr_val")
-                )  # noqa: E501
+                qty = size_risk_per_trade(price, equity, params, r.get("atr_val"))  # noqa: E501
             else:
                 qty = size_fixed_fraction(price, equity, params)
             side = "BUY"

@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 import hashlib
 import json
 from pathlib import Path
-from typing import Iterable, Dict
+from typing import Dict, Iterable
 
 
 def sha256_file(path: str | Path) -> str:

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-import pandas as pd
-import numpy as np
 
+import numpy as np
+import pandas as pd
 
 _DEF_OUT = "raporlar/ozet/summary.xlsx"
 
@@ -107,9 +107,7 @@ def build_excel_report(
                 fill_value=0,
                 aggfunc="sum",
             )
-            piv.reset_index().to_excel(
-                xw, index=False, sheet_name="PIVOT_FILTER_BY_DAY"
-            )
+            piv.reset_index().to_excel(xw, index=False, sheet_name="PIVOT_FILTER_BY_DAY")
         readme = pd.DataFrame(
             {
                 "info": [readme_text or "Stage1 A10 – summary.xlsx"],

@@ -1,6 +1,10 @@
 from __future__ import annotations
+
 import pandas as pd
-from .cross import cross_up as _cross_up, cross_down as _cross_down, cross_over, cross_under
+
+from .cross import cross_down as _cross_down
+from .cross import cross_over, cross_under
+from .cross import cross_up as _cross_up
 
 
 def build_env(df: pd.DataFrame):
@@ -28,18 +32,7 @@ def build_env(df: pd.DataFrame):
         out.iloc[-1] = False
         return out.fillna(False)
 
-    env = {
-        # canonical
-        "cross_up": _env_cross_up,
-        "cross_down": _env_cross_down,
-        # aliases
-        "CROSSUP": _env_cross_up,
-        "CROSSDOWN": _env_cross_down,
-        "crossOver": _env_cross_up,
-        "crossUnder": _env_cross_down,
-        "keser_yukari": _env_cross_up,
-        "keser_asagi": _env_cross_down,
-    }
+    env = {"cross_up": _env_cross_up, "cross_down": _env_cross_down}
     for c in df.columns:
         env[c] = df[c]
     return env

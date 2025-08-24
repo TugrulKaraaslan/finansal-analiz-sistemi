@@ -7,13 +7,13 @@ import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-from backtest.paths import DATA_DIR  # noqa: E402
 from backtest.eval.walk_forward import (  # noqa: E402
     WfParams,
     generate_folds,
     save_folds,
 )
-from backtest.logging_conf import set_fold_id, get_logger
+from backtest.logging_conf import get_logger, set_fold_id
+from backtest.paths import DATA_DIR  # noqa: E402
 
 log = get_logger("wf")
 

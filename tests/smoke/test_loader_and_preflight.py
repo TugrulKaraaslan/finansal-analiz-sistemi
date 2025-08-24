@@ -1,8 +1,8 @@
 import pandas as pd
 from click.testing import CliRunner
 
-from backtest.data_loader import canonicalize_columns, read_excels_long
 from backtest import cli
+from backtest.data_loader import canonicalize_columns, read_excels_long
 
 
 def test_duplicate_columns_collapsed():

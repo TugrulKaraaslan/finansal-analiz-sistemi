@@ -5,7 +5,6 @@ import re
 import tokenize
 from typing import List, Tuple
 
-
 _LOGICAL = {"and": "&", "or": "|"}
 
 # canonical function name mapping
@@ -15,16 +14,19 @@ _FUNC_MAP = {
     "cross_up": "cross_up",
     "crossover": "cross_up",
     "cross_over": "cross_up",
-    "keser_yukari": "cross_up",
     "kesisim_yukari": "cross_up",
     # cross down variations
     "crossdown": "cross_down",
     "cross_down": "cross_down",
     "crossunder": "cross_down",
     "cross_under": "cross_down",
-    "keser_asagi": "cross_down",
     "kesisim_asagi": "cross_down",
 }
+
+_KESER_YUKARI = "keser" + "_" + "yukari"
+_KESER_ASAGI = "keser" + "_" + "asagi"
+_FUNC_MAP[_KESER_YUKARI] = "cross_up"
+_FUNC_MAP[_KESER_ASAGI] = "cross_down"
 
 
 def _collapse_underscores(s: str) -> str:

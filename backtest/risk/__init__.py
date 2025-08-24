@@ -1,6 +1,6 @@
-from .guards import GuardResult, RiskDecision, RiskEngine
-from .context import RiskState
 from .apply import load_risk_cfg, run_risk
+from .context import RiskState
+from .guards import GuardResult, RiskDecision, RiskEngine
 
 __all__ = [
     "GuardResult",

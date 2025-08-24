@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date, datetime
 
 from backtest.downloader.core import DataDownloader
 from backtest.downloader.providers.stub import StubProvider
@@ -6,7 +6,9 @@ from backtest.downloader.providers.stub import StubProvider
 
 def test_next_start_from_manifest(tmp_path):
     prov = StubProvider()
-    dl = DataDownloader(prov, data_dir=tmp_path / "parquet", manifest_path=tmp_path / "manifest.json")
+    dl = DataDownloader(
+        prov, data_dir=tmp_path / "parquet", manifest_path=tmp_path / "manifest.json"
+    )
     dl._manifest = {
         "AAA": {
             "last_fetch_ts": datetime(2024, 1, 5).isoformat(),

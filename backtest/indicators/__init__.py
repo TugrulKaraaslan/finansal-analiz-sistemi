@@ -35,9 +35,7 @@ def compute_indicators(
     if params is not None and not isinstance(params, dict):
         raise TypeError("params must be a dict or None")
     if engine != "none":
-        raise ValueError(
-            "Gösterge hesaplaması politika gereği devre dışı (engine='none')."
-        )
+        raise ValueError("Gösterge hesaplaması politika gereği devre dışı (engine='none').")
     logger.info("indicators: using-from-data")
     logger.info("indicators: engine=none (using-from-data)")
     return df

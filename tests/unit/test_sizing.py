@@ -1,17 +1,13 @@
 from backtest.portfolio.engine import (
     PortfolioParams,
-    size_risk_per_trade,
     size_fixed_fraction,
+    size_risk_per_trade,
 )
 
 
 def test_risk_sizing_basic():
-    p = PortfolioParams(
-        initial_equity=1_000_000, risk_per_trade_bps=50, atr_mult=2
-    )  # noqa: E501
-    q = size_risk_per_trade(  # noqa: E501
-        price=100, equity=1_000_000, params=p, atr_val=1.5
-    )
+    p = PortfolioParams(initial_equity=1_000_000, risk_per_trade_bps=50, atr_mult=2)  # noqa: E501
+    q = size_risk_per_trade(price=100, equity=1_000_000, params=p, atr_val=1.5)  # noqa: E501
     assert q > 0
 
 

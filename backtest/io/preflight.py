@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date
+from difflib import get_close_matches
 from pathlib import Path
 from typing import Iterable, List
-from difflib import get_close_matches
 
 from utils.paths import resolve_path
 

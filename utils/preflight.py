@@ -1,4 +1,5 @@
 import re
+
 import pandas as pd
 
 REQUIRED_COLUMNS = ["sma_10", "sma_50", "adx_14"]

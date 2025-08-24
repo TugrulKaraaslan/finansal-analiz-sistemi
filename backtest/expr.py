@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import warnings
+
 from backtest.filters.engine import evaluate as _engine_evaluate
 
 _warned = False

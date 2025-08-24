@@ -1,4 +1,4 @@
-from backtest.logging_conf import get_logger, log_with, ensure_run_id
+from backtest.logging_conf import ensure_run_id, get_logger, log_with
 
 
 def test_json_log_shape(tmp_path, monkeypatch):

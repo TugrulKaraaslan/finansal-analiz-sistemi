@@ -2,22 +2,25 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import collections
+import logging
+from pathlib import Path
 
 import pandas as pd
-from loguru import logger
 
 from utils.paths import resolve_path
 
 REQUIRED_HEADER = ["FilterCode", "PythonQuery"]
 
 
+logger = logging.getLogger("backtest")
+
+
 def _check_delimiter(path: Path) -> None:
     first_line = path.read_text(encoding="utf-8").splitlines()[0]
     if "," in first_line and ";" not in first_line:
         raise ValueError(
-            "CSV delimiter ';' bekleniyor. Lütfen dosyayı ';' ile kaydedin."
+            "CSV delimiter ';' bekleniyor. Dosyayı ';' ile kaydedin: FilterCode;PythonQuery"
         )
 
 

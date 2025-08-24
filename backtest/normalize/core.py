@@ -1,10 +1,13 @@
 from __future__ import annotations
-from typing import Iterable, Dict, Tuple, Literal
+
 import re
+from typing import Dict, Iterable, Literal, Tuple
+
 import pandas as pd
 
 from backtest.naming import load_alias_map, normalize_indicator_token
-from .errors import CollisionError, AliasHeaderError
+
+from .errors import AliasHeaderError, CollisionError
 from .report import NormalizeReport
 
 BuildPolicy = Literal["strict", "prefer_first", "suffix"]
@@ -54,9 +57,7 @@ def build_column_mapping(
         # çakışma var
         if policy == "strict":
             report.add_collision(canon, originals)
-            raise CollisionError(
-                f"Kanonik isim çakışması: {canon} <- {originals}", code="VN001"
-            )
+            raise CollisionError(f"Kanonik isim çakışması: {canon} <- {originals}", code="VN001")
         elif policy == "prefer_first":
             # ilkini tut, diğerlerini drop listesine ekle
             for dup in originals[1:]:

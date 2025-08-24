@@ -1,47 +1,49 @@
 # flake8: noqa
 from __future__ import annotations
+
 import argparse
+import json
+import logging
 import os
 import sys
-import logging
-from types import SimpleNamespace as NS
 from pathlib import Path
-import pandas as pd
-import json
+from types import SimpleNamespace as NS
 
-from backtest.config import load_config, merge_cli_overrides, Flags
-from backtest.batch import run_scan_range, run_scan_day
-from backtest.normalizer import normalize
-from backtest.calendars import add_next_close
-from io_filters import load_filters_csv, read_filters_csv
-from backtest.filters_compile import compile_expression, compile_filters
-from backtest.screener import run_screener
+import pandas as pd
+
 from backtest.backtester import run_1g_returns
-from backtest.reporter import write_reports
-from backtest.validator import dataset_summary, quality_warnings
-from backtest.data_loader import read_excels_long as _read_excels_long
-from backtest.eval.metrics import SignalMetricConfig
-from backtest.eval.report import compute_signal_report, save_json
-from backtest.metrics import (
-    max_drawdown as risk_max_drawdown,
-    sharpe_ratio,
-    sortino_ratio,
-    turnover,
-)
-from backtest.trace import RunContext, ArtifactWriter, list_output_files
-from backtest.summary import summarize_range
-from backtest.reporting import build_excel_report
-from backtest.filters.normalize_expr import normalize_expr
-from backtest.filters.preflight import validate_filters as preflight_validate_filters
-from backtest.paths import DATA_DIR, EXCEL_DIR, BENCHMARK_PATH, ALIAS_PATH
-from backtest.portfolio.engine import PortfolioParams
-from backtest.portfolio.simulator import PortfolioSim
+from backtest.batch import run_scan_day, run_scan_range
+from backtest.calendars import add_next_close
+from backtest.config import Flags, load_config, merge_cli_overrides
 from backtest.config.schema import (
     ColabConfig,
     CostsConfig,
     PortfolioConfig,
     export_json_schema,
 )
+from backtest.data_loader import read_excels_long as _read_excels_long
+from backtest.eval.metrics import SignalMetricConfig
+from backtest.eval.report import compute_signal_report, save_json
+from backtest.filters.normalize_expr import normalize_expr
+from backtest.filters.preflight import validate_filters as preflight_validate_filters
+from backtest.filters_compile import compile_expression, compile_filters
+from backtest.metrics import max_drawdown as risk_max_drawdown
+from backtest.metrics import (
+    sharpe_ratio,
+    sortino_ratio,
+    turnover,
+)
+from backtest.normalizer import normalize
+from backtest.paths import ALIAS_PATH, BENCHMARK_PATH, DATA_DIR, EXCEL_DIR
+from backtest.portfolio.engine import PortfolioParams
+from backtest.portfolio.simulator import PortfolioSim
+from backtest.reporter import write_reports
+from backtest.reporting import build_excel_report
+from backtest.screener import run_screener
+from backtest.summary import summarize_range
+from backtest.trace import ArtifactWriter, RunContext, list_output_files
+from backtest.validator import dataset_summary, quality_warnings
+from io_filters import load_filters_csv, read_filters_csv
 
 __all__ = [
     "normalize",
@@ -54,7 +56,7 @@ __all__ = [
     "quality_warnings",
 ]
 
-from backtest.logging_conf import get_logger, log_with, ensure_run_id
+from backtest.logging_conf import ensure_run_id, get_logger, log_with
 
 log = get_logger("cli")
 run_id = ensure_run_id()
@@ -87,9 +89,7 @@ def preflight(cfg):  # tests monkeypatch ediyor
 
     if getattr(cfg.project, "single_date", None):
         dates = [pd.to_datetime(cfg.project.single_date).date()]
-    elif getattr(cfg.project, "start_date", None) and getattr(
-        cfg.project, "end_date", None
-    ):
+    elif getattr(cfg.project, "start_date", None) and getattr(cfg.project, "end_date", None):
         s = pd.to_datetime(cfg.project.start_date).date()
         e = pd.to_datetime(cfg.project.end_date).date()
         dates = pd.date_range(s, e).date
@@ -132,18 +132,12 @@ def convert_to_parquet(excel_dir: str | Path, out_dir: str | Path) -> None:
 
 
 def _run_scan(cfg):  # tests monkeypatch ediyor
-    src = (
-        cfg
-        if getattr(cfg.data, "price_schema", None)
-        else getattr(cfg.data, "excel_dir", "")
-    )
+    src = cfg if getattr(cfg.data, "price_schema", None) else getattr(cfg.data, "excel_dir", "")
     try:
         read_excels_long(src)
     except ValueError:
         pass
-    day = getattr(cfg.project, "single_date", None) or getattr(
-        cfg.project, "start_date", None
-    )
+    day = getattr(cfg.project, "single_date", None) or getattr(cfg.project, "start_date", None)
     out_dir = Path(getattr(cfg.project, "out_dir", "."))
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / f"SCAN_{day}.xlsx").write_text("", encoding="utf-8")
@@ -199,9 +193,7 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--data", required=False, help="Parquet/CSV fiyat verisi")
         sp.add_argument("--filters", "--filters-csv", dest="filters", required=False)
         sp.add_argument("--alias", default=str(ALIAS_PATH))
-        sp.add_argument(
-            "--filters-off", action="store_true", help="Filtre uygulamasını kapat"
-        )
+        sp.add_argument("--filters-off", action="store_true", help="Filtre uygulamasını kapat")
         sp.add_argument("--no-write", action="store_true", help="Dosya yazma kapalı")
         sp.add_argument("--costs", default=None, help="Maliyet config yolu")
         sp.add_argument(
@@ -226,12 +218,8 @@ def build_parser() -> argparse.ArgumentParser:
     prange.add_argument("--out", "--reports-dir", dest="out", required=False)
     add_common(prange)
 
-    ps = sub.add_parser(
-        "summarize", help="Sinyallerden günlük özet ve BIST oranlı alpha üret"
-    )
-    ps.add_argument(
-        "--data", required=True, help="Parquet/CSV fiyat paneli (MultiIndex destekli)"
-    )
+    ps = sub.add_parser("summarize", help="Sinyallerden günlük özet ve BIST oranlı alpha üret")
+    ps.add_argument("--data", required=True, help="Parquet/CSV fiyat paneli (MultiIndex destekli)")
     ps.add_argument("--signals", required=True, help="A6 günlük sinyal klasörü")
     ps.add_argument(
         "--benchmark",
@@ -264,32 +252,24 @@ def build_parser() -> argparse.ArgumentParser:
     seval.add_argument("--horizon-days", type=int, default=5)
     seval.add_argument("--threshold-bps", type=float, default=50)
     seval.add_argument("--signal-cols", nargs="*", default=["entry_long"])
-    seval.add_argument(
-        "--signals-csv", help="opsiyonel: sinyal DataFrame CSV yolu (date-indexli)"
-    )
+    seval.add_argument("--signals-csv", help="opsiyonel: sinyal DataFrame CSV yolu (date-indexli)")
     seval.add_argument("--equity-csv", default="artifacts/portfolio/daily_equity.csv")
     seval.add_argument("--weights-csv", default="artifacts/portfolio/weights.csv")
 
     gr = sub.add_parser("guardrails", help="Run guardrail checks")
     gr.add_argument("--out-dir", default="artifacts/guardrails")
 
-    cv = sub.add_parser(
-        "config-validate", help="Validate YAML configs and export JSON schemas"
-    )
+    cv = sub.add_parser("config-validate", help="Validate YAML configs and export JSON schemas")
     cv.add_argument("--config", default="config/colab_config.yaml")
     cv.add_argument("--portfolio", default="config/portfolio.yaml")
     cv.add_argument("--costs", default="config/costs.yaml")
     cv.add_argument("--export-json-schema", action="store_true")
-    cmp = sub.add_parser(
-        "compare-strategies", help="Run multiple strategies on same data"
-    )
+    cmp = sub.add_parser("compare-strategies", help="Run multiple strategies on same data")
     cmp.add_argument("--start", required=True)
     cmp.add_argument("--end", required=True)
     cmp.add_argument("--space", required=True, help="YAML strategy definitions")
 
-    tune = sub.add_parser(
-        "tune-strategy", help="Hyper-parameter tuning for a single strategy"
-    )
+    tune = sub.add_parser("tune-strategy", help="Hyper-parameter tuning for a single strategy")
     tune.add_argument("--start", required=True)
     tune.add_argument("--end", required=True)
     tune.add_argument("--space", required=True, help="YAML search space")
@@ -298,9 +278,7 @@ def build_parser() -> argparse.ArgumentParser:
     tune.add_argument("--max-iters", type=int, default=10)
     tune.add_argument("--seed", type=int, default=None)
 
-    ctp = sub.add_parser(
-        "convert-to-parquet", help="Excel dosyalarını Parquet'e dönüştür"
-    )
+    ctp = sub.add_parser("convert-to-parquet", help="Excel dosyalarını Parquet'e dönüştür")
     ctp.add_argument(
         "--excel-dir",
         required=False,
@@ -401,9 +379,9 @@ def main(argv=None):
             elif name == "local-excel":
                 prov = LocalExcelProvider(directory)
             elif name == "http-csv":
-                from backtest.downloader.providers.http_csv import (
+                from backtest.downloader.providers.http_csv import (  # pragma: no cover
                     HttpCSVProvider,
-                )  # pragma: no cover
+                )
 
                 prov = HttpCSVProvider(allow_download=allow_download)
             else:  # pragma: no cover
@@ -459,9 +437,7 @@ def main(argv=None):
         try:
             if Path(args.portfolio).exists():
                 p = (
-                    PortfolioConfig.model_validate_yaml(
-                        Path(args.portfolio).read_text()
-                    )
+                    PortfolioConfig.model_validate_yaml(Path(args.portfolio).read_text())
                     if hasattr(PortfolioConfig, "model_validate_yaml")
                     else PortfolioConfig(
                         **__import__("yaml").safe_load(Path(args.portfolio).read_text())
@@ -473,9 +449,7 @@ def main(argv=None):
             print(f"FAIL: {args.portfolio} → {e}")
         try:
             if Path(args.costs).exists():
-                k = CostsConfig(
-                    **__import__("yaml").safe_load(Path(args.costs).read_text())
-                )
+                k = CostsConfig(**__import__("yaml").safe_load(Path(args.costs).read_text()))
                 print(f"OK: {args.costs}")
         except Exception as e:
             ok = False
@@ -494,18 +468,14 @@ def main(argv=None):
 
     cfg_dict = _ns_to_dict(cfg)
     log_root = cfg_dict.get("paths", {}).get("logs", os.getenv("LOG_DIR", "loglar"))
-    art_root = cfg_dict.get("paths", {}).get(
-        "artifacts", os.getenv("ARTIFACTS_DIR", "artifacts")
-    )
+    art_root = cfg_dict.get("paths", {}).get("artifacts", os.getenv("ARTIFACTS_DIR", "artifacts"))
     rc = RunContext.create(log_root, art_root)
     logger.info("run_id=%s", rc.run_id)
     log_file = Path(log_root) / f"{rc.run_id}.log"
     global fh
     fh = logging.FileHandler(log_file, encoding="utf-8")
     fh.setLevel(logging.getLogger().level)
-    fh.setFormatter(
-        logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
-    )
+    fh.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s"))
     logging.getLogger().addHandler(fh)
 
     if args.config:
@@ -624,9 +594,7 @@ def main(argv=None):
             if not getattr(args, k, None):
                 need.append(k)
     if need:
-        parser.error(
-            f"the following arguments are required: {', '.join('--'+n for n in need)}"
-        )
+        parser.error(f"the following arguments are required: {', '.join('--'+n for n in need)}")
 
     if args.cmd == "eval-metrics":
         cfg = SignalMetricConfig(
@@ -691,9 +659,7 @@ def main(argv=None):
         sys.exit(0)
 
     if args.cmd == "portfolio-sim":
-        p = PortfolioParams.from_yaml(
-            Path(getattr(args, "portfolio", "config/portfolio.yaml"))
-        )
+        p = PortfolioParams.from_yaml(Path(getattr(args, "portfolio", "config/portfolio.yaml")))
         sim = PortfolioSim(
             p,
             Path(getattr(args, "costs", "config/costs.yaml")),
@@ -744,9 +710,7 @@ def main(argv=None):
         filters = load_filters_csv([filters_path])
         filters_df = pd.DataFrame(filters)
     except ValueError as exc:
-        raise ValueError(
-            "filters.csv beklenen kolonlar: FilterCode;PythonQuery"
-        ) from exc
+        raise ValueError("filters.csv beklenen kolonlar: FilterCode;PythonQuery") from exc
 
     if args.cmd == "scan-day":
         rows = run_scan_day(df, args.date, filters_df, alias_csv=args.alias)
@@ -759,9 +723,7 @@ def main(argv=None):
 
         OutputWriter(args.out).write_day(args.date, rows)
         if args.cmd in ("scan-day", "scan-range") and flags.write_outputs:
-            out_root = args.out or cfg_dict.get("paths", {}).get(
-                "outputs", "raporlar/gunluk"
-            )
+            out_root = args.out or cfg_dict.get("paths", {}).get("outputs", "raporlar/gunluk")
             files = list_output_files(out_root)
             ArtifactWriter(rc.artifacts_dir).write_checksums(files)
             logger.info("checksums.json yazıldı: %d dosya", len(files))
@@ -773,13 +735,9 @@ def main(argv=None):
             preflight_validate_filters(filters_path, DATA_DIR, alias_mode="warn")
         elif args.no_preflight:
             logger.info("--no-preflight aktif")
-        run_scan_range(
-            df, args.start, args.end, filters_df, out_dir=args.out, alias_csv=args.alias
-        )
+        run_scan_range(df, args.start, args.end, filters_df, out_dir=args.out, alias_csv=args.alias)
         if args.cmd in ("scan-day", "scan-range") and flags.write_outputs:
-            out_root = args.out or cfg_dict.get("paths", {}).get(
-                "outputs", "raporlar/gunluk"
-            )
+            out_root = args.out or cfg_dict.get("paths", {}).get("outputs", "raporlar/gunluk")
             files = list_output_files(out_root)
             ArtifactWriter(rc.artifacts_dir).write_checksums(files)
             logger.info("checksums.json yazıldı: %d dosya", len(files))
@@ -789,6 +747,7 @@ def main(argv=None):
 # ---- Click uyumluluk katmanı (eski testler) ----
 try:  # pragma: no cover - click opsiyonel
     import click
+
     from backtest.filters_cleanup import clean_filters
 
     @click.command(name="scan-range")
@@ -819,9 +778,7 @@ try:  # pragma: no cover - click opsiyonel
             try:
                 raw = pd.DataFrame(load_filters_csv([filters_csv]))
             except ValueError as exc:
-                raise ValueError(
-                    "filters.csv beklenen kolonlar: FilterCode;PythonQuery"
-                ) from exc
+                raise ValueError("filters.csv beklenen kolonlar: FilterCode;PythonQuery") from exc
             if "expr" not in raw.columns and "PythonQuery" in raw.columns:
                 raw = raw.rename(columns={"PythonQuery": "expr"})
             if "id" not in raw.columns and "FilterCode" in raw.columns:
@@ -886,9 +843,7 @@ try:  # pragma: no cover - click opsiyonel
                 df.to_csv(file, sep=";", index=False)
             else:
                 for idx in df.index[changed]:
-                    click.echo(
-                        f"{idx}: {df.at[idx, 'PythonQuery']} -> {norm.iloc[idx]}"
-                    )
+                    click.echo(f"{idx}: {df.at[idx, 'PythonQuery']} -> {norm.iloc[idx]}")
                 raise SystemExit(1)
         else:
             click.echo("OK")

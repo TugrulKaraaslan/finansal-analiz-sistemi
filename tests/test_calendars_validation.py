@@ -18,9 +18,7 @@ def test_add_next_close_invalid_inputs():
 
 
 def test_add_next_close_calendar_invalid_inputs():
-    df = pd.DataFrame(
-        {"symbol": ["A"], "date": [pd.Timestamp("2020-01-01")], "close": [1.0]}
-    )
+    df = pd.DataFrame({"symbol": ["A"], "date": [pd.Timestamp("2020-01-01")], "close": [1.0]})
     with pytest.raises(TypeError):
         add_next_close_calendar([], pd.DatetimeIndex([]))
     with pytest.raises(TypeError):

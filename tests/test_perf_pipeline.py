@@ -1,11 +1,12 @@
-import pandas as pd
 from pathlib import Path
 
-from backtest.io.panel_cache import build_panel_parquet, load_panel_parquet
+import pandas as pd
+
 from backtest.indicators.precompute import (
     collect_required_indicators,
     precompute_for_chunk,
 )
+from backtest.io.panel_cache import build_panel_parquet, load_panel_parquet
 
 
 def test_build_and_load_parquet(tmp_path: Path):

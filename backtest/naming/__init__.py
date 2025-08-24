@@ -1,15 +1,16 @@
-from .canonical import CANONICAL_BASE, CANONICAL_SET
-from .alias_loader import AliasMap, load_alias_map
-from .normalize import (
-    to_snake,
-    normalize_indicator_token,
-    normalize_dataframe_columns,
-)
-from .aliases import normalize_token
-from .legacy import *  # noqa: F401,F403
+import warnings
 
 import pandas as pd
-import warnings
+
+from .alias_loader import AliasMap, load_alias_map
+from .aliases import normalize_token
+from .canonical import CANONICAL_BASE, CANONICAL_SET
+from .legacy import *  # noqa: F401,F403
+from .normalize import (
+    normalize_dataframe_columns,
+    normalize_indicator_token,
+    to_snake,
+)
 
 
 def canonicalize_columns(df: pd.DataFrame) -> pd.DataFrame:

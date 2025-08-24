@@ -1,9 +1,11 @@
-import os
 import json
+import os
 from pathlib import Path
-import pandas as pd
+
 import numpy as np
-from backtest.trace import RunContext, ArtifactWriter, list_output_files, sha256_file
+import pandas as pd
+
+from backtest.trace import ArtifactWriter, RunContext, list_output_files, sha256_file
 
 
 def test_run_context_and_artifacts(tmp_path: Path):

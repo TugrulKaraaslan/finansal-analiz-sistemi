@@ -1,12 +1,14 @@
 from __future__ import annotations
-from pathlib import Path
+
 import re
 import warnings
-import pandas as pd
-from io_filters import read_filters_csv
+from pathlib import Path
 
-from backtest.naming.aliases import normalize_token
+import pandas as pd
+
 from backtest.filters.normalize_expr import normalize_expr
+from backtest.naming.aliases import normalize_token
+from io_filters import read_filters_csv
 
 ALLOW_FUNCS = {"cross_up", "cross_down"}
 ALLOWED_PATTERNS = [

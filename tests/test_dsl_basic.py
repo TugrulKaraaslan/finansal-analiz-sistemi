@@ -1,5 +1,6 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from backtest.dsl import Evaluator, SeriesContext, parse_expression
 
 idx = pd.date_range("2024-01-01", periods=5, freq="B")

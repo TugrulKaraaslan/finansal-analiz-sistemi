@@ -1,11 +1,11 @@
 from __future__ import annotations
-import pandas as pd
+
 from pathlib import Path
 
+import pandas as pd
 
-def load_benchmark(
-    path: str, *, date_col: str = "date", close_col: str = "close"
-) -> pd.Series:
+
+def load_benchmark(path: str, *, date_col: str = "date", close_col: str = "close") -> pd.Series:
     p = Path(path)
     if not p.exists():
         raise FileNotFoundError(f"SM001: benchmark yok: {p}")

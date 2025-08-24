@@ -1,55 +1,75 @@
 from __future__ import annotations
-from pathlib import Path
-import json, csv
-from datetime import datetime
-from jinja2 import Template
-import pandas as pd
 
-OUTDIR = Path('artifacts/report'); OUTDIR.mkdir(parents=True, exist_ok=True)
+import csv
+import json
+from datetime import datetime
+from pathlib import Path
+
+import pandas as pd
+from jinja2 import Template
+
+OUTDIR = Path("artifacts/report")
+OUTDIR.mkdir(parents=True, exist_ok=True)
+
 
 def _read_json(p: Path):
     try:
-        return json.loads(p.read_text(encoding='utf-8')) if p.exists() else None
+        return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
     except Exception as e:
-        return {'__error__': str(e)}
+        return {"__error__": str(e)}
+
 
 ctx = {
-    'ts': datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC'),
-    'wf_summary': _read_json(Path('artifacts/wf/summary.json')),
-    'wf_results_path': Path('artifacts/wf/results.jsonl').as_posix() if Path('artifacts/wf/results.jsonl').exists() else None,
-    'bench_scan': _read_json(Path('artifacts/bench/scan_bench.json')),
-    'profile_path': Path('artifacts/profiles/pyinstrument_scan.html').as_posix() if Path('artifacts/profiles/pyinstrument_scan.html').exists() else None,
-    'mem_top': _read_json(Path('artifacts/memory/top50.json')),
-    'golden_checksums': _read_json(Path('tests/golden/checksums.json')),
-    'quality_report': _read_json(Path('artifacts/quality/report.json')),
-    'portfolio_daily': None,
-    'portfolio_trades_head': None,
+    "ts": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+    "wf_summary": _read_json(Path("artifacts/wf/summary.json")),
+    "wf_results_path": (
+        Path("artifacts/wf/results.jsonl").as_posix()
+        if Path("artifacts/wf/results.jsonl").exists()
+        else None
+    ),
+    "bench_scan": _read_json(Path("artifacts/bench/scan_bench.json")),
+    "profile_path": (
+        Path("artifacts/profiles/pyinstrument_scan.html").as_posix()
+        if Path("artifacts/profiles/pyinstrument_scan.html").exists()
+        else None
+    ),
+    "mem_top": _read_json(Path("artifacts/memory/top50.json")),
+    "golden_checksums": _read_json(Path("tests/golden/checksums.json")),
+    "quality_report": _read_json(Path("artifacts/quality/report.json")),
+    "portfolio_daily": None,
+    "portfolio_trades_head": None,
 }
 
 # Portföy günlük
-p_daily = Path('artifacts/portfolio/daily_equity.csv')
+p_daily = Path("artifacts/portfolio/daily_equity.csv")
 if p_daily.exists():
     try:
         df = pd.read_csv(p_daily)
-        ctx['portfolio_daily'] = {
-            'rows': len(df),
-            'start_equity': float(df['equity'].iloc[0]) if 'equity' in df.columns and len(df)>0 else None,
-            'end_equity': float(df['equity'].iloc[-1]) if 'equity' in df.columns and len(df)>0 else None,
+        ctx["portfolio_daily"] = {
+            "rows": len(df),
+            "start_equity": (
+                float(df["equity"].iloc[0]) if "equity" in df.columns and len(df) > 0 else None
+            ),
+            "end_equity": (
+                float(df["equity"].iloc[-1]) if "equity" in df.columns and len(df) > 0 else None
+            ),
         }
     except Exception as e:
-        ctx['portfolio_daily'] = {'__error__': str(e)}
+        ctx["portfolio_daily"] = {"__error__": str(e)}
 
 # Portföy trades ilk 10 satır
-p_trades = Path('artifacts/portfolio/trades.csv')
+p_trades = Path("artifacts/portfolio/trades.csv")
 if p_trades.exists():
     try:
         import io
-        head = '\n'.join(p_trades.read_text(encoding='utf-8').splitlines()[:12])
-        ctx['portfolio_trades_head'] = head
-    except Exception as e:
-        ctx['portfolio_trades_head'] = f"__error__: {e}"
 
-TEMPLATE = Template(r"""
+        head = "\n".join(p_trades.read_text(encoding="utf-8").splitlines()[:12])
+        ctx["portfolio_trades_head"] = head
+    except Exception as e:
+        ctx["portfolio_trades_head"] = f"__error__: {e}"
+
+TEMPLATE = Template(
+    r"""
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -152,8 +172,9 @@ TEMPLATE = Template(r"""
 
 </body>
 </html>
-""")
+"""
+)
 
 html = TEMPLATE.render(**ctx)
-(OUTDIR / 'index.html').write_text(html, encoding='utf-8')
+(OUTDIR / "index.html").write_text(html, encoding="utf-8")
 print(f"wrote report → {OUTDIR/'index.html'}")

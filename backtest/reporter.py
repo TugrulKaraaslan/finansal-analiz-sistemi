@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-import re
 import logging
+import re
 import warnings
 from datetime import date, datetime
 from pathlib import Path
-from typing import Iterable, Mapping, Optional, Literal
+from typing import Iterable, Literal, Mapping, Optional
 
 import pandas as pd
 
 from utils.paths import resolve_path
-
 
 logger = logging.getLogger("summary_bist")
 
@@ -55,9 +54,7 @@ def _add_bist_columns(
     if xu100_pct is not None:
         bist_series = pd.Series(dict(xu100_pct), dtype=float).reindex(day_cols)
         mask = sw.notna() & bist_series.notna()
-        result["BIST_MEAN_RET"] = (mask.astype(float) * bist_series).sum(
-            axis=1
-        ) / mask.sum(axis=1)
+        result["BIST_MEAN_RET"] = (mask.astype(float) * bist_series).sum(axis=1) / mask.sum(axis=1)
     else:
         result["BIST_MEAN_RET"] = float("nan")
 
@@ -76,9 +73,7 @@ def _add_bist_columns(
             row["BIST_MEAN_RET"],
         )
 
-    result = result.drop(
-        columns=[c for c in ["Ortalama", "TradeCount"] if c in result.columns]
-    )
+    result = result.drop(columns=[c for c in ["Ortalama", "TradeCount"] if c in result.columns])
 
     metric_cols = [
         "MEAN_RET",
@@ -178,13 +173,9 @@ def write_reports(
         raise TypeError("summary_wide must be a DataFrame or None")
     if summary_winrate is not None and not isinstance(summary_winrate, pd.DataFrame):
         raise TypeError("summary_winrate must be a DataFrame or None")
-    if validation_summary is not None and not isinstance(
-        validation_summary, pd.DataFrame
-    ):
+    if validation_summary is not None and not isinstance(validation_summary, pd.DataFrame):
         raise TypeError("validation_summary must be a DataFrame or None")
-    if validation_issues is not None and not isinstance(
-        validation_issues, pd.DataFrame
-    ):
+    if validation_issues is not None and not isinstance(validation_issues, pd.DataFrame):
         raise TypeError("validation_issues must be a DataFrame or None")
 
     if dates is None:
@@ -265,9 +256,7 @@ def write_reports(
                     bist_ratio_summary.to_excel(writer, sheet_name="BIST_RATIO_SUMMARY")
 
                 if summary_winrate is not None and not summary_winrate.empty:
-                    summary_winrate.to_excel(
-                        writer, sheet_name=f"{summary_sheet_name}_WINRATE"
-                    )
+                    summary_winrate.to_excel(writer, sheet_name=f"{summary_sheet_name}_WINRATE")
 
                 day_cols = [c for c in summary_wide.columns if c not in metric_cols]
                 if xu100_pct is not None:
@@ -283,17 +272,10 @@ def write_reports(
                             diff[c] = diff[c] - float(xu100_series.get(c, float("nan")))
                         diff["MEAN_RET"] = diff.mean(axis=1)
                         diff.to_excel(writer, sheet_name=f"{summary_sheet_name}_DIFF")
-                    avg = (
-                        float(xu100_series.mean())
-                        if not xu100_series.empty
-                        else float("nan")
-                    )
+                    avg = float(xu100_series.mean()) if not xu100_series.empty else float("nan")
                     bist = (
                         pd.DataFrame(
-                            [
-                                [xu100_series.get(c, float("nan")) for c in day_cols]
-                                + [avg]
-                            ],
+                            [[xu100_series.get(c, float("nan")) for c in day_cols] + [avg]],
                             index=["BIST"],
                             columns=day_cols + ["MEAN_RET"],
                         )
@@ -309,9 +291,7 @@ def write_reports(
                         writer, sheet_name="VALIDATION_SUMMARY", index=False
                     )
                 if validation_issues is not None and not validation_issues.empty:
-                    validation_issues.to_excel(
-                        writer, sheet_name="VALIDATION_ISSUES", index=False
-                    )
+                    validation_issues.to_excel(writer, sheet_name="VALIDATION_ISSUES", index=False)
 
                 wb = writer.book
                 num_fmt = wb.add_format({"num_format": "0.00"})
@@ -337,11 +317,7 @@ def write_reports(
                 wr_sheet = f"{summary_sheet_name}_WINRATE"
                 if wr_sheet in writer.sheets:
                     ws = writer.sheets[wr_sheet]
-                    idx_cols = (
-                        summary_winrate.index.nlevels
-                        if summary_winrate is not None
-                        else 1
-                    )
+                    idx_cols = summary_winrate.index.nlevels if summary_winrate is not None else 1
                     ws.set_column(idx_cols, 100, 12, pct_fmt)
 
                 diff_sheet = f"{summary_sheet_name}_DIFF"

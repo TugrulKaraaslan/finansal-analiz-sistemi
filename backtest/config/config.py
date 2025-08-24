@@ -1,10 +1,11 @@
 from __future__ import annotations
-from types import SimpleNamespace as NS
-from pathlib import Path
-from typing import Any
+
 import copy
 import logging
 import warnings
+from pathlib import Path
+from types import SimpleNamespace as NS
+from typing import Any
 
 try:
     import yaml
@@ -113,9 +114,7 @@ def _expand_paths(doc: dict, base: Path) -> dict:
         cpp = doc["data"]["cache_parquet_path"]
         doc["data"]["cache_parquet_path"] = _norm(cpp)
     if doc.get("calendar", {}).get("holidays_csv_path"):
-        doc["calendar"]["holidays_csv_path"] = _norm(
-            doc["calendar"]["holidays_csv_path"]
-        )
+        doc["calendar"]["holidays_csv_path"] = _norm(doc["calendar"]["holidays_csv_path"])
     for key in ("excel_path", "csv_path"):
         if doc.get("benchmark", {}).get(key):
             doc["benchmark"][key] = _norm(doc["benchmark"][key])

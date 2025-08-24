@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from backtest.cross import cross_up, cross_down
+from backtest.cross import cross_down, cross_up
 from backtest.filters.engine import evaluate
 
 

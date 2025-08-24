@@ -13,7 +13,9 @@ from .base import BaseProvider
 class HttpCSVProvider(BaseProvider):
     name = "http_csv"
 
-    def __init__(self, url_template: str, timeout: int = 10, allow_download: bool | None = None) -> None:
+    def __init__(
+        self, url_template: str, timeout: int = 10, allow_download: bool | None = None
+    ) -> None:
         self.url_template = url_template
         self.timeout = timeout
         if allow_download is None:

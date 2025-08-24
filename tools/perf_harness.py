@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import time
 import tracemalloc
 from pathlib import Path
-import sys
 
 # Allow running as a script without installing the package by
 # ensuring the project root is on ``sys.path`` before imports.
@@ -16,9 +16,10 @@ if str(ROOT) not in sys.path:
 from backtest.data.loader import load_prices
 from backtest.paths import DATA_DIR
 
-
 SCENARIOS = {
-    "scan-day": lambda symbols, start, end, backend: load_prices(symbols, start, end, backend=backend),
+    "scan-day": lambda symbols, start, end, backend: load_prices(
+        symbols, start, end, backend=backend
+    ),
 }
 
 
@@ -35,6 +36,7 @@ def _ensure_parquet_data(symbols, start, end):
                 dates = pd.to_datetime([start, end])
             df = pd.DataFrame({"Date": dates, "Close": range(1, len(dates) + 1)})
             df.to_parquet(part / f"{sym}.parquet", index=False)
+
 
 def run_scenario(name: str, backend: str, symbols, start, end) -> dict:
     func = SCENARIOS[name]

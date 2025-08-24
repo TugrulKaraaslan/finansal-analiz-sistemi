@@ -1,8 +1,8 @@
 import pandas as pd
 
+from backtest.batch import run_scan_day
 from backtest.filters.engine import evaluate
 from backtest.screener import run_screener
-from backtest.batch import run_scan_day
 
 
 def _simple_df():
@@ -45,9 +45,7 @@ def test_screener_batch_consistency():
         },
         index=idx,
     )
-    filters_df = pd.DataFrame(
-        {"FilterCode": ["F1"], "PythonQuery": ["close > open"]}
-    )
+    filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > open"]})
     rows_batch = run_scan_day(df_batch, str(idx[0].date()), filters_df)
 
     df_screen = df_batch.reset_index().rename(columns={"index": "date"})

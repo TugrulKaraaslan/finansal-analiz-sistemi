@@ -2,23 +2,21 @@ from __future__ import annotations
 
 import pandas as pd
 
-from backtest.naming import (
-    normalize_columns as _normalize_columns,
-    normalize_name,
-)
+from backtest.naming.aliases import normalize_token
+from backtest.naming.normalize import normalize_dataframe_columns
 
 
 def canonical_name(name: str) -> str:
-    return normalize_name(name)
+    return normalize_token(name)
 
 
 def canonicalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    normed, _ = _normalize_columns(df)
-    return normed
+    norm_map = normalize_dataframe_columns(df.columns)
+    return df.rename(columns=norm_map)
 
 
 def canonicalize_filter_token(token: str) -> str:
-    return normalize_name(token)
+    return normalize_token(token)
 
 
 def set_name_normalization(mode: str) -> None:

@@ -1,5 +1,6 @@
-from hypothesis import given, strategies as st
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 from backtest.guardrails.no_lookahead import detect_future_refs
 

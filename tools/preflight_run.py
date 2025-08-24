@@ -1,10 +1,10 @@
-from pathlib import Path
 import os
 import sys
+from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from backtest.paths import DATA_DIR  # noqa: E402
 from backtest.filters.preflight import validate_filters  # noqa: E402
+from backtest.paths import DATA_DIR  # noqa: E402
 
 filters = Path("filters.csv")
 if not filters.exists():

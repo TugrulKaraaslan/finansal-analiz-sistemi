@@ -43,9 +43,7 @@ def test_run_screener_invalid_inputs():
 def test_run_screener_empty_dataset_logs(caplog):
     from loguru import logger
 
-    df_empty = pd.DataFrame(
-        columns=["symbol", "date", "open", "high", "low", "close", "volume"]
-    )
+    df_empty = pd.DataFrame(columns=["symbol", "date", "open", "high", "low", "close", "volume"])
     filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > 1"]})
     logger.add(caplog.handler, level="ERROR")
     with pytest.raises(ValueError):

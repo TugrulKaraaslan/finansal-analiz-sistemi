@@ -70,9 +70,7 @@ def build_trading_days(
     if holidays is not None:
         if isinstance(holidays, (int, float)):
             raise TypeError("holidays must be iterable or date-like")
-        if isinstance(holidays, Iterable) and not isinstance(
-            holidays, (str, bytes, pd.Timestamp)
-        ):
+        if isinstance(holidays, Iterable) and not isinstance(holidays, (str, bytes, pd.Timestamp)):
             hol_iter = list(holidays)
         else:
             hol_iter = [holidays]
@@ -107,9 +105,7 @@ def check_missing_trading_days(
     missing = pd.DatetimeIndex([d for d in trading_days if d not in actual])
 
     if len(missing) > 0:
-        msg = "Missing trading days: " + ", ".join(
-            d.strftime("%Y-%m-%d") for d in missing
-        )
+        msg = "Missing trading days: " + ", ".join(d.strftime("%Y-%m-%d") for d in missing)
         if raise_error:
             raise ValueError(msg)
         else:  # pragma: no cover - warning path
@@ -152,9 +148,7 @@ def check_missing_trading_days_by_symbol(
     return missing
 
 
-def add_next_close_calendar(
-    df: pd.DataFrame, trading_days: pd.DatetimeIndex
-) -> pd.DataFrame:
+def add_next_close_calendar(df: pd.DataFrame, trading_days: pd.DatetimeIndex) -> pd.DataFrame:
     """Calendar-driven next business day: next_date = next trading day
     (global). next_close is taken from symbol's close at that date; if
     missing, remains NaN (no trade possible).

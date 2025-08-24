@@ -1,6 +1,8 @@
 from __future__ import annotations
-import pandas as pd
+
 from typing import Iterable
+
+import pandas as pd
 
 
 def trading_days(index: pd.DatetimeIndex, start: str, end: str) -> pd.DatetimeIndex:

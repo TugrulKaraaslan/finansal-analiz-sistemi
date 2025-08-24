@@ -10,9 +10,7 @@ def test_pipeline_end_to_end():
     raw = pd.DataFrame(
         {
             "symbol": ["AAA", "AAA", "AAA"],
-            "date": pd.to_datetime(
-                ["2024-01-01", "2024-01-02", "2024-01-03"]
-            ).normalize(),
+            "date": pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"]).normalize(),
             "close": [10.0, 11.0, 12.0],
             "open": [10.0, 11.0, 12.0],
             "high": [10.0, 11.0, 12.0],

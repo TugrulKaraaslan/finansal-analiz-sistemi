@@ -5,9 +5,9 @@ import pandera as pa
 import pytest
 
 from backtest.naming import (
+    canonicalize_columns,
     normalize_name,
     validate_columns_schema,
-    canonicalize_columns,
 )
 
 

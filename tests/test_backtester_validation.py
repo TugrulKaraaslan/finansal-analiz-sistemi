@@ -43,9 +43,7 @@ def test_run_1g_returns_missing_columns():
 
 
 def test_run_1g_returns_empty_signals():
-    out = run_1g_returns(
-        _base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
-    )
+    out = run_1g_returns(_base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"]))
     assert out.empty
 
 
@@ -53,9 +51,7 @@ def test_run_1g_returns_logs_empty_signals(caplog):
     from loguru import logger
 
     logger.add(caplog.handler, level="WARNING")
-    out = run_1g_returns(
-        _base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
-    )
+    out = run_1g_returns(_base_df(), pd.DataFrame(columns=["FilterCode", "Symbol", "Date"]))
     assert out.empty
     assert "signals DataFrame is empty" in caplog.text
 

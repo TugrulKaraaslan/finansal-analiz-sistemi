@@ -1,8 +1,8 @@
-from hypothesis import given, strategies as st
 import pandas as pd
+from hypothesis import given
+from hypothesis import strategies as st
 
 from backtest.cv.timeseries import PurgedKFold, WalkForward
-
 
 given_size = st.integers(min_value=12, max_value=40)
 

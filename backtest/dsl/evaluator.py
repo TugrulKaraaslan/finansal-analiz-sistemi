@@ -1,13 +1,15 @@
 from __future__ import annotations
+
 import ast
 import operator as op
+from typing import Any, Mapping
+
 import numpy as np
 import pandas as pd
-from typing import Mapping, Any
 
-from .errors import DSLUnknownName, DSLBadArgs
-from .parser import parse_expression
+from .errors import DSLBadArgs, DSLUnknownName
 from .functions import FUNCTIONS
+from .parser import parse_expression
 
 # Karşılaştırma ve aritmetik operatörleri vektörel uygular
 _ARITH = {
@@ -67,11 +69,7 @@ class Evaluator:
         if isinstance(node, ast.UnaryOp):
             operand = self._eval_node(node.operand)
             if isinstance(node.op, ast.Not):
-                return (
-                    (~operand).fillna(False)
-                    if isinstance(operand, pd.Series)
-                    else (not operand)
-                )
+                return (~operand).fillna(False) if isinstance(operand, pd.Series) else (not operand)
             if isinstance(node.op, ast.USub):
                 return -operand
             if isinstance(node.op, ast.UAdd):
@@ -86,11 +84,7 @@ class Evaluator:
                 vals = [self._eval_node(v) for v in node.values]
                 out = vals[0]
                 for v in vals[1:]:
-                    out = (
-                        (out | v)
-                        if isinstance(out, pd.Series)
-                        else (bool(out) or bool(v))
-                    )
+                    out = (out | v) if isinstance(out, pd.Series) else (bool(out) or bool(v))
                 return out
         if isinstance(node, ast.Compare):
             left = self._eval_node(node.left)

@@ -15,11 +15,7 @@ ALIAS_PATH = DATA_DIR / "alias_mapping.csv"
 
 def project_root_from_config(config_path: str | Path) -> Path:
     config_path = Path(config_path).resolve()
-    return (
-        config_path.parent.parent
-        if config_path.parent.name == "config"
-        else config_path.parent
-    )
+    return config_path.parent.parent if config_path.parent.name == "config" else config_path.parent
 
 
 def resolve_under_root(

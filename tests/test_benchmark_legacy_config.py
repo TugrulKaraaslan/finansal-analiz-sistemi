@@ -17,9 +17,7 @@ benchmark:
     cfg_file = tmp_path / "cfg.yaml"
     cfg_file.write_text(cfg_text, encoding="utf-8")
     (tmp_path / "data").mkdir()
-    (tmp_path / "filters.csv").write_text(
-        "FilterCode;PythonQuery\nF1;close>0\n", encoding="utf-8"
-    )
+    (tmp_path / "filters.csv").write_text("FilterCode;PythonQuery\nF1;close>0\n", encoding="utf-8")
     (tmp_path / "bist.csv").write_text(
         "date,close\n2024-01-01,1\n",
         encoding="utf-8",

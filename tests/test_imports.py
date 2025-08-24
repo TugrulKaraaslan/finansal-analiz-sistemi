@@ -10,6 +10,6 @@ def test_imports():
         pass
 
     import backtest
-    from backtest import indicators, screener, data_loader
+    from backtest import data_loader, indicators, screener
 
     assert np and pd and backtest and indicators and screener and data_loader

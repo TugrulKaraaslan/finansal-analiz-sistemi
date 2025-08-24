@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 from backtest.paths import DATA_DIR
-from .backends import polars_backend, pandas_backend
+
+from .backends import pandas_backend, polars_backend
 
 
 def load_prices(

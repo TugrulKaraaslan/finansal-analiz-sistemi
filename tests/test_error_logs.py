@@ -1,9 +1,9 @@
 import pytest
 from loguru import logger
 
-from io_filters import load_filters_csv
-from backtest.data_loader import read_excels_long
 from backtest.config import load_config
+from backtest.data_loader import read_excels_long
+from io_filters import load_filters_csv
 
 
 def test_load_filters_csv_missing_logs(tmp_path, caplog):

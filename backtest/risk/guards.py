@@ -1,10 +1,12 @@
 from __future__ import annotations
-from dataclasses import dataclass, field
-from pathlib import Path
-import os
+
 import json
 import math
+import os
 import time
+from dataclasses import dataclass, field
+from pathlib import Path
+
 import pandas as pd
 
 
@@ -33,11 +35,7 @@ class RiskEngine:
         return None
 
     def _cb_intraday_dd(self, state) -> GuardResult | None:
-        bps = float(
-            self.cfg.get("circuit_breakers", {}).get(
-                "max_intraday_dd_bps", float("inf")
-            )
-        )
+        bps = float(self.cfg.get("circuit_breakers", {}).get("max_intraday_dd_bps", float("inf")))
         if not math.isfinite(bps):
             return None
         if state.get("intraday_dd_bps", 0.0) <= -abs(bps):
@@ -49,9 +47,7 @@ class RiskEngine:
         return None
 
     def _cb_max_trades(self, state) -> GuardResult | None:
-        lim = int(
-            self.cfg.get("circuit_breakers", {}).get("max_daily_trades", 10**9)
-        )  # noqa: E501
+        lim = int(self.cfg.get("circuit_breakers", {}).get("max_daily_trades", 10**9))  # noqa: E501
         if state.get("daily_trades", 0) >= lim:
             return GuardResult(
                 "block",
@@ -66,11 +62,7 @@ class RiskEngine:
             return None
         wnd = int(vol.get("atr_window", 14))
         thr_bps = float(vol.get("atr_to_price_bps", float("inf")))
-        atr = (
-            mkt_row.get(f"atr_{wnd}") or mkt_row.get("atr")
-            if mkt_row is not None
-            else None
-        )
+        atr = mkt_row.get(f"atr_{wnd}") or mkt_row.get("atr") if mkt_row is not None else None
         close = mkt_row.get("close") if mkt_row is not None else None
         if atr is not None and close:
             ratio_bps = (float(atr) / float(close)) * 1e4
@@ -129,9 +121,7 @@ class RiskEngine:
             and "fill_price" in orders_df.columns
             and "quantity" in orders_df.columns
         ):
-            notional = float(
-                (orders_df["fill_price"] * orders_df["quantity"]).sum()
-            )  # noqa: E501
+            notional = float((orders_df["fill_price"] * orders_df["quantity"]).sum())  # noqa: E501
             r = self._exposure_caps(notional, equity, symbol_exposure)
             if r:
                 reasons.append(r)
@@ -147,8 +137,7 @@ class RiskEngine:
         rec = {
             "final_action": decision.final_action,
             "reasons": [
-                dict(action=r.action, reason=r.reason, details=r.details)
-                for r in decision.reasons
+                dict(action=r.action, reason=r.reason, details=r.details) for r in decision.reasons
             ],
             "ts": int(time.time()),
         }

@@ -1,7 +1,7 @@
 import pandas as pd
 
-from backtest.naming.aliases import normalize_token
 from backtest.filters_compile import compile_expression
+from backtest.naming.aliases import normalize_token
 
 
 def test_token_normalization_examples():

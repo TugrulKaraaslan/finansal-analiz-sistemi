@@ -1,6 +1,5 @@
 import pandas as pd
 import pytest
-
 from loguru import logger
 
 from backtest.benchmark import BenchmarkLoader

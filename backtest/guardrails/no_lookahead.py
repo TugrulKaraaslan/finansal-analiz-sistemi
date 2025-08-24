@@ -1,8 +1,10 @@
 """Utilities to prevent look-ahead bias in backtests."""
+
 from __future__ import annotations
 
-from typing import Dict, Iterable
 import ast
+from typing import Dict, Iterable
+
 import pandas as pd
 
 DENY_PATTERNS = ["shift(-", "lead(", "next_", "t+"]

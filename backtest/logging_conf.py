@@ -1,12 +1,13 @@
 from __future__ import annotations
+
 import json
 import logging
 import os
 import sys
 import uuid
-from pathlib import Path
-from datetime import datetime
 from contextvars import ContextVar
+from datetime import datetime
+from pathlib import Path
 
 run_id_var: ContextVar[str] = ContextVar("run_id", default=None)
 fold_id_var: ContextVar[str] = ContextVar("fold_id", default=None)
@@ -65,9 +66,7 @@ def get_logger(name: str = "app") -> logging.Logger:
         if _DEF_FMT == "json":
             sh.setFormatter(JsonFormatter())
         else:
-            sh.setFormatter(
-                logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s")
-            )
+            sh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s"))
         root.addHandler(sh)
         fh = logging.FileHandler(_LOG_FILE, encoding="utf-8")
         fh.setFormatter(JsonFormatter())

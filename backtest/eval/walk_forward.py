@@ -1,8 +1,9 @@
 from __future__ import annotations
+
+import json
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-import json
 
 ISO = "%Y-%m-%d"
 
@@ -19,9 +20,7 @@ class WfParams:
     def normalized(self) -> "WfParams":
         step = self.step_days or self.test_days
         mtrain = self.min_train_days or self.train_days
-        return WfParams(
-            self.start, self.end, self.train_days, self.test_days, step, mtrain
-        )
+        return WfParams(self.start, self.end, self.train_days, self.test_days, step, mtrain)
 
 
 def _d(s: str) -> datetime:

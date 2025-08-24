@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import csv
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Tuple
-import json
-import yaml
-import csv
 
+import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 FILTERS_CSV = ROOT / "filters.csv"

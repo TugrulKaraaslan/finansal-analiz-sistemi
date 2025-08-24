@@ -59,9 +59,7 @@ def test_filters_csv_cli_overrides_yaml(tmp_path):
 
     cfg_yaml = _write_cfg(tmp_path, filters_yaml)
     runner = CliRunner()
-    res_yaml = runner.invoke(
-        cli.scan_range, ["--config", str(cfg_yaml), "--no-preflight"]
-    )
+    res_yaml = runner.invoke(cli.scan_range, ["--config", str(cfg_yaml), "--no-preflight"])
     assert res_yaml.exit_code == 0, res_yaml.output
 
     cfg_bad = _write_cfg(tmp_path, tmp_path / "missing.csv")

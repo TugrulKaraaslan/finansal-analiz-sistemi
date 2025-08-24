@@ -111,9 +111,7 @@ def test_run_1g_returns_ignores_out_of_bounds_signals():
     )
     out = run_1g_returns(df, sigs)
     assert len(out) == 2
-    assert pd.isna(
-        out.loc[out["Date"] == pd.Timestamp("2024-01-03"), "ReturnPct"]
-    ).all()
+    assert pd.isna(out.loc[out["Date"] == pd.Timestamp("2024-01-03"), "ReturnPct"]).all()
 
 
 def test_run_1g_returns_side_validation():

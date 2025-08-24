@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
+
 import pandas as pd
 import yaml
 
@@ -36,31 +38,21 @@ class CostParams:
             enabled=cfg.get("enabled", True),
             currency=cfg.get("currency", "TRY"),
             cash_decimals=int(cfg.get("rounding", {}).get("cash_decimals", 2)),
-            commission_model=cfg.get("commission", {}).get(
-                "model", "fixed_bps"
-            ),  # noqa: E501
+            commission_model=cfg.get("commission", {}).get("model", "fixed_bps"),  # noqa: E501
             commission_bps=float(cfg.get("commission", {}).get("bps", 5.0)),
-            commission_min_cash=float(
-                cfg.get("commission", {}).get("min_cash", 0.0)
-            ),  # noqa: E501
+            commission_min_cash=float(cfg.get("commission", {}).get("min_cash", 0.0)),  # noqa: E501
             tax_bps=float(cfg.get("taxes", {}).get("bps", 0.0)),
             spread_model=cfg.get("spread", {}).get("model", "half_spread"),
-            default_spread_bps=float(
-                cfg.get("spread", {}).get("default_spread_bps", 7.0)
-            ),
+            default_spread_bps=float(cfg.get("spread", {}).get("default_spread_bps", 7.0)),
             slippage_model=cfg.get("slippage", {}).get("model", "atr_linear"),
-            bps_per_1x_atr=float(
-                cfg.get("slippage", {}).get("bps_per_1x_atr", 10.0)
-            ),  # noqa: E501
+            bps_per_1x_atr=float(cfg.get("slippage", {}).get("bps_per_1x_atr", 10.0)),  # noqa: E501
             price_col=cfg.get("apply", {}).get("price_col", "fill_price"),
             qty_col=cfg.get("apply", {}).get("qty_col", "quantity"),
             side_col=cfg.get("apply", {}).get("side_col", "side"),
             date_col=cfg.get("apply", {}).get("date_col", "date"),
             id_col=cfg.get("apply", {}).get("id_col", "trade_id"),
             write_breakdown=cfg.get("report", {}).get("write_breakdown", True),
-            output_dir=cfg.get("report", {}).get(
-                "output_dir", "artifacts/costs"
-            ),  # noqa: E501
+            output_dir=cfg.get("report", {}).get("output_dir", "artifacts/costs"),  # noqa: E501
         )
 
 
@@ -76,9 +68,7 @@ def commission_cash(notional: pd.Series, params: CostParams) -> pd.Series:
     if params.commission_model == "fixed_bps":
         cash = notional.abs() * (params.commission_bps * BPS)
         if params.commission_min_cash > 0:
-            cash = cash.where(
-                cash >= params.commission_min_cash, params.commission_min_cash
-            )
+            cash = cash.where(cash >= params.commission_min_cash, params.commission_min_cash)
         return cash
     elif params.commission_model == "per_share_flat":
         # per-share  => notional yerine adet başına sabit
