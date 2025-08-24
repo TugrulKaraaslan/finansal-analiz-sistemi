@@ -13,7 +13,8 @@ from backtest.config import load_config, merge_cli_overrides, Flags
 from backtest.batch import run_scan_range, run_scan_day
 from backtest.normalizer import normalize
 from backtest.calendars import add_next_close
-from io_filters import load_filters_csv
+from io_filters import load_filters_csv, read_filters_csv
+from backtest.filters_compile import compile_filters
 from backtest.screener import run_screener
 from backtest.backtester import run_1g_returns
 from backtest.reporter import write_reports
@@ -75,19 +76,6 @@ def _ns_to_dict(x):
 
 
 # ---- Geri uyum: tests monkeypatch beklentileri ----
-
-
-def compile_filters(src: str, dst: str) -> None:
-    df = pd.read_csv(src, sep=";", dtype=str)
-    cols = {"id": "FilterCode", "expr": "PythonQuery"}
-    df = df.rename(columns={k: v for k, v in cols.items() if k in df.columns})
-    missing = {"FilterCode", "PythonQuery"}.difference(df.columns)
-    if missing:
-        raise ValueError(
-            "compile_filters: beklenen kolonlar yok: " + ", ".join(sorted(missing))
-        )
-    df = df[["FilterCode", "PythonQuery"]]
-    df.to_csv(dst, sep=";", index=False)
 
 
 def read_excels_long(cfg_or_path) -> pd.DataFrame:  # tests monkeypatch ediyor
@@ -292,12 +280,16 @@ def build_parser() -> argparse.ArgumentParser:
     cv.add_argument("--portfolio", default="config/portfolio.yaml")
     cv.add_argument("--costs", default="config/costs.yaml")
     cv.add_argument("--export-json-schema", action="store_true")
-    cmp = sub.add_parser("compare-strategies", help="Run multiple strategies on same data")
+    cmp = sub.add_parser(
+        "compare-strategies", help="Run multiple strategies on same data"
+    )
     cmp.add_argument("--start", required=True)
     cmp.add_argument("--end", required=True)
     cmp.add_argument("--space", required=True, help="YAML strategy definitions")
 
-    tune = sub.add_parser("tune-strategy", help="Hyper-parameter tuning for a single strategy")
+    tune = sub.add_parser(
+        "tune-strategy", help="Hyper-parameter tuning for a single strategy"
+    )
     tune.add_argument("--start", required=True)
     tune.add_argument("--end", required=True)
     tune.add_argument("--space", required=True, help="YAML search space")
@@ -306,7 +298,9 @@ def build_parser() -> argparse.ArgumentParser:
     tune.add_argument("--max-iters", type=int, default=10)
     tune.add_argument("--seed", type=int, default=None)
 
-    ctp = sub.add_parser("convert-to-parquet", help="Excel dosyalarını Parquet'e dönüştür")
+    ctp = sub.add_parser(
+        "convert-to-parquet", help="Excel dosyalarını Parquet'e dönüştür"
+    )
     ctp.add_argument(
         "--excel-dir",
         required=False,
@@ -343,7 +337,6 @@ def build_parser() -> argparse.ArgumentParser:
     ic_cmd.add_argument("--provider", default="stub")
     ic_cmd.add_argument("--directory", default=str(DATA_DIR))
 
-    
     return p
 
 
@@ -408,7 +401,10 @@ def main(argv=None):
             elif name == "local-excel":
                 prov = LocalExcelProvider(directory)
             elif name == "http-csv":
-                from backtest.downloader.providers.http_csv import HttpCSVProvider  # pragma: no cover
+                from backtest.downloader.providers.http_csv import (
+                    HttpCSVProvider,
+                )  # pragma: no cover
+
                 prov = HttpCSVProvider(allow_download=allow_download)
             else:  # pragma: no cover
                 raise SystemExit(f"unknown provider: {name}")
@@ -433,10 +429,12 @@ def main(argv=None):
         return
     if args.cmd == "compare-strategies":
         from backtest.strategy.cli import compare_strategies_cli
+
         compare_strategies_cli(args)
         return
     if args.cmd == "tune-strategy":
         from backtest.strategy.cli import tune_strategy_cli
+
         tune_strategy_cli(args)
         return
     if args.cmd == "convert-to-parquet":
@@ -743,12 +741,8 @@ def main(argv=None):
 
     filters_path = _resolve_filters_path(args.filters)
     try:
-        filters_df = pd.read_csv(
-            filters_path,
-            sep=";",
-            usecols=["FilterCode", "PythonQuery"],
-            dtype=str,
-        )
+        filters = load_filters_csv([filters_path])
+        filters_df = pd.DataFrame(filters)
     except ValueError as exc:
         raise ValueError(
             "filters.csv beklenen kolonlar: FilterCode;PythonQuery"
@@ -822,15 +816,11 @@ try:  # pragma: no cover - click opsiyonel
         if filters_csv:
             cfg.data.filters_csv = filters_csv
         if report_alias and filters_csv and reports_dir:
+            src = Path(filters_csv)
             dst = Path(reports_dir) / "filters_compiled.csv"
-            compile_filters(filters_csv, str(dst))
+            compile_filters(src, dst)
             try:
-                raw = pd.read_csv(
-                    filters_csv,
-                    sep=";",
-                    usecols=["FilterCode", "PythonQuery"],
-                    dtype=str,
-                )
+                raw = pd.DataFrame(load_filters_csv([filters_csv]))
             except ValueError as exc:
                 raise ValueError(
                     "filters.csv beklenen kolonlar: FilterCode;PythonQuery"
@@ -890,16 +880,13 @@ try:  # pragma: no cover - click opsiyonel
     @click.option("--file", "file", required=True)
     @click.option("--inplace", is_flag=True, default=False)
     def lint_filters(file: str, inplace: bool = False) -> None:
-        df = pd.read_csv(file, sep=None, engine="python")
-        if "PythonQuery" not in df.columns:
-            raise click.ClickException("PythonQuery column missing")
+        df = read_filters_csv(file)
         norm = df["PythonQuery"].map(normalize_expr)
         changed = norm != df["PythonQuery"]
         if changed.any():
             if inplace:
-                sep = ";" if ";" in Path(file).read_text().splitlines()[0] else ","
                 df["PythonQuery"] = norm
-                df.to_csv(file, sep=sep, index=False)
+                df.to_csv(file, sep=";", index=False)
             else:
                 for idx in df.index[changed]:
                     click.echo(

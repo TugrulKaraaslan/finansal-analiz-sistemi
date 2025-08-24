@@ -61,6 +61,24 @@ python -m backtest.cli scan-day \
   --date 2024-01-02 --out raporlar/gunluk
 ```
 
+## Filtre CSV formatı
+
+`filters.csv` dosyası tam olarak iki kolondan oluşur:
+`FilterCode;PythonQuery`. Ayraç olarak yalnızca noktalı virgül (`;`)
+kullanılmalıdır. Excel'den kaydederken `CSV` seçeneğiyle `;` ayırıcı
+kullanıldığından emin olun. Virgül ile kaydedilen dosyalar aşağıdaki hatayı
+üretir:
+
+```
+CSV delimiter ';' bekleniyor. Lütfen dosyayı ';' ile kaydedin.
+```
+
+Virgüllü eski dosyaları dönüştürmek için `tools/migrate_filters_csv.py`
+aracını kullanabilirsiniz.
+
+`PythonQuery` sütunu boş bırakılamaz. Boş veya sadece boşluk içeren
+satırlar `ValueError` ile sonuçlanır.
+
 ## Offline Varsayılanı
 Harici indirme kapalıdır. İndirme yapmak için
 `--allow-download` bayrağı veya `ALLOW_DOWNLOAD=1` ortam değişkeni

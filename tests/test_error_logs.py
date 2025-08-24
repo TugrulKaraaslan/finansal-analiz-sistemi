@@ -10,7 +10,7 @@ def test_load_filters_csv_missing_logs(tmp_path, caplog):
     missing = tmp_path / "missing.csv"
     logger.add(caplog.handler, level="ERROR")
     with pytest.raises(FileNotFoundError) as exc:
-        load_filters_csv(missing)
+        load_filters_csv([missing])
     msg = str(exc.value)
     assert str(missing) in msg
     assert "--filters-csv" in msg

@@ -21,6 +21,22 @@
 | vacuum-cache | Eski parçaları sil | --older-than-days |
 | integrity-check | Parquet bütünlüğü kontrolü | --symbols |
 
+## Filtre CSV formatı
+
+`filters.csv` dosyası `FilterCode;PythonQuery` kolonlarından oluşur ve
+ayraç olarak yalnızca noktalı virgül (`;`) kullanılabilir. Excel'den kaydederken
+`CSV` biçiminde `;` ayırıcı seçilmelidir. Virgüllü dosyalar şu hatayı üretir:
+
+```
+CSV delimiter ';' bekleniyor. Lütfen dosyayı ';' ile kaydedin.
+```
+
+Eski virgüllü dosyaları dönüştürmek için `tools/migrate_filters_csv.py`
+yardımcı programını kullanabilirsiniz.
+
+`PythonQuery` boş bırakılamaz; boş veya sadece boşluk içeren satırlar
+`ValueError` ile reddedilir.
+
 ## Filtre DSL Notu
 Filtre ifadelerinde `cross_up(x,y)` ve `cross_down(x,y)` fonksiyonları
 kullanılır. Yazımı farklı olsa bile (`CROSSUP`, `crossOver`, `keser_yukari`
