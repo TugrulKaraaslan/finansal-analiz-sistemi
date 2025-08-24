@@ -9,7 +9,7 @@ from typing import List, Tuple
 _LOGICAL = {"and": "&", "or": "|"}
 
 # canonical function name mapping
-_FUNC_ALIASES = {
+_FUNC_MAP = {
     # cross up variations
     "crossup": "cross_up",
     "cross_up": "cross_up",
@@ -122,7 +122,7 @@ def normalize_expr(expr: str) -> Tuple[str, List[Tuple[str, str, str]]]:
     )
 
     # normalize function aliases
-    for alias, canon in _FUNC_ALIASES.items():
+    for alias, canon in _FUNC_MAP.items():
         normalised = re.sub(rf"\b{alias}\s*\(", f"{canon}(", normalised, flags=re.I)
 
     macros: List[Tuple[str, str, str]] = []

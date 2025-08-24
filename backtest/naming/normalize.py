@@ -2,6 +2,8 @@ from __future__ import annotations
 import re
 from typing import Iterable, Dict
 from .canonical import CANONICAL_SET
+from .aliases import normalize_token
+
 
 _SNAKE_RE1 = re.compile(r"[^0-9A-Za-z]+")
 _SNAKE_RE2 = re.compile(r"_{2,}")
@@ -35,12 +37,17 @@ def to_snake(s: str) -> str:
 def normalize_indicator_token(
     token: str, alias_map: Dict[str, str] | None = None
 ) -> str:
-    # 1) alias çöz; 2) snake; 3) kanonik set kontrolü gerekirse üst katmanda yapılır
+    """Backward compatible wrapper over :func:`normalize_token`.
+
+    ``alias_map`` entries (typically loaded from ``alias_mapping.csv``) take
+    precedence over the built-in aliases before the value is normalised via
+    :func:`normalize_token`.
+    """
+
     raw = token
     if alias_map and raw in alias_map:
         raw = alias_map[raw]
-    norm = to_snake(raw)
-    return norm
+    return normalize_token(raw)
 
 
 def normalize_dataframe_columns(

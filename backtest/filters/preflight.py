@@ -5,15 +5,9 @@ import warnings
 import pandas as pd
 from io_filters import read_filters_csv
 
-ALIAS = {
-    "its_9": "ichimoku_conversionline",
-    "iks_26": "ichimoku_baseline",
-    "macd_12_26_9": "macd_line",
-    "macds_12_26_9": "macd_signal",
-    "bbm_20 2": "bbm_20_2",
-    "bbu_20 2": "bbu_20_2",
-    "bbl_20 2": "bbl_20_2",
-}
+from backtest.naming.aliases import normalize_token
+from backtest.filters.normalize_expr import normalize_expr
+
 ALLOW_FUNCS = {"cross_up", "cross_down"}
 ALLOWED_PATTERNS = [
     r"(?:ema|sma|wma|hma|vwma|dema|tema)_\d+",
@@ -48,25 +42,26 @@ def validate_filters(
     alias_mode: str = "allow",  # 'allow'|'warn'|'forbid'
     allow_unknown: bool = False,
 ) -> None:
-    cols = _dataset_columns(excel_dir)
+    cols = {normalize_token(c) for c in _dataset_columns(excel_dir)}
     alias_used: dict[str, set[str]] = {}
     unknown: dict[str, set[str]] = {}
 
     df = read_filters_csv(filters_csv)
     for _, row in df.iterrows():
         code = (row.get("FilterCode") or "").strip() or "<NO_CODE>"
-        expr = (row.get("PythonQuery") or "").strip()
+        expr_raw = (row.get("PythonQuery") or "").strip()
+        expr = normalize_expr(expr_raw)[0]
         for t in _tokens(expr):
-            if t in ALIAS:
-                alias_used.setdefault(code, set()).add(f"{t}->{ALIAS[t]}")
-                continue
+            canon = normalize_token(t)
+            if canon != t:
+                alias_used.setdefault(code, set()).add(f"{t}->{canon}")
             if (
-                t in ALLOW_FUNCS
-                or t in cols
-                or any(re.fullmatch(p, t) for p in ALLOWED_PATTERNS)
+                canon in ALLOW_FUNCS
+                or canon in cols
+                or any(re.fullmatch(p, canon) for p in ALLOWED_PATTERNS)
             ):
                 continue
-            unknown.setdefault(code, set()).add(t)
+            unknown.setdefault(code, set()).add(canon)
 
     if alias_used:
         lines = [f"{k}: {sorted(vs)}" for k, vs in alias_used.items()]
