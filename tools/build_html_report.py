@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import csv
 import json
 from datetime import datetime
 from pathlib import Path
@@ -68,8 +67,6 @@ if p_daily.exists():
 p_trades = Path("artifacts/portfolio/trades.csv")
 if p_trades.exists():
     try:
-        import io
-
         head = "\n".join(p_trades.read_text(encoding="utf-8").splitlines()[:12])
         ctx["portfolio_trades_head"] = head
     except Exception as e:

@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 from backtest.eval.metrics import rolling_future_return

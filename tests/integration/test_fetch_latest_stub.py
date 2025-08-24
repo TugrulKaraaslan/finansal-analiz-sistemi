@@ -1,5 +1,3 @@
-from datetime import date
-
 from backtest.downloader.core import DataDownloader
 from backtest.downloader.providers.stub import StubProvider
 

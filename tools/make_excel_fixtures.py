@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from backtest.paths import EXCEL_DIR
+from backtest.paths import EXCEL_DIR  # noqa: E402
 
 EXCEL_DIR.mkdir(parents=True, exist_ok=True)
 
