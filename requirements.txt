@@ -13,3 +13,4 @@ tqdm<5
 python-dateutil<3
 PyYAML<7
 click<9
+hypothesis<7
