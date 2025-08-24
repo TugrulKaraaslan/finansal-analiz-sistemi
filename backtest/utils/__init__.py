@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import math
 import re
 import unicodedata
-from typing import Optional
 
 
-def normalize_key(s: Optional[str]) -> str:
-    if s is None:
+def normalize_key(s: str | float | None) -> str:
+    if s is None or (isinstance(s, float) and math.isnan(s)):
         return ""
     s = str(s).strip()
     # Map Turkish specific chars to ASCII-ish
