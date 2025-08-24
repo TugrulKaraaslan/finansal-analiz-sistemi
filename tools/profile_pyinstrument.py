@@ -2,7 +2,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-from pyinstrument import Profiler
+try:  # Optional dependency
+    from pyinstrument import Profiler
+except ModuleNotFoundError as e:  # pragma: no cover - executed only when missing dep
+    raise ModuleNotFoundError(
+        "profile_pyinstrument requires the optional dependency 'pyinstrument'. "
+        "Install it with `pip install pyinstrument`."
+    ) from e
 
 
 def main():
