@@ -35,7 +35,9 @@ class RiskEngine:
         return None
 
     def _cb_intraday_dd(self, state) -> GuardResult | None:
-        bps = float(self.cfg.get("circuit_breakers", {}).get("max_intraday_dd_bps", float("inf")))
+        cb = self.cfg.get("circuit_breakers", {})
+        max_dd = cb.get("max_intraday_dd_bps", float("inf"))
+        bps = float(max_dd)
         if not math.isfinite(bps):
             return None
         if state.get("intraday_dd_bps", 0.0) <= -abs(bps):
@@ -47,7 +49,9 @@ class RiskEngine:
         return None
 
     def _cb_max_trades(self, state) -> GuardResult | None:
-        lim = int(self.cfg.get("circuit_breakers", {}).get("max_daily_trades", 10**9))  # noqa: E501
+        lim = int(
+            self.cfg.get("circuit_breakers", {}).get("max_daily_trades", 10**9)
+        )  # noqa: E501
         if state.get("daily_trades", 0) >= lim:
             return GuardResult(
                 "block",
@@ -56,14 +60,18 @@ class RiskEngine:
             )
         return None
 
-    def _cb_volatility(self, mkt_row: pd.Series) -> GuardResult | None:
+    def _cb_volatility(self, mkt_row: pd.Series | None) -> GuardResult | None:
         vol = self.cfg.get("circuit_breakers", {}).get("volatility_halt", {})
-        if not vol:
+        if not vol or mkt_row is None:
             return None
         wnd = int(vol.get("atr_window", 14))
         thr_bps = float(vol.get("atr_to_price_bps", float("inf")))
-        atr = mkt_row.get(f"atr_{wnd}") or mkt_row.get("atr") if mkt_row is not None else None
-        close = mkt_row.get("close") if mkt_row is not None else None
+
+        atr = mkt_row.get(f"atr_{wnd}")
+        if atr is None:
+            atr = mkt_row.get("atr")
+
+        close = mkt_row.get("close")
         if atr is not None and close:
             ratio_bps = (float(atr) / float(close)) * 1e4
             if ratio_bps >= thr_bps:
@@ -137,7 +145,12 @@ class RiskEngine:
         rec = {
             "final_action": decision.final_action,
             "reasons": [
-                dict(action=r.action, reason=r.reason, details=r.details) for r in decision.reasons
+                {
+                    "action": r.action,
+                    "reason": r.reason,
+                    "details": r.details,
+                }
+                for r in decision.reasons
             ],
             "ts": int(time.time()),
         }
