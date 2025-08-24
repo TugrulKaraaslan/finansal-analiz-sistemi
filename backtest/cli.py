@@ -13,7 +13,8 @@ from backtest.config import load_config, merge_cli_overrides, Flags
 from backtest.batch import run_scan_range, run_scan_day
 from backtest.normalizer import normalize
 from backtest.calendars import add_next_close
-from io_filters import load_filters_csv
+from io_filters import load_filters_csv, read_filters_csv
+from backtest.filters_compile import compile_filters
 from backtest.screener import run_screener
 from backtest.backtester import run_1g_returns
 from backtest.reporter import write_reports
@@ -75,19 +76,6 @@ def _ns_to_dict(x):
 
 
 # ---- Geri uyum: tests monkeypatch beklentileri ----
-
-
-def compile_filters(src: str, dst: str) -> None:
-    df = pd.read_csv(src, sep=";", dtype=str)
-    cols = {"id": "FilterCode", "expr": "PythonQuery"}
-    df = df.rename(columns={k: v for k, v in cols.items() if k in df.columns})
-    missing = {"FilterCode", "PythonQuery"}.difference(df.columns)
-    if missing:
-        raise ValueError(
-            "compile_filters: beklenen kolonlar yok: " + ", ".join(sorted(missing))
-        )
-    df = df[["FilterCode", "PythonQuery"]]
-    df.to_csv(dst, sep=";", index=False)
 
 
 def read_excels_long(cfg_or_path) -> pd.DataFrame:  # tests monkeypatch ediyor
@@ -743,12 +731,8 @@ def main(argv=None):
 
     filters_path = _resolve_filters_path(args.filters)
     try:
-        filters_df = pd.read_csv(
-            filters_path,
-            sep=";",
-            usecols=["FilterCode", "PythonQuery"],
-            dtype=str,
-        )
+        filters = load_filters_csv([filters_path])
+        filters_df = pd.DataFrame(filters)
     except ValueError as exc:
         raise ValueError(
             "filters.csv beklenen kolonlar: FilterCode;PythonQuery"
@@ -825,12 +809,7 @@ try:  # pragma: no cover - click opsiyonel
             dst = Path(reports_dir) / "filters_compiled.csv"
             compile_filters(filters_csv, str(dst))
             try:
-                raw = pd.read_csv(
-                    filters_csv,
-                    sep=";",
-                    usecols=["FilterCode", "PythonQuery"],
-                    dtype=str,
-                )
+                raw = pd.DataFrame(load_filters_csv([filters_csv]))
             except ValueError as exc:
                 raise ValueError(
                     "filters.csv beklenen kolonlar: FilterCode;PythonQuery"
@@ -890,16 +869,13 @@ try:  # pragma: no cover - click opsiyonel
     @click.option("--file", "file", required=True)
     @click.option("--inplace", is_flag=True, default=False)
     def lint_filters(file: str, inplace: bool = False) -> None:
-        df = pd.read_csv(file, sep=None, engine="python")
-        if "PythonQuery" not in df.columns:
-            raise click.ClickException("PythonQuery column missing")
+        df = read_filters_csv(file)
         norm = df["PythonQuery"].map(normalize_expr)
         changed = norm != df["PythonQuery"]
         if changed.any():
             if inplace:
-                sep = ";" if ";" in Path(file).read_text().splitlines()[0] else ","
                 df["PythonQuery"] = norm
-                df.to_csv(file, sep=sep, index=False)
+                df.to_csv(file, sep=";", index=False)
             else:
                 for idx in df.index[changed]:
                     click.echo(

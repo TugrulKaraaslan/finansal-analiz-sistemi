@@ -1,9 +1,9 @@
 from __future__ import annotations
 from pathlib import Path
-import csv
 import re
 import warnings
 import pandas as pd
+from io_filters import read_filters_csv
 
 ALIAS = {
     "its_9": "ichimoku_conversionline",
@@ -52,22 +52,21 @@ def validate_filters(
     alias_used: dict[str, set[str]] = {}
     unknown: dict[str, set[str]] = {}
 
-    with open(filters_csv, encoding="utf-8") as f:
-        rdr = csv.DictReader(f, delimiter=";")
-        for row in rdr:
-            code = (row.get("FilterCode") or "").strip() or "<NO_CODE>"
-            expr = (row.get("PythonQuery") or "").strip()
-            for t in _tokens(expr):
-                if t in ALIAS:
-                    alias_used.setdefault(code, set()).add(f"{t}->{ALIAS[t]}")
-                    continue
-                if (
-                    t in ALLOW_FUNCS
-                    or t in cols
-                    or any(re.fullmatch(p, t) for p in ALLOWED_PATTERNS)
-                ):
-                    continue
-                unknown.setdefault(code, set()).add(t)
+    df = read_filters_csv(filters_csv)
+    for _, row in df.iterrows():
+        code = (row.get("FilterCode") or "").strip() or "<NO_CODE>"
+        expr = (row.get("PythonQuery") or "").strip()
+        for t in _tokens(expr):
+            if t in ALIAS:
+                alias_used.setdefault(code, set()).add(f"{t}->{ALIAS[t]}")
+                continue
+            if (
+                t in ALLOW_FUNCS
+                or t in cols
+                or any(re.fullmatch(p, t) for p in ALLOWED_PATTERNS)
+            ):
+                continue
+            unknown.setdefault(code, set()).add(t)
 
     if alias_used:
         lines = [f"{k}: {sorted(vs)}" for k, vs in alias_used.items()]
