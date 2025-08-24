@@ -1,16 +1,16 @@
 project:
-  out_dir: "raporlar"
-  logs_dir: "loglar"
+  out_dir: "../raporlar"
+  logs_dir: "../loglar"
   run_mode: "range"
   holding_period: 1
   transaction_cost: 0.0
   stop_on_filter_error: false
 
 data:
-  excel_dir: "data"
-  filters_csv: "filters_bench.csv"
+  excel_dir: "../data"
+  filters_csv: "../filters.csv"
   enable_cache: false
-  cache_parquet_path: "cache"
+  cache_parquet_path: "../cache"
 
 calendar:
   tplus1_mode: "calendar"
@@ -18,7 +18,7 @@ calendar:
 
 benchmark:
   source: "excel"
-  excel_path: "data/BIST.xlsx"
+  excel_path: "../data/BIST.xlsx"
   excel_sheet: "BIST"
   csv_path: ""
   column_date: "date"
