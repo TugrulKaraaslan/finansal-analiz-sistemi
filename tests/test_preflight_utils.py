@@ -1,6 +1,6 @@
 import pandas as pd
 
-from utils.preflight import preflight_check, smart_parse_dates
+from utils.preflight import canonical, preflight_check, smart_parse_dates
 
 
 def test_smart_parse_dates_handles_iso_and_tr():
@@ -23,3 +23,8 @@ def test_preflight_check_counts_rows_and_missing_columns():
     result = preflight_check(df)
     assert result["rows_on_target"] == 1
     assert result["missing_required_cols"] == ["sma_50"]
+
+
+def test_canonical_handles_uppercase_dotted_i_sequences():
+    """Multiple Turkish 'İ' characters should collapse without underscores."""
+    assert canonical("İİ") == "ii"

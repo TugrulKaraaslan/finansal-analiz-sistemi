@@ -1,4 +1,5 @@
 import re
+import unicodedata
 
 import pandas as pd
 
@@ -32,24 +33,21 @@ def smart_parse_dates(series: pd.Series) -> pd.Series:
 
 
 def canonical(col: str) -> str:
-    """Return a normalized representation of a column name."""
+    """Return a normalized representation of a column name.
+
+    The previous implementation manually mapped a handful of Turkish
+    characters to their ASCII equivalents.  This was brittle and produced
+    spurious underscores when multiple dotted ``İ`` characters appeared
+    consecutively (``"İİ"`` -> ``"i_i"``).  By leveraging Unicode
+    normalisation and removing combining characters we obtain a robust
+    transliteration that collapses such sequences correctly.
+    """
+
     s = str(col).strip().lower()
-    tr = {
-        "ı": "i",
-        "ğ": "g",
-        "ü": "u",
-        "ş": "s",
-        "ö": "o",
-        "ç": "c",
-        "İ": "i",
-        "Ğ": "g",
-        "Ü": "u",
-        "Ş": "s",
-        "Ö": "o",
-        "Ç": "c",
-    }
-    for k, v in tr.items():
-        s = s.replace(k, v)
+    # Decompose accented characters ("Ş" -> "S" + combining cedilla) and drop
+    # the combining marks to obtain plain ASCII.
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))
     s = re.sub(r"[^a-z0-9]+", "_", s)
     return re.sub(r"_+", "_", s).strip("_")
 
