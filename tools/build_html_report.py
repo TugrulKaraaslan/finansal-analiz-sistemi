@@ -6,7 +6,14 @@ from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
-from jinja2 import Template
+
+try:  # Optional dependency
+    from jinja2 import Template
+except ModuleNotFoundError as e:  # pragma: no cover - executed only when missing dep
+    raise ModuleNotFoundError(
+        "build_html_report requires the optional dependency 'jinja2'. "
+        "Install it with `pip install jinja2`."
+    ) from e
 
 OUTDIR = Path("artifacts/report")
 OUTDIR.mkdir(parents=True, exist_ok=True)
