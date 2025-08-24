@@ -4,11 +4,12 @@ from utils.preflight import preflight_check, smart_parse_dates
 
 
 def test_smart_parse_dates_handles_iso_and_tr():
-    s = pd.Series(["2025-03-07", "07.03.2025", "bad"])
+    s = pd.Series(["2025-03-07", "07.03.2025", "07/03/2025", "bad"])
     parsed = smart_parse_dates(s)
     assert parsed[0] == pd.Timestamp("2025-03-07")
     assert parsed[1] == pd.Timestamp("2025-03-07")
-    assert pd.isna(parsed[2])
+    assert parsed[2] == pd.Timestamp("2025-03-07")
+    assert pd.isna(parsed[3])
 
 
 def test_preflight_check_counts_rows_and_missing_columns():

@@ -21,8 +21,12 @@ def smart_parse_dates(series: pd.Series) -> pd.Series:
     iso_mask = series.str.fullmatch(r"\d{4}-\d{2}-\d{2}")
     iso = pd.to_datetime(series.where(iso_mask), errors="coerce", format="%Y-%m-%d")
 
-    # Remaining values are treated as day-first (Turkish style)
-    local = pd.to_datetime(series.where(~iso_mask), errors="coerce", dayfirst=True)
+    # Remaining values are treated as day-first (Turkish style).  ``pd.to_datetime``
+    # struggles when a single Series mixes different separators (``07.03.2025``
+    # vs ``07/03/2025``) and can return ``NaT`` for otherwise valid values.  To
+    # ensure robust parsing we therefore apply the conversion element-wise.
+    remainder = series.where(~iso_mask)
+    local = remainder.map(lambda x: pd.to_datetime(x, errors="coerce", dayfirst=True))
 
     return iso.combine_first(local)
 
