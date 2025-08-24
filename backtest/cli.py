@@ -32,7 +32,7 @@ from backtest.summary import summarize_range
 from backtest.reporting import build_excel_report
 from backtest.filters.normalize_expr import normalize_expr
 from backtest.filters.preflight import validate_filters as preflight_validate_filters
-from backtest.paths import DATA_DIR
+from backtest.paths import DATA_DIR, EXCEL_DIR, BENCHMARK_PATH, ALIAS_PATH
 from backtest.portfolio.engine import PortfolioParams
 from backtest.portfolio.simulator import PortfolioSim
 from backtest.config.schema import (
@@ -124,7 +124,7 @@ def preflight(cfg):  # tests monkeypatch ediyor
         )
 
 
-def convert_to_parquet(excel_dir: str, out_dir: str) -> None:
+def convert_to_parquet(excel_dir: str | Path, out_dir: str | Path) -> None:
     """Read Excel files under *excel_dir* and write partitioned Parquet."""
     excel_path = Path(excel_dir)
     out = Path(out_dir)
@@ -189,9 +189,14 @@ def _resolve_filters_path(cli_arg: str | None) -> Path:
 def build_parser() -> argparse.ArgumentParser:
     desc = (
         "Stage1 CLI (varsayılan veri yolu: "
-        f"{DATA_DIR}; dış veri indirme yok)"
+        f"{DATA_DIR} (paths.py); dış veri indirme varsayılan olarak kapalı)"
     )
     p = argparse.ArgumentParser(prog="backtest", description=desc)
+    p.add_argument(
+        "--allow-download",
+        action="store_true",
+        help="Harici indirmeye izin ver",
+    )
     p.add_argument("--config", default=None, help="YAML config (opsiyonel)")
     p.add_argument("--log-level", default=None, help="DEBUG/INFO/WARNING/ERROR")
 
@@ -200,12 +205,12 @@ def build_parser() -> argparse.ArgumentParser:
     # dry-run
     pr = sub.add_parser("dry-run", help="filters.csv doğrulama")
     pr.add_argument("--filters", required=True)
-    pr.add_argument("--alias", default=None)
+    pr.add_argument("--alias", default=str(ALIAS_PATH))
 
     def add_common(sp):
         sp.add_argument("--data", required=False, help="Parquet/CSV fiyat verisi")
         sp.add_argument("--filters", "--filters-csv", dest="filters", required=False)
-        sp.add_argument("--alias", default=None)
+        sp.add_argument("--alias", default=str(ALIAS_PATH))
         sp.add_argument(
             "--filters-off", action="store_true", help="Filtre uygulamasını kapat"
         )
@@ -242,7 +247,8 @@ def build_parser() -> argparse.ArgumentParser:
     ps.add_argument("--signals", required=True, help="A6 günlük sinyal klasörü")
     ps.add_argument(
         "--benchmark",
-        required=True,
+        required=False,
+        default=str(BENCHMARK_PATH),
         help="BIST benchmark dosyası (CSV/XLSX: date,close)",
     )
     ps.add_argument("--out", required=False, default="raporlar/ozet")
@@ -301,7 +307,12 @@ def build_parser() -> argparse.ArgumentParser:
     tune.add_argument("--seed", type=int, default=None)
 
     ctp = sub.add_parser("convert-to-parquet", help="Excel dosyalarını Parquet'e dönüştür")
-    ctp.add_argument("--excel-dir", required=True)
+    ctp.add_argument(
+        "--excel-dir",
+        required=False,
+        default=None,
+        help="Excel kaynak klasörü (varsayılan: paths.EXCEL_DIR)",
+    )
     ctp.add_argument("--out", required=True, help="Parquet çıkış klasörü")
 
     fr = sub.add_parser("fetch-range", help="Veri aralığı indir")
@@ -309,28 +320,28 @@ def build_parser() -> argparse.ArgumentParser:
     fr.add_argument("--start", required=True)
     fr.add_argument("--end", required=True)
     fr.add_argument("--provider", default="stub")
-    fr.add_argument("--directory", default="data")
+    fr.add_argument("--directory", default=str(DATA_DIR))
 
     fl = sub.add_parser("fetch-latest", help="TTL ile en son veriyi indir")
     fl.add_argument("--symbols", required=True)
     fl.add_argument("--ttl-hours", type=int, default=6)
     fl.add_argument("--provider", default="stub")
-    fl.add_argument("--directory", default="data")
+    fl.add_argument("--directory", default=str(DATA_DIR))
 
     rc_cmd = sub.add_parser("refresh-cache", help="Önbelleği yenile")
     rc_cmd.add_argument("--ttl-hours", type=int, default=0)
     rc_cmd.add_argument("--provider", default="stub")
-    rc_cmd.add_argument("--directory", default="data")
+    rc_cmd.add_argument("--directory", default=str(DATA_DIR))
 
     vc_cmd = sub.add_parser("vacuum-cache", help="Eski parçaları temizle")
     vc_cmd.add_argument("--older-than-days", type=int, default=365)
     vc_cmd.add_argument("--provider", default="stub")
-    vc_cmd.add_argument("--directory", default="data")
+    vc_cmd.add_argument("--directory", default=str(DATA_DIR))
 
     ic_cmd = sub.add_parser("integrity-check", help="Parquet bütünlüğünü kontrol et")
     ic_cmd.add_argument("--symbols", required=True)
     ic_cmd.add_argument("--provider", default="stub")
-    ic_cmd.add_argument("--directory", default="data")
+    ic_cmd.add_argument("--directory", default=str(DATA_DIR))
 
     
     return p
@@ -389,7 +400,7 @@ def main(argv=None):
         from backtest.downloader.providers.local_excel import LocalExcelProvider
         from backtest.downloader.providers.stub import StubProvider
 
-        def _make_dl(name: str, directory: str) -> DataDownloader:
+        def _make_dl(name: str, directory: str, allow_download: bool) -> DataDownloader:
             if name == "stub":
                 prov = StubProvider()
             elif name == "local-csv":
@@ -398,12 +409,17 @@ def main(argv=None):
                 prov = LocalExcelProvider(directory)
             elif name == "http-csv":
                 from backtest.downloader.providers.http_csv import HttpCSVProvider  # pragma: no cover
-                prov = HttpCSVProvider()
+                prov = HttpCSVProvider(allow_download=allow_download)
             else:  # pragma: no cover
                 raise SystemExit(f"unknown provider: {name}")
             return DataDownloader(prov)
 
-        dl = _make_dl(args.provider, args.directory)
+        allow_dl = args.allow_download or os.getenv("ALLOW_DOWNLOAD") == "1"
+        if args.provider == "http-csv" and not allow_dl:
+            raise RuntimeError(
+                "Downloads are disabled by default; use --allow-download or ALLOW_DOWNLOAD=1"
+            )
+        dl = _make_dl(args.provider, args.directory, allow_dl)
         if args.cmd == "fetch-range":
             dl.fetch_range(args.symbols.split(","), args.start, args.end)
         elif args.cmd == "fetch-latest":
@@ -424,7 +440,8 @@ def main(argv=None):
         tune_strategy_cli(args)
         return
     if args.cmd == "convert-to-parquet":
-        convert_to_parquet(args.excel_dir, args.out)
+        excel_dir = args.excel_dir or EXCEL_DIR
+        convert_to_parquet(excel_dir, args.out)
         return
     if args.cmd == "guardrails":
         outdir = Path(getattr(args, "out_dir", "artifacts/guardrails"))

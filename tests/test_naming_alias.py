@@ -4,9 +4,9 @@ from backtest.naming import (
     normalize_indicator_token,
     CANONICAL_SET,
 )
-from pathlib import Path
+from backtest.paths import ALIAS_PATH
 
-ALIAS_CSV = Path("data/alias_mapping.csv")
+ALIAS_CSV = ALIAS_PATH
 
 
 def test_to_snake_basic():

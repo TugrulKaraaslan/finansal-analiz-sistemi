@@ -9,6 +9,7 @@ from typing import Iterable
 
 import pandas as pd
 
+from backtest.paths import DATA_DIR, PROJECT_ROOT
 from .schema import CANON_COLS, normalize
 
 
@@ -18,8 +19,8 @@ class DataDownloader:
     def __init__(
         self,
         provider,
-        data_dir: str | Path = "data/parquet",
-        manifest_path: str | Path = "artifacts/data/manifest.json",
+        data_dir: str | Path = DATA_DIR / "parquet",
+        manifest_path: str | Path = PROJECT_ROOT / "artifacts/data/manifest.json",
     ) -> None:
         self.provider = provider
         self.data_dir = Path(data_dir)

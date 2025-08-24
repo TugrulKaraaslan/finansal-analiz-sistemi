@@ -5,6 +5,8 @@ from pathlib import Path
 import pandas as pd
 from loguru import logger
 
+from backtest.paths import BENCHMARK_PATH
+
 
 class BenchmarkLoader:
     """Load benchmark price data according to configuration."""
@@ -30,7 +32,7 @@ class BenchmarkLoader:
         if src == "none":
             return None
         if src == "excel":
-            path = Path(self.cfg.get("excel_path", ""))
+            path = Path(self.cfg.get("excel_path", BENCHMARK_PATH))
             sheet = self.cfg.get("excel_sheet", "BIST")
             if not path.exists():
                 msg = (

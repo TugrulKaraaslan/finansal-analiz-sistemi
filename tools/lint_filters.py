@@ -9,12 +9,12 @@ which is useful in CI where fixtures are generated at runtime.
 """
 
 from pathlib import Path
-import os
 import sys
 import yaml
 import re
 import pandas as pd
 from backtest.filters.engine import ALIAS
+from backtest.paths import EXCEL_DIR
 
 
 def _load_cfg(path: Path) -> dict:
@@ -41,10 +41,7 @@ def main() -> None:
     # fmt: on
     cfg = _load_cfg(cfg_path)
 
-    # mevcut cfg okuma mantığının üstüne ENV override ekle
-    excel_dir = Path(
-        os.getenv("DATA_DIR", os.getenv("EXCEL_DIR", cfg["data"]["excel_dir"]))
-    )
+    excel_dir = EXCEL_DIR
     print(f"Using excel_dir={excel_dir}")
 
     sample = next(excel_dir.rglob("*.xlsx"))
