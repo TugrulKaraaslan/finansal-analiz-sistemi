@@ -82,7 +82,7 @@ from backtest.filters_compile import compile_expression
 import pandas as pd
 
 df = pd.DataFrame({"a": [1, 2, 3], "b": [0, 1, 2]})
-fn = compile_expression("CROSSUP(a,b)")
+fn = compile_expression("cross_up(a,b)")
 print(fn(df))
 ```
 

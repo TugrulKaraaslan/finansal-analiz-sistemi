@@ -11,7 +11,27 @@ import numpy as np
 import pandas as pd
 
 from backtest.naming import normalize_name
-from .cross import cross_up, cross_down, cross_over, cross_under
+from .cross import cross_up as _cross_up, cross_down as _cross_down, cross_over
+
+
+def _cross_up_env(a: pd.Series, b: pd.Series | float | int) -> pd.Series:
+    if isinstance(b, pd.Series):
+        out = _cross_up(a, b)
+    else:
+        out = cross_over(a, b)
+    return out.fillna(False)
+
+
+def _cross_down_env(a: pd.Series, b: pd.Series | float | int) -> pd.Series:
+    if isinstance(b, pd.Series):
+        if b.nunique() == 1:
+            level = b.iloc[0]
+            out = (a.shift(1) > level) & (a <= level)
+        else:
+            out = _cross_down(a, b)
+    else:
+        out = (a.shift(1) > b) & (a <= b)
+    return out.fillna(False)
 
 
 class SafeQuery:
@@ -48,18 +68,16 @@ class SafeQuery:
         "exp",
         "floor",
         "ceil",
-        "CROSSUP",
-        "crossup",
-        "CROSSDOWN",
-        "crossdown",
-        "CROSSOVER",
-        "crossover",
-        "CROSSUNDER",
-        "crossunder",
-        "CROSS_UP",
         "cross_up",
-        "CROSS_DOWN",
         "cross_down",
+        "CROSSUP",
+        "CROSSDOWN",
+        "crossOver",
+        "crossUnder",
+        "cross_over",
+        "cross_under",
+        "keser_yukari",
+        "keser_asagi",
     }
 
     def __init__(self, expr: str):
@@ -137,18 +155,18 @@ class SafeQuery:
                 "exp": np.exp,
                 "floor": np.floor,
                 "ceil": np.ceil,
-                "CROSSUP": lambda a, b: cross_up(a, b),
-                "crossup": lambda a, b: cross_up(a, b),
-                "CROSSDOWN": lambda a, b: cross_down(a, b),
-                "crossdown": lambda a, b: cross_down(a, b),
-                "CROSSOVER": lambda a, level: cross_over(a, level),
-                "crossover": lambda a, level: cross_over(a, level),
-                "CROSSUNDER": lambda a, level: cross_under(a, level),
-                "crossunder": lambda a, level: cross_under(a, level),
-                "CROSS_UP": lambda a, b: cross_up(a, b),
-                "cross_up": lambda a, b: cross_up(a, b),
-                "CROSS_DOWN": lambda a, b: cross_down(a, b),
-                "cross_down": lambda a, b: cross_down(a, b),
+                # canonical
+                "cross_up": _cross_up_env,
+                "cross_down": _cross_down_env,
+                # aliases
+                "CROSSUP": _cross_up_env,
+                "CROSSDOWN": _cross_down_env,
+                "crossOver": _cross_up_env,
+                "crossUnder": _cross_down_env,
+                "cross_over": _cross_up_env,
+                "cross_under": _cross_down_env,
+                "keser_yukari": _cross_up_env,
+                "keser_asagi": _cross_down_env,
             }
         )
         mask = pd.eval(self.expr, engine="python", parser="pandas", local_dict=env)

@@ -44,7 +44,21 @@ def _build_locals(df: pd.DataFrame) -> dict[str, pd.Series]:
     env = {}
     for c in df.columns:
         env[normalize_token(c)] = df[c]
-    env.update({"cross_up": cross_up, "cross_down": cross_down})
+    env.update(
+        {
+            # canonical
+            "cross_up": cross_up,
+            "cross_down": cross_down,
+            # legacy aliases
+            "CROSSUP": cross_up,
+            "CROSSDOWN": cross_down,
+            "crossOver": cross_up,
+            "crossUnder": cross_down,
+            # optional Turkish aliases
+            "keser_yukari": cross_up,
+            "keser_asagi": cross_down,
+        }
+    )
     return env
 
 
