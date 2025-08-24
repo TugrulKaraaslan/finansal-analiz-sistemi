@@ -18,9 +18,13 @@ pip install -r requirements-dev.txt
 python -m backtest.cli --help
 ```
 
-## Veri İndirme CLI
+Tüm veriler varsayılan olarak depo kökündeki `data/` dizininden okunur.
+Dış veri indirme otomatik olarak yapılmaz.
+
+## Opsiyonel Veri İndirme CLI
 
 Veri indirme servisi sembol bazlı Parquet yazımı ve TTL cache yönetimi sunar.
+Bu adımlar manuel olup normal akışın parçası değildir.
 Temel komutlar:
 
 ```bash
@@ -28,7 +32,7 @@ python -m backtest.cli fetch-range --symbols DEMO --start 2024-01-01 --end 2024-
 python -m backtest.cli fetch-latest --symbols DEMO --ttl-hours 6 --provider stub
 ```
 
-Tüm komutlar yalnız `--start` / `--end` parametrelerini kabul eder ve sabit `/content` yolları kullanılmaz.
+Tüm komutlar yalnız `--start` / `--end` parametrelerini kabul eder ve veri `data/` altına kaydedilir.
 
 ## Hızlı Başlangıç (Colab)
 
@@ -198,7 +202,7 @@ araç çıkış kodunu sıfırdan farklı yapar; tolerans aşımı uyarı olarak
 
 ## Veri ve Filtre Dosyaları
 
-* **Excel klasörü**: `Veri/` (proje kökünde)
+* **Excel klasörü**: `data/` (proje kökünde)
 * **filters.csv**: proje kökünde, ayracı `;`, başlıklar: `FilterCode;PythonQuery`
 
 Örnek satırlar:
@@ -222,7 +226,7 @@ Benchmarkt kaynağı config'te şu şekilde tanımlanır:
 ```yaml
 benchmark:
   source: "excel"
-  excel_path: "Veri/BIST.xlsx"
+  excel_path: "data/BIST.xlsx"
   excel_sheet: "BIST"
   column_date: "date"
   column_close: "close"

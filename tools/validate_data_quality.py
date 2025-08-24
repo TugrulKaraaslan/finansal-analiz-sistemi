@@ -11,7 +11,7 @@ import yaml
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from backtest.paths import EXCEL_DIR  # noqa: E402
+from backtest.paths import DATA_DIR  # noqa: E402
 
 CFG = Path("contracts/data_quality.yaml")
 assert CFG.exists(), "missing contracts/data_quality.yaml"
@@ -138,7 +138,7 @@ def should_include(p: Path) -> bool:
     s = str(p)
     inc = (
         any(
-            Path(EXCEL_DIR, "").joinpath(p).match(pattern)
+            Path(DATA_DIR, "").joinpath(p).match(pattern)
             or fnmatch.fnmatch(s, pattern)
             for pattern in includes
         )
@@ -147,28 +147,28 @@ def should_include(p: Path) -> bool:
     )
 
     def _match(pattern: str) -> bool:
-        path = Path(EXCEL_DIR, "").joinpath(p)
+        path = Path(DATA_DIR, "").joinpath(p)
         return path.match(pattern) or fnmatch.fnmatch(s, pattern)
 
     exc = any(_match(pattern) for pattern in excludes)
     return inc and not exc
 
 
-files = [Path(p) for p in EXCEL_DIR.rglob("*.xlsx") if should_include(p)]
+files = [Path(p) for p in DATA_DIR.rglob("*.xlsx") if should_include(p)]
 
-report = {"root": str(EXCEL_DIR), "files": []}
+report = {"root": str(DATA_DIR), "files": []}
 for f in files:
     try:
         # İlk sheet
         df = pd.ExcelFile(f).parse(0)
         probs = validate_df(df)
         report["files"].append(
-            {"file": str(f.relative_to(EXCEL_DIR)), "problems": probs}
+            {"file": str(f.relative_to(DATA_DIR)), "problems": probs}
         )
     except Exception as e:
         report["files"].append(
             {
-                "file": str(f.relative_to(EXCEL_DIR)),
+                "file": str(f.relative_to(DATA_DIR)),
                 "problems": [{"type": "io", "reason": str(e)}],
             }
         )

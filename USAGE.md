@@ -16,12 +16,12 @@ pip install -r requirements-dev.txt
 make fixtures
 ```
 
-Bu komut `Veri/` altındaki Excel dosyalarından test için küçük örnekler oluşturur.
+Bu komut `data/` altındaki Excel dosyalarından test için küçük örnekler oluşturur.
 
 ### Excel'den Parquet'e dönüşüm
 
 ```bash
-python -m backtest.cli convert-to-parquet --excel-dir Veri --out data/parquet
+python -m backtest.cli convert-to-parquet --excel-dir data --out data/parquet
 ```
 
 `config/data.yaml` dosyasındaki `backend` alanı ile `pandas` veya `polars` seçilebilir.
@@ -40,14 +40,14 @@ Preflight, `filters.csv` içindeki token'ların Excel kolonlarıyla uyuştuğunu
 python -m backtest.cli scan-range --config config_scan.yml --start 2025-03-07 --end 2025-03-11
 ```
 
-## Veri İndirme
+## Veri İndirme (isteğe bağlı)
 
 ```bash
 python -m backtest.cli fetch-range --symbols DEMO --start 2024-01-01 --end 2024-01-05 --provider stub
 python -m backtest.cli fetch-latest --symbols DEMO --ttl-hours 6 --provider stub
 ```
 
-Komutlar sadece `--start` / `--end` parametreleri alır ve sabit `/content` yolları içermez.
+Komutlar sadece `--start` / `--end` parametreleri alır ve veri `data/` altına yazılır.
 
 ### Filtre dosyası yol çözümü
 

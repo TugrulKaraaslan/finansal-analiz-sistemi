@@ -20,7 +20,7 @@ tolerances:
   max_nan_ratio_per_column: 0.02    # %2
   max_duplicate_ratio: 0.0
 
-# Hangi dosyalar taranacak (boş ise EXCEL_DIR altındaki tüm .xlsx)
+# Hangi dosyalar taranacak (boş ise DATA_DIR altındaki tüm .xlsx)
 include:
   - "**/*.xlsx"
 exclude:

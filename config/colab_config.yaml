@@ -7,7 +7,7 @@ project:
   stop_on_filter_error: false
 
 data:
-  excel_dir: "Veri"
+  excel_dir: "data"
   filters_csv: "filters_bench.csv"
   enable_cache: false
   cache_parquet_path: "cache"
@@ -18,7 +18,7 @@ calendar:
 
 benchmark:
   source: "excel"
-  excel_path: "Veri/BIST.xlsx"
+  excel_path: "data/BIST.xlsx"
   excel_sheet: "BIST"
   csv_path: ""
   column_date: "date"

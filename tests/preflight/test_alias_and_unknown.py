@@ -6,7 +6,7 @@ from backtest.preflight import UnknownSeriesError, check_unknown_series
 
 
 def _excel_dir(tmp_path):
-    d = tmp_path / "Veri"
+    d = tmp_path / "data"
     d.mkdir()
     pd.DataFrame({"close": [1]}).to_excel(d / "AAA.xlsx", index=False)
     return d

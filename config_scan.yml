@@ -10,7 +10,7 @@ project:
   raise_on_error: false
 
 data:
-  excel_dir: Veri
+  excel_dir: data
   filters_csv: filters.csv
   enable_cache: false
 

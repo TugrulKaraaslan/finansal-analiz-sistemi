@@ -1,7 +1,12 @@
 import os
 from pathlib import Path
 
-EXCEL_DIR = Path(os.getenv("EXCEL_DIR", "Veri"))
+# Project kökünü ve veri dizinini tek yerde tanımla. ENV ile override
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = Path(os.getenv("DATA_DIR", PROJECT_ROOT / "data"))
+
+# Geri uyum için EXCEL_DIR env'i destekle; aksi halde DATA_DIR kullan
+EXCEL_DIR = Path(os.getenv("EXCEL_DIR", DATA_DIR))
 
 
 def project_root_from_config(config_path: str | Path) -> Path:
@@ -24,4 +29,10 @@ def resolve_under_root(
     return (root / p).resolve()
 
 
-__all__ = ["project_root_from_config", "resolve_under_root", "EXCEL_DIR"]
+__all__ = [
+    "project_root_from_config",
+    "resolve_under_root",
+    "PROJECT_ROOT",
+    "DATA_DIR",
+    "EXCEL_DIR",
+]

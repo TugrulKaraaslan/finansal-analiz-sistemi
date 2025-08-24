@@ -9,7 +9,7 @@ def test_colab_config_env_override(tmp_path, monkeypatch):
     excel = tmp_path / 'excel'
     excel.mkdir()
     cfg.write_text('data:\n  excel_dir: "./does_not_exist"\n')
-    monkeypatch.setenv('EXCEL_DIR', str(excel))
+    monkeypatch.setenv('DATA_DIR', str(excel))
     c = ColabConfig.from_yaml_with_env(cfg)
     assert c.data.excel_dir == excel.resolve()
 

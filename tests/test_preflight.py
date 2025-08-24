@@ -46,11 +46,11 @@ def test_preflight_missing_some(tmp_path):
 
 
 def test_preflight_case_suggestion(tmp_path):
-    real_dir = tmp_path / "veri"
+    real_dir = tmp_path / "data"
     real_dir.mkdir()
-    rep = preflight(tmp_path / "Veri", [date(2025, 3, 7)], "{date}.xlsx")
+    rep = preflight(tmp_path / "Data", [date(2025, 3, 7)], "{date}.xlsx")
     assert rep.errors
-    assert any("veri" in s.lower() for s in rep.suggestions)
+    assert any("data" in s.lower() for s in rep.suggestions)
 
 
 def test_preflight_filename_near_match(tmp_path):

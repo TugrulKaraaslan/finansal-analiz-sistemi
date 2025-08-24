@@ -1,7 +1,7 @@
 # FAQ
 
 ## Excel nereye konur?
-Excel dosyaları proje kökünde `Veri/` klasörüne yerleştirilir. Farklı bir konum kullanmak için `config` dosyasındaki `excel_dir` alanını veya `EXCEL_DIR` ortam değişkenini ayarlayın.
+Excel dosyaları proje kökünde `data/` klasörüne yerleştirilir. Farklı bir konum kullanmak için `config` dosyasındaki `excel_dir` alanını veya `DATA_DIR` (geriye dönük olarak `EXCEL_DIR`) ortam değişkenini ayarlayın.
 
 ## Fixtures nasıl üretilir?
 Test için küçük örnek veri setlerini oluşturmak üzere:
