@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import logging
 import os
 import re
@@ -13,10 +14,23 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 import pandas as pd
 from loguru import logger
 
+from backtest.logging_conf import get_logger, log_with
 from backtest.utils import normalize_key
 from utils.paths import resolve_path
 
 from .columns import canonical_map, canonicalize
+
+
+def _append_event(event: dict) -> None:
+    """Append event to events.jsonl in log dir if available."""
+
+    log_dir = os.getenv("LOG_DIR", "loglar")
+    path = Path(log_dir) / "events.jsonl"
+    try:  # pragma: no cover - best effort
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(event, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
 
 def _first_existing(*paths: Union[str, Path]) -> Optional[Path]:
@@ -120,6 +134,11 @@ def validate_columns(df: pd.DataFrame, required: Iterable[str]) -> pd.DataFrame:
     """
     missing = set(required).difference(df.columns)
     if missing:
+        log = get_logger(__name__)
+        for col in sorted(missing):
+            msg = f"MISSING_COL_{col}"
+            logger.error(msg)
+            log_with(log, "ERROR", msg)
         raise ValueError(f"Missing required columns: {', '.join(sorted(missing))}")
     return df
 
@@ -242,6 +261,7 @@ def read_excels_long(
 ) -> pd.DataFrame:
     start_all = time.perf_counter()
     price_schema = None
+    log = get_logger(__name__)
     if isinstance(cfg_or_path, (str, Path)):
         excel_dir = resolve_path(cfg_or_path)
         enable_cache = None
@@ -263,6 +283,43 @@ def read_excels_long(
     excel_files: List[Path] = []
     if excel_dir and excel_dir.exists():
         excel_files = sorted(p for p in excel_dir.glob("*.xlsx"))
+    files_read = len(excel_files)
+    def _log_metrics(df: pd.DataFrame, level: str = "INFO", diag: str | None = None, **extra) -> None:
+        metrics = {
+            "rows": int(df.shape[0]),
+            "symbols": int(df["symbol"].nunique()) if "symbol" in df.columns else 0,
+            "date_min": (
+                str(df["date"].min().date()) if "date" in df.columns and not df.empty else None
+            ),
+            "date_max": (
+                str(df["date"].max().date()) if "date" in df.columns and not df.empty else None
+            ),
+            "files_read": files_read,
+        }
+        msg = f"diag={diag}" if diag else "load_data"
+        log_with(log, level, msg, stage="load_data", **metrics, **extra)
+        if diag:
+            logger.warning(
+                "diag=%s path=%s pattern=%s files_found=%s",
+                diag,
+                extra.get("path"),
+                extra.get("pattern"),
+                files_read,
+            )
+        else:
+            logger.info(
+                "Loaded %d rows for %d symbols from %d files (%s-%s)",
+                metrics["rows"],
+                metrics["symbols"],
+                files_read,
+                metrics["date_min"],
+                metrics["date_max"],
+            )
+        event = {"stage": "load_data", **metrics}
+        if diag:
+            event["diag"] = diag
+            event.update(extra)
+        _append_event(event)
     if enable_cache is not None:
         enable_cache = bool(str(enable_cache).lower() in ("true", "1"))
     if enable_cache is None:
@@ -279,11 +336,15 @@ def read_excels_long(
             cache_file = resolve_path(cache_path)
             if cache_file.exists() and cache_file.is_file():
                 try:
-                    return pd.read_parquet(cache_file)
+                    df_cached = pd.read_parquet(cache_file)
+                    _log_metrics(df_cached)
+                    return df_cached
                 except Exception as e:  # engine missing or wrong format
                     logger.warning("Önbellek okunamadı: {} -> {}", cache_path, e)
                     try:
-                        return pd.read_pickle(cache_file)
+                        df_cached = pd.read_pickle(cache_file)
+                        _log_metrics(df_cached)
+                        return df_cached
                     except Exception as e2:
                         logger.warning("Önbellek okunamadı: {} -> {}", cache_path, e2)
             aggregated_cache = cache_file if cache_file.suffix else None
@@ -406,8 +467,17 @@ def read_excels_long(
     records = [r for r in records if not r.empty]
     if not records:
         warnings.warn("Hiçbir sheet/çalışma sayfasından veri toplanamadı.")
-        cols = ["date", "open", "high", "low", "close", "volume", "symbol"]
-        return pd.DataFrame(columns=cols)
+        empty_df = pd.DataFrame(
+            columns=["date", "open", "high", "low", "close", "volume", "symbol"]
+        )
+        _log_metrics(
+            empty_df,
+            level="WARNING",
+            diag="DATA_EMPTY",
+            path=str(excel_dir),
+            pattern="*.xlsx",
+        )
+        return empty_df
 
     full = pd.concat(records, ignore_index=True)
     full = full.sort_values(["symbol", "date"], kind="mergesort").reset_index(drop=True)
@@ -418,6 +488,8 @@ def read_excels_long(
     full, _ = normalize_columns(full)
     full = canonicalize_columns(full)
     validate_columns(full, ["date", "open", "high", "low", "close", "volume", "symbol"])
+
+    _log_metrics(full)
 
     if enable_cache and aggregated_cache:
         try:
