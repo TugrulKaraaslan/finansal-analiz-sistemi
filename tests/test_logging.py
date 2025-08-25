@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import time
 from pathlib import Path
 
@@ -15,16 +16,16 @@ def _run_dir_from_logfile(logfile: str) -> Path:
 
 def test_logs_dir_default(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    logfile = setup_logger(run_id="t1")
+    logfile = setup_logger()
     run_dir = _run_dir_from_logfile(logfile)
     assert run_dir.parent.name == "loglar"
-    assert run_dir.name.startswith("run_")
+    assert re.match(r"\d{8}-\d{6}", run_dir.name)
     assert Path(logfile).exists()
 
 
 def test_timer_records_stage(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    logfile = setup_logger(run_id="t2")
+    logfile = setup_logger()
     with Timer("load_data") as t:
         t.update(rows=1, cols=2)
     run_dir = _run_dir_from_logfile(logfile)
@@ -37,7 +38,7 @@ def test_timer_records_stage(tmp_path, monkeypatch):
 
 def test_error_logging(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    logfile = setup_logger(run_id="t3")
+    logfile = setup_logger()
     with pytest.raises(RuntimeError):
         with Timer("boom"):
             raise RuntimeError("boom")
@@ -51,8 +52,8 @@ def test_error_logging(tmp_path, monkeypatch):
 def test_purge_old_logs(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     base = Path("loglar")
-    old_run = base / "run_old"
-    new_run = base / "run_new"
+    old_run = base / "old"
+    new_run = base / "new"
     old_run.mkdir(parents=True)
     new_run.mkdir(parents=True)
     old_time = time.time() - 8 * 24 * 3600
@@ -67,6 +68,6 @@ def test_legacy_logs_dir_ignored(tmp_path, caplog, monkeypatch):
     monkeypatch.chdir(tmp_path)
     Path("logs").mkdir()
     with caplog.at_level(logging.WARNING):
-        setup_logger(run_id="t4")
+        setup_logger()
     assert "legacy logs/ directory detected" not in caplog.text
     assert not Path("logs/migration.txt").exists()
