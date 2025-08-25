@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import copy
 import logging
-import warnings
 from pathlib import Path
 from types import SimpleNamespace as NS
 from typing import Any
+
+from backtest.deprecations import emit_deprecation
 
 try:
     import yaml
@@ -82,16 +83,10 @@ def _to_ns(x: Any, *, _key: str | None = None) -> Any:
 def _apply_legacy(doc: dict) -> dict:
     bmk = doc.get("benchmark", {})
     if "xu100_source" in bmk and "source" not in bmk:
-        warnings.warn(
-            "benchmark.xu100_source deprecated; use benchmark.source",
-            DeprecationWarning,
-        )
+        emit_deprecation("benchmark.xu100_source", "benchmark.source")
         bmk["source"] = bmk["xu100_source"]
     if "xu100_csv_path" in bmk and "csv_path" not in bmk:
-        warnings.warn(
-            "benchmark.xu100_csv_path deprecated; use benchmark.csv_path",
-            DeprecationWarning,
-        )
+        emit_deprecation("benchmark.xu100_csv_path", "benchmark.csv_path")
         bmk["csv_path"] = bmk["xu100_csv_path"]
     doc["benchmark"] = bmk
     return doc
