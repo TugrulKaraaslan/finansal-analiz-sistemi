@@ -7,6 +7,7 @@ from types import SimpleNamespace as NS
 from typing import Any
 
 from backtest.deprecations import emit_deprecation
+from .utils import normalize_path
 
 try:
     import yaml
@@ -93,11 +94,15 @@ def _apply_legacy(doc: dict) -> dict:
 
 
 def _expand_paths(doc: dict, base: Path) -> dict:
-    def _norm(p: str) -> str:
-        if not p:
-            return p
-        q = Path(p)
-        return str(q if q.is_absolute() else (base / q))
+    """Normalize path-like fields inside *doc*.
+
+    *base* is the directory containing the config file. All relative paths
+    are resolved against this directory and ``~`` is expanded using the
+    current user's home directory.
+    """
+
+    def _norm(p: str | Path) -> str:
+        return str(normalize_path(base, p)) if p else p  # type: ignore[arg-type]
 
     if doc.get("project", {}).get("out_dir"):
         doc["project"]["out_dir"] = _norm(doc["project"]["out_dir"])
@@ -109,7 +114,9 @@ def _expand_paths(doc: dict, base: Path) -> dict:
         cpp = doc["data"]["cache_parquet_path"]
         doc["data"]["cache_parquet_path"] = _norm(cpp)
     if doc.get("calendar", {}).get("holidays_csv_path"):
-        doc["calendar"]["holidays_csv_path"] = _norm(doc["calendar"]["holidays_csv_path"])
+        doc["calendar"]["holidays_csv_path"] = _norm(
+            doc["calendar"]["holidays_csv_path"]
+        )
     for key in ("excel_path", "csv_path"):
         if doc.get("benchmark", {}).get(key):
             doc["benchmark"][key] = _norm(doc["benchmark"][key])
@@ -117,7 +124,7 @@ def _expand_paths(doc: dict, base: Path) -> dict:
 
 
 def load_config(path: str | Path) -> NS:
-    p = Path(path)
+    p = Path(path).expanduser()
     if not p.exists():
         msg = f"config bulunamadı: {p.resolve()}  (İpucu: --config <dosya>)"
         logger.error(msg)
@@ -132,7 +139,8 @@ def load_config(path: str | Path) -> NS:
     doc = _deep_merge(_DEFAULT, user)
     if doc.get("indicators", {}).get("engine") != "none":
         raise ValueError("indicators.engine sadece 'none' olmalı")
-    doc = _expand_paths(doc, p.parent)
+    # normalize paths relative to config file directory
+    doc = _expand_paths(doc, p.parent.resolve())
     cfg = _to_ns(doc)
     if isinstance(cfg.indicators.params, NS):
         cfg.indicators.params = dict(cfg.indicators.params.__dict__)
