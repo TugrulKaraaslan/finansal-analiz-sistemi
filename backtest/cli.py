@@ -60,12 +60,8 @@ __all__ = [
     "compile_filters",
 ]
 
-from backtest.logging_conf import ensure_run_id
 from backtest.logging_utils import setup_logger
 from loguru import logger
-
-# runtime configurable logger; configured in ``main``
-run_id = None
 
 # setup_logging çağrısından sonra FileHandler eklemek için placeholder
 fh = None
@@ -480,10 +476,10 @@ def main(argv=None):
         argv = pre + [cmd] + post
     args = parser.parse_args(argv)
 
-    global run_id
-    run_id = ensure_run_id()
-    setup_logger(run_id=run_id, level=args.log_level, json_console=args.json_logs)
-    logger.bind(run_id=run_id, cmd=args.cmd).info("CLI start")
+    log_root = os.getenv("LOG_DIR", "loglar")
+    Path(log_root).mkdir(parents=True, exist_ok=True)
+    setup_logger(log_dir=log_root, level=args.log_level, json_console=args.json_logs)
+    logger.bind(cmd=args.cmd).info("CLI start")
     if args.cmd in {
         "fetch-range",
         "fetch-latest",

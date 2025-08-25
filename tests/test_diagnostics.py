@@ -18,7 +18,7 @@ import backtest.indicators as indicators
 def _setup_log(tmp_path):
     log_dir = tmp_path / "log"
     os.environ["LOG_DIR"] = str(log_dir)
-    events_path = setup_logger(run_id="t", log_dir=str(log_dir))
+    events_path = setup_logger(log_dir=str(log_dir))
     return Path(events_path)
 
 

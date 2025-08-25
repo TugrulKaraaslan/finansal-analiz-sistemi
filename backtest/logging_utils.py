@@ -145,20 +145,27 @@ class Timer:
 
 
 def setup_logger(
-    run_id: str | None = None,
-    level: str = _DEF_LEVEL,
     log_dir: str = "loglar",
+    *,
+    level: str = _DEF_LEVEL,
     json_console: bool = False,
 ) -> str:
-    """Initialise loggers and return the ``events.jsonl`` path."""
+    """Initialise loggers and return the ``events.jsonl`` path.
+
+    ``log_dir`` is the root directory under which a timestamp based
+    sub-directory is created for each run.  Inside this run directory an
+    ``events.jsonl`` file is prepared where structured log records are
+    written.  The function configures :mod:`loguru` to write console logs and
+    structured events and returns the path to ``events.jsonl`` as a string.
+    """
 
     global _RUN_DIR, _RUN_ID
 
     base = Path(log_dir)
     base.mkdir(parents=True, exist_ok=True)
 
-    stamp = run_id or datetime.now().strftime("%Y%m%d-%H%M%S")
-    run_dir = base / f"run_{stamp}"
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    run_dir = base / stamp
     run_dir.mkdir(parents=True, exist_ok=True)
 
     _RUN_DIR = run_dir
@@ -216,7 +223,7 @@ def purge_old_logs(days: int = 7, log_dir: str = "loglar") -> list[str]:
 
     cutoff = datetime.now() - timedelta(days=days)
     removed: list[str] = []
-    for d in base.glob("run_*"):
+    for d in base.iterdir():
         try:
             if d.is_dir() and datetime.fromtimestamp(d.stat().st_mtime) < cutoff:
                 shutil.rmtree(d, ignore_errors=True)
