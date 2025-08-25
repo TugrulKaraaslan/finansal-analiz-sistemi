@@ -1,36 +1,23 @@
-"""Google Colab setup for fixed package versions."""
+"""Google Colab setup for project dependencies with logging."""
 
 import subprocess
 import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+LOG_PATH = ROOT / "loglar" / "colab_install.log"
+LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
-def run(cmd: list[str]) -> None:
-    """Run a shell command."""
-    subprocess.run(cmd, check=True)
+def run(cmd: list[str], log_file) -> None:
+    """Run a shell command and log output."""
+    subprocess.run(cmd, check=True, stdout=log_file, stderr=subprocess.STDOUT)
 
 
-# Upgrade pip
-run([sys.executable, "-m", "pip", "install", "-q", "--upgrade", "pip"])
+req_file = ROOT / "requirements-colab.txt"
+if not req_file.exists():
+    req_file = ROOT / "requirements.txt"
 
-# Install required packages with fixed versions
-packages = [
-    "pandas==2.2.2",
-    "numpy==1.26.4",
-    "pandas-ta==0.3.14b",
-    "pandera==0.19.3",
-    "loguru",
-    "xlsxwriter",
-    "typing-inspect",
-]
-run([sys.executable, "-m", "pip", "install", "-q", *packages])
-
-import numpy as np  # noqa: E402
-
-# Verify installations
-import pandas as pd  # noqa: E402
-import pandas_ta  # noqa: E402
-
-print(pd.__version__)
-print(np.__version__)
-print(pandas_ta.__version__)
-print("Runtime'ı yeniden başlatmanız gerekiyor")
+with LOG_PATH.open("w") as log_file:
+    run([sys.executable, "-m", "pip", "install", "-U", "pip"], log_file)
+    run([sys.executable, "-m", "pip", "install", "-r", str(req_file)], log_file)
