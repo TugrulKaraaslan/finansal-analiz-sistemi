@@ -143,15 +143,123 @@ def convert_to_parquet(excel_dir: str | Path, out_dir: str | Path) -> None:
 
 
 def _run_scan(cfg):  # tests monkeypatch ediyor
-    src = cfg if getattr(cfg.data, "price_schema", None) else getattr(cfg.data, "excel_dir", "")
-    try:
-        read_excels_long(src)
-    except ValueError:
-        pass
-    day = getattr(cfg.project, "single_date", None) or getattr(cfg.project, "start_date", None)
+    from backtest.calendars import add_next_close_calendar
+    from backtest.data_loader import canonicalize_columns
+    from backtest.indicators import compute_indicators
+
+    events: list[dict[str, object]] = []
+
+    def _diag(code: str, **detail):
+        log_with(logger, "INFO", f"DIAG_{code}", **detail)
+        events.append({"type": "diag", "code": code, **detail})
+
     out_dir = Path(getattr(cfg.project, "out_dir", "."))
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / f"SCAN_{day}.xlsx").write_text("", encoding="utf-8")
+
+    start = getattr(cfg.project, "start_date", None)
+    end = getattr(cfg.project, "end_date", None)
+    single = getattr(cfg.project, "single_date", None)
+
+    df = read_excels_long(cfg)
+    if df.empty:
+        _diag("DATA_EMPTY")
+        (out_dir / "events.jsonl").write_text(
+            "\n".join(json.dumps(e, ensure_ascii=False) for e in events),
+            encoding="utf-8",
+        )
+        return None
+
+    df = canonicalize_columns(df)
+    df["date"] = pd.to_datetime(df["date"])
+
+    if single:
+        start = end = single
+    if not start:
+        start = str(df["date"].min().date())
+    if not end:
+        end = str(df["date"].max().date())
+
+    tdays = pd.date_range(start, end, freq="B")
+    df = df.drop(columns=[c for c in ["next_close", "next_date"] if c in df.columns])
+    df = add_next_close_calendar(df, tdays)
+    df = compute_indicators(
+        df, getattr(getattr(cfg, "indicators", NS()), "params", {}), engine="none"
+    )
+
+    filters_path = getattr(cfg.data, "filters_csv", None)
+    filters = load_filters_csv([filters_path]) if filters_path else []
+    filters_df = pd.DataFrame(filters)
+    if filters_df.empty:
+        _diag("FILTERS_EMPTY")
+        (out_dir / "events.jsonl").write_text(
+            "\n".join(json.dumps(e, ensure_ascii=False) for e in events),
+            encoding="utf-8",
+        )
+        return None
+
+    sig_frames: list[pd.DataFrame] = []
+    for d in tdays:
+        sig = run_screener(
+            df,
+            filters_df,
+            d,
+            stop_on_filter_error=False,
+            raise_on_error=False,
+        )
+        if sig.empty:
+            _diag("NO_MATCH_DAY", day=str(pd.to_datetime(d).date()))
+        else:
+            sig_frames.append(sig)
+
+    signals = (
+        pd.concat(sig_frames, ignore_index=True)
+        if sig_frames
+        else pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+    )
+
+    trades = run_1g_returns(
+        df,
+        signals,
+        holding_period=getattr(getattr(cfg, "trading", NS()), "holding_period", 1),
+        transaction_cost=getattr(getattr(cfg, "trading", NS()), "transaction_cost", 0.0),
+        trading_days=tdays,
+    )
+
+    if trades.empty:
+        _diag("ZERO_RESULT_RANGE")
+
+    idx_cols = ["FilterCode"]
+    if "Side" in trades.columns:
+        idx_cols.append("Side")
+    summary = (
+        trades.pivot_table(index=idx_cols, columns="Date", values="ReturnPct")
+        if not trades.empty
+        else pd.DataFrame()
+    )
+    v_summary = dataset_summary(df)
+    v_issues = quality_warnings(df)
+
+    write_reports(
+        trades,
+        dates=tdays,
+        summary_wide=summary,
+        out_xlsx=str(out_dir),
+        out_csv_dir=str(out_dir),
+        daily_sheet_prefix=getattr(cfg.report, "daily_sheet_prefix", "SCAN_"),
+        summary_sheet_name=getattr(cfg.report, "summary_sheet_name", "SUMMARY"),
+        percent_fmt=getattr(cfg.report, "percent_format", "0.00%"),
+        validation_summary=v_summary,
+        validation_issues=v_issues,
+        per_day_output=True,
+        filename_pattern="SCAN_{date}.xlsx",
+        csv_filename_pattern="SCAN_{date}.csv",
+    )
+
+    events_path = out_dir / "events.jsonl"
+    events_path.write_text(
+        "\n".join(json.dumps(e, ensure_ascii=False) for e in events),
+        encoding="utf-8",
+    )
     return None
 
 
