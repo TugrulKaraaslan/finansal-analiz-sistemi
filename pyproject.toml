@@ -1,14 +1,14 @@
 [project]
 name = "finansal-analiz-sistemi"
 version = "0.0.0"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.11,<3.13"
 dependencies = [
     "pandas==2.2.2",
     "pandas-ta==0.3.14b0",
     "numpy==2.0.2",
     "click",
     "loguru",
-    "pandera",
+    "pandera>=0.26.0",
     "pydantic",
     "pyarrow",
     "openpyxl",

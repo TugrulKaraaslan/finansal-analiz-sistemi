@@ -13,7 +13,10 @@ guardrails:
 	python -m backtest.cli guardrails
 
 test:
-	pytest -q
+        pytest -q
+
+ci:
+        bash tools/ci_checks.sh
 
 golden:
 	python tools/update_golden_checksums.py
