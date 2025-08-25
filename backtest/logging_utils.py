@@ -1,18 +1,9 @@
-"""Logging utilities for backtest package.
+"""Logging utilities for the backtest package.
 
-This module centralises logging configuration and timing helpers.  It
-implements a simple structured logging scheme where each execution
-creates a dedicated run directory under ``loglar/``.
-
-Example::
-
-    >>> from backtest.logging_utils import setup_logger, Timer
-    >>> logfile = setup_logger(run_id="example")
-    >>> with Timer("stage") as t:
-    ...     t.update(rows=10)
-
-The above snippet will create ``loglar/run_example`` with files such as
-``summary.txt`` and ``stages.jsonl``.
+This module centralises logging configuration and provides a small
+``Timer`` helper used throughout the project.  Each execution is assigned
+to a *run directory* under ``loglar/`` where structured log events are
+written as ``events.jsonl``.
 """
 
 from __future__ import annotations
@@ -24,7 +15,6 @@ import shutil
 import sys
 import time
 from datetime import datetime, timedelta, timezone
-from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any, Callable
 
@@ -36,26 +26,33 @@ __all__ = ["Timer", "setup_logger", "purge_old_logs"]
 _DEF_LEVEL = os.getenv("BIST_LOG_LEVEL", "INFO").upper()
 _DEF_FMT = "%(asctime)s | %(levelname)-7s | %(name)s | %(message)s"
 
-_def_handler: RotatingFileHandler | None = None
 _RUN_DIR: Path | None = None
+_RUN_ID: str | None = None
+_EVENT_KEY = "_event"
+
+_METRIC_KEYS = [
+    "rows",
+    "symbols",
+    "signals",
+    "trades",
+    "rows_written",
+    "duration_ms",
+]
 
 
 class Timer:
-    """Context manager & decorator to measure execution time.
-
-    Parameters
-    ----------
-    stage:
-        Name of the stage being timed.
-    extra:
-        Optional initial metrics that will be written to ``stages.jsonl``.
-    """
+    """Context manager and decorator measuring execution time."""
 
     def __init__(self, stage: str, *, extra: dict[str, Any] | None = None):
         self.stage = stage
-        self.extra = extra or {}
         self.t0: float | None = None
         self.start: datetime | None = None
+        self.day: str | None = None
+        self.diag: str | None = None
+        self.metrics: dict[str, Any] = {k: 0 for k in _METRIC_KEYS}
+        self.extra: dict[str, Any] = {}
+        if extra:
+            self.update(**extra)
 
     # ------------------------------------------------------------------
     # Context manager API
@@ -67,24 +64,24 @@ class Timer:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> bool:
-        assert self.t0 is not None and self.start is not None
+        assert self.t0 is not None
         end = datetime.now(timezone.utc)
         dt_ms = int((time.perf_counter() - self.t0) * 1000)
+        self.metrics["duration_ms"] = dt_ms
 
+        level = "ERROR" if exc_type else "INFO"
         record = {
             "ts": end.isoformat(),
+            "level": level,
             "stage": self.stage,
-            "elapsed_ms": dt_ms,
-            "start": self.start.isoformat(),
-            "end": end.isoformat(),
-            **self.extra,
+            "run_id": _RUN_ID,
+            "day": self.day,
+            "metrics": {k: self.metrics.get(k, 0) for k in _METRIC_KEYS},
+            "diag": self.diag or "None",
         }
-
-        stages_path = _RUN_DIR / "stages.jsonl" if _RUN_DIR else None
 
         if exc_type:
             logger.exception("❌ fail: {} in {} ms", self.stage, dt_ms)
-            record["level"] = "ERROR"
             if _RUN_DIR:
                 err_file = _RUN_DIR / f"{self.stage}.err"
                 with err_file.open("w", encoding="utf-8") as fh:
@@ -93,32 +90,55 @@ class Timer:
                     traceback.print_exception(exc_type, exc, tb, file=fh)
         else:
             logger.info("✅ done: {} in {} ms", self.stage, dt_ms)
-            record["level"] = "INFO"
+
+        if _RUN_DIR:
+            logger.bind(**{_EVENT_KEY: True}).log(
+                level, json.dumps(record, ensure_ascii=False)
+            )
+            stages_path = _RUN_DIR / "stages.jsonl"
+            legacy = {
+                "ts": end.isoformat(),
+                "stage": self.stage,
+                "elapsed_ms": dt_ms,
+                "start": self.start.isoformat() if self.start else None,
+                "end": end.isoformat(),
+                **self.metrics,
+                **self.extra,
+                "level": level,
+            }
+            with stages_path.open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(legacy, ensure_ascii=False) + "\n")
 
         self.elapsed_ms = dt_ms
-
-        if stages_path and stages_path.parent.exists():
-            with stages_path.open("a", encoding="utf-8") as fh:
-                fh.write(json.dumps(record, ensure_ascii=False) + "\n")
-
         return False  # do not suppress exceptions
 
     # ------------------------------------------------------------------
     # Helper methods
     # ------------------------------------------------------------------
     def update(self, **metrics: Any) -> None:
-        """Add metrics to be stored when the context exits."""
-
-        self.extra.update(metrics)
+        for k, v in metrics.items():
+            if k == "day":
+                self.day = v
+            elif k == "diag":
+                self.diag = v
+            elif k in _METRIC_KEYS:
+                self.metrics[k] = v
+            else:
+                self.extra[k] = v
 
     # ------------------------------------------------------------------
     # Decorator support
     # ------------------------------------------------------------------
     def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
-        """Allow ``Timer"`` to be used as a decorator."""
-
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            with Timer(self.stage, extra=self.extra.copy()):
+            with Timer(
+                self.stage,
+                extra={
+                    "day": self.day,
+                    "diag": self.diag,
+                    **{k: v for k, v in self.metrics.items() if v},
+                },
+            ):
                 return func(*args, **kwargs)
 
         return wrapper
@@ -128,16 +148,11 @@ def setup_logger(
     run_id: str | None = None,
     level: str = _DEF_LEVEL,
     log_dir: str = "loglar",
+    json_console: bool = False,
 ) -> str:
-    """Initialise root logger and return main log file path.
+    """Initialise loggers and return the ``events.jsonl`` path."""
 
-    A new run directory ``run_<timestamp>`` is created under ``log_dir``.
-    ``summary.txt`` within this directory is used as the main log file.
-    ``setup_logger`` also sets a module level ``_RUN_DIR`` used by
-    :class:`Timer`.
-    """
-
-    global _def_handler, _RUN_DIR
+    global _RUN_DIR, _RUN_ID
 
     base = Path(log_dir)
     base.mkdir(parents=True, exist_ok=True)
@@ -146,32 +161,50 @@ def setup_logger(
     run_dir = base / f"run_{stamp}"
     run_dir.mkdir(parents=True, exist_ok=True)
 
-    logfile = run_dir / "summary.txt"
+    _RUN_DIR = run_dir
+    _RUN_ID = stamp
 
-    root = logging.getLogger()
-    root.setLevel(getattr(logging, level, logging.INFO))
+    events_path = run_dir / "events.jsonl"
 
-    # console
-    if not any(isinstance(h, logging.StreamHandler) for h in root.handlers):
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setFormatter(logging.Formatter(_DEF_FMT))
-        root.addHandler(ch)
+    class InterceptHandler(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:  # pragma: no cover - thin
+            try:
+                lvl = logger.level(record.levelname).name
+            except ValueError:
+                lvl = record.levelno
+            logger.bind().opt(depth=6, exception=record.exc_info).log(
+                lvl, record.getMessage()
+            )
 
-    # file (rotating)
-    if _def_handler:
-        root.removeHandler(_def_handler)
-    _def_handler = RotatingFileHandler(logfile, maxBytes=5_000_000, backupCount=2)
-    _def_handler.setFormatter(logging.Formatter(_DEF_FMT))
-    root.addHandler(_def_handler)
+    logging.basicConfig(handlers=[InterceptHandler()], level=0)
 
     logger.remove()
-    logger.add(sys.stdout, format=_DEF_FMT, level=level)
-    logger.add(logfile, format=_DEF_FMT, level=level, rotation="5 MB", retention=2)
+    logger.add(
+        sys.stdout,
+        level=level,
+        serialize=json_console,
+        format=None if json_console else _DEF_FMT,
+    )
+    logger.add(
+        events_path,
+        level="DEBUG",
+        rotation="10 MB",
+        format="{message}",
+        filter=lambda r: r["extra"].get(_EVENT_KEY, False),
+    )
+    # ensure file exists with a start marker
+    start_event = {
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "level": "INFO",
+        "stage": "summary",
+        "run_id": _RUN_ID,
+        "day": None,
+        "metrics": {k: 0 for k in _METRIC_KEYS},
+        "diag": "None",
+    }
+    logger.bind(**{_EVENT_KEY: True}).info(json.dumps(start_event, ensure_ascii=False))
 
-    logger.info("Log dir: {}", run_dir)
-
-    _RUN_DIR = run_dir
-    return str(logfile)
+    return str(events_path)
 
 
 def purge_old_logs(days: int = 7, log_dir: str = "loglar") -> list[str]:
@@ -191,3 +224,4 @@ def purge_old_logs(days: int = 7, log_dir: str = "loglar") -> list[str]:
         except Exception:  # pragma: no cover - best effort
             pass
     return removed
+

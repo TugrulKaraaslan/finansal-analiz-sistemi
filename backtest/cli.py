@@ -60,12 +60,12 @@ __all__ = [
     "compile_filters",
 ]
 
-from backtest.logging_conf import ensure_run_id, get_logger, log_with
+from backtest.logging_conf import ensure_run_id
+from backtest.logging_utils import setup_logger
+from loguru import logger
 
-log = get_logger("cli")
-run_id = ensure_run_id()
-log.info("CLI start", extra={"extra_fields": {"run_id": run_id, "cmd": "scan-range"}})
-logger = log
+# runtime configurable logger; configured in ``main``
+run_id = None
 
 # setup_logging çağrısından sonra FileHandler eklemek için placeholder
 fh = None
@@ -150,7 +150,7 @@ def _run_scan(cfg):  # tests monkeypatch ediyor
     events: list[dict[str, object]] = []
 
     def _diag(code: str, **detail):
-        log_with(logger, "INFO", f"DIAG_{code}", **detail)
+        logger.bind(**detail).info(f"DIAG_{code}")
         events.append({"type": "diag", "code": code, **detail})
 
     out_dir = Path(getattr(cfg.project, "out_dir", "."))
@@ -291,7 +291,13 @@ def build_parser() -> argparse.ArgumentParser:
     desc = "Stage1 CLI (varsayılan veri yolu: " f"{DATA_DIR} (paths.py))"
     p = argparse.ArgumentParser(prog="backtest", description=desc)
     p.add_argument("--config", default=None, help="YAML config (opsiyonel)")
-    p.add_argument("--log-level", default=None, help="DEBUG/INFO/WARNING/ERROR")
+    p.add_argument(
+        "--log-level",
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        help="Konsol log seviyesi",
+    )
+    p.add_argument("--json-logs", action="store_true", help="Console'u JSON formatta yaz")
 
     sub = p.add_subparsers(dest="cmd", required=True)
 
@@ -465,11 +471,19 @@ def main(argv=None):
             if rest[i] in {"--config", "--log-level"} and i + 1 < len(rest):
                 pre.extend(rest[i : i + 2])
                 i += 2
+            elif rest[i] == "--json-logs":
+                pre.append(rest[i])
+                i += 1
             else:
                 post.append(rest[i])
                 i += 1
         argv = pre + [cmd] + post
     args = parser.parse_args(argv)
+
+    global run_id
+    run_id = ensure_run_id()
+    setup_logger(run_id=run_id, level=args.log_level, json_console=args.json_logs)
+    logger.bind(run_id=run_id, cmd=args.cmd).info("CLI start")
     if args.cmd in {
         "fetch-range",
         "fetch-latest",
@@ -570,7 +584,7 @@ def main(argv=None):
     log_root = cfg_dict.get("paths", {}).get("logs", os.getenv("LOG_DIR", "loglar"))
     art_root = cfg_dict.get("paths", {}).get("artifacts", os.getenv("ARTIFACTS_DIR", "artifacts"))
     rc = RunContext.create(log_root, art_root)
-    logger.info("run_id=%s", rc.run_id)
+    logger.info("run_id={}", rc.run_id)
     log_file = Path(log_root) / f"{rc.run_id}.log"
     global fh
     fh = logging.FileHandler(log_file, encoding="utf-8")
@@ -656,7 +670,7 @@ def main(argv=None):
         }
     if inputs:
         fields = {k: str(v) for k, v in inputs.items() if v is not None}
-        log_with(log, "INFO", args.cmd, **fields)
+        logger.bind(**fields).info(args.cmd)
 
     rc.write_env_snapshot()
     rc.write_config_snapshot(cfg_dict, inputs)
