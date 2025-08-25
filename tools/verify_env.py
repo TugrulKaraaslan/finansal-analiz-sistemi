@@ -28,3 +28,5 @@ if __name__ == "__main__":
         print("Please install compatible versions with:")
         print(RECOMMENDED_CMD)
         sys.exit(1)
+    else:
+        print("Environment check passed ✅")
