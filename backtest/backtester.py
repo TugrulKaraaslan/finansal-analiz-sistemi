@@ -7,7 +7,6 @@ from enum import Enum
 from pathlib import Path
 from time import perf_counter
 
-import numpy as np
 import pandas as pd
 from loguru import logger
 
@@ -229,7 +228,19 @@ def run_1g_returns(
                 if "Group" in invalid_side.columns:
                     cols.insert(1, "Group")
                 extras.append(invalid_side[cols])
-                return pd.concat(extras, ignore_index=True)
+                frames = []
+                for f in extras:
+                    if isinstance(f, pd.DataFrame):
+                        f = f.dropna(axis=1, how="all")
+                        if not f.dropna(how="all").empty:
+                            frames.append(f)
+                if not frames:
+                    out = pd.DataFrame(columns=cols)
+                    out["Side"] = pd.Series(dtype="object")
+                    return out
+                if len(frames) == 1:
+                    return frames[0].reindex(columns=cols)
+                return pd.concat(frames, ignore_index=True).reindex(columns=cols)
         signals = signals.copy()
         signals["Side"] = sides.replace("", "long").map(TradeSide.from_value)
     else:
@@ -368,16 +379,20 @@ def run_1g_returns(
             for col in cols:
                 if col not in ex.columns:
                     ex[col] = pd.NA
-            ex = ex[cols]
-            frames.append(ex)
-    # Exclude empty or all-NA DataFrames to avoid pandas FutureWarning
-    frames = [f.replace({pd.NA: np.nan}) for f in frames]
-    frames = [f for f in frames if not f.dropna(how="all").empty]
+            frames.append(ex[cols])
+    cleaned: list[pd.DataFrame] = []
+    for f in frames:
+        if isinstance(f, pd.DataFrame):
+            f = f.dropna(axis=1, how="all")
+            if not f.dropna(how="all").empty:
+                cleaned.append(f)
+    frames = cleaned
     if not frames:
         out = pd.DataFrame(columns=cols)
+        out["Side"] = pd.Series(dtype="object")
     elif len(frames) == 1:
-        out = frames[0]
+        out = frames[0].reindex(columns=cols)
     else:
-        out = pd.concat(frames, ignore_index=True)
+        out = pd.concat(frames, ignore_index=True).reindex(columns=cols)
     logger.debug("run_1g_returns end - produced {rows_out} rows", rows_out=len(out))
     return _finalize(out)
