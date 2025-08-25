@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import json
+import os
 import warnings
 from enum import Enum
+from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 import pandas as pd
@@ -13,6 +17,18 @@ from .calendars import (
     build_trading_days,
     check_missing_trading_days_by_symbol,
 )
+
+
+def _append_event(event: dict) -> None:
+    """Append *event* as JSON line to events.jsonl if possible."""
+
+    log_dir = os.getenv("LOG_DIR", "loglar")
+    path = Path(log_dir) / "events.jsonl"
+    try:  # pragma: no cover - best effort
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(event, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
 
 class TradeSide(Enum):
@@ -58,12 +74,41 @@ def run_1g_returns(
     pandas.DataFrame
         A DataFrame with calculated returns and win/loss flags for each signal.
     """
-
+    t0 = perf_counter()
+    n_signals_in = len(signals) if isinstance(signals, pd.DataFrame) else 0
     logger.debug(
         "run_1g_returns start - base rows: {rows_base}, signals rows: {rows_sig}",
         rows_base=len(df_with_next) if isinstance(df_with_next, pd.DataFrame) else "?",
-        rows_sig=len(signals) if isinstance(signals, pd.DataFrame) else "?",
+        rows_sig=n_signals_in if isinstance(signals, pd.DataFrame) else "?",
     )
+
+    day_str = None
+    if isinstance(signals, pd.DataFrame) and "Date" in signals.columns and not signals.empty:
+        try:
+            day_str = str(pd.to_datetime(signals["Date"].iloc[0]).date())
+        except Exception:
+            day_str = None
+
+    def _finalize(df: pd.DataFrame) -> pd.DataFrame:
+        duration_ms = int((perf_counter() - t0) * 1000)
+        event = {
+            "stage": "backtest",
+            "day": day_str,
+            "n_signals_in": n_signals_in,
+            "n_trades_out": len(df),
+            "duration_ms": duration_ms,
+        }
+        _append_event(event)
+        logger.info(
+            "BACKTEST_DAY day={} n_in={} n_out={} dur_ms={}",
+            day_str,
+            n_signals_in,
+            len(df),
+            duration_ms,
+        )
+        if len(df) == 0:
+            logger.info("NO_TRADES_DAY day={}", day_str)
+        return df
 
     if not isinstance(df_with_next, pd.DataFrame):
         logger.error("df_with_next must be a DataFrame")
@@ -95,7 +140,7 @@ def run_1g_returns(
         cols.insert(cols.index("ReturnPct"), "Side")
         empty_df = pd.DataFrame(columns=cols)
         empty_df["Side"] = pd.Series(dtype="object")
-        return empty_df
+        return _finalize(empty_df)
     if signals.empty:
         logger.warning("signals DataFrame is empty")
         cols = [
@@ -113,7 +158,7 @@ def run_1g_returns(
         cols.insert(cols.index("ReturnPct"), "Side")
         empty_df = pd.DataFrame(columns=cols)
         empty_df["Side"] = pd.Series(dtype="object")
-        return empty_df
+        return _finalize(empty_df)
 
     req_base = {"symbol", "date", "close"}
     missing_base = req_base.difference(df_with_next.columns)
@@ -335,4 +380,4 @@ def run_1g_returns(
     else:
         out = pd.concat(frames, ignore_index=True)
     logger.debug("run_1g_returns end - produced {rows_out} rows", rows_out=len(out))
-    return out
+    return _finalize(out)
