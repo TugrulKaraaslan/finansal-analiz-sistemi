@@ -21,6 +21,21 @@ python -m backtest.cli --help
 Tek veri kaynağı depo kökündeki `data/` dizinidir.
 
 
+## CLI Örnekleri
+
+```bash
+# Tek gün taraması
+python -m backtest.cli --log-level INFO --json-logs scan-day \
+  --data data/BIST.parquet --filters filters.csv \
+  --date 2024-01-02 --reports-dir raporlar/gunluk
+
+# Tarih aralığı taraması
+python -m backtest.cli --log-level INFO --json-logs scan-range \
+  --data data/BIST.parquet --filters filters.csv \
+  --start 2024-01-02 --end 2024-01-05 --reports-dir raporlar/aralik
+```
+
+
 ## Hızlı Başlangıç (Colab)
 
 ```python
@@ -56,6 +71,7 @@ make config-validate
 - `LOG_FORMAT` = json|plain (default: json)
 - `LOG_DIR` = loglar (default)
 - `BACKTEST_RUN_ID` = aynı koşudaki tüm logları korele etmek için custom run id
+- CLI global bayrakları: `--log-level` ve `--json-logs`
 
 ```bash
 LOG_LEVEL=DEBUG BACKTEST_RUN_ID=A12-DEV1 \
@@ -309,7 +325,7 @@ python tools/canonicalize_filters.py filters.csv filters_canonical.csv
 
 ## Rapor ve Log Dizini
 
-Komutlar çalıştığında çıktı dosyaları `raporlar/` klasörüne, loglar ise her çalıştırma için ayrı bir alt klasör oluşturularak `loglar/` içine yazılır.
+ Komutlar çalıştığında çıktı dosyaları `raporlar/` klasörüne, loglar ise her çalıştırma için ayrı bir alt klasör oluşturularak `loglar/` içine yazılır; her `run_*/` klasöründe `summary.txt` ve makine okunabilir `events.jsonl` bulunur.
 
 ```
 raporlar/
@@ -317,7 +333,7 @@ raporlar/
 loglar/
     run_20250101-120000/
         summary.txt
-        stages.jsonl
+        events.jsonl
 ```
 
 Colab veya uzak bir ortamda sonuçları indirmenin kolay yolu:
