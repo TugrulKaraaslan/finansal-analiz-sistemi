@@ -5,7 +5,7 @@
 Aşağıdaki hücreler Colab ortamında projeyi kurar, ortamı doğrular ve örnek bir tarama çalıştırır:
 
 ```python
-!make colab
+!python notebooks/colab_setup.py
 
 %cd /content/finansal-analiz-sistemi
 %env PYTHONPATH=/content/finansal-analiz-sistemi
@@ -20,12 +20,11 @@ Aşağıdaki hücreler Colab ortamında projeyi kurar, ortamı doğrular ve örn
 import logging
 from backtest.logging_utils import setup_logger
 setup_logger()
-!echo "Kurulum başlıyor" | tee -a loglar/colab_shell.log
-!make colab 2>&1 | tee -a loglar/colab_shell.log
+!python notebooks/colab_setup.py
 !pytest -q 2>&1 | tee -a loglar/colab_shell.log
 ```
 
-> `tee -a` komutu hem ekrana hem dosyaya yazdırır.
+> `notebooks/colab_setup.py` komutu paket kurulum çıktısını `loglar/colab_install.log` dosyasına yazar.
 
 ## Ortam Doğrulama
 
