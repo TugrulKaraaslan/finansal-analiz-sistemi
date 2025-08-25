@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import logging
+import os
 import re
 import warnings
 from datetime import date, datetime
@@ -12,6 +14,18 @@ import pandas as pd
 from utils.paths import resolve_path
 
 logger = logging.getLogger("summary_bist")
+
+
+def _append_event(event: dict) -> None:
+    """Append *event* as JSON line to events.jsonl if possible."""
+
+    log_dir = os.getenv("LOG_DIR", "loglar")
+    path = Path(log_dir) / "events.jsonl"
+    try:  # pragma: no cover - best effort
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(event, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
 
 def _add_bist_columns(
@@ -218,14 +232,48 @@ def write_reports(
                 )
                 summary_df.to_excel(writer, sheet_name="SUMMARY", index=False)
             excel_paths.append(xlsx_path)
+            csv_written = None
             if csv_also:
                 csv_name = _sanitize_filename(csv_filename_pattern.format(date=day_str))
-                csv_path = _handle_overwrite(base_dir / csv_name, overwrite)
-                day_df.to_csv(csv_path, index=False, encoding="utf-8")
-                csv_paths.append(csv_path)
+                csv_written = _handle_overwrite(base_dir / csv_name, overwrite)
+                day_df.to_csv(csv_written, index=False, encoding="utf-8")
+                csv_paths.append(csv_written)
+            rows_written = len(day_df)
+            event = {
+                "event": "WRITE_DAY",
+                "day": day_str,
+                "rows_written": rows_written,
+                "xlsx_path": str(xlsx_path),
+            }
+            if csv_written is not None:
+                event["csv_path"] = str(csv_written)
+            _append_event(event)
+            logger.info(
+                "WRITE_DAY day=%s rows_written=%d xlsx_path=%s csv_path=%s",
+                day_str,
+                rows_written,
+                xlsx_path,
+                csv_written,
+            )
+            if rows_written == 0:
+                logger.info("WRITE_DAY_ZERO day=%s", day_str)
         outputs["excel"] = excel_paths
         if csv_paths:
             outputs["csv"] = csv_paths
+        rows_total = len(trades_all)
+        event = {
+            "event": "WRITE_RANGE",
+            "rows_total": rows_total,
+            "out_dir": str(base_dir),
+        }
+        _append_event(event)
+        logger.info(
+            "WRITE_RANGE rows_total=%d out_dir=%s",
+            rows_total,
+            base_dir,
+        )
+        if rows_total == 0:
+            logger.info("ZERO_RESULT_RANGE out_dir=%s", base_dir)
         return outputs
     if summary_wide is None:
         summary_wide = pd.DataFrame()
@@ -375,4 +423,24 @@ def write_reports(
             if missing:
                 warnings.warn(f"CSV yazılamadı: {missing}")
             outputs["csv"] = [p for p in csv_paths if p.exists()]
+    rows_total = len(trades_all)
+    if out_csv_dir:
+        out_dir = resolve_path(out_csv_dir)
+    elif out_xlsx:
+        out_dir = resolve_path(out_xlsx).parent
+    else:
+        out_dir = Path(".")
+    event = {
+        "event": "WRITE_RANGE",
+        "rows_total": rows_total,
+        "out_dir": str(out_dir),
+    }
+    _append_event(event)
+    logger.info(
+        "WRITE_RANGE rows_total=%d out_dir=%s",
+        rows_total,
+        out_dir,
+    )
+    if rows_total == 0:
+        logger.info("ZERO_RESULT_RANGE out_dir=%s", out_dir)
     return outputs
