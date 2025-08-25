@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd
+import warnings
 from click.testing import CliRunner
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -12,6 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
 from backtest import cli as bt_cli  # noqa: E402
+from backtest.backtester import run_1g_returns  # noqa: E402
 from tests._utils.synth_data import make_price_frame  # noqa: E402
 
 
@@ -102,3 +104,20 @@ report:
     assert report_file.exists()
     report_txt = report_file.read_text()
     assert "BBM_20_2.0" in report_txt and "BBM_20_2" in report_txt
+
+
+def test_run_1g_returns_empty_no_futurewarning() -> None:
+    base = pd.DataFrame(
+        {
+            "symbol": ["AAA"],
+            "date": pd.to_datetime(["2024-01-01"]),
+            "close": [1.0],
+            "next_date": pd.to_datetime(["2024-01-02"]),
+            "next_close": [1.1],
+        }
+    )
+    signals = pd.DataFrame(columns=["FilterCode", "Symbol", "Date"])
+    with warnings.catch_warnings(record=True) as w:
+        out = run_1g_returns(base, signals)
+    assert out.empty
+    assert not any(issubclass(w.category, FutureWarning) for w in w)
