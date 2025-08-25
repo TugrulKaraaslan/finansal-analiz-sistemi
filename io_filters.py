@@ -70,6 +70,10 @@ def load_filters_csv(paths: list[Path | str]) -> list[dict]:
     """
 
     all_rows: list[dict] = []
+
+    if not paths:
+        raise ValueError("En az bir filtre CSV yolu gerekli")
+
     for path in paths:
         p = resolve_path(path)
         if not p.exists():
