@@ -1,3 +1,4 @@
+-c constraints.txt
 numpy<2.0.0
 pandas
 pandas-ta
@@ -10,6 +11,7 @@ tqdm
 click
 pydantic
 pandera
-pyyaml
+PyYAML
 polars
 jinja2
+typing-inspect
