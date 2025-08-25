@@ -18,6 +18,22 @@ log = logging.getLogger("backtest")
 
 _TOKEN_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
+# Flag to allow evaluation of potentially unsafe expressions.  Tests or callers
+# may toggle this module level variable if dangerous expressions should be
+# executed instead of raising an error.  Defaults to ``False`` for safety.
+UNSAFE_EVAL = False
+
+# Names that should never appear in a filter expression.  Presence of any of
+# these indicates a potentially dangerous expression.
+_UNSAFE_TOKENS = {
+    "os",
+    "sys",
+    "subprocess",
+    "eval",
+    "exec",
+    "open",
+}
+
 
 def cross_up(a: pd.Series, b: pd.Series | float | int) -> pd.Series:
     if isinstance(b, pd.Series):
@@ -51,11 +67,18 @@ def _build_locals(df: pd.DataFrame) -> dict[str, pd.Series]:
 
 def _validate_tokens(expr: str, locals_map: Mapping[str, object]):
     undefined: list[str] = []
+    unsafe: list[str] = []
     for tok in _TOKEN_RE.findall(expr):
         if tok in {"and", "or", "not"}:
             continue
         if tok not in locals_map:
-            undefined.append(tok)
+            if tok.startswith("_") or tok in _UNSAFE_TOKENS or "import" in tok:
+                unsafe.append(tok)
+            else:
+                undefined.append(tok)
+    if unsafe and not UNSAFE_EVAL:
+        bad = ", ".join(sorted(set(unsafe)))
+        raise SyntaxError(f"UNSAFE_EXPR: {bad}")
     if undefined:
         unknown = ", ".join(sorted(set(undefined)))
         raise NameError(f"Bilinmeyen değişkenler: {unknown}")
@@ -80,6 +103,9 @@ def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
     _validate_tokens(expr, locals_map)
     try:
         return pd.eval(expr, engine="python", local_dict=locals_map)
+    except SyntaxError as e:
+        # Propagate syntax errors so callers can decide how to handle them.
+        raise SyntaxError(str(e)) from e
     except Exception as e:  # pragma: no cover - defensive
         log.exception("evaluate failed", extra={"extra_fields": {"expr": expr}})
         raise ValueError(f"evaluate failed: {expr} → {e}") from e

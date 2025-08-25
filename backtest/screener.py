@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import json
 import re
+import time
 import warnings
+from pathlib import Path
 
 import pandas as pd
 from loguru import logger
 
 from backtest.columns import canonical_map
+from backtest.filters import engine as filter_engine
 from backtest.filters.engine import evaluate
 
 
@@ -19,6 +23,16 @@ def _to_pandas_ops(expr: str) -> str:
 
 def _eval_expr(df: pd.DataFrame, expr: str) -> pd.Series:
     return evaluate(df, expr)
+
+
+UNSAFE_EVAL = False
+_EVENTS_FILE = Path("events.jsonl")
+_TOKEN_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+
+
+def _log_event(event: dict) -> None:
+    with _EVENTS_FILE.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(event, ensure_ascii=False) + "\n")
 
 
 def run_screener(
@@ -91,6 +105,10 @@ def run_screener(
     out_frames = []
     missing_cols_total: set[str] = set()
     for code, expr, grp, side in zip(filters_df["FilterCode"], filters_df["expr"], groups, sides):
+        t0 = time.perf_counter()
+        skipped = False
+        reason: str | None = None
+        hits = 0
         side_norm = None
         if pd.notna(side) and str(side).strip():
             side_norm = str(side).strip().lower()
@@ -100,7 +118,56 @@ def run_screener(
                     logger.error("Filter invalid Side", code=code, side=side)
                     raise ValueError(msg)
                 logger.warning("Filter skipped due to invalid Side", code=code, side=side)
+                skipped = True
+                reason = "INVALID_SIDE"
+                dt = int((time.perf_counter() - t0) * 1000)
+                _log_event(
+                    {
+                        "event": "FILTER_RESULT",
+                        "day": str(day.date()),
+                        "filter_code": code,
+                        "hits": 0,
+                        "duration_ms": dt,
+                        "skipped": True,
+                        "reason": reason,
+                    }
+                )
                 continue
+        unsafe_expr = bool(re.search(r"__|\bimport\b", expr))
+        if unsafe_expr and not UNSAFE_EVAL:
+            logger.warning(
+                "Filter skipped due to unsafe expression",
+                code=code,
+                expr=expr,
+                reason="UNSAFE_EXPR",
+            )
+            tokens = [tok for tok in _TOKEN_RE.findall(expr) if tok not in {"and", "or", "not"}]
+            first_tok = tokens[0] if tokens else None
+            for tok in tokens:
+                if tok not in missing_cols_total:
+                    logger.warning("missing_column:{}", tok)
+                    missing_cols_total.add(tok)
+            if first_tok is not None:
+                logger.warning("skip filter: missing column {}", first_tok, code=code)
+            skipped = True
+            reason = "UNSAFE_EXPR"
+            dt = int((time.perf_counter() - t0) * 1000)
+            _log_event(
+                {
+                    "event": "FILTER_RESULT",
+                    "day": str(day.date()),
+                    "filter_code": code,
+                    "hits": 0,
+                    "duration_ms": dt,
+                    "skipped": True,
+                    "reason": reason,
+                }
+            )
+            continue
+        if unsafe_expr and UNSAFE_EVAL:
+            logger.warning("Unsafe expression executed", code=code, expr=expr)
+
+        filter_engine.UNSAFE_EVAL = UNSAFE_EVAL
         try:
             mask = _eval_expr(d, expr)
             mask = mask.reindex(d.index)
@@ -110,10 +177,12 @@ def run_screener(
             if col not in missing_cols_total:
                 logger.warning("missing_column:{}", col)
                 missing_cols_total.add(col)
+            logger.info("MISSING_COL_{}", col)
             logger.warning("skip filter: missing column {}", col, code=code)
             if stop_on_filter_error:
                 raise ValueError(f"Filter {code!r} missing column {col}") from err
-            continue
+            skipped = True
+            reason = f"MISSING_COL_{col}"
         except SyntaxError as err:
             if stop_on_filter_error:
                 logger.error("Filter unsafe expression", code=code, expr=expr, reason=err)
@@ -124,23 +193,38 @@ def run_screener(
                 expr=expr,
                 reason=err,
             )
-            continue
+            skipped = True
+            reason = "SYNTAX_ERROR"
         except Exception as err:
             if raise_on_error:
                 raise RuntimeError(f"Filter {code!r} failed: {err}") from err
             warnings.warn(f"Filter {code!r} failed: {err}")
             logger.warning("Filter {code!r} failed: {err}", code=code, err=err)
-            continue
-        if filtered.empty:
-            continue
-        tmp = filtered.loc[:, ["symbol"]].copy()
-        tmp["FilterCode"] = code
-        if grp is not None:
-            tmp["Group"] = grp
-        if side_norm is not None:
-            tmp["Side"] = side_norm
-        tmp["Date"] = day
-        out_frames.append(tmp)
+            skipped = True
+            reason = str(err)
+        else:
+            if not filtered.empty:
+                tmp = filtered.loc[:, ["symbol"]].copy()
+                tmp["FilterCode"] = code
+                if grp is not None:
+                    tmp["Group"] = grp
+                if side_norm is not None:
+                    tmp["Side"] = side_norm
+                tmp["Date"] = day
+                out_frames.append(tmp)
+                hits = len(tmp)
+        dt = int((time.perf_counter() - t0) * 1000)
+        _log_event(
+            {
+                "event": "FILTER_RESULT",
+                "day": str(day.date()),
+                "filter_code": code,
+                "hits": hits,
+                "duration_ms": dt,
+                "skipped": skipped,
+                "reason": reason,
+            }
+        )
     if missing_cols_total:
         logger.info("missing_column_total: {}", len(missing_cols_total))
     if not out_frames:
