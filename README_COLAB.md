@@ -5,13 +5,14 @@
 Aşağıdaki hücreler Colab ortamında projeyi kurar, ortamı doğrular ve örnek bir tarama çalıştırır:
 
 ```python
-# pip kurulumu
-%pip install -q -r requirements_colab.txt -c constraints.txt --only-binary=:all:
+!make colab
 
 %cd /content/finansal-analiz-sistemi
 %env PYTHONPATH=/content/finansal-analiz-sistemi
 !mkdir -p raporlar
 ```
+
+> opencv gerekiyorsa: `pip install '.[cv]'`
 
 ## Konsol Çıktılarını Loglama
 
@@ -20,7 +21,7 @@ import logging
 from backtest.logging_utils import setup_logger
 setup_logger()
 !echo "Kurulum başlıyor" | tee -a loglar/colab_shell.log
-!pip install -r requirements_colab.txt 2>&1 | tee -a loglar/colab_shell.log
+!make colab 2>&1 | tee -a loglar/colab_shell.log
 !pytest -q 2>&1 | tee -a loglar/colab_shell.log
 ```
 
@@ -41,7 +42,7 @@ setup_logger()
 !ls -la raporlar | head
 ```
 
-> Excel okuma/yazma için gerekli `openpyxl` ve `XlsxWriter` paketleri `requirements_colab.txt` içinde yer alır.
+> Excel okuma/yazma için gerekli `openpyxl` ve `XlsxWriter` paketleri bağımlılık setinde yer alır.
 > Tek veri kaynağı proje içindeki `data/` dizinidir; CLI'da `--excel-dir` parametresi yoktur.
 > Spacy, fastai ve fastdownload bağımlılıkları kaldırılmıştır.
 
@@ -55,7 +56,7 @@ kaynakları ve filtreler arasında tutarlılık sağlanır.
 İsteğe bağlı olarak testleri çalıştırmak için:
 
 ```python
-%pip install -q -r requirements-dev.txt -c constraints.txt --only-binary=:all:
+!make dev-setup
 !pytest -q
 ```
 

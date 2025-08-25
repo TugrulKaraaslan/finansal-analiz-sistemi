@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.11']
+        python-version: ['3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,10 +26,12 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: pip-${{ hashFiles('**/requirements*.txt') }}
-      - run: pip install -r requirements.txt || true
-      - run: pip install -r requirements-dev.txt || true
-      - run: pip install pytest
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements-py312.lock.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+      - run: pip install -U pip
+      - if: matrix.python-version == '3.12'
+        run: pip install -r requirements-py312.lock.txt
+      - run: pip install -e ".[dev]"
       - run: bash tools/ci_checks.sh
 
   release:

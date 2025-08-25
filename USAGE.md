@@ -1,5 +1,25 @@
 # USAGE
 
+## Kurulum
+
+Geliştirme ortamı:
+
+```bash
+make dev-setup
+```
+
+Colab ortamı:
+
+```python
+!make colab
+```
+
+opencv gerekiyorsa:
+
+```bash
+pip install '.[cv]'
+```
+
 ## Komut Listesi
 | Komut | Açıklama | Önemli Argümanlar |
 |-------|----------|-------------------|

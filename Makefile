@@ -1,5 +1,5 @@
-.PHONY: fixtures preflight test golden golden-verify lint check dev bench bench-cli profile mem perf-report guardrails
-	actions = fixtures preflight lint test golden-verify
+.PHONY: fixtures preflight test golden golden-verify lint check dev-setup bench bench-cli profile mem perf-report guardrails colab
+actions = fixtures preflight lint test golden-verify
 
 export LOG_LEVEL ?= INFO
 export LOG_FORMAT ?= json
@@ -13,7 +13,10 @@ guardrails:
 	python -m backtest.cli guardrails
 
 test:
-	pytest -q
+        pytest -q
+
+ci:
+        bash tools/ci_checks.sh
 
 golden:
 	python tools/update_golden_checksums.py
@@ -27,9 +30,11 @@ lint:
 check:
 	$(MAKE) $(actions)
 
-dev:
-	pip install -r requirements.txt || true
-	pip install -r requirements-dev.txt
+dev-setup:
+	pip install -U pip && pip install -e ".[dev]" && pip-sync requirements-py312.lock.txt
+
+colab:
+	pip install -U pip && pip install -r requirements-colab.lock.txt
 
 bench:
 	pytest -q -k perf --benchmark-only

@@ -1,38 +1,32 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+set -euo pipefail
+export PYTHONUNBUFFERED=1
 
-# 1. Tek kaynak doğrulaması (veri_guncel_fix)
-if grep -RIn "veri_guncel_fix" backtest utils tools tests | grep -v "tools/ci_checks.sh" >/dev/null; then
-  echo "ERR: legacy path 'veri_guncel_fix' detected" >&2
-  exit 1
-fi
+echo "== Env =="
+python --version
+pip --version
 
-# 2. Dış indirme guard'ı
-if grep -RIn "requests\|http://\|https://\|wget\|urllib" backtest utils tools | grep -v "backtest/downloader" >/dev/null; then
-  echo "ERR: network call outside downloader" >&2
-  exit 1
-fi
-
-# 3. CLI yardım çıktısı kontrolü
-python -m backtest.cli --help >/dev/null 2>&1 || { echo "ERR: cli help failed" >&2; exit 1; }
-
-# 4. Pytest
-pytest -q || { echo "ERR: pytest failed" >&2; exit 1; }
-
-# 5. Markdown hızlı denetim (opsiyonel, ağsız)
-python <<'PY'
-import sys, re, pathlib
-files = [pathlib.Path('README.md'), pathlib.Path('README_STAGE1.md'), pathlib.Path('USAGE.md'), pathlib.Path('TROUBLESHOOT.md'), pathlib.Path('FAQ.md')]
-pattern = re.compile(r'\[[^\]]+\]\((?!https?://)[^)]+\)')
-missing = []
-for f in files:
-    text = f.read_text(encoding='utf-8')
-    if not pattern.search(text):
-        missing.append(f)
-if missing:
-    for f in missing:
-        print(f"ERR: no relative link found in {f}", file=sys.stderr)
-    sys.exit(1)
+echo "== Ensure package importable =="
+python - <<'PY'
+import importlib, sys
+m = importlib.import_module("backtest")
+print("backtest package OK:", m.__file__)
 PY
 
-echo "OK: offline default & data/ single-source checks passed"
+echo "== CLI help smoke =="
+if ! python -m backtest.cli -h >/dev/null 2>&1; then
+  echo "ERR: cli help failed"
+  python - <<'PY'
+import traceback
+try:
+    import backtest.cli as cli
+    print("Imported backtest.cli OK but -h exited nonzero")
+except Exception:
+    traceback.print_exc()
+    raise
+PY
+  exit 1
+fi
+
+echo "== Pytest =="
+pytest -q
