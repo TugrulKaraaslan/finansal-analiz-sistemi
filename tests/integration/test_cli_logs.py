@@ -1,26 +1,76 @@
-import glob
+import importlib
+import logging
 import os
-import subprocess
-import sys
+from pathlib import Path
+
+import pandas as pd
+import pytest
 
 
-def test_cli_emits_logs():
-    env = dict(os.environ, LOG_LEVEL="INFO", LOG_FORMAT="json")
-    subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "backtest.cli",
-            "scan-range",
-            "--config",
-            "config/colab_config.yaml",
-            "--start",
-            "2025-03-07",
-            "--end",
-            "2025-03-07",
-        ],
-        env=env,
-        check=False,
+def test_cli_emits_logs(tmp_path, monkeypatch):
+    orig_cwd = os.getcwd()
+    monkeypatch.setenv("LOG_LEVEL", "INFO")
+    monkeypatch.setenv("LOG_FORMAT", "json")
+    monkeypatch.chdir(tmp_path)
+
+    for h in logging.getLogger().handlers[:]:
+        logging.getLogger().removeHandler(h)
+    import backtest.logging_conf as logging_conf
+    importlib.reload(logging_conf)
+    import backtest.cli as cli
+    importlib.reload(cli)
+
+    df = pd.DataFrame({"close": [1.0]}, index=pd.to_datetime(["2025-03-07"]))
+    monkeypatch.setattr(cli, "read_excels_long", lambda src: df)
+    monkeypatch.setattr(cli, "run_scan_range", lambda *a, **k: None)
+    monkeypatch.setattr(cli, "list_output_files", lambda *a, **k: [])
+
+    filters_csv = tmp_path / "filters.csv"
+    filters_csv.write_text("FilterCode;PythonQuery\nF1;True\n", encoding="utf-8")
+    monkeypatch.setattr(cli, "load_filters_csv", lambda paths: [{"FilterCode": "F1", "PythonQuery": "True"}])
+
+    out_dir = tmp_path / "raporlar"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    cfg_path = tmp_path / "cfg.yaml"
+    cfg_path.write_text(
+        f"""
+project:
+  out_dir: "{out_dir.as_posix()}"
+  start_date: "2025-03-07"
+  end_date: "2025-03-07"
+data:
+  excel_dir: "{(tmp_path/'data').as_posix()}"
+  filters_csv: "{filters_csv.as_posix()}"
+preflight: false
+columns:
+  column_date: "date"
+  column_symbol: "symbol"
+  column_close: "close"
+""",
+        encoding="utf-8",
     )
-    files = glob.glob("loglar/app-*.jsonl")
-    assert files, "no log file produced"
+
+    args = [
+        "scan-range",
+        "--config",
+        str(cfg_path),
+        "--no-preflight",
+        "--out",
+        str(out_dir),
+    ]
+    with pytest.raises(SystemExit) as exc:
+        cli.main(args)
+    assert exc.value.code == 0
+
+    log_dir = tmp_path / "loglar"
+    jsonls = list(log_dir.glob("*.jsonl")) or list(tmp_path.rglob("*.jsonl"))
+    assert jsonls, "no jsonl logs found under tmp_path"
+    assert all(p.stat().st_size > 0 for p in jsonls), "empty jsonl log file(s) detected"
+
+    monkeypatch.delenv("LOG_LEVEL", raising=False)
+    monkeypatch.delenv("LOG_FORMAT", raising=False)
+    for h in logging.getLogger().handlers[:]:
+        logging.getLogger().removeHandler(h)
+    os.chdir(orig_cwd)
+    importlib.reload(logging_conf)
+    importlib.reload(cli)
