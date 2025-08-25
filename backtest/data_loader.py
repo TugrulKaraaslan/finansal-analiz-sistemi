@@ -466,7 +466,7 @@ def read_excels_long(
 
     records = [r for r in records if not r.empty]
     if not records:
-        warnings.warn("Hiçbir sheet/çalışma sayfasından veri toplanamadı.")
+        warnings.warn("No valid sheets found", UserWarning)
         empty_df = pd.DataFrame(
             columns=["date", "open", "high", "low", "close", "volume", "symbol"]
         )

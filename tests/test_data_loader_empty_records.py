@@ -16,7 +16,8 @@ def test_read_excels_long_no_valid_sheets(tmp_path):
         # sheet missing required 'date' column
         pd.DataFrame({"close": [1]}).to_excel(writer, sheet_name="NoDate", index=False)
 
-    df = read_excels_long(tmp_path)
+    with pytest.warns(UserWarning, match="No valid sheets found"):
+        df = read_excels_long(tmp_path)
     expected = ["date", "open", "high", "low", "close", "volume", "symbol"]
     assert df.empty
     assert list(df.columns) == expected
