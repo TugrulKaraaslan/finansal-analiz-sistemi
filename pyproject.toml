@@ -3,9 +3,9 @@ name = "finansal-analiz-sistemi"
 version = "0.0.0"
 requires-python = ">=3.11,<3.13"
 dependencies = [
-    "pandas==2.2.2",
+    "pandas==2.1.4",
     "pandas-ta==0.3.14b0",
-    "numpy==2.0.2",
+    "numpy==1.26.4",
     "click",
     "loguru",
     "pandera>=0.26.0",
