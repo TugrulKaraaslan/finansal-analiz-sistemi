@@ -1,15 +1,62 @@
 [project]
 name = "finansal-analiz-sistemi"
 version = "0.0.0"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.12,<3.13"
 dependencies = [
-    "numpy<2.0.0",
+    "pandas==2.2.2",
+    "pandas-ta==0.3.14b0",
+    "numpy==2.0.2",
+    "click",
+    "loguru",
+    "pandera",
+    "pydantic",
+    "pyarrow",
+    "openpyxl",
+    "xlsxwriter",
+    "xlrd",
+    "tqdm",
+    "python-dateutil",
+    "PyYAML",
+    "polars",
+    "typing-inspect",
+    "jinja2",
 ]
 classifiers = [
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-benchmark",
+    "black",
+    "ruff",
+    "flake8",
+    "mypy",
+    "pip-tools",
+]
+colab = [
+    "click",
+    "loguru",
+    "pandera",
+    "pydantic",
+    "pyarrow",
+    "openpyxl",
+    "xlsxwriter",
+    "xlrd",
+    "tqdm",
+    "python-dateutil",
+    "PyYAML",
+    "polars",
+    "typing-inspect",
+    "jinja2",
+]
+cv = [
+    "opencv-python-headless",
+]
+
+[tool.setuptools.packages.find]
+include = ["backtest", "tests_utils"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -20,7 +67,7 @@ python_functions = ["test_*"]
 
 [tool.black]
 line-length = 100
-target-version = ["py310", "py311"]
+target-version = ["py312"]
 
 [tool.isort]
 profile = "black"
