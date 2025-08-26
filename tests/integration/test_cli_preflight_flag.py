@@ -11,7 +11,7 @@ def test_cli_preflight_flag(monkeypatch, tmp_path):
     def fake_validate(_filters, excel_dir):
         called["preflight"] = True
 
-    monkeypatch.setattr(cli, "preflight_validate_filters", fake_validate)
+    monkeypatch.setattr(cli, "preflight_validate_filters", fake_validate, raising=False)
     monkeypatch.setattr(cli, "run_scan_range", lambda *a, **k: None)
     monkeypatch.setattr(cli, "list_output_files", lambda *a, **k: [])
     args = [

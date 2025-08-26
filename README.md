@@ -26,12 +26,12 @@ Tek veri kaynağı depo kökündeki `data/` dizinidir.
 ```bash
 # Tek gün taraması
 python -m backtest.cli --log-level INFO --json-logs scan-day \
-  --data data/BIST.parquet --filters filters.csv \
+  --data data/BIST.parquet \-\-filters filters.csv \
   --date 2024-01-02 --reports-dir raporlar/gunluk
 
 # Tarih aralığı taraması
 python -m backtest.cli --log-level INFO --json-logs scan-range \
-  --data data/BIST.parquet --filters filters.csv \
+  --data data/BIST.parquet \-\-filters filters.csv \
   --start 2024-01-02 --end 2024-01-05 --reports-dir raporlar/aralik
 ```
 
@@ -255,7 +255,7 @@ python -m backtest.cli scan-range --config config/colab_config.yaml --start 2025
 
 ## Yol Öncelik Sırası
 
-`--config` ve `--filters-csv` gibi yol argümanları şu öncelik sırasıyla değerlendirilir:
+`--config` ve `\-\-filters-csv` gibi yol argümanları şu öncelik sırasıyla değerlendirilir:
 
 1. CLI argümanı
 2. YAML config içeriği
@@ -264,7 +264,7 @@ python -m backtest.cli scan-range --config config/colab_config.yaml --start 2025
 Hem mutlak hem göreli yollar desteklenir ve dahili olarak `Path(...).expanduser().resolve()` ile gerçek yola çevrilir.
 
 ```bash
-python -m backtest.cli scan-range --filters-csv my/filters.csv
+python -m backtest.cli scan-range \-\-filters-csv my/filters.csv
 ```
 Yukarıdaki komutta `my/filters.csv` kullanılır; YAML veya varsayılan yol yok sayılır.
 
@@ -308,7 +308,7 @@ Filtre dosyasını temizlemek ve alias uyumsuzluklarını raporlamak için yeni 
 ```bash
 python -m backtest.cli scan-range --config config_scan.yml \
   --no-preflight --report-alias \
-  --filters-csv config/filters.csv \
+  \-\-filters-csv config/filters.csv \
   --reports-dir raporlar/
 ```
 

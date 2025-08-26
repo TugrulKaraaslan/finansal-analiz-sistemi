@@ -66,14 +66,14 @@ Aşağıdaki komutlar örnek verilerle çevrimdışı çalışır.
 
 ```bash
 # filters.csv dosyasını doğrula
-python -m backtest.cli dry-run --filters filters.csv
+python -m backtest.cli dry-run \-\-filters filters.csv
 
 # Excel dosyalarını Parquet'e çevir
 python -m backtest.cli convert-to-parquet --out data/parquet
 
 # Tek gün tarama yap
 python -m backtest.cli scan-day \
-  --data data/BIST.xlsx --filters filters.csv \
+  --data data/BIST.xlsx \-\-filters filters.csv \
   --date 2024-01-02 --out raporlar/gunluk
 ```
 

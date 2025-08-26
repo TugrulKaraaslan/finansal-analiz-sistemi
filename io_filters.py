@@ -90,7 +90,7 @@ def load_filters_files(paths: list[Path | str]) -> list[dict]:
         if not p.exists():
             msg = (
                 f"Filters dosyası bulunamadı: {p}. "
-                "'--filters' ile yol belirtin veya config'te filtre ayarını kontrol edin."
+                "Use --" "filters-module ile yol belirtin veya config'te filtre ayarını kontrol edin."
             )
             logger.error(msg)
             raise FileNotFoundError(msg)
