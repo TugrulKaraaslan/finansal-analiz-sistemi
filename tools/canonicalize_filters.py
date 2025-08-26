@@ -1,7 +1,10 @@
-import csv
+from __future__ import annotations
+
+import argparse
 import re
-import sys
 from pathlib import Path
+
+from filters.module_loader import load_filters_from_module
 
 ALIAS = {
     "its_9": "ichimoku_conversionline",
@@ -17,17 +20,26 @@ ALIAS = {
 def canonicalize_expr(expr: str) -> str:
     out = expr or ""
     for k, v in sorted(ALIAS.items(), key=lambda x: -len(x[0])):
-        out = re.sub(rf"\b{re.escape(k)}\b", v, out)
+        out = re.sub(rf"\\b{re.escape(k)}\\b", v, out)
     return out
 
 
-src = Path(sys.argv[1] if len(sys.argv) > 1 else "filters.csv")
-dst = Path(sys.argv[2] if len(sys.argv) > 2 else "filters_canonical.csv")
-rows = list(csv.DictReader(open(src, encoding="utf-8"), delimiter=";"))
-for r in rows:
-    r["PythonQuery"] = canonicalize_expr(r.get("PythonQuery", ""))
-with open(dst, "w", encoding="utf-8", newline="") as f:
-    w = csv.DictWriter(f, fieldnames=rows[0].keys())
-    w.writeheader()
-    w.writerows(rows)
-print(f"Canonical filters written to {dst}")
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--module", type=str, default=None)
+    parser.add_argument("--output", type=Path, default=None)
+    args = parser.parse_args()
+
+    df = load_filters_from_module(args.module).copy()
+    if "PythonQuery" in df.columns:
+        df["PythonQuery"] = df["PythonQuery"].map(canonicalize_expr)
+    if args.output:
+        df.to_csv(args.output, sep=";", index=False)
+        print(f"Canonical filters written to {args.output}")
+    else:
+        print(df.to_csv(sep=";", index=False))
+
+
+if __name__ == "__main__":  # pragma: no cover
+    main()
+

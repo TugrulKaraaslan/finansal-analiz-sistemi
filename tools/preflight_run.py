@@ -7,15 +7,13 @@ import pandas as pd
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from backtest.filters.preflight import validate_filters  # noqa: E402
 from backtest.paths import DATA_DIR  # noqa: E402
-from io_filters import read_filters_file  # noqa: E402
+from filters.module_loader import load_filters_from_module  # noqa: E402
 
-filters_path = Path("filters.csv")
-if not filters_path.exists():
-    filters_path = Path("config/filters.csv")
 alias_mode = os.getenv("PREFLIGHT_ALIAS_MODE", "forbid")
 allow_unknown = os.getenv("PREFLIGHT_ALLOW_UNKNOWN", "0") == "1"
+filters_module = os.getenv("FILTERS_MODULE")
 
-filters_df = read_filters_file(filters_path)
+filters_df = load_filters_from_module(filters_module)
 sample = next(DATA_DIR.rglob("*.xlsx"))
 dataset_df = pd.read_excel(sample, nrows=0)
 

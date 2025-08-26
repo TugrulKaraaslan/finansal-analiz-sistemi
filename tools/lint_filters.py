@@ -17,7 +17,7 @@ import yaml
 
 from backtest.filters.engine import ALIAS
 from backtest.paths import EXCEL_DIR
-from io_filters import read_filters_file
+from filters.module_loader import load_filters_from_module
 
 
 def _load_cfg(path: Path) -> dict:
@@ -38,9 +38,7 @@ def main() -> None:
     cfg_path = (
         Path(sys.argv[1]) if len(sys.argv) > 1 else Path("config_scan.yml")
     )
-    filters_path = (
-        Path(sys.argv[2]) if len(sys.argv) > 2 else Path("filters.csv")
-    )
+    filters_module = sys.argv[2] if len(sys.argv) > 2 else None
     # fmt: on
     _load_cfg(cfg_path)
 
@@ -51,7 +49,7 @@ def main() -> None:
     df = pd.read_excel(sample)
     cols = set(df.columns)
 
-    fdf = read_filters_file(filters_path)
+    fdf = load_filters_from_module(filters_module)
     ok = True
     for i, expr in enumerate(fdf.get("PythonQuery", [])):
         tokens = _tokenize(str(expr))
