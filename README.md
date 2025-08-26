@@ -378,6 +378,16 @@ python -m backtest.cli scan-range --config config/colab_config.yaml --start 2025
 
 Colab için ayrıntılar: `docs/colab.md`.
 
+## Legacy conversion
+
+Tek seferlik dönüştürücü ile eski CSV tabanlı filtreleri Python `FILTERS` modülüne çevirebilirsin:
+
+```bash
+python tools/legacy/migrate_filters_csv.py legacy_filters_file.csv FILTERS.py
+```
+
+Normal koşularda CSV filtre desteği yoktur; yalnızca geçmiş veriyi taşımak için kullan.
+
 ## Contributing
 
 CSV/legacy flag'ler CI’da fail eder; tools/legacy/** altı hariç.
