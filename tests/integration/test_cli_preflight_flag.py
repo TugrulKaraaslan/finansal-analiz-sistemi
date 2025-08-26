@@ -8,7 +8,7 @@ def test_cli_preflight_flag(monkeypatch, tmp_path):
     monkeypatch.setattr(cli, "read_excels_long", lambda src: df)
     called = {}
 
-    def fake_validate(_filters, excel_dir):
+    def fake_validate(_filters_df, _dataset_df):
         called["preflight"] = True
 
     monkeypatch.setattr(cli, "preflight_validate_filters", fake_validate, raising=False)

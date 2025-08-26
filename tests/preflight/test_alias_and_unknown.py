@@ -3,38 +3,38 @@ import pytest
 
 from backtest.filters.preflight import validate_filters
 from backtest.preflight import UnknownSeriesError, check_unknown_series
+from io_filters import read_filters_file
 
 
-def _excel_dir(tmp_path):
-    d = tmp_path / "data"
-    d.mkdir()
-    pd.DataFrame({"close": [1]}).to_excel(d / "AAA.xlsx", index=False)
-    return d
+def _dataset_df() -> pd.DataFrame:
+    return pd.DataFrame({"close": [1]})
 
 
 def test_alias_denied(tmp_path):
-    excel_dir = _excel_dir(tmp_path)
+    df = _dataset_df()
     filters = tmp_path / "filters.csv"
     filters.write_text(
         "FilterCode;PythonQuery\nF;SMA50>0\n",
         encoding="utf-8",
     )
+    filters_df = read_filters_file(filters)
     with pytest.raises(SystemExit) as excinfo:
-        validate_filters(filters, excel_dir, alias_mode="forbid")
+        validate_filters(filters_df, df, alias_mode="forbid")
     assert "Legacy aliases" in str(excinfo.value)
 
 
 def test_unknown_denied(tmp_path):
-    excel_dir = _excel_dir(tmp_path)
+    df = _dataset_df()
     filters = tmp_path / "filters.csv"
     filters.write_text(
         "FilterCode;PythonQuery\nF;unknown_col>0\n",
         encoding="utf-8",
     )
+    filters_df = read_filters_file(filters)
     with pytest.raises(SystemExit) as excinfo:
         validate_filters(
-            filters,
-            excel_dir,
+            filters_df,
+            df,
             alias_mode="forbid",
             allow_unknown=False,
         )

@@ -11,12 +11,20 @@ import yaml
 from backtest.cv.timeseries import PurgedKFold, WalkForward, cross_validate
 
 from . import StrategyRegistry, StrategySpec, run_strategy
+from io_filters import read_filters_file
 
 
 def compare_strategies_cli(args) -> None:
     """CLI entry for comparing multiple strategies."""
 
-    reg, _constraints = StrategyRegistry.load_from_file(args.space)
+    root = Path(__file__).resolve().parents[2]
+    filters_path = root / "filters.csv"
+    filters_df = (
+        read_filters_file(filters_path)
+        if filters_path.exists()
+        else pd.DataFrame(columns=["FilterCode", "PythonQuery"])
+    )
+    reg, _constraints = StrategyRegistry.load_from_file(args.space, filters_df)
     dates = pd.date_range(args.start, args.end, freq="B")
     np.random.seed(0)
     data = pd.DataFrame({"returns": np.random.normal(0, 0.01, len(dates))}, index=dates)

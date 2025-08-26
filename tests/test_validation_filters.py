@@ -1,4 +1,6 @@
-import tempfile
+from io import StringIO
+
+import pandas as pd
 
 from backtest.validation import validate_filters
 
@@ -10,14 +12,8 @@ F1;close > 10
 
 
 def test_validation_detects_errors():
-    with tempfile.NamedTemporaryFile(
-        mode="w",
-        suffix=".csv",
-        delete=False,
-    ) as f:
-        f.write(CSV_CONTENT)
-        fname = f.name
-    rep = validate_filters(fname)
+    df = pd.read_csv(StringIO(CSV_CONTENT), sep=";")
+    rep = validate_filters(df)
     codes = [e["code"] for e in rep.errors]
     assert "VC002" in codes  # boş query
     assert "VC001" in codes  # FilterCode tekrarı
