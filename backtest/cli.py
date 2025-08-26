@@ -448,7 +448,7 @@ def main(argv=None):
         if arg == bad_off:
             raise RuntimeError("Use --" "filters-include= (empty) to disable filters.")
         if arg.startswith(bad) and not any(arg.startswith(ok) for ok in allowed):
-            raise RuntimeError("CSV filters are removed. Use `filters.module`.")
+            raise RuntimeError("CSV-based filters are removed. Use `filters.module`.")
     if argv and argv[0] in {
         "scan-day",
         "scan-range",
@@ -575,7 +575,7 @@ def main(argv=None):
 
     cfg, flags = _load_and_prepare(args)
     if getattr(getattr(cfg, "data", NS()), "filters_csv", None):
-        raise RuntimeError("CSV filters are removed. Use `filters.module`.")
+        raise RuntimeError("CSV-based filters are removed. Use `filters.module`.")
 
     cfg_dict = _ns_to_dict(cfg)
     log_root = cfg_dict.get("paths", {}).get("logs", os.getenv("LOG_DIR", "loglar"))

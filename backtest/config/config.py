@@ -112,9 +112,7 @@ def _expand_paths(doc: dict, base: Path) -> dict:
         cpp = doc["data"]["cache_parquet_path"]
         doc["data"]["cache_parquet_path"] = _norm(cpp)
     if doc.get("calendar", {}).get("holidays_csv_path"):
-        doc["calendar"]["holidays_csv_path"] = _norm(
-            doc["calendar"]["holidays_csv_path"]
-        )
+        doc["calendar"]["holidays_csv_path"] = _norm(doc["calendar"]["holidays_csv_path"])
     for key in ("excel_path", "csv_path"):
         if doc.get("benchmark", {}).get(key):
             doc["benchmark"][key] = _norm(doc["benchmark"][key])
@@ -133,12 +131,14 @@ def load_config(path: str | Path) -> NS:
         user = yaml.safe_load(f) or {}
     if not isinstance(user, dict):
         raise TypeError("config mapping olmalı")
-    if user.get("data", {}).get("filters_csv"):
-        raise ValueError("data.filters_csv kaldırıldı; filters.module kullanın")
-    if user.get("filters_csv"):
-        raise ValueError("filters_csv kaldırıldı; filters.module kullanın")
-    if user.get("filters", {}).get("path"):
-        raise ValueError("filters.path kaldırıldı; filters.module kullanın")
+    if (
+        user.get("data", {}).get("filters_csv")
+        or user.get("filters_csv")
+        or user.get("filters", {}).get("path")
+    ):
+        raise ValueError("CSV-based filters are removed. Use `filters.module`.")
+    if "filters" not in user or "module" not in user.get("filters", {}):
+        raise ValueError("filters.module is required (default: io_filters)")
     user = _apply_legacy(user)
     doc = _deep_merge(_DEFAULT, user)
     if doc.get("indicators", {}).get("engine") != "none":
