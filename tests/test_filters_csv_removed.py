@@ -15,14 +15,15 @@ def _write_cfg(tmp_path: Path, content: str) -> Path:
 
 def test_cli_filters_args_rejected():
     bad = "--" + "filters"
-    with pytest.raises(RuntimeError, match="CSV-based filters are removed. Use `filters.module`."):
+    msg = (
+        "CSV-based or --filters-off flags are removed. "
+        "Use --filters-module/--filters-include."
+    )
+    with pytest.raises(RuntimeError, match=msg):
         cli.main(["scan-day", bad, "foo.csv"])
 
     bad_off = bad + "-off"
-    with pytest.raises(
-        RuntimeError,
-        match=r"Use --filters-include= \(empty\) to disable filters.",
-    ):
+    with pytest.raises(RuntimeError, match=msg):
         cli.main(["scan-day", bad_off])
 
 
