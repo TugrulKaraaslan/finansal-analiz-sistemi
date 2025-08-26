@@ -12,6 +12,10 @@ data:
   enable_cache: false
   cache_parquet_path: "../cache"
 
+filters:
+  module: io_filters
+  include: ["*"]
+
 calendar:
   tplus1_mode: "calendar"
   holiday_csv: ""

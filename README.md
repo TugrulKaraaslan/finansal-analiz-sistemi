@@ -30,9 +30,29 @@ python -m backtest.cli --log-level INFO --json-logs scan-day \
   --date 2024-01-02 --reports-dir raporlar/gunluk
 
 # Tarih aralığı taraması
-python -m backtest.cli --log-level INFO --json-logs scan-range \
-  --data data/BIST.parquet --filters filters.csv \
-  --start 2024-01-02 --end 2024-01-05 --reports-dir raporlar/aralik
+  python -m backtest.cli --log-level INFO --json-logs scan-range \
+    --data data/BIST.parquet --filters filters.csv \
+    --start 2024-01-02 --end 2024-01-05 --reports-dir raporlar/aralik
+  ```
+
+## Gömülü filtrelerle tarama
+
+Filtre kaynakları config dosyasından belirlenir; `--filters-module` diye bir bayrak yoktur.
+
+```yaml
+filters:
+  module: io_filters
+  include: ["*"]
+```
+
+Kısa doğrulama ve tek gün taraması:
+
+```bash
+python -m backtest.cli config-validate --config config/colab_config.yaml
+
+python -m backtest.cli scan-day \
+  --config config/colab_config.yaml \
+  --date 2025-03-07
 ```
 
 
