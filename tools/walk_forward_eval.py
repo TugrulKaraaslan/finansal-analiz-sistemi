@@ -45,8 +45,6 @@ with results_path.open("w", encoding="utf-8") as w:
             "scan-range",
             "--config",
             "config_scan.yml",
-            "--" "filters-module",
-            "io_filters",
             "--no-preflight",
             "--start",
             f["train_start"],
