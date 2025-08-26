@@ -21,6 +21,16 @@
 Örnek:
 `python -m backtest.cli scan-day --config config/scan.yml --filters-module io_filters --filters-include "*"`
 
+## Filters configuration
+
+```yaml
+filters:
+  module: "io_filters"
+  include: ["*"]
+```
+
+Tam örnek için `examples/example_filters_module.yml` dosyasına bakın.
+
 ## Hata Kodları (CLI)
 - CL001: Argüman eksik/uyumsuz
 - CL002: Dosya yolu yok/erişilemedi
