@@ -1,5 +1,7 @@
 # USAGE
 
+> Migration notu: CSV desteği kaldırıldı; modül bazlı sisteme geçildi.
+
 ## Kurulum
 
 Geliştirme ortamı:
@@ -23,8 +25,7 @@ pip install '.[cv]'
 ## Komut Listesi
 | Komut | Açıklama | Önemli Argümanlar |
 |-------|----------|-------------------|
-| dry-run | filters.csv doğrulama | \-\-filters, --alias |
-| scan-day | Tek gün tarama | --date, --data, \-\-filters |
+| scan-day | Tek gün tarama | --date, --data, --filters-module |
 | scan-range | Tarih aralığı tarama | --start, --end, --data |
 | summarize | Sinyal özetleri ve BIST karşılaştırması | --data, --signals |
 | report-excel | CSV özetlerinden Excel rapor | --daily, --filter-counts |
@@ -40,22 +41,6 @@ pip install '.[cv]'
 | refresh-cache | Önbelleği yenile | --ttl-hours |
 | vacuum-cache | Eski parçaları sil | --older-than-days |
 | integrity-check | Parquet bütünlüğü kontrolü | --symbols |
-
-## Filtre CSV formatı
-
-`filters.csv` dosyası `FilterCode;PythonQuery` kolonlarından oluşur ve
-ayraç olarak yalnızca noktalı virgül (`;`) kullanılabilir. Excel'den kaydederken
-`CSV` biçiminde `;` ayırıcı seçilmelidir. Virgüllü dosyalar şu hatayı üretir:
-
-```
-CSV delimiter ';' bekleniyor. Dosyayı ';' ile kaydedin: FilterCode;PythonQuery
-```
-
-Eski virgüllü dosyaları dönüştürmek için `tools/migrate_filters_csv.py`
-yardımcı programını kullanabilirsiniz.
-
-`PythonQuery` boş bırakılamaz; boş veya sadece boşluk içeren satırlar
-`ValueError` ile reddedilir.
 
 ## Filtre DSL Notu
 Filtre ifadelerinde `cross_up(x,y)` ve `cross_down(x,y)` fonksiyonları
@@ -75,7 +60,7 @@ kanonik isme dönüştürülür (`hacim`, `islem_hacmi`, `lot` → `volume`).
 | `hacim` | `volume` |
 | `bbm_20.5_2` | `bbm_20p5_2` |
 
-CSV dosyalarında kanonik isimleri kullanmanız önerilir; ancak ham girdiler
+Filtre ifadelerinde kanonik isimleri kullanmanız önerilir; ancak ham girdiler
 de desteklenir ve otomatik olarak normalize edilir.
 
 ## Filtre derleme
@@ -96,19 +81,6 @@ funcs = compile_filters(["a > b", "b > a"])
 ```
 
 ## Komut Başına Rehber
-### dry-run
-**Amaç:** filters.csv dosyasının yapısını ve alias eşleşmelerini kontrol eder.
-
-| Flag | Tip | Varsayılan | Açıklama |
-|------|-----|------------|----------|
-| \-\-filters | yol | zorunlu | Filtre dosyası |
-| --alias | yol | `data/alias_mapping.csv` | Alias eşlemesi |
-
-**Örnek**
-```bash
-python -m backtest.cli dry-run \-\-filters filters.csv
-```
-
 ### scan-day
 **Amaç:** Tek gün için filtre taraması çalıştırır.
 
@@ -116,10 +88,10 @@ python -m backtest.cli dry-run \-\-filters filters.csv
 |------|-----|------------|----------|
 | --date | YYYY-MM-DD | `None` | Hedef gün |
 | --data | yol | `None` | Fiyat verisi (Excel/CSV/Parquet) |
-| \-\-filters | yol | `None` | Filtre tanımları |
+| --filters-module | metin | `io_filters` | Filtre modülü |
+| --filters-include | metin | "*" | Dahil edilecek filtre deseni |
 | --alias | yol | `data/alias_mapping.csv` | Alias eşlemesi |
 | --out | yol | `None` | Çıktı dizini |
-| \-\-filters-off | flag | `False` | Filtreleri devre dışı bırak |
 | --no-write | flag | `False` | Dosya yazma |
 | --costs | yol | `None` | Maliyet config |
 | --report-alias | flag | `False` | Alias raporu |
@@ -128,7 +100,8 @@ python -m backtest.cli dry-run \-\-filters filters.csv
 **Örnek**
 ```bash
 python -m backtest.cli scan-day \
-  --data data/BIST.xlsx \-\-filters filters.csv \
+  --data data/BIST.xlsx \
+  --filters-module io_filters --filters-include "*" \
   --date 2024-01-02 --out raporlar/gunluk
 ```
 
@@ -145,7 +118,8 @@ python -m backtest.cli scan-day \
 **Örnek**
 ```bash
 python -m backtest.cli scan-range \
-  --data data/BIST.xlsx \-\-filters filters.csv \
+  --data data/BIST.xlsx \
+  --filters-module io_filters --filters-include "*" \
   --start 2024-01-02 --end 2024-01-05
 ```
 
@@ -372,7 +346,7 @@ python -m backtest.cli integrity-check --symbols DEMO
 - `DATA_DIR`: Tüm verilerin kökü (`data/`).
 - `EXCEL_DIR`: Excel kaynak klasörü; varsayılan `DATA_DIR`.
 ## Sık Karşılaşılan Hatalar
-- Yol bulunamadı: `filters.csv` veya veri dosyaları için tam yol belirtin.
+- Modül bulunamadı: `--filters-module` değeri veya veri dosyaları için doğru yol belirtin.
 - İzin reddedildi: İlgili dizinlerin yazma izni olduğundan emin olun.
 - Eksik argüman: CLI yardımını `-h` ile kontrol edin.
  Daha fazla bilgi için [TROUBLESHOOT.md](TROUBLESHOOT.md) dosyasına bakın.

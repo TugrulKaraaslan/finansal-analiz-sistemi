@@ -5,6 +5,7 @@
 ![release](https://img.shields.io/badge/release-A12-success)
 
 Bu proje, BIST verileri üzerinde filtre bazlı tarama yaparak raporlar üretir.
+> Migration notu: CSV desteği kaldırıldı; modül bazlı sisteme geçildi.
 Son sürüm: [A12](CHANGELOG.md#A12--2025-08-23) (2025-08-23).
 
 Kullanım için [USAGE.md](USAGE.md), sık sorular için [FAQ.md](FAQ.md) ve hata çözümü için [TROUBLESHOOT.md](TROUBLESHOOT.md) dosyalarına bakın.
@@ -26,12 +27,14 @@ Tek veri kaynağı depo kökündeki `data/` dizinidir.
 ```bash
 # Tek gün taraması
 python -m backtest.cli --log-level INFO --json-logs scan-day \
-  --data data/BIST.parquet \-\-filters filters.csv \
+  --data data/BIST.parquet \
+  --filters-module io_filters --filters-include "*" \
   --date 2024-01-02 --reports-dir raporlar/gunluk
 
 # Tarih aralığı taraması
 python -m backtest.cli --log-level INFO --json-logs scan-range \
-  --data data/BIST.parquet \-\-filters filters.csv \
+  --data data/BIST.parquet \
+  --filters-module io_filters --filters-include "*" \
   --start 2024-01-02 --end 2024-01-05 --reports-dir raporlar/aralik
 ```
 
@@ -203,21 +206,6 @@ Kurallar ve tolerans değerleri `contracts/data_quality.yaml` dosyasından
 güncellenebilir. Şema ihlalleri ve mantıksal hatalar kritik kabul edilir ve
 araç çıkış kodunu sıfırdan farklı yapar; tolerans aşımı uyarı olarak raporlanır.
 
-## Veri ve Filtre Dosyaları
-
-* **Excel klasörü**: `data/` (proje kökünde)
-* **filters.csv**: proje kökünde, ayracı `;`, başlıklar: `FilterCode;PythonQuery`
-
-Örnek satırlar:
-
-```
-FilterCode;PythonQuery
-EX1; ichimoku_conversionline > ichimoku_baseline
-EX2; macd_line > macd_signal
-```
-
-Excel klasör yolu config dosyasından okunur; CLI'da `--excel-dir` parametresi bulunmaz.
-
 ## Config Dosyası
 
 Varsayılan örnek: `config/colab_config.yaml.example` (aşağıda). Kendi çalıştırman için bunu `config/colab_config.yaml` olarak kopyala ve tarihleri düzenle.
@@ -241,6 +229,21 @@ Komut örneği:
 python -m backtest.cli scan-day --config config/colab_config.yaml --date 2025-03-07
 ```
 
+## Filtre Modülü Örneği
+
+```yaml
+filters:
+  module: "io_filters"
+  include: ["*"]
+```
+
+CLI:
+
+```bash
+python -m backtest.cli scan-day --config config/scan.yml \
+       --filters-module io_filters --filters-include "*"
+```
+
 ## CLI Kullanımı (tek doğru biçim)
 
 ```bash
@@ -255,18 +258,13 @@ python -m backtest.cli scan-range --config config/colab_config.yaml --start 2025
 
 ## Yol Öncelik Sırası
 
-`--config` ve `\-\-filters-csv` gibi yol argümanları şu öncelik sırasıyla değerlendirilir:
+`--config` gibi yol argümanları şu öncelik sırasıyla değerlendirilir:
 
 1. CLI argümanı
 2. YAML config içeriği
-3. Kod içi varsayılan (`config_scan.yml`, `filters.csv`)
+3. Kod içi varsayılan (`config_scan.yml`)
 
 Hem mutlak hem göreli yollar desteklenir ve dahili olarak `Path(...).expanduser().resolve()` ile gerçek yola çevrilir.
-
-```bash
-python -m backtest.cli scan-range \-\-filters-csv my/filters.csv
-```
-Yukarıdaki komutta `my/filters.csv` kullanılır; YAML veya varsayılan yol yok sayılır.
 
 ## Test ve Preflight Kontrolü
 
@@ -294,34 +292,8 @@ Filtre motoru DataFrame kolonlarını bire bir kullanır ve her kolonun
 lower-case kopyasını otomatik olarak sağlar. Çalışma zamanı **yalnızca
 kanonik** isimleri kabul eder; tanımsız veya alias kolonlar preflight
 sırasında **hata** üretir.
-
-Araştırma amaçlı hazırlanan `filters.csv` dosyası araçlar tarafından
-değiştirilmez. Eğer dosyada legacy alias'lar bulunuyorsa, çalıştırmadan önce
-`tools/canonicalize_filters.py` ile kanonik hale getirmeniz önerilir.
 Kanonik kolon listesi için [docs/canonical_names.md](docs/canonical_names.md)
 dosyasına bakabilirsiniz.
-
-## Filtre Alias Raporu
-
-Filtre dosyasını temizlemek ve alias uyumsuzluklarını raporlamak için yeni bayraklar kullanılır:
-
-```bash
-python -m backtest.cli scan-range --config config_scan.yml \
-  --no-preflight --report-alias \
-  \-\-filters-csv config/filters.csv \
-  --reports-dir raporlar/
-```
-
-Örnek tarama çok-gün bir Excel üzerinde çalışır, isteğe bağlı olarak preflight
-kontrolü atlanabilir ve `alias_uyumsuzluklar.csv` dosyasına alias raporu yazılır.
-
-## Filtre Kanonikleştirme Aracı
-
-`filters.csv` içindeki legacy alias'ları kanonik isimlere dönüştürmek için:
-
-```bash
-python tools/canonicalize_filters.py filters.csv filters_canonical.csv
-```
 
 ## Rapor ve Log Dizini
 

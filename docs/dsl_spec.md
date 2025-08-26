@@ -1,7 +1,7 @@
 # PythonQuery DSL – Aşama 1 (Güvenli AST & Kesişim Semantiği)
 
 ## Amaç
-`filters.csv` içindeki `PythonQuery` ifadelerini **güvenli**, **deterministik** ve **okunur** şekilde değerlendirmek.
+Filtre modülündeki `PythonQuery` ifadelerini **güvenli**, **deterministik** ve **okunur** şekilde değerlendirmek.
 
 ## Temel Kurallar
 - **Güvenlik:** Python `eval` YOK. Sadece `ast.parse(..., mode="eval")` + **whitelist** node yürütme.

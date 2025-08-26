@@ -13,7 +13,7 @@
 ### Komut örnekleri
 ```bash
 python -m backtest.cli --help
-python -m backtest.cli dry-run \-\-filters filters.csv
+python -m backtest.cli scan-day --config config/scan.yml --filters-module io_filters --filters-include "*"
 python -m backtest.cli convert-to-parquet --out data_parquet
 ```
 
@@ -102,7 +102,7 @@ python -m backtest.cli convert-to-parquet --out data_parquet
 - **Çözüm Adımları**:
   ```bash
   python -m backtest.cli scan-range --start 2024-01-01 --end 2024-01-05 \
-    --data data/BIST.xlsx \-\-filters filters.csv --out raporlar
+    --data data/BIST.xlsx --filters-module io_filters --filters-include "*" --out raporlar
   ```
 - **Doğrulama**: Komut başarıyla tamamlanır ve `raporlar/` dizini oluşur.
 
@@ -144,7 +144,8 @@ python -m backtest.cli convert-to-parquet --out data_parquet
 - **Muhtemel Neden(ler)**: Log seviyesi düşük veya dizin bilinmiyor.
 - **Çözüm Adımları**:
   ```bash
-  python -m backtest.cli scan-day --data data/BIST.xlsx \-\-filters filters.csv \
+  python -m backtest.cli scan-day --data data/BIST.xlsx \
+    --filters-module io_filters --filters-include "*" \
     --date 2024-01-02 --out raporlar --log-level DEBUG
   ```
   Loglar varsayılan olarak `loglar/` dizinine yazılır.

@@ -18,10 +18,6 @@ print("OK: Kurulum bitti. Eğer NumPy/Pandas yükseldiyse Runtime → Restart ru
 !git clone https://github.com/TugrulKaraaslan/finansal-analiz-sistemi.git || echo "Repo zaten var"
 %cd /content/finansal-analiz-sistemi
 !mkdir -p raporlar loglar config data cache
-from pathlib import Path
-if not Path("filters.csv").exists():
-    Path("filters.csv").write_text("FilterCode,PythonQuery\nEXAMPLE_01, (rsi_14 > 50) & (ema_20 > ema_50)\n", encoding="utf-8")
-    print("⚠️ filters.csv örneği oluşturuldu. Kendi dosyanla değiştir.")
 ```
 
 ### Hücre 3 — Config yaz (mutlak yollar)
@@ -38,7 +34,6 @@ project:
 
 data:
   excel_dir: "/content/finansal-analiz-sistemi/data"
-  filters_csv: "/content/finansal-analiz-sistemi/filters.csv"
   enable_cache: false
   cache_parquet_path: "cache"
 
@@ -53,6 +48,10 @@ data:
     csv_path: ""
     column_date: "date"
     column_close: "close"
+
+filters:
+  module: "io_filters"
+  include: ["*"]
 
 report:
   with_bist_ratio_summary: true

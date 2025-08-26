@@ -7,7 +7,7 @@
 - **`BIST.xlsx` eksikse ne yaparım?** Örnek dosyayı `data/`ya kopyala; [Yol & Veri Sorunları](TROUBLESHOOT.md#yol-veri-sorunlari).
 - **CLI komutları nereden öğrenirim?** `python -m backtest.cli --help`; sorunlar için [CLI Hataları](TROUBLESHOOT.md#cli-hatalari).
 - **Tarih formatı ne olmalı?** ISO `YYYY-MM-DD`; [CLI Hataları](TROUBLESHOOT.md#cli-hatalari).
-- **`filters.csv` bulunamıyor, neden?** Yanlış yol; [Yol & Veri Sorunları](TROUBLESHOOT.md#yol-veri-sorunlari).
+- **Filtre modülü bulunamıyor, neden?** Modül yolu yanlış; [Yol & Veri Sorunları](TROUBLESHOOT.md#yol-veri-sorunlari).
 - **`ModuleNotFoundError: openpyxl` ne demek?** Excel motoru eksik; [Excel/CSV/Parquet Okuma Hataları](TROUBLESHOOT.md#excel-hatalari).
 - **Büyük Excel dosyaları yavaş mı?** Parquet'e dönüştür; [Excel/CSV/Parquet Okuma Hataları](TROUBLESHOOT.md#excel-hatalari).
 - **Parquet'e nasıl dönüştürürüm?** `convert-to-parquet` komutunu kullan; [Excel/CSV/Parquet Okuma Hataları](TROUBLESHOOT.md#excel-hatalari).
