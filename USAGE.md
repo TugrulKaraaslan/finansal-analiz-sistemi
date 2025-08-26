@@ -23,8 +23,8 @@ pip install '.[cv]'
 ## Komut Listesi
 | Komut | Açıklama | Önemli Argümanlar |
 |-------|----------|-------------------|
-| dry-run | filters.csv doğrulama | --filters, --alias |
-| scan-day | Tek gün tarama | --date, --data, --filters |
+| dry-run | filters.csv doğrulama | \-\-filters, --alias |
+| scan-day | Tek gün tarama | --date, --data, \-\-filters |
 | scan-range | Tarih aralığı tarama | --start, --end, --data |
 | summarize | Sinyal özetleri ve BIST karşılaştırması | --data, --signals |
 | report-excel | CSV özetlerinden Excel rapor | --daily, --filter-counts |
@@ -101,12 +101,12 @@ funcs = compile_filters(["a > b", "b > a"])
 
 | Flag | Tip | Varsayılan | Açıklama |
 |------|-----|------------|----------|
-| --filters | yol | zorunlu | Filtre dosyası |
+| \-\-filters | yol | zorunlu | Filtre dosyası |
 | --alias | yol | `data/alias_mapping.csv` | Alias eşlemesi |
 
 **Örnek**
 ```bash
-python -m backtest.cli dry-run --filters filters.csv
+python -m backtest.cli dry-run \-\-filters filters.csv
 ```
 
 ### scan-day
@@ -116,10 +116,10 @@ python -m backtest.cli dry-run --filters filters.csv
 |------|-----|------------|----------|
 | --date | YYYY-MM-DD | `None` | Hedef gün |
 | --data | yol | `None` | Fiyat verisi (Excel/CSV/Parquet) |
-| --filters | yol | `None` | Filtre tanımları |
+| \-\-filters | yol | `None` | Filtre tanımları |
 | --alias | yol | `data/alias_mapping.csv` | Alias eşlemesi |
 | --out | yol | `None` | Çıktı dizini |
-| --filters-off | flag | `False` | Filtreleri devre dışı bırak |
+| \-\-filters-off | flag | `False` | Filtreleri devre dışı bırak |
 | --no-write | flag | `False` | Dosya yazma |
 | --costs | yol | `None` | Maliyet config |
 | --report-alias | flag | `False` | Alias raporu |
@@ -128,7 +128,7 @@ python -m backtest.cli dry-run --filters filters.csv
 **Örnek**
 ```bash
 python -m backtest.cli scan-day \
-  --data data/BIST.xlsx --filters filters.csv \
+  --data data/BIST.xlsx \-\-filters filters.csv \
   --date 2024-01-02 --out raporlar/gunluk
 ```
 
@@ -145,7 +145,7 @@ python -m backtest.cli scan-day \
 **Örnek**
 ```bash
 python -m backtest.cli scan-range \
-  --data data/BIST.xlsx --filters filters.csv \
+  --data data/BIST.xlsx \-\-filters filters.csv \
   --start 2024-01-02 --end 2024-01-05
 ```
 

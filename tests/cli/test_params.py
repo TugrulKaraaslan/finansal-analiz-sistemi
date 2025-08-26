@@ -14,9 +14,7 @@ def test_from_to_rejected():
     assert p.returncode != 0
     assert b"unrecognized arguments" in p.stderr
 
-
 def test_start_end_ok(tmp_path):
-    (tmp_path / "filters.csv").write_text("FilterCode;PythonQuery\nF1;close>1\n", encoding="utf-8")
     env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[2]))
     p = subprocess.run(
         [

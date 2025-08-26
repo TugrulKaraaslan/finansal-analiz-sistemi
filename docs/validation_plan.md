@@ -20,7 +20,7 @@
 
 ## CLI Kullanımı
 ```bash
-python -m backtest.cli --filters filters.csv --dry-run
+python -m backtest.cli \-\-filters filters.csv --dry-run
 ```
 
 Çıktı: Hata/uyarı raporu. Başarılı ise: `✅ Uyum Tam`

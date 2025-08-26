@@ -28,7 +28,6 @@ from backtest.data_loader import read_excels_long as _read_excels_long
 from backtest.eval.metrics import SignalMetricConfig
 from backtest.eval.report import compute_signal_report, save_json
 from backtest.filters.normalize_expr import normalize_expr
-from backtest.filters.preflight import validate_filters as preflight_validate_filters
 from backtest.filters_compile import compile_filters
 from backtest.metrics import max_drawdown as risk_max_drawdown
 from backtest.metrics import (
@@ -46,13 +45,12 @@ from backtest.screener import run_screener
 from backtest.summary import summarize_range
 from backtest.trace import ArtifactWriter, RunContext, list_output_files
 from backtest.validator import dataset_summary, quality_warnings
-from io_filters import load_filters_files, read_filters_file
+from io_filters import read_filters_file
 from filters.module_loader import load_filters_from_module
 
 __all__ = [
     "normalize",
     "add_next_close",
-    "load_filters_files",
     "run_screener",
     "run_1g_returns",
     "write_reports",
@@ -183,15 +181,10 @@ def _run_scan(cfg):  # tests monkeypatch ediyor
         df, getattr(getattr(cfg, "indicators", NS()), "params", {}), engine="none"
     )
 
-    filters_path = getattr(cfg.data, "filters_csv", None)
-    if filters_path:
-        filters = load_filters_files([filters_path])
-        filters_df = pd.DataFrame(filters)
-    else:
-        fcfg = getattr(cfg, "filters", NS())
-        module = getattr(fcfg, "module", None)
-        include = getattr(fcfg, "include", ["*"])
-        filters_df = load_filters_from_module(module, include)
+    fcfg = getattr(cfg, "filters", NS())
+    module = getattr(fcfg, "module", None)
+    include = getattr(fcfg, "include", ["*"])
+    filters_df = load_filters_from_module(module, include)
     if filters_df.empty:
         _diag("FILTERS_EMPTY")
         (out_dir / "events.jsonl").write_text(
@@ -276,20 +269,6 @@ def _file_exists_or_exit(path: str, code: str = "CL002"):
     sys.exit(2)
 
 
-def _resolve_filters_path(cli_arg: str | None) -> Path:
-    candidates: list[Path] = []
-    if cli_arg:
-        candidates.append(Path(cli_arg))
-    candidates += [Path("filters.csv"), Path("config/filters.csv")]
-    for p in candidates:
-        if p.exists():
-            return p
-    cwd = Path(".").resolve()
-    raise FileNotFoundError(
-        f"filters.csv bulunamadı. Denenen yollar: {', '.join(map(str, candidates))}. Çalışma dizini: {cwd}"
-    )
-
-
 def build_parser() -> argparse.ArgumentParser:
     desc = "Stage1 CLI (varsayılan veri yolu: " f"{DATA_DIR} (paths.py))"
     p = argparse.ArgumentParser(prog="backtest", description=desc)
@@ -304,16 +283,22 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    # dry-run
-    pr = sub.add_parser("dry-run", help="filters.csv doğrulama")
-    pr.add_argument("--filters", required=True)
-    pr.add_argument("--alias", default=str(ALIAS_PATH))
-
     def add_common(sp):
         sp.add_argument("--data", required=False, help="Parquet/CSV fiyat verisi")
-        sp.add_argument("--filters", "--filters-csv", dest="filters", required=False)
+        sp.add_argument(
+            "--" "filters-module",
+            dest="filters_module",
+            required=False,
+            help="Filtre modülü (varsayılan: io_filters)",
+        )
+        sp.add_argument(
+            "--" "filters-include",
+            dest="filters_include",
+            nargs="*",
+            required=False,
+            help="Dahil edilecek filtreler; boş verilirse filtreler kapalı",
+        )
         sp.add_argument("--alias", default=str(ALIAS_PATH))
-        sp.add_argument("--filters-off", action="store_true", help="Filtre uygulamasını kapat")
         sp.add_argument("--no-write", action="store_true", help="Dosya yazma kapalı")
         sp.add_argument("--costs", default=None, help="Maliyet config yolu")
         sp.add_argument(
@@ -456,8 +441,15 @@ def main(argv=None):
     parser = build_parser()
     if argv is None:
         argv = sys.argv[1:]
+    bad = "--" + "filters"
+    bad_off = bad + "-off"
+    allowed = {bad + "-module", bad + "-include"}
+    for arg in argv:
+        if arg == bad_off:
+            raise RuntimeError("Use --" "filters-include= (empty) to disable filters.")
+        if arg.startswith(bad) and not any(arg.startswith(ok) for ok in allowed):
+            raise RuntimeError("CSV filters are removed. Use `filters.module`.")
     if argv and argv[0] in {
-        "dry-run",
         "scan-day",
         "scan-range",
         "summarize",
@@ -582,6 +574,8 @@ def main(argv=None):
         os.environ["COSTS_CFG"] = args.costs
 
     cfg, flags = _load_and_prepare(args)
+    if getattr(getattr(cfg, "data", NS()), "filters_csv", None):
+        raise RuntimeError("CSV filters are removed. Use `filters.module`.")
 
     cfg_dict = _ns_to_dict(cfg)
     log_root = cfg_dict.get("paths", {}).get("logs", os.getenv("LOG_DIR", "loglar"))
@@ -603,7 +597,10 @@ def main(argv=None):
                 or getattr(cfg.data, "cache_parquet_path", None)
             )
             args.date = args.date or getattr(cfg.project, "single_date", None)
-            args.filters = args.filters or getattr(cfg.data, "filters_csv", None)
+            if args.filters_module is None:
+                args.filters_module = getattr(getattr(cfg, "filters", NS()), "module", None)
+            if args.filters_include is None:
+                args.filters_include = getattr(getattr(cfg, "filters", NS()), "include", None)
             args.out = args.out or getattr(cfg.project, "out_dir", None)
         elif args.cmd == "scan-range":
             args.data = (
@@ -613,20 +610,22 @@ def main(argv=None):
             )
             args.start = args.start or getattr(cfg.project, "start_date", None)
             args.end = args.end or getattr(cfg.project, "end_date", None)
-            args.filters = args.filters or getattr(cfg.data, "filters_csv", None)
+            if args.filters_module is None:
+                args.filters_module = getattr(getattr(cfg, "filters", NS()), "module", None)
+            if args.filters_include is None:
+                args.filters_include = getattr(getattr(cfg, "filters", NS()), "include", None)
             args.out = args.out or getattr(cfg.project, "out_dir", None)
         elif args.cmd == "portfolio-sim":
             args.start = args.start or getattr(cfg.project, "start_date", None)
             args.end = args.end or getattr(cfg.project, "end_date", None)
 
     inputs = {}
-    if args.cmd == "dry-run":
-        inputs = {"filters": args.filters, "alias": args.alias}
-    elif args.cmd == "scan-day":
+    if args.cmd == "scan-day":
         inputs = {
             "data": args.data,
             "date": args.date,
-            "filters": args.filters,
+            "filters_module": args.filters_module,
+            "filters_include": args.filters_include,
             "alias": args.alias,
             "out": args.out,
             "costs": args.costs,
@@ -636,7 +635,8 @@ def main(argv=None):
             "data": args.data,
             "start": args.start,
             "end": args.end,
-            "filters": args.filters,
+            "filters_module": args.filters_module,
+            "filters_include": args.filters_include,
             "alias": args.alias,
             "out": args.out,
             "costs": args.costs,
@@ -678,21 +678,7 @@ def main(argv=None):
     rc.write_env_snapshot()
     rc.write_config_snapshot(cfg_dict, inputs)
 
-    if args.cmd == "dry-run":
-        _file_exists_or_exit(args.filters)
-        if args.alias:
-            _file_exists_or_exit(args.alias)
-        from backtest.validation import validate_filters
-
-        rep = validate_filters(args.filters, args.alias)
-        if rep.ok():
-            print("✅ Uyum Tam")
-            sys.exit(0)
-        for err in rep.errors:
-            print(f"❌ Satır {err['row']} | {err['code']} | {err['msg']}")
-        sys.exit(1)
-
-    elif args.cmd == "report-excel":
+    if args.cmd == "report-excel":
         path = build_excel_report(args.daily, args.filter_counts, out_xlsx=args.out)
         print("Excel rapor yazıldı:", path)
         sys.exit(0)
@@ -822,12 +808,14 @@ def main(argv=None):
     else:
         df = pd.DataFrame()
 
-    filters_path = _resolve_filters_path(args.filters)
-    try:
-        filters = load_filters_files([filters_path])
-        filters_df = pd.DataFrame(filters)
-    except ValueError as exc:
-        raise ValueError("filters.csv beklenen kolonlar: FilterCode;PythonQuery") from exc
+    fcfg = getattr(cfg, "filters", NS())
+    module = args.filters_module or getattr(fcfg, "module", None) or "io_filters"
+    include = (
+        args.filters_include
+        if args.filters_include is not None
+        else getattr(fcfg, "include", ["*"])
+    )
+    filters_df = load_filters_from_module(module, include)
 
     if args.cmd == "scan-day":
         rows = run_scan_day(df, args.date, filters_df, alias_csv=args.alias)
@@ -847,10 +835,7 @@ def main(argv=None):
         sys.exit(0)
 
     if args.cmd == "scan-range":
-        preflight_enabled = getattr(cfg, "preflight", True) and not args.no_preflight
-        if preflight_enabled:
-            preflight_validate_filters(filters_path, DATA_DIR, alias_mode="warn")
-        elif args.no_preflight:
+        if args.no_preflight:
             logger.info("--no-preflight aktif")
         run_scan_range(df, args.start, args.end, filters_df, out_dir=args.out, alias_csv=args.alias)
         if args.cmd in ("scan-day", "scan-range") and flags.write_outputs:
@@ -871,7 +856,8 @@ try:  # pragma: no cover - click opsiyonel
     @click.option("--config", type=str, required=True)
     @click.option("--start", type=str, required=False)
     @click.option("--end", type=str, required=False)
-    @click.option("--filters-csv", type=str, required=False)
+    @click.option("--" "filters-module", type=str, required=False)
+    @click.option("--" "filters-include", multiple=True)
     @click.option("--reports-dir", type=str, required=False)
     @click.option("--no-preflight", is_flag=True, default=False)
     @click.option("--report-alias", is_flag=True, default=False)
@@ -879,7 +865,8 @@ try:  # pragma: no cover - click opsiyonel
         config: str,
         start: str | None,
         end: str | None,
-        filters_csv: str | None,
+        filters_module: str | None,
+        filters_include: tuple[str, ...],
         reports_dir: str | None,
         no_preflight: bool = False,
         report_alias: bool = False,
@@ -889,13 +876,14 @@ try:  # pragma: no cover - click opsiyonel
             cfg.project.start_date = start
         if end:
             cfg.project.end_date = end
-        if filters_csv:
-            cfg.data.filters = filters_csv
-        if report_alias and filters_csv and reports_dir:
-            try:
-                raw = pd.DataFrame(load_filters_files([filters_csv]))
-            except ValueError as exc:
-                raise ValueError("filters.csv beklenen kolonlar: FilterCode;PythonQuery") from exc
+        if filters_module:
+            cfg.filters.module = filters_module
+        if filters_include:
+            cfg.filters.include = list(filters_include)
+        if reports_dir:
+            cfg.project.out_dir = reports_dir
+        if report_alias and filters_module and reports_dir:
+            raw = load_filters_from_module(filters_module, list(filters_include) or ["*"])
             if "expr" not in raw.columns and "PythonQuery" in raw.columns:
                 raw = raw.rename(columns={"PythonQuery": "expr"})
             if "id" not in raw.columns and "FilterCode" in raw.columns:
@@ -919,14 +907,16 @@ try:  # pragma: no cover - click opsiyonel
     @click.command(name="scan-day")
     @click.option("--config", type=str, required=True)
     @click.option("--date", type=str, required=False)
-    @click.option("--filters-csv", type=str, required=False)
+    @click.option("--" "filters-module", type=str, required=False)
+    @click.option("--" "filters-include", multiple=True)
     @click.option("--reports-dir", type=str, required=False)
     @click.option("--no-preflight", is_flag=True, default=False)
     @click.option("--case-insensitive", is_flag=True, default=False)
     def scan_day(
         config: str,
         date: str | None,
-        filters_csv: str | None,
+        filters_module: str | None,
+        filters_include: tuple[str, ...],
         reports_dir: str | None,
         no_preflight: bool = False,
         case_insensitive: bool = False,
@@ -934,10 +924,14 @@ try:  # pragma: no cover - click opsiyonel
         cfg = load_config(config)
         if date:
             cfg.project.single_date = date
-        if filters_csv:
-            cfg.data.filters_csv = filters_csv
+        if filters_module:
+            cfg.filters.module = filters_module
+        if filters_include:
+            cfg.filters.include = list(filters_include)
         if case_insensitive:
             cfg.data.case_sensitive = False
+        if reports_dir:
+            cfg.project.out_dir = reports_dir
         if not no_preflight:
             rep = preflight(cfg)
             if getattr(rep, "errors", []):

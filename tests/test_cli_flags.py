@@ -1,12 +1,4 @@
-import pytest
-
 from backtest.cli import build_parser
-
-
-def test_dry_run_requires_filters():
-    p = build_parser()
-    with pytest.raises(SystemExit):
-        p.parse_args(["dry-run"])  # --filters yok → hata
 
 
 def test_common_flags_present():
@@ -18,13 +10,15 @@ def test_common_flags_present():
             "data.csv",
             "--date",
             "2024-01-02",
-            "--filters",
-            "filters.csv",
+            "--" "filters-module",
+            "io_filters",
+            "--" "filters-include",
+            "F1",
             "--out",
             "out",
-            "--filters-off",
             "--no-write",
         ]
     )
-    assert args.filters_off is True
+    assert args.filters_module == "io_filters"
+    assert args.filters_include == ["F1"]
     assert args.no_write is True

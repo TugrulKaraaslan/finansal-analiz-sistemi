@@ -121,6 +121,7 @@ def test_scan_day_no_preflight(monkeypatch):
         "cfg.yml",
         "2025-03-07",
         None,
+        (),
         None,
         no_preflight=True,
     )

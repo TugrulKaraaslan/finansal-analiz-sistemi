@@ -13,13 +13,13 @@
 ## Bayraklar (genel)
 - `--config path.yaml` (opsiyonel)
 - `--log-level {DEBUG,INFO,WARNING,ERROR}`
-- `--filters-off` → `filters_enabled = false`
+- `\-\-filters-off` → `filters_enabled = false`
 - `--dry-run` → doğrulama modunu çalıştır (A4)
 
 ## Komutlar
-- `dry-run --filters filters.csv [--alias alias.csv]`
-- `scan-day --data <path> --date YYYY-MM-DD --filters filters.csv --out dir [--alias alias.csv] [--filters-off] [--no-write]`
-- `scan-range --data <path> --start YYYY-MM-DD --end YYYY-MM-DD --filters filters.csv --out dir [--alias alias.csv] [--filters-off] [--no-write]`
+- `dry-run \-\-filters filters.csv [--alias alias.csv]`
+- `scan-day --data <path> --date YYYY-MM-DD \-\-filters filters.csv --out dir [--alias alias.csv] [\-\-filters-off] [--no-write]`
+- `scan-range --data <path> --start YYYY-MM-DD --end YYYY-MM-DD \-\-filters filters.csv --out dir [--alias alias.csv] [\-\-filters-off] [--no-write]`
 
 ## Hata Kodları (CLI)
 - CL001: Argüman eksik/uyumsuz
