@@ -8,7 +8,7 @@ import pandas as pd
 
 from backtest.filters.normalize_expr import normalize_expr
 from backtest.naming.aliases import normalize_token
-from io_filters import read_filters_csv
+from io_filters import read_filters_file
 
 ALLOW_FUNCS = {"cross_up", "cross_down"}
 ALLOWED_PATTERNS = [
@@ -39,7 +39,7 @@ def _tokens(expr: str) -> list[str]:
 
 
 def validate_filters(
-    filters_csv: Path,
+    filters_file: Path,
     excel_dir: Path,
     alias_mode: str = "allow",  # 'allow'|'warn'|'forbid'
     allow_unknown: bool = False,
@@ -48,7 +48,7 @@ def validate_filters(
     alias_used: dict[str, set[str]] = {}
     unknown: dict[str, set[str]] = {}
 
-    df = read_filters_csv(filters_csv)
+    df = read_filters_file(filters_file)
     for _, row in df.iterrows():
         code = (row.get("FilterCode") or "").strip() or "<NO_CODE>"
         expr_raw = (row.get("PythonQuery") or "").strip()
