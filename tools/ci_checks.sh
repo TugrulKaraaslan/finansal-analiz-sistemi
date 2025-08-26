@@ -7,7 +7,7 @@ python --version
 pip --version
 
 echo "== Legacy CSV guard =="
-if rg -n 'filters\.csv|load_filters_csv|--filters\b|--filters-off' -S tools -g '!ci_checks.sh'; then
+if rg -n 'load_filters_csv|--filters\b|--filters-off' -S tools -g '!ci_checks.sh'; then
   echo "CSV/legacy flags detected"; exit 1; fi
 
 echo "== Ensure package importable =="

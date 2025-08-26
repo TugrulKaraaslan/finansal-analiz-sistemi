@@ -47,8 +47,6 @@ def main() -> None:
                 }
             )
             df.to_excel(tmp_path / "AAA.xlsx", index=False)
-            filters_csv = tmp_path / "filters.csv"
-            filters_csv.write_text("FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8")
             cfg_path = tmp_path / "cfg.yml"
             cfg_path.write_text(
                 textwrap.dedent(
@@ -63,8 +61,10 @@ def main() -> None:
                       stop_on_filter_error: false
                     data:
                       excel_dir: {tmp_path}
-                      filters_csv: {filters_csv}
                       enable_cache: false
+                    filters:
+                      module: io_filters
+                      include: ['*']
                     calendar:
                       tplus1_mode: price
                     indicators:

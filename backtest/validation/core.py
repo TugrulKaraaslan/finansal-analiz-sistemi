@@ -20,7 +20,7 @@ def validate_filters(
     report = ValidationReport()
 
     if list(df.columns) != ["FilterCode", "PythonQuery"]:
-        raise ValidationError("filters.csv hatalı başlık", code="VC999")
+        raise ValidationError("filters tablosu hatalı başlık", code="VC999")
 
     seen_codes = set()
     alias_map = alias_map or {}

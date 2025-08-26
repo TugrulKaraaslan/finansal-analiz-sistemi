@@ -65,15 +65,15 @@ normalizasyon ile çalışır.
 Aşağıdaki komutlar örnek verilerle çevrimdışı çalışır.
 
 ```bash
-# filters.csv dosyasını doğrula
-python -m backtest.cli dry-run \-\-filters filters.csv
+# filtre modülünü doğrula
+python -m backtest.cli dry-run --filters-module io_filters --filters-include "*"
 
 # Excel dosyalarını Parquet'e çevir
 python -m backtest.cli convert-to-parquet --out data/parquet
 
 # Tek gün tarama yap
 python -m backtest.cli scan-day \
-  --data data/BIST.xlsx \-\-filters filters.csv \
+  --data data/BIST.xlsx --filters-module io_filters --filters-include "*" \
   --date 2024-01-02 --out raporlar/gunluk
 ```
 
@@ -86,23 +86,11 @@ fn = compile_expression("cross_up(a,b)")
 print(fn(df))
 ```
 
-## Filtre CSV formatı
+## Filtre Modülü
 
-`filters.csv` dosyası tam olarak iki kolondan oluşur:
-`FilterCode;PythonQuery`. Ayraç olarak yalnızca noktalı virgül (`;`)
-kullanılmalıdır. Excel'den kaydederken `CSV` seçeneğiyle `;` ayırıcı
-kullanıldığından emin olun. Virgül ile kaydedilen dosyalar aşağıdaki hatayı
-üretir:
-
-```
-CSV delimiter ';' bekleniyor. Dosyayı ';' ile kaydedin: FilterCode;PythonQuery
-```
-
-Virgüllü eski dosyaları dönüştürmek için `tools/migrate_filters_csv.py`
-aracını kullanabilirsiniz.
-
-`PythonQuery` sütunu boş bırakılamaz. Boş veya sadece boşluk içeren
-satırlar `ValueError` ile sonuçlanır.
+Filtre tanımları artık CSV dosyaları yerine Python modülleriyle
+sağlanır. Varsayılan `io_filters` modülü `[{"FilterCode": "FI",
+"PythonQuery": "True"}]` tanımlar ve tüm örneklerde kullanılır.
 
 ## Sorun Giderme & Detaylı Kullanım
 Ek argümanlar, tüm alt komutlar ve ipuçları için
