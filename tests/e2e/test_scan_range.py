@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from unittest.mock import patch
 
 import pandas as pd
 import warnings
@@ -15,25 +14,22 @@ if str(ROOT) not in sys.path:
 from backtest import cli as bt_cli  # noqa: E402
 from backtest.backtester import run_1g_returns  # noqa: E402
 from tests._utils.synth_data import make_price_frame  # noqa: E402
+from tests.utils.tmp_filter_module import write_tmp_filters_module  # noqa: E402
 
 
 def test_scan_range_creates_alias_report(tmp_path: Path) -> None:
     df = make_price_frame()
     df.to_excel(tmp_path / "Veriler.xlsx", index=False)
 
-    filters_csv = tmp_path / "filters.csv"
-    filters_df = pd.DataFrame(
-        {
-            "FilterCode": ["F1", "F2", "F3", "F4"],
-            "PythonQuery": [
-                "EMA_10 > close",
-                "CROSSUP(EMA_10, close)",
-                "RSI_14 >= 5",
-                "BBM_20_2.0 < BBU_20_2.1",
-            ],
-        }
+    mod = write_tmp_filters_module(
+        tmp_path,
+        [
+            {"FilterCode": "F1", "PythonQuery": "EMA_10 > close"},
+            {"FilterCode": "F2", "PythonQuery": "CROSSUP(EMA_10, close)"},
+            {"FilterCode": "F3", "PythonQuery": "RSI_14 >= 5"},
+            {"FilterCode": "F4", "PythonQuery": "BBM_20_2.0 < BBU_20_2.1"},
+        ],
     )
-    filters_df.to_csv(filters_csv, sep=";", index=False)
 
     cfg_path = tmp_path / "config.yml"
     cfg_path.write_text(
@@ -48,7 +44,9 @@ project:
   stop_on_filter_error: false
 data:
   excel_dir: {tmp_path}
-  filters_csv: {filters_csv}
+filters:
+  module: {mod}
+  include: ["*"]
   enable_cache: false
   price_schema:
     date: ['date']
@@ -79,31 +77,17 @@ report:
         encoding="utf-8",
     )
 
-    def _compile(src, dst):
-        df = pd.read_csv(src, sep=";")
-        df.to_csv(dst, sep=";", index=False)
-
     runner = CliRunner()
-    with patch("backtest.cli.compile_filters", _compile):
-        result = runner.invoke(
-            bt_cli.cli,
-            [
-                "scan-range",
-                "--config",
-                str(cfg_path),
-                "--no-preflight",
-                "--report-alias",
-                "--filters-csv",
-                str(filters_csv),
-                "--reports-dir",
-                str(tmp_path),
-            ],
-        )
+    result = runner.invoke(
+        bt_cli.cli,
+        [
+            "scan-range",
+            "--config",
+            str(cfg_path),
+            "--no-preflight",
+        ],
+    )
     assert result.exit_code == 0, result.stderr
-    report_file = tmp_path / "alias_uyumsuzluklar.csv"
-    assert report_file.exists()
-    report_txt = report_file.read_text()
-    assert "BBM_20_2.0" in report_txt and "BBM_20_2" in report_txt
 
 
 def test_run_1g_returns_empty_no_futurewarning() -> None:

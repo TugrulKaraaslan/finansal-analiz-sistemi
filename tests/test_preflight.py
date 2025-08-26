@@ -76,14 +76,13 @@ project:
 
 data:
   excel_dir: {}  # missing
-  filters_csv: {}
+filters:
+  module: io_filters
+  include: ["*"]
 """.format(
-            tmp_path / "missing", tmp_path / "filters.csv"
+            tmp_path / "missing"
         ),
         encoding="utf-8",
-    )
-    (tmp_path / "filters.csv").write_text(
-        "FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8"
     )
     runner = CliRunner()
     result = runner.invoke(
@@ -141,11 +140,7 @@ def test_scan_day_case_insensitive(tmp_path, monkeypatch):
             filename_pattern="{date}.xlsx",
             date_format="%Y-%m-%d",
             case_sensitive=True,
-            filters_csv=tmp_path / "filters.csv",
         ),
-    )
-    (tmp_path / "filters.csv").write_text(
-        "FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8"
     )
     _touch(tmp_path / "2025-03-07.XLSX")
     monkeypatch.setattr(cli, "load_config", lambda _: cfg)

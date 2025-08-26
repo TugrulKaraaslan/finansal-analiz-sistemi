@@ -1,4 +1,5 @@
 import tempfile
+import tempfile
 import textwrap
 from pathlib import Path
 
@@ -24,7 +25,9 @@ def test_load_config_independent_defaults():
           end_date: '2020-12-31'
         data:
           excel_dir: data
-          filters_csv: filters.csv
+        filters:
+          module: io_filters
+          include: ['*']
         """
     )
     path = _write_cfg(cfg_text)
@@ -45,16 +48,18 @@ def test_load_config_invalid_yaml():
 def test_load_config_relative_paths(tmp_path):
     cfg_text = textwrap.dedent(
         """
-          project:
-            out_dir: out
-          data:
-            excel_dir: data
-            filters_csv: filters.csv
-          calendar:
-            holidays_csv_path: hol.csv
-          benchmark:
-            excel_path: bist.xlsx
-            csv_path: xu.csv
+        project:
+          out_dir: out
+        data:
+          excel_dir: data
+        filters:
+          module: io_filters
+          include: ['*']
+        calendar:
+          holidays_csv_path: hol.csv
+        benchmark:
+          excel_path: bist.xlsx
+          csv_path: xu.csv
         """
     )
     cfg_file = tmp_path / "cfg.yaml"
@@ -63,7 +68,6 @@ def test_load_config_relative_paths(tmp_path):
     base = cfg_file.parent
     assert cfg.project.out_dir == str(base / "out")
     assert cfg.data.excel_dir == str(base / "data")
-    assert cfg.data.filters_csv == str(base / "filters.csv")
     assert cfg.calendar.holidays_csv_path == str(base / "hol.csv")
     assert cfg.benchmark.excel_path == str(base / "bist.xlsx")
     assert cfg.benchmark.csv_path == str(base / "xu.csv")

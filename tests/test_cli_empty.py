@@ -20,12 +20,12 @@ def _cfg():
             raise_on_error=False,
         ),
         data=SimpleNamespace(
-            filters_csv="dummy.csv",
             excel_dir=".",
             filename_pattern="{date}.xlsx",
             date_format="%Y-%m-%d",
             case_sensitive=True,
         ),
+        filters=SimpleNamespace(module="io_filters", include=["*"]),
         calendar=SimpleNamespace(
             tplus1_mode="price", holidays_source="none", holidays_csv_path=None
         ),
@@ -66,7 +66,7 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(cli, "normalize", lambda df: df)
     monkeypatch.setattr(cli, "add_next_close", lambda df: df)
     filters = [{"FilterCode": "F1", "PythonQuery": "close>0", "Group": "G"}]
-    monkeypatch.setattr(cli, "load_filters_files", lambda _: filters)
+    monkeypatch.setattr(cli, "load_filters_from_module", lambda *a, **k: pd.DataFrame(filters))
 
     def _run_screener(df, filters, d, stop_on_filter_error=None, raise_on_error=None):
         assert raise_on_error is False
@@ -117,7 +117,7 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(cli, "normalize", lambda df: df)
     monkeypatch.setattr(cli, "add_next_close", lambda df: df)
     filters = [{"FilterCode": "F1", "PythonQuery": "close>0", "Group": "G"}]
-    monkeypatch.setattr(cli, "load_filters_files", lambda _: filters)
+    monkeypatch.setattr(cli, "load_filters_from_module", lambda *a, **k: pd.DataFrame(filters))
 
     def _run_screener(df, filters, d, stop_on_filter_error=None, raise_on_error=None):
         assert raise_on_error is False

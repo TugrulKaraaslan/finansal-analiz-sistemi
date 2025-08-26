@@ -24,9 +24,11 @@ def test_cli_emits_logs(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, "read_excels_long", lambda src: df)
     monkeypatch.setattr(cli, "run_scan_range", lambda *a, **k: None)
     monkeypatch.setattr(cli, "list_output_files", lambda *a, **k: [])
-
-    filters_csv = tmp_path / "filters.csv"
-    filters_csv.write_text("FilterCode;PythonQuery\nF1;True\n", encoding="utf-8")
+    monkeypatch.setattr(cli, "compile_filters", lambda *a, **k: None)
+    filters_file = tmp_path / "f.csv"
+    filters_file.write_text("FilterCode;PythonQuery\nF1;True\n", encoding="utf-8")
+    monkeypatch.setattr(cli, "_resolve_filters_path", lambda _: filters_file)
+    monkeypatch.setattr(cli, "load_filters_files", lambda paths: [{"FilterCode": "F1", "PythonQuery": "True"}])
 
     out_dir = tmp_path / "raporlar"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -57,8 +59,6 @@ filters:
         "--no-preflight",
         "--out",
         str(out_dir),
-        "--filters-csv",
-        str(filters_csv),
     ]
     with pytest.raises(SystemExit) as exc:
         cli.main(args)

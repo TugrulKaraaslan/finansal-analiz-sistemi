@@ -47,6 +47,7 @@ from backtest.summary import summarize_range
 from backtest.trace import ArtifactWriter, RunContext, list_output_files
 from backtest.validator import dataset_summary, quality_warnings
 from io_filters import load_filters_files, read_filters_file
+from filters.module_loader import load_filters_from_module
 
 __all__ = [
     "normalize",
@@ -183,8 +184,14 @@ def _run_scan(cfg):  # tests monkeypatch ediyor
     )
 
     filters_path = getattr(cfg.data, "filters_csv", None)
-    filters = load_filters_files([filters_path]) if filters_path else []
-    filters_df = pd.DataFrame(filters)
+    if filters_path:
+        filters = load_filters_files([filters_path])
+        filters_df = pd.DataFrame(filters)
+    else:
+        fcfg = getattr(cfg, "filters", NS())
+        module = getattr(fcfg, "module", None)
+        include = getattr(fcfg, "include", ["*"])
+        filters_df = load_filters_from_module(module, include)
     if filters_df.empty:
         _diag("FILTERS_EMPTY")
         (out_dir / "events.jsonl").write_text(

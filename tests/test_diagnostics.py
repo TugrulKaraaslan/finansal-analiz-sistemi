@@ -35,7 +35,16 @@ def test_data_empty(tmp_path, caplog, monkeypatch):
     logger.add(caplog.handler, level="INFO")
 
     monkeypatch.setattr(cli, "read_excels_long", lambda cfg: pd.DataFrame())
-    cfg = NS(project=NS(out_dir=str(tmp_path / "out")), data=NS(filters_csv=str(tmp_path / "f.csv")))
+    monkeypatch.setattr(
+        cli,
+        "load_filters_from_module",
+        lambda mod, inc: pd.DataFrame([{"FilterCode": "F1", "PythonQuery": "True"}]),
+    )
+    cfg = NS(
+        project=NS(out_dir=str(tmp_path / "out")),
+        data=NS(),
+        filters=NS(module="io_filters", include=["*"]),
+    )
     cli._run_scan(cfg)
 
     assert "DATA_EMPTY" in caplog.text
@@ -63,12 +72,15 @@ def test_filters_empty(tmp_path, caplog, monkeypatch):
     monkeypatch.setattr(data_loader, "canonicalize_columns", lambda df: df)
     monkeypatch.setattr(calendars, "add_next_close_calendar", lambda df, t: df)
     monkeypatch.setattr(indicators, "compute_indicators", lambda df, params, engine=None: df)
-    monkeypatch.setattr(cli, "load_filters_files", lambda paths: [])
+    monkeypatch.setattr(
+        cli, "load_filters_from_module", lambda mod, inc: pd.DataFrame()
+    )
 
     cfg = NS(
         project=NS(out_dir=str(tmp_path / "out")),
-        data=NS(filters_csv=str(tmp_path / "filters.csv")),
+        data=NS(),
         report=NS(daily_sheet_prefix="SCAN_", summary_sheet_name="SUMMARY", percent_format="0.00%"),
+        filters=NS(module="io_filters", include=["*"]),
     )
     cli._run_scan(cfg)
 
@@ -97,7 +109,13 @@ def test_no_match_day_zero_result(tmp_path, caplog, monkeypatch):
     monkeypatch.setattr(data_loader, "canonicalize_columns", lambda df: df)
     monkeypatch.setattr(calendars, "add_next_close_calendar", lambda df, t: df)
     monkeypatch.setattr(indicators, "compute_indicators", lambda df, params, engine=None: df)
-    monkeypatch.setattr(cli, "load_filters_files", lambda paths: [{"FilterCode": "F1", "PythonQuery": "close>0"}])
+    monkeypatch.setattr(
+        cli,
+        "load_filters_from_module",
+        lambda mod, inc: pd.DataFrame([
+            {"FilterCode": "F1", "PythonQuery": "close>0"}
+        ]),
+    )
     monkeypatch.setattr(
         cli,
         "run_screener",
@@ -126,8 +144,9 @@ def test_no_match_day_zero_result(tmp_path, caplog, monkeypatch):
 
     cfg = NS(
         project=NS(out_dir=str(tmp_path / "out")),
-        data=NS(filters_csv=str(tmp_path / "filters.csv")),
+        data=NS(),
         report=NS(daily_sheet_prefix="SCAN_", summary_sheet_name="SUMMARY", percent_format="0.00%"),
+        filters=NS(module="io_filters", include=["*"]),
     )
     cli._run_scan(cfg)
 
@@ -157,7 +176,13 @@ def test_positive_write_logs(tmp_path, caplog, monkeypatch):
     monkeypatch.setattr(data_loader, "canonicalize_columns", lambda df: df)
     monkeypatch.setattr(calendars, "add_next_close_calendar", lambda df, t: df)
     monkeypatch.setattr(indicators, "compute_indicators", lambda df, params, engine=None: df)
-    monkeypatch.setattr(cli, "load_filters_files", lambda paths: [{"FilterCode": "F1", "PythonQuery": "close>0"}])
+    monkeypatch.setattr(
+        cli,
+        "load_filters_from_module",
+        lambda mod, inc: pd.DataFrame([
+            {"FilterCode": "F1", "PythonQuery": "close>0"}
+        ]),
+    )
 
     monkeypatch.setattr(
         cli,
@@ -203,8 +228,9 @@ def test_positive_write_logs(tmp_path, caplog, monkeypatch):
 
     cfg = NS(
         project=NS(out_dir=str(tmp_path / "out")),
-        data=NS(filters_csv=str(tmp_path / "filters.csv")),
+        data=NS(),
         report=NS(daily_sheet_prefix="SCAN_", summary_sheet_name="SUMMARY", percent_format="0.00%"),
+        filters=NS(module="io_filters", include=["*"]),
     )
     cli._run_scan(cfg)
 
