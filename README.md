@@ -233,20 +233,48 @@ Komut örneği:
 python -m backtest.cli scan-day --config config/colab_config.yaml --date 2025-03-07
 ```
 
-## Filtre Modülü Örneği
+## Kendi filtre modülünü yaz
+
+En küçük modül iki yöntemle tanımlanabilir:
+
+```python
+# my_filters.py
+FILTERS = [
+    {"FilterCode": "FI", "PythonQuery": "df['close'] > df['ema20']"},
+    {"FilterCode": "RSI", "PythonQuery": "df['rsi14'] < 30"},
+]
+```
+
+Alternatif olarak:
+
+```python
+# my_filters.py
+def get_filters():
+    return [
+        {"FilterCode": "FI", "PythonQuery": "df['close'] > df['ema20']"},
+        {"FilterCode": "RSI", "PythonQuery": "df['rsi14'] < 30"},
+    ]
+```
+
+Konfig bağlama:
 
 ```yaml
 filters:
-  module: "io_filters"
-  include: ["*"]
+  module: "my_filters"      # my_filters.py dosyanız
+  include: ["FI","RSI*"]    # fnmatch desenleri
 ```
 
-CLI:
+Çalıştırma:
 
 ```bash
 python -m backtest.cli scan-day --config config/scan.yml \
-       --filters-module io_filters --filters-include "*"
+       --filters-module my_filters --filters-include "FI" --filters-include "RSI*"
 ```
+
+Hata ipuçları:
+
+- `filters module missing FILTERS/get_filters` → modülünüzde yukarıdaki yapılardan biri yok.
+- Include boş ise: filtreler devre dışı kalır (bilerek).
 
 ## CLI Kullanımı (tek doğru biçim)
 
