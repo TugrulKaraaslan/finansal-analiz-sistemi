@@ -4,13 +4,17 @@ from pathlib import Path
 
 import yaml
 
+from tests.utils.tmp_filter_module import write_tmp_filters_module
+
 
 def test_cli_smoke(tmp_path: Path):
     root = tmp_path / "proj"
     (root / "data").mkdir(parents=True)
-    (root / "filters.csv").write_text(
-        "FilterCode;PythonQuery\n" "EXAMPLE_01; (rsi_14 > 50) & (ema_20 > ema_50)\n",
-        encoding="utf-8",
+    mod = write_tmp_filters_module(
+        root,
+        [
+            {"FilterCode": "EXAMPLE_01", "PythonQuery": "(rsi_14 > 50) & (ema_20 > ema_50)"},
+        ],
     )
     (root / "config").mkdir()
     cfg_path = root / "config" / "colab_config.yaml"
@@ -25,10 +29,10 @@ def test_cli_smoke(tmp_path: Path):
         },
         "data": {
             "excel_dir": "data",
-            "filters_csv": "filters.csv",
             "enable_cache": False,
             "cache_parquet_path": "cache",
         },
+        "filters": {"module": mod, "include": ["*"]},
         "calendar": {"tplus1_mode": "calendar", "holiday_csv": ""},
         "benchmark": {
             "source": "none",

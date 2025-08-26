@@ -1,59 +1,33 @@
-from pathlib import Path
+import sys
 
 import pytest
 
-from io_filters import load_filters_csv
-
-DATA_DIR = Path(__file__).resolve().parent / "data"
+from filters.module_loader import load_filters_from_module
 
 
-def test_load_filters_ok(tmp_path):
-    p = tmp_path / "filters.csv"
-    p.write_text("FilterCode;PythonQuery\nf1;close>0\nf2;volume>0\n", encoding="utf-8")
-    rows = load_filters_csv([p])
-    assert len(rows) == 2
+def test_load_filters_from_module():
+    df = load_filters_from_module("io_filters", ["*"])
+    assert list(df.columns) == ["FilterCode", "PythonQuery"]
+    assert not df.empty
 
 
-def test_load_filters_empty_file(tmp_path):
-    p = tmp_path / "filters.csv"
-    p.write_text("", encoding="utf-8")
-    with pytest.raises(ValueError):
-        load_filters_csv([p])
+def test_missing_columns_module(tmp_path):
+    mod_path = tmp_path / "bad_filters.py"
+    mod_path.write_text("FILTERS = [{\"FilterCode\": \"F1\"}]\n", encoding="utf-8")
+    sys.path.insert(0, str(tmp_path))
+    try:
+        with pytest.raises(ValueError):
+            load_filters_from_module("bad_filters")
+    finally:
+        sys.path.remove(str(tmp_path))
 
 
-def test_load_filters_header_only(tmp_path):
-    p = tmp_path / "filters.csv"
-    p.write_text("FilterCode;PythonQuery\n", encoding="utf-8")
-    with pytest.raises(ValueError):
-        load_filters_csv([p])
-
-
-def test_load_filters_empty_query():
-    with pytest.raises(ValueError):
-        load_filters_csv([DATA_DIR / "filters_empty.csv"])
-
-
-def test_load_filters_missing_column():
-    with pytest.raises(ValueError):
-        load_filters_csv([DATA_DIR / "filters_missing_col.csv"])
-
-
-def test_load_filters_semicolon(tmp_path):
-    csv_file = tmp_path / "filters.csv"
-    csv_file.write_text("FilterCode;PythonQuery\nF1;close>0\n", encoding="utf-8")
-    rows = load_filters_csv([csv_file])
-    assert rows[0]["FilterCode"] == "F1"
-
-
-def test_load_filters_parse_error(tmp_path):
-    csv_file = tmp_path / "filters.csv"
-    csv_file.write_text('FilterCode;PythonQuery\n"unclosed', encoding="utf-8")
-    with pytest.raises(ValueError):
-        load_filters_csv([csv_file])
-
-
-def test_load_filters_duplicate_codes(tmp_path):
-    csv_file = tmp_path / "filters.csv"
-    csv_file.write_text("FilterCode;PythonQuery\nF1;close>0\nF1;close>1\n", encoding="utf-8")
-    with pytest.raises(ValueError):
-        load_filters_csv([csv_file])
+def test_missing_filters_attr(tmp_path):
+    mod_path = tmp_path / "no_filters.py"
+    mod_path.write_text("X = 1\n", encoding="utf-8")
+    sys.path.insert(0, str(tmp_path))
+    try:
+        with pytest.raises(ValueError):
+            load_filters_from_module("no_filters")
+    finally:
+        sys.path.remove(str(tmp_path))

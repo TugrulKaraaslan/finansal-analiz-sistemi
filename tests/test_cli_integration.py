@@ -2,8 +2,10 @@ import textwrap
 
 import pandas as pd
 from click.testing import CliRunner
+import textwrap
 
 from backtest import cli
+from tests.utils.tmp_filter_module import write_tmp_filters_module
 
 
 def test_cli_scan_range_integration(tmp_path):
@@ -18,8 +20,10 @@ def test_cli_scan_range_integration(tmp_path):
         }
     )
     df.to_excel(tmp_path / "AAA.xlsx", index=False)
-    filters_csv = tmp_path / "filters.csv"
-    filters_csv.write_text("FilterCode;PythonQuery\nF1;close > 0\n", encoding="utf-8")
+    mod = write_tmp_filters_module(
+        tmp_path,
+        [{"FilterCode": "F1", "PythonQuery": "close > 0"}],
+    )
     cfg_path = tmp_path / "cfg.yaml"
     cfg_path.write_text(
         textwrap.dedent(
@@ -34,7 +38,6 @@ def test_cli_scan_range_integration(tmp_path):
 
             data:
               excel_dir: "{out_dir}"
-              filters_csv: "{filters}"
               enable_cache: false
               cache_parquet_path: "{out_dir}/cache.parquet"
               price_schema:
@@ -66,8 +69,12 @@ def test_cli_scan_range_integration(tmp_path):
               percent_format: "0.00%"
               daily_sheet_prefix: "SCAN_"
               summary_sheet_name: "SUMMARY"
+
+            filters:
+              module: {mod}
+              include: ["*"]
             """
-        ).format(out_dir=tmp_path, filters=filters_csv),
+        ).format(out_dir=tmp_path, mod=mod),
         encoding="utf-8",
     )
     runner = CliRunner()
@@ -88,10 +95,9 @@ def test_cli_scan_missing_column(tmp_path):
         }
     )
     df.to_excel(tmp_path / "AAA.xlsx", index=False)
-    filters_csv = tmp_path / "filters.csv"
-    filters_csv.write_text(
-        "FilterCode;PythonQuery\nF1;nonexistent > 0\n",
-        encoding="utf-8",
+    mod = write_tmp_filters_module(
+        tmp_path,
+        [{"FilterCode": "F1", "PythonQuery": "nonexistent > 0"}],
     )
     cfg_path = tmp_path / "cfg.yaml"
     cfg_path.write_text(
@@ -107,7 +113,6 @@ def test_cli_scan_missing_column(tmp_path):
 
             data:
               excel_dir: "{out_dir}"
-              filters_csv: "{filters}"
               enable_cache: false
               cache_parquet_path: "{out_dir}/cache.parquet"
               price_schema:
@@ -127,20 +132,24 @@ def test_cli_scan_missing_column(tmp_path):
               engine: "none"
               params: {{}}
 
-              benchmark:
-                source: "none"
-                excel_path: ""
-                excel_sheet: "BIST"
-                csv_path: ""
-                column_date: "date"
-                column_close: "close"
+            benchmark:
+              source: "none"
+              excel_path: ""
+              excel_sheet: "BIST"
+              csv_path: ""
+              column_date: "date"
+              column_close: "close"
 
             report:
               percent_format: "0.00%"
               daily_sheet_prefix: "SCAN_"
               summary_sheet_name: "SUMMARY"
+
+            filters:
+              module: {mod}
+              include: ["*"]
             """
-        ).format(out_dir=tmp_path, filters=filters_csv),
+        ).format(out_dir=tmp_path, mod=mod),
         encoding="utf-8",
     )
     runner = CliRunner()

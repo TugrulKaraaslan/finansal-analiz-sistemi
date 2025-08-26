@@ -30,7 +30,6 @@ _DEFAULT = {
     },
     "data": {
         "excel_dir": "data",
-        "filters_csv": "filters.csv",
         "enable_cache": False,
         "cache_parquet_path": "",
         "price_schema": {},
@@ -57,6 +56,7 @@ _DEFAULT = {
         "daily_sheet_prefix": "SCAN_",
         "summary_sheet_name": "SUMMARY",
     },
+    "filters": {"module": "io_filters", "include": ["*"]},
     "preflight": True,
 }
 
@@ -108,8 +108,6 @@ def _expand_paths(doc: dict, base: Path) -> dict:
         doc["project"]["out_dir"] = _norm(doc["project"]["out_dir"])
     if doc.get("data", {}).get("excel_dir"):
         doc["data"]["excel_dir"] = _norm(doc["data"]["excel_dir"])
-    if doc.get("data", {}).get("filters_csv"):
-        doc["data"]["filters_csv"] = _norm(doc["data"]["filters_csv"])
     if doc.get("data", {}).get("cache_parquet_path"):
         cpp = doc["data"]["cache_parquet_path"]
         doc["data"]["cache_parquet_path"] = _norm(cpp)
@@ -135,6 +133,12 @@ def load_config(path: str | Path) -> NS:
         user = yaml.safe_load(f) or {}
     if not isinstance(user, dict):
         raise TypeError("config mapping olmalı")
+    if user.get("data", {}).get("filters_csv"):
+        raise ValueError("data.filters_csv kaldırıldı; filters.module kullanın")
+    if user.get("filters_csv"):
+        raise ValueError("filters_csv kaldırıldı; filters.module kullanın")
+    if user.get("filters", {}).get("path"):
+        raise ValueError("filters.path kaldırıldı; filters.module kullanın")
     user = _apply_legacy(user)
     doc = _deep_merge(_DEFAULT, user)
     if doc.get("indicators", {}).get("engine") != "none":

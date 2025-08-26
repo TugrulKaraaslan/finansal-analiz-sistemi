@@ -8,7 +8,6 @@ project:
 
 data:
   excel_dir: "../data"
-  filters_csv: "../filters.csv"
   enable_cache: false
   cache_parquet_path: "../cache"
 
@@ -28,6 +27,10 @@ report:
   with_bist_ratio_summary: true
   include_hit_ratio: true
   excel_engine: "xlsxwriter"
+
+filters:
+  module: "io_filters"
+  include: ["*"]
 
 range:
   start_date: "2022-01-03"

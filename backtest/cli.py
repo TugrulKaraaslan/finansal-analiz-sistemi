@@ -46,12 +46,13 @@ from backtest.screener import run_screener
 from backtest.summary import summarize_range
 from backtest.trace import ArtifactWriter, RunContext, list_output_files
 from backtest.validator import dataset_summary, quality_warnings
-from io_filters import load_filters_csv, read_filters_csv
+from io_filters import load_filters_files, read_filters_file
+from filters.module_loader import load_filters_from_module
 
 __all__ = [
     "normalize",
     "add_next_close",
-    "load_filters_csv",
+    "load_filters_files",
     "run_screener",
     "run_1g_returns",
     "write_reports",
@@ -183,8 +184,14 @@ def _run_scan(cfg):  # tests monkeypatch ediyor
     )
 
     filters_path = getattr(cfg.data, "filters_csv", None)
-    filters = load_filters_csv([filters_path]) if filters_path else []
-    filters_df = pd.DataFrame(filters)
+    if filters_path:
+        filters = load_filters_files([filters_path])
+        filters_df = pd.DataFrame(filters)
+    else:
+        fcfg = getattr(cfg, "filters", NS())
+        module = getattr(fcfg, "module", None)
+        include = getattr(fcfg, "include", ["*"])
+        filters_df = load_filters_from_module(module, include)
     if filters_df.empty:
         _diag("FILTERS_EMPTY")
         (out_dir / "events.jsonl").write_text(
@@ -817,7 +824,7 @@ def main(argv=None):
 
     filters_path = _resolve_filters_path(args.filters)
     try:
-        filters = load_filters_csv([filters_path])
+        filters = load_filters_files([filters_path])
         filters_df = pd.DataFrame(filters)
     except ValueError as exc:
         raise ValueError("filters.csv beklenen kolonlar: FilterCode;PythonQuery") from exc
@@ -883,10 +890,10 @@ try:  # pragma: no cover - click opsiyonel
         if end:
             cfg.project.end_date = end
         if filters_csv:
-            cfg.data.filters_csv = filters_csv
+            cfg.data.filters = filters_csv
         if report_alias and filters_csv and reports_dir:
             try:
-                raw = pd.DataFrame(load_filters_csv([filters_csv]))
+                raw = pd.DataFrame(load_filters_files([filters_csv]))
             except ValueError as exc:
                 raise ValueError("filters.csv beklenen kolonlar: FilterCode;PythonQuery") from exc
             if "expr" not in raw.columns and "PythonQuery" in raw.columns:
@@ -944,7 +951,7 @@ try:  # pragma: no cover - click opsiyonel
     @click.option("--file", "file", required=True)
     @click.option("--inplace", is_flag=True, default=False)
     def lint_filters(file: str, inplace: bool = False) -> None:
-        df = read_filters_csv(file)
+        df = read_filters_file(file)
         norm = df["PythonQuery"].map(normalize_expr)
         changed = norm != df["PythonQuery"]
         if changed.any():

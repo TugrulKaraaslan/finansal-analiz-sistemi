@@ -5,9 +5,14 @@ import pytest
 
 from backtest.config import load_config
 from backtest.indicators import compute_indicators
+from tests.utils.tmp_filter_module import write_tmp_filters_module
 
 
 def test_indicators_engine_none_is_default_and_locked(tmp_path):
+    mod = write_tmp_filters_module(
+        tmp_path,
+        [{"FilterCode": "F", "PythonQuery": "close>0"}],
+    )
     cfg_txt = f"""
 project:
   out_dir: "{tmp_path}"
@@ -19,9 +24,10 @@ project:
 
 data:
   excel_dir: "{tmp_path}"
-  filters_csv: "{tmp_path}/f.csv"
+filters:
+  module: {mod}
+  include: ["*"]
 """
-    (tmp_path / "f.csv").write_text("FilterCode;PythonQuery\nF;close>0\n", encoding="utf-8")
     cfg_path = tmp_path / "cfg.yaml"
     cfg_path.write_text(cfg_txt, encoding="utf-8")
     cfg = load_config(cfg_path)

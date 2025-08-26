@@ -5,6 +5,7 @@ from __future__ import annotations
 import collections
 import logging
 from pathlib import Path
+from typing import Dict, List
 
 import pandas as pd
 
@@ -15,15 +16,25 @@ REQUIRED_HEADER = ["FilterCode", "PythonQuery"]
 
 logger = logging.getLogger("backtest")
 
+# --- Default module-based filters ---
+
+FILTERS: List[Dict[str, str]] = [
+    {"FilterCode": "FI", "PythonQuery": "True"}
+]
+
+
+def get_filters() -> List[Dict[str, str]]:
+    return FILTERS
+
 
 def _check_delimiter(path: Path) -> None:
     lines = path.read_text(encoding="utf-8").splitlines()
     if not lines:
-        raise ValueError("Filters CSV dosyası boş")
+        raise ValueError("Filters dosyası boş")
     first_line = lines[0]
     if "," in first_line and ";" not in first_line:
         raise ValueError(
-            "CSV delimiter ';' bekleniyor. Dosyayı ';' ile kaydedin: FilterCode;PythonQuery"
+            "';' ayraç bekleniyor. Dosyayı ';' ile kaydedin: FilterCode;PythonQuery"
         )
 
 
@@ -31,7 +42,7 @@ def validate_filters_df(df: pd.DataFrame) -> pd.DataFrame:
     """Validate filter DataFrame ensuring strict schema and content."""
 
     if list(df.columns) != REQUIRED_HEADER:
-        raise ValueError(f"filters.csv kolonları {REQUIRED_HEADER!r} olmalı")
+        raise ValueError(f"filters kolonları {REQUIRED_HEADER!r} olmalı")
 
     df = df.dropna(how="all")
 
@@ -53,7 +64,7 @@ def validate_filters_df(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def read_filters_csv(path: Path | str) -> pd.DataFrame:
+def read_filters_file(path: Path | str) -> pd.DataFrame:
     """Read filter definitions using strict ``;`` separated schema."""
 
     p = resolve_path(path)
@@ -62,29 +73,28 @@ def read_filters_csv(path: Path | str) -> pd.DataFrame:
     return validate_filters_df(df)
 
 
-def load_filters_csv(paths: list[Path | str]) -> list[dict]:
+def load_filters_files(paths: list[Path | str]) -> list[dict]:
     """Load filters from multiple CSV files.
 
-    Each path is validated via :func:`read_filters_csv`. Duplicate
+    Each path is validated via :func:`read_filters_file`. Duplicate
     ``FilterCode`` values across files raise ``ValueError``.
     """
 
     all_rows: list[dict] = []
 
     if not paths:
-        raise ValueError("En az bir filtre CSV yolu gerekli")
+        raise ValueError("En az bir filtre dosya yolu gerekli")
 
     for path in paths:
         p = resolve_path(path)
         if not p.exists():
             msg = (
-                f"Filters CSV bulunamadı: {p}. "
-                "'--filters-csv' ile yol belirtin veya "
-                "config'te 'data.filters_csv' ayarını kontrol edin."
+                f"Filters dosyası bulunamadı: {p}. "
+                "'--filters' ile yol belirtin veya config'te filtre ayarını kontrol edin."
             )
             logger.error(msg)
             raise FileNotFoundError(msg)
-        df = read_filters_csv(p)
+        df = read_filters_file(p)
         all_rows.extend(df.to_dict("records"))
 
     codes = [r["FilterCode"] for r in all_rows]
@@ -95,4 +105,10 @@ def load_filters_csv(paths: list[Path | str]) -> list[dict]:
     return all_rows
 
 
-__all__ = ["read_filters_csv", "load_filters_csv", "validate_filters_df"]
+__all__ = [
+    "read_filters_file",
+    "load_filters_files",
+    "validate_filters_df",
+    "FILTERS",
+    "get_filters",
+]

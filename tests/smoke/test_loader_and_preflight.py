@@ -3,6 +3,7 @@ from click.testing import CliRunner
 
 from backtest import cli
 from backtest.data_loader import canonicalize_columns, read_excels_long
+from tests.utils.tmp_filter_module import write_tmp_filters_module
 
 
 def test_duplicate_columns_collapsed():
@@ -51,8 +52,7 @@ def test_no_preflight_flag(monkeypatch, tmp_path):
     cfg_path = tmp_path / "cfg.yml"
     excel_dir = tmp_path / "data"
     excel_dir.mkdir()
-    filters = tmp_path / "filters.csv"
-    filters.write_text("FilterCode;PythonQuery\n")
+    mod = write_tmp_filters_module(tmp_path, [{"FilterCode": "F1", "PythonQuery": "True"}])
     cfg_path.write_text(
         (
             "project:\n"
@@ -61,7 +61,9 @@ def test_no_preflight_flag(monkeypatch, tmp_path):
             f"  out_dir: {tmp_path / 'out'}\n"
             f"data:\n"
             f"  excel_dir: {excel_dir}\n"
-            f"  filters_csv: {filters}\n"
+            "filters:\n"
+            f"  module: {mod}\n"
+            "  include: ['*']\n"
         )
     )
     runner = CliRunner()
