@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-"""Convert comma-separated filter CSV to semicolon-separated format."""
+"""
+DEPRECATION / LEGACY TOOL
+This script exists only to convert historical filters.csv into a Python FILTERS module.
+Do NOT use in normal runs. CSV-based filters are removed.
+"""
 
 import csv
 import sys
@@ -20,6 +24,6 @@ def migrate(src: str, dst: str) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("kullanim: python tools/migrate_filters_csv.py input.csv output.csv")
+        print("kullanim: python tools/legacy/migrate_filters_csv.py input.csv output.py")
         raise SystemExit(1)
     migrate(sys.argv[1], sys.argv[2])
