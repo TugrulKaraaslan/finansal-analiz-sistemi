@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- filters.csv ve türevleri kaldırıldı; filtre tanımları modül tabanlı hale geldi
+- filter CSV dosyaları ve türevleri kaldırıldı; filtre tanımları modül tabanlı hale geldi
 
 ## A12 — 2025-08-23
 
