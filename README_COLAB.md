@@ -32,6 +32,14 @@ setup_logger()
 !python tools/verify_env.py
 ```
 
+## Hızlı Doğrulama
+
+```bash
+!python -m backtest.cli config-validate --config config/colab_config.yaml
+
+!python -m backtest.cli dry-run --config config/colab_config.yaml
+```
+
 ## Örnek Tarama
 
 ```python
@@ -39,6 +47,15 @@ setup_logger()
   --start 2025-03-07 --end 2025-03-11
 
 !ls -la raporlar | head
+```
+
+## Kısa Smoke Test (opsiyonel)
+
+```bash
+!python -m backtest.cli scan-day --config config/colab_config.yaml --date 2025-03-07
+
+!ls -la raporlar || true
+!head -n 5 raporlar/2025-03-07.csv || true
 ```
 
 > Excel okuma/yazma için gerekli `openpyxl` ve `XlsxWriter` paketleri bağımlılık setinde yer alır.

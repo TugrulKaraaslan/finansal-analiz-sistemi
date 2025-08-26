@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
+from .utils import normalize_path
 
 # --- Ortak yardımcılar ---
 
@@ -33,8 +34,14 @@ class ColabData(BaseModel):
         return _must_exist(v)
 
 
+class FilterModule(BaseModel):
+    module: str = Field(..., description="Python module containing filters")
+    include: list[str] = Field(default_factory=lambda: ["*"])
+
+
 class ColabConfig(BaseModel):
     data: ColabData
+    filters: FilterModule
 
     @classmethod
     def from_yaml_with_env(cls, yaml_path: Path) -> "ColabConfig":
@@ -45,6 +52,10 @@ class ColabConfig(BaseModel):
         excel_env = os.getenv("DATA_DIR") or os.getenv("EXCEL_DIR")
         if excel_env:
             raw.setdefault("data", {})["excel_dir"] = excel_env
+        elif raw.get("data", {}).get("excel_dir"):
+            raw["data"]["excel_dir"] = str(
+                normalize_path(yaml_path.parent, raw["data"]["excel_dir"])
+            )
         return cls(**raw)
 
 
