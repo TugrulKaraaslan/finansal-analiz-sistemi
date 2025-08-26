@@ -19,7 +19,7 @@ Hedef: Basit ama hatasız, tekrarlanabilir ve denetlenebilir çıktı.
 MACD histogram rengi, "en iyi hisse seçimi", canlı tarama, portföy kuralları, optimizasyon, dashboard.
 
 ## 3. Girdiler
-- Fiyat verisi, filters.csv, alias_mapping.csv, config.
+- Fiyat verisi, filtre modülü, alias_mapping.csv, config.
 
 ## 4. Çıktılar
 - Günlük sinyaller: `raporlar/gunluk/YYYY-MM-DD.csv`
@@ -34,7 +34,7 @@ MACD histogram rengi, "en iyi hisse seçimi", canlı tarama, portföy kuralları
 Eval yok, deterministik çalışma, NaN→False, isim standardı zorunlu, dry-run varsayılan.
 
 ## 7. Kabul Kriterleri
-1) filters.csv hatasız
+1) filtre modülü hatasız
 2) Örnek 3 gün sinyalleri tutar
 3) Özet tablolar ±0.0001 sapma
 4) Log/artefakt tam

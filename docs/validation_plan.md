@@ -1,10 +1,10 @@
 # Dry‑Run Doğrulama (A4) – Plan
 
 ## Amaç
-`filters.csv` içindeki filtrelerin ve veri kolonlarının geçerliliğini **çalıştırmadan önce** kontrol etmek.
+Filtre modülündeki filtrelerin ve veri kolonlarının geçerliliğini **çalıştırmadan önce** kontrol etmek.
 
 ## Doğrulanan Alanlar
-1. **CSV Şeması**
+1. **Filtre Listesi**
    - `FilterCode` boş değil, tekil olmalı
    - `PythonQuery` boş olmamalı
 2. **DSL İfadeleri**
@@ -20,7 +20,7 @@
 
 ## CLI Kullanımı
 ```bash
-python -m backtest.cli \-\-filters filters.csv --dry-run
+python -m backtest.cli --filters-module io_filters --filters-include "*" --dry-run
 ```
 
 Çıktı: Hata/uyarı raporu. Başarılı ise: `✅ Uyum Tam`
