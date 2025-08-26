@@ -45,6 +45,24 @@ setup_logger()
 > Tek veri kaynağı proje içindeki `data/` dizinidir; CLI'da `--excel-dir` parametresi yoktur.
 > Spacy, fastai ve fastdownload bağımlılıkları kaldırılmıştır.
 
+## Gömülü filtrelerle tarama
+
+Filtre modülü config'te belirtilir; `--filters-module` bayrağı yoktur.
+
+```yaml
+filters:
+  module: io_filters
+  include: ["*"]
+```
+
+```bash
+python -m backtest.cli config-validate --config config/colab_config.yaml
+
+python -m backtest.cli scan-day \
+  --config config/colab_config.yaml \
+  --date 2025-03-07
+```
+
 ## İsim normalizasyonu
 
 Veri dosyalarındaki ve filtre ifadelerindeki tüm sütun isimleri otomatik olarak

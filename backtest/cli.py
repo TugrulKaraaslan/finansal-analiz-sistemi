@@ -47,6 +47,8 @@ from backtest.summary import summarize_range
 from backtest.trace import ArtifactWriter, RunContext, list_output_files
 from backtest.validator import dataset_summary, quality_warnings
 from io_filters import load_filters_csv, read_filters_csv
+import importlib
+import fnmatch
 
 __all__ = [
     "normalize",
@@ -182,11 +184,8 @@ def _run_scan(cfg):  # tests monkeypatch ediyor
         df, getattr(getattr(cfg, "indicators", NS()), "params", {}), engine="none"
     )
 
-    filters_path = getattr(cfg.data, "filters_csv", None)
-    filters = load_filters_csv([filters_path]) if filters_path else []
-    filters_df = pd.DataFrame(filters)
+    filters_df = _load_filters(cfg, allow_empty=True, diag=_diag)
     if filters_df.empty:
-        _diag("FILTERS_EMPTY")
         (out_dir / "events.jsonl").write_text(
             "\n".join(json.dumps(e, ensure_ascii=False) for e in events),
             encoding="utf-8",
@@ -282,6 +281,68 @@ def _resolve_filters_path(cli_arg: str | None) -> Path:
         f"filters.csv bulunamadı. Denenen yollar: {', '.join(map(str, candidates))}. Çalışma dizini: {cwd}"
     )
 
+
+def _load_filters(
+    cfg,
+    override_csv: str | Path | None = None,
+    *,
+    allow_empty: bool = False,
+    diag: callable | None = None,
+) -> pd.DataFrame:
+    f_cfg = getattr(cfg, "filters", NS())
+    module_name = getattr(f_cfg, "module", None)
+    if not module_name:
+        print("filters.module missing in config", file=sys.stderr)
+        sys.exit(2)
+    try:
+        mod = importlib.import_module(module_name)
+    except Exception:
+        print(f"cannot import filters module: {module_name}", file=sys.stderr)
+        sys.exit(2)
+    func_name = getattr(f_cfg, "callable", None)
+    filters_list = None
+    try:
+        if func_name:
+            func = getattr(mod, func_name, None)
+            if callable(func):
+                filters_list = func()
+        elif hasattr(mod, "FILTERS"):
+            filters_list = getattr(mod, "FILTERS")
+        elif hasattr(mod, "get_filters") and callable(getattr(mod, "get_filters")):
+            filters_list = mod.get_filters()
+        elif hasattr(mod, "load_filters_csv"):
+            path = override_csv or getattr(getattr(cfg, "data", NS()), "filters_csv", None)
+            if path:
+                filters_list = mod.load_filters_csv([path])
+    except Exception:
+        filters_list = None
+    if not filters_list:
+        if allow_empty and diag:
+            diag("FILTERS_EMPTY")
+            return pd.DataFrame()
+        print("no filters discovered from module", file=sys.stderr)
+        sys.exit(2)
+    df = pd.DataFrame(filters_list)
+    include_patterns = getattr(f_cfg, "include", ["*"])
+    if "FilterCode" in df.columns:
+        mask = [
+            any(fnmatch.fnmatch(str(code), pat) for pat in include_patterns)
+            for code in df["FilterCode"].astype(str)
+        ]
+        df = df[mask]
+    if df.empty:
+        if allow_empty and diag:
+            diag("FILTERS_EMPTY")
+            return pd.DataFrame()
+        print("no filters discovered from module", file=sys.stderr)
+        sys.exit(2)
+    logger.info(
+        "filters.module=%s filters=%d sample=%s",
+        module_name,
+        len(df),
+        df["FilterCode"].head(5).tolist() if "FilterCode" in df.columns else [],
+    )
+    return df
 
 def build_parser() -> argparse.ArgumentParser:
     desc = "Stage1 CLI (varsayılan veri yolu: " f"{DATA_DIR} (paths.py))"
@@ -816,11 +877,7 @@ def main(argv=None):
         df = pd.DataFrame()
 
     filters_path = _resolve_filters_path(args.filters)
-    try:
-        filters = load_filters_csv([filters_path])
-        filters_df = pd.DataFrame(filters)
-    except ValueError as exc:
-        raise ValueError("filters.csv beklenen kolonlar: FilterCode;PythonQuery") from exc
+    filters_df = _load_filters(cfg, filters_path)
 
     if args.cmd == "scan-day":
         rows = run_scan_day(df, args.date, filters_df, alias_csv=args.alias)
