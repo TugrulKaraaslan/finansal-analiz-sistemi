@@ -19,7 +19,9 @@ logger = logging.getLogger("backtest")
 # --- Default module-based filters ---
 
 FILTERS: List[Dict[str, str]] = [
-    {"FilterCode": "FI", "PythonQuery": "True"}
+    {"FilterCode": "FI", "PythonQuery": "True"},
+    {"FilterCode": "T1", "PythonQuery": "close > open"},
+    {"FilterCode": "T2", "PythonQuery": "sma_5 > sma_10"},
 ]
 
 

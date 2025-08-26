@@ -11,7 +11,6 @@ project:
 
 data:
   excel_dir: data
-  filters_csv: filters.csv
   enable_cache: false
 
 calendar:
@@ -33,3 +32,7 @@ report:
   percent_format: "0.00%"
   daily_sheet_prefix: "SCAN_"
   summary_sheet_name: "SUMMARY"
+
+filters:
+  module: io_filters
+  include: ["*"]
