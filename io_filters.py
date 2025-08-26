@@ -1,20 +1,12 @@
-"""Helpers for reading filter CSV files with a single ``;`` delimiter."""
+"""Default filter definitions and validation helpers."""
 
 from __future__ import annotations
-
-import collections
-import logging
-from pathlib import Path
 from typing import Dict, List
 
 import pandas as pd
 
-from utils.paths import resolve_path
-
 REQUIRED_HEADER = ["FilterCode", "PythonQuery"]
 
-
-logger = logging.getLogger("backtest")
 
 # --- Default module-based filters ---
 
@@ -27,17 +19,6 @@ FILTERS: List[Dict[str, str]] = [
 
 def get_filters() -> List[Dict[str, str]]:
     return FILTERS
-
-
-def _check_delimiter(path: Path) -> None:
-    lines = path.read_text(encoding="utf-8").splitlines()
-    if not lines:
-        raise ValueError("Filters dosyası boş")
-    first_line = lines[0]
-    if "," in first_line and ";" not in first_line:
-        raise ValueError(
-            "';' ayraç bekleniyor. Dosyayı ';' ile kaydedin: FilterCode;PythonQuery"
-        )
 
 
 def validate_filters_df(df: pd.DataFrame) -> pd.DataFrame:
@@ -66,50 +47,7 @@ def validate_filters_df(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def read_filters_file(path: Path | str) -> pd.DataFrame:
-    """Read filter definitions using strict ``;`` separated schema."""
-
-    p = resolve_path(path)
-    _check_delimiter(p)
-    df = pd.read_csv(p, sep=";", dtype=str, encoding="utf-8")
-    return validate_filters_df(df)
-
-
-def load_filters_files(paths: list[Path | str]) -> list[dict]:
-    """Load filters from multiple CSV files.
-
-    Each path is validated via :func:`read_filters_file`. Duplicate
-    ``FilterCode`` values across files raise ``ValueError``.
-    """
-
-    all_rows: list[dict] = []
-
-    if not paths:
-        raise ValueError("En az bir filtre dosya yolu gerekli")
-
-    for path in paths:
-        p = resolve_path(path)
-        if not p.exists():
-            msg = (
-                f"Filters dosyası bulunamadı: {p}. "
-                "Use --" "filters-module ile yol belirtin veya config'te filtre ayarını kontrol edin."
-            )
-            logger.error(msg)
-            raise FileNotFoundError(msg)
-        df = read_filters_file(p)
-        all_rows.extend(df.to_dict("records"))
-
-    codes = [r["FilterCode"] for r in all_rows]
-    dup = [c for c, cnt in collections.Counter(codes).items() if cnt > 1]
-    if dup:
-        dup_codes = ", ".join(sorted(dup))
-        raise ValueError(f"Duplicate FilterCode detected across files: {dup_codes}")
-    return all_rows
-
-
 __all__ = [
-    "read_filters_file",
-    "load_filters_files",
     "validate_filters_df",
     "FILTERS",
     "get_filters",

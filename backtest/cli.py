@@ -27,7 +27,6 @@ from backtest.config.schema import (
 from backtest.data_loader import read_excels_long as _read_excels_long
 from backtest.eval.metrics import SignalMetricConfig
 from backtest.eval.report import compute_signal_report, save_json
-from backtest.filters.normalize_expr import normalize_expr
 from backtest.filters_compile import compile_filters
 from backtest.metrics import max_drawdown as risk_max_drawdown
 from backtest.metrics import (
@@ -45,7 +44,6 @@ from backtest.screener import run_screener
 from backtest.summary import summarize_range
 from backtest.trace import ArtifactWriter, RunContext, list_output_files
 from backtest.validator import dataset_summary, quality_warnings
-from io_filters import read_filters_file
 from filters.module_loader import load_filters_from_module
 
 __all__ = [
@@ -941,31 +939,12 @@ try:  # pragma: no cover - click opsiyonel
         except FileNotFoundError as e:  # pragma: no cover
             raise click.ClickException(str(e))
 
-    @click.command(name="lint-filters")
-    @click.option("--file", "file", required=True)
-    @click.option("--inplace", is_flag=True, default=False)
-    def lint_filters(file: str, inplace: bool = False) -> None:
-        df = read_filters_file(file)
-        norm = df["PythonQuery"].map(normalize_expr)
-        changed = norm != df["PythonQuery"]
-        if changed.any():
-            if inplace:
-                df["PythonQuery"] = norm
-                df.to_csv(file, sep=";", index=False)
-            else:
-                for idx in df.index[changed]:
-                    click.echo(f"{idx}: {df.at[idx, 'PythonQuery']} -> {norm.iloc[idx]}")
-                raise SystemExit(1)
-        else:
-            click.echo("OK")
-
     @click.group()
     def cli() -> None:
         pass
 
     cli.add_command(scan_range)
     cli.add_command(scan_day)
-    cli.add_command(lint_filters)
 except Exception:  # pragma: no cover
     pass
 
