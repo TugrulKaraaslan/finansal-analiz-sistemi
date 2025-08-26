@@ -1,24 +1,26 @@
+import pandas as pd
 import pytest
 
-from io_filters import load_filters_files, read_filters_file
+from io_filters import validate_filters_df
 
 
-def test_filters_semicolon_and_schema(tmp_path):
-    p = tmp_path / "filters.csv"
-    p.write_text("FilterCode;PythonQuery\nF1;close>1\n", encoding="utf-8")
-    rows = load_filters_files([p])
-    assert rows[0]["FilterCode"] == "F1"
+def test_filters_schema_valid():
+    df = pd.DataFrame([
+        {"FilterCode": "F1", "PythonQuery": "close>1"}
+    ])
+    out = validate_filters_df(df)
+    assert out.iloc[0]["FilterCode"] == "F1"
 
 
-def test_filters_missing_column(tmp_path):
-    p = tmp_path / "filters.csv"
-    p.write_text("FilterCode;Foo\nF1;1\n", encoding="utf-8")
+def test_filters_missing_column():
+    df = pd.DataFrame([
+        {"FilterCode": "F1", "Foo": 1}
+    ])
     with pytest.raises(ValueError):
-        load_filters_files([p])
+        validate_filters_df(df)
 
 
-def test_filters_wrong_delimiter(tmp_path):
-    p = tmp_path / "filters.csv"
-    p.write_text("FilterCode,PythonQuery\nF1,close>1\n", encoding="utf-8")
-    with pytest.raises(ValueError, match="';' ayraç bekleniyor"):
-        read_filters_file(p)
+def test_filters_empty():
+    df = pd.DataFrame(columns=["FilterCode", "PythonQuery"])
+    with pytest.raises(ValueError):
+        validate_filters_df(df)
