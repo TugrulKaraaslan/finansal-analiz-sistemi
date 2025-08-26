@@ -17,6 +17,7 @@ import yaml
 
 from backtest.filters.engine import ALIAS
 from backtest.paths import EXCEL_DIR
+from io_filters import read_filters_file
 
 
 def _load_cfg(path: Path) -> dict:
@@ -50,12 +51,7 @@ def main() -> None:
     df = pd.read_excel(sample)
     cols = set(df.columns)
 
-    fdf = pd.read_csv(
-        filters_path,
-        sep=";",
-        usecols=["FilterCode", "PythonQuery"],
-        dtype=str,
-    )
+    fdf = read_filters_file(filters_path)
     ok = True
     for i, expr in enumerate(fdf.get("PythonQuery", [])):
         tokens = _tokenize(str(expr))

@@ -5,7 +5,6 @@ import pandas as pd
 from backtest.dsl import DSLError, parse_expression
 from backtest.naming import (
     CANONICAL_SET,
-    load_alias_map,
     normalize_indicator_token,
 )
 
@@ -14,17 +13,17 @@ from .report import ValidationReport
 
 
 def validate_filters(
-    csv_path: str,
-    alias_csv: str | None = None,
+    filters_df: pd.DataFrame,
+    alias_map: dict[str, str] | None = None,
 ) -> ValidationReport:
-    df = pd.read_csv(csv_path, sep=";", dtype=str, encoding="utf-8")
+    df = filters_df
     report = ValidationReport()
 
     if list(df.columns) != ["FilterCode", "PythonQuery"]:
         raise ValidationError("filters.csv hatalı başlık", code="VC999")
 
     seen_codes = set()
-    alias_map = load_alias_map(alias_csv).mapping if alias_csv else {}
+    alias_map = alias_map or {}
 
     for i, row in df.iterrows():
         code = str(row.get("FilterCode", "")).strip()

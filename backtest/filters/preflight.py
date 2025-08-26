@@ -2,13 +2,11 @@ from __future__ import annotations
 
 import re
 import warnings
-from pathlib import Path
 
 import pandas as pd
 
 from backtest.filters.normalize_expr import normalize_expr
 from backtest.naming.aliases import normalize_token
-from io_filters import read_filters_file
 
 ALLOW_FUNCS = {"cross_up", "cross_down"}
 ALLOWED_PATTERNS = [
@@ -26,30 +24,21 @@ ALLOWED_PATTERNS = [
 ]
 
 
-def _dataset_columns(excel_dir: Path) -> set[str]:
-    xls = sorted([p for p in (excel_dir).rglob("*.xlsx")])
-    assert xls, f"Preflight: Excel bulunamadı: {excel_dir}"
-    df = pd.ExcelFile(xls[0]).parse(0, nrows=0)
-    cols = set(map(str, df.columns))
-    return cols | {c.lower() for c in cols}
-
-
 def _tokens(expr: str) -> list[str]:
     return re.findall(r"[A-Za-z_][A-Za-z0-9_]*", expr or "")
 
 
 def validate_filters(
-    filters_file: Path,
-    excel_dir: Path,
+    filters_df: pd.DataFrame,
+    dataset_df: pd.DataFrame,
     alias_mode: str = "allow",  # 'allow'|'warn'|'forbid'
     allow_unknown: bool = False,
 ) -> None:
-    cols = {normalize_token(c) for c in _dataset_columns(excel_dir)}
+    cols = {normalize_token(c) for c in dataset_df.columns}
     alias_used: dict[str, set[str]] = {}
     unknown: dict[str, set[str]] = {}
 
-    df = read_filters_file(filters_file)
-    for _, row in df.iterrows():
+    for _, row in filters_df.iterrows():
         code = (row.get("FilterCode") or "").strip() or "<NO_CODE>"
         expr_raw = (row.get("PythonQuery") or "").strip()
         expr = normalize_expr(expr_raw)[0]

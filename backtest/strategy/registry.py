@@ -1,29 +1,20 @@
 from __future__ import annotations
 
-import csv
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+import pandas as pd
 import yaml
 
-ROOT = Path(__file__).resolve().parents[2]
-FILTERS_CSV = ROOT / "filters.csv"
 
+def _load_canonical_filters(df: pd.DataFrame | None) -> set[str]:
+    """Extract canonical filter codes from a DataFrame."""
 
-def _load_canonical_filters(path: Path = FILTERS_CSV) -> set[str]:
-    """Load canonical filter codes from filters.csv.
-
-    The repository uses a canonical-only policy for filter identifiers. This
-    helper reads `filters.csv` which is expected to use `;` as separator with
-    a `FilterCode` column. Only the codes are returned.
-    """
-    if not path.exists():
+    if df is None or df.empty or "FilterCode" not in df.columns:
         return set()
-    with path.open("r", encoding="utf-8") as f:
-        reader = csv.DictReader(f, delimiter=";")
-        return {row["FilterCode"] for row in reader if row.get("FilterCode")}
+    return {str(c).strip() for c in df["FilterCode"].dropna()}
 
 
 @dataclass
@@ -39,13 +30,13 @@ class StrategyRegistry:
     """Registry holding available strategies.
 
     A minimal in-memory registry that can also be constructed from YAML or
-    JSON files. During registration filter names are validated against the
-    canonical list loaded from :mod:`filters.csv`.
+    JSON files. During registration filter names are validated against a
+    canonical list supplied at initialisation.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, canonical_filters_df: pd.DataFrame | None = None) -> None:
         self._strategies: Dict[str, StrategySpec] = {}
-        self._canonical_filters = _load_canonical_filters()
+        self._canonical_filters = _load_canonical_filters(canonical_filters_df)
 
     # ------------------------------------------------------------------
     def register(self, spec: StrategySpec) -> None:
@@ -69,7 +60,11 @@ class StrategyRegistry:
 
     # ------------------------------------------------------------------
     @classmethod
-    def load_from_file(cls, path: str | Path) -> Tuple["StrategyRegistry", Dict[str, object]]:
+    def load_from_file(
+        cls,
+        path: str | Path,
+        canonical_filters_df: pd.DataFrame | None = None,
+    ) -> Tuple["StrategyRegistry", Dict[str, object]]:
         """Load strategies and optional constraints from YAML/JSON file.
 
         The file format is expected to be of the form::
@@ -90,7 +85,7 @@ class StrategyRegistry:
                 cfg = yaml.safe_load(f) or {}
             else:
                 cfg = json.load(f)
-        registry = cls()
+        registry = cls(canonical_filters_df)
         for item in cfg.get("strategies", []):
             spec = StrategySpec(
                 id=item["id"],
