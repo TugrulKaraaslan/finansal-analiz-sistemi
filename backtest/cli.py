@@ -447,7 +447,7 @@ def main(argv=None):
             arg.startswith(bad) and not any(arg.startswith(ok) for ok in allowed)
         ):
             raise RuntimeError(
-                "CSV-based or --filters-off flags are removed. "
+                "CSV-based or " + bad_off + " flags are removed. "
                 "Use --filters-module/--filters-include."
             )
     if argv and argv[0] in {

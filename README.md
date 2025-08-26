@@ -378,3 +378,7 @@ python -m backtest.cli scan-range --config config/colab_config.yaml --start 2025
 
 Colab için ayrıntılar: `docs/colab.md`.
 
+## Contributing
+
+CSV/legacy flag'ler CI’da fail eder; tools/legacy/** altı hariç.
+
