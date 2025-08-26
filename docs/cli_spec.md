@@ -18,6 +18,9 @@
 - `scan-day --data <path> --date YYYY-MM-DD --filters-module io_filters --filters-include "*" --out dir [--alias alias.csv] [--no-write]`
 - `scan-range --data <path> --start YYYY-MM-DD --end YYYY-MM-DD --filters-module io_filters --filters-include "*" --out dir [--alias alias.csv] [--no-write]`
 
+Örnek:
+`python -m backtest.cli scan-day --config config/scan.yml --filters-module io_filters --filters-include "*"`
+
 ## Hata Kodları (CLI)
 - CL001: Argüman eksik/uyumsuz
 - CL002: Dosya yolu yok/erişilemedi

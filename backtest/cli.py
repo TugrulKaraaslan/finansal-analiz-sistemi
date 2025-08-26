@@ -180,7 +180,7 @@ def _run_scan(cfg):  # tests monkeypatch ediyor
     )
 
     fcfg = getattr(cfg, "filters", NS())
-    module = getattr(fcfg, "module", None)
+    module = getattr(fcfg, "module", "io_filters")
     include = getattr(fcfg, "include", ["*"])
     filters_df = load_filters_from_module(module, include)
     if filters_df.empty:
@@ -443,10 +443,13 @@ def main(argv=None):
     bad_off = bad + "-off"
     allowed = {bad + "-module", bad + "-include"}
     for arg in argv:
-        if arg == bad_off:
-            raise RuntimeError("Use --" "filters-include= (empty) to disable filters.")
-        if arg.startswith(bad) and not any(arg.startswith(ok) for ok in allowed):
-            raise RuntimeError("CSV-based filters are removed. Use `filters.module`.")
+        if arg == bad_off or (
+            arg.startswith(bad) and not any(arg.startswith(ok) for ok in allowed)
+        ):
+            raise RuntimeError(
+                "CSV-based or --filters-off flags are removed. "
+                "Use --filters-module/--filters-include."
+            )
     if argv and argv[0] in {
         "scan-day",
         "scan-range",

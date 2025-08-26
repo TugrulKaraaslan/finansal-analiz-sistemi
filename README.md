@@ -36,6 +36,10 @@ python -m backtest.cli --log-level INFO --json-logs scan-range \
   --data data/BIST.parquet \
   --filters-module io_filters --filters-include "*" \
   --start 2024-01-02 --end 2024-01-05 --reports-dir raporlar/aralik
+
+# Config üzerinden filtre override
+python -m backtest.cli scan-day --config config/scan.yml \
+       --filters-module io_filters --filters-include "*"
 ```
 
 
