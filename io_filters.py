@@ -5,6 +5,7 @@ from __future__ import annotations
 import collections
 import logging
 from pathlib import Path
+from typing import Dict, List
 
 import pandas as pd
 
@@ -14,6 +15,16 @@ REQUIRED_HEADER = ["FilterCode", "PythonQuery"]
 
 
 logger = logging.getLogger("backtest")
+
+# --- Default module-based filters ---
+
+FILTERS: List[Dict[str, str]] = [
+    {"FilterCode": "FI", "PythonQuery": "True"}
+]
+
+
+def get_filters() -> List[Dict[str, str]]:
+    return FILTERS
 
 
 def _check_delimiter(path: Path) -> None:
@@ -94,4 +105,10 @@ def load_filters_files(paths: list[Path | str]) -> list[dict]:
     return all_rows
 
 
-__all__ = ["read_filters_file", "load_filters_files", "validate_filters_df"]
+__all__ = [
+    "read_filters_file",
+    "load_filters_files",
+    "validate_filters_df",
+    "FILTERS",
+    "get_filters",
+]

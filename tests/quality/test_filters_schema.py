@@ -20,5 +20,5 @@ def test_filters_missing_column(tmp_path):
 def test_filters_wrong_delimiter(tmp_path):
     p = tmp_path / "filters.csv"
     p.write_text("FilterCode,PythonQuery\nF1,close>1\n", encoding="utf-8")
-    with pytest.raises(ValueError, match="CSV delimiter ';' bekleniyor"):
+    with pytest.raises(ValueError, match="';' ayraç bekleniyor"):
         read_filters_file(p)

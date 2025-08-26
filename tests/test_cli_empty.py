@@ -66,7 +66,7 @@ def test_scan_range_empty(monkeypatch):
     monkeypatch.setattr(cli, "normalize", lambda df: df)
     monkeypatch.setattr(cli, "add_next_close", lambda df: df)
     filters = [{"FilterCode": "F1", "PythonQuery": "close>0", "Group": "G"}]
-    monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters)
+    monkeypatch.setattr(cli, "load_filters_files", lambda _: filters)
 
     def _run_screener(df, filters, d, stop_on_filter_error=None, raise_on_error=None):
         assert raise_on_error is False
@@ -117,7 +117,7 @@ def test_scan_day_empty(monkeypatch):
     monkeypatch.setattr(cli, "normalize", lambda df: df)
     monkeypatch.setattr(cli, "add_next_close", lambda df: df)
     filters = [{"FilterCode": "F1", "PythonQuery": "close>0", "Group": "G"}]
-    monkeypatch.setattr(cli, "load_filters_csv", lambda _: filters)
+    monkeypatch.setattr(cli, "load_filters_files", lambda _: filters)
 
     def _run_screener(df, filters, d, stop_on_filter_error=None, raise_on_error=None):
         assert raise_on_error is False

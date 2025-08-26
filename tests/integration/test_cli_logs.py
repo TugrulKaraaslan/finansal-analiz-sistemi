@@ -27,7 +27,6 @@ def test_cli_emits_logs(tmp_path, monkeypatch):
 
     filters_csv = tmp_path / "filters.csv"
     filters_csv.write_text("FilterCode;PythonQuery\nF1;True\n", encoding="utf-8")
-    monkeypatch.setattr(cli, "load_filters_csv", lambda paths: [{"FilterCode": "F1", "PythonQuery": "True"}])
 
     out_dir = tmp_path / "raporlar"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -40,12 +39,13 @@ project:
   end_date: "2025-03-07"
 data:
   excel_dir: "{(tmp_path/'data').as_posix()}"
-  filters_csv: "{filters_csv.as_posix()}"
 preflight: false
 columns:
   column_date: "date"
   column_symbol: "symbol"
   column_close: "close"
+filters:
+  module: io_filters
 """,
         encoding="utf-8",
     )
@@ -57,6 +57,8 @@ columns:
         "--no-preflight",
         "--out",
         str(out_dir),
+        "--filters-csv",
+        str(filters_csv),
     ]
     with pytest.raises(SystemExit) as exc:
         cli.main(args)
