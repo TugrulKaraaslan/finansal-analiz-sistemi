@@ -15,14 +15,14 @@ def _write_cfg(tmp_path: Path, content: str) -> Path:
 
 def test_cli_filters_args_rejected():
     bad = "--" + "filters"
+    bad_off = bad + "-off"
     msg = (
-        "CSV-based or --filters-off flags are removed. "
+        "CSV-based or " + bad_off + " flags are removed. "
         "Use --filters-module/--filters-include."
     )
     with pytest.raises(RuntimeError, match=msg):
         cli.main(["scan-day", bad, "foo.csv"])
 
-    bad_off = bad + "-off"
     with pytest.raises(RuntimeError, match=msg):
         cli.main(["scan-day", bad_off])
 

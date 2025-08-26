@@ -7,12 +7,10 @@ python --version
 pip --version
 
 echo "== Legacy CSV guard =="
-p1="load_filters_"'csv'
-p2="--filt"'ers\\b'
-p3="--filt"'ers-off'
-pat="${p1}|${p2}|${p3}"
-if rg -n "$pat" -S tools -g '!ci_checks.sh'; then
-  echo "CSV/legacy flags detected"; exit 1; fi
+pat='(filters\.csv|load_filters_csv|read_filters_csv|--filters(\s|=)|--filters-off)'
+repo_root="$(git rev-parse --show-toplevel)"
+if rg -n "$pat" -S "$repo_root" --glob '!tools/legacy/**' --glob '!tools/ci_checks.sh'; then
+  echo -e "\e[31mCSV/legacy flags detected\e[0m"; exit 1; fi
 
 echo "== Ensure package importable =="
 python - <<'PY'
