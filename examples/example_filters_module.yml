@@ -1,0 +1,5 @@
+---
+filters:
+  module: "io_filters"
+  include: ["*"]
+# diğer alanlar proje örneklerine göre sade bırakılabilir
