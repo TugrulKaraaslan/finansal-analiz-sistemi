@@ -5,6 +5,7 @@ import tempfile
 import textwrap
 from datetime import datetime
 from pathlib import Path
+from filters.module_loader import load_filters_from_module
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -28,6 +29,7 @@ def main() -> None:
             env=env,
         )
         import pandas as pd
+        filters_df = load_filters_from_module("io_filters", ["*"])
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
@@ -74,7 +76,6 @@ def main() -> None:
                       source: none
                       excel_path: ''
                       excel_sheet: BIST
-                      csv_path: ''
                       column_date: date
                       column_close: close
                     report:
@@ -86,15 +87,17 @@ def main() -> None:
                 encoding="utf-8",
             )
             subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "backtest.cli",
-                    "scan-range",
-                    "--config",
-                    str(cfg_path),
-                    "--no-preflight",
-                ],
+                  [
+                      sys.executable,
+                      "-m",
+                      "backtest.cli",
+                      "scan-range",
+                      "--config",
+                      str(cfg_path),
+                      "--filters-module",
+                      "io_filters",
+                      "--no-preflight",
+                  ],
                 check=True,
                 cwd=PROJECT_ROOT,
                 env=env,
