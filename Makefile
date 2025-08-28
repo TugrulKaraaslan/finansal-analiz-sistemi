@@ -13,10 +13,10 @@ guardrails:
 	python -m backtest.cli guardrails
 
 test:
-        pytest -q
+	pytest -q
 
 ci:
-        bash tools/ci_checks.sh
+	bash tools/ci_checks.sh
 
 golden:
 	python tools/update_golden_checksums.py
@@ -52,7 +52,7 @@ perf-report: bench bench-cli profile mem
 
 .PHONY: config-validate
 config-validate:
-DATA_DIR=data python -m backtest.cli config-validate --export-json-schema
+	DATA_DIR=data python -m backtest.cli config-validate --export-json-schema
 
 .PHONY: validate
 validate: config-validate
