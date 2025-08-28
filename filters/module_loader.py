@@ -14,6 +14,8 @@ from typing import Iterable
 
 import pandas as pd
 
+from backtest.filters.loader import sanitize_filters_df
+
 DEFAULT_FILTERS_MODULE = "io_filters"
 
 
@@ -57,7 +59,8 @@ def load_filters_from_module(
         raise ValueError(f"filters must contain columns {required!r}")
 
     patterns = include or ["*"]
-    return _filter_codes(df, patterns)
+    df = _filter_codes(df, patterns)
+    return sanitize_filters_df(df)
 
 
 __all__ = ["DEFAULT_FILTERS_MODULE", "load_filters_from_module"]

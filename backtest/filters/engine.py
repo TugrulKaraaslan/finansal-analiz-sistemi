@@ -4,6 +4,7 @@ import logging
 import re
 from typing import Mapping
 
+import numpy as np
 import pandas as pd
 
 from backtest.cross import cross_down as _cross_down
@@ -69,7 +70,7 @@ def _validate_tokens(expr: str, locals_map: Mapping[str, object]):
     undefined: list[str] = []
     unsafe: list[str] = []
     for tok in _TOKEN_RE.findall(expr):
-        if tok in {"and", "or", "not"}:
+        if tok in {"and", "or", "not"} or tok.lower() in {"true", "false"}:
             continue
         if tok not in locals_map:
             if tok.startswith("_") or tok in _UNSAFE_TOKENS or "import" in tok:
@@ -94,15 +95,31 @@ def _canonicalise_tokens(expr: str) -> str:
     return _TOKEN_RE.sub(repl, expr)
 
 
+_BOOL_RE = re.compile(r"\b(true|false)\b", flags=re.I)
+
+
+def _normalise_boolean_literals(expr: str) -> str:
+    """Replace case-insensitive boolean tokens with Python bool literals."""
+
+    def repl(m: re.Match[str]) -> str:
+        return m.group(1).capitalize()
+
+    return _BOOL_RE.sub(repl, expr)
+
+
 def evaluate(df: pd.DataFrame, expr: str) -> pd.Series:
     """Evaluate a normalised filter expression on *df*."""
 
     expr = normalize_expr(expr)[0]
     expr = _canonicalise_tokens(expr)
+    expr = _normalise_boolean_literals(expr)
     locals_map = _build_locals(df)
     _validate_tokens(expr, locals_map)
     try:
-        return pd.eval(expr, engine="python", local_dict=locals_map)
+        result = pd.eval(expr, engine="python", local_dict=locals_map)
+        if isinstance(result, (bool, np.bool_, int, float)):
+            return pd.Series([bool(result)] * len(df), index=df.index)
+        return result
     except SyntaxError as e:
         # Propagate syntax errors so callers can decide how to handle them.
         raise SyntaxError(str(e)) from e
