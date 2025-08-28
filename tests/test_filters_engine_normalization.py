@@ -45,6 +45,7 @@ def test_screener_batch_consistency():
         },
         index=idx,
     )
+    df_batch.attrs["symbol"] = "SYM"
     filters_df = pd.DataFrame({"FilterCode": ["F1"], "PythonQuery": ["close > open"]})
     rows_batch = run_scan_day(df_batch, str(idx[0].date()), filters_df)
 

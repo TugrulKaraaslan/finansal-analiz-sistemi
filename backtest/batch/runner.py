@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from concurrent.futures import ProcessPoolExecutor
 from time import perf_counter
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import pandas as pd
 
@@ -19,16 +19,37 @@ from backtest.normalize import normalize_dataframe
 log = get_logger("runner")
 
 
+def _parse_symbol_columns(df: pd.DataFrame) -> Dict[str, List[str]]:
+    """Map symbols to their column names.
+
+    Column convention: SYMBOL_field. Falls back to df.attrs['symbol'] for
+    single-symbol data.
+    """
+    sym_map: Dict[str, List[str]] = {}
+    for c in df.columns:
+        if isinstance(c, str) and "_" in c:
+            sym, rest = c.split("_", 1)
+            if sym.isupper():
+                sym_map.setdefault(sym, []).append(c)
+    if sym_map:
+        return sym_map
+    sym = df.attrs.get("symbol")
+    if not sym:
+        raise ValueError("df.attrs['symbol'] missing for single-symbol data")
+    return {sym: list(df.columns)}
+
+
 def _process_chunk(args):
-    df_chunk, filters_df, indicators, day, alias_csv, multi_symbol = args
+    df_chunk, filters_df, indicators, day, alias_csv = args
+    attrs = df_chunk.attrs
     df_chunk, _ = normalize_dataframe(df_chunk, alias_csv, policy="prefer_first")  # noqa: E501
+    df_chunk.attrs.update(attrs)
     df_chunk = precompute_for_chunk(df_chunk, indicators)
     d = pd.to_datetime(day)
     rows: List[Tuple[str, str]] = []
-    if multi_symbol:
-        symbols = sorted({c[0] for c in df_chunk.columns})
-        for sym in symbols:
-            sub = df_chunk.xs(sym, axis=1, level=0)
+    if "symbol" in df_chunk.columns:
+        for sym, sub in df_chunk.groupby("symbol"):
+            sub = sub.drop(columns=["symbol"])
             for i, r in enumerate(filters_df.itertuples(index=False)):
                 code = str(r.FilterCode).strip()
                 expr = str(r.PythonQuery).strip()
@@ -47,34 +68,45 @@ def _process_chunk(args):
                         "evaluate failed",
                         extra={"extra_fields": {"expr": expr}},
                     )
-                    raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e  # noqa: E501
+                    raise ValueError(
+                        f"Filter evaluation failed: {expr} → {e}"
+                    ) from e
                 val = mask.loc[d]
                 ok = val.any() if isinstance(val, pd.Series) else bool(val)
                 if ok:
                     rows.append((sym, code))
     else:
-        for i, r in enumerate(filters_df.itertuples(index=False)):
-            code = str(r.FilterCode).strip()
-            expr = str(r.PythonQuery).strip()
-            log_with(
-                log,
-                "DEBUG",
-                "evaluate",
-                expr=expr,
-                chunk_idx=i,
-            )
-            try:
-                mask = evaluate(df_chunk, expr)
-            except Exception as e:
-                log.exception(
-                    "evaluate failed",
-                    extra={"extra_fields": {"expr": expr}},
+        sym_cols = _parse_symbol_columns(df_chunk)
+        for sym, cols in sym_cols.items():
+            sub = df_chunk[cols].copy()
+            sub.columns = [
+                c.split("_", 1)[1] if c.startswith(f"{sym}_") else c for c in cols
+            ]
+            for i, r in enumerate(filters_df.itertuples(index=False)):
+                code = str(r.FilterCode).strip()
+                expr = str(r.PythonQuery).strip()
+                log_with(
+                    log,
+                    "DEBUG",
+                    "evaluate",
+                    expr=expr,
+                    chunk_idx=i,
+                    symbol=sym,
                 )
-                raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e  # noqa: E501
-            val = mask.loc[d]
-            ok = val.any() if isinstance(val, pd.Series) else bool(val)
-            if ok:
-                rows.append(("SYMBOL", code))
+                try:
+                    mask = evaluate(sub, expr)
+                except Exception as e:
+                    log.exception(
+                        "evaluate failed",
+                        extra={"extra_fields": {"expr": expr}},
+                    )
+                    raise ValueError(
+                        f"Filter evaluation failed: {expr} → {e}"
+                    ) from e  # noqa: E501
+                val = mask.loc[d]
+                ok = val.any() if isinstance(val, pd.Series) else bool(val)
+                if ok:
+                    rows.append((sym, code))
     return rows
 
 
@@ -86,7 +118,6 @@ def run_scan_day(
     alias_csv: str | None = None,
 ) -> List[Tuple[str, str]]:
     """Generate signals for a single day."""
-    multi_symbol = isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2  # noqa: E501
     indicators = collect_required_indicators(filters_df)
     return _process_chunk(
         (
@@ -95,7 +126,6 @@ def run_scan_day(
             indicators,
             day,
             alias_csv,
-            multi_symbol,
         )
     )
 
@@ -120,26 +150,19 @@ def run_scan_range(
     if len(days) == 0:
         raise RuntimeError("BR002: tarih aralığı veriyle kesişmiyor")
 
-    multi_symbol = isinstance(df.columns, pd.MultiIndex) and df.columns.nlevels == 2  # noqa: E501
-    symbols = sorted({c[0] for c in df.columns}) if multi_symbol else ["SYMBOL"]  # noqa: E501
-    chunks = [
-        symbols[i : i + chunk_size]  # noqa: E203
-        for i in range(
-            0,
-            len(symbols),
-            chunk_size,
-        )
-    ]
+    sym_cols = _parse_symbol_columns(df)
+    symbols = sorted(sym_cols.keys())
+    chunks = [symbols[i : i + chunk_size] for i in range(0, len(symbols), chunk_size)]  # noqa: E203
     indicators = collect_required_indicators(filters_df)
 
     for day in days:
         t0 = perf_counter()
         tasks = []
         for chunk_syms in chunks:
-            if multi_symbol:
-                df_chunk = df.loc[:, pd.IndexSlice[chunk_syms, :]].copy()
-            else:
-                df_chunk = df.copy()
+            cols: List[str] = []
+            for sym in chunk_syms:
+                cols.extend(sym_cols[sym])
+            df_chunk = df.loc[:, cols].copy()
             tasks.append(
                 (
                     df_chunk,
@@ -147,7 +170,6 @@ def run_scan_range(
                     indicators,
                     str(day.date()),
                     alias_csv,
-                    multi_symbol,
                 )
             )
         if workers > 1:

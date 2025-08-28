@@ -11,7 +11,7 @@ idx = pd.date_range("2024-01-01", periods=5, freq="B")
 
 def _df_single():
     np.random.seed(0)
-    return pd.DataFrame(
+    df = pd.DataFrame(
         {
             "open": [9, 10, 11, 10, 12],
             "high": [10, 11, 12, 11, 13],
@@ -21,6 +21,8 @@ def _df_single():
         },
         index=idx,
     )
+    df.attrs["symbol"] = "SYM"
+    return df
 
 
 def _filters_df():
@@ -40,7 +42,7 @@ def test_run_scan_day_outputs_rows():
     filters_df = _filters_df()
     rows = run_scan_day(df, str(idx[2].date()), filters_df)  # 3. gün
     # EMA20 NaN olabilir; ikinci kural çalışmalı
-    assert ("SYMBOL", "F2") in rows
+    assert ("SYM", "F2") in rows
 
 
 def test_run_scan_range_writes_files(tmp_path: Path):
