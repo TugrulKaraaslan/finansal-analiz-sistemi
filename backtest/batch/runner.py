@@ -41,37 +41,72 @@ def _parse_symbol_columns(df: pd.DataFrame) -> Dict[str, List[str]]:
 
 def _process_chunk(args):
     df_chunk, filters_df, indicators, day, alias_csv = args
+    attrs = df_chunk.attrs
     df_chunk, _ = normalize_dataframe(df_chunk, alias_csv, policy="prefer_first")  # noqa: E501
+    df_chunk.attrs.update(attrs)
     df_chunk = precompute_for_chunk(df_chunk, indicators)
     d = pd.to_datetime(day)
     rows: List[Tuple[str, str]] = []
-    sym_cols = _parse_symbol_columns(df_chunk)
-    for sym, cols in sym_cols.items():
-        sub = df_chunk[cols].copy()
-        sub.columns = [c.split("_", 1)[1] if c.startswith(f"{sym}_") else c for c in cols]
-        for i, r in enumerate(filters_df.itertuples(index=False)):
-            code = str(r.FilterCode).strip()
-            expr = str(r.PythonQuery).strip()
-            log_with(
-                log,
-                "DEBUG",
-                "evaluate",
-                expr=expr,
-                chunk_idx=i,
-                symbol=sym,
-            )
-            try:
-                mask = evaluate(sub, expr)
-            except Exception as e:
-                log.exception(
-                    "evaluate failed",
-                    extra={"extra_fields": {"expr": expr}},
+    if "symbol" in df_chunk.columns:
+        for sym, sub in df_chunk.groupby("symbol"):
+            sub = sub.drop(columns=["symbol"])
+            for i, r in enumerate(filters_df.itertuples(index=False)):
+                code = str(r.FilterCode).strip()
+                expr = str(r.PythonQuery).strip()
+                log_with(
+                    log,
+                    "DEBUG",
+                    "evaluate",
+                    expr=expr,
+                    chunk_idx=i,
+                    symbol=sym,
                 )
-                raise ValueError(f"Filter evaluation failed: {expr} → {e}") from e  # noqa: E501
-            val = mask.loc[d]
-            ok = val.any() if isinstance(val, pd.Series) else bool(val)
-            if ok:
-                rows.append((sym, code))
+                try:
+                    mask = evaluate(sub, expr)
+                except Exception as e:
+                    log.exception(
+                        "evaluate failed",
+                        extra={"extra_fields": {"expr": expr}},
+                    )
+                    raise ValueError(
+                        f"Filter evaluation failed: {expr} → {e}"
+                    ) from e
+                val = mask.loc[d]
+                ok = val.any() if isinstance(val, pd.Series) else bool(val)
+                if ok:
+                    rows.append((sym, code))
+    else:
+        sym_cols = _parse_symbol_columns(df_chunk)
+        for sym, cols in sym_cols.items():
+            sub = df_chunk[cols].copy()
+            sub.columns = [
+                c.split("_", 1)[1] if c.startswith(f"{sym}_") else c for c in cols
+            ]
+            for i, r in enumerate(filters_df.itertuples(index=False)):
+                code = str(r.FilterCode).strip()
+                expr = str(r.PythonQuery).strip()
+                log_with(
+                    log,
+                    "DEBUG",
+                    "evaluate",
+                    expr=expr,
+                    chunk_idx=i,
+                    symbol=sym,
+                )
+                try:
+                    mask = evaluate(sub, expr)
+                except Exception as e:
+                    log.exception(
+                        "evaluate failed",
+                        extra={"extra_fields": {"expr": expr}},
+                    )
+                    raise ValueError(
+                        f"Filter evaluation failed: {expr} → {e}"
+                    ) from e  # noqa: E501
+                val = mask.loc[d]
+                ok = val.any() if isinstance(val, pd.Series) else bool(val)
+                if ok:
+                    rows.append((sym, code))
     return rows
 
 
