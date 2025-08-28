@@ -4,6 +4,10 @@ from pathlib import Path
 
 import pandas as pd
 
+from backtest.logging_conf import get_logger
+
+logger = get_logger("output_writer")
+
 
 class OutputWriter:
     def __init__(self, out_dir: str | Path):
@@ -16,10 +20,12 @@ class OutputWriter:
         if not rows:
             # Boş gün de dosyalanır (görülebilirlik için)
             df = pd.DataFrame(columns=["date", "symbol", "filter_code"])
-            df.to_csv(p, index=False)
+            df.to_csv(p, index=False, encoding="utf-8")
+            logger.info("wrote=%d path=%s", 0, p)
             return p
         df = pd.DataFrame(rows, columns=["symbol", "filter_code"])
         df.insert(0, "date", pd.to_datetime(day).date())
         df.drop_duplicates(subset=["date", "symbol", "filter_code"], inplace=True)
-        df.to_csv(p, index=False)
+        df.to_csv(p, index=False, encoding="utf-8")
+        logger.info("wrote=%d path=%s", len(df), p)
         return p
